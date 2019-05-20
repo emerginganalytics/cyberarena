@@ -1,0 +1,103 @@
+<!doctype html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <title>{% block title %}Flask Basics{% endblock %}</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/bronze_lion/css/bronze_lion.css" />
+
+    {% block head_block %}{% endblock %}
+    {#
+    This block can be overwritten by child templates to add page-specific CSS
+    #}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary" >
+        <h1 class="text-light">Flask Basics</h1>
+        <button class="navbar-toggler"
+                type="button"
+                data-toggle="collapse"
+                data-target="#top_nav"
+                aria-controls="top_nav"
+                aria-expanded="false"
+                aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="top_nav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/template_list_example' %}text-light{% endif %}" href="/template_list_example">
+                        List Example
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if '/data_in_url' in request.path  %}text-light{% endif %}" href="/data_in_url/EXAMPLE">
+                        Data In URLs
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/simple_form' %}text-light{% endif %}" href="/simple_form">
+                        Simple Form
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {% if request.path == '/ajax_example' %}text-light{% endif %}" href="/ajax_example">
+                        AJAX Example
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        {% block content %}
+                        <h2>Default Content!</h2>
+                        <p>If a page doesn't overwrite the content block, this is displayed!</p>
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {#
+    Javascript needed by the entire site can be included here.  It's a good idea to only include
+    the minimum needed by every page here and then extend the js_block below with any page-specific
+    Javascript to reduce page load times.
+    #}
+    <script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    <script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    {% block js_block %}{% endblock %}
+    {#
+    This block can be overwritten by child templates to add page-specific Javascript
+    #}
+</body>
+</html>

@@ -1,0 +1,22 @@
+{% extends 'pages/main_page.jinja' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-6">
+        <h4>Add Something</h4>
+        <div class="form-group">
+            <label for="text_input">Item:</label>
+            <input type="text" class="form-control form-control-sm" id="text_input" name="text_input" />
+        </div>
+        <button class="btn btn-sm btn-primary" id="button_add_something">Add It</button>
+    </div>
+    <div class="col-6">
+        <h4>My AJAX List of Stuff!</h4>
+        <div id="div_my_list"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_block %}
+<script type="text/javascript" src="/static/js/ajax_example.js"></script>
+{% endblock %}

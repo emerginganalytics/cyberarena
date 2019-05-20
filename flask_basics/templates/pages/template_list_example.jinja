@@ -1,0 +1,20 @@
+{% extends 'pages/main_page.jinja' %}
+{# This is a Jinja comment! #}
+{#
+Anything commented out will not be included in the HTML rendered by the
+Jinja template engine
+#}
+
+<!--
+This is an HTML comment.  It will be included in the HTML rendered
+by the Jinja template engine
+-->
+
+{% block content %}
+<div>
+    <h3>Role Call!</h3>
+    {% for list_item in return_list %}
+        {{ list_item.name }} - {{ list_item.role }} <br />
+    {% endfor %}
+</div>
+{% endblock %}
