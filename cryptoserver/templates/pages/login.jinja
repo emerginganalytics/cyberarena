@@ -1,0 +1,24 @@
+{% extends 'pages/index.jinja' %}
+
+{% block content %}
+<!-- Page Content -->
+    <div class="w3-padding-large" id="main">
+        <h3>Login Form</h3>
+        {% if login_error %}
+        {{ login_error }}
+        {% endif %}
+        <form method="POST" action="{{ request.path }}">
+            <div style="margin-bottom: 10px;">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" />
+            </div>
+            <div style="margin-bottom: 10px;">
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" />
+            </div>
+            <div style="margin-bottom: 10px;">
+                <input type="submit" value="Login" />
+            </div>
+        </form>
+    </div>
+{% endblock content %}
