@@ -15,6 +15,24 @@ def home():
     return 'So far this doesnt do anything'
 
 
+@app.route('/hashing_algorithms')
+def hashing_algorithms():
+    page_template = 'pages/hashing_algorithms.jinja'
+
+    return render_template(page_template)
+
+
+@app.route('/ajax_calculate_unsalted_hash', methods=['POST'])
+def ajax_calculate_unsalted_hash():
+    plaintext_password = request.get_json()
+
+    hashed_password = hashlib.sha256(plaintext_password.encode('utf-8')).hexdigest()
+
+    print(hashed_password)
+
+    return jsonify({'hashed_password': hashed_password})
+
+
 @app.route('/md5_page', methods=['GET', 'POST'])
 def md5_page():
     page_template = 'pages/md5_page.jinja'
