@@ -1,4 +1,4 @@
-The PhishPhactor is a phishing website that works with Kali BeEF.
+# The PhishPhactor is a phishing website that works with Kali BeEF.
 
 ###################################################################
 
@@ -13,8 +13,8 @@ Works best with Ubuntu 18.04 or later
 
 ###################################################################
 
-# NGINX Server Configuration
-# [ PhishPhactor Ports ]
+NGINX Server Configuration
+[ PhishPhactor Ports ]
 server {
 	listen 3001;
 	server_name <internal-ip>;
@@ -24,8 +24,9 @@ server {
 		proxy_set_header X-Real-IP $remote_addr;
 		include proxy_params;
 	}
-}
-#[ BeEF ]
+  }
+
+[ BeEF ]
 server {
 	listen 3002;
 	server_name <internal-ip>;
@@ -36,33 +37,33 @@ server {
 		include proxy_params;
 	}
 
-}
+ }
 
-# [ eof ]
+[ eof ]
 
 ##################################################################
 
-# [ Gunicorn Entry Point // wsgi.py ]
+[ Gunicorn Entry Point // wsgi.py ]
 from app import app as application
 
 if __name__ == "__main__":
 	application.run()
 
-# [ eof ]
+[ eof ]
 
 ##################################################################
  
-# /usr/local/sbin/beef-startup.sh
-# [ BeEF Startup Bash Script ]
+/usr/local/sbin/beef-startup.sh
+[ BeEF Startup Bash Script ]
 
 #!/bin/sh
 cd beef && sudo ./beef
 
-# [ eof ]
+[ eof ]
 
 ##################################################################
-# /etc/systemd/system/beef-startup.service
-# [BeEF Systemd Startup ]
+/etc/systemd/system/beef-startup.service
+[BeEF Systemd Startup ]
 [Unit]
 Description=BeEF Startup on Boot
 
@@ -72,11 +73,11 @@ ExecStart=/usr/local/sbin/beef-startup.sh
 [Install]
 WantedBy=multi-user.target
 
-#[ eof ]
+[ eof ]
 
 ##################################################################
 
-# /etc/supervisor/conf.d/phishphactor
+/etc/supervisor/conf.d/phishphactor
 [program:phishphactor]
 directory=/var/www/PhishPhactor
 command=/usr/local/bin/gunicorn wsgi:application --bind localhost:5000
@@ -86,4 +87,4 @@ autorestart=true
 stderr_logfile=/var/log/gunicorn/PhishPhactor.err.log
 stdout_logfile=/var/log/gunicorn/PhishPhactor.out.log
 
-# [ eof ]
+[ eof ]
