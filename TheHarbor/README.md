@@ -1,4 +1,4 @@
-# TheHarbor is a simple website that scans open ports on click
+# TheHarbor is a simple website that scans for open ports on click
 ==============================================================
 
 There isn't a lot of configuration needed to run this site. 
