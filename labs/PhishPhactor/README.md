@@ -1,6 +1,5 @@
 # The PhishPhactor is a phishing website that works with Kali BeEF.
-
-=====================================================================
+The goal of this workout is to demonstrate how dangerious phishing attacks can be and a few ways to protect yourself from these attacks.
 ```
 [ System requirements ]
 Works best with Ubuntu 18.04 or later
@@ -11,7 +10,9 @@ Works best with Ubuntu 18.04 or later
 	- Python 3.5 or later
 	- Supervisor
 ```
-=====================================================================
+# Setup
+First we can create a file in ```/etc/nginx/sites-enabled/``` and call it ```flask_settings```.
+
 ```
 # NGINX Server Configuration
 # [ PhishPhactor Ports ]
@@ -42,7 +43,8 @@ server {
 
 # [ eof ]
 ```
-=====================================================================
+For Gunicorn to work, we need to establish an entry point called, wsgi.py.
+
 ```
 # [ Gunicorn Entry Point // wsgi.py ]
 
@@ -54,7 +56,8 @@ if __name__ == "__main__":
 
 # [ eof ]
 ```
-=====================================================================
+To make BeEF run on system boot / reboot we'll need to create two files.
+In ```/usr/local/sbin/ ```, create a file called ```beef-startup.sh```.
 ``` 
 # /usr/local/sbin/beef-startup.sh
 # [ BeEF Startup Bash Script ]
@@ -64,7 +67,9 @@ cd beef && sudo ./beef
 
 # [ eof ]
 ```
-=====================================================================
+
+Next, create the file called beef-startup.service in ```/etc/systemd/system/```. Reload systemd.
+
 ```
 # /etc/systemd/system/beef-startup.service
 # [BeEF Systemd Startup ]
@@ -79,7 +84,8 @@ WantedBy=multi-user.target
 
 # [ eof ]
 ```
-=====================================================================
+Finally we need to create a file called phishphactor.conf in ```/etc/supervisor/conf.d/``` to run PhishPhactor on system boot.
+Once created, reload supervisor.
 ```
 # /etc/supervisor/conf.d/phishphactor
 [program:phishphactor]
