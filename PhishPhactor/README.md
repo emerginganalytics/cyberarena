@@ -15,6 +15,7 @@ Works best with Ubuntu 18.04 or later
 
 NGINX Server Configuration
 [ PhishPhactor Ports ]
+
 server {
 	listen 3001;
 	server_name <internal-ip>;
