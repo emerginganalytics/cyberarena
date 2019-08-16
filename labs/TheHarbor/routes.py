@@ -15,6 +15,7 @@ def home_alt():
     return render_template(load_template)
 
 
+# if scanner doesn't work, replace request.environ.get lines with literal internal IP of target
 @app.route('/scanner', methods=['GET'])
 def redirect():
     delay = 30
