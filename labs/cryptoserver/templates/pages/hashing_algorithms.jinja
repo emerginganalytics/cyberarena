@@ -1,0 +1,17 @@
+{% extends 'pages/index.jinja' %}
+
+{% block content %}
+<!-- Page Content -->
+    <div id="unsalted_hash">
+        <label for="password">Password:</label>
+        <input type="text" name="password" id="password" />
+    </div>
+    <div>
+        <button id="button_unsalted_hash">Calculate Unsalted Hash</button>
+    </div>
+    <div id="unsalted_hash_results"></div>
+{% endblock content %}
+
+{% block js_block %}
+    <script type="text/javascript" src="/static/js/hashing_algorithms.js"></script>
+{% endblock js_block %}
