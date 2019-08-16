@@ -1,8 +1,5 @@
 # TheHarbor is a simple website that scans for open ports on click
-==============================================================
-
 There isn't a lot of configuration needed to run this site. 
-
 ```
 [ System Requirements ]
 	- Flask
@@ -11,7 +8,9 @@ There isn't a lot of configuration needed to run this site.
 	- Nginx
 	- Supervisor
 ```
-==============================================================
+I've opted to host this site on the same instance as PhishPhactor so just create a new nginx server block copying those settings.
+
+In ```/etc/supervisor/conf.d/```, create a file called ```theharbor.conf```. This is what we'll use to start TheHarbor on system boot.
 ```
 # [ /etc/supervisor/conf.d/theharbor.conf ]
 [program:theharbor]
