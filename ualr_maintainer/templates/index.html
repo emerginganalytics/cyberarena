@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cyber Gym Project</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+
+    
+    
+<div class='container title-ctn'>
+    <h1>TEST BUILD WORKOUT</h1>
+    <h4>Only DOS and cyberattack workout available</h4>
+</div>
+
+
+<div id="workout-form" class='container form-ctn'>
+
+    <div class="input-field col s12">
+        <input placeholder="Enter your email" id="email" type="email" class="validate">
+        <label for="email">Email</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="workout" name="workout">
+                <option value="dos">DOS</option>
+                <option value="cyberattack">Cyberattack</option>
+                <option value="spoof">Spoof</option>
+                <option value="hiddennode">Hidden Node</option>
+                <option value="ids">IDS</option>
+            </select>
+            <label>Select workout</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="team" name="team">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <label>Select number of teams</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="availability" name="availability">
+                <option value="1">(not available)</option>
+                <option value="2">(not available)</option>
+                <option value="3">(not available)</option>
+                <option value="4">(not available)</option>
+                <option value="5">(not available)</option>
+            </select>
+            <label>Select length of availability</label>
+    </div>
+
+    <div class="btn-ctn" id="build-workout" onclick="$('#loading').show();">
+        <a class="waves-effect waves-light btn">BUILD WORKOUT</a>
+    </div>
+
+
+    <div id="loading" style="display:none;">
+        <div class="progress">
+            <div class="indeterminate"></div>
+        </div>
+        <i>It can take some times, please be patient !</i>
+    </div>
+
+
+
+</div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+
+    
+</body>
+</html>
