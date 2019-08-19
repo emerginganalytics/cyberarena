@@ -1,5 +1,5 @@
 # The PhishPhactor is a phishing website that works with Kali BeEF.
-The goal of this workout is to demonstrate how dangerious phishing attacks can be and a few ways to protect yourself from these attacks.
+The goal of this workout is to demonstrate the danger of phishing attacks and a few ways to protect yourself from these attacks.
 ```
 [ System requirements ]
 Works best with Ubuntu 18.04 or later
