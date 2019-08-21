@@ -115,7 +115,7 @@ def create_ecosystem_workout(name, ts):
     time.sleep(35)
     print("name : ", name)
     subnetwork = 'lab-{}-{}'.format(ts, name[-5:])
-    print("subnet : ", )
+    print("subnet : ", subnetwork)
     create_subnet(name, subnetwork)
     time.sleep(20)
 
