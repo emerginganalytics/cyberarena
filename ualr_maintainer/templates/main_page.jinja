@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="UA Little Rock Promise Cybersecurity Course Lab Deployments"/>
+ 	<meta name="author" content="UA Little Rock"/>
+    <title>{% block title %}Promise Workout{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/
+	SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+{% block head_block %}
+<style>
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+h3, h4 {
+    		margin: 10px 0 30px 0;
+    		letter-spacing: 2px;  /* 10px */
+    		font-size: 20px;
+    		color: #111; /* #111 */
+	}
+.bg-1 {
+    		background: #6e2639; /* #2d2d30 */
+    		color: #a7a9ac; /*#bdbdbd */
+	}
+.bg-1 h3 {
+		color: #a7a9ac; /* #fff */
+	}
+	.bg-1 p {
+		font-style: italic;
+	}
+.form-ctn {
+    width: 40%;
+    margin-top: 10vh;
+    -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    padding: 2%;
+    background-color: white;
+}
+
+
+.btn-ctn {
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.input-field {
+    margin-top: 5vh;
+}
+
+#loading {
+    text-align: center;
+    margin-top: 5vh;
+}
+    .nav-tabs li a {
+    		color: #777;
+  	}
+  	.navbar {
+    		font-family: Montserrat, sans-serif;
+    		background-color: #2d2d30;
+    		border: 0;
+    		font-size: 11px !important;
+    		letter-spacing: 4px;
+    		opacity: 0.9;
+  	}
+  	.navbar li a, .navbar .navbar-brand {
+    		color: #d5d5d5 !important;
+  	}
+  	.navbar-nav li a:hover {
+    		color: #fff !important;
+  	}
+  	.navbar-nav li.active a {
+    		color: #fff !important;
+    		background-color: #29292c !important;
+  	}
+  	.navbar-default .navbar-toggle {
+    		border-color: transparent;
+  	}
+    .carousel-inner img {
+    		width: 100%;
+    		margin: auto;
+	}
+	.carousel-caption h3 {
+    		color: #fff !important;
+	}
+	@media (max-width: 600px) {
+	.carousel-caption {
+		display: none; /* Mobile adaptation */
+		}
+	}
+  	footer {
+    		background-color: #6e2639; /* #2d2d30 */
+    		color: #f5f5f5;
+    		padding: 32px;
+  	}
+  	footer a {
+    		color: #f5f5f5;
+  	}
+  	footer a:hover {
+    		color: #777;
+    		text-decoration: none;
+  	}
+{% endblock %}
+</head>
+{% block content %}
+<body id="homePage" data-spy="scroll" data-target=".navbar" data-offset="50" class="bg-1">
+<nav class="navbar navbar-default navbar-fixed-top">
+  	<div class="container-fluid">
+    		<div class="navbar-header">
+      			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navBar">
+        			<span class="icon-bar"></span>
+        			<span class="icon-bar"></span>
+        			<span class="icon-bar"></span>
+      			</button>
+      			<a class="navbar-brand" href="#homePage">UA Little Rock Cyber Gym</a>
+    		</div>
+    		<div class="collapse navbar-collapse" id="navBar">
+      			<ul class="nav navbar-nav navbar-right">
+       				<li><a href="#homePage">HOME</a></li>
+        			<li><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">COURSE BUILDER</a></li>
+      			</ul>
+    		</div>
+  	</div>
+</nav>
+<div id="workout-form" class='container-fluid form-ctn'>
+
+    <div class="input-field col s12">
+        <input placeholder="Enter your email" id="email" type="email" class="validate">
+        <label for="email">Email</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="workout" name="workout">
+                <option value="dos">DOS</option>
+                <option value="cyberattack">Cyberattack</option>
+                <option value="spoof">Spoof</option>
+                <option value="hiddennode">Hidden Node</option>
+                <option value="ids">IDS</option>
+            </select>
+            <label>Select workout</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="team" name="team">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>
+            <label>Select number of teams</label>
+    </div>
+
+    <div class="input-field col s12">
+            <select id="availability" name="availability">
+                <option value="1">(not available)</option>
+                <option value="2">(not available)</option>
+                <option value="3">(not available)</option>
+                <option value="4">(not available)</option>
+                <option value="5">(not available)</option>
+            </select>
+            <label>Select length of availability</label>
+    </div>
+
+    <div class="btn-ctn" id="build-workout" onclick="$('#loading').show();">
+        <a class="waves-effect waves-light btn">BUILD WORKOUT</a>
+    </div>
+
+
+    <div id="loading" style="display:none;">
+        <div class="progress">
+            <div class="indeterminate"></div>
+        </div>
+        <i>It can take some times, please be patient !</i>
+    </div>
+
+
+
+</div>
+
+
+<div id="myCarousel" class="carousel slide" data-ride="carousel">
+    	<!-- Indicators -->
+    	<ol class="carousel-indicators">
+      		<li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+     	 	<li data-target="#myCarousel" data-slide-to="1"></li>
+   	 </ol>
+
+    	<!--Slide Items -->
+    	<div class="carousel-inner" role="listbox">
+      	<div class="item active">
+        	<img src="/static/eac-feature-image.png" alt="EAC Feature Image" width="1200" height="700">
+       		<div class="carousel-caption">
+          		<h3>EAC</h3>
+          		<p>Creating something VIRTUAL!</p>
+        	</div>
+	</div>
+
+      	<div class="item">
+        	<img src="/static/eac-placeholder.jpg" alt="Data Center" width="1200" height="700">
+       	 	<div class="carousel-caption">
+          		<h3>Data Center</h3>
+          		<p>A whole bunch of servers to break.</p>
+          	</div>
+		</div>
+    	<!--Carousel Controls -->
+    	<a class="left carousel-control" href="#myCarousel" role="button" data-slide="prev">
+      		<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+      		<span class="sr-only">Previous</span>
+    	</a>
+    	<a class="right carousel-control" href="#myCarousel" role="button" data-slide="next">
+      		<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+      		<span class="sr-only">Next</span>
+    	</a>
+        </div>
+</div>
+
+<footer class="text-center">
+	<br><br>
+	<p>UA Little Rock Emerging Analytics Center</p>
+</footer>
+{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+{% block js_block %}
+ <script>
+     	$(document).ready(function(){
+		// Initialize Tooltip
+		$('[data-toggle="tooltip"]').tooltip();
+
+		// Add smooth scrolling to all links in navbar + footer link
+		$(".navbar a, footer a[href='#homePage']").on('click', function(event) {
+
+		// Make sure this.hash has a value before overriding default behavior
+		if (this.hash !== "") {
+			// Prevent default anchor click behavior
+			event.preventDefault();
+      			var hash = this.hash;
+
+      			// Using jQuery's animate() method to add smooth page scroll
+      			// The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
+      			$('html, body').animate({
+       			scrollTop: $(hash).offset().top
+      			}, 900, function(){
+
+        	// Add hash (#) to URL when done scrolling (default click behavior)
+       		window.location.hash = hash;
+			});
+		}
+	});
+});
+// init Materialize select
+$(document).ready(function(){
+
+    $('select').formSelect();
+
+});
+
+
+
+// process values on the client side
+$("#build-workout").click(function () {
+
+    var user_email = $("input#email").val();
+    var workout_type = $("select#workout").val();
+    var number_team = $("select#team").val();
+    var length_availability = $("select#availability").val();
+
+    var build_data = {
+        "email": user_email,
+        "type": workout_type,
+        "team": number_team,
+        "length": length_availability,
+    }
+
+    console.log(build_data);
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        url: "/update",
+        traditional: "true",
+        data: JSON.stringify({
+            "email": user_email,
+            "type": workout_type,
+            "team": number_team,
+            "length": length_availability,
+        }),
+        dataType: "json",
+
+        // success: function (result) {
+
+        //     console.log(result)
+        //     console.log(result.redirect)
+
+        //     window.location.href = result.redirect
+
+        //     //window.location.replace(result.redirect);
+        //     //console.log(result);
+        // }
+
+    });
+
+    $("#workout-form").html("Thanks, an email will be send when your workout is ready !");
+
+});
+
+$("#go_dos_workout").click(function() {
+    window.location.href = 'https://www.google.fr';
+})
+
+
+
+
+
+$("#stop-vm").click(function () {
+
+    var instance_name = $(this).find('a')[0].id;
+    console.log(instance_name);
+
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        url: "/stopvm",
+        traditional: "true",
+        data: JSON.stringify({
+            "instance": instance_name,
+        }),
+        dataType: "json",
+    });
+
+});
+
+$("#start-vm").click(function () {
+
+    var instance_name = $(this).find('a')[0].id;
+    console.log(instance_name);
+
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        url: "/startvm",
+        traditional: "true",
+        data: JSON.stringify({
+            "instance": instance_name,
+        }),
+        dataType: "json",
+    });
+
+});
+</script>
+{% endblock%}
+</body>
+</html>
