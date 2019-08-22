@@ -1,5 +1,6 @@
 import os
-import time, calendar
+import time
+import calendar
 
 import create_workout
 import list_vm
@@ -11,7 +12,7 @@ from flask import request
 
 import smtplib
 
-# --------------------------- FLQSK APP --------------------------
+# --------------------------- FLASK APP --------------------------
 
 # send email method
 def send_email(user_mail, workout_type, list_ext_IP):
@@ -47,11 +48,10 @@ def send_email(user_mail, workout_type, list_ext_IP):
 # Application
 
 app = Flask(__name__)
-app.config['DEBUG'] = True
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('main_page.html')
 
 
 @app.route('/workout_done/<build_data>')
@@ -97,14 +97,6 @@ def stop_vm():
 
 @app.route('/update', methods=['GET', 'POST'])
 def build_dos_workout():
-
-    print("Build Workout begins")
-
-    app.logger.debug("this is a DEBUG message")
-    app.logger.info("this is an INFO message")
-    app.logger.warning("this is a WARNING message")
-    app.logger.error("this is an ERROR message")
-    app.logger.critical("this is a CRITICAL message")
 
     if request.method == 'POST':
 
@@ -162,7 +154,7 @@ def build_dos_workout():
         # for i in range(len(list_ext_ip)):
         #     time.sleep(60)
 
-        # send_email(build_data['email'], build_data['type'], list_ext_ip)
+        send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         return "DONE"
 
