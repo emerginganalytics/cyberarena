@@ -54,9 +54,9 @@ def send_email(user_mail, workout_type, list_ext_IP):
     server.starttls()
     server.ehlo()
 
-    server.login('gaetan.verdinpol@gmail.com', 'wohmersychenpiju')
+    server.login('philiphuff7@gmail.com', 'xnwaiuucpaxzsnys')
 
-    subject = "Your workout is ready"
+    subject = "Your UA Little Rock Cyber Gym Workout is Ready!"
     body = "You just created a {} workout for {} team \n\n".format(workout_type, len(list_ext_IP))
 
     for (ind,team_url) in enumerate(list_ext_IP):
@@ -65,7 +65,7 @@ def send_email(user_mail, workout_type, list_ext_IP):
     msg = f"Subject: {subject}\n\n{body}"
 
     server.sendmail(
-        'gaetan.verdinpol@gmail.com',
+        'philiphuff7@gmail.com',
         user_mail,
         msg
     )
