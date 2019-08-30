@@ -31,6 +31,8 @@ def create_network(name):
         "region": "region",
     }
 
+    print("create network", name)
+
     request = compute.networks().insert(project=project, body=network_body)
     response = request.execute()
 
@@ -110,12 +112,14 @@ def create_firewall_allow_internal(network_name):
 # this is probably not the best practice...
 # but basically we have to wait for a certain amount of time before create a subnetwork
 def create_ecosystem_workout(name, ts):
-    print("ecosystem creation")
+
+    print("ecosystem creation {}-{}".format(name, ts))
     create_network(name)
-    time.sleep(35)
-    print("name : ", name)
-    subnetwork = 'lab-{}-{}'.format(ts, name[-5:])
-    print("subnet : ", subnetwork)
+    time.sleep(50)
+
+    subnetwork = 'lab-{}-{}'.format(ts, name[-9:])
+    print("Network-name : {}, Subnetwork-name : {}".format(name, subnetwork))
+
     create_subnet(name, subnetwork)
     time.sleep(20)
 
