@@ -196,7 +196,7 @@ def build_dos_workout():
                 list_ext_ip.append(ext_IP_lab_entry)
 
 
-        send_email(build_data['email'], build_data['type'], list_ext_ip)
+            send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
