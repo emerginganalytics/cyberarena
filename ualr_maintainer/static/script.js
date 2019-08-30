@@ -7,11 +7,14 @@ $(document).ready(function(){
 
 
 
-// process values on the client side
+// process values on the client - side
 $("#build-workout").click(function () {
 
+    console.log("click");
+
+
     var user_email = $("input#email").val();
-    var workout_type = $("select#workout").val();
+    var workout_type = $("div.workout_type").html();
     var number_team = $("select#team").val();
     var length_availability = $("select#availability").val();
 

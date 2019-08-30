@@ -128,12 +128,14 @@ h3, h4 {
 </nav>
 <div id="workout-form" class='container-fluid form-ctn'>
 
+    <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
+
     <div class="input-field col s12">
         <input placeholder="Enter your email" id="email" type="email" class="validate">
         <label for="email">Email</label>
     </div>
 
-    <div class="input-field col s12">
+    <!-- <div class="input-field col s12">
             <select id="workout" name="workout">
                 <option value="dos">DOS</option>
                 <option value="cyberattack">Cyberattack</option>
@@ -142,7 +144,7 @@ h3, h4 {
                 <option value="ids">IDS</option>
             </select>
             <label>Select workout</label>
-    </div>
+    </div> -->
 
     <div class="input-field col s12">
             <select id="team" name="team">
@@ -274,8 +276,8 @@ $(document).ready(function(){
 $("#build-workout").click(function () {
 
     var user_email = $("input#email").val();
-    var workout_type = $("select#workout").val();
     var number_team = $("select#team").val();
+    var workout_type = $("#workout_type").html();
     var length_availability = $("select#availability").val();
 
     var build_data = {
