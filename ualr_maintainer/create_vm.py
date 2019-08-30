@@ -232,16 +232,22 @@ def build_dos_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'dos-{}-{}-{}'.format(image, ts, network[-5:]),
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'dos-{}-{}'.format(image[6:], network[-9:]),
                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
 
-        print("{} created".format(image))
+        print("{} created".format('dos-{}-{}'.format(image[6:], network[-9:])))
 
     # we want to retrieve the external IP for the labentry VM
+    time.sleep(5)
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='dos-image-labentry-{}-{}'.format(ts, network[-5:]))
+                                      instance='dos-labentry-{}'.format(network[-9:]))
     response = request.execute()
+
+    print(response)
+    print("\n")
+    print(response['networkInterfaces'])
+
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
     guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MQBjAG15c3Fs"
@@ -265,16 +271,18 @@ def build_cyberattack_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'attacker-{}-{}-{}'.format(image, ts, network[-5:]),
-                                    'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
-        
-        print("{} created".format(image))
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'attacker-{}-{}'.format(image[6:], network[-9:]),
+                            'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+
+        print("{} created".format('attacker-{}-{}'.format(image[6:], network[-9:])))
 
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
+    print("ext ip from :",'attacker-labentry-{}'.format(network[-9:]))
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='attacker-image-labentry-{}-{}'.format(ts, network[-5:]))
+                                      instance='attacker-labentry-{}'.format(network[-9:]))
     response = request.execute()
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
@@ -299,15 +307,18 @@ def build_spoof_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'spoof-{}-{}-{}'.format(image, ts, network[-5:]),
-                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
-        print("{} created".format(image))
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'spoof-{}-{}'.format(image[6:], network[-9:]),
+                            'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+
+        print("{} created".format('attacker-{}-{}'.format(image[6:], network[-9:])))
+
 
     # we want to retrieve the external IP for the labentry VM
-    time.sleep(5)
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='spoof-image-labentry-{}-{}'.format(ts, network[-5:]))
+                                      instance='spoof-labentry-{}'.format(network[-9:]))
+
     response = request.execute()
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
@@ -335,15 +346,16 @@ def build_hiddennode_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'hiddennode-{}-{}-{}'.format(image, ts, network[-5:]),
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'hiddennode-{}-{}'.format(image[6:], network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
 
         print("{} created".format(image))
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='hiddennode-image-labentry-{}-{}'.format(ts, network[-5:]))
+                                      instance='hiddennode-labentry-{}'.format(network[-9:]))
     response = request.execute()
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
@@ -370,15 +382,16 @@ def build_ids_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'ids-{}-{}-{}'.format(image, ts, network[-5:]),
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'ids-{}-{}'.format(image, network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+        
 
         print("{} created".format(image))
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='ids-image-labentry-{}-{}'.format(ts, network[-5:]))
+                                      instance='ids-image-labentry-{}'.format(network[-9:]))
     response = request.execute()
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
