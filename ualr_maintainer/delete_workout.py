@@ -12,33 +12,28 @@ ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 
 def isReadyToDelete(created_date):
-
     now = datetime.now()
     print(now)
-
     intance_creation_date = datetime.strptime(created_date[:19], '%Y-%m-%dT%H:%M:%S')
     print(intance_creation_date)
-
     delta = now - intance_creation_date
     print (delta.days)
 
 
-
 # retrieve all workout rows information
 list_info_workout = []
+list_workout_id = []
 def retrieve_workout_info():
     query_user = ds_client.query(kind='cybergym-workout')
     for workout in list(query_user.fetch()):
         list_info_workout.append(workout)
+        list_workout_id.append(workout['workout_ID'])
 
 
+# store the vm name into a list
+list_vm_workout = []
 
-# delete all expired instances
-
-def del_expired_instances(compute, project, zone):
-
-    # store the vm name into a list
-    list_vm_workout = []
+def retrieve_all_vm(compute, project, zone):
 
     result = compute.instances().list(project=project, zone=zone).execute()
 
@@ -49,27 +44,24 @@ def del_expired_instances(compute, project, zone):
         print("No VM found")
 
     # test only the instances created for t workout --> contain "team" inside their names
-    for instance in list_vm:
+    for instance in list_vm_workout:
         if "team" in instance['name']:
-            print(instance['name'])
-            print("creation date of the vm :", instance['creationTimestamp'])
             isReadyToDelete(instance['creationTimestamp'])
 
 
 # del_expired_instances(compute, 'ualr-cybersecurity', 'us-central1-a')
 
 retrieve_workout_info()
+retrieve_all_vm(compute, 'ualr-cybersecurity','us-central1-a')
+
+
+print("\n")
+
+for vm in list_vm_workout:
+    for w_id in list_workout_id:
+        if (w_id in vm["name"]):
+            print(w_id) 
 
 
 
-for workout in list_info_workout:
-    print(type(workout))
-    print(workout['workout_ID']) 
-    print(workout['user_email']) 
-    print(workout['expiration']) 
-
-    print(workout.id)
-
-    if (int(workout['expiration'])) == 1:
-        print("yo")
 

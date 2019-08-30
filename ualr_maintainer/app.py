@@ -57,7 +57,7 @@ def send_email(user_mail, workout_type, list_ext_IP):
     server.login('philiphuff7@gmail.com', 'xnwaiuucpaxzsnys')
 
     subject = "Your UA Little Rock Cyber Gym Workout is Ready!"
-    body = "You just created a {} workout for {} team \n\n".format(workout_type, len(list_ext_IP))
+    body = "You just created a {} workout for a team of student. \n\n".format(workout_type)
 
     for (ind,team_url) in enumerate(list_ext_IP):
         body += "Team {} : {} \n".format(ind+1, team_url[7:])
@@ -79,8 +79,13 @@ def send_email(user_mail, workout_type, list_ext_IP):
 app = Flask(__name__)
 
 @app.route('/')
-def index():
-    return render_template('main_page.html')
+def invalid_workout():
+    return render_template('no_workout.html')
+    
+
+@app.route('/<workout_type>')
+def index(workout_type):
+    return render_template('main_page.html', workout_type=workout_type)
 
 
 @app.route('/workout_done/<build_data>')
@@ -127,6 +132,8 @@ def stop_vm():
 @app.route('/update', methods=['GET', 'POST'])
 def build_dos_workout():
 
+    print("yo test")
+
     if request.method == 'POST':
 
         # create random number specirfic to the workout (6 characters by default)
@@ -134,6 +141,8 @@ def build_dos_workout():
 
         build_data = request.get_json()
         num_team = int(build_data['team'])
+
+        print(build_data)
 
         # we have to store each labentry ext IP and send it to the user
         list_ext_ip = []
@@ -187,11 +196,14 @@ def build_dos_workout():
                 list_ext_ip.append(ext_IP_lab_entry)
 
 
+        send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
         #     time.sleep(60)
-        send_email(build_data['email'], build_data['type'], list_ext_ip)
+        
+        print("YOOO")
+
 
         return "DONE"
     
