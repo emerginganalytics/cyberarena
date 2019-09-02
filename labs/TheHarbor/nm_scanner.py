@@ -5,16 +5,14 @@ def scanner(client):
 
     status = []
     open_port = []
-    check_port = [135, 445, 1840]  # , 5357]
-#   check_port = [22, 53, 80, 631, 3306, 5901, 6001, 8080]
+    check_port = [22, 53, 80, 5901, 6001]
 
     nm = nmap.PortScanner()
     nm.scan(str(client), arguments='-p T: 135, 445, 1840, 5000')
 
-    for host in nm.all_hosts():
-        for proto in nm[host].all_protocols():
-            open_port.append(nm[host][proto].keys())
-            status.append(nm[host]['state'])
+    for proto in nm[client].all_protocols():
+        open_port = nm[client][proto].keys()
+        status.append(nm[client]['state'])
 
     print(status)
 
