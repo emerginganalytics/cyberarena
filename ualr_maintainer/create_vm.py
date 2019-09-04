@@ -9,7 +9,6 @@ from googleapiclient.errors import HttpError
 compute = googleapiclient.discovery.build('compute', 'v1')
 
 
-
 # -------------------- TEST GOOGLE API AUTHENTICATION --------------------------
 
 def implicit():
@@ -34,7 +33,6 @@ def implicit():
 #     print('error')
 
 
-
 # ------------------------ LIST EXISTING VM ------------------------------
 
 # list all existing instances
@@ -57,7 +55,6 @@ def list_instances(compute, project, zone):
     #return result['items'] if 'items' in result else None
 
 # list_instances(compute, 'ualr-cybersecurity', 'us-central1-a')
-
 
 
 # -------------------- TEST REGULAR VM INSTANCIATION --------------------------
@@ -134,7 +131,6 @@ def create_instance_ubuntu(compute, project, zone, name, bucket):
 # create_instance_ubuntu(compute, 'ualr-cybersecurity', 'us-central1-a', 'YOYO', 'dvwa-test-gaetan')
 
 
-
 # -------------------- CREATE CUSTOM IMAGE --------------------------
 
 def create_instance_custom_image(compute, project, zone, name, 
@@ -196,7 +192,7 @@ def create_instance_custom_image(compute, project, zone, name,
              {
                 'key': 'bucket',
                 'value': bucket
-            },
+             },
             
             
             ]
@@ -222,7 +218,6 @@ def build_dos_vm(network, subnet, ts):
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, None]
     list_tags = [{'items': ['http-server','https-server']}, None, None]
 
-    
     # we store each response in this list --> specially to retrieve ext IP of the labentry
     list_response = []
 
@@ -234,7 +229,6 @@ def build_dos_vm(network, subnet, ts):
 
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'dos-{}-{}'.format(image[6:], network[-9:]),
                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
-
 
         print("{} created".format('dos-{}-{}'.format(image[6:], network[-9:])))
 
@@ -255,7 +249,6 @@ def build_dos_vm(network, subnet, ts):
     return guaca_redirection
 
 
-
 # -------------------- BUILD CYBERATTACK WORKOUT --------------------------
 
 def build_cyberattack_vm(network, subnet, ts):
@@ -274,9 +267,7 @@ def build_cyberattack_vm(network, subnet, ts):
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'attacker-{}-{}'.format(image[6:], network[-9:]),
                             'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
-
         print("{} created".format('attacker-{}-{}'.format(image[6:], network[-9:])))
-
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
@@ -289,7 +280,6 @@ def build_cyberattack_vm(network, subnet, ts):
     guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs"
 
     return guaca_redirection
-
 
 
 # -------------------- BUILD SPOOF WORKOUT --------------------------
@@ -307,13 +297,11 @@ def build_spoof_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'spoof-{}-{}'.format(image[6:], network[-9:]),
                             'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
 
         print("{} created".format('attacker-{}-{}'.format(image[6:], network[-9:])))
-
 
     # we want to retrieve the external IP for the labentry VM
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
@@ -326,7 +314,6 @@ def build_spoof_vm(network, subnet, ts):
         ":8080/guacamole/#/client/MQBjAG15c3Fs"
 
     return guaca_redirection
-
 
 
 # -------------------- BUILD HIDDEN NODE WORKOUT --------------------------
@@ -348,7 +335,6 @@ def build_hiddennode_vm(network, subnet, ts):
 
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'hiddennode-{}-{}'.format(image[6:], network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
-
 
         print("{} created".format(image))
 
@@ -384,7 +370,6 @@ def build_ids_vm(network, subnet, ts):
 
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'ids-{}-{}'.format(image, network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
-        
 
         print("{} created".format(image))
 
@@ -397,5 +382,74 @@ def build_ids_vm(network, subnet, ts):
 
     guaca_redirection = "http://" + ext_IP + \
         ":8080/guacamole/#/client/MQBjAG15c3Fs"
+
+    return guaca_redirection
+
+
+# ----------------------- BUILD PHISHING WORKOUT ---------------------------
+
+
+def build_phishing_vm(network, subnet, ts):
+    list_images_to_create = ['image-promise-vnc-final', 'image-labentry']
+    list_interal_ip = ['10.128.0.20', '10.128.0.18']
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
+                    'name': 'External NAT'}, None]
+    list_tags = [{'items': ['http_server', 'https-server', 'attacker', 'vnc-server', 'guac-server']}, None]
+
+    for i in range(len(list_images_to_create)):
+        image = list_images_to_create[i]
+        int_IP = list_interal_ip[i]
+        ext_IP = list_ext_ip[i]
+        tags = list_tags[i]
+
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-centrall-a', 'phishing-{}-{}'.format(image, network[-9:]),
+                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+        print("{} created".format(image))
+
+    # we want to retrieve the external IP for the labentry VM
+    time.sleep(5)
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-centrall-a',
+                                      instance='phishing-image-labentry-{}'.format(network[-9:]))
+
+    response = request.execute()
+    ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+
+    guaca_redirection = "http://" + ext_IP + \
+                        ":8080/guacamole/#/client/MQBjAG15c3Fs"
+
+    return guaca_redirection
+
+# ----------------------- BUILD PHISHING WORKOUT ---------------------------
+
+
+def build_theharbor_vm(network, subnet, ts):
+    list_images_to_create = ['image-promise-vnc-final', 'image-labentry']
+    list_interal_ip = ['10.128.0.20', '10.128.0.18']
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
+                    'name': 'External NAT'}, None]
+    list_tags = [{'items': ['http_server', 'https-server', 'attacker', 'vnc-server', 'guac-server']}, None]
+
+    for i in range(len(list_images_to_create)):
+        image = list_images_to_create[i]
+        int_IP = list_interal_ip[i]
+        ext_IP = list_ext_ip[i]
+        tags = list_tags[i]
+
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-centrall-a', 'theharbor-{}-{}'.format(image, network[-9:]),
+                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+        print("{} created".format(image))
+
+    # we want to retrieve the external IP for the labentry VM
+    time.sleep(5)
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-centrall-a',
+                                      instance='theharbor-image-labentry-{}'.format(network[-9:]))
+
+    response = request.execute()
+    ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+
+    guaca_redirection = "http://" + ext_IP + \
+                        ":8080/guacamole/#/client/MQBjAG15c3Fs"
 
     return guaca_redirection
