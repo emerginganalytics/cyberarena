@@ -420,7 +420,8 @@ def build_phishing_vm(network, subnet, ts):
 
     return guaca_redirection
 
-# ----------------------- BUILD PHISHING WORKOUT ---------------------------
+
+# ----------------------- BUILD FIREWALL WORKOUT ---------------------------
 
 
 def build_theharbor_vm(network, subnet, ts):
