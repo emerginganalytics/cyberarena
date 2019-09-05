@@ -25,34 +25,33 @@
     		color: #111; /* #111 */
 	}
     .bg-1 {
-    		background: #6e2639; /* #2d2d30 */
-    		color: #a7a9ac; /*#bdbdbd */
+            background: #6e2639; /* #2d2d30 */
+            color: #a7a9ac; /*#bdbdbd */
 	}
     .bg-1 h3 {
-		color: #a7a9ac; /* #fff */
+		    color: #a7a9ac; /* #fff */
 	}
 	.bg-1 p {
-		font-style: italic;
+		    font-style: italic;
 	}
     .form-ctn {
-        width: 40%;
-        margin-top: 2vh;
-        -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
-        box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
-        padding: 2%;
-        background-color: white;
+            width: 40%;
+            margin-top: 2vh;
+            -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+            box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+            padding: 2%;
+            background-color: white;
     }
     .btn-ctn {
-        text-align: center;
-        margin-top: 5vh;
+            text-align: center;
+            margin-top: 5vh;
     }
-
     .input-field {
-        margin-top: 5vh;
+            margin-top: 5vh;
     }
     #loading {
-        text-align: center;
-        margin-top: 5vh;
+            text-align: center;
+            margin-top: 5vh;
     }
     .nav-tabs li a {
     		color: #777;
@@ -109,13 +108,12 @@
         			<span class="icon-bar"></span>
         			<span class="icon-bar"></span>
       			</button>
-
-            <a class="navbar-brand" href="#homePage"> UA Little Rock Cyber Gym </a>
+      			<a class="navbar-brand" href="#homePage">UA Little Rock Cyber Gym</a>
     		</div>
     		<div class="collapse navbar-collapse" id="navBar">
       			<ul class="nav navbar-nav navbar-right">
        				<li><a href="#homePage">HOME</a></li>
-        			<li><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ">COURSE BUILDER</a></li>
+        			<li><a href="google.com">COURSE BUILDER</a></li>
       			</ul>
     		</div>
   	</div>
@@ -123,22 +121,12 @@
 <img src="/static/CyberGym_v2.png" alt="UA Little Rock Cyber Gym Logo"  class="center"/>
 <div id="workout-form" class='container-fluid form-ctn'>
 
+    <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
+
     <div class="input-field col s12">
         <input placeholder="Enter your email" id="email" type="email" class="validate">
         <label for="email">Email</label>
     </div>
-
-    <div class="input-field col s12">
-            <select id="workout" name="workout">
-                <option value="dos">DOS</option>
-                <option value="cyberattack">Cyberattack</option>
-                <option value="spoof">Spoof</option>
-                <option value="hiddennode">Hidden Node</option>
-                <option value="ids">IDS</option>
-            </select>
-            <label>Select workout</label>
-    </div>
-
     <div class="input-field col s12">
             <select id="team" name="team">
                 <option value="1">1</option>
@@ -150,11 +138,11 @@
 
     <div class="input-field col s12">
             <select id="availability" name="availability">
-                <option value="1">(not available)</option>
-                <option value="2">(not available)</option>
-                <option value="3">(not available)</option>
-                <option value="4">(not available)</option>
-                <option value="5">(not available)</option>
+                <option value="1">1 day</option>
+                <option value="2">2 days</option>
+                <option value="3">3 days</option>
+                <option value="4">4 days</option>
+                <option value="5">5 days</option>
             </select>
             <label>Select length of availability</label>
     </div>
@@ -170,6 +158,9 @@
         </div>
         <i>It can take some times, please be patient !</i>
     </div>
+
+
+
 </div>
 
 <footer class="text-center">
@@ -229,8 +220,8 @@ $(document).ready(function(){
 $("#build-workout").click(function () {
 
     var user_email = $("input#email").val();
-    var workout_type = $("select#workout").val();
     var number_team = $("select#team").val();
+    var workout_type = $("#workout_type").html();
     var length_availability = $("select#availability").val();
 
     var build_data = {
@@ -268,7 +259,8 @@ $("#build-workout").click(function () {
 
     });
 
-    $("#workout-form").html("Thanks, an email will be send when your workout is ready !");
+    $("#workout-form").html("Thank you, unique emails for each team will be sent when your work out is ready. " +
+        "This usually take about five minutes. Please forward these emails to your student teams when ready.");
 
 });
 
