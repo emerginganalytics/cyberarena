@@ -255,7 +255,7 @@ def build_cyberattack_vm(network, subnet, ts):
 
     list_images_to_create = ['image-labentry', 'image-promise-victim-win2012']
     list_internal_ip = ['10.1.1.10', '10.1.1.11']
-    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None]
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['http-server','https-server']}, None]
 
     for i in range(len(list_images_to_create)):
