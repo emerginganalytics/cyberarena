@@ -62,7 +62,7 @@ def send_email(user_mail, workout_type, list_ext_IP):
 
     for (ind, team_url) in enumerate(list_ext_IP):
         body = str.replace(cyberattack.EMAIL_BODY, "WORKOUT_URL", team_url)
-        subject = "Your UA Little Rock Cyber Gym Workout %s is Ready! Forward this email to Team %d" % (
+        subject = "Your UA Little Rock Cyber Gym Workout {} is Ready! Forward this email to Team {}".format(
         workout_type, str(ind + 1))
         msg = f"Subject: {subject}\n\n{body}"
 
