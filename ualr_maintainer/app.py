@@ -7,13 +7,13 @@ import string
 import create_workout
 import list_vm
 import start_stop_vm
-from workoutdescription import cyberattack
 
 from flask import Flask, render_template, redirect, url_for
 from flask import jsonify
 from flask import request
 
 import smtplib
+import workoutdescription
 
 # datastore dependency
 from google.cloud import datastore
@@ -61,7 +61,9 @@ def send_email(user_mail, workout_type, list_ext_IP):
     server.login(from_address, from_address_cred)
 
     for (ind, team_url) in enumerate(list_ext_IP):
-        body = str.replace(cyberattack.EMAIL_BODY, "WORKOUT_URL", team_url)
+
+        body = workoutdescription.body_workout_message(workout_type, team_url)
+        # body = str.replace(workoutdescription.workout_type, "WORKOUT_URL", team_url)
         subject = "Your UA Little Rock Cyber Gym Workout {} is Ready! Forward this email to Team {}".format(
         workout_type, str(ind + 1))
         msg = f"Subject: {subject}\n\n{body}"
@@ -126,8 +128,7 @@ def stop_vm():
 
 
 @app.route('/update', methods=['GET', 'POST'])
-def build_dos_workout():
-    print("yo test")
+def build_workout():
 
     if request.method == 'POST':
 
@@ -137,13 +138,10 @@ def build_dos_workout():
         build_data = request.get_json()
         num_team = int(build_data['team'])
 
-        print(build_data)
-
         # we have to store each labentry ext IP and send it to the user
         list_ext_ip = []
 
         ts = str(calendar.timegm(time.gmtime()))
-        print("timestamp : ", ts)
 
         store_workout_info(generated_workout_ID, build_data['email'], build_data['length'], build_data['type'], ts)
 
@@ -189,8 +187,6 @@ def build_dos_workout():
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
         #     time.sleep(60)
-
-        print("YOOO")
 
         return "DONE"
 

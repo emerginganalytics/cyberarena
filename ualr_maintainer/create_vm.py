@@ -238,10 +238,6 @@ def build_dos_vm(network, subnet, ts):
                                       instance='dos-labentry-{}'.format(network[-9:]))
     response = request.execute()
 
-    print(response)
-    print("\n")
-    print(response['networkInterfaces'])
-
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
     guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MQBjAG15c3Fs"
