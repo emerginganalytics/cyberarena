@@ -184,6 +184,15 @@ def build_dos_workout():
                 ext_IP_lab_entry = create_workout.create_ids_workout(network, subnetwork, ts)
                 list_ext_ip.append(ext_IP_lab_entry)
 
+            if (build_data['type'] == 'phishing'):
+                ext_IP_lab_entry = create_workout.create_phishing_workout(network, subnetwork, ts)
+                list_ext_ip.append(ext_IP_lab_entry)
+
+            if (build_data['type'] == 'theharbor'):
+                ext_IP_lab_entry = create_workout.create_theharbor_workout(network, subnetwork, ts)
+                list_ext_ip.append(ext_IP_lab_entry)
+
+
         send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team

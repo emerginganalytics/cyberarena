@@ -49,7 +49,7 @@ def create_ids_workout(name_workout, name_subnet_workout, ts):
     return create_vm.build_ids_vm(name_workout, name_subnet_workout, ts)
 
 
-def create_phishing(name_workout, name_subnet_workout, ts):
+def create_phishing_workout(name_workout, name_subnet_workout, ts):
 
     create_network.create_ecosystem_workout(name_workout, ts)
     time.sleep(10)
@@ -58,7 +58,7 @@ def create_phishing(name_workout, name_subnet_workout, ts):
     return create_vm.build_phishing_vm(name_workout, name_subnet_workout, ts)
 
 
-def create_theharbor(name_workout, name_subnet_workout, ts):
+def create_theharbor_workout(name_workout, name_subnet_workout, ts):
 
     create_network.create_ecosystem_workout(name_workout, ts)
     time.sleep(10)
