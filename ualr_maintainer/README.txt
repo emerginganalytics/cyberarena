@@ -9,6 +9,7 @@ Before launching the app, you have to set up the the Goole API environment varia
 Packages to install in our python venv :
     - flask
     - google api client 
+    -
 
 Run python app.py
 
