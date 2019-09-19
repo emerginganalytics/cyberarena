@@ -65,7 +65,7 @@ def send_email(user_mail, workout_type, list_ext_IP):
 
         body = workoutdescription.body_workout_message(workout_type, team_url)
         mimebody = MIMEText(body, 'html')
-        subject = "Team {}: Your UA Little Rock Cyber Gym Workout {} is Ready!".format(str(ind + 1), workout_type)
+        subject = "Team {}: Your UA Little Rock Cyber Gym Workout is Ready!".format(str(ind + 1))
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From'] = from_address
