@@ -3,7 +3,6 @@ import time
 import calendar
 import random
 import string
-
 import create_workout
 import list_vm
 import start_stop_vm
@@ -13,6 +12,8 @@ from flask import jsonify
 from flask import request
 
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 import workoutdescription
 
 # datastore dependency
@@ -63,15 +64,17 @@ def send_email(user_mail, workout_type, list_ext_IP):
     for (ind, team_url) in enumerate(list_ext_IP):
 
         body = workoutdescription.body_workout_message(workout_type, team_url)
-        # body = str.replace(workoutdescription.workout_type, "WORKOUT_URL", team_url)
-        subject = "Your UA Little Rock Cyber Gym Workout {} is Ready! Forward this email to Team {}".format(
-        workout_type, str(ind + 1))
-        msg = f"Subject: {subject}\n\n{body}"
-
+        mimebody = MIMEText(body, 'html')
+        subject = "Team {}: Your UA Little Rock Cyber Gym Workout {} is Ready!".format(str(ind + 1), workout_type)
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = from_address
+        msg['To'] = user_mail
+        msg.attach(mimebody)
         server.sendmail(
             from_address,
             user_mail,
-            msg
+            msg.as_string()
         )
 
     print('Email has been sent')
@@ -199,6 +202,5 @@ def build_workout():
 
         return "DONE"
 
-### Purpose of the os.environ.get ??? --> why not just choosing a port
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+if __name__ == '__main__':
+     app.run(debug=True, host='0.0.0.0', port=8080)
