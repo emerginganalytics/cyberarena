@@ -386,11 +386,10 @@ def build_ids_vm(network, subnet, ts):
 
 
 def build_phishing_vm(network, subnet, ts):
-    list_images_to_create = ['image-promise-vnc', 'image-labentry']
-    list_interal_ip = ['10.128.0.20', '10.128.0.18']
-    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
-                    'name': 'External NAT'}, None]
-    list_tags = [{'items': ['http_server', 'https-server', 'attacker', 'vnc-server', 'guac-server']}, None]
+    list_images_to_create = ['image-labentry', 'image-promise-vnc']
+    list_interal_ip = ['10.1.1.18', '10.1.1.20']
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
+    list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server']}, None]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
