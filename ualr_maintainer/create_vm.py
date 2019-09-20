@@ -212,7 +212,7 @@ def build_dos_vm(network, subnet, ts):
 
     print("build dos network : {}".format(network))
 
-    # create the vm for the dos workout and assigne them to the previous network
+    # create the vm for the dos workout and assign them to the previous network
     list_images_to_create = ['image-labentry','image-promise-dvwalab','image-promise-attacker']
     list_internal_ip = ['10.1.1.10', '10.1.1.3', '10.1.1.4']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, None]
@@ -386,7 +386,7 @@ def build_ids_vm(network, subnet, ts):
 
 
 def build_phishing_vm(network, subnet, ts):
-    list_images_to_create = ['image-promise-vnc-final', 'image-labentry']
+    list_images_to_create = ['image-promise-vnc', 'image-labentry']
     list_interal_ip = ['10.128.0.20', '10.128.0.18']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None]
@@ -421,7 +421,7 @@ def build_phishing_vm(network, subnet, ts):
 
 
 def build_theharbor_vm(network, subnet, ts):
-    list_images_to_create = ['image-promise-vnc-final', 'image-labentry']
+    list_images_to_create = ['image-promise-vnc', 'image-labentry']
     list_interal_ip = ['10.128.0.20', '10.128.0.18']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None]
