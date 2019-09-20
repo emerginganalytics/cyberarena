@@ -60,7 +60,6 @@ def body_workout_message(workout_type, team_url):
                                 "phishing attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
 
-
     email_body_footer = ' '
     email_body_footer = email_body_footer + '<br>Thank you'
     email_body_footer = email_body_footer + '<br>Your Cyber Gym Support Team<br>' \
