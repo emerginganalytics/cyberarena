@@ -69,6 +69,4 @@ def body_workout_message(workout_type, team_url):
     email_body = str(email_body_header) + str(email_body_content) + str(email_body_footer)
 
     return email_body
->>>>>>> f0158763c716587f0b921d3cef2b4eadf54853da
-
 
