@@ -46,6 +46,7 @@ def body_workout_message(workout_type, team_url):
                         ' credentials category. Choose the "Get credentials from browser" option and you ' \
                         'should get an output with the username and password you entered. Note: If for some' \
                         ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
+
     elif (workout_type == "dos"):
         email_body_content = " "
         email_body_content += "<h1>DOS Workout</h1>"
@@ -68,5 +69,4 @@ def body_workout_message(workout_type, team_url):
     email_body = str(email_body_header) + str(email_body_content) + str(email_body_footer)
 
     return email_body
-
 
