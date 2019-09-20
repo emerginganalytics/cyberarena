@@ -398,14 +398,14 @@ def build_phishing_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-centrall-a', 'phishing-{}-{}'.format(image, network[-9:]),
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central-a', 'phishing-{}-{}'.format(image, network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
         print("{} created".format(image))
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
-    request = compute.instances().get(project='ualr-cybersecurity', zone='us-centrall-a',
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-central-a',
                                       instance='phishing-image-labentry-{}'.format(network[-9:]))
 
     response = request.execute()
@@ -433,14 +433,14 @@ def build_theharbor_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-centrall-a', 'theharbor-{}-{}'.format(image, network[-9:]),
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central-a', 'theharbor-{}-{}'.format(image, network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
         print("{} created".format(image))
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
-    request = compute.instances().get(project='ualr-cybersecurity', zone='us-centrall-a',
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-central-a',
                                       instance='theharbor-image-labentry-{}'.format(network[-9:]))
 
     response = request.execute()
