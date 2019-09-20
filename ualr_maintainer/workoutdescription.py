@@ -46,9 +46,19 @@ def body_workout_message(workout_type, team_url):
                         ' credentials category. Choose the "Get credentials from browser" option and you ' \
                         'should get an output with the username and password you entered. Note: If for some' \
                         ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
-    
-    if (workout_type == "dos"):
-        message = "Test dos message workout {}".format(team_url)
+    elif (workout_type == "dos"):
+        email_body_content = " "
+        email_body_content += "<h1>DOS Workout</h1>"
+        email_body_content += "Welcome to your team's Denial of Service workout, in which you will experience how a " \
+                                "Denial of Service attack works. Your server should now be ready at the following " \
+                                "website: {}".format(team_url)
+    elif (workout_type == "phishing"):
+        email_body_content = " "
+        email_body_content += "<h1>Phishing Workout</h1>"
+        email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
+                                "phishing attack works. Your server should now be ready at the following " \
+                                "website: {}".format(team_url)
+
 
     email_body_footer = ' '
     email_body_footer = email_body_footer + '<br>Thank you'
