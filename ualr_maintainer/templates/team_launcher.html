@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="description" content="UA Little Rock Promise Cybersecurity Course Lab Deployments"/>
+    <meta name="description" content="UA Little Rock Promise Cybersecurity Course Team Launcher"/>
  	<meta name="author" content="UA Little Rock"/>
-    <title>Promise Workout Builder</title>
+    <title>Promise Team Launcher</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/
 	SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
@@ -15,8 +15,12 @@
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
 </head>
 <style>
+    html {
+        height:100%;
+    }
     body {
             font-family: 'Montserrat', sans-serif;
+            height:100%;
     }
     h3, h4 {
     		margin: 10px 0 30px 0;
@@ -31,24 +35,12 @@
     .bg-1 h3 {
 		    color: #a7a9ac; /* #fff */
 	}
+    .bg-1 h1 {
+            color: black;
+    }
 	.bg-1 p {
 		    font-style: italic;
 	}
-    .form-ctn {
-            width: 40%;
-            margin-top: 10vh;
-            -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
-            box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
-            padding: 2%;
-            background-color: white;
-    }
-    .btn-ctn {
-            text-align: center;
-            margin-top: 5vh;
-    }
-    .input-field {
-            margin-top: 5vh;
-    }
     .nav-tabs li a {
     		color: #777;
   	}
@@ -74,17 +66,23 @@
     		border-color: transparent;
   	}
 
-    .left {
-        display: block;
-        margin-left: 10vh;
-        margin-top: 10vh;
-        width: 20%;
-        height: 25%;
+    .container {
+            display: block;
+            width: 50%;
+            height:30%;
+            margin-right:auto;
+            margin-left:auto;
+            -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+            box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+            padding-bottom: 2%;
+            background-color: white;
     }
+
   	footer {
     		background-color: #6e2639; /* #2d2d30 */
     		color: #f5f5f5;
-    		padding: 32px;
+            padding:1vh;
+            float:bottom;
   	}
   	footer a {
     		color: #f5f5f5;
@@ -108,57 +106,27 @@
     		</div>
     		<div class="collapse navbar-collapse" id="navBar">
       			<ul class="nav navbar-nav navbar-right">
-       				<li><a>HOME</a></li>
-        			<li><a href="{{ url_for('team_launcher') }}">TEAM LAUNCHER</a></li>
+                    <li><a href="https://google.com">HOME </a></li>
+        			<li><a href="https://google.com">COURSE BUILDER</a></li>
       			</ul>
     		</div>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
-            <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a href="dos">DOS</a></li>
-            <li><a href="xss">XSS</a></li>
-            <li><a href="spoof">Spoof</a></li>
-          </ul>
   	</div>
 </nav>
-<img src="/static/CyberGym_v2.png" alt="UA Little Rock Cyber Gym Logo"  class="left"/>
-<div id="workout-form" class='container-fluid form-ctn'>
 
-    <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
+    <h1 class="text-center" style="margin-top:13vh"> Attacker</h1>
+<a href = ""  id="launch">
+    <div class = "container" style="margin-top:2vh;background-image:url('../static/attacker.jpg');
+background-size:cover; background-repeat:no-repeat;background-position:center">
 
-    <div class="input-field col s12">
-        <input placeholder="Enter your email" id="email" type="email" class="validate">
-        <label for="email">Email</label>
     </div>
-    <div class="input-field col s12">
-            <select id="team" name="team">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-            </select>
-            <label>Select number of teams</label>
+</a>
+            <h1 class="text-center" style="margin-top:5vh"> Defender</h1>
+<a href = "https://google.com">
+    <div class = "container" style="margin-top:2vh;background-image:url('../static/defender.png');
+background-size:cover; background-repeat:no-repeat;background-position:center">
     </div>
-
-    <div class="input-field col s12">
-            <select id="availability" name="availability">
-                <option value="1">1 day</option>
-                <option value="2">2 days</option>
-                <option value="3">3 days</option>
-                <option value="4">4 days</option>
-                <option value="5">5 days</option>
-            </select>
-            <label>Select length of availability</label>
-    </div>
-
-     <div class="btn-ctn" id="build-workout">
-        <a class="waves-effect waves-light btn">BUILD WORKOUT</a>
-    </div>
-
-
-</div>
-
+</a>
+<br><br>
 <footer class="text-center">
 	<br><br>
 	<p>UA Little Rock Emerging Analytics Center</p>
@@ -225,7 +193,7 @@ $("#build-workout").click(function () {
         "type": workout_type,
         "team": number_team,
         "length": length_availability,
-    };
+    }
 
     console.log(build_data);
 
@@ -258,13 +226,14 @@ $("#build-workout").click(function () {
     $("#workout-form").html("Thank you, unique emails for each team will be sent when your work out is ready. " +
         "This usually take about five minutes. Please forward these emails to your student teams when ready.");
 
-
-
 });
 
 $("#go_dos_workout").click(function() {
     window.location.href = 'https://www.google.fr';
-});
+})
+
+
+
 
 
 $("#stop-vm").click(function () {
@@ -303,6 +272,12 @@ $("#start-vm").click(function () {
         dataType: "json",
     });
 
+});
+$("#launch").click(function() {
+    let guac = "http://" + {{ ext_IP }} +
+                       ":8080/guacamole/#/client/MQBjAG15c3Fs";
+   // document.getElementById("launch").href = guaca_redirection;
+    document.getElementById("launch").setAttribute("href", guac);
 });
 </script>
 </body>
