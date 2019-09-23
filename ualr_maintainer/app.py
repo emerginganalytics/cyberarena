@@ -95,6 +95,11 @@ def index(workout_type):
     return render_template('main_page.html', workout_type=workout_type)
 
 
+@app.route('/team_launcher')
+def team_launcher():
+    return render_template('team_launcher.html')
+
+
 @app.route('/workout_done/<build_data>')
 def workout_done(build_data):
     return render_template('workout_done.html', build_data=build_data)
