@@ -472,7 +472,7 @@ def build_hashmyfiles_vm(network, subnet, ts):
 
     # we want to retrieve the external IP for the labentry VM
     time.sleep(5)
-    print("ext ip from :",'attacker-labentry-{}'.format(network[-9:]))
+    print("ext ip from :", 'attacker-labentry-{}'.format(network[-9:]))
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
                                       instance='attacker-labentry-{}'.format(network[-9:]))
     response = request.execute()
