@@ -215,7 +215,7 @@ def build_dos_vm(network, subnet, ts):
     # create the vm for the dos workout and assign them to the previous network
     list_images_to_create = ['image-labentry','image-promise-dvwalab','image-promise-attacker']
     list_internal_ip = ['10.1.1.10', '10.1.1.3', '10.1.1.4']
-    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, None]
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['http-server','https-server']}, None, None]
 
     # we store each response in this list --> specially to retrieve ext IP of the labentry
@@ -389,7 +389,7 @@ def build_phishing_vm(network, subnet, ts):
     list_images_to_create = ['image-labentry', 'image-promise-vnc']
     list_interal_ip = ['10.1.1.18', '10.1.1.20']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
-    list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server']}, None]
+    list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']}, None]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
