@@ -65,3 +65,13 @@ def create_theharbor_workout(name_workout, name_subnet_workout, ts):
 
     # create the vm and return the ext IP of the entry lab
     return create_vm.build_theharbor_vm(name_workout, name_subnet_workout, ts)
+
+
+def create_hashmyfiles_workout(name_workout, name_subnet_workout, ts):
+
+    create_network.create_ecosystem_workout(name_workout, ts)
+    time.sleep(10)
+
+    # Create the vm and return the ext IP of the entry lab
+    return create_vm.build_hashmyfiles_vm(name_workout, name_subnet_workout, ts)
+
