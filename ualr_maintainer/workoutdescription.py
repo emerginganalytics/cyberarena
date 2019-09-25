@@ -60,6 +60,47 @@ def body_workout_message(workout_type, team_url):
                                 "phishing attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
 
+    elif (workout_type == "hashmyfiles"):
+        email_body_content = " "
+        email_body_content += "<h1>Hash My Files</h1>"
+        email_body_content += "Welcome to your team's hashing workout. Here you will discover the importance of " \
+                              "reading file hashes. Your server should be ready at the following " \
+                              "website: {}".format(team_url)
+        email_body_content += "<br><br><span style='font-weight: 700; text-decoration-line: underline;'> " \
+                              "Objective of the Lab:</span><br>For this workout, we will be using the Windows Server " \
+                              "2016 Virtual Machine. The workouts are stored in a folder called Crypto Labs. This " \
+                              "time, we will be using the program, HashMyFiles, to check if each MD5 hash of the " \
+                              "lab files are the same as the one's provided in the lab.<br><br>" \
+                              '<span style="font-weight: bold; text-decoration-line: underline;">MD5 Hashes: ' \
+                              "</span>&nbsp;<br><div class='yui-wk-div'>junk1.txt:756edf02e845e9ea432caaad4b6a48b6 " \
+                              "</div><div class='yui-wk-div'>junk2.txt:cfbaf687c9ccc5ae41b483f4f4158eda</div> " \
+                              "<div class='yui-wk-div'>junk3.txt:77c7b4017439256042775724a3281af5</div> " \
+                              '<div class="yui-wk-div">junk4.txt:fbf5bca33521752656f7acacbf93c51c</div> ' \
+                              '<div class="yui-wk-div">junk5.txt:43b417d2caaf198a568bf1719bc27e72</div> ' \
+                              '<div class="yui-wk-div">junk6.txt:123e09403dacc9bf1091e1ad340ad80f</div> ' \
+                              '<div class="yui-wk-div">junk7.txt:a02f5ea2cf85c7efd91937d8837e283e</div> ' \
+                              '<div class="yui-wk-div">junk8.txt:c74c56db1adcb161f208b67854b2a2ce<br><br>1) Inside ' \
+                              "the folder called Hashing Labs, there are 8 text files called junk.txt. Which one " \
+                              "of these files are holding the flag? It would be good to know that one of the files " \
+                              "has been tampered with recently. To check for recent file changes, we need to check " \
+                              'the file hashes. Start by opening up HashMyFiles.<br>' \
+                              '<img src="assets/img/Selection_085.png"class="yui-img" title="" alt=""><br><br>2) ' \
+                              "With HashMyFiles open, click on File and choose the option that says add files. Make " \
+                              "sure to add every file. Once that's finished, one should see each file's value " \
+                              "displayed on the right. For now, only concentrate on the MD5 hashes.&nbsp;<br> " \
+                              '<img src="assets/img/Selection_086.png" class="yui-img" title="" alt=""><br><br>3) ' \
+                              "Now, try and validate each hash value with the values given in the directions above. " \
+                              "If the values are the same, then the file has not been tampered with. If the values " \
+                              "are different, then something has been changed. Notice how junk5.txt has a different " \
+                              'value. This must be the flag!<br><img src="assets/img/Selection_087.png" ' \
+                              'class="yui-img" title="" alt=""><br><br>4)&nbsp; But wait, inside ' \
+                              "junk5.txt, there isn't anything that says it's the flag. That's because the flag has " \
+                              "been encoded using an algorithm. Can you guess which encoding was used? " \
+                              "Simply put the value into a decryptor and you should " \
+                              "end up with the flag. <br><br>For a decryptor, you can either use " \
+                              "asciitohex.com or use CrypTool which should already be installed on the desktop.<br>" \
+                              '<img src="assets/img/Selection_088.png" class="yui-img" title="" alt="" ' \
+                              'style="width: 379px;"><br></div>'
     email_body_footer = ' '
     email_body_footer = email_body_footer + '<br>Thank you'
     email_body_footer = email_body_footer + '<br>Your Cyber Gym Support Team<br>' \

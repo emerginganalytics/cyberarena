@@ -198,6 +198,9 @@ def build_workout():
                 ext_IP_lab_entry = create_workout.create_theharbor_workout(network, subnetwork, ts)
                 list_ext_ip.append(ext_IP_lab_entry)
 
+            if (build_data['type'] == 'hashmyfiles'):
+                ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, ts)
+                list_ext_ip.append(ext_IP_lab_entry)
 
         send_email(build_data['email'], build_data['type'], list_ext_ip)
 
@@ -206,6 +209,7 @@ def build_workout():
         #     time.sleep(60)
 
         return "DONE"
+
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
