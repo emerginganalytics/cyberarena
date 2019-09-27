@@ -389,7 +389,8 @@ def build_phishing_vm(network, subnet, ts):
     list_images_to_create = ['image-labentry', 'image-promise-vnc']
     list_interal_ip = ['10.1.1.18', '10.1.1.20']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
-    list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']}, None]
+    list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']},
+                 {'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']}]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
