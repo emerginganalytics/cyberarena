@@ -1,4 +1,3 @@
-
 def body_workout_message(workout_type, team_url):
     print(workout_type)
 
@@ -59,6 +58,20 @@ def body_workout_message(workout_type, team_url):
         email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
                                 "phishing attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
+    elif (workout_type == "shodan"):
+        email_body_content = " " 
+        email_body_content += "<h1>Shodan Search Engine</h1>"
+        email_body_content += "Welcome to the Shodan exercise, where you will learn how to find and search up IoT devices and other systems across the       Internet.&nbsp;<br><br>When using the Shodan search engine, here are some search terms:<br><ul><li>port:554 has_screenshot:true</li><li>category:malware</li><li>port:25565</li><li>gps</li></ul><div>Try messing around with the search terms and look up common IoT devices like fridges, microwaves, etc.<br>Link:<a href="https://www.shodan.io/">https://www.shodan.io</a><br></div>"
+
+
+    elif (workout_type == "BinaryHex"):
+        email_body_content += " "
+        email_body_content += "<h1>Binary and Hex Games</h1>"
+        email_body_content += "Welcome to the binary and hex games! These games will both teach you the fundamentals of binary and hexadecimal which are essential to   learning about other topics like reverse engineering and binary exploitation. Follow the additional instructions each game provides and have fun."<br>Links:<br>BinaryBlitz:<a href="https://games.penjee.com/binary-numbers-game/">https://games.penjee.com/binary-numbers-game/</a><br>FlippyBit:<a href="http://flippybitandtheattackofthehexadecimalsfrombase16.com/">http://flippybitandtheattackofthehexadecimalsfrombase16.com/</a>&nbsp;
+
+    elif (workout_type == "osint"):
+        email_body_content =""
+        email_body_content += "Welcome to the OSINT challenge! You've been given the task of gathering information on an individual known as Thomas Atkins. He is a senior software analyst at TechHex. The information you gather from him should eventually lead you to a flag. Hint:Start by looking at LinkedIn."
 
     elif (workout_type == "hashmyfiles"):
         email_body_content = " "
