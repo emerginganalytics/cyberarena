@@ -100,22 +100,22 @@ def body_workout_message(workout_type, team_url):
                               "time, we will be using the program, HashMyFiles, to check if each MD5 hash of the " \
                               "lab files are the same as the one's provided in the lab.<br><br>" \
                               '<span style="font-weight: bold; text-decoration-line: underline;">MD5 Hashes: ' \
-                              "</span>&nbsp;<br><div class='yui-wk-div'>junk1.txt:40834f1c8154f258dc448193d0d6aa8e" \
-                              "</div><div class='yui-wk-div'>junk2.txt:100838d76c047298d11629a375dda6cb</div> " \
-                              "<div class='yui-wk-div'>junk3.txt:9425b1d98182b3bb4cb909aaf46f51bb</div> " \
-                              '<div class="yui-wk-div">junk4.txt:0249946f4bf77ce54f12f7a6efcb532d</div> ' \
-                              '<div class="yui-wk-div">junk5.txt:8a3b4012d0c872828b3a1ba605d2e7cf</div> ' \
-                              '<div class="yui-wk-div">junk6.txt:01d5de820c79276cff66026cbfe3464f</div> ' \
-                              '<div class="yui-wk-div">junk7.txt:ea37150ab2008ebca11afa387bd11d13</div> ' \
-                              '<div class="yui-wk-div">junk8.txt:9ccdcf6a85ea6497daeb4c088e1c2972<br><br>1) Inside ' \
+                              "</span>&nbsp;<br><div class='yui-wk-div'>junk1:756edf02e845e9ea432caaad4b6a48b6" \
+                              "</div><div class='yui-wk-div'>junk2:cfbaf687c9ccc5ae41b483f4f4158eda</div> " \
+                              "<div class='yui-wk-div'>junk3:77c7b4017439256042775724a3281af5</div> " \
+                              '<div class="yui-wk-div">junk4:fbf5bca33521752656f7acacbf93c51c</div> ' \
+                              '<div class="yui-wk-div">junk5:ab08a62b4042fa833573172a67944bf1</div> ' \
+                              '<div class="yui-wk-div">junk6:123e09403dacc9bf1091e1ad340ad80f</div> ' \
+                              '<div class="yui-wk-div">junk7:a02f5ea2cf85c7efd91937d8837e283e</div> ' \
+                              '<div class="yui-wk-div">junk8:c74c56db1adcb161f208b67854b2a2ce<br><br>1) Inside ' \
                               "the folder called Hashing Labs, there are 8 text files called junk.txt. Which one " \
                               "of these files are holding the flag? It would be good to know that one of the files " \
                               "has been tampered with recently. To check for recent file changes, we need to check " \
                               'the file hashes. Start by opening up HashMyFiles.<br>' \
                               '<img src="assets/img/Selection_085.png"class="yui-img" title="" alt=""><br><br>2) ' \
                               "With HashMyFiles open, click on File and choose the option that says add files. Make " \
-                              "sure to add every file. Once that's finished, one should see each file's value " \
-                              "displayed on the right. For now, only concentrate on the MD5 hashes.&nbsp;<br> " \
+                              "sure to add every 'junk(*).txt' file. Once that's finished, one should see each file's "\
+                              "value displayed on the right. For now, only concentrate on the MD5 hashes.&nbsp;<br> " \
                               '<img src="assets/img/Selection_086.png" class="yui-img" title="" alt=""><br><br>3) ' \
                               "Now, try and validate each hash value with the values given in the directions above. " \
                               "If the values are the same, then the file has not been tampered with. If the values " \
