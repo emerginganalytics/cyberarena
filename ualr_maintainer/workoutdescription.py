@@ -45,7 +45,11 @@ def body_workout_message(workout_type, team_url):
                         ' credentials category. Choose the "Get credentials from browser" option and you ' \
                         'should get an output with the username and password you entered. Note: If for some' \
                         ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
-
+    elif (workout_type == "xss"):
+        email_body_content = " "
+        email_body_content += "<h1>Cross-Site Scripting Workout</h1>"
+        email_body_content += "Welcome to your team's cross-site scripting workout! " \
+                                "website: {}".format(team_url)
     elif (workout_type == "dos"):
         email_body_content = " "
         email_body_content += "<h1>DOS Workout</h1>"
