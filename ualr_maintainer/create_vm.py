@@ -216,7 +216,7 @@ def build_dos_vm(network, subnet, ts):
     list_images_to_create = ['image-labentry','image-promise-dvwalab','image-promise-attacker']
     list_internal_ip = ['10.1.1.10', '10.1.1.3', '10.1.1.4']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
-    list_tags = [{'items': ['http-server','https-server']}, None, None]
+    list_tags = [{'items': ['http-server','https-server']}, None, {'items': ['http-server','https-server']}]
 
     # we store each response in this list --> specially to retrieve ext IP of the labentry
     list_response = []
@@ -244,6 +244,36 @@ def build_dos_vm(network, subnet, ts):
     
     return guaca_redirection
 
+# -------------------- BUILD XSS WORKOUT --------------------------
+
+
+def build_xss_vm(network, subnet, ts):
+
+    list_images_to_create = ['image-promise-dvwalab']
+    list_internal_ip = ['10.1.1.253']
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
+    list_tags = [{'items': ['http-server', 'https-server']}, None]
+
+    for i in range(len(list_images_to_create)):
+        image = list_images_to_create[i]
+        int_IP = list_internal_ip[i]
+        ext_IP = list_ext_ip[i]
+        tags = list_tags[i]
+
+        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a',
+                                     'xss-{}-{}'.format(image[6:], network[-9:]),
+                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+
+    time.sleep(5)
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
+                                      instance='xss-promise-dvwalab-{}'.format(network[-9:]))
+    response = request.execute()
+    ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+
+    guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs"
+
+    return guaca_redirection
 
 # -------------------- BUILD CYBERATTACK WORKOUT --------------------------
 

@@ -22,6 +22,15 @@ def create_cyberattack_workout(name_workout, name_subnet_workout, ts):
     return create_vm.build_cyberattack_vm(name_workout, name_subnet_workout, ts)
 
 
+def create_xss_workout(name_workout, name_subnet_workout, ts):
+
+    create_network.create_ecosystem_workout(name_workout, ts)
+    time.sleep(10)
+
+    # create the vm and return the ext IP of the entry lab
+    return create_vm.build_xss_vm(name_workout, name_subnet_workout, ts)
+
+
 def create_spoof_workout(name_workout, name_subnet_workout, ts):
 
     create_network.create_ecosystem_workout(name_workout, ts)

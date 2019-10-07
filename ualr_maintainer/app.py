@@ -174,6 +174,9 @@ def build_workout():
                 ext_IP_lab_entry = create_workout.create_cyberattack_workout(network, subnetwork, ts)
                 list_ext_ip.append(ext_IP_lab_entry)
 
+            if (build_data['type'] == 'xss'):
+                ext_IP_lab_entry = create_workout.create_xss_workout(network, subnetwork, ts)
+                list_ext_ip.append(ext_IP_lab_entry)
             # future work
             # jsonify is very important for otherwise AJAX succes is not handle correctly
             # return jsonify(succesData)
