@@ -52,10 +52,28 @@ def body_workout_message(workout_type, team_url):
                                 "website: {}".format(team_url)
     elif (workout_type == "dos"):
         email_body_content = " "
-        email_body_content += "<h1>DOS Workout</h1>"
+        email_body_content += "<h1>DoS Workout</h1>"
         email_body_content += "Welcome to your team's Denial of Service workout, in which you will experience how a " \
                                 "Denial of Service attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
+        email_body_content += '<h2>Preparation:</h2> ' \
+                              '<ol> ' \
+                    '<li>Log into the Guacamole web server using <i>init_user</i> and ' \
+                        '<i>promiseme</i> as the username and password.</li>' \
+                    '<li>You may have to refresh the page if a screen does not come up.</li></ol>' \
+                  '<h2>Attacker:</h2>' \
+                  '<ol>' \
+                    '<li>Open the terminal from applications and enter&#10;cd /loic/LOIC/&#10;./loic.sh run</li>'\
+                    '<li> You should see the Low Orbital Ion Cannon application window open. In the IP input' \
+                    'form enter 10.1.1.3 and click the Lock On button. <b>Do not change any other setting.</b>' \
+                              ' When you are ready click the ready button to start dosing the defender VM</li>' \
+                    '</ol>' \
+                  '<h2>Defender:</h2>' \
+                  '<ol>' \
+                    '<li>Click the top left button named Applications. Hover down to the Systems Tools tab and click' \
+                              'the System Monitor tool. Within the tool, click the Resources tab. You will see the' \
+                              ' CPU history. This is important to monitor when experiencing the DoS attack. </li>' \
+                '</ol>'
     elif (workout_type == "phishing"):
         email_body_content = " "
         email_body_content += "<h1>Phishing Workout</h1>"
