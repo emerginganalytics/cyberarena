@@ -97,8 +97,9 @@ def body_workout_message(workout_type, team_url):
                               '<li>To open Zenmap, go to <span style="font-weight: 700;">Applications &lt; Internet '\
                               '&lt; Zenmap (run as root)<br></span></li><li>Enter the same password&nbsp; as above '\
                               'to run the program as root.</li></ul><br><br>2. In the input box type in the following '\
-                              'code<br><gcb-code mode="" instanceid="RS81NILI6rpx">nmap -sn 10.1.0.0/24</gcb-code>'\
-                              '<br>The command -sn allows you scan a range of IP address to see if they are up<br>'\
+                              'code<br><gcb-code mode="" instanceid="RS81NILI6rpx">nmap -sn -T5 10.1.0.0/24</gcb-code>'\
+                              '<br>The command -sn allows you scan a range of IP address to see if they are up and '\
+                              '-T5 tells Zenmap how aggressive to scan with five being the loudest in a network.<br>'\
                               '10.1.0.0/24 is the range of IP address from 10.1.1.0 - 10.1.1.255<br><br>3. When you '\
                               'run it you will see five different IP address<br>10.1.1.10 is our IP address.'\
                               '<br>10.1.1.1 is not important to this workout.<br>This leaves three machines left. '\
