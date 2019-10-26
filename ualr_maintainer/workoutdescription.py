@@ -80,6 +80,43 @@ def body_workout_message(workout_type, team_url):
         email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
                                 "phishing attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
+
+    elif (workout_type == "hiddennode"):
+        email_body_content = " "
+        email_body_content += "<h1>Hidden Node Workout</h1>"
+        email_body_content += "Welcome to your team's hidden node workout. Here you will use basic recon tactics to " \ 
+                              'discover a node hidden in the network. Your server should now be ready at the ' \
+                              'following website: {}'.format(team_url)
+        email_body_content += '<div class="yui-wk-div"><span style="white-space: pre;"><span style="font-weight: ' \
+                              'bold;">Preparation:</span><span style="font-weight: 700;"></span><ul style="">' \
+                              '<li style=""><span style="white-space: pre;">Log into the Guacamole web server using ' \
+                              '</span><i style="white-space: pre;">init_user</i><span style="white-space: pre;"> and ' \
+                              '</span><i style="white-space: pre;">promiseme</i><span style="white-space: pre;"> as ' \
+                              'the username and password.</span></li></ul></span></div><br><br>1.&nbsp; Open the ' \
+                              'Zenmap application on your machine.<br><ul>'\
+                              '<li>To open Zenmap, go to <span style="font-weight: 700;">Applications &lt; Internet '\
+                              '&lt; Zenmap (run as root)<br></span></li><li>Enter the same password&nbsp; as above '\
+                              'to run the program as root.</li></ul><br><br>2. In the input box type in the following '\
+                              'code<br><gcb-code mode="" instanceid="RS81NILI6rpx">nmap -sn 10.1.0.0/24</gcb-code>'\
+                              '<br>The command -sn allows you scan a range of IP address to see if they are up<br>'\
+                              '10.1.0.0/24 is the range of IP address from 10.1.1.0 - 10.1.1.255<br><br>3. When you '\
+                              'run it you will see five different IP address<br>10.1.1.10 is our IP address.'\
+                              '<br>10.1.1.1 is not important to this workout.<br>This leaves three machines left. '\
+                              'Try running a basic scan against each of the remaining three IP addresses.&nbsp;<br>'\
+                              '<br><br>4. Type the following code into the input box. Each new line will run a new '\
+                              'target scan so be sure to wait <br>until the current scan is finished before beginning '\
+                              'a new one.<br><gcb-code mode="" instanceid="UHqsG475vUN5">nmap 10.1.1.111 nmap '\
+                              '10.1.1.115 nmap 10.1.1.253 </gcb-code><br>Remember, be sure to record the open ports '\
+                              'for each scan before scanning the next target.<br><br>5. If you scan the targets in '\
+                              'the order listed you will find the first two targets only have one open port each, 22 '\
+                              'and 3389.<br>Port 22 is the port number used for SSH connections and 3389 is used for '\
+                              "RDP. For now, we aren't interested in these ports.<br>The last machine, 10.1.1.253 "\
+                              'will return four total ports<br><ul><li>22 (SSH)</li><li>80 (HTTP)</li><li>5901 (VNC)'\
+                              "</li><li>6001&nbsp; (X11)</li></ul><div>Again, we aren't interested in port 22. Ports "\
+                              '5901 and 6001 are how you are able to connect to graphical interface.&nbsp;<br>This '\
+                              'leaves port 80 which is the default port used for web access.</div>'\
+                              '<br><br>6. Go to 10.1.1.253 in the web browser and record what you find.'
+
     elif (workout_type == "shodan"):
         email_body_content = " " 
         email_body_content += "<h1>Shodan Search Engine</h1>"

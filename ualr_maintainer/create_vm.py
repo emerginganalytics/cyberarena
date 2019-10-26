@@ -249,10 +249,10 @@ def build_dos_vm(network, subnet, ts):
 
 def build_xss_vm(network, subnet, ts):
 
-    list_images_to_create = ['image-promise-dvwalab']
-    list_internal_ip = ['10.1.1.253']
-    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
-    list_tags = [{'items': ['http-server', 'https-server']}, None]
+    list_images_to_create = ['image-promise-dvwalab', 'image-labentry']
+    list_internal_ip = ['10.1.1.253', '10.1.1.10']
+    list_ext_ip = [None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
+    list_tags = [{'items': ['guac-server']}, {'items': ['http-server', 'https-server', 'guac-server']}]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
@@ -264,21 +264,22 @@ def build_xss_vm(network, subnet, ts):
                                      'xss-{}-{}'.format(image[6:], network[-9:]),
                                      'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
-
     time.sleep(5)
     request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='xss-promise-dvwalab-{}'.format(network[-9:]))
+                                      instance='xss-labentry-{}'.format(network[-9:]))
     response = request.execute()
     ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
 
     guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs"
 
+    # dvwa_redirection = "http://" + ext_IP + "/DVWA"
+
     return guaca_redirection
 
 # -------------------- BUILD CYBERATTACK WORKOUT --------------------------
 
-def build_cyberattack_vm(network, subnet, ts):
 
+def build_cyberattack_vm(network, subnet, ts):
     list_images_to_create = ['image-labentry', 'image-promise-victim-win2012']
     list_internal_ip = ['10.1.1.10', '10.1.1.11']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
@@ -326,7 +327,6 @@ def build_spoof_vm(network, subnet, ts):
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'spoof-{}-{}'.format(image[6:], network[-9:]),
                             'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
-
         print("{} created".format('attacker-{}-{}'.format(image[6:], network[-9:])))
 
     # we want to retrieve the external IP for the labentry VM
@@ -347,11 +347,11 @@ def build_spoof_vm(network, subnet, ts):
 def build_hiddennode_vm(network, subnet, ts):
 
     list_images_to_create = ['image-labentry',
-                             'image-promise-dvwalab', 'ce-linux-boot-image-002']
-    list_internal_ip = ['10.1.1.10', '10.1.1.253', '10.1.1.111']
+                             'image-promise-dvwalab', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']
+    list_internal_ip = ['10.1.1.10', '10.1.1.253', '10.1.1.111', '10.1.1.115', '10.1.1.25']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
-                    'name': 'External NAT'}, None, None]
-    list_tags = [{'items': ['http-server', 'https-server']}, None, None]
+                    'name': 'External NAT'}, None, None, None, None]
+    list_tags = [{'items': ['http-server', 'https-server', 'guac-server', 'attacker', 'vnc-server']}, None, None, None, None]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
@@ -417,14 +417,14 @@ def build_ids_vm(network, subnet, ts):
 
 def build_phishing_vm(network, subnet, ts):
     list_images_to_create = ['image-labentry', 'image-promise-vnc']
-    list_interal_ip = ['10.1.1.18', '10.1.1.20']
+    list_internal_ip = ['10.1.1.18', '10.1.1.20']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']},
                  {'items': ['attacker', 'vnc-server', 'guac-server', 'http-server', 'https-server']}]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
-        int_IP = list_interal_ip[i]
+        int_IP = list_internal_ip[i]
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
@@ -452,14 +452,14 @@ def build_phishing_vm(network, subnet, ts):
 
 def build_theharbor_vm(network, subnet, ts):
     list_images_to_create = ['image-promise-vnc', 'image-labentry']
-    list_interal_ip = ['10.128.0.20', '10.128.0.18']
+    list_internal_ip = ['10.128.0.20', '10.128.0.18']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None]
     list_tags = [{'items': ['http_server', 'https-server', 'attacker', 'vnc-server', 'guac-server']}, None]
 
     for i in range(len(list_images_to_create)):
         image = list_images_to_create[i]
-        int_IP = list_interal_ip[i]
+        int_IP = list_internal_ip[i]
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
