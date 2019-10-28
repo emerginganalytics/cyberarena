@@ -84,7 +84,7 @@ def body_workout_message(workout_type, team_url):
     elif (workout_type == "hiddennode"):
         email_body_content = " "
         email_body_content += "<h1>Hidden Node Workout</h1>"
-        email_body_content += "Welcome to your team's hidden node workout. Here you will use basic recon tactics to " \ 
+        email_body_content += "Welcome to your team's hidden node workout. Here you will use basic recon tactics to " \
                               'discover a node hidden in the network. Your server should now be ready at the ' \
                               'following website: {}'.format(team_url)
         email_body_content += '<div class="yui-wk-div"><span style="white-space: pre;"><span style="font-weight: ' \
@@ -106,8 +106,8 @@ def body_workout_message(workout_type, team_url):
                               'Try running a basic scan against each of the remaining three IP addresses.&nbsp;<br>'\
                               '<br><br>4. Type the following code into the input box. Each new line will run a new '\
                               'target scan so be sure to wait <br>until the current scan is finished before beginning '\
-                              'a new one.<br><gcb-code mode="" instanceid="UHqsG475vUN5">nmap 10.1.1.111 nmap '\
-                              '10.1.1.115 nmap 10.1.1.253 </gcb-code><br>Remember, be sure to record the open ports '\
+                              'a new one.<br>nmap 10.1.1.111 <br>nmap '\
+                              '10.1.1.115 <br>nmap 10.1.1.253 <br>Remember, be sure to record the open ports '\
                               'for each scan before scanning the next target.<br><br>5. If you scan the targets in '\
                               'the order listed you will find the first two targets only have one open port each, 22 '\
                               'and 3389.<br>Port 22 is the port number used for SSH connections and 3389 is used for '\
