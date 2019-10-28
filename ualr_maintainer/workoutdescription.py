@@ -80,7 +80,11 @@ def body_workout_message(workout_type, team_url):
         email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
                                 "phishing attack works. Your server should now be ready at the following " \
                                 "website: {}".format(team_url)
-
+    elif (workout_type == "spoofing");
+        email_body_content= " "    
+        email_body_content+="Welcome to the spoofing exercise! Here, you will be learning about DNS spoofing and how it can directly affect a victim. "
+        email_body_content+="Your server should be ready at the following " \
+                            "website: {}".format(team_url)  
     elif (workout_type == "hiddennode"):
         email_body_content = " "
         email_body_content += "<h1>Hidden Node Workout</h1>"
