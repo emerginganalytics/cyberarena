@@ -47,11 +47,13 @@ def body_workout_message(workout_type, team_url):
                         ' credentials category. Choose the "Get credentials from browser" option and you ' \
                         'should get an output with the username and password you entered. Note: If for some' \
                         ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
+
     elif (workout_type == "xss"):
         email_body_content = " "
         email_body_content += "<h1>Cross-Site Scripting Workout</h1>"
         email_body_content += "Welcome to your team's cross-site scripting workout! " \
                                 "website: {}".format(team_url)
+
     elif (workout_type == "dos"):
         email_body_content = " "
         email_body_content += "<h1>DoS Workout</h1>"
@@ -76,6 +78,7 @@ def body_workout_message(workout_type, team_url):
                               'the System Monitor tool. Within the tool, click the Resources tab. You will see the' \
                               ' CPU history. This is important to monitor when experiencing the DoS attack. </li>' \
                 '</ol>'
+
     elif (workout_type == "phishing"):
         email_body_content = " "
         email_body_content += "<h1>Phishing Workout</h1>"
@@ -84,10 +87,10 @@ def body_workout_message(workout_type, team_url):
                                 "website: {}".format(team_url)
 
     elif (workout_type == "spoofing"):
-        email_body_content= " "    
-        email_body_content+="Welcome to the spoofing exercise! Here, you will be learning about DNS spoofing and how it can directly affect a victim. "
-        email_body_content+="Your server should be ready at the following " \
-                            "website: {}".format(team_url)  
+        email_body_content = " "
+        email_body_content += "Welcome to the spoofing exercise! Here, you will be learning about DNS spoofing and " \
+                              "how it can directly affect a victim. Your server should be ready at the following " \
+                              "website: {}".format(team_url)
 
     elif (workout_type == "hiddennode"):
         email_body_content = " "
