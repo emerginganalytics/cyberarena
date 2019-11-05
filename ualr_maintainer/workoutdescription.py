@@ -2,8 +2,10 @@ def body_workout_message(workout_type, team_url):
     print(workout_type)
 
     email_body_header = ' '
-    email_body_header += '<html><head></head><body>'
-    email_body_header += '<style type="text/css"></style>'
+    email_body_header += '<html><head><meta charset="UTF-8"></head><body>'
+    email_body_header += '<style type="text/css">' \
+                         '' \
+                         '</style>'
 
     if (workout_type == "cyberattack"):
         email_body_content = " "
