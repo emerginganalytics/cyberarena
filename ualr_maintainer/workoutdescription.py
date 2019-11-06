@@ -11,87 +11,87 @@ def body_workout_message(workout_type, team_url):
         email_body_content = " "
         email_body_content += "<h1>The Cyber Attack Workout</h1>"
         email_body_content += "Welcome to your team's cyber attack workout, in which you will experience how a " \
-                                "cyber-attack known as a botnet. Your server should now be ready at the following " \
-                                "website: {}".format(team_url)
+                              "cyber-attack known as a botnet. Your server should now be ready at the following " \
+                              "website: {}".format(team_url)
         email_body_content += '<h2>Preparation:</h2> ' \
-                  '<ol style=""> ' \
-                    '<li style="">Log into the Guacamole web server using <i>init_user</i> and ' \
-                        '<i>promiseme</i> as the username and password.</li>' \
-                    '<li style="">You may have to refresh the page if a screen does not come up.</li>' \
-                    '<li style="">Once you are logged in, double click shinobot to run it.</li>' \
-                    '<li style="">In another tab, browse to ' \
-                        '<a href="http://shinobotps1.com/">http://shinobotps1.com</a>/ and click on ' \
-                        'the C&amp;C tab.</li><li style="">Find your instance and login with the ' \
-                        'credentials 5xvoKbVlGegt.</li></ol>' \
-                  '<h2>Exercises:</h2>' \
-                  '<ol style="">' \
-                    '<li style="">On the shinobot C&amp;C, scroll down until you see the ' \
-                        'command prompt. Type in the following command: "<b>calc.exe</b>" ' \
-                        'without the quotes. After inputting the command, switch back to the windows' \
-                        'screen and notice how the calculator has now opened up. (Note: You may have' \
-                        'to wait a few seconds before the command is processed.)</li>' \
-                    '<li style="">Now, scroll down a little bit more to see something titled ' \
-                        '<b>command template</b> and a drop down menu that says select category. ' \
-                        'Let us start by clicking on the menu and selecting List Up All Windows User. ' \
-                        'After a few seconds, you should see output that displays all available user accounts.</li>' \
-                    '<li style="">Now, let\'s choose the system category. Click any of the choices and ' \
-                        'see what kind of output it gives you. This is how an attacker would begin ' \
-                        'gathering information on a potential target.</li>' \
-                    '<li style="">What if you wanted to see the victim\'s desktop? Use the ' \
-                        '"<span style="font-weight: bold;">Take Screenshot</span>" option to accomplish this.</li>' \
-                    '<li style="">Finally, let\'s try to harvest some credentials. Browse to a site called ' \
-                        '<a href="http://aavtrain.com" target="" title="">aavtrain.com</a> ' \
-                        'where you\'ll be greeted with a login prompt. Put in some fake credentials like ' \
-                        'the following:<br>User: iamatest<br>Password: thisisatest<br> ' \
-                        'Now, in the shinobot C&amp;C, go to the command template, and choose the' \
-                        ' credentials category. Choose the "Get credentials from browser" option and you ' \
-                        'should get an output with the username and password you entered. Note: If for some' \
-                        ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
-
+                              '<ol style=""> ' \
+                              '<li style="">Log into the Guacamole web server using <i>init_user</i> and ' \
+                              '<i>promiseme</i> as the username and password.</li>' \
+                              '<li style="">You may have to refresh the page if a screen does not come up.</li>' \
+                              '<li style="">Once you are logged in, double click shinobot to run it.</li>' \
+                              '<li style="">In another tab, browse to ' \
+                              '<a href="http://shinobotps1.com/">http://shinobotps1.com</a>/ and click on ' \
+                              'the C&amp;C tab.</li><li style="">Find your instance and login with the ' \
+                              'credentials 5xvoKbVlGegt.</li></ol>' \
+                              '<h2>Exercises:</h2>' \
+                              '<ol style="">' \
+                              '<li style="">On the shinobot C&amp;C, scroll down until you see the ' \
+                              'command prompt. Type in the following command: "<b>calc.exe</b>" ' \
+                              'without the quotes. After inputting the command, switch back to the windows' \
+                              'screen and notice how the calculator has now opened up. (Note: You may have' \
+                              'to wait a few seconds before the command is processed.)</li>' \
+                              '<li style="">Now, scroll down a little bit more to see something titled ' \
+                              '<b>command template</b> and a drop down menu that says select category. ' \
+                              'Let us start by clicking on the menu and selecting List Up All Windows User. ' \
+                              'After a few seconds, you should see output that displays all available user accounts.'\
+                              '</li>' \
+                              '<li style="">Now, let\'s choose the system category. Click any of the choices and ' \
+                              'see what kind of output it gives you. This is how an attacker would begin ' \
+                              'gathering information on a potential target.</li>' \
+                              '<li style="">What if you wanted to see the victim\'s desktop? Use the ' \
+                              '"<span style="font-weight: bold;">Take Screenshot</span>" option to accomplish this.'\
+                              '</li>' \
+                              '<li style="">Finally, let\'s try to harvest some credentials. Browse to a site called ' \
+                              '<a href="http://aavtrain.com" target="" title="">aavtrain.com</a> ' \
+                              'where you\'ll be greeted with a login prompt. Put in some fake credentials like ' \
+                              'the following:<br>User: iamatest<br>Password: thisisatest<br> ' \
+                              'Now, in the shinobot C&amp;C, go to the command template, and choose the' \
+                              ' credentials category. Choose the "Get credentials from browser" option and you ' \
+                              'should get an output with the username and password you entered. Note: If for some' \
+                              ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
     elif (workout_type == "xss"):
         email_body_content = " "
         email_body_content += "<h1>Cross-Site Scripting Workout</h1>"
         email_body_content += "Welcome to your team's cross-site scripting workout! " \
-                                "website: {}".format(team_url)
-
+                              "website: {}".format(team_url)
     elif (workout_type == "dos"):
         email_body_content = " "
         email_body_content += "<h1>DoS Workout</h1>"
         email_body_content += "Welcome to your team's Denial of Service workout, in which you will experience how a " \
-                                "Denial of Service attack works. Your server should now be ready at the following " \
-                                "website: {}".format(team_url)
+                              "Denial of Service attack works. Your server should now be ready at the following " \
+                              "website: {}".format(team_url)
         email_body_content += '<h2>Preparation:</h2> ' \
                               '<ol> ' \
-                    '<li>Log into the Guacamole web server using <i>init_user</i> and ' \
-                        '<i>promiseme</i> as the username and password.</li>' \
-                    '<li>You may have to refresh the page if a screen does not come up.</li></ol>' \
-                  '<h2>Attacker:</h2>' \
-                  '<ol>' \
-                    '<li>Open the terminal from applications and enter&#10;cd /loic/LOIC/&#10;./loic.sh run</li>'\
-                    '<li> You should see the Low Orbital Ion Cannon application window open. In the IP input' \
-                    'form enter 10.1.1.3 and click the Lock On button. <b>Do not change any other setting.</b>' \
+                              '<li>Log into the Guacamole web server using <i>init_user</i> and ' \
+                              '<i>promiseme</i> as the username and password.</li>' \
+                              '<li>You may have to refresh the page if a screen does not come up.</li></ol>' \
+                              '<h2>Attacker:</h2>' \
+                              '<ol>' \
+                              '<li>Open the terminal from applications and enter&#10;cd /loic/LOIC/&#10;./loic.sh run' \
+                              '</li>'\
+                              '<li> You should see the Low Orbital Ion Cannon application window open. In the IP '\
+                              'input form enter 10.1.1.3 and click the Lock On button. <b>Do not change any other ' \
+                              'setting.</b>' \
                               ' When you are ready click the ready button to start dosing the defender VM</li>' \
-                    '</ol>' \
-                  '<h2>Defender:</h2>' \
-                  '<ol>' \
-                    '<li>Click the top left button named Applications. Hover down to the Systems Tools tab and click' \
-                              'the System Monitor tool. Within the tool, click the Resources tab. You will see the' \
-                              ' CPU history. This is important to monitor when experiencing the DoS attack. </li>' \
-                '</ol>'
-
+                              '</ol>' \
+                              '<h2>Defender:</h2>' \
+                              '<ol>' \
+                              '<li>Click the top left button named Applications. Hover down to the Systems Tools tab ' \
+                              'and click the System Monitor tool. Within the tool, click the Resources tab. ' \
+                              'You will see the CPU history. This is important to monitor when experiencing the ' \
+                              'DoS attack. </li>' \
+                              '</ol>'
     elif (workout_type == "phishing"):
         email_body_content = " "
         email_body_content += "<h1>Phishing Workout</h1>"
         email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
-                                "phishing attack works. Your server should now be ready at the following " \
-                                "website: {}".format(team_url)
-
+                              "phishing attack works. Your server should now be ready at the following " \
+                              "website: {}".format(team_url)
     elif (workout_type == "spoofing"):
         email_body_content = " "
         email_body_content += "Welcome to the spoofing exercise! Here, you will be learning about DNS spoofing and " \
                               "how it can directly affect a victim. Your server should be ready at the following " \
                               "website: {}".format(team_url)
-
     elif (workout_type == "hiddennode"):
         email_body_content = " "
         email_body_content += "<h1>Hidden Node Workout</h1>"
@@ -128,7 +128,6 @@ def body_workout_message(workout_type, team_url):
                               '5901 and 6001 are how you are able to connect to graphical interface.&nbsp;<br>This '\
                               'leaves port 80 which is the default port used for web access.</div>'\
                               '<br><br>6. Go to 10.1.1.253 in the web browser and record what you find.'
-
     elif (workout_type == "shodan"):
         email_body_content = " " 
         email_body_content += "<h1>Shodan Search Engine</h1>"
@@ -139,7 +138,6 @@ def body_workout_message(workout_type, team_url):
                               "<li>port:25565</li><li>gps</li></ul><div>Try messing around with the search terms and " \
                               "look up common IoT devices like fridges, microwaves, etc.<br>" \
                               "Link:<a href='https://www.shodan.io/'>https://www.shodan.io</a><br></div>"
-
     elif (workout_type == "BinaryHex"):
         email_body_content = " "
         email_body_content += "<h1>Binary and Hex Games</h1>"
@@ -151,14 +149,12 @@ def body_workout_message(workout_type, team_url):
                               "https://games.penjee.com/binary-numbers-game/</a><br>FlippyBit:" \
                               "<a href='http://flippybitandtheattackofthehexadecimalsfrombase16.com/'>"\
                               "http://flippybitandtheattackofthehexadecimalsfrombase16.com/</a>&nbsp;"
-
     elif (workout_type == "osint"):
         email_body_content = " "
         email_body_content += "Welcome to the OSINT challenge! You've been given the task of gathering information on "\
                               "an individual known as Thomas Atkins. He is a senior software analyst at TechHex. The "\
                               "information you gather from him should eventually lead you to a flag. Hint: Start by "\
                               "looking at LinkedIn."
-
     elif (workout_type == "hashmyfiles"):
         email_body_content = " "
         email_body_content += "<h1>Hash My Files</h1>"
