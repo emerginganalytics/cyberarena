@@ -7,8 +7,8 @@ def body_workout_message(workout_type, team_url):
                          '' \
                          '</style>'
 
+    email_body_content = " "
     if (workout_type == "cyberattack"):
-        email_body_content = " "
         email_body_content += "<h1>The Cyber Attack Workout</h1>"
         email_body_content += "Welcome to your team's cyber attack workout, in which you will experience how a " \
                               "cyber-attack known as a botnet. Your server should now be ready at the following " \
@@ -50,12 +50,10 @@ def body_workout_message(workout_type, team_url):
                               'should get an output with the username and password you entered. Note: If for some' \
                               ' reason you don\'t receive any output, try clearing all browser history.</li></ol>'
     elif (workout_type == "xss"):
-        email_body_content = " "
         email_body_content += "<h1>Cross-Site Scripting Workout</h1>"
         email_body_content += "Welcome to your team's cross-site scripting workout! " \
                               "website: {}".format(team_url)
     elif (workout_type == "dos"):
-        email_body_content = " "
         email_body_content += "<h1>DoS Workout</h1>"
         email_body_content += "Welcome to your team's Denial of Service workout, in which you will experience how a " \
                               "Denial of Service attack works. Your server should now be ready at the following " \
@@ -82,18 +80,15 @@ def body_workout_message(workout_type, team_url):
                               'DoS attack. </li>' \
                               '</ol>'
     elif (workout_type == "phishing"):
-        email_body_content = " "
         email_body_content += "<h1>Phishing Workout</h1>"
         email_body_content += "Welcome to your team's phishing workout, in which you will experience how a " \
                               "phishing attack works. Your server should now be ready at the following " \
                               "website: {}".format(team_url)
     elif (workout_type == "spoofing"):
-        email_body_content = " "
         email_body_content += "Welcome to the spoofing exercise! Here, you will be learning about DNS spoofing and " \
                               "how it can directly affect a victim. Your server should be ready at the following " \
                               "website: {}".format(team_url)
     elif (workout_type == "hiddennode"):
-        email_body_content = " "
         email_body_content += "<h1>Hidden Node Workout</h1>"
         email_body_content += "Welcome to your team's hidden node workout. Here you will use basic recon tactics to " \
                               'discover a node hidden in the network. Your server should now be ready at the ' \
@@ -129,7 +124,6 @@ def body_workout_message(workout_type, team_url):
                               'leaves port 80 which is the default port used for web access.</div>'\
                               '<br><br>6. Go to 10.1.1.253 in the web browser and record what you find.'
     elif (workout_type == "shodan"):
-        email_body_content = " " 
         email_body_content += "<h1>Shodan Search Engine</h1>"
         email_body_content += "Welcome to the Shodan exercise, where you will learn how to find and search up IoT " \
                               "devices and other systems across the       Internet.&nbsp;<br><br>When using the " \
@@ -139,7 +133,6 @@ def body_workout_message(workout_type, team_url):
                               "look up common IoT devices like fridges, microwaves, etc.<br>" \
                               "Link:<a href='https://www.shodan.io/'>https://www.shodan.io</a><br></div>"
     elif (workout_type == "BinaryHex"):
-        email_body_content = " "
         email_body_content += "<h1>Binary and Hex Games</h1>"
         email_body_content += "Welcome to the binary and hex games! These games will both teach you the fundamentals " \
                               "of binary and hexadecimal which are essential to   learning about other topics like " \
@@ -150,13 +143,11 @@ def body_workout_message(workout_type, team_url):
                               "<a href='http://flippybitandtheattackofthehexadecimalsfrombase16.com/'>"\
                               "http://flippybitandtheattackofthehexadecimalsfrombase16.com/</a>&nbsp;"
     elif (workout_type == "osint"):
-        email_body_content = " "
         email_body_content += "Welcome to the OSINT challenge! You've been given the task of gathering information on "\
                               "an individual known as Thomas Atkins. He is a senior software analyst at TechHex. The "\
                               "information you gather from him should eventually lead you to a flag. Hint: Start by "\
                               "looking at LinkedIn."
     elif (workout_type == "hashmyfiles"):
-        email_body_content = " "
         email_body_content += "<h1>Hash My Files</h1>"
         email_body_content += "Welcome to your team's hashing workout. Here you will discover the importance of " \
                               "reading file hashes. Your server should be ready at the following " \

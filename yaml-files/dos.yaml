@@ -5,7 +5,7 @@ workout:
   workout-description: 'Exerience how a denial of service attack works'
   project-name: ualr-cybersecurity
   project-api-key-type: cloud
-  flag-location:/usr/src/flag
+  flag-location: /usr/src/flag
 
 network:
   ip-cidr: 10.1.0.0/16
