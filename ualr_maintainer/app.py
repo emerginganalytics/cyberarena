@@ -210,7 +210,17 @@ def build_workout():
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
         #     time.sleep(60)
-
+        key = ds_client.('workout_resources_track')
+        user_register = datastore.entity(key)
+        user_register.update({
+                'timestamp_origin' : datetime.datetime.now()
+                'user' : build_data['email']
+                'workout_type' : build_data['type']
+                'duration' : build_data['length']
+                'network' : network
+                'subnetwork' : subnetwork
+            })
+        ds_client.put(user_register)
         return "DONE"
 
 
