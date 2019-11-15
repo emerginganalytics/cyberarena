@@ -497,8 +497,9 @@ def build_hashmyfiles_vm(network, subnet, ts):
         ext_IP = list_ext_ip[i]
         tags = list_tags[i]
 
-        create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a', 'hashmyfiles-{}-{}'.format(image[6:], network[-9:]),
-                            'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+        create_instance_custom_image(compute, 'ualr-cybersecurity',
+                                     'us-central1-a', 'hashmyfiles-{}-{}'.format(image[6:], network[-9:]),
+                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
 
         print("{} created".format('hashmyfiles-{}-{}'.format(image[6:], network[-9:])))
 
