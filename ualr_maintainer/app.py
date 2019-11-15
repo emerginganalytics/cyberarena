@@ -1,3 +1,4 @@
+import datetime
 import os
 import time
 import calendar
@@ -213,12 +214,12 @@ def build_workout():
         key = ds_client.key('workout_resources_track')
         user_register = datastore.entity(key)
         user_register.update({
-                'timestamp_origin' : datetime.datetime.now()
-                'user' : build_data['email']
-                'workout_type' : build_data['type']
-                'duration' : build_data['length']
-                'network' : network
-                'subnetwork' : subnetwork
+                'timestamp_origin': datetime.datetime.now(),
+                'user': build_data['email'],
+                'workout_type': build_data['type'],
+                'duration': build_data['length'],
+                'network': network,
+                'subnetwork': subnetwork
             })
         ds_client.put(user_register)
         return "DONE"
