@@ -13,9 +13,6 @@ from pprint import pprint
 
 compute = googleapiclient.discovery.build('compute', 'v1')
 
-# network = 'test-gaetan-' + ts
-# subnetwork = 'lab-' + ts
-
 project = 'ualr-cybersecurity'
 region = 'us-central1'
 
