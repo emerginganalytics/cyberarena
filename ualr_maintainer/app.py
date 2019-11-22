@@ -206,13 +206,13 @@ def build_workout():
                 ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, ts)
                 list_ext_ip.append(ext_IP_lab_entry)
 
+        time.sleep(120)
         send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
-        #     time.sleep(60)
         key = ds_client.key('workout_resources_track')
-        user_register = datastore.entity(key)
+        user_register = datastore.Entity(key)
         user_register.update({
                 'timestamp_origin': datetime.datetime.now(),
                 'user': build_data['email'],
