@@ -15,8 +15,8 @@ def body_workout_message(workout_type, team_url):
                               "website: {}".format(team_url)
         email_body_content += '<h2>Preparation:</h2> ' \
                               '<ol style=""> ' \
-                              '<li style="">Log into the Guacamole web server using <i>init_user</i> and ' \
-                              '<i>promiseme</i> as the username and password.</li>' \
+                              '<li style="">Log into the Guacamole web server using <i>cybergym</i> and ' \
+                              '<i>Let\'s workout!</i> as the username and password.</li>' \
                               '<li style="">You may have to refresh the page if a screen does not come up.</li>' \
                               '<li style="">Once you are logged in, double click shinobot to run it.</li>' \
                               '<li style="">In another tab, browse to ' \
@@ -60,8 +60,8 @@ def body_workout_message(workout_type, team_url):
                               "website: {}".format(team_url)
         email_body_content += '<h2>Preparation:</h2> ' \
                               '<ol> ' \
-                              '<li>Log into the Guacamole web server using <i>init_user</i> and ' \
-                              '<i>promiseme</i> as the username and password.</li>' \
+                              '<li>Log into the Guacamole web server using <i>cybergym</i> and ' \
+                              '<i>Let\'s workout!</i> as the username and password.</li>' \
                               '<li>You may have to refresh the page if a screen does not come up.</li></ol>' \
                               '<h2>Attacker:</h2>' \
                               '<ol>' \
@@ -96,8 +96,8 @@ def body_workout_message(workout_type, team_url):
         email_body_content += '<div class="yui-wk-div"><span style="white-space: pre;"><span style="font-weight: ' \
                               'bold;">Preparation:</span><span style="font-weight: 700;"></span><ul style="">' \
                               '<li style=""><span style="white-space: pre;">Log into the Guacamole web server using ' \
-                              '</span><i style="white-space: pre;">init_user</i><span style="white-space: pre;"> and ' \
-                              '</span><i style="white-space: pre;">promiseme</i><span style="white-space: pre;"> as ' \
+                              '</span><i style="white-space: pre;">cybergym</i><span style="white-space: pre;"> and ' \
+                              '</span><i style="white-space: pre;">Let\'s workout!</i><span style="white-space: pre;"> as ' \
                               'the username and password.</span></li></ul></span></div><br><br>1.&nbsp; Open the ' \
                               'Zenmap application on your machine.<br><ul>'\
                               '<li>To open Zenmap, go to <span style="font-weight: 700;">Applications &lt; Internet '\
