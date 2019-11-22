@@ -103,7 +103,7 @@ def body_workout_message(workout_type, team_url):
                               '<li>To open Zenmap, go to <span style="font-weight: 700;">Applications &lt; Internet '\
                               '&lt; Zenmap (run as root)<br></span></li><li>Enter the same password&nbsp; as above '\
                               'to run the program as root.</li></ul><br><br>2. In the input box type in the following '\
-                              'code<br><gcb-code mode="" instanceid="RS81NILI6rpx">nmap -sn -T5 10.1.0.0/24</gcb-code>'\
+                              'code<br><gcb-code mode="" instanceid="RS81NILI6rpx">nmap -sn -T4 10.1.0.0/24</gcb-code>'\
                               '<br>The command -sn allows you scan a range of IP address to see if they are up and '\
                               '-T5 tells Zenmap how aggressive to scan with five being the loudest in a network.<br>'\
                               '10.1.0.0/24 is the range of IP address from 10.1.1.0 - 10.1.1.255<br><br>3. When you '\
@@ -112,8 +112,8 @@ def body_workout_message(workout_type, team_url):
                               'Try running a basic scan against each of the remaining three IP addresses.&nbsp;<br>'\
                               '<br><br>4. Type the following code into the input box. Each new line will run a new '\
                               'target scan so be sure to wait <br>until the current scan is finished before beginning '\
-                              'a new one.<br>nmap 10.1.1.111 <br>nmap '\
-                              '10.1.1.115 <br>nmap 10.1.1.253 <br>Remember, be sure to record the open ports '\
+                              'a new one.<br>nmap -T4 10.1.1.111 <br>nmap -T4'\
+                              '10.1.1.115 <br>nmap -T4 10.1.1.253 <br>Remember, be sure to record the open ports '\
                               'for each scan before scanning the next target.<br><br>5. If you scan the targets in '\
                               'the order listed you will find the first two targets only have one open port each, 22 '\
                               'and 3389.<br>Port 22 is the port number used for SSH connections and 3389 is used for '\
