@@ -86,12 +86,14 @@ project = 'ualr-cybersecurity'
 zone = 'us-central1-a'
 region = 'us-central1'
 
+
 # retrieve vm and query from datastore
 retrieve_workout_info()
 retrieve_all_vm(compute, project, zone)
 retrieve_all_network(compute, project)
 retrieve_all_subnetwork(compute, project, region)
 retrieve_all_firewall_rules(compute, project)
+
 
 # delete matching vm
 for vm in list_vm_workout:
@@ -102,6 +104,7 @@ for vm in list_vm_workout:
                                                  instance=vm["name"])
             response = request.execute()
 
+
 # delete matching firewall-rules
 for fw_rule in list_vm_workout:
     for w_id in list_workout_id:
@@ -110,6 +113,7 @@ for fw_rule in list_vm_workout:
             request = compute.firewalls().delete(project=project, instance=fw_rule["name"])
             response = request.execute()
 
+
 # delete matching subnetworks
 for subnetwork in list_subnetwork:
     for w_id in list_workout_id:
@@ -117,6 +121,7 @@ for subnetwork in list_subnetwork:
             print("Delete network : ", subnetwork["name"])
             request = compute.subnetworks().delete(project=project, region=region, subnetwork=subnetwork["name"])
             response = request.execute()
+
 
 # delete matching networks
 for network in list_network:
