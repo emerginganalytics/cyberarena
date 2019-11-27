@@ -34,18 +34,19 @@ def randomStringDigits(stringLength=6):
 # store workout info to google cloud datastore
 def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
     # create a new user
-    new_user = datastore.Entity(ds_client.key('cybergym-workout'))
+    new_workout = datastore.Entity(ds_client.key('cybergym-workout'))
 
-    new_user.update({
+    new_workout.update({
         'workout_ID': workout_id,
         'user_email': user_mail,
         'expiration': workout_duration,
         'type': workout_type,
-        'timestamp': timestamp
+        'timestamp': timestamp,
+        'resources_deleted': False
     })
 
     # insert a new user
-    ds_client.put(new_user)
+    ds_client.put(new_workout)
 
 
 # send email method
@@ -156,11 +157,11 @@ def build_workout():
 
         for i in range(1, num_team + 1):
 
-            network = 'workout-{}-{}-t{}'.format(ts, generated_workout_ID, i)
-            subnetwork = 'lab-{}-{}-t{}'.format(ts, generated_workout_ID, i)
+            network = '{}-net-{}-t{}'.format(generated_workout_ID, ts, i)
+            subnetwork = '{}-subnet'.format(generated_workout_ID)
 
             if (build_data['type'] == 'dos'):
-                ext_IP_lab_entry = create_workout.create_dos_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_dos_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
                 # succesData = {
                 #     # 'redirect' : '/workout_done/' + build_data['type'],
@@ -172,38 +173,38 @@ def build_workout():
                 # return jsonify(succesData)
 
             if (build_data['type'] == 'cyberattack'):
-                ext_IP_lab_entry = create_workout.create_cyberattack_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_cyberattack_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'xss'):
-                ext_IP_lab_entry = create_workout.create_xss_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_xss_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
             # future work
             # jsonify is very important for otherwise AJAX succes is not handle correctly
             # return jsonify(succesData)
 
             if (build_data['type'] == 'spoof'):
-                ext_IP_lab_entry = create_workout.create_spoof_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_spoof_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'hiddennode'):
-                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'ids'):
-                ext_IP_lab_entry = create_workout.create_ids_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_ids_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'phishing'):
-                ext_IP_lab_entry = create_workout.create_phishing_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_phishing_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'theharbor'):
-                ext_IP_lab_entry = create_workout.create_theharbor_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_theharbor_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'hashmyfiles'):
-                ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, ts)
+                ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
         time.sleep(120)

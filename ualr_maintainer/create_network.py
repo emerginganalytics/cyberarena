@@ -108,16 +108,13 @@ def create_firewall_allow_internal(network_name):
 
 # this is probably not the best practice...
 # but basically we have to wait for a certain amount of time before create a subnetwork
-def create_ecosystem_workout(name, ts):
+def create_ecosystem_workout(name, name_subnet, workout_id):
 
-    print("ecosystem creation {}-{}".format(name, ts))
+    print("ecosystem creation {}-{}".format(name, workout_id))
     create_network(name)
     time.sleep(50)
 
-    subnetwork = 'lab-{}-{}'.format(ts, name[-9:])
-    print("Network-name : {}, Subnetwork-name : {}".format(name, subnetwork))
-
-    create_subnet(name, subnetwork)
+    create_subnet(name, name_subnet)
     time.sleep(20)
 
     create_firewall_allow_server_ports(name)
