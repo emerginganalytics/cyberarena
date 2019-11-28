@@ -83,17 +83,17 @@ result = compute.networks().list(project=project, filter='name = workout*').exec
 for network in result['items']:
     compute.networks().delete(project=project, network=network["name"]).execute()
 
-
-query_workouts = ds_client.query(kind='cybergym-workout')
-query_workouts.add_filter("timestamp", "<", str(datetime.now() - timedelta(days=30)))
-for workout in list(query_workouts.fetch()):
-    if 'resources_deleted' not in workout:
-        workout['resources_deleted'] = False
-    if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
-        expired_id = workout['workout_ID']
-        delete_vms(expired_id)
-        delete_firewall_rules(expired_id)
-        delete_subnetworks(expired_id)
-        delete_network(expired_id)
-        workout['resources_deleted'] = True
-        ds_client.put(workout)
+def delete_workouts():
+    query_workouts = ds_client.query(kind='cybergym-workout')
+    query_workouts.add_filter("timestamp", "<", str(datetime.now() - timedelta(days=30)))
+    for workout in list(query_workouts.fetch()):
+        if 'resources_deleted' not in workout:
+            workout['resources_deleted'] = False
+        if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
+            expired_id = workout['workout_ID']
+            delete_vms(expired_id)
+            delete_firewall_rules(expired_id)
+            delete_subnetworks(expired_id)
+            delete_network(expired_id)
+            workout['resources_deleted'] = True
+            ds_client.put(workout)
