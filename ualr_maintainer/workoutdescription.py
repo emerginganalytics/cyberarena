@@ -10,7 +10,7 @@ def body_workout_message(workout_type, team_url):
     email_body_content = " "
     if (workout_type == "cyberattack"):
         email_body_content += "<h1>The Cyber Attack Workout</h1>"
-        email_body_content += "Welcome to your team's cyber attack workout, in which you will experience how a " \
+        email_body_content += "Welcome to your team's cyber attack workout, in which you will experience a " \
                               "cyber-attack known as a botnet. Your server should now be ready at the following " \
                               "website: {}".format(team_url)
         email_body_content += '<h2>Preparation:</h2> ' \
@@ -187,6 +187,22 @@ def body_workout_message(workout_type, team_url):
                               "asciitohex.com or use CrypTool which should already be installed on the desktop.<br>" \
                               '<img src="assets/img/Selection_088.png" class="yui-img" title="" alt="" ' \
                               'style="width: 379px;"><br></div>'
+    elif (workout_type == "mobileforensics"):
+        email_body_content += "<h1>Mobile Forensics Workout</h1>"
+        email_body_content += "Welcome to your team's mobile forensics workout, in which you will perform " \
+                              "forensic analysis on a mobile phone image. Thank you to the Little Rock FBI Field " \
+                              "Office for providing the test mobile phone image! " \
+                              "Your server should now be ready at the following " \
+                              "website: {}".format(team_url)
+        email_body_content += '<h2>Logging In:</h2> ' \
+                              '<ol style=""> ' \
+                              '<li style="">Log into the Guacamole web server using <i>cybergym</i> and ' \
+                              '<i>Let\'s workout!</i> as the username and password.</li>' \
+                              '<li style="">You may have to refresh the page if a screen does not come up.</li>' \
+                              '<li style="">Once you are logged in, double click the Autopsy Doberman icon.</li>' \
+                              '<li style="">Select to open a recent case and choose the Cyber Gym Mobile Forensics' \
+                              'Workout case.</li>' \
+                              '<li style="">Give this a few minutes to load the mobile phone image.</li></ol>'
     email_body_footer = ' '
     email_body_footer = email_body_footer + '<br>Thank you'
     email_body_footer = email_body_footer + '<br>Your Cyber Gym Support Team<br>' \

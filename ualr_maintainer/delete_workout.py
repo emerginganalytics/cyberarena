@@ -11,7 +11,7 @@ from google.cloud import datastore
 
 # Global variables for this function
 ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1')
+compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
 expired_workout = []
 project = 'ualr-cybersecurity'
 zone = 'us-central1-a'
@@ -45,7 +45,7 @@ def delete_firewall_rules(workout_id):
         result = compute.firewalls().list(project=project, filter='name = {}*'.format(workout_id)).execute()
         if 'items' in result:
             for fw_rule in result['items']:
-                compute.firewalls().delete(project=project, instance=fw_rule["name"]).execute()
+                compute.firewalls().delete(project=project, firewall=fw_rule["name"]).execute()
     except():
         print("Error in deleting firewall rules for %s" % workout_id)
 
@@ -72,24 +72,14 @@ def delete_network(workout_id):
         print("Error in deleting network for %s" % workout_id)
 
 
-
-result = compute.subnetworks().list(project=project, region=region,
-                                      filter='name = lab*').execute()
-for subnetwork in result['items']:
-    compute.subnetworks().delete(project=project, region=region,
-                                           subnetwork=subnetwork["name"]).execute()
-
-result = compute.networks().list(project=project, filter='name = workout*').execute()
-for network in result['items']:
-    compute.networks().delete(project=project, network=network["name"]).execute()
-
-def delete_workouts():
+def delete_workouts(event, context):
     query_workouts = ds_client.query(kind='cybergym-workout')
     query_workouts.add_filter("timestamp", "<", str(datetime.now() - timedelta(days=30)))
     for workout in list(query_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
         if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
+            print('Deleting resources from workout %s', workout['workout_ID'])
             expired_id = workout['workout_ID']
             delete_vms(expired_id)
             delete_firewall_rules(expired_id)

@@ -25,8 +25,7 @@ ds_client = datastore.Client()
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
-    lettersAndDigits = string.ascii_lowercase + string.digits
-    return ''.join(random.choice(lettersAndDigits) for i in range(stringLength))
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
 
 # --------------------------- FLASK APP --------------------------
@@ -147,15 +146,23 @@ def build_workout():
 
         build_data = request.get_json()
         num_team = int(build_data['team'])
+        if num_team > 10:
+            num_team = 10
+
+        build_length = int(build_data['length'])
+        if build_length > 7:
+            build_length = 7
 
         # we have to store each labentry ext IP and send it to the user
         list_ext_ip = []
 
         ts = str(calendar.timegm(time.gmtime()))
 
-        store_workout_info(generated_workout_ID, build_data['email'], build_data['length'], build_data['type'], ts)
+        store_workout_info(generated_workout_ID, build_data['email'], build_length, build_data['type'], ts)
 
         for i in range(1, num_team + 1):
+            # create random number specific to the workout (6 characters by default)
+            generated_workout_ID = randomStringDigits()
 
             network = '{}-net-{}-t{}'.format(generated_workout_ID, ts, i)
             subnetwork = '{}-subnet'.format(generated_workout_ID)
@@ -207,6 +214,9 @@ def build_workout():
                 ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
+            if (build_data['type'] == 'mobileforensics'):
+                ext_IP_lab_entry = create_workout.create_mobileforensics_workout(network, subnetwork, generated_workout_ID)
+                list_ext_ip.append(ext_IP_lab_entry)
         time.sleep(120)
         send_email(build_data['email'], build_data['type'], list_ext_ip)
 

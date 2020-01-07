@@ -110,7 +110,7 @@ def create_firewall_allow_internal(network_name):
 # but basically we have to wait for a certain amount of time before create a subnetwork
 def create_ecosystem_workout(name, name_subnet, workout_id):
 
-    print("ecosystem creation {}-{}".format(name, workout_id))
+    print("ecosystem creation {}-{}".format(workout_id, name))
     create_network(name)
     time.sleep(50)
 
