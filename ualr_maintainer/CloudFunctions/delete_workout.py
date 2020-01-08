@@ -9,6 +9,7 @@ import googleapiclient.discovery
 from datetime import datetime, timedelta, date
 from google.cloud import datastore
 import time
+import calendar
 
 # Global variables for this function
 ds_client = datastore.Client()
