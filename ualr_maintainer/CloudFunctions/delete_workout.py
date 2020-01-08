@@ -8,6 +8,7 @@
 import googleapiclient.discovery
 from datetime import datetime, timedelta, date
 from google.cloud import datastore
+import time
 
 # Global variables for this function
 ds_client = datastore.Client()
@@ -74,16 +75,20 @@ def delete_network(workout_id):
 
 def delete_workouts(event, context):
     query_workouts = ds_client.query(kind='cybergym-workout')
-    query_workouts.add_filter("timestamp", "<", str(datetime.now() - timedelta(days=30)))
+    # Only process the workouts from the last month. 2628000 is the number of seconds in a month
+    query_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 2628000))
     for workout in list(query_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
         if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
             print('Deleting resources from workout %s', workout['workout_ID'])
             expired_id = workout['workout_ID']
-            delete_vms(expired_id)
-            delete_firewall_rules(expired_id)
-            delete_subnetworks(expired_id)
-            delete_network(expired_id)
-            workout['resources_deleted'] = True
-            ds_client.put(workout)
+            if delete_vms(expired_id):
+                time.sleep(60)
+                if delete_firewall_rules(expired_id):
+                    time.sleep(10)
+                    if delete_subnetworks(expired_id):
+                        time.sleep(10)
+                        if delete_network(expired_id):
+                            workout['resources_deleted'] = True
+                            ds_client.put(workout)
