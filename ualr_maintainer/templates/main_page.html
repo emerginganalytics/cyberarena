@@ -133,23 +133,13 @@
         <label for="email">Email</label>
     </div>
     <div class="input-field col s12">
-            <select id="team" name="team">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-            </select>
-            <label>Select number of teams</label>
+            <input type="number" id="team" name="team" min="1" max="10">
+            <label>Select number of teams (between 1 and 10)</label>
     </div>
 
     <div class="input-field col s12">
-            <select id="availability" name="availability">
-                <option value="1">1 day</option>
-                <option value="2">2 days</option>
-                <option value="3">3 days</option>
-                <option value="4">4 days</option>
-                <option value="5">5 days</option>
-            </select>
-            <label>Select length of availability</label>
+            <input type="number" id="availability" name="availability" min="1" max="7">
+            <label>Select length of availability (between 1 and 7 days)</label>
     </div>
 
      <div class="btn-ctn" id="build-workout">
@@ -216,9 +206,9 @@ $(document).ready(function(){
 $("#build-workout").click(function () {
 
     var user_email = $("input#email").val();
-    var number_team = $("select#team").val();
+    var number_team = $("input#team").val();
     var workout_type = $("#workout_type").html();
-    var length_availability = $("select#availability").val();
+    var length_availability = $("input#availability").val();
 
     var build_data = {
         "email": user_email,

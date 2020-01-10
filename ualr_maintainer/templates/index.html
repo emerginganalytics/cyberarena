@@ -28,35 +28,13 @@
     </div>
 
     <div class="input-field col s12">
-            <select id="workout" name="workout">
-                <option value="dos">DOS</option>
-                <option value="cyberattack">Cyberattack</option>
-                <option value="spoof">Spoof</option>
-                <option value="hiddennode">Hidden Node</option>
-                <option value="ids">IDS</option>
-            </select>
-            <label>Select workout</label>
+            <input type="number" id="team" name="team" min="1" max="10">
+            <label>Select number of teams (between 1 and 10)</label>
     </div>
 
     <div class="input-field col s12">
-            <select id="team" name="team">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-            </select>
-            <label>Select number of teams</label>
-    </div>
-
-    <div class="input-field col s12">
-            <select id="availability" name="availability">
-                <option value="1">(not available)</option>
-                <option value="2">(not available)</option>
-                <option value="3">(not available)</option>
-                <option value="4">(not available)</option>
-                <option value="5">(not available)</option>
-            </select>
-            <label>Select length of availability</label>
+            <input type="number" id="availability" name="availability" min="1" max="7">
+            <label>Select length of availability (between 1 and 7 days)</label>
     </div>
 
     <div class="btn-ctn" id="build-workout" onclick="$('#loading').show();">

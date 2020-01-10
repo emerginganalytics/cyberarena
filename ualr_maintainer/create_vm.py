@@ -622,3 +622,38 @@ def build_hashmyfiles_vm(network, subnet, workout_id):
     guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs"
 
     return guaca_redirection
+
+
+# ----------------------------------- Mobile Forensics Workout ---------------------------------------------------
+
+
+def build_mobileforensics_vm(network, subnet, workout_id):
+
+    list_images_to_create = ['image-labentry', 'image-cybergym-forensics-workstation']
+    list_internal_ip = ['10.1.1.10', '10.1.1.11']
+    list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None]
+    list_tags = [{'items': ['http-server','https-server']}, None]
+
+    for i in range(len(list_images_to_create)):
+        image = list_images_to_create[i]
+        int_IP = list_internal_ip[i]
+        ext_IP = list_ext_ip[i]
+        tags = list_tags[i]
+
+        create_instance_custom_image(compute, 'ualr-cybersecurity',
+                                     'us-central1-a', '{}-mobileforensics-{}'.format(workout_id, image[6:]),
+                                     'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+
+        print("{} created".format('{}-mobileforensics-{}'.format(image[6:], workout_id)))
+
+    # we want to retrieve the external IP for the labentry VM
+    time.sleep(5)
+    print("ext ip from :", '{}-mobileforensics-labentry'.format(workout_id))
+    request = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
+                                      instance='{}-mobileforensics-labentry'.format(workout_id))
+    response = request.execute()
+    ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+
+    guaca_redirection = "http://" + ext_IP + ":8080/guacamole/#/client/NwBjAG15c3Fs"
+
+    return guaca_redirection

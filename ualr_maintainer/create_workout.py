@@ -84,3 +84,11 @@ def create_hashmyfiles_workout(name_workout, name_subnet_workout, workout_id):
     # Create the vm and return the ext IP of the entry lab
     return create_vm.build_hashmyfiles_vm(name_workout, name_subnet_workout, workout_id)
 
+def create_mobileforensics_workout(name_workout, name_subnet_workout, workout_id):
+
+    create_network.create_ecosystem_workout(name_workout, name_subnet_workout, workout_id)
+    time.sleep(10)
+
+    # Create the vm and return the ext IP of the entry lab
+    return create_vm.build_mobileforensics_vm(name_workout, name_subnet_workout, workout_id)
+
