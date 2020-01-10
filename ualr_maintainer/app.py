@@ -161,11 +161,8 @@ def build_workout():
         store_workout_info(generated_workout_ID, build_data['email'], build_length, build_data['type'], ts)
 
         for i in range(1, num_team + 1):
-            # create random number specific to the workout (6 characters by default)
-            generated_workout_ID = randomStringDigits()
-
             network = '{}-net-{}-t{}'.format(generated_workout_ID, ts, i)
-            subnetwork = '{}-subnet'.format(generated_workout_ID)
+            subnetwork = '{}-subnet-{}-t{}'.format(generated_workout_ID, ts, i)
 
             if (build_data['type'] == 'dos'):
                 ext_IP_lab_entry = create_workout.create_dos_workout(network, subnetwork, generated_workout_ID)
