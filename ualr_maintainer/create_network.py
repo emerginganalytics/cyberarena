@@ -8,14 +8,12 @@ from googleapiclient.errors import HttpError
 from pprint import pprint
 
 
-
 # ------------------------------ parameters ----------------------------------
 
 compute = googleapiclient.discovery.build('compute', 'v1')
 
 project = 'ualr-cybersecurity'
 region = 'us-central1'
-
 
 
 # --------------------------- create network ----------------------------------
@@ -37,13 +35,12 @@ def create_network(name):
     print("Network {} created".format(name))
 
 
-
 # --------------------------- create subnet ----------------------------------
 
 # network_name should refer to an existing network
 def create_subnet(network_name, subnet_name):
     subnetwork_body = {
-        "name" : subnet_name,
+        "name": subnet_name,
         "network": "projects/ualr-cybersecurity/global/networks/" + network_name,
         "ipCidrRange": "10.1.1.0/24",
     }
@@ -53,7 +50,6 @@ def create_subnet(network_name, subnet_name):
 
     # print(response)
     print("Subnet {} of network {} created".format(subnetwork_body['name'], network_name))
-
 
 
 # --------------------------- add firewall rules ----------------------------------
