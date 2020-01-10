@@ -11,6 +11,7 @@ import start_stop_vm
 from flask import Flask, render_template, redirect, url_for
 from flask import jsonify
 from flask import request
+from base64 import b64encode as b64
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -27,11 +28,22 @@ ds_client = datastore.Client()
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
+# ------------------------ FLAG GENERATOR -------------------------
+# See also build_flag_startup in create_vm.py for implementation
+
+def flag_generator():
+    from os import urandom as rand
+
+    token = b64(rand(12)).decode('UTF-8')
+    rand_flag = str('CyberGym{') + token + str('}')
+
+    return rand_flag
+
 
 # --------------------------- FLASK APP --------------------------
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
+def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp, flag):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout'))
 
@@ -41,7 +53,8 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
         'expiration': workout_duration,
         'type': workout_type,
         'timestamp': timestamp,
-        'resources_deleted': False
+        'resources_deleted': False,
+        'flag': flag
     })
 
     # insert a new user
@@ -141,9 +154,9 @@ def build_workout():
 
     if request.method == 'POST':
 
-        # create random number specirfic to the workout (6 characters by default)
+        # create random number specific to the workout (6 characters by default)
         generated_workout_ID = randomStringDigits()
-
+        flag = flag_generator()
         build_data = request.get_json()
         num_team = int(build_data['team'])
         if num_team > 10:
@@ -158,7 +171,7 @@ def build_workout():
 
         ts = str(calendar.timegm(time.gmtime()))
 
-        store_workout_info(generated_workout_ID, build_data['email'], build_length, build_data['type'], ts)
+        store_workout_info(generated_workout_ID, build_data['email'], build_data['length'], build_data['type'], ts, flag)
 
         for i in range(1, num_team + 1):
             network = '{}-net-{}-t{}'.format(generated_workout_ID, ts, i)
@@ -192,7 +205,7 @@ def build_workout():
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'hiddennode'):
-                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID)
+                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID, flag)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'ids'):
@@ -227,9 +240,11 @@ def build_workout():
                 'workout_type': build_data['type'],
                 'duration': build_data['length'],
                 'network': network,
-                'subnetwork': subnetwork
+                'subnetwork': subnetwork,
+                'flag': flag
             })
         ds_client.put(user_register)
+
         return "DONE"
 
 
