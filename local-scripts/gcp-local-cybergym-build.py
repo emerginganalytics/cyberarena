@@ -142,7 +142,6 @@ def create_instance_custom_image(compute, project, zone, name, custom_image, mac
 
 def test_full_create_workout(project, region, zone):
     generated_workout_ID = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
-    network_name = '{}-net'.format(generated_workout_ID)
 
     # Store the workout information in the cloud data store. This will be used to delete the workout after a day
     ts = str(calendar.timegm(time.gmtime()))
