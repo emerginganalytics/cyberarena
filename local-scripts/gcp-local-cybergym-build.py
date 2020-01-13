@@ -38,19 +38,28 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
 
 def create_firewall_rules(project, firewall_rules):
     for rule in firewall_rules:
+        # Convert the port specification to the correct json format
+        allowed = []
+        for port_spec in rule["ports"]:
+            protocol, ports = port_spec.split("/")
+            if ports == "any":
+                addPorts = {"IPProtocol": protocol}
+            else:
+                addPorts = {"IPProtocol": protocol, "ports": ports}
+            allowed.append(addPorts)
+
         firewall_body = {
             "name": rule["name"],
             "network": "https://www.googleapis.com/compute/v1/projects/ualr-cybersecurity/global/networks/" +
-                       rule["network_name"],
+                       rule["network"],
             "targetTags": rule["targetTags"],
-            "allowed": [
-                {
-                    "IPProtocol": rule["protocol"],
-                    "ports": rule["ports"]
-                }
-            ],
+            "allowed": allowed,
             "sourceRanges": rule["sourceRanges"]
         }
+        # If targetTags is None, then we do not want to include it in the insertion request
+        if not rule["targetTags"]:
+            del firewall_body["targetTags"]
+
         compute.firewalls().insert(project=project, body=firewall_body).execute()
 
 
@@ -210,7 +219,7 @@ def test_full_create_workout(project, region, zone):
             {"network": dmz_network["name"], "internal_IP": "10.1.2.10",
              "subnet": dmz_network["name"] + "-default", "external_NAT": False}
         ],
-        "tags": {"items": ["firewall-server"]},
+        "tags": {"items": ["firewall-server", "http-server"]},
         "metadata": None,
         "wait": True
     }
@@ -244,7 +253,16 @@ def test_full_create_workout(project, region, zone):
 
     firewall_rules = [
         {"name": generated_workout_ID + "-allow-http", "network": external_network["name"],
-         "targetTags": "http-server", "protocol": "tcp", "ports": ["80", "8080", "443"], "sourceRanges": ["0.0.0.0/0"]}
+         "targetTags": "http-server", "ports": ["tcp/80,8080,443"], "sourceRanges": ["0.0.0.0/0"]},
+        {"name": generated_workout_ID + "-allow-all-local-external", "network": external_network["name"],
+         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
+         "sourceRanges": ["10.1.0.0/16"]},
+        {"name": generated_workout_ID + "-allow-all-local-internal", "network": internal_network["name"],
+         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
+         "sourceRanges": ["10.1.0.0/16"]},
+        {"name": generated_workout_ID + "-allow-all-local-dmz", "network": dmz_network["name"],
+         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
+         "sourceRanges": ["10.1.0.0/16"]}
     ]
     create_firewall_rules(project, firewall_rules)
 

@@ -1,8 +1,5 @@
 #
 # This function is intended to be run in Google Cloud Functions as the handler to the maintenance pub/sub topic
-# Need to rewrite to delete based on expired workout and not loop through all resources each time.
-# Use this to filter based on project labels.workoutid = sd89wj when querying
-# e.g. compute.instances().list(project=project, zone=zone, filter='labels.workoutid = sd89wj').execute()
 #
 
 import googleapiclient.discovery
@@ -34,12 +31,15 @@ def delete_vms(workout_id):
     try:
         if 'items' in result:
             for vm_instance in result['items']:
-                compute.instances().delete(project=project, zone=zone,
+                response = compute.instances().delete(project=project, zone=zone,
                                            instance=vm_instance["name"]).execute()
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
         else:
             print("No Virtual Machines to delete for workout %s" % workout_id)
+        return True
     except():
         print("Error in deleting VM for %s" % workout_id)
+        return False
 
 
 def delete_firewall_rules(workout_id):
@@ -47,9 +47,12 @@ def delete_firewall_rules(workout_id):
         result = compute.firewalls().list(project=project, filter='name = {}*'.format(workout_id)).execute()
         if 'items' in result:
             for fw_rule in result['items']:
-                compute.firewalls().delete(project=project, firewall=fw_rule["name"]).execute()
+                response = compute.firewalls().delete(project=project, firewall=fw_rule["name"]).execute()
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+        return True
     except():
         print("Error in deleting firewall rules for %s" % workout_id)
+        return False
 
 
 def delete_subnetworks(workout_id):
@@ -58,10 +61,13 @@ def delete_subnetworks(workout_id):
                                               filter='name = {}*'.format(workout_id)).execute()
         if 'items' in result:
             for subnetwork in result['items']:
-                compute.subnetworks().delete(project=project, region=region,
+                response = compute.subnetworks().delete(project=project, region=region,
                                                        subnetwork=subnetwork["name"]).execute()
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+        return True
     except():
         print("Error in deleting subnetworks for %s" % workout_id)
+        return True
 
 
 def delete_network(workout_id):
@@ -70,8 +76,10 @@ def delete_network(workout_id):
         if 'items' in result:
             for network in result['items']:
                 compute.networks().delete(project=project, network=network["name"]).execute()
+        return True
     except():
         print("Error in deleting network for %s" % workout_id)
+        return False
 
 
 def delete_workouts(event, context):
@@ -85,11 +93,12 @@ def delete_workouts(event, context):
             print('Deleting resources from workout %s', workout['workout_ID'])
             expired_id = workout['workout_ID']
             if delete_vms(expired_id):
-                time.sleep(60)
                 if delete_firewall_rules(expired_id):
-                    time.sleep(10)
                     if delete_subnetworks(expired_id):
-                        time.sleep(10)
                         if delete_network(expired_id):
                             workout['resources_deleted'] = True
                             ds_client.put(workout)
+
+
+# The main function is only for debugging. Do not include this line in the cloud function
+delete_workouts(None, None)
