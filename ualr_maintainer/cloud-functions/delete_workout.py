@@ -33,6 +33,7 @@ def delete_vms(workout_id):
             for vm_instance in result['items']:
                 response = compute.instances().delete(project=project, zone=zone,
                                            instance=vm_instance["name"]).execute()
+            time.sleep(60)
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
         else:
             print("No Virtual Machines to delete for workout %s" % workout_id)
@@ -48,7 +49,7 @@ def delete_firewall_rules(workout_id):
         if 'items' in result:
             for fw_rule in result['items']:
                 response = compute.firewalls().delete(project=project, firewall=fw_rule["name"]).execute()
-            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
         return True
     except():
         print("Error in deleting firewall rules for %s" % workout_id)
@@ -63,7 +64,7 @@ def delete_subnetworks(workout_id):
             for subnetwork in result['items']:
                 response = compute.subnetworks().delete(project=project, region=region,
                                                        subnetwork=subnetwork["name"]).execute()
-            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
         return True
     except():
         print("Error in deleting subnetworks for %s" % workout_id)
@@ -72,6 +73,14 @@ def delete_subnetworks(workout_id):
 
 def delete_network(workout_id):
     try:
+        # First delete any routes specific to the workout
+        result = compute.routes().list(project=project, filter='name = {}*'.format(workout_id)).execute()
+        if 'items' in result:
+            for route in result['items']:
+                response = compute.routes().delete(project=project, route=route["name"]).execute()
+            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+
+        # Now it is safe to delete the networks.
         result = compute.networks().list(project=project, filter='name = {}*'.format(workout_id)).execute()
         if 'items' in result:
             for network in result['items']:
