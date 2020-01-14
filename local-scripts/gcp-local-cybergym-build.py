@@ -45,7 +45,8 @@ def create_firewall_rules(project, firewall_rules):
             if ports == "any":
                 addPorts = {"IPProtocol": protocol}
             else:
-                addPorts = {"IPProtocol": protocol, "ports": ports}
+                portlist = ports.split(",")
+                addPorts = {"IPProtocol": protocol, "ports": portlist}
             allowed.append(addPorts)
 
         firewall_body = {
@@ -79,7 +80,7 @@ def create_route(project, zone, route):
 
 
 def create_instance_custom_image(compute, project, zone, name, custom_image, machine_type,
-                                 canIpForward, networks, tags=None, metadata=None, wait=False):
+                                 networkRouting, networks, tags=None, metadata=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -120,7 +121,6 @@ def create_instance_custom_image(compute, project, zone, name, custom_image, mac
                 }
             }
         ],
-        'canIpForward': canIpForward,
         'networkInterfaces': networkInterfaces,
         # Allow the instance to access cloud storage and logging.
         'serviceAccounts': [{
@@ -135,8 +135,21 @@ def create_instance_custom_image(compute, project, zone, name, custom_image, mac
         'metadata': metadata
     }
 
+    # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
+    if networkRouting:
+        config["canIpForward"] = True
+        image_config = {"name": name + "-disk", "sizeGb": 30,
+                        "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
+
+        response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+
+        new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
+                     "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
+        config['disks'].append(new_disk)
+
     response = compute.instances().insert(project=project, zone=zone, body=config).execute()
-    if wait:
+    if networkRouting:
         compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
 
@@ -187,8 +200,7 @@ def test_full_create_workout(project, region, zone):
              "subnet": external_network["name"] + "-default", "external_NAT": True}
         ],
         "tags": {"items": ["http-server"]},
-        "metadata": None,
-        "wait": False
+        "metadata": None
     }
 
     active_directory_server = {
@@ -201,8 +213,7 @@ def test_full_create_workout(project, region, zone):
              "subnet": internal_network["name"] + "-default", "external_NAT": False}
         ],
         "tags": {"items": ["ad-server", "rdp-server"]},
-        "metadata": None,
-        "wait": False
+        "metadata": None
     }
 
     fortinet_firewall = {
@@ -219,20 +230,14 @@ def test_full_create_workout(project, region, zone):
              "subnet": dmz_network["name"] + "-default", "external_NAT": False}
         ],
         "tags": {"items": ["firewall-server", "http-server"]},
-        "metadata": None,
-        "wait": True
+        "metadata": None
     }
 
     serverlist = [lab_entry_server, active_directory_server, fortinet_firewall]
 
     for server in serverlist:
-        if server["network_routing"]:
-            canIPForward = True
-        else:
-            canIPForward = False
         create_instance_custom_image(compute, project, zone, server["name"], server["image"], server["machine_type"],
-                                     canIPForward, server["nics"], server["tags"], server["metadata"],
-                                     server["wait"])
+                                     server["network_routing"], server["nics"], server["tags"], server["metadata"])
 
     # Create all of the network routes and firewall rules
     internal_route = {"name": generated_workout_ID + "-default-internal-fortinet", "network": internal_network["name"],
