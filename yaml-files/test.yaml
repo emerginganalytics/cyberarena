@@ -1,0 +1,111 @@
+version: '1'
+
+workout:
+  name: test
+  workout_description: 'Insert workout description here'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.0.0/24
+  - name: internal-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.1.0/24
+  - name: dmz-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.2.0/24
+
+servers:
+  - name: cybergym-labentry
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_ip: 10.1.0.2
+        subnet: external-network-default
+        external_nat: true
+  - name: cybergym-ad-dc
+    image: image-cybergym-activedirectory-domaincontroller
+    machine_type: "n1-standard-2"
+    network_routing: false
+    tags: {items: ["ad-server", "rdp-server"]}
+    metadata: none
+    nics:
+      - network: internal-network
+        internal_ip: 10.1.1.2
+        subnet: internal-network-default
+        external_nat: false
+  - name: cybergym-fortinet-fortigate
+    image: image-cybergym-fortinet-fortigate1
+    machine_type: "n1-standard-4"
+    network_routing: true
+    tags: {items: ["firewall-server", "http-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_ip: 10.1.0.10
+        subnet: external-network-default
+        external_nat: true
+      - network: internal-network
+        internal_ip: 10.1.1.10
+        subnet: internal-network-default
+        external_nat: false
+      - network: internal-network
+        internal_ip: 10.1.2.10
+        subnet: internal-network-default
+        external_nat: false
+
+routes:
+  - name: default-internal-fortinet
+    network: internal-network
+    dest_range: "0.0.0.0/0"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: default-dmz-fortinet
+    network: dmz-network
+    dest_range: "0.0.0.0/0"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: external-to-internal
+    network: external-network
+    dest_range: "10.1.1.0/24"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: external-to-dmz
+    network: external-network
+    dest_range: "10.1.2.0/24"
+    next_hop_instance: cybergym-fortinet-fortigate
+
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
+  - name: allow-all-local-internal
+    network: internal-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
+  - name: allow-all-local-dmz
+    network: dmz-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]

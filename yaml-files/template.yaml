@@ -1,0 +1,53 @@
+# This template provides an overview of the YAML specification for Cyber Gym
+# workout configurations. Use this as a basis for creating new YAML config files
+
+version: '1'
+
+# Insert basic workout information here.
+workout:
+  name: # workout name
+  workout_description: # workout description -- enclose this in quotes (i.e. 'Here is a description')
+  project_name: # project name
+  region: # data center region -- this should match the desired region in Google Cloud (i.e., "us-central1")
+  zone: # data center zone -- this should match the desired zone in Google Cloud (i.e., "us-central1-a")
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+
+# List all networks and all subnets here
+networks:
+  - name: # network name
+    # Multiple subnets can be listed using YAML block sequence format
+    subnets:
+      - name: # subnet name
+        ip-subnet: #subnet CIDR range
+
+# List all VMs required for the workout. Multiple VMs may be listed using YAML block sequence format
+servers:
+  - name: # server name
+    image: # server image
+    machine_type: # Google Cloud VM type (i.e., "n1-standard-1")
+    network_routing: # boolean value
+    tags: # list tags for this VM (i.e., {items: ["http-server"]})
+    metadata: # VM metadata
+    # List all nics for this server. Multiple items may be included using YAML block sequence format
+    nics:
+      - network: # network name
+        internal_ip: # VM IP address
+        subnet: # subnet name
+        external_nat: # boolean value
+
+# List network routes. Multiple routes may be listed using YAML block sequence format
+routes:
+  - name: # route name
+    network: # network name
+    dest_range: # destination CIDR range
+    next_hop_instance: # name of next hop VM
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: # rule name
+    network: # network name
+    target_tags: # list of target tags (i.e., ["http-server"])
+    protocol: # network protocol
+    ports: # list of affected ports (i.e., ["tcp/80,8080,443"])
+    source_ranges: # list of source ranges (i.e., ["0.0.0.0/0"])
