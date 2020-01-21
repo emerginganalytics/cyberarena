@@ -13,10 +13,10 @@ from google.cloud import datastore
 import calendar
 import time
 from google.cloud import datastore
+from yaml import load, dump, Loader, Dumper
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
-
 
 # store workout info to google cloud datastore
 def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
@@ -153,122 +153,61 @@ def create_instance_custom_image(compute, project, zone, name, custom_image, mac
         compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
 
-def test_full_create_workout(project, region, zone):
+def test_full_create_workout(yaml_file):
+    # Open and read YAML file
+    f = open(yaml_file, "r")
+    y = load(f, Loader=Loader)
+
+    workout_name = y['workout']['name']
+    project = y['workout']['project_name']
+    region = y['workout']['region']
+    zone = y['workout']['zone']
+
     generated_workout_ID = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
 
     # Store the workout information in the cloud data store. This will be used to delete the workout after a day
     ts = str(calendar.timegm(time.gmtime()))
-    store_workout_info(generated_workout_ID, "pdhuff@ualr.edu", 1, "test-fortinet-ad", ts)
+    store_workout_info(generated_workout_ID, "pdhuff@ualr.edu", 1, workout_name, ts)
 
     # Create the networks and subnets
-    external_network = {
-        "name": '{}-external-network'.format(generated_workout_ID),
-        "ip-subnet": "10.1.0.0/24"
-    }
-    internal_network = {
-        "name": '{}-internal-network'.format(generated_workout_ID),
-        "ip-subnet": "10.1.1.0/24"
-    }
-    dmz_network = {
-        "name": '{}-dmz-network'.format(generated_workout_ID),
-        "ip-subnet": "10.1.2.0/24"
-    }
-
-    networks = [external_network, internal_network, dmz_network]
-
-    for network in networks:
-        network_body = {"name": network["name"], "autoCreateSubnetworks": False, "region": "region"}
+    for network in y['networks']:
+        network_body = {"name": "%s-%s" %(generated_workout_ID, network['name']),
+                        "autoCreateSubnetworks": False,
+                        "region": region}
         response = compute.networks().insert(project=project, body=network_body).execute()
         compute.globalOperations().wait(project=project, operation=response["id"]).execute()
 
-        subnetwork_body = {
-            "name": network["name"] + "-default",
-            "network": "projects/ualr-cybersecurity/global/networks/" + network["name"],
-            "ipCidrRange": network["ip-subnet"]
-        }
-        response = compute.subnetworks().insert(project=project, region=region, body=subnetwork_body).execute()
-        compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+        for subnet in network['subnets']:
+            subnetwork_body = {
+                "name": "%s-%s" % (network_body['name'], subnet['name']),
+                "network": "projects/ualr-cybersecurity/global/networks/" + network_body['name'],
+                "ipCidrRange": subnet['ip_subnet']
+            }
+            response = compute.subnetworks().insert(project=project, region=region, body=subnetwork_body).execute()
+            compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
     # Now create the servers
-    lab_entry_server = {
-        "name": "{}-{}".format(generated_workout_ID, "cybergym-labentry"),
-        "image": "image-labentry",
-        "machine_type": "n1-standard-1",
-        "network_routing": False,
-        "nics": [
-            {"network": external_network["name"], "internal_IP": "10.1.0.2",
-             "subnet": external_network["name"] + "-default", "external_NAT": True}
-        ],
-        "tags": {"items": ["http-server"]},
-        "metadata": None
-    }
-
-    active_directory_server = {
-        "name": "{}-{}".format(generated_workout_ID, "cybergym-ad-dc"),
-        "image": "image-cybergym-activedirectory-domaincontroller",
-        "machine_type": "n1-standard-2",
-        "network_routing": False,
-        "nics": [
-            {"network": internal_network["name"], "internal_IP": "10.1.1.2",
-             "subnet": internal_network["name"] + "-default", "external_NAT": False}
-        ],
-        "tags": {"items": ["ad-server", "rdp-server"]},
-        "metadata": None
-    }
-
-    fortinet_firewall = {
-        "name": "{}-{}".format(generated_workout_ID, "cybergym-fortinet-fortigate"),
-        "image": "image-cybergym-fortinet-fortigate1",
-        "machine_type": "n1-standard-4",
-        "network_routing": True,
-        "nics": [
-            {"network": external_network["name"], "internal_IP": "10.1.0.10",
-             "subnet": external_network["name"] + "-default", "external_NAT": True},
-            {"network": internal_network["name"], "internal_IP": "10.1.1.10",
-             "subnet": internal_network["name"] + "-default", "external_NAT": False},
-            {"network": dmz_network["name"], "internal_IP": "10.1.2.10",
-             "subnet": dmz_network["name"] + "-default", "external_NAT": False}
-        ],
-        "tags": {"items": ["firewall-server", "http-server"]},
-        "metadata": None
-    }
-
-    serverlist = [lab_entry_server, active_directory_server, fortinet_firewall]
-
-    for server in serverlist:
-        create_instance_custom_image(compute, project, zone, server["name"], server["image"], server["machine_type"],
-                                     server["network_routing"], server["nics"], server["tags"], server["metadata"])
+    for server in y.servers:
+        create_instance_custom_image(compute, project, zone, server['name'], server['image'], server['machine_type'],
+                                     server['network_routing'], server['nics'], server['tags'], server['metadata'])
 
     # Create all of the network routes and firewall rules
-    internal_route = {"name": generated_workout_ID + "-default-internal-fortinet", "network": internal_network["name"],
-                      "destRange": "0.0.0.0/0", "nextHopInstance": fortinet_firewall["name"]}
-    dmz_route = {"name": generated_workout_ID + "-default-dmz-fortinet", "network": dmz_network["name"],
-                 "destRange": "0.0.0.0/0", "nextHopInstance": fortinet_firewall["name"]}
-    external_to_internal_route = {"name": generated_workout_ID + "-external-to-internal",
-                                  "network": external_network["name"], "destRange": "10.1.1.0/24",
-                                  "nextHopInstance": fortinet_firewall["name"]}
-    external_to_dmz_route = {"name": generated_workout_ID + "-external-to-dmz",
-                                  "network": external_network["name"], "destRange": "10.1.2.0/24",
-                                  "nextHopInstance": fortinet_firewall["name"]}
+    for route in y.routes:
+        r = {"name": generated_workout_ID + route['name'],
+             "network": route['network'],
+             "destRange": route['dest_range'],
+             "nextHopInstance": route['next_hop_instance']}
+        create_route(project, zone, r)
 
-    routes = [internal_route, dmz_route, external_to_internal_route, external_to_dmz_route]
-    for route in routes:
-        create_route(project, zone, route)
+    firewall_rules = []
+    for rule in y['firewall_rules']:
+        firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
+                               "network": rule['network'],
+                               "targetTags": rule['target_tags'],
+                               "protocol": rule['protocol'],
+                               "ports": rule['ports'],
+                               "sourceRanges": rule['source_ranges']})
 
-    firewall_rules = [
-        {"name": generated_workout_ID + "-allow-http", "network": external_network["name"],
-         "targetTags": "http-server", "ports": ["tcp/80,8080,443"], "sourceRanges": ["0.0.0.0/0"]},
-        {"name": generated_workout_ID + "-allow-all-local-external", "network": external_network["name"],
-         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
-         "sourceRanges": ["10.1.0.0/16"]},
-        {"name": generated_workout_ID + "-allow-all-local-internal", "network": internal_network["name"],
-         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
-         "sourceRanges": ["10.1.0.0/16"]},
-        {"name": generated_workout_ID + "-allow-all-local-dmz", "network": dmz_network["name"],
-         "targetTags": None, "protocol": "tcp", "ports": ["tcp/any", "udp/any", "icmp/any"],
-         "sourceRanges": ["10.1.0.0/16"]}
-    ]
     create_firewall_rules(project, firewall_rules)
 
-
-test_full_create_workout('ualr-cybersecurity', 'us-central1', 'us-central1-a')
+test_full_create_workout("../yaml-files/test.yaml")
