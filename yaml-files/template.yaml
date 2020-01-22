@@ -32,9 +32,9 @@ servers:
     # List all nics for this server. Multiple items may be included using YAML block sequence format
     nics:
       - network: # network name
-        internal_ip: # VM IP address
+        internal_IP: # VM IP address
         subnet: # subnet name
-        external_nat: # boolean value
+        external_NAT: # boolean value
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:

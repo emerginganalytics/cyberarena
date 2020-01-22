@@ -173,7 +173,7 @@ def test_full_create_workout(yaml_file):
     for network in y['networks']:
         network_body = {"name": "%s-%s" %(generated_workout_ID, network['name']),
                         "autoCreateSubnetworks": False,
-                        "region": region}
+                        "region": "region"}
         response = compute.networks().insert(project=project, body=network_body).execute()
         compute.globalOperations().wait(project=project, operation=response["id"]).execute()
 
@@ -187,22 +187,32 @@ def test_full_create_workout(yaml_file):
             compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
     # Now create the servers
-    for server in y.servers:
-        create_instance_custom_image(compute, project, zone, server['name'], server['image'], server['machine_type'],
-                                     server['network_routing'], server['nics'], server['tags'], server['metadata'])
+    for server in y['servers']:
+        server_name = "%s-%s" % (generated_workout_ID, server['name'])
+        nics = []
+        for n in server['nics']:
+            nic = {
+                "network": "%s-%s" % (generated_workout_ID, n['network']),
+                "internal_IP": n['internal_IP'],
+                "subnet": "%s-%s" % (generated_workout_ID, n['subnet']),
+                "external_NAT": n['external_NAT']
+            }
+            nics.append(nic)
+        create_instance_custom_image(compute, project, zone, server_name, server['image'], server['machine_type'],
+                                     server['network_routing'], nics, server['tags'], server['metadata'])
 
     # Create all of the network routes and firewall rules
-    for route in y.routes:
-        r = {"name": generated_workout_ID + route['name'],
-             "network": route['network'],
+    for route in y['routes']:
+        r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
+             "network": "%s-%s" % (generated_workout_ID, route['network']),
              "destRange": route['dest_range'],
-             "nextHopInstance": route['next_hop_instance']}
+             "nextHopInstance": "%s-%s" % (generated_workout_ID, route['next_hop_instance'])}
         create_route(project, zone, r)
 
     firewall_rules = []
     for rule in y['firewall_rules']:
         firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
-                               "network": rule['network'],
+                               "network": "%s-%s" % (generated_workout_ID, rule['network']),
                                "targetTags": rule['target_tags'],
                                "protocol": rule['protocol'],
                                "ports": rule['ports'],
