@@ -17,11 +17,11 @@ networks:
   - name: internal-network
     subnets:
       - name: default
-        ip-subnet: 10.1.1.0/24
+        ip_subnet: 10.1.1.0/24
   - name: dmz-network
     subnets:
       - name: default
-        ip-subnet: 10.1.2.0/24
+        ip_subnet: 10.1.2.0/24
 
 servers:
   - name: cybergym-labentry
@@ -32,9 +32,9 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_ip: 10.1.0.2
+        internal_IP: 10.1.0.2
         subnet: external-network-default
-        external_nat: true
+        external_NAT: true
   - name: cybergym-ad-dc
     image: image-cybergym-activedirectory-domaincontroller
     machine_type: "n1-standard-2"
@@ -43,9 +43,9 @@ servers:
     metadata: none
     nics:
       - network: internal-network
-        internal_ip: 10.1.1.2
+        internal_IP: 10.1.1.2
         subnet: internal-network-default
-        external_nat: false
+        external_NAT: false
   - name: cybergym-fortinet-fortigate
     image: image-cybergym-fortinet-fortigate1
     machine_type: "n1-standard-4"
@@ -54,17 +54,17 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_ip: 10.1.0.10
+        internal_IP: 10.1.0.10
         subnet: external-network-default
-        external_nat: true
+        external_NAT: true
       - network: internal-network
-        internal_ip: 10.1.1.10
+        internal_IP: 10.1.1.10
         subnet: internal-network-default
-        external_nat: false
-      - network: internal-network
-        internal_ip: 10.1.2.10
-        subnet: internal-network-default
-        external_nat: false
+        external_NAT: false
+      - network: dmz-network
+        internal_IP: 10.1.2.10
+        subnet: dmz-network-default
+        external_NAT: false
 
 routes:
   - name: default-internal-fortinet
