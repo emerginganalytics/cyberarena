@@ -21,10 +21,10 @@ def build_flag_startup(flag_os, name, flag):
 
     client = gcs.Client()
     flag_bucket = client.get_bucket('ualr-cybersecurity-bucket')
+    script = ''
 
     if flag_os == 'linux':
         script  = '#!/bin/bash\n'
-        script += 'sleep 60\n'
         script += 'cd /usr/local/share/planted/\n' # 'sudo mkdir /usr/local/share/planted/ && cd /usr/local/share/planted\n'
         script += 'sudo echo {} > flag.txt'.format(flag)
 
@@ -34,7 +34,6 @@ def build_flag_startup(flag_os, name, flag):
     elif flag_os == 'windows':
         flag_dir = 'C:\\Program Files\\Google\\Compute Engine\\planted'
         script  = '@echo off\n'
-        script += 'timeout 60\n'
         script += 'mkdir {} && cd {}\n'.format(flag_dir, flag_dir)
         script += 'echo {} > flag.txt' .format(flag)
 
@@ -42,9 +41,12 @@ def build_flag_startup(flag_os, name, flag):
         bucket_file = flag_bucket.blob('startup-scripts/flags/' + file_name)  # + something.sh
 
     bucket_file.upload_from_string(script)
-    return file_name
+    # return file_name
+    return script
 
-# So far this does put the startup script there, but for some reason it's not running(?)
+# temp fix: instances don't have permissions to buckets. Alt is to just return the script instead of bucket url.
+# works as long as script isn't too long
+
 # -------------------- TEST GOOGLE API AUTHENTICATION --------------------------
 
 
@@ -236,8 +238,8 @@ def create_instance_custom_image(compute, project, zone, name, flag_container, f
                         'value': bucket
                     },
                     {
-                        'key': 'startup-script-url',
-                        'value': "gs://ualr-cybersecurity-bucket/startup-scripts/flags/{}".format(flag_startup)
+                        'key': 'startup-script',
+                        'value': flag_startup
                     }
                 ]
 
@@ -312,7 +314,7 @@ def build_dos_vm(network, subnet, workout_id):
     print("build dos network : {}".format(network))
 
     # create the vm for the dos workout and assign them to the previous network
-    list_images_to_create = ['image-labentry','image-promise-dvwalab','image-promise-attacker']
+    list_images_to_create = ['image-labentry','image-cybergym-dvwalab','image-promise-attacker']
     list_internal_ip = ['10.1.1.10', '10.1.1.3', '10.1.1.4']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['http-server','https-server']}, None, {'items': ['http-server','https-server']}]
@@ -349,7 +351,7 @@ def build_dos_vm(network, subnet, workout_id):
 
 def build_xss_vm(network, subnet, workout_id):
 
-    list_images_to_create = ['image-promise-dvwalab', 'image-labentry']
+    list_images_to_create = ['image-cybergym-dvwalab', 'image-labentry']
     list_internal_ip = ['10.1.1.253', '10.1.1.10']
     list_ext_ip = [None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['guac-server']}, {'items': ['http-server', 'https-server', 'guac-server']}]
@@ -447,14 +449,14 @@ def build_spoof_vm(network, subnet, workout_id):
 def build_hiddennode_vm(network, subnet, workout_id, flag):
 
     list_images_to_create = ['image-labentry',
-                             'image-cybergym-hiddennode', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']
+                             'image-cybergym-dvwalab', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']
     list_internal_ip = ['10.1.1.10', '10.1.1.253', '10.1.1.111', '10.1.1.115', '10.1.1.25']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None, None, None, None]
     list_tags = [{'items': ['http-server', 'https-server', 'guac-server', 'attacker', 'vnc-server']}, None, None, None, None]
 
     # specify which instance you want to store the flag on: [called in metadata]
-    flag_location = 'image-cybergym-hiddennode'
+    flag_location = 'image-cybergym-dvwalab'
     flag_container = '{}-hiddennode-{}'.format(workout_id, flag_location[6:])
 
     # build the startup script
@@ -490,7 +492,7 @@ def build_hiddennode_vm(network, subnet, workout_id, flag):
 def build_ids_vm(network, subnet, workout_id):
 
     list_images_to_create = ['image-labentry',
-                             'image-promise-dvwalab']
+                             'image-cybergym-dvwalab']
     list_internal_ip = ['10.1.1.10', '10.1.1.11']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None]
