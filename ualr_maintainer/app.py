@@ -8,10 +8,12 @@ import create_workout
 import list_vm
 import start_stop_vm
 
+import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for
 from flask import jsonify
 from flask import request
 from base64 import b64encode as b64
+from yaml import load, dump, Loader, Dumper
 
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -22,7 +24,7 @@ import workoutdescription
 from google.cloud import datastore
 
 ds_client = datastore.Client()
-
+compute = googleapiclient.discovery.build('compute', 'v1')
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -94,6 +96,122 @@ def send_email(user_mail, workout_type, list_ext_IP):
     print('Email has been sent')
     server.quit()
 
+def create_firewall_rules(project, firewall_rules):
+    for rule in firewall_rules:
+        # Convert the port specification to the correct json format
+        allowed = []
+        for port_spec in rule["ports"]:
+            protocol, ports = port_spec.split("/")
+            if ports == "any":
+                addPorts = {"IPProtocol": protocol}
+            else:
+                portlist = ports.split(",")
+                addPorts = {"IPProtocol": protocol, "ports": portlist}
+            allowed.append(addPorts)
+
+        firewall_body = {
+            "name": rule["name"],
+            "network": "https://www.googleapis.com/compute/v1/projects/ualr-cybersecurity/global/networks/" +
+                       rule["network"],
+            "targetTags": rule["targetTags"],
+            "allowed": allowed,
+            "sourceRanges": rule["sourceRanges"]
+        }
+        # If targetTags is None, then we do not want to include it in the insertion request
+        if not rule["targetTags"]:
+            del firewall_body["targetTags"]
+
+        compute.firewalls().insert(project=project, body=firewall_body).execute()
+
+
+def create_route(project, zone, route):
+    nextHopInstance = "https://www.googleapis.com/compute/v1/projects/" + project + "/zones/" + zone +\
+                      "/instances/" + route["nextHopInstance"]
+    route_body = {
+        "destRange": route["destRange"],
+        "name": route["name"],
+        "network": "https://www.googleapis.com/compute/v1/projects/ualr-cybersecurity/global/networks/" +
+                route["network"],
+        "priority": 0,
+        "tags": [],
+        "nextHopInstance": nextHopInstance
+    }
+    compute.routes().insert(project=project, body=route_body).execute()
+
+
+def create_instance_custom_image(compute, project, zone, name, custom_image, machine_type,
+                                 networkRouting, networks, tags=None, metadata=None):
+
+    image_response = compute.images().get(project=project, image=custom_image).execute()
+    source_disk_image = image_response['selfLink']
+
+    # Configure the machine
+    machine = "zones/%s/machineTypes/%s" % (zone, machine_type)
+
+    networkInterfaces = []
+    for network in networks:
+        if network["external_NAT"]:
+            accessConfigs = {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+        else:
+            accessConfigs = None
+        add_network_interface = {
+            'network': 'projects/ualr-cybersecurity/global/networks/' + network["network"],
+            'subnetwork': 'regions/us-central1/subnetworks/' + network["subnet"],
+            'networkIP': network["internal_IP"],
+            'accessConfigs': [
+                accessConfigs
+            ]
+        }
+        networkInterfaces.append(add_network_interface)
+
+    config = {
+        'name': name,
+        'machineType': machine,
+
+        # allow http and https server with tags
+        'tags': tags,
+
+        # Specify the boot disk and the image to use as a source.
+        'disks': [
+            {
+                'boot': True,
+                'autoDelete': True,
+                'initializeParams': {
+                    'sourceImage': source_disk_image,
+                }
+            }
+        ],
+        'networkInterfaces': networkInterfaces,
+        # Allow the instance to access cloud storage and logging.
+        'serviceAccounts': [{
+            'email': 'default',
+            'scopes': [
+                'https://www.googleapis.com/auth/devstorage.read_write',
+                'https://www.googleapis.com/auth/logging.write'
+            ]
+        }],
+        # Metadata is readable from the instance and allows you to
+        # pass configuration from deployment scripts to instances.
+        'metadata': metadata
+    }
+
+    # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
+    if networkRouting:
+        config["canIpForward"] = True
+        image_config = {"name": name + "-disk", "sizeGb": 30,
+                        "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
+
+        response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+
+        new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
+                     "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
+        config['disks'].append(new_disk)
+
+    response = compute.instances().insert(project=project, zone=zone, body=config).execute()
+    if networkRouting:
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+
 
 # Application
 app = Flask(__name__)
@@ -154,10 +272,26 @@ def build_workout():
 
     if request.method == 'POST':
 
+        build_data = request.get_json()
+
+        # Open and read YAML file
+        yaml_file = "../yaml-files/%s.yaml" % (build_data['type'])
+
+        try:
+            f = open(yaml_file, "r")
+        except:
+            print("File does not exist")
+
+        y = load(f, Loader=Loader)
+
+        workout_name = y['workout']['name']
+        project = y['workout']['project_name']
+        region = y['workout']['region']
+        zone = y['workout']['zone']
+
         # create random number specific to the workout (6 characters by default)
         generated_workout_ID = randomStringDigits()
         flag = flag_generator()
-        build_data = request.get_json()
         num_team = int(build_data['team'])
         if num_team > 10:
             num_team = 10
@@ -177,56 +311,59 @@ def build_workout():
             network = '{}-net-{}-t{}'.format(generated_workout_ID, ts, i)
             subnetwork = '{}-subnet-{}-t{}'.format(generated_workout_ID, ts, i)
 
-            if (build_data['type'] == 'dos'):
-                ext_IP_lab_entry = create_workout.create_dos_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-                # succesData = {
-                #     # 'redirect' : '/workout_done/' + build_data['type'],
-                #     'redirect' : ext_IP_lab_entry,
-                #     'build_data' : build_data
-                # }
+            # Create the networks and subnets
+            for network in y['networks']:
+                network_body = {"name": "%s-%s" % (generated_workout_ID, network['name']),
+                                "autoCreateSubnetworks": False,
+                                "region": "region"}
+                response = compute.networks().insert(project=project, body=network_body).execute()
+                compute.globalOperations().wait(project=project, operation=response["id"]).execute()
 
-                # jsonify is very important for otherwise AJAX succes is not handle correctly
-                # return jsonify(succesData)
+                for subnet in network['subnets']:
+                    subnetwork_body = {
+                        "name": "%s-%s" % (network_body['name'], subnet['name']),
+                        "network": "projects/ualr-cybersecurity/global/networks/" + network_body['name'],
+                        "ipCidrRange": subnet['ip_subnet']
+                    }
+                    response = compute.subnetworks().insert(project=project, region=region,
+                                                            body=subnetwork_body).execute()
+                    compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
-            if (build_data['type'] == 'cyberattack'):
-                ext_IP_lab_entry = create_workout.create_cyberattack_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
+            # Now create the servers
+            for server in y['servers']:
+                server_name = "%s-%s" % (generated_workout_ID, server['name'])
+                nics = []
+                for n in server['nics']:
+                    nic = {
+                        "network": "%s-%s" % (generated_workout_ID, n['network']),
+                        "internal_IP": n['internal_IP'],
+                        "subnet": "%s-%s" % (generated_workout_ID, n['subnet']),
+                        "external_NAT": n['external_NAT']
+                    }
+                    nics.append(nic)
+                create_instance_custom_image(compute, project, zone, server_name, server['image'],
+                                             server['machine_type'],
+                                             server['network_routing'], nics, server['tags'], server['metadata'])
 
-            if (build_data['type'] == 'xss'):
-                ext_IP_lab_entry = create_workout.create_xss_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-            # future work
-            # jsonify is very important for otherwise AJAX succes is not handle correctly
-            # return jsonify(succesData)
+            # Create all of the network routes and firewall rules
+            for route in y['routes']:
+                r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
+                     "network": "%s-%s" % (generated_workout_ID, route['network']),
+                     "destRange": route['dest_range'],
+                     "nextHopInstance": "%s-%s" % (generated_workout_ID, route['next_hop_instance'])}
+                create_route(project, zone, r)
 
-            if (build_data['type'] == 'spoof'):
-                ext_IP_lab_entry = create_workout.create_spoof_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
+            firewall_rules = []
+            for rule in y['firewall_rules']:
+                firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
+                                       "network": "%s-%s" % (generated_workout_ID, rule['network']),
+                                       "targetTags": rule['target_tags'],
+                                       "protocol": rule['protocol'],
+                                       "ports": rule['ports'],
+                                       "sourceRanges": rule['source_ranges']})
 
-            if (build_data['type'] == 'hiddennode'):
-                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID, flag)
-                list_ext_ip.append(ext_IP_lab_entry)
+            create_firewall_rules(project, firewall_rules)
 
-            if (build_data['type'] == 'ids'):
-                ext_IP_lab_entry = create_workout.create_ids_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-
-            if (build_data['type'] == 'phishing'):
-                ext_IP_lab_entry = create_workout.create_phishing_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-
-            if (build_data['type'] == 'theharbor'):
-                ext_IP_lab_entry = create_workout.create_theharbor_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-
-            if (build_data['type'] == 'hashmyfiles'):
-                ext_IP_lab_entry = create_workout.create_hashmyfiles_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
-
-            if (build_data['type'] == 'mobileforensics'):
-                ext_IP_lab_entry = create_workout.create_mobileforensics_workout(network, subnetwork, generated_workout_ID)
-                list_ext_ip.append(ext_IP_lab_entry)
         time.sleep(120)
         send_email(build_data['email'], build_data['type'], list_ext_ip)
 
