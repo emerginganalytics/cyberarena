@@ -373,8 +373,6 @@ def build_workout():
                 'user': build_data['email'],
                 'workout_type': build_data['type'],
                 'duration': build_data['length'],
-                'network': network,
-                'subnetwork': subnetwork,
                 'flag': flag
             })
         ds_client.put(user_register)
