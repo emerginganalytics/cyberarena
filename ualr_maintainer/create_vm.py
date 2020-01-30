@@ -174,8 +174,7 @@ def create_instance_ubuntu(compute, project, zone, name, bucket):
 # ** Function now requires two more arguments, flag_container and flag_startup. The first is the machine name where the
 # **  flag is stored. flag_startup is the result of running build_flag_startup()
 
-def create_instance_custom_image(compute, project, zone, name, flag_container, flag_startup, flag,
-                                 bucket, custom_image, internal_IP,
+def create_instance_custom_image(compute, project, zone, name, bucket, custom_image, internal_IP,
                                  network_name, subnet_name, accessConfigs=None, tags=None):
     # Get the latest Debian Jessie image.
     
@@ -186,119 +185,119 @@ def create_instance_custom_image(compute, project, zone, name, flag_container, f
     machine_type = "zones/%s/machineTypes/n1-standard-1" % zone
 
     # add custom metadata only if machine == flag_container
-    if name == flag_container:
+    # if name == flag_container:
+    #
+    #     config = {
+    #         'name': name,
+    #         'machineType': machine_type,
+    #
+    #         # allow http and https server with tags
+    #         'tags': tags,
+    #
+    #         # Specify the boot disk and the image to use as a source.
+    #         'disks': [
+    #             {
+    #                 'boot': True,
+    #                 'autoDelete': True,
+    #                 'initializeParams': {
+    #                     'sourceImage': source_disk_image,
+    #                 }
+    #             }
+    #         ],
+    #
+    #         # Specify a network interface with NAT to access the public
+    #         # internet.
+    #
+    #         'networkInterfaces': [
+    #             {
+    #                 'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
+    #                 'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
+    #                 'networkIP': internal_IP,
+    #                 'accessConfigs': [
+    #                     accessConfigs
+    #                 ]
+    #             }
+    #         ],
+    #
+    #         # Allow the instance to access cloud storage and logging.
+    #         'serviceAccounts': [{
+    #             'email': 'default',
+    #             'scopes': [
+    #                 'https://www.googleapis.com/auth/devstorage.read_write',
+    #                 'https://www.googleapis.com/auth/logging.write'
+    #             ]
+    #         }],
+    #
+    #         # Metadata is readable from the instance and allows you to
+    #         # pass configuration from deployment scripts to instances.
+    #         'metadata': {
+    #             'items': [
+    #                 {
+    #                     'key': 'bucket',
+    #                     'value': bucket
+    #                 },
+    #                 {
+    #                     'key': 'startup-script',
+    #                     'value': flag_startup
+    #                 }
+    #             ]
+    #
+    #         }
+    #     }
+    # else:
+    config = {
+        'name': name,
+        'machineType': machine_type,
 
-        config = {
-            'name': name,
-            'machineType': machine_type,
+        # allow http and https server with tags
+        'tags': tags,
 
-            # allow http and https server with tags
-            'tags': tags,
-
-            # Specify the boot disk and the image to use as a source.
-            'disks': [
-                {
-                    'boot': True,
-                    'autoDelete': True,
-                    'initializeParams': {
-                        'sourceImage': source_disk_image,
-                    }
+        # Specify the boot disk and the image to use as a source.
+        'disks': [
+            {
+                'boot': True,
+                'autoDelete': True,
+                'initializeParams': {
+                    'sourceImage': source_disk_image,
                 }
-            ],
-
-            # Specify a network interface with NAT to access the public
-            # internet.
-
-            'networkInterfaces': [
-                {
-                    'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
-                    'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
-                    'networkIP': internal_IP,
-                    'accessConfigs': [
-                        accessConfigs
-                    ]
-                }
-            ],
-
-            # Allow the instance to access cloud storage and logging.
-            'serviceAccounts': [{
-                'email': 'default',
-                'scopes': [
-                    'https://www.googleapis.com/auth/devstorage.read_write',
-                    'https://www.googleapis.com/auth/logging.write'
-                ]
-            }],
-
-            # Metadata is readable from the instance and allows you to
-            # pass configuration from deployment scripts to instances.
-            'metadata': {
-                'items': [
-                    {
-                        'key': 'bucket',
-                        'value': bucket
-                    },
-                    {
-                        'key': 'startup-script',
-                        'value': flag_startup
-                    }
-                ]
-
             }
-        }
-    else:
-        config = {
-            'name': name,
-            'machineType': machine_type,
+        ],
 
-            # allow http and https server with tags
-            'tags': tags,
+        # Specify a network interface with NAT to access the public
+        # internet.
 
-            # Specify the boot disk and the image to use as a source.
-            'disks': [
-                {
-                    'boot': True,
-                    'autoDelete': True,
-                    'initializeParams': {
-                        'sourceImage': source_disk_image,
-                    }
-                }
-            ],
-
-            # Specify a network interface with NAT to access the public
-            # internet.
-
-            'networkInterfaces': [
-                {
-                    'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
-                    'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
-                    'networkIP': internal_IP,
-                    'accessConfigs': [
-                        accessConfigs
-                    ]
-                }
-            ],
-
-            # Allow the instance to access cloud storage and logging.
-            'serviceAccounts': [{
-                'email': 'default',
-                'scopes': [
-                    'https://www.googleapis.com/auth/devstorage.read_write',
-                    'https://www.googleapis.com/auth/logging.write'
+        'networkInterfaces': [
+            {
+                'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
+                'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
+                'networkIP': internal_IP,
+                'accessConfigs': [
+                    accessConfigs
                 ]
-            }],
-
-            # Metadata is readable from the instance and allows you to
-            # pass configuration from deployment scripts to instances.
-            'metadata': {
-                'items': [
-                    {
-                        'key': 'bucket',
-                        'value': bucket
-                    },
-                ]
-
             }
+        ],
+
+        # Allow the instance to access cloud storage and logging.
+        'serviceAccounts': [{
+            'email': 'default',
+            'scopes': [
+                'https://www.googleapis.com/auth/devstorage.read_write',
+                'https://www.googleapis.com/auth/logging.write'
+            ]
+        }],
+
+        # Metadata is readable from the instance and allows you to
+        # pass configuration from deployment scripts to instances.
+        'metadata': {
+            'items': [
+                {
+                    'key': 'bucket',
+                    'value': bucket
+                },
+            ]
+
         }
+    }
 
     compute.instances().insert(project=project, zone=zone, body=config).execute()
     return 'Done'
