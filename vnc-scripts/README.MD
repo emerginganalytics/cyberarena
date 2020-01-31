@@ -14,7 +14,7 @@ Make vnc-setup.sh executable and then run it.
 Once the script finishes, you'll need to login as each user and type `vncserver` to initialize the server for that user.   
 Once the server starts for that user, you can  run `sudo cat vnc-xstartup.txt > ~/.vnc/xstartup`   
 Repeat for all desired users.
-Finally, you can enable the service by typing:
+Finally, you can enable the service to run at system start by typing:
 ```
 sudo update-rc.d vncserver defualts 99
 sudo /etc/init.d/vncserver start
