@@ -1,7 +1,7 @@
 # VNC Server Configuration Scripts
 ---
 ---
-#### This collection of scripts is used to speed up the process of installing and configuring a VNC server with support of multiple connections per user.   
+#### This collection of scripts is used to speed up the process of installing and configuring a VNC server with support of multiple connections per machine.   
 
 ### [ How this works ]
 
