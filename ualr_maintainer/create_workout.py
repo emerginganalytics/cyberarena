@@ -40,7 +40,7 @@ def create_spoof_workout(name_workout, name_subnet_workout, workout_id):
     return create_vm.build_spoof_vm(name_workout, name_subnet_workout, workout_id)
 
 
-def create_hiddennode_workout(name_workout, name_subnet_workout, workout_id, flag):
+def create_hiddennode_workout(name_workout, name_subnet_workout, workout_id):
 
     create_network.create_ecosystem_workout(name_workout, name_subnet_workout, workout_id)
     time.sleep(10)

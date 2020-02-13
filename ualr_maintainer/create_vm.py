@@ -445,7 +445,7 @@ def build_spoof_vm(network, subnet, workout_id):
 
 # -------------------- BUILD HIDDEN NODE WORKOUT --------------------------
 
-def build_hiddennode_vm(network, subnet, workout_id, flag):
+def build_hiddennode_vm(network, subnet, workout_id):
 
     list_images_to_create = ['image-labentry',
                              'image-dvwalab', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']

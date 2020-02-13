@@ -6,8 +6,6 @@ import sys
 # Static Global Variables:
 project_id = 'ualr-cybersecurity'
 project_kind = 'cybergym-workout'
-topic_name = 'check-workout-completion'
-
 
 # Retrieving the flag from the GCP Datastore
 def query_flag(workout_id):
@@ -23,15 +21,15 @@ def query_flag(workout_id):
 # for query testing purposes
 # print(query_flag('pmljcz'))
 def workouts(workout_type, workout_id):
+    pass
 
 
-'''
-def pub_sub():
+def pub_sub(workout_name):
     from google.cloud import pubsub
+    topic_name = '{}'.format(workout_name)
 
     publisher = pubsub.PublisherClient()
-
     topic_path = publisher.topic_path(project_id, topic_name)
-'''
+
 
 # query_flag(sys.argv[1])

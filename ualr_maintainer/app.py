@@ -205,7 +205,7 @@ def build_workout():
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'hiddennode'):
-                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID, flag)
+                ext_IP_lab_entry = create_workout.create_hiddennode_workout(network, subnetwork, generated_workout_ID)
                 list_ext_ip.append(ext_IP_lab_entry)
 
             if (build_data['type'] == 'ids'):
