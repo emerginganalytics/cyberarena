@@ -9,7 +9,7 @@ import list_vm
 import start_stop_vm
 
 import googleapiclient.discovery
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, make_response
 from flask import jsonify
 from flask import request
 from base64 import b64encode as b64
@@ -308,61 +308,69 @@ def build_workout():
 
         store_workout_info(generated_workout_ID, build_data['email'], build_data['length'], build_data['type'], ts, flag)
 
-        # Create the networks and subnets
-        for network in y['networks']:
-            network_body = {"name": "%s-%s" % (generated_workout_ID, network['name']),
-                            "autoCreateSubnetworks": False,
-                            "region": "region"}
-            response = compute.networks().insert(project=project, body=network_body).execute()
-            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+        for i in range(1, num_team+1):
 
-            for subnet in network['subnets']:
-                subnetwork_body = {
-                    "name": "%s-%s" % (network_body['name'], subnet['name']),
-                    "network": "projects/ualr-cybersecurity/global/networks/" + network_body['name'],
-                    "ipCidrRange": subnet['ip_subnet']
-                }
-                response = compute.subnetworks().insert(project=project, region=region,
-                                                        body=subnetwork_body).execute()
-                compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+            # Create the networks and subnets
+            for network in y['networks']:
+                network_body = {"name": "%s-%s-%s" % (generated_workout_ID, network['name'], i),
+                                "autoCreateSubnetworks": False,
+                                "region": "region"}
+                response = compute.networks().insert(project=project, body=network_body).execute()
+                compute.globalOperations().wait(project=project, operation=response["id"]).execute()
 
-        # Now create the servers
-        for server in y['servers']:
-            server_name = "%s-%s" % (generated_workout_ID, server['name'])
-            nics = []
-            for n in server['nics']:
-                nic = {
-                    "network": "%s-%s" % (generated_workout_ID, n['network']),
-                    "internal_IP": n['internal_IP'],
-                    "subnet": "%s-%s" % (generated_workout_ID, n['subnet']),
-                    "external_NAT": n['external_NAT']
-                }
-                nics.append(nic)
-            create_instance_custom_image(compute, project, zone, server_name, server['image'],
-                                         server['machine_type'],
-                                         server['network_routing'], nics, server['tags'], server['metadata'])
+                for subnet in network['subnets']:
+                    subnetwork_body = {
+                        "name": "%s-%s" % (network_body['name'], subnet['name']),
+                        "network": "projects/ualr-cybersecurity/global/networks/" + network_body['name'],
+                        "ipCidrRange": subnet['ip_subnet']
+                    }
+                    response = compute.subnetworks().insert(project=project, region=region,
+                                                            body=subnetwork_body).execute()
+                    compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
-        # Create all of the network routes and firewall rules
-        for route in y['routes']:
-            r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
-                 "network": "%s-%s" % (generated_workout_ID, route['network']),
-                 "destRange": route['dest_range'],
-                 "nextHopInstance": "%s-%s" % (generated_workout_ID, route['next_hop_instance'])}
-            create_route(project, zone, r)
+            # Now create the servers
+            for server in y['servers']:
+                server_name = "%s-%s-%s" % (generated_workout_ID, server['name'], i)
+                nics = []
+                for n in server['nics']:
+                    nic = {
+                        "network": "%s-%s-%s" % (generated_workout_ID, n['network'], i),
+                        "internal_IP": n['internal_IP'],
+                        "subnet": "%s-%s-%s-%s" % (generated_workout_ID, n['network'], i, n['subnet']),
+                        "external_NAT": n['external_NAT']
+                    }
+                    nics.append(nic)
+                create_instance_custom_image(compute, project, zone, server_name, server['image'],
+                                             server['machine_type'],
+                                             server['network_routing'], nics, server['tags'], server['metadata'])
 
-        firewall_rules = []
-        for rule in y['firewall_rules']:
-            firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
-                                   "network": "%s-%s" % (generated_workout_ID, rule['network']),
-                                   "targetTags": rule['target_tags'],
-                                   "protocol": rule['protocol'],
-                                   "ports": rule['ports'],
-                                   "sourceRanges": rule['source_ranges']})
+            # Create all of the network routes and firewall rules
+            for route in y['routes']:
+                r = {"name": "%s-%s-%s" % (generated_workout_ID, route['name'], i),
+                     "network": "%s-%s-%s" % (generated_workout_ID, route['network'], i),
+                     "destRange": route['dest_range'],
+                     "nextHopInstance": "%s-%s-%s" % (generated_workout_ID, route['next_hop_instance'], i)}
+                create_route(project, zone, r)
 
-        create_firewall_rules(project, firewall_rules)
+            firewall_rules = []
+            for rule in y['firewall_rules']:
+                firewall_rules.append({"name": "%s-%s-%s" % (generated_workout_ID, rule['name'], i),
+                                       "network": "%s-%s-%s" % (generated_workout_ID, rule['network'], i),
+                                       "targetTags": rule['target_tags'],
+                                       "protocol": rule['protocol'],
+                                       "ports": rule['ports'],
+                                       "sourceRanges": rule['source_ranges']})
 
-        time.sleep(120)
-        send_email(build_data['email'], build_data['type'], list_ext_ip)
+            create_firewall_rules(project, firewall_rules)
+
+            req = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
+                                          instance='%s-cybergym-labentry-%s' % (generated_workout_ID, i))
+            response = req.execute()
+            ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+            list_ext_ip.append("http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs")
+
+        # time.sleep(120)
+        # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team
         # for i in range(len(list_ext_ip)):
@@ -377,7 +385,9 @@ def build_workout():
             })
         ds_client.put(user_register)
 
-        return "DONE"
+        print(list_ext_ip)
+
+        return make_response(ds_client.get(key))
 
 
 if __name__ == '__main__':
