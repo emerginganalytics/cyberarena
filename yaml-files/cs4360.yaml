@@ -1,0 +1,135 @@
+version: '1'
+
+workout:
+  name: cs4360
+  workout_description: 'Test system for Computer Security CPSC4360'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+  labentry_guac_path: "MjQAYwBteXNxbA=="
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.0.0/24
+  - name: internal-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+  - name: dmz-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.2.0/24
+
+servers:
+  - name: cybergym-labentry
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.0.2
+        subnet: external-network-default
+        external_NAT: true
+  - name: cybergym-ad-dc
+    image: image-cybergym-activedirectory-domaincontroller
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["ad-server", "rdp-server"]}
+    metadata: none
+    nics:
+      - network: internal-network
+        internal_IP: 10.1.1.2
+        subnet: internal-network-default
+        external_NAT: false
+  - name: cybergym-ad-member-server
+    image: image-cybergym-activedirectory-memberserver
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["ad-server", "rdp-server", "file-server"]}
+    metadata: none
+    nics:
+      - network: internal-network
+        internal_IP: 10.1.1.17
+        subnet: internal-network-default
+        external_NAT: false
+  - name: cybergym-teenyweb
+    image: image-cybergym-teenyweb
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server"]}
+    metadata: none
+    sshkey: "gymboss:ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnY0o/cKSB2U8pgFPG2X+A6rw5EDkxJUkDGhvDvEbvnwf/sUUl60CioWBQy3K9qWJ8xK3Df2tyzR6eCKnEV1qjzQ3T584zLmTSeDy/z3NxH0VzB1jNuLP2WqFoxcG67cKGyCTECImYb32hzWU/IPu5KfAoXn45QAG+MmcrEMwNgjyLhbUQel2fPfUXFgFJW9CLFNtQZdjlhdOlFasqPfIhUBypSiRMgJ77Gmv06/MkUCbsUeLxE1E9Zp5wx+uKwZwMRxhn/ZURGwmH3JTLYKHJTLNaOJDbl5MfIgcnjCG+h12qplBUvFKDhwIGKIt152GlhbEOJWA+zRHajOAczGp4w== gymboss"
+    nics:
+      - network: dmz-network
+        internal_IP: 10.1.2.2
+        subnet: dmz-network-default
+        external_NAT: false
+  - name: cybergym-fortinet-fortigate
+    image: image-cybergym-fortinet-fortigate
+    machine_type: "n1-standard-4"
+    network_routing: true
+    tags: {items: ["firewall-server", "http-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.0.10
+        subnet: external-network-default
+        external_NAT: false
+      - network: internal-network
+        internal_IP: 10.1.1.10
+        subnet: internal-network-default
+        external_NAT: false
+      - network: dmz-network
+        internal_IP: 10.1.2.10
+        subnet: dmz-network-default
+        external_NAT: false
+
+routes:
+  - name: default-internal-fortinet
+    network: internal-network
+    dest_range: "0.0.0.0/0"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: default-dmz-fortinet
+    network: dmz-network
+    dest_range: "0.0.0.0/0"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: external-to-internal
+    network: external-network
+    dest_range: "10.1.1.0/24"
+    next_hop_instance: cybergym-fortinet-fortigate
+  - name: external-to-dmz
+    network: external-network
+    dest_range: "10.1.2.0/24"
+    next_hop_instance: cybergym-fortinet-fortigate
+
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
+  - name: allow-all-local-internal
+    network: internal-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
+  - name: allow-all-local-dmz
+    network: dmz-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
