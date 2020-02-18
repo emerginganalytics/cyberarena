@@ -15,6 +15,7 @@ expired_workout = []
 project = 'ualr-cybersecurity'
 zone = 'us-central1-a'
 region = 'us-central1'
+dnszone = 'cybergym-public'
 
 
 # IN PROGRESS
@@ -90,17 +91,44 @@ def delete_network(workout_id):
         print("Error in deleting network for %s" % workout_id)
         return False
 
+def delete_dns(workout_id, servers):
+    try:
+        service = googleapiclient.discovery.build('dns', 'v1')
+
+        for server in servers:
+            change_body = {"deletions": [
+                {
+                    "kind": "dns#resourceRecordSet",
+                    "name": workout_id + ".cybergym-eac-ualr.org.",
+                    "rrdatas": [server["ip_address"]],
+                    "type": "A",
+                    "ttl": 30
+                }
+            ]}
+
+            request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+            response = request.execute()
+    except():
+        print("Error in deleting DNS record for workout %s" % workout_id)
+        return False
+    return True
+
 
 def delete_workouts(event, context):
     query_workouts = ds_client.query(kind='cybergym-workout')
     # Only process the workouts from the last month. 2628000 is the number of seconds in a month
-    query_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 86400))
+    query_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 2628000))
     for workout in list(query_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
         if workout['resources_deleted']:
             print('Deleting resources from workout %s' % workout['workout_ID'])
-            expired_id = workout['workout_ID']
+            expired_id = workout.key
+
+            # First, delete the DNS entries associated with this workout.
+            if "servers" in workout:
+                expired_server_names = workout["servers"]
+                delete_dns(expired_id, expired_server_names)
             if delete_vms(expired_id):
                 if delete_firewall_rules(expired_id):
                     if delete_subnetworks(expired_id):
