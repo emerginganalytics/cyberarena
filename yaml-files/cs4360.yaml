@@ -9,7 +9,6 @@ workout:
   dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location: /usr/src/flag
-  labentry_guac_path: "MjQAYwBteXNxbA=="
 
 networks:
   - name: external-network
@@ -27,6 +26,7 @@ networks:
 
 servers:
   - name: cybergym-labentry
+    labentry: True
     image: image-labentry
     machine_type: "n1-standard-1"
     network_routing: false
@@ -43,6 +43,7 @@ servers:
     network_routing: false
     tags: {items: ["ad-server", "rdp-server"]}
     metadata: none
+    guac_path: "MjQAYwBteXNxbA=="
     nics:
       - network: internal-network
         internal_IP: 10.1.1.2

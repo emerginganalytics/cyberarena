@@ -17,7 +17,7 @@ ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp, labentry_guac_path):
+def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -25,7 +25,6 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
         'user_email': user_mail,
         'expiration': workout_duration,
         'type': workout_type,
-        'labentry_guac_path': labentry_guac_path,
         'start_time': timestamp,
         'run_hours': 2,
         'timestamp': timestamp,
@@ -36,9 +35,8 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
     # insert a new user
     ds_client.put(new_workout)
 
-
-# Create a new DNS record for the server and add the information to the datastore for later management
-def register_workout_server(project, dnszone, workout_id, server, ip_address):
+# Create a new DNS record for the server and
+def add_dns_record(project, dnszone, workout_id, ip_address):
     service = googleapiclient.discovery.build('dns', 'v1')
 
     change_body = {"additions": [
@@ -56,7 +54,15 @@ def register_workout_server(project, dnszone, workout_id, server, ip_address):
 
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
-    workout["servers"].append({"server": server, "ip_address": ip_address})
+    workout["external_ip"] = ip_address
+    ds_client.put(workout)
+
+
+# Add the information to the datastore for later management
+def register_workout_server(workout_id, server, guac_path):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    workout["servers"].append({"server": server, "guac_path": guac_path})
     ds_client.put(workout)
 
 
@@ -68,24 +74,6 @@ def print_workout_info(workout_id):
             print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, server["ip_address"],
                                                                workout['labentry_guac_path']))
 
-
-
-def create_dns_record(project, dnszone, workout_id, ip_address):
-    service = googleapiclient.discovery.build('dns', 'v1')
-
-    change_body = {"additions": [
-        {
-            "kind": "dns#resourceRecordSet",
-            "name": workout_id + ".cybergym-eac-ualr.org.",
-            "rrdatas": [ip_address],
-            "type": "A",
-            "ttl": 30
-        }
-    ]}
-
-
-    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
-    response = request.execute()
 
 
 def create_firewall_rules(project, firewall_rules):
@@ -132,7 +120,7 @@ def create_route(project, zone, route):
 
 
 def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags=None, metadata=None, sshkey=None):
+                                 networkRouting, networks, tags=None, metadata=None, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -207,7 +195,9 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
     ip_address = None
     if 'accessConfigs' in new_instance['networkInterfaces'][0]:
         ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-        register_workout_server(project, dnszone, workout, name, ip_address)
+        add_dns_record(project, dnszone, workout, ip_address)
+
+    register_workout_server(workout, name, ip_address, guac_path)
 
 
     if sshkey:
@@ -234,14 +224,13 @@ def test_full_create_workout(yaml_file, generated_workout_ID):
     region = y['workout']['region']
     zone = y['workout']['zone']
     dnszone = y['workout']['dnszone']
-    labentry_guac_path = y['workout']['labentry_guac_path']
 
     # generated_workout_ID = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
     # generated_workout_ID = 'cs4360'
 
     # Store the workout information in the cloud data store. This will be used to delete the workout after a day
     ts = str(calendar.timegm(time.gmtime()))
-    store_workout_info(generated_workout_ID, "pdhuff@ualr.edu", 57, workout_name, ts, labentry_guac_path)
+    store_workout_info(generated_workout_ID, "pdhuff@ualr.edu", 57, workout_name, ts)
 
     # Create the networks and subnets
     for network in y['networks']:
@@ -277,9 +266,13 @@ def test_full_create_workout(yaml_file, generated_workout_ID):
         if "sshkey" in server:
             sshkey = server["sshkey"]
 
+        guac_path = None
+        if "guac_path" in server:
+            guac_path = server["guac_path"]
+
         create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                      server['machine_type'], server['network_routing'], nics, server['tags'],
-                                     server['metadata'], sshkey)
+                                     server['metadata'], sshkey, guac_path)
 
     # Create all of the network routes and firewall rules
     for route in y['routes']:
