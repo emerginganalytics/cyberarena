@@ -18,39 +18,37 @@ region = 'us-central1'
 dnszone = 'cybergym-public'
 
 # Create a new DNS record for the server and add the information to the datastore for later management
-def register_workout_update(project, dnszone, workout_id, ip_address):
+def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
     service = googleapiclient.discovery.build('dns', 'v1')
 
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
-    for server in workout["servers"]:
-        change_body = {
-            "deletions": [
-                {
-                    "kind": "dns#resourceRecordSet",
-                    "name": workout_id + ".cybergym-eac-ualr.org.",
-                    "rrdatas": [server["ip_address"]],
-                    "type": "A",
-                    "ttl": 30
-                }
-            ],
-            "additions": [
+    change_body = {
+        "deletions": [
             {
                 "kind": "dns#resourceRecordSet",
                 "name": workout_id + ".cybergym-eac-ualr.org.",
-                "rrdatas": [ip_address],
+                "rrdatas": [old_ip],
                 "type": "A",
                 "ttl": 30
             }
-        ]}
+        ],
+        "additions": [
+        {
+            "kind": "dns#resourceRecordSet",
+            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "rrdatas": [new_ip],
+            "type": "A",
+            "ttl": 30
+        }
+    ]}
 
-        request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
-        response = request.execute()
+    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+    response = request.execute()
 
 
-
-        workout["servers"].append({"server": server, "ip_address": ip_address})
-        ds_client.put(workout)
+    workout["external_ip"] = new_ip
+    ds_client.put(workout)
 
 
 
@@ -68,7 +66,7 @@ def start_workout(workout_id):
 
                 if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
                     ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                    register_workout_update(project, dnszone, workout, name, ip_address)
+                    register_workout_update(project, dnszone, workout, workout["external_ip"], ip_address)
             print("No Virtual Machines to stop for workout %s" % workout_id)
         return True
     except():

@@ -91,23 +91,22 @@ def delete_network(workout_id):
         print("Error in deleting network for %s" % workout_id)
         return False
 
-def delete_dns(workout_id, servers):
+def delete_dns(workout_id, ip_address):
     try:
         service = googleapiclient.discovery.build('dns', 'v1')
 
-        for server in servers:
-            change_body = {"deletions": [
-                {
-                    "kind": "dns#resourceRecordSet",
-                    "name": workout_id + ".cybergym-eac-ualr.org.",
-                    "rrdatas": [server["ip_address"]],
-                    "type": "A",
-                    "ttl": 30
-                }
-            ]}
+        change_body = {"deletions": [
+            {
+                "kind": "dns#resourceRecordSet",
+                "name": workout_id + ".cybergym-eac-ualr.org.",
+                "rrdatas": [ip_address],
+                "type": "A",
+                "ttl": 30
+            }
+        ]}
 
-            request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
-            response = request.execute()
+        request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+        response = request.execute()
     except():
         print("Error in deleting DNS record for workout %s" % workout_id)
         return False
@@ -126,9 +125,8 @@ def delete_workouts(event, context):
             expired_id = workout.key
 
             # First, delete the DNS entries associated with this workout.
-            if "servers" in workout:
-                expired_server_names = workout["servers"]
-                delete_dns(expired_id, expired_server_names)
+            if "external_ip" in workout:
+                delete_dns(expired_id, workout["external_ip"])
             if delete_vms(expired_id):
                 if delete_firewall_rules(expired_id):
                     if delete_subnetworks(expired_id):
