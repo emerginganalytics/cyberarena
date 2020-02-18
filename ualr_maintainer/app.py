@@ -369,7 +369,7 @@ def build_workout():
             ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
             list_ext_ip.append("http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs")
 
-        # time.sleep(120)
+        time.sleep(120)
         # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
         # add time for guacamole setup for each team
@@ -380,6 +380,7 @@ def build_workout():
                 'timestamp_origin': datetime.datetime.now(),
                 'user': build_data['email'],
                 'workout_type': build_data['type'],
+                'ip_list': list_ext_ip,
                 'duration': build_data['length'],
                 'flag': flag
             })
@@ -387,7 +388,7 @@ def build_workout():
 
         print(list_ext_ip)
 
-        return make_response(ds_client.get(key))
+        return "DONE"
 
 
 if __name__ == '__main__':
