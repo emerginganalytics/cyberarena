@@ -37,7 +37,23 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
     ds_client.put(new_workout)
 
 
-def add_workout_server_info(workout_id, server, ip_address):
+# Create a new DNS record for the server and add the information to the datastore for later management
+def register_workout_server(project, dnszone, workout_id, server, ip_address):
+    service = googleapiclient.discovery.build('dns', 'v1')
+
+    change_body = {"additions": [
+        {
+            "kind": "dns#resourceRecordSet",
+            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "rrdatas": [ip_address],
+            "type": "A",
+            "ttl": 30
+        }
+    ]}
+
+    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+    response = request.execute()
+
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     workout["servers"].append({"server": server, "ip_address": ip_address})
@@ -52,6 +68,24 @@ def print_workout_info(workout_id):
             print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, server["ip_address"],
                                                                workout['labentry_guac_path']))
 
+
+
+def create_dns_record(project, dnszone, workout_id, ip_address):
+    service = googleapiclient.discovery.build('dns', 'v1')
+
+    change_body = {"additions": [
+        {
+            "kind": "dns#resourceRecordSet",
+            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "rrdatas": [ip_address],
+            "type": "A",
+            "ttl": 30
+        }
+    ]}
+
+
+    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+    response = request.execute()
 
 
 def create_firewall_rules(project, firewall_rules):
@@ -97,7 +131,7 @@ def create_route(project, zone, route):
     compute.routes().insert(project=project, body=route_body).execute()
 
 
-def create_instance_custom_image(compute, project, zone, workout, name, custom_image, machine_type,
+def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
                                  networkRouting, networks, tags=None, metadata=None, sshkey=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
@@ -173,7 +207,8 @@ def create_instance_custom_image(compute, project, zone, workout, name, custom_i
     ip_address = None
     if 'accessConfigs' in new_instance['networkInterfaces'][0]:
         ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-    add_workout_server_info(workout, name, ip_address)
+        register_workout_server(project, dnszone, workout, name, ip_address)
+
 
     if sshkey:
         ssh_key_body = {
@@ -198,6 +233,7 @@ def test_full_create_workout(yaml_file, generated_workout_ID):
     project = y['workout']['project_name']
     region = y['workout']['region']
     zone = y['workout']['zone']
+    dnszone = y['workout']['dnszone']
     labentry_guac_path = y['workout']['labentry_guac_path']
 
     # generated_workout_ID = ''.join(random.choice(string.ascii_lowercase) for i in range(6))
@@ -241,7 +277,7 @@ def test_full_create_workout(yaml_file, generated_workout_ID):
         if "sshkey" in server:
             sshkey = server["sshkey"]
 
-        create_instance_custom_image(compute, project, zone, generated_workout_ID, server_name, server['image'],
+        create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                      server['machine_type'], server['network_routing'], nics, server['tags'],
                                      server['metadata'], sshkey)
 
