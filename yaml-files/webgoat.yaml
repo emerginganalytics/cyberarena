@@ -5,8 +5,8 @@ workout:
   workout_description: 'This is a Webgoat server used for teaching web vulnerabilities'
   project_name: ualr-cybersecurity
   region: "us-central1"
-  zone:	"us-central1-a"
-  project_api_key_type:	cloud
+  zone: "us-central1-a"
+  project_api_key_type: cloud
   flag_location: /usr/src/flag
 
 
@@ -14,7 +14,11 @@ networks:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.1.0/24
+        ip_subnet: 10.1.0.0/24
+  - name: internal-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
 
 servers:
   - name: cybergym-labentry
@@ -26,7 +30,7 @@ servers:
     nics:
       - network: external-network
         internal_IP: 10.1.0.2
-        subnet: external-network-default
+        subnet: default
         external_NAT: true
 
   - name: cybergym-weboat-3
@@ -38,15 +42,10 @@ servers:
     nics:
       - network: internal-network
         internal_IP: 10.1.1.6
-        subnet: internal-network-default
+        subnet: default
         external_NAT: false
 
 routes:
-  - name:
-    network:
-    dest_range:
-    next_hop_instance:
-
 
 firewall_rules:
   - name: default-allow-http
@@ -71,5 +70,5 @@ firewall_rules:
     network: internal-network
     target_tags: []
     protocol: none
-    ports: [all]
+    ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
