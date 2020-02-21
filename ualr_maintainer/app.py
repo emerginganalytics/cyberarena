@@ -9,9 +9,7 @@ import list_vm
 import start_stop_vm
 
 import googleapiclient.discovery
-from flask import Flask, render_template, redirect, url_for, make_response
-from flask import jsonify
-from flask import request
+from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
 from base64 import b64encode as b64
 from yaml import load, dump, Loader, Dumper
 
@@ -46,7 +44,7 @@ def flag_generator():
 # --------------------------- FLASK APP --------------------------
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp, flag):
+def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -58,13 +56,49 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
         'run_hours': 2,
         'timestamp': timestamp,
         'resources_deleted': False,
-        'servers': [],
-        'flag': flag
+        'servers': []
     })
 
     # insert a new user
     ds_client.put(new_workout)
 
+# Create a new DNS record for the server and
+def add_dns_record(project, dnszone, workout_id, ip_address):
+    service = googleapiclient.discovery.build('dns', 'v1')
+
+    change_body = {"additions": [
+        {
+            "kind": "dns#resourceRecordSet",
+            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "rrdatas": [ip_address],
+            "type": "A",
+            "ttl": 30
+        }
+    ]}
+
+    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+    response = request.execute()
+
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    workout["external_ip"] = ip_address
+    ds_client.put(workout)
+
+# Add the information to the datastore for later management
+def register_workout_server(workout_id, server, guac_path):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    workout["servers"].append({"server": server, "guac_path": guac_path})
+    ds_client.put(workout)
+
+
+def print_workout_info(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    for server in workout["servers"]:
+        if server["server"] == workout_id + "-cybergym-labentry":
+            print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, server["ip_address"],
+                                                               workout['labentry_guac_path']))
 
 # send email method
 def send_email(user_mail, workout_type, list_ext_IP):
@@ -280,6 +314,7 @@ def stop_vm():
 def build_workout(build_data, workout_type):
 
     # Open and read YAML file
+    print('Loading config file')
     yaml_file = "../yaml-files/%s.yaml" % workout_type
 
     try:
@@ -310,11 +345,12 @@ def build_workout(build_data, workout_type):
 
     ts = str(calendar.timegm(time.gmtime()))
 
-    store_workout_info(generated_workout_ID, build_data.email.data, build_data.length.data, workout_type, ts, flag)
+    store_workout_info(generated_workout_ID, build_data.email.data, build_data.length.data, workout_type, ts)
 
     for i in range(1, num_team+1):
-
+        print('Creating workout for team %s' % (i))
         # Create the networks and subnets
+        print('Creating networks')
         for network in y['networks']:
             network_body = {"name": "%s-%s-%s" % (generated_workout_ID, network['name'], i),
                             "autoCreateSubnetworks": False,
@@ -333,6 +369,7 @@ def build_workout(build_data, workout_type):
                 compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
         # Now create the servers
+        print('Creating servers')
         for server in y['servers']:
             server_name = "%s-%s-%s" % (generated_workout_ID, server['name'], i)
             nics = []
@@ -349,6 +386,7 @@ def build_workout(build_data, workout_type):
                                          server['network_routing'], nics, server['tags'], server['metadata'])
 
         # Create all of the network routes and firewall rules
+        print('Creating network routes and firewall rules')
         if (y['routes']):
             for route in y['routes']:
                 r = {"name": "%s-%s-%s" % (generated_workout_ID, route['name'], i),
@@ -374,12 +412,13 @@ def build_workout(build_data, workout_type):
         ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
         list_ext_ip.append("http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs")
 
-    time.sleep(120)
+    # time.sleep(120)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
     # add time for guacamole setup for each team
     # for i in range(len(list_ext_ip)):
-    key = ds_client.key('workout_resources_track')
+    print('Storing workout info in datastore')
+    key = ds_client.key('cybergym-workout', generated_workout_ID)
     user_register = datastore.Entity(key)
     user_register.update({
             'timestamp_origin': datetime.datetime.now(),
@@ -391,17 +430,33 @@ def build_workout(build_data, workout_type):
         })
     ds_client.put(user_register)
 
-    print(list_ext_ip)
-
     return generated_workout_ID
 
 @app.route('/landing/<workout_id>/<team>', methods=['GET', 'POST'])
 def landing_page(workout_id, team):
-    return render_template('landing_page.html', workout_id=workout_id, team=team)
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+
+    workout_type = workout['workout_type']
+
+    yaml_file = "../yaml-files/%s.yaml" % workout_type
+
+    try:
+        f = open(yaml_file, "r")
+    except:
+        print("File does not exist")
+
+    y = load(f, Loader=Loader)
+
+    ip = workout['ip_list'][int(team)-1]
+    description = y['workout']['workout_description']
+
+    return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description)
 
 @app.route('/workout_list/<workout_id>', methods=['GET', 'POST'])
 def workout_list(workout_id):
-    return render_template('workout_list.html', workout_id=workout_id)
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    print(workout)
+    return render_template('workout_list.html', ip_list=workout['ip_list'], workout_id=workout_id, workout_type=workout['workout_type'])
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
