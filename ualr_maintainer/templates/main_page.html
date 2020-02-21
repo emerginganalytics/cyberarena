@@ -1,32 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div id="workout-form" class='container-fluid form-ctn'>
-    <div class="center">
-        <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+    <div id="workout-form" class='container-fluid form-ctn'>
+        <div class="center">
+            <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+            <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
+
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                <div class="input-field col s12">
+                    {{ form.email(size=32) }}<br>
+                    {{ form.email.label }}
+                </div>
+                <div class="input-field col s12">
+                    {{ form.team(size=32) }}<br>
+                    {{ form.team.label }}
+                </div>
+
+                <div class="input-field col s12">
+                    {{ form.length(size=32) }}<br>
+                    {{ form.length.label }}
+                </div>
+
+                <div class="btn-ctn">
+                    <button type="submit" id="build-workout" class="waves-effect waves-light btn" >BUILD WORKOUT</button>
+                </div>
+            </form>
+            </br>
+            <div id="loading-msg">
+
+            </div>
+        </div>
     </div>
-    <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
-
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <div class="input-field col s12">
-            {{ form.email(size=32) }}<br>
-            {{ form.email.label }}
-        </div>
-        <div class="input-field col s12">
-            {{ form.team(size=32) }}<br>
-            {{ form.team.label }}
-        </div>
-
-        <div class="input-field col s12">
-            {{ form.length(size=32) }}<br>
-            {{ form.length.label }}
-        </div>
-
-        <div class="btn-ctn" id="build-workout">
-            <input type="submit" class="waves-effect waves-light btn" value="BUILD WORKOUT">
-        </div>
-    </form>
-
-</div>
-    {% endblock %}
+{% endblock %}
