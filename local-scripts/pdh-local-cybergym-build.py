@@ -70,9 +70,9 @@ def print_workout_info(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     for server in workout["servers"]:
-        if server["server"] == workout_id + "-cybergym-labentry":
-            print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, server["ip_address"],
-                                                               workout['labentry_guac_path']))
+        if "guac_path" in server:
+            print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, workout["external_ip"],
+                                                               server["guac_path"]))
 
 
 
@@ -197,7 +197,7 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
         add_dns_record(project, dnszone, workout, ip_address)
 
-    register_workout_server(workout, name, ip_address, guac_path)
+    register_workout_server(workout, name, guac_path)
 
 
     if sshkey:
