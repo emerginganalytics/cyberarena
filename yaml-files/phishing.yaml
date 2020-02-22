@@ -1,0 +1,72 @@
+version: '1'
+
+workout:
+  name: phishing
+  workout_description: 'Experience the dangers of a phishing attack'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.0.0/24
+  - name: internal-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-labentry 
+    image: image-labentry
+    machine_type: "n1-standard-1" 
+    network_routing: false
+    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.18
+        subnet: external-network-default
+        external_NAT: true
+  - name: cybergym-phishing
+    image: image-promise-vnc
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.20
+        subnet: external-network-default
+        external_NAT: false
+
+# List network routes. Multiple routes may be listed using YAML block sequence format
+routes:
+  - name: # route name
+    network: # network name
+    dest_range: # destination CIDR range
+    next_hop_instance: # name of next hop VM
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: external-netowrk
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80, 8080, 443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-internal
+    network: internal-network
+    target_tags: ["attacker"]
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/24"]
