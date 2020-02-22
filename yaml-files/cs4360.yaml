@@ -86,7 +86,7 @@ servers:
       - network: internal-network
         internal_IP: 10.1.1.10
         subnet: internal-network-default
-        external_NAT: false
+        external_NAT: true
       - network: dmz-network
         internal_IP: 10.1.2.10
         subnet: dmz-network-default

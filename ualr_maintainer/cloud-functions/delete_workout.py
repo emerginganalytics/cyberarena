@@ -145,6 +145,8 @@ def delete_specific_workout(workout_ID):
             workout['resources_deleted'] = False
         if not workout['resources_deleted']:
             print('Deleting resources from workout %s' % workout_ID)
+            if "external_ip" in workout:
+                delete_dns(workout_ID, workout["external_ip"])
             if delete_vms(workout_ID):
                 if delete_firewall_rules(workout_ID):
                     if delete_subnetworks(workout_ID):
@@ -153,8 +155,8 @@ def delete_specific_workout(workout_ID):
                             ds_client.put(workout)
 
 # The main function is only for debugging. Do not include this line in the cloud function
-delete_workouts(None, None)
+# delete_workouts(None, None)
 
-# delete_workouts = ['cs4360inst-vt']
-# for workout in delete_workouts:
-#    delete_specific_workout(workout)
+delete_workouts = ['cs4360may-jw', 'cs4360may-jk', ]
+for workout in delete_workouts:
+    delete_specific_workout(workout)
