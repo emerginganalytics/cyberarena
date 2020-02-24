@@ -46,7 +46,7 @@ def create_hiddennode_workout(name_workout, name_subnet_workout, workout_id):
     time.sleep(10)
 
     # create the vm and return the ext IP of the entry lab
-    return create_vm.build_hiddennode_vm(name_workout, name_subnet_workout, workout_id, flag)
+    return create_vm.build_hiddennode_vm(name_workout, name_subnet_workout, workout_id)
 
 
 def create_ids_workout(name_workout, name_subnet_workout, workout_id):

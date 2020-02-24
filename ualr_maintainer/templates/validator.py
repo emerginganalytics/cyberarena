@@ -1,35 +1,127 @@
-# Simple Pub/Sub Script to check workout completion and return the flag
-import sys
+# Simple Pub/Sub Script to establish Pub/Sub system and return the flag
 # TODO Establish Pub/Sub connection with workout based
-#  functions
+#  functions.
+# TODO Build conditional script on each workout server
+#  that will check for completion before publishing to
+#  related topic. Ex: 1 hiddennode publishes to
+#  ad8jds-hiddennode-workout
+from google.cloud import pubsub_v1
+import base64 as b64
+import sys
 
-# Static Global Variables:
-project_id = 'ualr-cybersecurity'
-project_kind = 'cybergym-workout'
+# Retrieves the flag from the GCP Datastore
+# Will be implemented into Student Landing
+# page NOT pub/sub server
+class Info:
+    # Project variables
+    project_id = 'ualr-cybersecurity'
+    project_kind = 'cybergym-workout'
 
-# Retrieving the flag from the GCP Datastore
+    # Topic Variables
+    topic_name = ''
+    topic_path = ''
+    topic = ''
+
+    # Subscription variables
+    subscription_path = ''
+    subscription = ''
+
+    # Workout Variables
+    workout_name = ''
+    workout_id = ''
+
+
 def query_flag(workout_id):
     from google.cloud import datastore
     ds_client = datastore.Client()
 
-    query = ds_client.query(kind=project_kind)
+    query = ds_client.query(kind=Info.project_kind)
     for workout in list(query.fetch()):
         if workout['workout_ID'] == workout_id:
-            return print(workout['flag'])
+            return workout['flag']
 
 
-# for query testing purposes
-# print(query_flag('pmljcz'))
-def workouts(workout_type, workout_id):
-    pass
+# Create a topic for each workout built: [!!] Cloud Run app is the publisher [!!]
+def create_pub_sub(workout_id, workout_name, pub_message):
+    Info.topic_name = '{}-{}-workout'.format(workout_id, workout_name)
+
+    publisher = pubsub_v1.PublisherClient()
+    Info.topic_path = publisher.topic_path(Info.project_id, Info.topic_name)
+
+    topic = publisher.create_topic(Info.topic_path)
+    Info.topic = topic
+    print("Topic created: {}".format(topic))
+
+    publisher.publish(Info.topic_path, pub_message, spam='eggs')
+    print('[+] Publishing Message to {}...'.format(topic))
 
 
-def pub_sub(workout_name):
-    from google.cloud import pubsub
-    topic_name = '{}'.format(workout_name)
+# TODO: Subscription established on machines to "ACK" if workout == Complete, Else no response
+def create_subscription(sub_message):
+    # Create a Pull Subscription for the workout topic
+    print('[+] Creating subscriber ...')
+    subscriber = pubsub_v1.SubscriberClient()
+    topic_path = subscriber.topic_path(Info.project_id, Info.topic_name)
 
-    publisher = pubsub.PublisherClient()
-    topic_path = publisher.topic_path(project_id, topic_name)
+    # sub_path requires project_id and subscription_name(sub_name == topic_name)
+    # Set and Create Subscription path
+    subscription_path = subscriber.subscription_path(Info.project_id, Info.topic_name)
+    subscription = subscriber.create_subscription(subscription_path, topic_path)
+
+    # Update Class Info member values
+    Info.subscription_path = subscription_path
+    Info.subscription = subscription
+
+    print('[*] Pull Subscription created: {}'.format(subscription))
+
+    def callback(sub_message):
+        print('[*] Received message: {}'.format(sub_message.data))
+        if sub_message.attributes:
+            print("[*] Attributes:")
+            for key in sub_message.attributes:
+                value = sub_message.attributes.get(key)
+                print("[-->] {}: {}".format(key, value))
+        sub_message.ack()
+
+    streaming_pull_future = subscriber.subscribe(
+        subscription_path, callback=callback
+    )
+    print('[*] Listening for messages on {}...\n'.format(subscription_path))
+
+    # result() in a future will block indefinitely if 'timeout' is not set,
+    # unless an exception is encountered first.
+    try:
+        streaming_pull_future.result(timeout=5.0)
+    except:     # noqa
+        streaming_pull_future.cancel()
+    return Info.topic, subscription
 
 
-# query_flag(sys.argv[1])
+def delete_pubsub():
+    # Code to Delete Topic
+    publisher = pubsub_v1.PublisherClient()
+    publisher.delete_topic('projects/ualr-cybersecurity/topics/promise-permissions-workout')
+
+    print("[*] Topic deleted: {}".format('projects/ualr-cybersecurity/topics/promise-permissions-workout'))
+
+    # Code to Delete Subscription
+    subscriber = pubsub_v1.SubscriberClient()
+    subscriber.delete_subscription('projects/ualr-cybersecurity/subscriptions/-vnc-permissions')
+
+    print("[*] Subscription deleted: {}".format('projects/ualr-cybersecurity/topics/-vnc-permissions'))
+
+
+# Testing Calls
+pub_message = b64.b64encode(b"Linux is complete")
+sub_message = b64.b64encode(b"I'm a subscriber!")
+
+Info.workout_id = 'promise'
+Info.workout_name = 'permissions'
+
+if sys.argv[1] == 'create':
+    create_pub_sub(Info.workout_id, Info.workout_name, pub_message)
+    # create_subscription(sub_message)
+elif sys.argv[1] == 'delete':
+    delete_pubsub()
+else:
+    print('Invalid: Use create or delete')
