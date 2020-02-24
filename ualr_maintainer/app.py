@@ -436,27 +436,28 @@ def build_workout(build_data, workout_type):
 def landing_page(workout_id, team):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
 
-    workout_type = workout['workout_type']
-
-    yaml_file = "../yaml-files/%s.yaml" % workout_type
-
-    try:
-        f = open(yaml_file, "r")
-    except:
-        print("File does not exist")
-
-    y = load(f, Loader=Loader)
-
-    ip = workout['ip_list'][int(team)-1]
-    description = y['workout']['workout_description']
-
-    return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description)
+    if (workout):
+        workout_type = workout['workout_type']
+        yaml_file = "../yaml-files/%s.yaml" % workout_type
+        try:
+            f = open(yaml_file, "r")
+        except:
+            print("File does not exist")
+        y = load(f, Loader=Loader)
+        ip = workout['ip_list'][int(team)-1]
+        description = y['workout']['workout_description']
+        return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description)
+    else:
+        return render_template('no_workout.html')
 
 @app.route('/workout_list/<workout_id>', methods=['GET', 'POST'])
 def workout_list(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     print(workout)
-    return render_template('workout_list.html', ip_list=workout['ip_list'], workout_id=workout_id, workout_type=workout['workout_type'])
+    if (workout):
+        return render_template('workout_list.html', ip_list=workout['ip_list'], workout_id=workout_id, workout_type=workout['workout_type'])
+    else:
+        return render_template('no_workout.html')
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
