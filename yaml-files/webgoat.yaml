@@ -64,7 +64,7 @@ firewall_rules:
     network: external-network
     target_tags: []
     protocol: none
-    ports: ["tcp/80","3389","80","443","5901-5906","8080","8000"]
+    ports: ["tcp/80","tcp/3389","tcp/80","tcp/443","tcp/5901-5906","tcp/8080","tcp/8000"]
     source_ranges: ["0.0.0.0/0"]
   - name: default-network-internal-allow
     network: internal-network
