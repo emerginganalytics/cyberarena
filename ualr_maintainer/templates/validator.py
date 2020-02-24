@@ -30,7 +30,7 @@ class Info:
     workout_name = ''
     workout_id = ''
 
-
+# not needed since page already uses this
 def query_flag(workout_id):
     from google.cloud import datastore
     ds_client = datastore.Client()
@@ -41,7 +41,8 @@ def query_flag(workout_id):
             return workout['flag']
 
 
-# Create a topic for each workout built: [!!] Cloud Run app is the publisher [!!]
+# Create a topic for each workout built based on workout id and type (name):
+# [!!] Initially Created with web app as the publisher
 def create_pub_sub(workout_id, workout_name, pub_message):
     Info.topic_name = '{}-{}-workout'.format(workout_id, workout_name)
 
@@ -56,7 +57,8 @@ def create_pub_sub(workout_id, workout_name, pub_message):
     print('[+] Publishing Message to {}...'.format(topic))
 
 
-# TODO: Subscription established on machines to "ACK" if workout == Complete, Else no response
+# Creates a Pull subscription. Possibly need to reformat to Push subscription
+#  with CybergGym endpoint POST URL
 def create_subscription(sub_message):
     # Create a Pull Subscription for the workout topic
     print('[+] Creating subscriber ...')
@@ -97,6 +99,7 @@ def create_subscription(sub_message):
     return Info.topic, subscription
 
 
+# [!!] Following portions are for local testing purposes only [!!]
 def delete_pubsub():
     # Code to Delete Topic
     publisher = pubsub_v1.PublisherClient()
