@@ -26,7 +26,7 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: [{items: ["http-server", "labentry"]}, none]
+    tags: {items: ["http-server", "labentry"]}
     metadata: none
     nics:
       - network: external-network
@@ -38,7 +38,7 @@ servers:
     image: image-cybergym-webgoat-3
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: []
+    tags:
     metadata: none
     nics:
       - network: internal-network

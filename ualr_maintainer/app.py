@@ -10,7 +10,6 @@ import start_stop_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
-from flask_login import LoginManager
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -28,8 +27,8 @@ from google.cloud import datastore
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
-dns_suffix = ".cybergym-eac-ualr.org."
-project = 'ualr-cybersecurity'
+dns_suffix = ".aca-bootcamp.com"
+project = 'acapte'
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -99,7 +98,7 @@ def add_dns_record(project, dnszone, workout_id, ip_address):
     change_body = {"additions": [
         {
             "kind": "dns#resourceRecordSet",
-            "name": workout_id + dns_suffix,
+            "name": workout_id + dns_suffix + ".",
             "rrdatas": [ip_address],
             "type": "A",
             "ttl": 30
@@ -279,7 +278,7 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
     new_instance = compute.instances().get(project=project, zone=zone, instance=name).execute()
     ip_address = None
     if tags:
-        for item in tags[0]['items']:
+        for item in tags['items']:
             if item == 'labentry':
                 ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
                 add_dns_record(project, dnszone, workout, ip_address)
@@ -303,7 +302,6 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
 # Application
 app = Flask(__name__)
-login_manager = LoginManager(app)
 
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 
@@ -353,7 +351,6 @@ def build_workout(build_data, workout_type):
     y = load(f, Loader=Loader)
 
     workout_name = y['workout']['name']
-    project = y['workout']['project_name']
     region = y['workout']['region']
     zone = y['workout']['zone']
     dnszone = y['workout']['dnszone']
@@ -388,7 +385,7 @@ def build_workout(build_data, workout_type):
                             "region": "region"}
             response = compute.networks().insert(project=project, body=network_body).execute()
             compute.globalOperations().wait(project=project, operation=response["id"]).execute()
-
+            time.sleep(10)
             for subnet in network['subnets']:
                 subnetwork_body = {
                     "name": "%s-%s" % (network_body['name'], subnet['name']),
@@ -466,7 +463,9 @@ def landing_page(workout_id):
         except:
             print("File does not exist")
         y = load(f, Loader=Loader)
-        guac_path = workout['servers'][0]['guac_path']
+        guac_path = None
+        if workout['servers']:
+            guac_path = workout['servers'][0]['guac_path']
         description = y['workout']['workout_description']
         return render_template('landing_page.html', dns_suffix=dns_suffix, guac_path=guac_path, description=description, workout_id=workout_id)
     else:

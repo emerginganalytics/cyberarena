@@ -30,12 +30,12 @@ servers:
     image: image-aca-cybergym-labentry
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["http-server"]}
+    tags: {items: ["http-server", "labentry"]}
     metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.0.2
-        subnet: external-network-default
+        subnet: default
         external_NAT: true
   - name: cybergym-ad-dc
     image: image-aca-cybergym-ad-dc
@@ -47,10 +47,10 @@ servers:
     nics:
       - network: internal-network
         internal_IP: 10.1.1.2
-        subnet: internal-network-default
+        subnet: default
         external_NAT: false
   - name: sweaty
-    image: image-cybergym-activedirectory-memberserver
+    image: image-aca-cybergym-domain-member
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["ad-server", "rdp-server", "file-server"]}
@@ -58,7 +58,7 @@ servers:
     nics:
       - network: internal-network
         internal_IP: 10.1.1.17
-        subnet: internal-network-default
+        subnet: default
         external_NAT: false
   - name: cybergym-teenyweb
     image: image-aca-cybergym-teenyweb
@@ -70,7 +70,7 @@ servers:
     nics:
       - network: dmz-network
         internal_IP: 10.1.2.2
-        subnet: dmz-network-default
+        subnet: default
         external_NAT: false
   - name: cybergym-fortinet-fortigate
     image: image-aca-cybergym-fortinet
@@ -81,15 +81,15 @@ servers:
     nics:
       - network: external-network
         internal_IP: 10.1.0.10
-        subnet: external-network-default
+        subnet: default
         external_NAT: false
       - network: internal-network
         internal_IP: 10.1.1.10
-        subnet: internal-network-default
+        subnet: default
         external_NAT: true
       - network: dmz-network
         internal_IP: 10.1.2.10
-        subnet: dmz-network-default
+        subnet: default
         external_NAT: false
 
 routes:

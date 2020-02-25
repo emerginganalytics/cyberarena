@@ -1,1 +1,1 @@
-gcloud beta run deploy --image gcr.io/ualr-cybersecurity/cybergym
+gcloud beta run deploy --image gcr.io/acapte/cybergym
