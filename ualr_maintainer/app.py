@@ -29,6 +29,7 @@ from google.cloud import datastore
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 dns_suffix = ".cybergym-eac-ualr.org."
+project = 'ualr-cybersecurity'
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -177,8 +178,7 @@ def create_firewall_rules(project, firewall_rules):
 
         firewall_body = {
             "name": rule["name"],
-            "network": "https://www.googleapis.com/compute/v1/projects/ualr-cybersecurity/global/networks/" +
-                       rule["network"],
+            "network": "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s" % (project, rule["network"]),
             "targetTags": rule["targetTags"],
             "allowed": allowed,
             "sourceRanges": rule["sourceRanges"]
@@ -196,8 +196,7 @@ def create_route(project, zone, route):
     route_body = {
         "destRange": route["destRange"],
         "name": route["name"],
-        "network": "https://www.googleapis.com/compute/v1/projects/ualr-cybersecurity/global/networks/" +
-                route["network"],
+        "network": "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s" % (project, route["network"]),
         "priority": 0,
         "tags": [],
         "nextHopInstance": nextHopInstance
@@ -221,7 +220,7 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         else:
             accessConfigs = None
         add_network_interface = {
-            'network': 'projects/ualr-cybersecurity/global/networks/' + network["network"],
+            'network': 'projects/%s/global/networks/%s' % (project, network["network"]),
             'subnetwork': 'regions/us-central1/subnetworks/' + network["subnet"],
             'networkIP': network["internal_IP"],
             'accessConfigs': [
@@ -279,13 +278,14 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
     new_instance = compute.instances().get(project=project, zone=zone, instance=name).execute()
     ip_address = None
-    for item in tags[0]['items']:
-        if item == 'labentry':
-            ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-            add_dns_record(project, dnszone, workout, ip_address)
+    if tags:
+        for item in tags[0]['items']:
+            if item == 'labentry':
+                ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                add_dns_record(project, dnszone, workout, ip_address)
 
-    register_workout_server(workout, name, guac_path)
-
+    if guac_path:
+        register_workout_server(workout, name, guac_path)
 
     if sshkey:
         ssh_key_body = {
@@ -334,7 +334,7 @@ def workout_done(build_data):
 
 @app.route('/listvm')
 def list_vm_instances():
-    list_vm_test = list_vm.list_instances('ualr-cybersecurity', 'us-central1-a')
+    list_vm_test = list_vm.list_instances(project, 'us-central1-a')
     return render_template('list_instances.html', list_vm=list_vm_test)
 
 
@@ -392,7 +392,7 @@ def build_workout(build_data, workout_type):
             for subnet in network['subnets']:
                 subnetwork_body = {
                     "name": "%s-%s" % (network_body['name'], subnet['name']),
-                    "network": "projects/ualr-cybersecurity/global/networks/" + network_body['name'],
+                    "network": "projects/%s/global/networks/%s" % (project, network_body['name']),
                     "ipCidrRange": subnet['ip_subnet']
                 }
                 response = compute.subnetworks().insert(project=project, region=region,
@@ -412,9 +412,14 @@ def build_workout(build_data, workout_type):
                     "external_NAT": n['external_NAT']
                 }
                 nics.append(nic)
+
+            guac_path = None
+            if "guac_path" in server:
+                guac_path = server['guac_path']
+
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                          server['machine_type'],
-                                         server['network_routing'], nics, server['tags'], server['metadata'])
+                                         server['network_routing'], nics, server['tags'], server['metadata'], guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
@@ -442,7 +447,7 @@ def build_workout(build_data, workout_type):
 
     # add time for guacamole setup for each team
     # for i in range(len(list_ext_ip)):
-    unit = datastore.Entity(ds_client.key('cybergym-unit', unit_id))
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     unit['workouts'] = workout_ids
     ds_client.put(unit)
 
@@ -451,18 +456,19 @@ def build_workout(build_data, workout_type):
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
     if (workout):
-        workout_type = workout['workout_type']
-        yaml_file = "../yaml-files/%s.yaml" % workout_type
+        print(workout)
+        yaml_file = "../yaml-files/%s.yaml" % unit['workout_type']
         try:
             f = open(yaml_file, "r")
         except:
             print("File does not exist")
         y = load(f, Loader=Loader)
-        ip = workout['external_ip']
+        guac_path = workout['servers'][0]['guac_path']
         description = y['workout']['workout_description']
-        return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description, workout_id=workout_id)
+        return render_template('landing_page.html', dns_suffix=dns_suffix, guac_path=guac_path, description=description, workout_id=workout_id)
     else:
         return render_template('no_workout.html')
 
@@ -471,7 +477,7 @@ def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     if (unit):
         print(unit)
-        return render_template('workout_list.html', ip_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
+        return render_template('workout_list.html', workout_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
