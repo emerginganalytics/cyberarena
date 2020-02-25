@@ -36,13 +36,13 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
     ds_client.put(new_workout)
 
 # Create a new DNS record for the server and
-def add_dns_record(project, dnszone, workout_id, ip_address):
+def add_dns_record(project, dnszone, workout_id, name, ip_address):
     service = googleapiclient.discovery.build('dns', 'v1')
 
     change_body = {"additions": [
         {
             "kind": "dns#resourceRecordSet",
-            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "name": workout_id + "-" + name + ".cybergym-eac-ualr.org.",
             "rrdatas": [ip_address],
             "type": "A",
             "ttl": 30
@@ -54,8 +54,9 @@ def add_dns_record(project, dnszone, workout_id, ip_address):
 
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
-    workout["external_ip"] = ip_address
-    ds_client.put(workout)
+    if "external_ip" not in workout:
+        workout["external_ip"] = ip_address
+        ds_client.put(workout)
 
 
 # Add the information to the datastore for later management
@@ -195,7 +196,7 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
     ip_address = None
     if 'accessConfigs' in new_instance['networkInterfaces'][0]:
         ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-        add_dns_record(project, dnszone, workout, ip_address)
+        add_dns_record(project, dnszone, workout, name, ip_address)
 
     register_workout_server(workout, name, guac_path)
 
