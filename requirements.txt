@@ -8,3 +8,4 @@ google-cloud-storage
 google-cloud-datastore
 google-api-python-client
 pyyaml
+flask-wtf

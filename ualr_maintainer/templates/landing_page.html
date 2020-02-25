@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="workout-form" class='container-fluid form-ctn'>
+        <h1 style="text-transform: capitalize">{{ workout_type }} Workout</h1>
+        <h2>Description</h2>
+        <p>{{ description }}</p>
+        <h2>Link</h2>
+        <a href="{{ ip }}">{{ ip }}</a>
+    </div>
+{% endblock %}
