@@ -1,30 +1,36 @@
 # This template provides an overview of the YAML specification for Cyber Gym
 # workout configurations. Use this as a basis for creating new YAML config files
 
+# General notes:
+# YAML is aware of spacing and tabs. Use tabs to indent sub-entries,
+# but only use spaces to separate tags from values.
+# a dash ('-') indicates the beginning of a list item. Additional tags and values
+# for a list item should be indented. Subsequent list items should begin with a dash.
+
 version: '1'
 
 # Insert basic workout information here.
 workout:
-  name: # workout name
-  workout_description: # workout description -- enclose this in quotes (i.e. 'Here is a description')
-  project_name: # project name
+  name: # Name
+  workout_description: # Enclose this in quotes. Include all relevant description and instructions for the workout here.
+  project_name: ualr-cybersecurity
   region: # data center region -- this should match the desired region in Google Cloud (i.e., "us-central1")
   zone: # data center zone -- this should match the desired zone in Google Cloud (i.e., "us-central1-a")
   project_api_key_type: cloud
-  flag_location: /usr/src/flag
+  flag_location: # This is used for the flag generation script. Ignore for now.
 
 # List all networks and all subnets here
 networks:
-  - name: # network name
+  - name: # The network name is arbitrary, but be consistent as this will be referenced by subnets, VMs, routes, and firewall rules
     # Multiple subnets can be listed using YAML block sequence format
     subnets:
-      - name: # subnet name
-        ip-subnet: #subnet CIDR range
+      - name: # Subnet name is arbitrary.
+        ip-subnet: #Include the full CIDR range for the subnet
 
 # List all VMs required for the workout. Multiple VMs may be listed using YAML block sequence format
 servers:
-  - name: # server name
-    image: # server image
+  - name: # Server name is arbitrary
+    image: # Use the exact name of the server image from Google Cloud
     machine_type: # Google Cloud VM type (i.e., "n1-standard-1")
     network_routing: # boolean value
     tags: # list tags for this VM (i.e., {items: ["http-server"]})
@@ -32,11 +38,12 @@ servers:
     # List all nics for this server. Multiple items may be included using YAML block sequence format
     nics:
       - network: # network name
-        internal_IP: # VM IP address
+        internal_IP: # VM IP address. Make sure this is within the subnet CIDR range
         subnet: # subnet name
         external_NAT: # boolean value
 
-# List network routes. Multiple routes may be listed using YAML block sequence format
+# List network routes. Multiple routes may be listed using YAML block sequence format.
+# If no routes are needed, delete all sub-entries under 'routes:' and leave it empty
 routes:
   - name: # route name
     network: # network name
