@@ -458,5 +458,6 @@ def workout_list(workout_id):
     else:
         return render_template('no_workout.html')
 
+
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)

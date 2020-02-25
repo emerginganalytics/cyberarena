@@ -2,7 +2,7 @@ version: '1'
 
 workout:
   name: dos
-  workout-description: 'Exerience how a denial of service attack works'
+  workout-description: 'Experience how a denial of service attack works'
   project-name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
