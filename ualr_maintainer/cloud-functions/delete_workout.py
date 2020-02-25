@@ -15,6 +15,7 @@ expired_workout = []
 project = 'ualr-cybersecurity'
 zone = 'us-central1-a'
 region = 'us-central1'
+dnszone = 'cybergym-public'
 
 
 # IN PROGRESS
@@ -90,6 +91,27 @@ def delete_network(workout_id):
         print("Error in deleting network for %s" % workout_id)
         return False
 
+def delete_dns(workout_id, ip_address):
+    try:
+        service = googleapiclient.discovery.build('dns', 'v1')
+
+        change_body = {"deletions": [
+            {
+                "kind": "dns#resourceRecordSet",
+                "name": workout_id + ".cybergym-eac-ualr.org.",
+                "rrdatas": [ip_address],
+                "type": "A",
+                "ttl": 30
+            }
+        ]}
+
+        request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
+        response = request.execute()
+    except():
+        print("Error in deleting DNS record for workout %s" % workout_id)
+        return False
+    return True
+
 
 def delete_workouts(event, context):
     query_workouts = ds_client.query(kind='cybergym-workout')
@@ -98,9 +120,13 @@ def delete_workouts(event, context):
     for workout in list(query_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
-        if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
-            print('Deleting resources from workout %s', workout['workout_ID'])
-            expired_id = workout['workout_ID']
+        if workout['resources_deleted']:
+            print('Deleting resources from workout %s' % workout['workout_ID'])
+            expired_id = workout.key
+
+            # First, delete the DNS entries associated with this workout.
+            if "external_ip" in workout:
+                delete_dns(expired_id, workout["external_ip"])
             if delete_vms(expired_id):
                 if delete_firewall_rules(expired_id):
                     if delete_subnetworks(expired_id):
@@ -109,5 +135,28 @@ def delete_workouts(event, context):
                             ds_client.put(workout)
 
 
+# This function is only for local testing
+def delete_specific_workout(workout_ID):
+    query_workouts = ds_client.query(kind='cybergym-workout')
+    first_key = ds_client.key('cybergym-workout', workout_ID)
+    query_workouts.key_filter(first_key, '=')
+    for workout in list(query_workouts.fetch()):
+        if 'resources_deleted' not in workout:
+            workout['resources_deleted'] = False
+        if not workout['resources_deleted']:
+            print('Deleting resources from workout %s' % workout_ID)
+            if "external_ip" in workout:
+                delete_dns(workout_ID, workout["external_ip"])
+            if delete_vms(workout_ID):
+                if delete_firewall_rules(workout_ID):
+                    if delete_subnetworks(workout_ID):
+                        if delete_network(workout_ID):
+                            workout['resources_deleted'] = True
+                            ds_client.put(workout)
+
 # The main function is only for debugging. Do not include this line in the cloud function
-delete_workouts(None, None)
+# delete_workouts(None, None)
+
+delete_workouts = ['cs4360may-jw', 'cs4360may-jk', ]
+for workout in delete_workouts:
+    delete_specific_workout(workout)

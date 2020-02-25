@@ -21,10 +21,10 @@ def build_flag_startup(flag_os, name, flag):
 
     client = gcs.Client()
     flag_bucket = client.get_bucket('ualr-cybersecurity-bucket')
+    script = ''
 
     if flag_os == 'linux':
         script  = '#!/bin/bash\n'
-        script += 'sleep 60\n'
         script += 'cd /usr/local/share/planted/\n' # 'sudo mkdir /usr/local/share/planted/ && cd /usr/local/share/planted\n'
         script += 'sudo echo {} > flag.txt'.format(flag)
 
@@ -34,7 +34,6 @@ def build_flag_startup(flag_os, name, flag):
     elif flag_os == 'windows':
         flag_dir = 'C:\\Program Files\\Google\\Compute Engine\\planted'
         script  = '@echo off\n'
-        script += 'timeout 60\n'
         script += 'mkdir {} && cd {}\n'.format(flag_dir, flag_dir)
         script += 'echo {} > flag.txt' .format(flag)
 
@@ -42,9 +41,12 @@ def build_flag_startup(flag_os, name, flag):
         bucket_file = flag_bucket.blob('startup-scripts/flags/' + file_name)  # + something.sh
 
     bucket_file.upload_from_string(script)
-    return file_name
+    # return file_name
+    return script
 
-# So far this does put the startup script there, but for some reason it's not running(?)
+# temp fix: instances don't have permissions to buckets. Alt is to just return the script instead of bucket url.
+# works as long as script isn't too long
+
 # -------------------- TEST GOOGLE API AUTHENTICATION --------------------------
 
 
@@ -172,9 +174,8 @@ def create_instance_ubuntu(compute, project, zone, name, bucket):
 # ** Function now requires two more arguments, flag_container and flag_startup. The first is the machine name where the
 # **  flag is stored. flag_startup is the result of running build_flag_startup()
 
-def create_instance_custom_image(compute, project, zone, name, flag_container, flag_startup, flag,
-                                 bucket, custom_image, internal_IP,
-                                 network_name, subnet_name, accessConfigs=None, tags=None):
+def create_instance_custom_image(compute, project, zone, name, bucket, custom_image,
+                                 internal_IP, network_name, subnet_name, accessConfigs=None, tags=None):
     # Get the latest Debian Jessie image.
     
     image_response = compute.images().get(project='ualr-cybersecurity', image=custom_image).execute()
@@ -184,119 +185,119 @@ def create_instance_custom_image(compute, project, zone, name, flag_container, f
     machine_type = "zones/%s/machineTypes/n1-standard-1" % zone
 
     # add custom metadata only if machine == flag_container
-    if name == flag_container:
+    '''if name == flag_container:
 
-        config = {
-            'name': name,
-            'machineType': machine_type,
+         config = {
+             'name': name,
+             'machineType': machine_type,
 
-            # allow http and https server with tags
-            'tags': tags,
+             # allow http and https server with tags
+             'tags': tags,
 
-            # Specify the boot disk and the image to use as a source.
-            'disks': [
-                {
-                    'boot': True,
-                    'autoDelete': True,
-                    'initializeParams': {
-                        'sourceImage': source_disk_image,
-                    }
+             # Specify the boot disk and the image to use as a source.
+             'disks': [
+                 {
+                     'boot': True,
+                     'autoDelete': True,
+                     'initializeParams': {
+                         'sourceImage': source_disk_image,
+                     }
+                 }
+             ],
+
+             # Specify a network interface with NAT to access the public
+             # internet.
+
+             'networkInterfaces': [
+                 {
+                     'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
+                     'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
+                     'networkIP': internal_IP,
+                     'accessConfigs': [
+                         accessConfigs
+                     ]
+                 }
+             ],
+
+             # Allow the instance to access cloud storage and logging.
+             'serviceAccounts': [{
+                 'email': 'default',
+                 'scopes': [
+                     'https://www.googleapis.com/auth/devstorage.read_write',
+                     'https://www.googleapis.com/auth/logging.write'
+                 ]
+             }],
+
+             # Metadata is readable from the instance and allows you to
+             # pass configuration from deployment scripts to instances.
+             'metadata': {
+                 'items': [
+                     {
+                         'key': 'bucket',
+                         'value': bucket
+                     },
+                     {
+                         'key': 'startup-script',
+                         'value': flag_startup
+                     }
+                 ]
+
+             }
+         }
+    else:'''
+    config = {
+        'name': name,
+        'machineType': machine_type,
+
+        # allow http and https server with tags
+        'tags': tags,
+
+        # Specify the boot disk and the image to use as a source.
+        'disks': [
+            {
+                'boot': True,
+                'autoDelete': True,
+                'initializeParams': {
+                   'sourceImage': source_disk_image,
                 }
-            ],
-
-            # Specify a network interface with NAT to access the public
-            # internet.
-
-            'networkInterfaces': [
-                {
-                    'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
-                    'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
-                    'networkIP': internal_IP,
-                    'accessConfigs': [
-                        accessConfigs
-                    ]
-                }
-            ],
-
-            # Allow the instance to access cloud storage and logging.
-            'serviceAccounts': [{
-                'email': 'default',
-                'scopes': [
-                    'https://www.googleapis.com/auth/devstorage.read_write',
-                    'https://www.googleapis.com/auth/logging.write'
-                ]
-            }],
-
-            # Metadata is readable from the instance and allows you to
-            # pass configuration from deployment scripts to instances.
-            'metadata': {
-                'items': [
-                    {
-                        'key': 'bucket',
-                        'value': bucket
-                    },
-                    {
-                        'key': 'startup-script-url',
-                        'value': "gs://ualr-cybersecurity-bucket/startup-scripts/flags/{}".format(flag_startup)
-                    }
-                ]
-
             }
-        }
-    else:
-        config = {
-            'name': name,
-            'machineType': machine_type,
+        ],
 
-            # allow http and https server with tags
-            'tags': tags,
+        # Specify a network interface with NAT to access the public
+        # internet.
 
-            # Specify the boot disk and the image to use as a source.
-            'disks': [
-                {
-                    'boot': True,
-                    'autoDelete': True,
-                    'initializeParams': {
-                        'sourceImage': source_disk_image,
-                    }
-                }
-            ],
-
-            # Specify a network interface with NAT to access the public
-            # internet.
-
-            'networkInterfaces': [
-                {
-                    'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
-                    'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
-                    'networkIP': internal_IP,
-                    'accessConfigs': [
-                        accessConfigs
-                    ]
-                }
-            ],
-
-            # Allow the instance to access cloud storage and logging.
-            'serviceAccounts': [{
-                'email': 'default',
-                'scopes': [
-                    'https://www.googleapis.com/auth/devstorage.read_write',
-                    'https://www.googleapis.com/auth/logging.write'
+        'networkInterfaces': [
+            {
+                'network': 'projects/ualr-cybersecurity/global/networks/' + network_name,
+                'subnetwork': 'regions/us-central1/subnetworks/' + str(subnet_name),
+                'networkIP': internal_IP,
+                'accessConfigs': [
+                    accessConfigs
                 ]
-            }],
-
-            # Metadata is readable from the instance and allows you to
-            # pass configuration from deployment scripts to instances.
-            'metadata': {
-                'items': [
-                    {
-                        'key': 'bucket',
-                        'value': bucket
-                    },
-                ]
-
             }
+        ],
+
+        # Allow the instance to access cloud storage and logging.
+        'serviceAccounts': [{
+            'email': 'default',
+            'scopes': [
+                'https://www.googleapis.com/auth/devstorage.read_write',
+                'https://www.googleapis.com/auth/logging.write'
+            ]
+        }],
+
+        # Metadata is readable from the instance and allows you to
+        # pass configuration from deployment scripts to instances.
+        'metadata': {
+            'items': [
+                {
+                    'key': 'bucket',
+                    'value': bucket
+                },
+            ]
+
         }
+    }
 
     compute.instances().insert(project=project, zone=zone, body=config).execute()
     return 'Done'
@@ -312,7 +313,7 @@ def build_dos_vm(network, subnet, workout_id):
     print("build dos network : {}".format(network))
 
     # create the vm for the dos workout and assign them to the previous network
-    list_images_to_create = ['image-labentry','image-promise-dvwalab','image-promise-attacker']
+    list_images_to_create = ['image-labentry','image-cybergym-dvwalab','image-promise-attacker']
     list_internal_ip = ['10.1.1.10', '10.1.1.3', '10.1.1.4']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}, None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['http-server','https-server']}, None, {'items': ['http-server','https-server']}]
@@ -349,7 +350,7 @@ def build_dos_vm(network, subnet, workout_id):
 
 def build_xss_vm(network, subnet, workout_id):
 
-    list_images_to_create = ['image-promise-dvwalab', 'image-labentry']
+    list_images_to_create = ['image-cybergym-dvwalab', 'image-labentry']
     list_internal_ip = ['10.1.1.253', '10.1.1.10']
     list_ext_ip = [None, {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}]
     list_tags = [{'items': ['guac-server']}, {'items': ['http-server', 'https-server', 'guac-server']}]
@@ -444,21 +445,21 @@ def build_spoof_vm(network, subnet, workout_id):
 
 # -------------------- BUILD HIDDEN NODE WORKOUT --------------------------
 
-def build_hiddennode_vm(network, subnet, workout_id, flag):
+def build_hiddennode_vm(network, subnet, workout_id):
 
     list_images_to_create = ['image-labentry',
-                             'image-cybergym-hiddennode', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']
+                             'image-dvwalab', 'ce-linux-boot-image-002',  'ce-windows-boot-image-002']
     list_internal_ip = ['10.1.1.10', '10.1.1.253', '10.1.1.111', '10.1.1.115', '10.1.1.25']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None, None, None, None]
     list_tags = [{'items': ['http-server', 'https-server', 'guac-server', 'attacker', 'vnc-server']}, None, None, None, None]
 
     # specify which instance you want to store the flag on: [called in metadata]
-    flag_location = 'image-cybergym-hiddennode'
-    flag_container = '{}-hiddennode-{}'.format(workout_id, flag_location[6:])
+    # flag_location = 'image-dvwalab'
+    # flag_container = '{}-hiddennode-{}'.format(workout_id, flag_location[6:])
 
     # build the startup script
-    flag_startup = build_flag_startup('linux', flag_container, flag)
+    # flag_startup = build_flag_startup('linux', flag_container, flag)
 
     # building instances
     for i in range(len(list_images_to_create)):
@@ -468,8 +469,8 @@ def build_hiddennode_vm(network, subnet, workout_id, flag):
         tags = list_tags[i]
 
         create_instance_custom_image(compute, 'ualr-cybersecurity', 'us-central1-a',
-                                     '{}-hiddennode-{}'.format(workout_id, image[6:]), flag_container, flag_startup,
-                                     flag, 'ualr-cybersecurity', image, int_IP, network, subnet, ext_IP, tags)
+                                     '{}-hiddennode-{}'.format(workout_id, image[6:]), 'ualr-cybersecurity', image,
+                                     int_IP, network, subnet, ext_IP, tags)
         print("{} created".format(image))
 
     # we want to retrieve the external IP for the labentry VM
@@ -490,7 +491,7 @@ def build_hiddennode_vm(network, subnet, workout_id, flag):
 def build_ids_vm(network, subnet, workout_id):
 
     list_images_to_create = ['image-labentry',
-                             'image-promise-dvwalab']
+                             'image-cybergym-dvwalab']
     list_internal_ip = ['10.1.1.10', '10.1.1.11']
     list_ext_ip = [{'type': 'ONE_TO_ONE_NAT',
                     'name': 'External NAT'}, None]
