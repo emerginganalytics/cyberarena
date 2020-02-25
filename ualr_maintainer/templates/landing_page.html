@@ -2,10 +2,49 @@
 
 {% block content %}
     <div id="workout-form" class='container-fluid form-ctn'>
+        <div id="workout_id" hidden>{{ workout_id }}</div>
         <h1 style="text-transform: capitalize">{{ workout_type }} Workout</h1>
         <h2>Description</h2>
         <p>{{ description }}</p>
         <h2>Link</h2>
         <a href="{{ ip }}">{{ ip }}</a>
+
+        <div class="btn-ctn">
+            <button id="start-vm" class="waves-effect waves-light btn" >START VM</button>
+        </div>
+        <div class="btn-ctn">
+            <button id="stop-vm" class="waves-effect waves-light btn" >STOP VM</button>
+        </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#start-vm").click(function () {
+                var workout_id = $("#workout_id").html()
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/start_vm",
+                    traditional: "true",
+                    data: JSON.stringify({
+                        "workout_id": workout_id,
+                    }),
+                    dataType: "json",
+                });
+            });
+            $("#stop-vm").click(function () {
+                var workout_id = $("#workout_id").html()
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=utf-8",
+                    url: "/stop_vm",
+                    traditional: "true",
+                    data: JSON.stringify({
+                        "workout_id": workout_id,
+                    }),
+                    dataType: "json",
+                });
+            });
+        });
+    </script>
 {% endblock %}

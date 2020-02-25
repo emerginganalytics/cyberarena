@@ -9,3 +9,4 @@ google-cloud-datastore
 google-api-python-client
 pyyaml
 flask-wtf
+flask-login
