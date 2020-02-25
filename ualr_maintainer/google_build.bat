@@ -1,1 +1,1 @@
-gcloud builds submit --tag gcr.io/ualr-cybersecurity/cybergym
+gcloud builds submit --tag gcr.io/acapte/cybergym

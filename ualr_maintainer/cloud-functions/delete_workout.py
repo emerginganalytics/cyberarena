@@ -157,6 +157,6 @@ def delete_specific_workout(workout_ID):
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
 
-delete_workouts = ['doauzq', 'jpxymv', 'ocpcjm', 'szxzle', 'wbqzve', 'rsxalp']
+delete_workouts = ['pcqvvz']
 for workout in delete_workouts:
     delete_specific_workout(workout)
