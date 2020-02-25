@@ -6,6 +6,7 @@ workout:
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
+  dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location: /usr/src/flag
 
@@ -28,7 +29,7 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: [{items: ["http-server"]}, None]
+    tags: [{items: ["http-server", "labentry"]}, None]
     metadata: none
     nics:
       - network: external-network

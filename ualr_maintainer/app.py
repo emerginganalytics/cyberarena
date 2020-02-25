@@ -7,6 +7,10 @@ import string
 import create_workout
 import list_vm
 import start_stop_vm
+import start_workout
+from stop_workout import stop_workout
+from start_workout import start_workout
+from flask_login import LoginManager
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -24,6 +28,7 @@ from google.cloud import datastore
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
+dns_suffix = ".cybergym-eac-ualr.org."
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -43,12 +48,35 @@ def flag_generator():
 
 # --------------------------- FLASK APP --------------------------
 
+def store_instructor_info(email):
+    new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
+
+    new_instructor.update({
+        "units": []
+    })
+
+    ds_client.put(new_instructor)
+
+def store_unit_info(id, email, name, ts, workout_type):
+    new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
+
+    new_unit.update({
+        "name": name,
+        "instructor_id": email,
+        "timestamp": ts,
+        "workout_type": workout_type,
+        "workouts": []
+    })
+
+    ds_client.put(new_unit)
+
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, user_mail, workout_duration, workout_type, timestamp):
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
     new_workout.update({
+        'unit_id': unit_id,
         'user_email': user_mail,
         'expiration': workout_duration,
         'type': workout_type,
@@ -62,6 +90,7 @@ def store_workout_info(workout_id, user_mail, workout_duration, workout_type, ti
     # insert a new user
     ds_client.put(new_workout)
 
+
 # Create a new DNS record for the server and
 def add_dns_record(project, dnszone, workout_id, ip_address):
     service = googleapiclient.discovery.build('dns', 'v1')
@@ -69,7 +98,7 @@ def add_dns_record(project, dnszone, workout_id, ip_address):
     change_body = {"additions": [
         {
             "kind": "dns#resourceRecordSet",
-            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "name": workout_id + dns_suffix,
             "rrdatas": [ip_address],
             "type": "A",
             "ttl": 30
@@ -90,7 +119,6 @@ def register_workout_server(workout_id, server, guac_path):
     workout = ds_client.get(key)
     workout["servers"].append({"server": server, "guac_path": guac_path})
     ds_client.put(workout)
-
 
 def print_workout_info(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
@@ -177,8 +205,8 @@ def create_route(project, zone, route):
     compute.routes().insert(project=project, body=route_body).execute()
 
 
-def create_instance_custom_image(compute, project, zone, name, custom_image, machine_type,
-                                 networkRouting, networks, tags=None, metadata=None):
+def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
+                                 networkRouting, networks, tags, metadata=None, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -247,12 +275,36 @@ def create_instance_custom_image(compute, project, zone, name, custom_image, mac
         config['disks'].append(new_disk)
 
     response = compute.instances().insert(project=project, zone=zone, body=config).execute()
-    if networkRouting:
-        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+    compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+
+    new_instance = compute.instances().get(project=project, zone=zone, instance=name).execute()
+    ip_address = None
+    for item in tags[0]['items']:
+        if item == 'labentry':
+            ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+            add_dns_record(project, dnszone, workout, ip_address)
+
+    register_workout_server(workout, name, guac_path)
+
+
+    if sshkey:
+        ssh_key_body = {
+            "items": [
+                {
+                    "key": "ssh-keys",
+                    "value": sshkey
+                }
+            ],
+            "fingerprint": new_instance["metadata"]["fingerprint"]
+        }
+        request = compute.instances().setMetadata(project=project, zone=zone, instance=name, body=ssh_key_body)
+        response = request.execute()
 
 
 # Application
 app = Flask(__name__)
+login_manager = LoginManager(app)
+
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 
 @app.route('/')
@@ -264,8 +316,8 @@ def invalid_workout():
 def index(workout_type):
     form=CreateWorkoutForm()
     if form.validate_on_submit():
-        workout_id = build_workout(form, workout_type)
-        url = '/workout_list/%s' % (workout_id)
+        unit_id = build_workout(form, workout_type)
+        url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
 
@@ -286,30 +338,6 @@ def list_vm_instances():
     return render_template('list_instances.html', list_vm=list_vm_test)
 
 
-@app.route('/startvm', methods=['GET', 'POST'])
-def start_vm():
-    if request.method == 'POST':
-        vm = request.get_json()
-        print(vm)
-        print(vm['instance'])
-
-        start_stop_vm.start_vm(vm['instance'])
-
-        return "vm start"
-
-
-@app.route('/stopvm', methods=['GET', 'POST'])
-def stop_vm():
-    if request.method == 'POST':
-        vm = request.get_json()
-        print(vm)
-        print(vm['instance'])
-
-        start_stop_vm.stop_vm(vm['instance'])
-
-        return "vm stop"
-
-
 @app.route('/update', methods=['GET', 'POST'])
 def build_workout(build_data, workout_type):
 
@@ -328,9 +356,9 @@ def build_workout(build_data, workout_type):
     project = y['workout']['project_name']
     region = y['workout']['region']
     zone = y['workout']['zone']
+    dnszone = y['workout']['dnszone']
 
     # create random number specific to the workout (6 characters by default)
-    generated_workout_ID = randomStringDigits()
     flag = flag_generator()
     num_team = int(build_data.team.data)
     if num_team > 10:
@@ -341,18 +369,21 @@ def build_workout(build_data, workout_type):
         build_length = 7
 
     # we have to store each labentry ext IP and send it to the user
-    list_ext_ip = []
+    workout_ids = []
 
     ts = str(calendar.timegm(time.gmtime()))
-
-    store_workout_info(generated_workout_ID, build_data.email.data, build_data.length.data, workout_type, ts)
+    unit_id = randomStringDigits()
+    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type)
 
     for i in range(1, num_team+1):
-        print('Creating workout for team %s' % (i))
+        generated_workout_ID = randomStringDigits()
+        workout_ids.append(generated_workout_ID)
+        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts)
+        print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
         print('Creating networks')
         for network in y['networks']:
-            network_body = {"name": "%s-%s-%s" % (generated_workout_ID, network['name'], i),
+            network_body = {"name": "%s-%s" % (generated_workout_ID, network['name']),
                             "autoCreateSubnetworks": False,
                             "region": "region"}
             response = compute.networks().insert(project=project, body=network_body).execute()
@@ -371,17 +402,17 @@ def build_workout(build_data, workout_type):
         # Now create the servers
         print('Creating servers')
         for server in y['servers']:
-            server_name = "%s-%s-%s" % (generated_workout_ID, server['name'], i)
+            server_name = "%s-%s" % (generated_workout_ID, server['name'])
             nics = []
             for n in server['nics']:
                 nic = {
-                    "network": "%s-%s-%s" % (generated_workout_ID, n['network'], i),
+                    "network": "%s-%s" % (generated_workout_ID, n['network']),
                     "internal_IP": n['internal_IP'],
-                    "subnet": "%s-%s-%s-%s" % (generated_workout_ID, n['network'], i, n['subnet']),
+                    "subnet": "%s-%s-%s" % (generated_workout_ID, n['network'], n['subnet']),
                     "external_NAT": n['external_NAT']
                 }
                 nics.append(nic)
-            create_instance_custom_image(compute, project, zone, server_name, server['image'],
+            create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                          server['machine_type'],
                                          server['network_routing'], nics, server['tags'], server['metadata'])
 
@@ -389,16 +420,16 @@ def build_workout(build_data, workout_type):
         print('Creating network routes and firewall rules')
         if (y['routes']):
             for route in y['routes']:
-                r = {"name": "%s-%s-%s" % (generated_workout_ID, route['name'], i),
-                     "network": "%s-%s-%s" % (generated_workout_ID, route['network'], i),
+                r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
+                     "network": "%s-%s" % (generated_workout_ID, route['network']),
                      "destRange": route['dest_range'],
-                     "nextHopInstance": "%s-%s-%s" % (generated_workout_ID, route['next_hop_instance'], i)}
+                     "nextHopInstance": "%s-%s" % (generated_workout_ID, route['next_hop_instance'])}
                 create_route(project, zone, r)
 
         firewall_rules = []
         for rule in y['firewall_rules']:
-            firewall_rules.append({"name": "%s-%s-%s" % (generated_workout_ID, rule['name'], i),
-                                   "network": "%s-%s-%s" % (generated_workout_ID, rule['network'], i),
+            firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
+                                   "network": "%s-%s" % (generated_workout_ID, rule['network']),
                                    "targetTags": rule['target_tags'],
                                    "protocol": rule['protocol'],
                                    "ports": rule['ports'],
@@ -406,34 +437,19 @@ def build_workout(build_data, workout_type):
 
         create_firewall_rules(project, firewall_rules)
 
-        req = compute.instances().get(project='ualr-cybersecurity', zone='us-central1-a',
-                                      instance='%s-cybergym-labentry-%s' % (generated_workout_ID, i))
-        response = req.execute()
-        ext_IP = response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-        list_ext_ip.append("http://" + ext_IP + ":8080/guacamole/#/client/MgBjAG15c3Fs")
-
     # time.sleep(120)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
     # add time for guacamole setup for each team
     # for i in range(len(list_ext_ip)):
-    print('Storing workout info in datastore')
-    key = ds_client.key('cybergym-workout', generated_workout_ID)
-    user_register = datastore.Entity(key)
-    user_register.update({
-            'timestamp_origin': datetime.datetime.now(),
-            'user': build_data.email.data,
-            'workout_type': workout_type,
-            'ip_list': list_ext_ip,
-            'duration': build_data.length.data,
-            'flag': flag
-        })
-    ds_client.put(user_register)
+    unit = datastore.Entity(ds_client.key('cybergym-unit', unit_id))
+    unit['workouts'] = workout_ids
+    ds_client.put(unit)
 
-    return generated_workout_ID
+    return unit_id
 
-@app.route('/landing/<workout_id>/<team>', methods=['GET', 'POST'])
-def landing_page(workout_id, team):
+@app.route('/landing/<workout_id>', methods=['GET', 'POST'])
+def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
 
     if (workout):
@@ -444,20 +460,34 @@ def landing_page(workout_id, team):
         except:
             print("File does not exist")
         y = load(f, Loader=Loader)
-        ip = workout['ip_list'][int(team)-1]
+        ip = workout['external_ip']
         description = y['workout']['workout_description']
-        return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description)
+        return render_template('landing_page.html', workout_type=workout_type, ip=ip, description=description, workout_id=workout_id)
     else:
         return render_template('no_workout.html')
 
-@app.route('/workout_list/<workout_id>', methods=['GET', 'POST'])
-def workout_list(workout_id):
-    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-    if (workout):
-        return render_template('workout_list.html', ip_list=workout['ip_list'], workout_id=workout_id, workout_type=workout['workout_type'])
+@app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
+def workout_list(unit_id):
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    if (unit):
+        print(unit)
+        return render_template('workout_list.html', ip_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
+@app.route('/start_vm', methods=['GET', 'POST'])
+def start_vm():
+    if (request.method == 'POST'):
+        data = request.get_json()
+        workout_id = data['workout_id']
+        start_workout(workout_id)
+
+@app.route('/stop_vm', methods=['GET', 'POST'])
+def stop_vm():
+    if (request.method == 'POST'):
+        data = request.get_json()
+        workout_id = data['workout_id']
+        stop_workout(workout_id)
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
