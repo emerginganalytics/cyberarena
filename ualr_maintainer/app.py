@@ -453,7 +453,6 @@ def landing_page(workout_id, team):
 @app.route('/workout_list/<workout_id>', methods=['GET', 'POST'])
 def workout_list(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-    print(workout)
     if (workout):
         return render_template('workout_list.html', ip_list=workout['ip_list'], workout_id=workout_id, workout_type=workout['workout_type'])
     else:
