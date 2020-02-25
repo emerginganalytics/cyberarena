@@ -3,11 +3,10 @@
 {% block content %}
     <div id="workout-form" class='container-fluid form-ctn'>
         <div id="workout_id" hidden>{{ workout_id }}</div>
-        <h1 style="text-transform: capitalize">{{ workout_type }} Workout</h1>
         <h2>Description</h2>
         <p>{{ description }}</p>
         <h2>Link</h2>
-        <a href="{{ ip }}">{{ ip }}</a>
+        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}">http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}</a>
 
         <div class="btn-ctn">
             <button id="start-vm" class="waves-effect waves-light btn" >START VM</button>
