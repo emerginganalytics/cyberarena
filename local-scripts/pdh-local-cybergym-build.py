@@ -198,7 +198,8 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
         add_dns_record(project, dnszone, workout, name, ip_address)
 
-    register_workout_server(workout, name, guac_path)
+    if guac_path:
+        register_workout_server(workout, name, guac_path)
 
 
     if sshkey:
