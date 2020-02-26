@@ -82,11 +82,11 @@ servers:
       - network: external-network
         internal_IP: 10.1.0.10
         subnet: default
-        external_NAT: false
+        external_NAT: true
       - network: internal-network
         internal_IP: 10.1.1.10
         subnet: default
-        external_NAT: true
+        external_NAT: false
       - network: dmz-network
         internal_IP: 10.1.2.10
         subnet: default
