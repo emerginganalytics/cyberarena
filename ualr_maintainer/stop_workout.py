@@ -14,6 +14,7 @@ def stop_workout(workout_id):
     result = compute.instances().list(project=project, zone=zone,
                                       filter='name = {}*'.format(workout_id)).execute()
     print(result)
-    for vm_instance in result['items']:
-        response = compute.instances().stop(project=project, zone=zone,
-                                            instance=vm_instance["name"]).execute()
+    if 'items' in result:
+        for vm_instance in result['items']:
+            response = compute.instances().stop(project=project, zone=zone,
+                                                instance=vm_instance["name"]).execute()

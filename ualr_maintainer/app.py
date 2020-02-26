@@ -272,7 +272,10 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         config['disks'].append(new_disk)
 
     response = compute.instances().insert(project=project, zone=zone, body=config).execute()
-    compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+    try:
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+    except:
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
     new_instance = compute.instances().get(project=project, zone=zone, instance=name).execute()
     ip_address = None
@@ -457,7 +460,6 @@ def landing_page(workout_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
     if (workout):
-        print(workout)
         yaml_file = "../yaml-files/%s.yaml" % unit['workout_type']
         try:
             f = open(yaml_file, "r")
@@ -488,16 +490,8 @@ def start_vm():
         data = request.get_json()
         workout_id = data['workout_id']
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-
-        #DEBUG
-        print(workout)
-
         workout['run_hours'] = data['time']
         ds_client.put(workout)
-
-        #DEBUG
-        workoutdebug = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        print(workoutdebug)
 
         start_workout(workout_id)
     return "DONE"

@@ -5,7 +5,11 @@
     <h2>Description</h2>
     <p>{{ description }}</p>
     <h2>Link</h2>
-    <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}">http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}</a>
+    {% if guac_path==None %}
+        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080">http://{{ workout_id }}{{ dns_suffix }}:8080</a>
+    {% else %}
+        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}">http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}</a>
+    {% endif %}
     <div class="input-field col s12">
             <input type="number" id="time" name="time" min="1" max="10">
             <label>How many hours would you like the workout to run (between 1 and 10 hours)?</label>
