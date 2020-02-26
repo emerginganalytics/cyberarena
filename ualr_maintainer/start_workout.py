@@ -62,8 +62,9 @@ def start_workout(workout_id):
                 compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
                 if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
-                    ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                    register_workout_update(project, dnszone, workout, workout["external_ip"], ip_address)
+                    if 'natIP' in vm_instance['networkInterfaces'][0]['accessConfigs'][0]:
+                        ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                        register_workout_update(project, dnszone, workout, workout["external_ip"], ip_address)
             print("No Virtual Machines to stop for workout %s" % workout_id)
         return True
     except():

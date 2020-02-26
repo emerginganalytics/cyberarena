@@ -7,16 +7,12 @@ from datetime import datetime, timedelta, date
 from google.cloud import datastore
 import time
 import calendar
+from globals import ds_client, compute, project, dnszone, dns_suffix
 
 # Global variables for this function
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
 expired_workout = []
-project = 'apacte'
 zone = 'us-central1-a'
 region = 'us-central1'
-dnszone = 'cybergym-public'
-
 
 # IN PROGRESS
 # to be update with expiration date query from datastore
@@ -25,7 +21,6 @@ def workout_age(created_date):
     instance_creation_date = datetime.fromtimestamp(int(created_date))
     delta = now - instance_creation_date
     return delta.days
-
 
 def delete_vms(workout_id):
     result = compute.instances().list(project=project, zone=zone, filter='name = {}*'.format(workout_id)).execute()
@@ -98,7 +93,7 @@ def delete_dns(workout_id, ip_address):
         change_body = {"deletions": [
             {
                 "kind": "dns#resourceRecordSet",
-                "name": workout_id + ".cybergym-eac-ualr.org.",
+                "name": workout_id + dns_suffix + ".",
                 "rrdatas": [ip_address],
                 "type": "A",
                 "ttl": 30
@@ -146,7 +141,10 @@ def delete_specific_workout(workout_ID):
         if not workout['resources_deleted']:
             print('Deleting resources from workout %s' % workout_ID)
             if "external_ip" in workout:
-                delete_dns(workout_ID, workout["external_ip"])
+                try:
+                    delete_dns(workout_ID, workout["external_ip"])
+                except:
+                    print("DNS record does not exist")
             if delete_vms(workout_ID):
                 if delete_firewall_rules(workout_ID):
                     if delete_subnetworks(workout_ID):
@@ -157,6 +155,6 @@ def delete_specific_workout(workout_ID):
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
 
-delete_workouts = ['sukulr']
+delete_workouts = ['olggdz']
 for workout in delete_workouts:
     delete_specific_workout(workout)
