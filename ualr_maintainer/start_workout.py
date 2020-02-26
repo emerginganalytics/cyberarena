@@ -7,15 +7,12 @@ from datetime import datetime, timedelta, date
 from google.cloud import datastore
 import time
 import calendar
+from globals import ds_client, project, compute, dnszone
 
 # Global variables for this function
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
 expired_workout = []
-project = 'ualr-cybersecurity'
 zone = 'us-central1-a'
 region = 'us-central1'
-dnszone = 'cybergym-public'
 
 # Create a new DNS record for the server and add the information to the datastore for later management
 def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):

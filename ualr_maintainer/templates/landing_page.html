@@ -6,7 +6,10 @@
     <p>{{ description }}</p>
     <h2>Link</h2>
     <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}">http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}</a>
-
+    <div class="input-field col s12">
+            <input type="number" id="time" name="time" min="1" max="10">
+            <label>How many hours would you like the workout to run (between 1 and 10 hours)?</label>
+    </div>
     <div class="btn-ctn">
         <button id="start-vm" class="waves-effect waves-light btn" >START VM</button>
     </div>
@@ -18,6 +21,7 @@
         $(document).ready(function() {
             $("#start-vm").click(function () {
                 var workout_id = $("#workout_id").html()
+                var time = $("input#time").val();
                 $.ajax({
                     type: "POST",
                     contentType: "application/json;charset=utf-8",
@@ -25,6 +29,7 @@
                     traditional: "true",
                     data: JSON.stringify({
                         "workout_id": workout_id,
+                        "time": time
                     }),
                     dataType: "json",
                 });
