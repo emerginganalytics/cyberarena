@@ -11,7 +11,7 @@ from google.cloud import datastore
 # Global variables for this function
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
-project = 'ualr-cybersecurity'
+project = 'acapte'
 zone = 'us-central1-a'
 region = 'us-central1'
 
@@ -47,7 +47,3 @@ def student_firewall_add(project, workout_id, ip_address):
         }
 
     compute.firewalls().insert(project=project, body=firewall_body).execute()
-
-
-student_firewall_add('ualr-cybersecurity', 'cs4360inst-pp', '8.40.240.81')
-student_firewall_update('ualr-cybersecurity', 'cs4360inst-pp', '8.40.240.81')

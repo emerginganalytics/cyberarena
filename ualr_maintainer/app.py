@@ -11,6 +11,7 @@ import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
 from workout_firewall_update import student_firewall_add, student_firewall_update
+from globals import ds_client, dns_suffix, project, compute
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -25,11 +26,6 @@ from forms import CreateWorkoutForm
 
 # datastore dependency
 from google.cloud import datastore
-
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1')
-dns_suffix = ".aca-bootcamp.com"
-project = 'acapte'
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -163,6 +159,7 @@ def send_email(user_mail, workout_type, list_ext_IP):
     print('Email has been sent')
     server.quit()
 
+# Build scripts
 
 def create_firewall_rules(project, firewall_rules):
     for rule in firewall_rules:
@@ -471,7 +468,7 @@ def landing_page(workout_id):
         if workout['servers']:
             guac_path = workout['servers'][0]['guac_path']
         description = y['workout']['workout_description']
-        return render_template('landing_page.html', dns_suffix=dns_suffix, guac_path=guac_path, description=description, workout_id=workout_id)
+        return render_template('landing_page.html', description=description, dns_suffix=dns_suffix, guac_path=guac_path, workout_id=workout_id)
     else:
         return render_template('no_workout.html')
 
@@ -490,8 +487,20 @@ def start_vm():
     if (request.method == 'POST'):
         data = request.get_json()
         workout_id = data['workout_id']
-        start_workout(workout_id)
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
 
+        #DEBUG
+        print(workout)
+
+        workout['run_hours'] = data['time']
+        ds_client.put(workout)
+
+        #DEBUG
+        workoutdebug = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        print(workoutdebug)
+
+        start_workout(workout_id)
+    return "DONE"
 
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
@@ -499,6 +508,7 @@ def stop_vm():
         data = request.get_json()
         workout_id = data['workout_id']
         stop_workout(workout_id)
+    return "DONE"
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)

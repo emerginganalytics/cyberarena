@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, IntegerField, SubmitField
-from wtforms.validators import DataRequired, Email
+from wtforms.validators import DataRequired, Email, NumberRange
 
 class CreateWorkoutForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
