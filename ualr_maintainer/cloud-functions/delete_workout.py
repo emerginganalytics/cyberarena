@@ -12,7 +12,7 @@ import calendar
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
 expired_workout = []
-project = 'ualr-cybersecurity'
+project = 'apacte'
 zone = 'us-central1-a'
 region = 'us-central1'
 dnszone = 'cybergym-public'
@@ -157,6 +157,6 @@ def delete_specific_workout(workout_ID):
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
 
-delete_workouts = ['pcqvvz']
+delete_workouts = ['sukulr']
 for workout in delete_workouts:
     delete_specific_workout(workout)
