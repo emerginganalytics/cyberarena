@@ -10,6 +10,7 @@ import start_stop_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
+from workout_firewall_update import student_firewall_add, student_firewall_update
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -65,6 +66,7 @@ def store_unit_info(id, email, name, ts, workout_type):
         "instructor_id": email,
         "timestamp": ts,
         "workout_type": workout_type,
+        "description": '',
         "workouts": []
     })
 
@@ -450,6 +452,8 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
+
+# TODO: add time selection when starting vm
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
@@ -480,12 +484,14 @@ def workout_list(unit_id):
     else:
         return render_template('no_workout.html')
 
+# TODO: add student_firewall_update call after workout starts
 @app.route('/start_vm', methods=['GET', 'POST'])
 def start_vm():
     if (request.method == 'POST'):
         data = request.get_json()
         workout_id = data['workout_id']
         start_workout(workout_id)
+
 
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
