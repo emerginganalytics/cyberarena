@@ -11,7 +11,7 @@ import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
 from workout_firewall_update import student_firewall_add, student_firewall_update
-from globals import ds_client, dns_suffix, project, compute, WORKOUT_BOUNDS
+from globals import ds_client, dns_suffix, project, compute, workout_globals
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -462,7 +462,7 @@ def start_vm():
         if 'time' not in data:
             workout['run_hours'] = 2
         else:
-            workout['run_hours'] = min(int(data['time']), WORKOUT_BOUNDS.MAX_RUN_HOURS)
+            workout['run_hours'] = min(int(data['time']), workout_globals.MAX_RUN_HOURS)
         ds_client.put(workout)
 
         start_workout(workout_id)
