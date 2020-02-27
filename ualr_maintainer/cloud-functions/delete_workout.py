@@ -7,7 +7,16 @@ from datetime import datetime, timedelta, date
 from google.cloud import datastore
 import time
 import calendar
-from globals import ds_client, compute, project, dnszone, dns_suffix
+from googleapiclient.errors import HttpError
+
+import googleapiclient.discovery
+from google.cloud import datastore
+
+ds_client = datastore.Client()
+compute = googleapiclient.discovery.build('compute', 'v1')
+dns_suffix = ".cybergym-eac-ualr.org"
+project = 'ualr-cybersecurity'
+dnszone = 'cybergym-public'
 
 # Global variables for this function
 expired_workout = []
@@ -30,7 +39,10 @@ def delete_vms(workout_id):
                 response = compute.instances().delete(project=project, zone=zone,
                                            instance=vm_instance["name"]).execute()
             time.sleep(60)
-            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            try:
+                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            except:
+                pass
         else:
             print("No Virtual Machines to delete for workout %s" % workout_id)
         return True
@@ -45,7 +57,10 @@ def delete_firewall_rules(workout_id):
         if 'items' in result:
             for fw_rule in result['items']:
                 response = compute.firewalls().delete(project=project, firewall=fw_rule["name"]).execute()
-            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+            try:
+                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            except:
+                pass
         return True
     except():
         print("Error in deleting firewall rules for %s" % workout_id)
@@ -60,7 +75,10 @@ def delete_subnetworks(workout_id):
             for subnetwork in result['items']:
                 response = compute.subnetworks().delete(project=project, region=region,
                                                        subnetwork=subnetwork["name"]).execute()
-            compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+            try:
+                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            except:
+                pass
         return True
     except():
         print("Error in deleting subnetworks for %s" % workout_id)
@@ -74,7 +92,10 @@ def delete_network(workout_id):
         if 'items' in result:
             for route in result['items']:
                 response = compute.routes().delete(project=project, route=route["name"]).execute()
-            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+            try:
+                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            except:
+                pass
 
         # Now it is safe to delete the networks.
         result = compute.networks().list(project=project, filter='name = {}*'.format(workout_id)).execute()
@@ -108,53 +129,62 @@ def delete_dns(workout_id, ip_address):
     return True
 
 
+def delete_specific_workout(workout_id, workout):
+        try:
+            delete_dns(workout_id, workout["external_ip"])
+        except HttpError:
+            print("DNS record does not exist")
+            pass
+        except KeyError:
+            print("workout %s has no external IP address" % workout_id)
+            pass
+        if delete_vms(workout_id):
+            if delete_firewall_rules(workout_id):
+                if delete_subnetworks(workout_id):
+                    if delete_network(workout_id):
+                        return True
+
+        return False
+
+
+
 def delete_workouts(event, context):
-    query_workouts = ds_client.query(kind='cybergym-workout')
     # Only process the workouts from the last month. 2628000 is the number of seconds in a month
-    query_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 2628000))
-    for workout in list(query_workouts.fetch()):
+    query_old_workouts = ds_client.query(kind='cybergym-workout')
+    query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 2628000))
+    for workout in list(query_old_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
-        if workout['resources_deleted']:
-            print('Deleting resources from workout %s' % workout['workout_ID'])
-            expired_id = workout.key
+        if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
+            workout_id = None
+            if workout.key.name:
+                workout_id = workout.key.name
+            elif "workout_ID" in workout:
+                workout_id = workout["workout_ID"]
 
-            # First, delete the DNS entries associated with this workout.
-            if "external_ip" in workout:
-                delete_dns(expired_id, workout["external_ip"])
-            if delete_vms(expired_id):
-                if delete_firewall_rules(expired_id):
-                    if delete_subnetworks(expired_id):
-                        if delete_network(expired_id):
-                            workout['resources_deleted'] = True
-                            ds_client.put(workout)
+            if workout_id:
+                print('Deleting resources from workout %s' % workout_id)
+                if delete_specific_workout(workout_id, workout):
+                    workout['resources_deleted'] = True
+                    ds_client.put(workout)
 
+    query_misfit_workouts = ds_client.query(kind='cybergym-workout')
+    query_misfit_workouts.add_filter("misfit", "=", True)
+    for workout in list(query_misfit_workouts.fetch()):
+        workout_id = None
+        if workout.key.name:
+            workout_id = workout.key.name
+        elif "workout_ID" in workout:
+            workout_id = workout["workout_ID"]
 
-# This function is only for local testing
-def delete_specific_workout(workout_ID):
-    query_workouts = ds_client.query(kind='cybergym-workout')
-    first_key = ds_client.key('cybergym-workout', workout_ID)
-    query_workouts.key_filter(first_key, '=')
-    for workout in list(query_workouts.fetch()):
-        if 'resources_deleted' not in workout:
-            workout['resources_deleted'] = False
-        if not workout['resources_deleted']:
-            print('Deleting resources from workout %s' % workout_ID)
-            if "external_ip" in workout:
-                try:
-                    delete_dns(workout_ID, workout["external_ip"])
-                except:
-                    print("DNS record does not exist")
-            if delete_vms(workout_ID):
-                if delete_firewall_rules(workout_ID):
-                    if delete_subnetworks(workout_ID):
-                        if delete_network(workout_ID):
-                            workout['resources_deleted'] = True
-                            ds_client.put(workout)
+        if workout_id:
+            print('Deleting resources from workout %s' % workout_id)
+            if delete_specific_workout(workout_id, workout):
+                workout['resources_deleted'] = True
+                ds_client.put(workout)
+
 
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
 
-delete_workouts = ['olggdz']
-for workout in delete_workouts:
-    delete_specific_workout(workout)
+delete_workouts(None, None)

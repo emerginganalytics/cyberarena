@@ -11,7 +11,7 @@ import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
 from workout_firewall_update import student_firewall_add, student_firewall_update
-from globals import ds_client, dns_suffix, project, compute
+from globals import ds_client, dns_suffix, project, compute, WORKOUT_BOUNDS
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
@@ -111,12 +111,14 @@ def add_dns_record(project, dnszone, workout_id, ip_address):
     workout["external_ip"] = ip_address
     ds_client.put(workout)
 
+
 # Add the information to the datastore for later management
 def register_workout_server(workout_id, server, guac_path):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     workout["servers"].append({"server": server, "guac_path": guac_path})
     ds_client.put(workout)
+
 
 def print_workout_info(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
@@ -126,40 +128,7 @@ def print_workout_info(workout_id):
             print("%s: http://%s:8080/guacamole/#/client/%s" %(workout_id, server["ip_address"],
                                                                workout['labentry_guac_path']))
 
-# send email method
-def send_email(user_mail, workout_type, list_ext_IP):
-    from_address = 'philiphuff7@gmail.com'
-    from_address_cred = 'xnwaiuucpaxzsnys'
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    # extended simple mail transfer protocol command sent by an email
-    # to identify iterself when connecting to another email server to start
-    # the process of sendig an email
-    server.ehlo()
-    server.starttls()
-    server.ehlo()
 
-    server.login(from_address, from_address_cred)
-
-    for (ind, team_url) in enumerate(list_ext_IP):
-
-        body = workoutdescription.body_workout_message(workout_type, team_url)
-        mimebody = MIMEText(body, 'html')
-        subject = "Team {}: Your UA Little Rock Cyber Gym Workout is Ready!".format(str(ind + 1))
-        msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = from_address
-        msg['To'] = user_mail
-        msg.attach(mimebody)
-        server.sendmail(
-            from_address,
-            user_mail,
-            msg.as_string()
-        )
-
-    print('Email has been sent')
-    server.quit()
-
-# Build scripts
 
 def create_firewall_rules(project, firewall_rules):
     for rule in firewall_rules:
@@ -490,7 +459,10 @@ def start_vm():
         data = request.get_json()
         workout_id = data['workout_id']
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        workout['run_hours'] = data['time']
+        if 'time' not in data:
+            workout['run_hours'] = 2
+        else:
+            workout['run_hours'] = min(int(data['time']), WORKOUT_BOUNDS.MAX_RUN_HOURS)
         ds_client.put(workout)
 
         start_workout(workout_id)
