@@ -36,3 +36,7 @@ def get_callback(future, data):
 
 future = publisher.publish(topic_path, data=message)
 future.add_done_callback(get_callback(future, message))
+
+# test values
+print('[*] Publishing workout status ...')
+print('[*] message: {}'.format(message))
