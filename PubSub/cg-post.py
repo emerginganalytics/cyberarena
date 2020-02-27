@@ -1,31 +1,38 @@
 #!/usr/bin/python3
+from google.cloud import pubsub_v1
+
+import base64 as b64
 import os
 import requests
 import sys
 
-# TODO REMOVE THIS COMMENT BLOCK ONCE ADDED TO EACH VM
-# This script is built soley for the purpose of posting to CyberGym
-# endpoint as a workout completion checkpoint. 
-# Validation scripts will check the appropriate workout conditions
-# and call this funtion when done. Example call: os.system('python cg-post.py')
+# NOTE change environment = .json system location
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '<json file location>'
 
-# parsing hostname to determine workout_ID, type, and team number
+# parsing hostname to determine workout_ID and team number; type=sys.arv[1]
 name = os.uname()[1]
 data = name.split("-")
 
 w_id = data[0]
-w_type = data[1] 
+w_type = sys.argv[1]
 team_num = data[-1]
 
-# TODO Add CyberGYm endpoint URL for Pub/Sbu
-URL = "http://localhost"
+w_string = '{}-{} workout: complete!'.format(w_type, team_num)
+message = b64.b64encode(w_string.encode('utf-8'))
 
-data = {
-        'workout_ID':w_id,
-        'team_num': team_num,
-        'status':'Q29tcGxldGUh',
-        }
-print('[*] Posting Workout Status ...')
-r = requests.post(url=URL, data=data)
+# create publish session and publish message
+publisher = pubsub_v1.PublisherClient()
+topic_path = publisher.topic_path('ualr-cybersecurity', \
+        '{}-{}-{}'.format(w_id, w_type, team_num))
 
-# [eof]
+# error handling
+def get_callback(future, data):
+    def callback(future):
+        try:
+            print(future.result())
+        except: # noqa
+            print("Please handle {} for {}.".format(future.exception(), data))
+    return callback
+
+future = publisher.publish(topic_path, data=message)
+future.add_done_callback(get_callback(future, message))
