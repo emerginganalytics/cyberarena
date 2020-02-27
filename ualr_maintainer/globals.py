@@ -11,7 +11,7 @@ dnszone = 'cybergym-public'
 class workout_globals():
     MAX_RUN_HOURS = 10
 
-    def extended_wait(self, project, zone, operation_id):
+    def extended_wait(project, zone, operation_id):
         max_wait = 3
         i = 0
         complete = False
