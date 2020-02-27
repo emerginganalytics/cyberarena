@@ -63,9 +63,13 @@ def start_workout(workout_id):
 
                 if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
                     if 'natIP' in vm_instance['networkInterfaces'][0]['accessConfigs'][0]:
-                        ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                        register_workout_update(project, dnszone, workout, workout["external_ip"], ip_address)
-            print("No Virtual Machines to stop for workout %s" % workout_id)
+                        tags = workout['tags']
+                        if tags:
+                            for item in tags['items']:
+                                if item == 'labentry':
+                                    ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                                    register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
+            print("Finished starting %s" % workout_id)
         return True
     except():
         print("Error in starting VM for %s" % workout_id)

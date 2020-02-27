@@ -1,7 +1,4 @@
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1')
-dns_suffix = ".aca-bootcamp.com"
-project = 'acapte'
+from globals import ds_client, compute, project, dnszone, dns_suffix
 
 def create_firewall_rules(project, firewall_rules):
     for rule in firewall_rules:
