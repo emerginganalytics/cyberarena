@@ -45,6 +45,8 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
 
 
     workout["external_ip"] = new_ip
+    if workout['running'] == False:
+        workout['running'] = True
     ds_client.put(workout)
 
 

@@ -82,6 +82,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'run_hours': 2,
         'timestamp': timestamp,
         'resources_deleted': False,
+        'running': True,
         'servers': []
     })
 
@@ -421,8 +422,6 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
-
-# TODO: add time selection when starting vm
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
@@ -437,9 +436,11 @@ def landing_page(workout_id):
         y = load(f, Loader=Loader)
         guac_path = None
         if workout['servers']:
-            guac_path = workout['servers'][0]['guac_path']
+            for server in workout['servers']:
+                if server['guac_path'] != None:
+                    guac_path = server['guac_path']
         description = y['workout']['workout_description']
-        return render_template('landing_page.html', description=description, dns_suffix=dns_suffix, guac_path=guac_path, workout_id=workout_id)
+        return render_template('landing_page.html', description=description, dns_suffix=dns_suffix, guac_path=guac_path, workout_id=workout_id, running=workout['running'])
     else:
         return render_template('no_workout.html')
 
