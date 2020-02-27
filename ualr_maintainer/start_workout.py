@@ -65,7 +65,7 @@ def start_workout(workout_id):
 
                 if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
                     if 'natIP' in vm_instance['networkInterfaces'][0]['accessConfigs'][0]:
-                        tags = workout['tags']
+                        tags = vm_instance['tags']
                         if tags:
                             for item in tags['items']:
                                 if item == 'labentry':
