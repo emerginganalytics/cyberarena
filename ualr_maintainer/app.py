@@ -452,8 +452,6 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
-
-# TODO: add time selection when starting vm
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
