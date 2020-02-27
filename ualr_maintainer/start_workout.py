@@ -3,11 +3,9 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from datetime import datetime, timedelta, date
-from google.cloud import datastore
+from globals import ds_client, project, compute, dnszone, workout_globals
 import time
 import calendar
-from globals import ds_client, project, compute, dnszone, workout_globals
 
 # Global variables for this function
 expired_workout = []
@@ -47,6 +45,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
     workout["external_ip"] = new_ip
     if workout['running'] == False:
         workout['running'] = True
+    workout['start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(workout)
 
 
