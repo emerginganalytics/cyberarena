@@ -4,6 +4,8 @@
 #
 import googleapiclient.discovery
 from globals import ds_client, project, compute, dnszone, workout_globals
+import time
+import calendar
 
 # Global variables for this function
 expired_workout = []
@@ -43,6 +45,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
     workout["external_ip"] = new_ip
     if workout['running'] == False:
         workout['running'] = True
+    workout['start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(workout)
 
 

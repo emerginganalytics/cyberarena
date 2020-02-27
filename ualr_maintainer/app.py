@@ -420,13 +420,17 @@ def landing_page(workout_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
     if (workout):
+        expiration = time.strftime('%d %B %Y', (
+            time.gmtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+        shutoff = time.strftime('%I:%M %p',
+                                (time.gmtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
         guac_path = None
         if workout['servers']:
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, workout_id=workout_id, running=workout['running'])
+                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id, running=workout['running'])
     else:
         return render_template('no_workout.html')
 
