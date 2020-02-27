@@ -3,10 +3,6 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from datetime import datetime, timedelta, date
-from google.cloud import datastore
-import time
-import calendar
 from globals import ds_client, project, compute, dnszone, workout_globals
 
 # Global variables for this function

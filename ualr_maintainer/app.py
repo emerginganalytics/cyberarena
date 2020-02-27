@@ -1,12 +1,8 @@
-import datetime
-import os
 import time
 import calendar
 import random
 import string
-import create_workout
 import list_vm
-import start_stop_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
@@ -14,18 +10,14 @@ from workout_firewall_update import student_firewall_add, student_firewall_updat
 from globals import ds_client, dns_suffix, project, compute, workout_globals
 
 import googleapiclient.discovery
-from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
+from flask import Flask, render_template, redirect, request
 from base64 import b64encode as b64
-from yaml import load, dump, Loader, Dumper
+from yaml import load, Loader
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import workoutdescription
-from forms import CreateWorkoutForm, StartVMForm, StopVMForm
+from forms import CreateWorkoutForm
 
 # datastore dependency
-from google.cloud import datastore
+from google.cloud import datastore, storage
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -426,8 +418,6 @@ def build_workout(build_data, workout_type):
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
-    startForm = StartVMForm()
-    stopForm = StopVMForm()
 
     if (workout):
         guac_path = None
