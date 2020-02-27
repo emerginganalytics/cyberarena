@@ -1,12 +1,8 @@
-import datetime
-import os
 import time
 import calendar
 import random
 import string
-import create_workout
 import list_vm
-import start_stop_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
@@ -14,18 +10,14 @@ from workout_firewall_update import student_firewall_add, student_firewall_updat
 from globals import ds_client, dns_suffix, project, compute, workout_globals
 
 import googleapiclient.discovery
-from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
+from flask import Flask, render_template, redirect, request
 from base64 import b64encode as b64
-from yaml import load, dump, Loader, Dumper
+from yaml import load, Loader
 
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-import workoutdescription
-from forms import CreateWorkoutForm, StartVMForm, StopVMForm
+from forms import CreateWorkoutForm
 
 # datastore dependency
-from google.cloud import datastore
+from google.cloud import datastore, storage
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -382,13 +374,18 @@ def build_workout(build_data, workout_type):
                 }
                 nics.append(nic)
 
+            # The ssh keys are included with some servers for local authentication within the network
+            sshkey = None
+            if "sshkey" in server:
+                sshkey = server["sshkey"]
+
             guac_path = None
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         server['machine_type'],
-                                         server['network_routing'], nics, server['tags'], server['metadata'], guac_path)
+                                         server['machine_type'], server['network_routing'], nics, server['tags'],
+                                         server['metadata'], sshkey, guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
@@ -426,17 +423,19 @@ def build_workout(build_data, workout_type):
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
-    startForm = StartVMForm()
-    stopForm = StopVMForm()
 
     if (workout):
+        expiration = time.strftime('%d %B %Y', (
+            time.gmtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+        shutoff = time.strftime('%I:%M %p',
+                                (time.gmtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
         guac_path = None
         if workout['servers']:
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, workout_id=workout_id, running=workout['running'])
+                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id, running=workout['running'])
     else:
         return render_template('no_workout.html')
 
