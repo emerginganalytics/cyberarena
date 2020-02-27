@@ -17,5 +17,5 @@ file location.
   > systems
   
 Example workout publish calls:
-  > python3 /<path to script/cg-post.py permissions 
+  > python3 /<path to script>/cg-post.py permissions 
 ---
