@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, date
 from google.cloud import datastore
 import time
 import calendar
-from globals import ds_client, project, compute, dnszone
+from globals import ds_client, project, compute, dnszone, workout_globals
 
 # Global variables for this function
 expired_workout = []
@@ -59,13 +59,17 @@ def start_workout(workout_id):
         if 'items' in result:
             for vm_instance in result['items']:
                 response = compute.instances().start(project=project, zone=zone, instance=vm_instance["name"]).execute()
-                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+                workout_globals.extended_wait(project, zone, response["id"])
 
                 if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
                     if 'natIP' in vm_instance['networkInterfaces'][0]['accessConfigs'][0]:
-                        ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                        register_workout_update(project, dnszone, workout, workout["external_ip"], ip_address)
-            print("No Virtual Machines to stop for workout %s" % workout_id)
+                        tags = workout['tags']
+                        if tags:
+                            for item in tags['items']:
+                                if item == 'labentry':
+                                    ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                                    register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
+            print("Finished starting %s" % workout_id)
         return True
     except():
         print("Error in starting VM for %s" % workout_id)

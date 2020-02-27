@@ -9,12 +9,7 @@ from google.cloud import datastore
 
 
 # Global variables for this function
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1', cache_discovery=False)
-project = 'acapte'
-zone = 'us-central1-a'
-region = 'us-central1'
-
+from globals import ds_client, compute, project, dnszone, dns_suffix
 
 def student_firewall_update(project, workout_id, ip_address):
     response = compute.firewalls().delete(project=project, firewall=workout_id + "-external-allow-student").execute()
