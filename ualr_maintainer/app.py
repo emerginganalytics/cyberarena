@@ -374,13 +374,18 @@ def build_workout(build_data, workout_type):
                 }
                 nics.append(nic)
 
+            # The ssh keys are included with some servers for local authentication within the network
+            sshkey = None
+            if "sshkey" in server:
+                sshkey = server["sshkey"]
+
             guac_path = None
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         server['machine_type'],
-                                         server['network_routing'], nics, server['tags'], server['metadata'], guac_path)
+                                         server['machine_type'], server['network_routing'], nics, server['tags'],
+                                         server['metadata'], sshkey, guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
