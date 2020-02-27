@@ -15,5 +15,6 @@ def stop_workout(workout_id):
                                                 instance=vm_instance["name"]).execute()
         workout['running'] = False
         ds_client.put(workout)
+        print("Workouts stopped")
     else:
         print("No workouts to stop")

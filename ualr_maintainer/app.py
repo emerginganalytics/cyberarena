@@ -22,7 +22,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import workoutdescription
-from forms import CreateWorkoutForm
+from forms import CreateWorkoutForm, StartVMForm, StopVMForm
 
 # datastore dependency
 from google.cloud import datastore
@@ -54,7 +54,7 @@ def store_instructor_info(email):
 
     ds_client.put(new_instructor)
 
-def store_unit_info(id, email, name, ts, workout_type):
+def store_unit_info(id, email, name, ts, workout_type, description):
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
     new_unit.update({
@@ -62,7 +62,7 @@ def store_unit_info(id, email, name, ts, workout_type):
         "instructor_id": email,
         "timestamp": ts,
         "workout_type": workout_type,
-        "description": '',
+        "description": description,
         "workouts": []
     })
 
@@ -342,7 +342,7 @@ def build_workout(build_data, workout_type):
 
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
-    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type)
+    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['description'])
 
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
@@ -426,21 +426,17 @@ def build_workout(build_data, workout_type):
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+    startForm = StartVMForm()
+    stopForm = StopVMForm()
 
     if (workout):
-        yaml_file = "../yaml-files/%s.yaml" % unit['workout_type']
-        try:
-            f = open(yaml_file, "r")
-        except:
-            print("File does not exist")
-        y = load(f, Loader=Loader)
         guac_path = None
         if workout['servers']:
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
-        description = y['workout']['workout_description']
-        return render_template('landing_page.html', description=description, dns_suffix=dns_suffix, guac_path=guac_path, workout_id=workout_id, running=workout['running'])
+        return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
+                               guac_path=guac_path, workout_id=workout_id, running=workout['running'])
     else:
         return render_template('no_workout.html')
 
@@ -457,25 +453,23 @@ def workout_list(unit_id):
 @app.route('/start_vm', methods=['GET', 'POST'])
 def start_vm():
     if (request.method == 'POST'):
-        data = request.get_json()
-        workout_id = data['workout_id']
+        workout_id = request.form['workout_id']
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        if 'time' not in data:
+        if 'time' not in request.form:
             workout['run_hours'] = 2
         else:
-            workout['run_hours'] = min(int(data['time']), workout_globals.MAX_RUN_HOURS)
+            workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
         ds_client.put(workout)
 
         start_workout(workout_id)
-    return "DONE"
+        return redirect("/landing/%s" % (workout_id))
 
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
     if (request.method == 'POST'):
-        data = request.get_json()
-        workout_id = data['workout_id']
+        workout_id = request.form['workout_id']
         stop_workout(workout_id)
-    return "DONE"
+        return redirect("/landing/%s" % (workout_id))
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
