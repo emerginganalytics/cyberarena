@@ -18,17 +18,17 @@
   </div>
 <div id="id01" class="modal">
 
-  <form class="modal-content animate" method="post">
+  <form class="modal-content animate" action="{{url_for('do_admin_login')}}" method="POST">
     <div class="imgcontainer">
       <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
       <img src="/static/CyberGymClassified.png" alt="Avatar" class="avatar">
     </div>
 
     <div class="container" >
-      <label for="uname"><b>Username</b></label>
-      <input type="text" placeholder="Enter Username (I think it's 'admin' I need to contact IT about this...)" required>
+      <label for="username"><b>Username</b></label>
+      <input type="text" name="username" placeholder="admin"required>
 
-      <label for="psw"><b>Password</b></label>
+      <label for="password"><b>Password</b></label>
       <input type="password" placeholder="Enter Password" name="psw" required>
 
       <button type="submit">Login</button>
