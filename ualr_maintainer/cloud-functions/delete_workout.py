@@ -185,5 +185,8 @@ def delete_workouts(event, context):
 
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
+specific_workouts = ['cs4360dit-pp']
+for workout in specific_workouts:
+    delete_specific_workout(workout)
 
 delete_workouts(None, None)

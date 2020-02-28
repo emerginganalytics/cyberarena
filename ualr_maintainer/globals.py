@@ -10,6 +10,8 @@ dnszone = 'cybergym-public'
 
 class workout_globals():
     MAX_RUN_HOURS = 10
+    yaml_bucket = project + '_cloudbuild'
+    yaml_folder = 'yaml-build-files/'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):

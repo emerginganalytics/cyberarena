@@ -7,7 +7,7 @@ import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
 from workout_firewall_update import student_firewall_add, student_firewall_update
-from globals import ds_client, dns_suffix, project, compute, workout_globals
+from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, request
@@ -17,7 +17,7 @@ from yaml import load, Loader
 from forms import CreateWorkoutForm
 
 # datastore dependency
-from google.cloud import datastore, storage
+from google.cloud import datastore
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -305,14 +305,13 @@ def build_workout(build_data, workout_type):
 
     # Open and read YAML file
     print('Loading config file')
-    yaml_file = "../yaml-files/%s.yaml" % workout_type
-
-    try:
-        f = open(yaml_file, "r")
-    except:
-        print("File does not exist")
-
-    y = load(f, Loader=Loader)
+    # get bucket with name
+    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    # get bucket data as blob
+    blob = bucket.get_blob(workout_globals.yaml_folder + workout_type + ".yaml")
+    # convert to string
+    yaml_from_bucket = blob.download_as_string()
+    y = load(yaml_from_bucket, Loader=Loader)
 
     workout_name = y['workout']['name']
     region = y['workout']['region']
@@ -334,7 +333,7 @@ def build_workout(build_data, workout_type):
 
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
-    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['description'])
+    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['workout_description'])
 
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
@@ -346,7 +345,7 @@ def build_workout(build_data, workout_type):
         for network in y['networks']:
             network_body = {"name": "%s-%s" % (generated_workout_ID, network['name']),
                             "autoCreateSubnetworks": False,
-                            "region": "region"}
+                            "region": region}
             response = compute.networks().insert(project=project, body=network_body).execute()
             compute.globalOperations().wait(project=project, operation=response["id"]).execute()
             time.sleep(10)
@@ -429,13 +428,15 @@ def landing_page(workout_id):
             time.gmtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
         shutoff = time.strftime('%I:%M %p',
                                 (time.gmtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
+
         guac_path = None
         if workout['servers']:
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id, running=workout['running'])
+                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id,
+                               running=workout['running'])
     else:
         return render_template('no_workout.html')
 
