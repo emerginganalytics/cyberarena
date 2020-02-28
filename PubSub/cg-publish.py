@@ -15,15 +15,14 @@ data = name.split("-")
 
 w_id = data[0]
 w_type = sys.argv[1]
-team_num = data[-1]
 
-w_string = '{}-{} workout: complete!'.format(w_type, team_num)
+w_string = '{}-{} workout: complete!'.format(w_type)
 message = b64.b64encode(w_string.encode('utf-8'))
 
 # create publish session and publish message
 publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path('ualr-cybersecurity', \
-        '{}-{}-{}-workout'.format(w_id, w_type, team_num))
+        '{}-{}-workout'.format(w_id, w_type))
 
 # error handling
 def get_callback(future, data):
