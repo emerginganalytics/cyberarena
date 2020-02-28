@@ -3,12 +3,7 @@
 
 ---
 ---
-## [ validator.py ]:   
-This script is what is used to test creation and deletion of Pub/Sub topics and subscribers.   
-Not a final design -- Topic will be created upon workout build. No need to have a seperate
-script to do the same thing.
 
----
 ## [ cg-publish.py ]:   
 This script can be used with any workout. In order for the script to work properly, you'll need to make
 sure google-service.json file is downloaded on each machine. Modify the cg-post.py to point to the json
