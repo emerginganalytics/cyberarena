@@ -23,7 +23,7 @@ message = b64.b64encode(w_string.encode('utf-8'))
 # create publish session and publish message
 publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path('ualr-cybersecurity', \
-        '{}-{}-{}'.format(w_id, w_type, team_num))
+        '{}-{}-{}-workout'.format(w_id, w_type, team_num))
 
 # error handling
 def get_callback(future, data):
