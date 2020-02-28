@@ -42,9 +42,9 @@ def stop_workouts(event, context):
                                                                 instance=vm_instance["name"]).execute()
                     else:
                         print("No Virtual Machines to stop for workout %s" % workout_id)
-                    return True
                 except KeyError:
                     print("Error when stopping in finding key in workout %s" % workout_id)
                     pass
+        print('Stopped servers for workout %s' % workout_id)
 
 stop_workouts(None, None)
