@@ -6,23 +6,67 @@ workout:
   project-name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
+  dnszone: "cybergym-public"
   project-api-key-type: cloud
   flag-location: /usr/src/flag
 
 network:
-  ip-cidr: 10.1.0.0/16
-  subnets:
-    ip-cidr: 10.1.1.0/24
-		firewall-allow:
-			- any,10.1.1.10,tcp,any,8080
-		images: {
-          image: image-labentry
-            localip: 10.1.1.10
-            external: yes
-            image: image-promise-dvwalab
-              localip: 10.1.1.11
-              external: no
-            image: image-promise-attacker
-              localip: 10.1.1.12
-              external: no
-        }
+  - name: external-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.1.0/24
+
+servers:
+  - name: labentry-server
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "labentry"]}
+    metadata: None
+    guac_path: "MQBjAG15c3Fs"
+    # List all nics for this server. Multiple items may be included using YAML block sequence format
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: promise-dvwalab-server
+    image: image-promise-dvwalab
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: None
+    metadata: None
+    # List all nics for this server. Multiple items may be included using YAML block sequence format
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.3
+        subnet: default
+        external_NAT: false
+  - name: promise-attacker-server
+    image: image-promise-attacker
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {'items': ['http-server','https-server']}
+    metadata: None
+    # List all nics for this server. Multiple items may be included using YAML block sequence format
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.4
+        subnet: default
+        external_NAT: true
+
+routes:
+
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]

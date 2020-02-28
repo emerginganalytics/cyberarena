@@ -26,7 +26,6 @@ networks:
 
 servers:
   - name: cybergym-labentry
-    labentry: True
     image: image-labentry
     machine_type: "n1-standard-1"
     network_routing: false
