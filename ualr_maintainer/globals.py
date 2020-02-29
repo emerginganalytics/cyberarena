@@ -4,9 +4,9 @@ from google.cloud import datastore, storage
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-dns_suffix = ".cybergym-eac-ualr.org"
-project = 'ualr-cybersecurity'
-dnszone = 'cybergym-public'
+dns_suffix = ".acactb.com"
+project = 'acapte'
+dnszone = 'aca-bootcamp-public'
 
 class workout_globals():
     MAX_RUN_HOURS = 10

@@ -242,10 +242,11 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
     new_instance = compute.instances().get(project=project, zone=zone, instance=name).execute()
     ip_address = None
     if tags:
-        for item in tags['items']:
-            if item == 'labentry':
-                ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                add_dns_record(project, dnszone, workout, ip_address)
+        if 'items' in tags:
+            for item in tags['items']:
+                if item == 'labentry':
+                    ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                    add_dns_record(project, dnszone, workout, ip_address)
 
     if guac_path:
         register_workout_server(workout, name, guac_path)
@@ -388,7 +389,7 @@ def build_workout(build_data, workout_type):
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
-        if (y['routes']):
+        if 'routes' in y and y['routes']:
             for route in y['routes']:
                 r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
                      "network": "%s-%s" % (generated_workout_ID, route['network']),
