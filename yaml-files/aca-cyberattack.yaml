@@ -3,23 +3,24 @@ version: '1'
 workout:
   name: cyberattack
   workout_description: 'Experience a botnet cyber-attack'
-  project_name: ualr-cybersecurity
+  project_name: acapte
   region: "us-central1"
   zone: "us-central1-a"
-  dnszone: "cybergym-public"
+  dnszone: "aca-bootcamp-public"
   project_api_key_type: cloud
   flag_location:
 
-networks: 
+networks:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.1.0/24
+        ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
+  - name: cybergym-labentry
+    labentry: true
+    image: image-aca-cybergym-labentry
+    machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["http-server", "https-server", "labentry"]}
     metadata: none
@@ -28,22 +29,21 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.10
         subnet: default
-        external_NAT: True
+        external_NAT: true
   - name: cybergym-victim
-    image: image-promise-victim-win2012
+    image: image-aca-cybergym-teenyweb
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: None
     metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.11
         subnet: default
-        external_NAT: True
+        external_NAT: false
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
-- name: allow-http
+  - name: allow-http
     network: external-network
     target_tags: ["http-server"]
     protocol: none

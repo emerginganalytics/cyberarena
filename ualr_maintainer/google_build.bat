@@ -1,1 +1,0 @@
-gcloud builds submit --tag gcr.io/ualr-cybersecurity/cybergym-v2

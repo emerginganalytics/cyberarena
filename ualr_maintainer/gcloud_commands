@@ -1,0 +1,9 @@
+# Change the project
+gcloud config set project [project-name]
+
+# Deploy to cloud run
+gcloud builds submit --tag gcr.io/ualr-cybersecurity/cybergym-v2
+gcloud beta run deploy --image gcr.io/ualr-cybersecurity/cybergym-v2
+
+gcloud builds submit --tag gcr.io/acapte/cybergym
+gcloud beta run deploy --image gcr.io/acapte/cybergym
