@@ -5,5 +5,6 @@ gcloud config set project [project-name]
 gcloud builds submit --tag gcr.io/ualr-cybersecurity/cybergym-v2
 gcloud beta run deploy --image gcr.io/ualr-cybersecurity/cybergym-v2
 
+# Deploy to cloud run on ACA Cyber Gym
 gcloud builds submit --tag gcr.io/acapte/cybergym
 gcloud beta run deploy --image gcr.io/acapte/cybergym
