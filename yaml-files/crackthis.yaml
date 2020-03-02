@@ -1,0 +1,61 @@
+version: '1'
+
+workout:
+  name: crackthis
+  workout_description: 'Learn how to reverse engineer binary files'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  project_api_key_type: cloud
+  flag_location:
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.0.0/24
+
+servers:
+  - name: cybergym-labentry 
+    image: image-labentry
+    machine_type: "n1-standard-1" 
+    network_routing: false
+    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: external-network-default
+        external_NAT: true
+  - name: cybergym-windows-16
+    image: image-promise-win2016
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-rdp"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.20
+        subnet: external-network-default
+        external_NAT: false
+routes:
+
+firewall_rules:
+  - name: allow-http
+    network: external-netowrk
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80, 8080, 443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
+  - name: allow-internal
+    network: internal-network
+    target_tags: ["attacker"]
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/24"]
