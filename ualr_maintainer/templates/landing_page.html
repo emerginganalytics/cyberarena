@@ -23,9 +23,9 @@
             </div>
             <div class="btn-ctn">
                 {% if running %}
-                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START VM</button>
+                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
                 {% else %}
-                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START VM</button>
+                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
                 {% endif %}
             </div>
         </form>
@@ -35,10 +35,18 @@
             <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
             <div class="btn-ctn">
                 {% if running %}
-                    <button id="stop-vm" class="waves-effect waves-light btn" >STOP VM</button>
+                    <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
                 {% else %}
-                    <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP VM</button>
+                    <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
                 {% endif %}
+            </div>
+        </form>
+    </div>
+    <div>
+        <form action="/reset_vm" method="post">
+            <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+            <div class="btn-ctn">
+                    <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUT</button>
             </div>
         </form>
     </div>

@@ -6,6 +6,7 @@ import list_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
+from reset_workout import reset_workout
 from workout_firewall_update import student_firewall_add
 from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client
 
@@ -472,6 +473,13 @@ def stop_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
         stop_workout(workout_id)
+        return redirect("/landing/%s" % (workout_id))
+
+@app.route('/reset_vm', methods=['GET', 'POST'])
+def reset_vm():
+    if (request.method == 'POST'):
+        workout_id = request.form['workout_id']
+        reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
 if __name__ == '__main__':
