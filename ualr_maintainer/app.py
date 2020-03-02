@@ -74,7 +74,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'run_hours': 2,
         'timestamp': timestamp,
         'resources_deleted': False,
-        'running': True,
+        'running': False,
         'servers': []
     })
 
@@ -407,6 +407,8 @@ def build_workout(build_data, workout_type):
                                    "sourceRanges": rule['source_ranges']})
 
         create_firewall_rules(project, firewall_rules)
+
+        stop_workout(generated_workout_ID)
 
     # time.sleep(120)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
