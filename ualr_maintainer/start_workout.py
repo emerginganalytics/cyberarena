@@ -3,7 +3,7 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from globals import ds_client, project, compute, dnszone, workout_globals
+from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
 import time
 import calendar
 
@@ -22,7 +22,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
         "deletions": [
             {
                 "kind": "dns#resourceRecordSet",
-                "name": workout_id + ".cybergym-eac-ualr.org.",
+                "name": workout_id + dns_suffix + ".",
                 "rrdatas": [old_ip],
                 "type": "A",
                 "ttl": 30
@@ -31,7 +31,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
         "additions": [
         {
             "kind": "dns#resourceRecordSet",
-            "name": workout_id + ".cybergym-eac-ualr.org.",
+            "name": workout_id + dns_suffix + ".",
             "rrdatas": [new_ip],
             "type": "A",
             "ttl": 30
@@ -62,13 +62,14 @@ def start_workout(workout_id):
                 response = compute.instances().start(project=project, zone=zone, instance=vm_instance["name"]).execute()
                 workout_globals.extended_wait(project, zone, response["id"])
 
-                if 'accessConfigs' in vm_instance['networkInterfaces'][0]:
-                    if 'natIP' in vm_instance['networkInterfaces'][0]['accessConfigs'][0]:
-                        tags = vm_instance['tags']
+                started_vm = compute.instances().get(project=project, zone=zone, instance=vm_instance["name"]).execute()
+                if 'accessConfigs' in started_vm['networkInterfaces'][0]:
+                    if 'natIP' in started_vm['networkInterfaces'][0]['accessConfigs'][0]:
+                        tags = started_vm['tags']
                         if tags:
                             for item in tags['items']:
                                 if item == 'labentry':
-                                    ip_address = vm_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                                    ip_address = started_vm['networkInterfaces'][0]['accessConfigs'][0]['natIP']
                                     register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
             print("Finished starting %s" % workout_id)
         return True
