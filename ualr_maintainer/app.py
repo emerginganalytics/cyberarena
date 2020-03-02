@@ -6,7 +6,7 @@ import list_vm
 import start_workout
 from stop_workout import stop_workout
 from start_workout import start_workout
-from workout_firewall_update import student_firewall_add, student_firewall_update
+from workout_firewall_update import student_firewall_add
 from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client
 
 import googleapiclient.discovery
