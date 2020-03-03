@@ -14,8 +14,9 @@ from workout_firewall_update import student_firewall_add, student_firewall_updat
 from globals import ds_client, dns_suffix, project, compute, workout_globals
 
 import googleapiclient.discovery
-from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
 from base64 import b64encode as b64
+from flask import Flask, render_template, redirect, url_for, make_response, request, jsonify, flash
+from google.cloud import pubsub_v1
 from yaml import load, dump, Loader, Dumper
 
 import smtplib
@@ -31,9 +32,8 @@ from google.cloud import datastore
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
-# ------------------------ FLAG GENERATOR -------------------------
-# See also build_flag_startup in create_vm.py for implementation
 
+# ------------------------ FLAG GENERATOR -------------------------
 def flag_generator():
     from os import urandom as rand
 
@@ -43,8 +43,49 @@ def flag_generator():
     return rand_flag
 
 
-# --------------------------- FLASK APP --------------------------
+# TODO Identify where to call create_pub_sub_topic() and create_subscriber()
+# Create Workout Topic based on id, type[name], and team number
+def create_workout_topic(workout_id, workout_type):
+    publisher = pubsub_v1.PublisherClient()
 
+    topic_name = '{}-{}-workout'.format(workout_id, workout_type)
+    topic_path = publisher.topic_path(project, topic_name)
+
+    topic = publisher.create_topic(topic_path)
+    print('Topic create: {}'.format(topic))
+    return topic_path, topic_name
+
+
+# Create Subscriber for each workout Topic
+def create_subscriber(workout_topic, topic_name):  # workout_topic = create_pub_sub_topic.topic_path
+    timeout = 10.0
+    subscriber = pubsub_v1.SubscriberClient()
+
+    subscription_path = subscriber.subscription_path(project, topic_name)
+
+    def callback(message):
+        print("Received message: {}".format(message.data))
+        if message.attributes:
+            print("Attributes:")
+            for key in message.attributes:
+                value = message.attributes.get(key)
+                print('{}: {}'.format(key, value))
+        message.ack()
+    streaming_pull_future = subscriber.subscribe(
+        subscription_path, callback=callback
+    )
+    print("Listening for message on {}..\n".format(subscription_path))
+    # subscription = subscriber.create_subscription(subscription_path, workout_topic)
+    try:
+        streaming_pull_future.result(timeout=timeout)
+    except Exception as e:
+        streaming_pull_future.cancel()
+        print(
+            "Listening for messages on {} threw an exception: {}".format(topic_name, e)
+        )
+
+
+# --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
     new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
 
@@ -53,6 +94,7 @@ def store_instructor_info(email):
     })
 
     ds_client.put(new_instructor)
+
 
 def store_unit_info(id, email, name, ts, workout_type):
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
