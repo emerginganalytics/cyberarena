@@ -1,49 +1,50 @@
 version: '1'
 
 workout:
-  name: cyberattack
-  workout_description: 'Experience a botnet cyber-attack'
+  name: xss
+  workout_description: 'Insert workout description here'
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
   dnszone: "cybergym-public"
   project_api_key_type: cloud
-  flag_location:
+  flag_location: /usr/src/flag
 
-networks: 
+networks:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.1.0/24
+        ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-labentry 
+  - name: cybergym-labentry
     image: image-labentry
-    machine_type: "n1-standard-1" 
+    machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["http-server", "https-server", "labentry"]}
+    tags: {items: ["http-server", "labentry"]}
     metadata: none
     guac_path: "MgBjAG15c3Fs"
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
         subnet: default
-        external_NAT: True
-  - name: cybergym-victim
-    image: image-promise-victim-win2012
+        external_NAT: true
+  - name: cybergym-dvwalab
+    image: image-cybergym-dvwalab
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: None
+    tags: {'items': ['guac-server']}
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.11
+        internal_IP: 10.1.1.253
         subnet: default
-        external_NAT: True
+        external_NAT: false
 
-# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+routes:
+
 firewall_rules:
-- name: allow-http
+  - name: allow-http
     network: external-network
     target_tags: ["http-server"]
     protocol: none
@@ -54,4 +55,4 @@ firewall_rules:
     target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.1.0/24"]
+    source_ranges: ["10.1.0.0/16"]

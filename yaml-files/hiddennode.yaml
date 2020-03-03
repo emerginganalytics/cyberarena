@@ -6,6 +6,7 @@ workout:
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
+  dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location:
 
@@ -13,23 +14,20 @@ networks:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.0.0/24
-  - name: internal-network
-    subnets:
-      - name: default
-        ip_subnet: 10.1.1.0/24
+        ip-subnet: 10.1.1.0/24
 
 servers:
   - name: cybergym-labentry 
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    tags: {items: ["http-server", "https-server", "guac-server", "attacker", "vnc-server", "labentry"]}
     metadata: none
+    guac_path: "MQBjAG15c3Fs"
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
-        subnet: external-network-default
+        subnet: default
         external_NAT: true
   - name: dvwalab
     image: image-dvwalab
@@ -40,7 +38,7 @@ servers:
     nics:
       - network: external-network
         internal_IP: 10.1.1.253
-        subnet: external-network-default
+        subnet: default
         external_NAT: false
     - name: ce-linux
       image: ce-linux-boot-image-002
@@ -51,7 +49,7 @@ servers:
       nics:
         - network: external-network
           internal_IP: 10.1.1.111
-          subnet: external-network-default
+          subnet: default
           external_NAT: false
     - name: cd-windows
       image: ce-windows-boot-image-002
@@ -62,15 +60,11 @@ servers:
       nics:
         - network: external-network
           internal_IP: 10.1.1.115
-          subnet: external-network-default
+          subnet: default
           external_NAT: false
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:
-  - name: # route name
-    network: # network name
-    dest_range: # destination CIDR range
-    next_hop_instance: # name of next hop VM
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
@@ -86,9 +80,9 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/5901-5909"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-internal
-    network: internal-network
-    target_tags: ["attacker"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.0.0/24"]
+    source_ranges: ["10.1.1.0/24"]

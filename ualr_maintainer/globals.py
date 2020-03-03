@@ -1,15 +1,20 @@
 import googleapiclient.discovery
-from google.cloud import datastore
+from google.cloud import datastore, storage
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
+storage_client = storage.Client()
+# dns_suffix = ".acactb.com"
+# project = 'acapte'
+# dnszone = 'aca-bootcamp-public'
 dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 
-
 class workout_globals():
     MAX_RUN_HOURS = 10
+    yaml_bucket = project + '_cloudbuild'
+    yaml_folder = 'yaml-build-files/'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):
@@ -28,3 +33,7 @@ class workout_globals():
             return False
         else:
             return True
+
+    @staticmethod
+    def refresh_api():
+        globals.compute = googleapiclient.discovery.build('compute', 'v1')

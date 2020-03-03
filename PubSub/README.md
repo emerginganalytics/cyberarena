@@ -3,15 +3,51 @@
 
 ---
 ---
-## [ validator.py ]:   
-This script is what is used to test creation and deletion of Pub/Sub topics and subscribers.   
-Not a final design
 
----
-## [ cg-post.py ]:   
-This script can be used with any workout. All that needs to be done is to call the script
-from within the respective workout validation script and it will POST a status to the
-designated Pub/Sub endpoint.   
+## [ cg-publish.py ]:   
+This script can be used with any workout. In order for the script to work properly, you'll need to make
+sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json
+file location. 
   > Important to note mild syntax changes are to be made when implementing on Windows   
   > systems
----
+  
+Example workout publish calls:    
+
+    #!/usr/bin/python3
+    import os
+    import socket
+    import logging
+
+    def check_linux_perm():
+        filename = '/usr/local/etc/protect_me/vulnerable.txt'
+        status = os.stat(filename)
+        permissions = oct(status.st_mode)[-3:]
+
+        if permissions == '755':
+            print("[+] Permisions: {} --> I'm Secure!".format(permissions))
+            return True
+        else:
+            print("[+] Permissions: {} --> Still vulnerable! ".format(permissions))
+            return False
+
+    def check_win_perm():
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind(('10.128.0.20', 5555))
+        s.listen(5)
+
+        conn, addr = s.accept()
+        data = conn.recv(1024).decode('utf-8')
+
+        if data:
+            print('[+] Message Received: {}'.format(data))
+            s.close()
+            return True
+
+    # if workout is complete, publish
+    check_linux = check_linux_perm()
+    check_windows = check_win_perm()
+
+    if check_linux and check_windows:
+        print('[*] Publishing Results ...')
+        os.system('python3 /usr/local/bin/cg-post.py permissions')   
+

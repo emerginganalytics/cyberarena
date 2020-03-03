@@ -8,7 +8,6 @@ from google.cloud import datastore
 import time
 import calendar
 from googleapiclient.errors import HttpError
-
 import googleapiclient.discovery
 from google.cloud import datastore
 
@@ -180,11 +179,14 @@ def delete_workouts(event, context):
         if workout_id:
             print('Deleting resources from workout %s' % workout_id)
             if delete_specific_workout(workout_id, workout):
-                workout['resources_deleted'] = True
-                ds_client.put(workout)
+                ds_client.delete(workout.key)
+                print("Finished deleting workout %s" % workout_id)
 
 
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
+specific_workouts = ['cs4360dit-pp']
+for workout in specific_workouts:
+    delete_specific_workout(workout)
 
 delete_workouts(None, None)

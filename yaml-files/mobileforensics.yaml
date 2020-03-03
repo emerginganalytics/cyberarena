@@ -6,6 +6,7 @@ workout:
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
+  dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location:
 
