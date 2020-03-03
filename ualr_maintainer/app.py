@@ -448,7 +448,6 @@ def landing_page(workout_id):
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     if (unit):
-        print(unit)
         return render_template('workout_list.html', workout_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
@@ -481,6 +480,40 @@ def reset_vm():
         workout_id = request.form['workout_id']
         reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
+
+@app.route('/start_all', methods=['GET', 'POST'])
+def start_all():
+    if (request.method == 'POST'):
+        unit_id = request.form['unit_id']
+        unit = ds_client.get('cybergym-unit', unit_id)
+        for workout_id in unit['workouts']:
+            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+            if 'time' not in request.form:
+                workout['run_hours'] = 2
+            else:
+                workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+            ds_client.put(workout)
+
+            start_workout(workout_id)
+        return redirect("/workout_list/%s" % (unit_id))
+
+@app.route('/stop_all', methods=['GET', 'POST'])
+def stop_all():
+    if (request.method == 'POST'):
+        unit_id = request.form['unit_id']
+        unit = ds_client.get('cybergym-unit', unit_id)
+        for workout_id in unit['workouts']:
+            stop_workout(workout_id)
+        return redirect("/workout_list/%s" % (unit_id))
+
+@app.route('/reset_all', methods=['GET', 'POST'])
+def stop_all():
+    if (request.method == 'POST'):
+        unit_id = request.form['unit_id']
+        unit = ds_client.get('cybergym-unit', unit_id)
+        for workout_id in unit['workouts']:
+            reset_workout(workout_id)
+        return redirect("/workout_list/%s" % (unit_id))
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
