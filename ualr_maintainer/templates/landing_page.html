@@ -56,12 +56,12 @@
     <script>
         $(document).ready(function(){
             $("form").submit(function(){
-                $('#workout-form :input').attr('readonly','readonly');
-                $('#build-workout').attr('disabled','disabled');
+                $('#start-vm').attr('disabled','disabled');
+                $('#stop-vm').attr('disabled','disabled');
+                $('#reset-vm').attr('disabled','disabled');
                 $("#loading-msg").html('Please wait while the process completes' +
                     '</br><div class="loader"></div>');
             });
-
         });
     </script>
 {% endblock %}
