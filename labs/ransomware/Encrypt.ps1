@@ -1,9 +1,8 @@
 ﻿Set-ExecutionPolicy unrestricted -Scope CurrentUser
 Add-Type -AssemblyName System.Windows.Forms
 
-#$result = [System.Windows.MessageBox]::Show($popup_output)
 
-$files = Get-ChildItem C:\Users\nrstewart\Desktop\*
+$files = Get-ChildItem C:\Users\nrstewart\Desktop\* -Exclude 'Free Candy!!!.exe'
 foreach ($file in $files) 
 {
     $thisstring = $file.Name
