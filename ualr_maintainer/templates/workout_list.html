@@ -15,11 +15,7 @@
                     <label>How long should the workout run (1 - 10 hours)?</label>
             </div>
             <div class="btn-ctn">
-                {% if running %}
-                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUTS</button>
-                {% else %}
                     <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUTS</button>
-                {% endif %}
             </div>
         </form>
     </div>
@@ -27,11 +23,7 @@
         <form action="/stop_all" method="post">
             <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
             <div class="btn-ctn">
-                {% if running %}
                     <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
-                {% else %}
-                    <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUTS</button>
-                {% endif %}
             </div>
         </form>
     </div>
