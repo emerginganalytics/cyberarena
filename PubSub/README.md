@@ -6,7 +6,7 @@
 
 ## [ cg-publish.py ]:   
 This script can be used with any workout. In order for the script to work properly, you'll need to make
-sure google-service.json file is downloaded on each machine. Modify the cg-post.py to point to the json
+sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json
 file location. 
   > Important to note mild syntax changes are to be made when implementing on Windows   
   > systems
