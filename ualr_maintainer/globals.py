@@ -33,3 +33,7 @@ class workout_globals():
             return False
         else:
             return True
+
+    @staticmethod
+    def refresh_api():
+        globals.compute = googleapiclient.discovery.build('compute', 'v1')

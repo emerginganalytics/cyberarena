@@ -464,21 +464,33 @@ def start_vm():
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
         ds_client.put(workout)
 
-        start_workout(workout_id)
+        try:
+            start_workout(workout_id)
+        except:
+            workout_globals.refresh_api()
+            start_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
-        stop_workout(workout_id)
+        try:
+            stop_workout(workout_id)
+        except:
+            workout_globals.refresh_api()
+            stop_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
 @app.route('/reset_vm', methods=['GET', 'POST'])
 def reset_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
-        reset_workout(workout_id)
+        try:
+            reset_workout(workout_id)
+        except:
+            workout_globals.refresh_api()
+            reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
 @app.route('/start_all', methods=['GET', 'POST'])
@@ -494,7 +506,11 @@ def start_all():
                 workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
             ds_client.put(workout)
 
-            start_workout(workout_id)
+            try:
+                start_workout(workout_id)
+            except:
+                workout_globals.refresh_api()
+                start_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
 @app.route('/stop_all', methods=['GET', 'POST'])
@@ -503,7 +519,11 @@ def stop_all():
         unit_id = request.form['unit_id']
         unit = ds_client.get('cybergym-unit', unit_id)
         for workout_id in unit['workouts']:
-            stop_workout(workout_id)
+            try:
+                stop_workout(workout_id)
+            except:
+                workout_globals.refresh_api()
+                stop_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
 @app.route('/reset_all', methods=['GET', 'POST'])
@@ -512,7 +532,11 @@ def stop_all():
         unit_id = request.form['unit_id']
         unit = ds_client.get('cybergym-unit', unit_id)
         for workout_id in unit['workouts']:
-            reset_workout(workout_id)
+            try:
+                reset_workout(workout_id)
+            except:
+                workout_globals.refresh_api()
+                reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
 if __name__ == '__main__':
