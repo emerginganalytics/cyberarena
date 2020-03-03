@@ -10,7 +10,7 @@
     <div style="padding:1em;">
         <form action="/start_all" method="post">
             <div class="input-field col s12" >
-                    <input type="hidden" id="unit_id" name="workout_id" value="{{ workout_id }}">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
                     <input type="number" id="time" name="time" value="2" min="1" max="10">
                     <label>How long should the workout run (1 - 10 hours)?</label>
             </div>
@@ -25,7 +25,7 @@
     </div>
     <div>
         <form action="/stop_all" method="post">
-            <input type="hidden" id="unit_id" name="workout_id" value="{{ workout_id }}">
+            <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
             <div class="btn-ctn">
                 {% if running %}
                     <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
@@ -37,7 +37,7 @@
     </div>
     <div>
         <form action="/reset_all" method="post">
-            <input type="hidden" id="unit_id" name="workout_id" value="{{ workout_id }}">
+            <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
             <div class="btn-ctn">
                     <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUTS</button>
             </div>

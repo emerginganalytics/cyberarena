@@ -497,7 +497,7 @@ def reset_vm():
 def start_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get('cybergym-unit', unit_id)
+        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         for workout_id in unit['workouts']:
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             if 'time' not in request.form:
@@ -517,7 +517,7 @@ def start_all():
 def stop_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get('cybergym-unit', unit_id)
+        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         for workout_id in unit['workouts']:
             try:
                 stop_workout(workout_id)
@@ -530,7 +530,7 @@ def stop_all():
 def reset_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get('cybergym-unit', unit_id)
+        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         for workout_id in unit['workouts']:
             try:
                 reset_workout(workout_id)
