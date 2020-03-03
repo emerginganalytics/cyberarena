@@ -527,7 +527,7 @@ def stop_all():
         return redirect("/workout_list/%s" % (unit_id))
 
 @app.route('/reset_all', methods=['GET', 'POST'])
-def stop_all():
+def reset_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
         unit = ds_client.get('cybergym-unit', unit_id)
