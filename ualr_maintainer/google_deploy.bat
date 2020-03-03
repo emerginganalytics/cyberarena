@@ -1,1 +1,0 @@
-gcloud beta run deploy --image gcr.io/acapte/cybergym

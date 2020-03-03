@@ -16,6 +16,7 @@ workout:
   project_name: ualr-cybersecurity
   region: # data center region -- this should match the desired region in Google Cloud (i.e., "us-central1")
   zone: # data center zone -- this should match the desired zone in Google Cloud (i.e., "us-central1-a")
+  dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location: # This is used for the flag generation script. Ignore for now.
 

@@ -1,7 +1,3 @@
-#
-# This script is intended to be copied into the landing page application for the button click when
-# resuming a workout which has previously been stopped.
-#
 import googleapiclient.discovery
 from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
 import time
@@ -49,7 +45,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
 
 
 
-def start_workout(workout_id):
+def reset_workout(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
@@ -58,7 +54,7 @@ def start_workout(workout_id):
     try:
         if 'items' in result:
             for vm_instance in result['items']:
-                response = compute.instances().start(project=project, zone=zone, instance=vm_instance["name"]).execute()
+                response = compute.instances().reset(project=project, zone=zone, instance=vm_instance["name"]).execute()
                 workout_globals.extended_wait(project, zone, response["id"])
 
                 started_vm = compute.instances().get(project=project, zone=zone, instance=vm_instance["name"]).execute()
@@ -70,8 +66,8 @@ def start_workout(workout_id):
                                 if item == 'labentry':
                                     ip_address = started_vm['networkInterfaces'][0]['accessConfigs'][0]['natIP']
                                     register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
-            print("Finished starting %s" % workout_id)
+            print("Finished resetting %s" % workout_id)
         return True
     except():
-        print("Error in starting VM for %s" % workout_id)
+        print("Error in resetting VM for %s" % workout_id)
         return False
