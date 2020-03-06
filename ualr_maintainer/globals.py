@@ -1,3 +1,4 @@
+import logging
 import googleapiclient.discovery
 from google.cloud import datastore, storage
 
@@ -10,6 +11,8 @@ storage_client = storage.Client()
 dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
+
+logger = logging.getLogger()
 
 class workout_globals():
     MAX_RUN_HOURS = 10

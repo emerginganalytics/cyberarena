@@ -4,11 +4,13 @@ import random
 import string
 import list_vm
 import start_workout
+import threading
+
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
 from workout_firewall_update import student_firewall_add
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client
+from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, request
@@ -104,6 +106,18 @@ def store_unit_info(id, email, name, ts, workout_type, description):
     })
 
     ds_client.put(new_unit)
+
+
+# This function queries and returns all workout IDs for a given unit
+def get_unit_workouts(unit_id):
+    unit_workouts = ds_client.query(kind='cybergym-workout')
+    unit_workouts.add_filter("unit_id", "=", unit_id)
+    workout_list = []
+    for workout in list(unit_workouts.fetch()):
+        workout_list.append(workout.key.name)
+
+    return workout_list
+
 
 # store workout info to google cloud datastore
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp):
@@ -494,11 +508,14 @@ def landing_page(workout_id):
     else:
         return render_template('no_workout.html')
 
+
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    if (unit):
-        return render_template('workout_list.html', workout_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
+    workout_list = get_unit_workouts(unit_id)
+
+    if unit and len(workout_list) > 0:
+        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
@@ -543,12 +560,14 @@ def reset_vm():
             reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
+
 @app.route('/start_all', methods=['GET', 'POST'])
 def start_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        t_list = []
+        for workout_id in workout_list:
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             if 'time' not in request.form:
                 workout['run_hours'] = 2
@@ -561,14 +580,16 @@ def start_all():
             except:
                 workout_globals.refresh_api()
                 start_workout(workout_id)
+
         return redirect("/workout_list/%s" % (unit_id))
+
 
 @app.route('/stop_all', methods=['GET', 'POST'])
 def stop_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        for workout_id in workout_list:
             try:
                 stop_workout(workout_id)
             except:
@@ -576,12 +597,13 @@ def stop_all():
                 stop_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
+
 @app.route('/reset_all', methods=['GET', 'POST'])
 def reset_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        for workout_id in workout_list:
             try:
                 reset_workout(workout_id)
             except:

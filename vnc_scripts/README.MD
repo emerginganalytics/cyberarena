@@ -36,7 +36,7 @@ su <username> -c "vncserver -kill :<display>"
 This will initiate the server and establish a password for each connection. The last command
 kills the connection to ensure there won't be any errors when starting the service.   
 
-Copy the contents of xstartup.txt into each perspective ~/.vnc/xstartup file.
+Copy the contents of xstartup.txt into each respective ~/.vnc/xstartup file.
 ```
 sudo cat xstartup.txt > /home/<cybergym1-5>/.vnc/xstartup
 ```   
