@@ -453,6 +453,9 @@ def build_workout(build_data, workout_type):
 
         create_firewall_rules(project, firewall_rules)
 
+        # Create Topic for each workout
+        create_workout_topic(generated_workout_ID, workout_type)
+
         stop_workout(generated_workout_ID)
 
     # time.sleep(120)
@@ -470,6 +473,9 @@ def build_workout(build_data, workout_type):
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+
+    # TODO: Add Subscription based off datastore workout topic_path, topic_name
+    #  create_subscriber(workout_topic, topic_name)
 
     if (workout):
         expiration = time.strftime('%d %B %Y', (
