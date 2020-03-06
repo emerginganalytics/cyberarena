@@ -3,7 +3,7 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
+from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix, logger
 import time
 import calendar
 from googleapiclient.errors import HttpError
@@ -61,6 +61,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
 
 
 def start_workout(workout_id):
+    print("Starting workout %s" % workout_id)
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
