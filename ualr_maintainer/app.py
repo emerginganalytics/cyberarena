@@ -487,9 +487,11 @@ def landing_page(workout_id):
 
     if (workout):
         expiration = time.strftime('%d %B %Y', (
-            time.gmtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+            time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+
+        expiration = int(workout['run_hours'])
         shutoff = time.strftime('%I:%M %p',
-                                (time.gmtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
+                                (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
 
         guac_path = None
         if workout['servers']:
