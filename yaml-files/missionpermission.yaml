@@ -1,8 +1,8 @@
 version: '1'
 
 workout:
-  name: hashmyfiles
-  workout_description: 'Learn about file hashes'
+  name: missionpermission
+  workout_description: 'Learn About File Security'
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -21,25 +21,36 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["http-server", "labentry"]}
+    tags: {items: ["http-server", "attacker", "vnc-server", "labentry"]}
     metadata: none
-    guac_path: "MgBjAG15c3Fs"
+    guac_path: "MQBjAG15c3Fs"
     nics:
       - network: external-network
-        internal_IP: 10.1.1.10
+        internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
-  - name: cybergym-windows-16
-    image: image-promise-win-2016
+  - name: cybergym-ubuntu18
+    image: image-promise-vnc
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["allow-rdp"]}
+    tags: {items: ["vnc-server", "listener"]}
     metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.20
         subnet: default
-        external_NAT: true
+        external_NAT: false
+  - name: cybergym-windows16
+    image: image-promise-win-2016
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-rdp", "listener"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.30
+        subnet: default
+        external_NAT: false
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:
@@ -52,13 +63,24 @@ firewall_rules:
     protocol: none
     ports: ["tcp/80, 8080, 443"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-rdp
+  - name: allow-vnc
     network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-listener
+    network: external-network
+    target_tags: ["listener"]
+    protocol: tcp
+    ports: ["tcp/5555"]
+    source_ranges: ["10.1.1.0/24"]
+  - name: allow-rdp
     target_tags: ["allow-rdp"]
     protocol: tcp
     ports: ["tcp/3306"]
     source_ranges: ["10.1.0.0/24"]
-- name: allow-all-local-external
+  - name: allow-all-local-external
     network: external-network
     target_tags: []
     protocol: tcp

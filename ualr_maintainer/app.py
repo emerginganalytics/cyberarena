@@ -41,7 +41,7 @@ def flag_generator():
 
 
 # TODO Identify where to call create_pub_sub_topic() and create_subscriber()
-# Create Workout Topic based on id, type[name], and team number
+# Create Workout Topic based on id and type[name]
 def create_workout_topic(workout_id, workout_type):
     publisher = pubsub_v1.PublisherClient()
 
@@ -49,12 +49,12 @@ def create_workout_topic(workout_id, workout_type):
     topic_path = publisher.topic_path(project, topic_name)
 
     topic = publisher.create_topic(topic_path)
-    print('Topic create: {}'.format(topic))
-    return topic_path, topic_name
+    print('Topic created: {}'.format(topic))
+    return topic_name
 
 
 # Create Subscriber for each workout Topic
-def create_subscriber(workout_topic, topic_name):  # workout_topic = create_pub_sub_topic.topic_path
+def create_subscriber(topic_name):  # workout_topic = create_pub_sub_topic.topic_path
     timeout = 10.0
     subscriber = pubsub_v1.SubscriberClient()
 
@@ -118,9 +118,10 @@ def get_unit_workouts(unit_id):
 
     return workout_list
 
+# NOTICE: Added topic_name and flag entities to store_workout_info()
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp):
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, flag):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -134,7 +135,9 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'timestamp': timestamp,
         'resources_deleted': False,
         'running': False,
-        'servers': []
+        'servers': [],
+        'topic_name': topic_name,
+        'flag': flag
     })
 
     # insert a new user
@@ -395,10 +398,12 @@ def build_workout(build_data, workout_type):
     unit_id = randomStringDigits()
     store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['workout_description'])
 
+    # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
-        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts)
+        topic_name = create_workout_topic(generated_workout_ID, workout_type)
+        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts, topic_name, flag)
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
         print('Creating networks')
@@ -467,9 +472,6 @@ def build_workout(build_data, workout_type):
 
         create_firewall_rules(project, firewall_rules)
 
-        # Create Topic for each workout
-        create_workout_topic(generated_workout_ID, workout_type)
-
         stop_workout(generated_workout_ID)
 
     # time.sleep(120)
@@ -490,6 +492,7 @@ def landing_page(workout_id):
 
     # TODO: Add Subscription based off datastore workout topic_path, topic_name
     #  create_subscriber(workout_topic, topic_name)
+    # create_subscriber(workout['topic_name'])
 
     if (workout):
         expiration = time.strftime('%d %B %Y', (
