@@ -614,5 +614,6 @@ def reset_all():
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
+
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
