@@ -1,4 +1,6 @@
-# VNC Scripts:   
+# [!!Work In Progress!!]
+### Currently debugging issues where systemd restarts service infinitely
+VNC Scripts:   
 
 ---   
 ### This is a collection of scripts to help automate the setup of the vncservers.

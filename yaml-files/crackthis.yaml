@@ -6,6 +6,7 @@ workout:
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
+  dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location:
 
@@ -13,19 +14,19 @@ networks:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.0.0/24
+        ip_subnet: 10.1.1.0/24
 
 servers:
   - name: cybergym-labentry 
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    tags: {items: ["http-server", "attacker", "vnc-server", "labentry"]}
     metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
-        subnet: external-network-default
+        subnet: default
         external_NAT: true
   - name: cybergym-windows-16
     image: image-promise-win2016
@@ -36,16 +37,16 @@ servers:
     nics:
       - network: external-network
         internal_IP: 10.1.1.20
-        subnet: external-network-default
+        subnet: default
         external_NAT: false
 routes:
 
 firewall_rules:
   - name: allow-http
-    network: external-netowrk
+    network: external-network
     target_tags: ["http-server"]
     protocol: none
-    ports: ["tcp/80, 8080, 443"]
+    ports: ["tcp/80,8080,443"]
     source_ranges: ["0.0.0.0/0"]
   - name: allow-rdp
     network: external-network
@@ -53,9 +54,9 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/3306"]
     source_ranges: ["10.1.0.0/24"]
-  - name: allow-internal
-    network: internal-network
-    target_tags: ["attacker"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.0.0/24"]
+    source_ranges: ["10.1.1.0/24"]
