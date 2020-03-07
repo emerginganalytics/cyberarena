@@ -21,7 +21,7 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["http-server", "labentry"]}
+    tags: {items: ["http-server", "https-server", "labentry"]}
     metadata: none
     guac_path: "NwBjAG15c3Fs"
     nics:
