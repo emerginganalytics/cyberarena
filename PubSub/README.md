@@ -3,6 +3,11 @@
 
 ---
 ---
+## [ Requirements ]:
+Python3.5 or greater
+
+Python library:
+google-cloud-pubsub
 
 ## [ cg-publish.py ]:   
 This script can be used with any workout. In order for the script to work properly, you'll need to make
