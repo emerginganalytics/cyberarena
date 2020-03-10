@@ -342,6 +342,8 @@ def index(workout_type):
     form=CreateWorkoutForm()
     if form.validate_on_submit():
         unit_id = build_workout(form, workout_type)
+        if unit_id == False:
+            return render_template('no_workout.html')
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
@@ -372,6 +374,8 @@ def build_workout(build_data, workout_type):
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     # get bucket data as blob
     blob = bucket.get_blob(workout_globals.yaml_folder + workout_type + ".yaml")
+    if blob == None:
+        return False
     # convert to string
     yaml_from_bucket = blob.download_as_string()
     y = load(yaml_from_bucket, Loader=Loader)
