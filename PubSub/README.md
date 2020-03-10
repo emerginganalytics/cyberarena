@@ -7,8 +7,13 @@
 Python3.5 or greater
 
 Python library:
-google-cloud-pubsub
+google-cloud-pubsub   
 
+PubSub Service .json key:   
+```
+Go to IAM & Admin > Service Accounts > cybergym-publisher@... > edit > create key
+```
+Even though this key only has access to Publish to the Cloud, be sure to store it in a safe place.
 ## [ cg-publish.py ]:   
 This script can be used with any workout. In order for the script to work properly, you'll need to make
 sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json
