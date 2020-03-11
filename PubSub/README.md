@@ -18,8 +18,8 @@ Even though this key only has access to Publish to the Cloud, be sure to store i
 This script can be used with any workout. In order for the script to work properly, you'll need to make
 sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json
 file location. 
-  > Important to note mild syntax changes are to be made when implementing on Windows   
-  > systems
+  
+***If you're running on Windows systems, replace os.uname()[1] with platform.uname()[1]***
   
 Example workout publish calls:    
 
