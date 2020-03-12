@@ -39,4 +39,5 @@ class workout_globals():
 
     @staticmethod
     def refresh_api():
-        globals.compute = googleapiclient.discovery.build('compute', 'v1')
+        compute = googleapiclient.discovery.build('compute', 'v1')
+        return compute

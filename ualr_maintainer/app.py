@@ -131,7 +131,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'expiration': workout_duration,
         'type': workout_type,
         'start_time': timestamp,
-        'run_hours': 2,
+        'run_hours': 0,
         'timestamp': timestamp,
         'resources_deleted': False,
         'running': False,
@@ -502,9 +502,12 @@ def landing_page(workout_id):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
 
-        expiration = int(workout['run_hours'])
-        shutoff = time.strftime('%I:%M %p',
-                                (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
+        run_hours = int(workout['run_hours'])
+        if run_hours == 0:
+            shutoff = "expired"
+        else:
+            shutoff = time.strftime('%d %B %Y at %I:%M %p',
+                                    (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
 
         guac_path = None
         if workout['servers']:
@@ -512,7 +515,7 @@ def landing_page(workout_id):
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id,
+                               guac_path=guac_path, expiration=expiration, shutoff=shutoff, workout_id=workout_id,
                                running=workout['running'])
     else:
         return render_template('no_workout.html')
@@ -543,7 +546,7 @@ def start_vm():
         try:
             start_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             start_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
@@ -554,7 +557,7 @@ def stop_vm():
         try:
             stop_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             stop_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
@@ -565,7 +568,7 @@ def reset_vm():
         try:
             reset_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
@@ -602,7 +605,7 @@ def stop_all():
             try:
                 stop_workout(workout_id)
             except:
-                workout_globals.refresh_api()
+                compute = workout_globals.refresh_api()
                 stop_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
