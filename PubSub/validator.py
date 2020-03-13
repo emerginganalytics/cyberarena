@@ -53,6 +53,10 @@ def create_pub_sub(workout_id, workout_name, pub_message):
     Info.topic = topic
     print("Topic created: {}".format(topic))
 
+    print("Topic_name = {}".format(Info.topic_name))
+    print("Topic_path = {}".format(Info.topic_path))
+    print("Topic = {}".format(Info.topic))
+
     publisher.publish(Info.topic_path, pub_message, spam='eggs')
     print('[+] Publishing Message to {}...'.format(topic))
 
@@ -75,7 +79,8 @@ def create_subscription(sub_message):
     Info.subscription = subscription
 
     print('[*] Pull Subscription created: {}'.format(subscription))
-
+    print('Subscription_path = {}'.format(subscription_path))
+    print('subscription = {}'.format(subscription))
     def callback(sub_message):
         print('[*] Received message: {}'.format(sub_message.data))
         if sub_message.attributes:
@@ -123,7 +128,7 @@ Info.workout_name = 'permissions'
 
 if sys.argv[1] == 'create':
     create_pub_sub(Info.workout_id, Info.workout_name, pub_message)
-    # create_subscription(sub_message)
+    create_subscription(sub_message)
 elif sys.argv[1] == 'delete':
     delete_pubsub()
 else:

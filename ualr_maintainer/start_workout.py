@@ -3,9 +3,10 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
+from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix, logger
 import time
 import calendar
+from googleapiclient.errors import HttpError
 
 # Global variables for this function
 expired_workout = []
@@ -29,20 +30,30 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
             }
         ],
         "additions": [
-        {
-            "kind": "dns#resourceRecordSet",
-            "name": workout_id + dns_suffix + ".",
-            "rrdatas": [new_ip],
-            "type": "A",
-            "ttl": 30
-        }
+            {
+                "kind": "dns#resourceRecordSet",
+                "name": workout_id + dns_suffix + ".",
+                "rrdatas": [new_ip],
+                "type": "A",
+                "ttl": 30
+            }
     ]}
 
-    request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
-    response = request.execute()
-
+    # Try first to perform the DNS change, but in case the DNS did not previously exist, try again without the deletion change.
+    try:
+        service
+        request = service.changes().create(project=project, managedZone=dnszone, body=change_body).execute()
+    except HttpError:
+        try:
+            del change_body["deletions"]
+            request = service.changes().create(project=project, managedZone=dnszone, body=change_body).execute()
+        except HttpError:
+            # Finally, it may be the DNS has already been successfully updated, in which case
+            # the API call will throw an error. We ignore this case.
+            pass
 
     workout["external_ip"] = new_ip
+
     workout['running'] = True
     workout['start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(workout)
@@ -50,6 +61,7 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
 
 
 def start_workout(workout_id):
+    print("Starting workout %s" % workout_id)
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 

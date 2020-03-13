@@ -1,3 +1,4 @@
+# TODO: Remove global variables from YAML files
 version: '1'
 
 workout:

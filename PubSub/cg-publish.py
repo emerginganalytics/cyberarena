@@ -3,6 +3,7 @@ from google.cloud import pubsub_v1
 
 import base64 as b64
 import os
+import platform
 import requests
 import sys
 
@@ -11,12 +12,14 @@ os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '<json file location>'
 
 # parsing hostname to determine workout_ID and team number; type=sys.arv[1]
 name = os.uname()[1]
+# If on Windows, use this line instead:
+# name = platform.uname()[1]
 data = name.split("-")
 
 w_id = data[0]
 w_type = sys.argv[1]
 
-w_string = '{}-{} workout: complete!'.format(w_type)
+w_string = '{}-{} workout: complete!'.format(w_id, w_type)
 message = b64.b64encode(w_string.encode('utf-8'))
 
 # create publish session and publish message
