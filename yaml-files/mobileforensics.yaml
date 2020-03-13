@@ -22,7 +22,7 @@ servers:
     machine_type: "n1-standard-1" 
     network_routing: false
     tags: {items: ["http-server", "https-server", "labentry"]}
-    metadata: none
+    metadata: None
     guac_path: "NwBjAG15c3Fs"
     nics:
       - network: external-network
@@ -34,7 +34,7 @@ servers:
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["allow-rdp"]}
-    metadata: none
+    metadata: None
     nics:
       - network: external-network
         internal_IP: 10.1.1.11

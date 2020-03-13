@@ -407,6 +407,7 @@ def build_workout(build_data, workout_type):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         topic_name = create_workout_topic(generated_workout_ID, workout_type)
+        create_subscriber(topic_name)
         store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts, topic_name, flag)
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
@@ -450,6 +451,11 @@ def build_workout(build_data, workout_type):
             guac_path = None
             if "guac_path" in server:
                 guac_path = server['guac_path']
+
+            if server['metadata'] == None:
+                server['metadata'] = topic_name
+            else:
+                server['metadata'].append(topic_name)
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                          server['machine_type'], server['network_routing'], nics, server['tags'],
@@ -622,7 +628,6 @@ def reset_all():
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
-
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
