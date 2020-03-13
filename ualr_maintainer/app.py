@@ -4,11 +4,13 @@ import random
 import string
 import list_vm
 import start_workout
+import threading
+
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
 from workout_firewall_update import student_firewall_add
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client
+from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
 
 import googleapiclient.discovery
 from flask import Flask, render_template, redirect, request
@@ -17,6 +19,9 @@ from yaml import load, Loader
 
 from forms import CreateWorkoutForm
 
+# pubusub dependency
+from google.cloud import pubsub_v1
+
 # datastore dependency
 from google.cloud import datastore
 
@@ -24,9 +29,8 @@ from google.cloud import datastore
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
-# ------------------------ FLAG GENERATOR -------------------------
-# See also build_flag_startup in create_vm.py for implementation
 
+# ------------------------ FLAG GENERATOR -------------------------
 def flag_generator():
     from os import urandom as rand
 
@@ -36,8 +40,49 @@ def flag_generator():
     return rand_flag
 
 
-# --------------------------- FLASK APP --------------------------
+# TODO Identify where to call create_pub_sub_topic() and create_subscriber()
+# Create Workout Topic based on id and type[name]
+def create_workout_topic(workout_id, workout_type):
+    publisher = pubsub_v1.PublisherClient()
 
+    topic_name = '{}-{}-workout'.format(workout_id, workout_type)
+    topic_path = publisher.topic_path(project, topic_name)
+
+    topic = publisher.create_topic(topic_path)
+    print('Topic created: {}'.format(topic))
+    return topic_name
+
+
+# Create Subscriber for each workout Topic
+def create_subscriber(topic_name):  # workout_topic = create_pub_sub_topic.topic_path
+    timeout = 10.0
+    subscriber = pubsub_v1.SubscriberClient()
+
+    subscription_path = subscriber.subscription_path(project, topic_name)
+
+    def callback(message):
+        print("Received message: {}".format(message.data))
+        if message.attributes:
+            print("Attributes:")
+            for key in message.attributes:
+                value = message.attributes.get(key)
+                print('{}: {}'.format(key, value))
+        message.ack()
+    streaming_pull_future = subscriber.subscribe(
+        subscription_path, callback=callback
+    )
+    print("Listening for message on {}..\n".format(subscription_path))
+    # subscription = subscriber.create_subscription(subscription_path, workout_topic)
+    try:
+        streaming_pull_future.result(timeout=timeout)
+    except Exception as e:
+        streaming_pull_future.cancel()
+        print(
+            "Listening for messages on {} threw an exception: {}".format(topic_name, e)
+        )
+
+
+# --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
     new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
 
@@ -48,6 +93,7 @@ def store_instructor_info(email):
     ds_client.put(new_instructor)
 
 def store_unit_info(id, email, name, ts, workout_type, description):
+
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
     new_unit.update({
@@ -61,8 +107,21 @@ def store_unit_info(id, email, name, ts, workout_type, description):
 
     ds_client.put(new_unit)
 
+
+# This function queries and returns all workout IDs for a given unit
+def get_unit_workouts(unit_id):
+    unit_workouts = ds_client.query(kind='cybergym-workout')
+    unit_workouts.add_filter("unit_id", "=", unit_id)
+    workout_list = []
+    for workout in list(unit_workouts.fetch()):
+        workout_list.append(workout.key.name)
+
+    return workout_list
+
+# NOTICE: Added topic_name and flag entities to store_workout_info()
+
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp):
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, flag):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -72,11 +131,13 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'expiration': workout_duration,
         'type': workout_type,
         'start_time': timestamp,
-        'run_hours': 2,
+        'run_hours': 0,
         'timestamp': timestamp,
         'resources_deleted': False,
         'running': False,
-        'servers': []
+        'servers': [],
+        'topic_name': topic_name,
+        'flag': flag
     })
 
     # insert a new user
@@ -281,6 +342,8 @@ def index(workout_type):
     form=CreateWorkoutForm()
     if form.validate_on_submit():
         unit_id = build_workout(form, workout_type)
+        if unit_id == False:
+            return render_template('no_workout.html')
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
@@ -311,6 +374,8 @@ def build_workout(build_data, workout_type):
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     # get bucket data as blob
     blob = bucket.get_blob(workout_globals.yaml_folder + workout_type + ".yaml")
+    if blob == None:
+        return False
     # convert to string
     yaml_from_bucket = blob.download_as_string()
     y = load(yaml_from_bucket, Loader=Loader)
@@ -337,10 +402,12 @@ def build_workout(build_data, workout_type):
     unit_id = randomStringDigits()
     store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['workout_description'])
 
+    # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
-        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts)
+        topic_name = create_workout_topic(generated_workout_ID, workout_type)
+        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts, topic_name, flag)
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
         print('Creating networks')
@@ -427,11 +494,20 @@ def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
+    # TODO: Add Subscription based off datastore workout topic_path, topic_name
+    #  create_subscriber(workout_topic, topic_name)
+    # create_subscriber(workout['topic_name'])
+
     if (workout):
         expiration = time.strftime('%d %B %Y', (
-            time.gmtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
-        shutoff = time.strftime('%I:%M %p',
-                                (time.gmtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
+            time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+
+        run_hours = int(workout['run_hours'])
+        if run_hours == 0:
+            shutoff = "expired"
+        else:
+            shutoff = time.strftime('%d %B %Y at %I:%M %p',
+                                    (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
 
         guac_path = None
         if workout['servers']:
@@ -439,16 +515,19 @@ def landing_page(workout_id):
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               expiration=expiration, guac_path=guac_path, shutoff=shutoff, workout_id=workout_id,
+                               guac_path=guac_path, expiration=expiration, shutoff=shutoff, workout_id=workout_id,
                                running=workout['running'])
     else:
         return render_template('no_workout.html')
 
+
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    if (unit):
-        return render_template('workout_list.html', workout_list=unit['workouts'], unit_id=unit_id, workout_type=unit['workout_type'])
+    workout_list = get_unit_workouts(unit_id)
+
+    if unit and len(workout_list) > 0:
+        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
@@ -467,7 +546,7 @@ def start_vm():
         try:
             start_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             start_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
@@ -478,7 +557,7 @@ def stop_vm():
         try:
             stop_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             stop_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
@@ -489,16 +568,18 @@ def reset_vm():
         try:
             reset_workout(workout_id)
         except:
-            workout_globals.refresh_api()
+            compute = workout_globals.refresh_api()
             reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
+
 
 @app.route('/start_all', methods=['GET', 'POST'])
 def start_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        t_list = []
+        for workout_id in workout_list:
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             if 'time' not in request.form:
                 workout['run_hours'] = 2
@@ -511,33 +592,37 @@ def start_all():
             except:
                 workout_globals.refresh_api()
                 start_workout(workout_id)
+
         return redirect("/workout_list/%s" % (unit_id))
+
 
 @app.route('/stop_all', methods=['GET', 'POST'])
 def stop_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        for workout_id in workout_list:
             try:
                 stop_workout(workout_id)
             except:
-                workout_globals.refresh_api()
+                compute = workout_globals.refresh_api()
                 stop_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
+
 
 @app.route('/reset_all', methods=['GET', 'POST'])
 def reset_all():
     if (request.method == 'POST'):
         unit_id = request.form['unit_id']
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for workout_id in unit['workouts']:
+        workout_list = get_unit_workouts(unit_id)
+        for workout_id in workout_list:
             try:
                 reset_workout(workout_id)
             except:
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
+
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)

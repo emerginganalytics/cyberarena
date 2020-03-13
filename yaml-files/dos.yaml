@@ -14,7 +14,7 @@ network:
   - name: external-network
     subnets:
       - name: default
-        ip-subnet: 10.1.1.0/24
+        ip_subnet: 10.1.1.0/24
 
 servers:
   - name: labentry-server
