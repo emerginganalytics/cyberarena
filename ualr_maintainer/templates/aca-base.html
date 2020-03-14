@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="description" content="UA Little Rock Promise Cybersecurity Course Lab Deployments"/>
+    <meta name="description" content="ACA Training - UA Little Rock Cyber Gym"/>
  	<meta name="author" content="UA Little Rock"/>
-    <title>Promise Workout Builder</title>
+    <title>ACA Training - UA Little Rock Cyber Gym</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
@@ -117,7 +117,15 @@
       content: "Team " counter(elementcounter) ": ";
       counter-increment: elementcounter;
       font-weight: bold;
-}
+    }
+
+    .btn {
+        background-color: #2e75b6;
+    }
+
+    .waves-effect.waves-light {
+        background-color: #9dc3ec;
+    }
 </style>
 
 <body id="homePage" data-spy="scroll" data-target=".navbar" data-offset="50" class="bg-1">
@@ -149,7 +157,7 @@
 </nav>
     <div id="workout-form" class='container-fluid form-ctn'>
         <div class="center">
-            <img src="/static/ACA-Logo-Navy.png" alt="ACA Logo"/>
+            <img src="/static/ACA-Logo-Navy.png" alt="ACA Logo" style="max-width: 80%; height: auto;"/>
             <div>
                 {% block content %}{% endblock %}
             </div>
@@ -159,7 +167,6 @@
 <footer class="text-center">
 	<br><br>
 	<p>Powered by UA Little Rock Cyber Gym</p>
-    <img src="/static/CyberGymLogo_small.png">
     <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
 </footer>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
