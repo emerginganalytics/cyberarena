@@ -312,19 +312,20 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
     if guac_path:
         register_workout_server(workout, name, guac_path)
-
+    metabody = {"items": [],
+            "fingerprint": new_instance["metadata"]["fingerprint"]}
     if sshkey:
-        ssh_key_body = {
-            "items": [
-                {
+        metabody['items'].append({
                     "key": "ssh-keys",
                     "value": sshkey
-                }
-            ],
-            "fingerprint": new_instance["metadata"]["fingerprint"]
-        }
-        request = compute.instances().setMetadata(project=project, zone=zone, instance=name, body=ssh_key_body)
-        response = request.execute()
+                })
+
+    if metadata:
+        metabody['items'].append(metadata)
+
+    
+    request = compute.instances().setMetadata(project=project, zone=zone, instance=name, body=metabody)
+    response = request.execute()
 
 
 # Application
@@ -452,8 +453,8 @@ def build_workout(build_data, workout_type):
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
-            if server['metadata'] == None:
-                server['metadata'] = topic_name
+            if server['metadata'] == 'None' or server['metadata'] == 'none':
+                server['metadata'] = {"items": [{"topic": topic_name}]}
             else:
                 server['metadata'].append(topic_name)
 
