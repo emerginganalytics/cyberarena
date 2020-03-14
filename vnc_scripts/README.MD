@@ -36,3 +36,8 @@ Copy the contents of the xstartup file into each respective ~/.vnc/xstartup file
 ```
 sudo cat xstartup > /home/<cybergym1-5>/.vnc/xstartup
 ```   
+# [ !!IMPORTANT!! ] You need to update Labentry for each new VNC server created!   
+Log into the guac server, go to settings > connections > add connection or you can click on an existing connection, clone it, and change the IP and port numbers to match the new server internal ip.   
+
+Once you have that configured, you need to go to the **user** tab and click on each user and give them rights to access the new connection.   
+Save and re-image Labentry.
