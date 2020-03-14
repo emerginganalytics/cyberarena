@@ -21,28 +21,26 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["http-server", "attacker", "vnc-server", "labentry"]}
+    tags: {items: ["labentry"]}
     metadata: none
-    guac_path: "MQBjAG15c3Fs"
     nics:
       - network: external-network
         internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
-  - name: cybergym-phishing
+  - name: cybergym-ubuntu
     image: image-promise-vnc
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["http-server", "attacker", "vnc-server"]}
     metadata: none
+    guac_path: "MQBjAG15c3Fs"
     nics:
       - network: external-network
         internal_IP: 10.1.1.20
         subnet: default
         external_NAT: false
 
-# List network routes. Multiple routes may be listed using YAML block sequence format
-routes:
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
@@ -50,17 +48,11 @@ firewall_rules:
     network: external-network
     target_tags: ["http-server"]
     protocol: none
-    ports: ["tcp/80, 8080, 443"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-vnc
-    network: external-network
-    target_tags: ["vnc-server"]
-    protocol: tcp
-    ports: ["tcp/5901-5909"]
+    ports: ["tcp/80,8080,443"]
     source_ranges: ["0.0.0.0/0"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.1.0/24"]
+    source_ranges: ["10.1.0.0/16"]

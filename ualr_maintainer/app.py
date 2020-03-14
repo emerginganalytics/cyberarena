@@ -92,7 +92,7 @@ def store_instructor_info(email):
 
     ds_client.put(new_instructor)
 
-def store_unit_info(id, email, name, ts, workout_type, description):
+def store_unit_info(id, email, name, ts, workout_type, description, student_instructions_url):
 
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
@@ -102,6 +102,7 @@ def store_unit_info(id, email, name, ts, workout_type, description):
         "timestamp": ts,
         "workout_type": workout_type,
         "description": description,
+        "student_instructions_url": student_instructions_url,
         "workouts": []
     })
 
@@ -392,9 +393,16 @@ def build_workout(build_data, workout_type):
     # we have to store each labentry ext IP and send it to the user
     workout_ids = []
 
+    # To do: Pull all of the yaml defaults into a separate function
+    if "student_instructions_url" in y['workout']:
+        student_instructions_url = y['workout']['student_instructions_url']
+    else:
+        student_instructions_url = None
+
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
-    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['workout_description'])
+    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type,
+                    student_instructions_url, y['workout']['workout_description'])
 
     # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
     for i in range(1, num_team+1):
@@ -446,8 +454,18 @@ def build_workout(build_data, workout_type):
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
+            if "machine_type" in server:
+                machine_type = server["machine_type"]
+            else:
+                machine_type = "n1-standard-1"
+
+            if "network_routing" in server:
+                network_routing = server["network_routing"]
+            else:
+                network_routing = False
+
             meta = {}
-            if server['metadata'] == 'None' \
+            if "metadata" not in server or server['metadata'] == 'None' \
                     or server['metadata'] == 'none' \
                     or server['metadata'] == None:
                 meta = {"items": [
@@ -459,7 +477,7 @@ def build_workout(build_data, workout_type):
                                       "value": topic_name})
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         server['machine_type'], server['network_routing'], nics, server['tags'],
+                                         machine_type, network_routing, nics, server['tags'],
                                          meta, sshkey, guac_path)
 
         # Create all of the network routes and firewall rules

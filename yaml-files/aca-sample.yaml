@@ -1,0 +1,61 @@
+version: '1'
+
+workout:
+  name: "ACA Sample Build"
+  workout_description: 'This is a sample build for testing with the American Cyber Alliance'
+  student_instructions_url: none
+  project_name: acapte
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "aca-bootcamp-public"
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+
+networks:
+  - name: aca-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.0.0/24
+
+servers:
+  - name: cybergym-labentry
+    labentry: True
+    image: image-aca-cybergym-labentry
+    tags: {items: ["http-server", "labentry"]}
+    nics:
+      - network: aca-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: aca-windows
+    image: image-aca-cybergym-ad-dc
+    tags: {items: ["ad-server", "rdp-server"]}
+    guac_path: "MjQAYwBteXNxbA=="
+    nics:
+      - network: aca-network
+        internal_IP: 10.1.1.2
+        subnet: default
+        external_NAT: true
+  - name: aca-linux
+    image: networking-img
+    tags: {items: ["http-server"]}
+    sshkey: "gymboss:ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnY0o/cKSB2U8pgFPG2X+A6rw5EDkxJUkDGhvDvEbvnwf/sUUl60CioWBQy3K9qWJ8xK3Df2tyzR6eCKnEV1qjzQ3T584zLmTSeDy/z3NxH0VzB1jNuLP2WqFoxcG67cKGyCTECImYb32hzWU/IPu5KfAoXn45QAG+MmcrEMwNgjyLhbUQel2fPfUXFgFJW9CLFNtQZdjlhdOlFasqPfIhUBypSiRMgJ77Gmv06/MkUCbsUeLxE1E9Zp5wx+uKwZwMRxhn/ZURGwmH3JTLYKHJTLNaOJDbl5MfIgcnjCG+h12qplBUvFKDhwIGKIt152GlhbEOJWA+zRHajOAczGp4w== gymboss"
+    nics:
+      - network: aca-network
+        internal_IP: 10.1.1.3
+        subnet: default
+        external_NAT: true
+
+firewall_rules:
+  - name: allow-http
+    network: aca-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-internal
+    network: aca-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
