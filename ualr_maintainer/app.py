@@ -227,7 +227,7 @@ def create_route(project, zone, route):
 
 
 def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, metadata=None, sshkey=None, guac_path=None):
+                                 networkRouting, networks, tags, metadata, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -282,6 +282,14 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         'metadata': metadata
     }
 
+    if sshkey:
+        config['metadata']['items'].append({
+                    "key": "ssh-keys",
+                    "value": sshkey
+                })
+
+    print(config['metadata'])
+
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
@@ -312,21 +320,6 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
     if guac_path:
         register_workout_server(workout, name, guac_path)
-    metabody = {"items": [],
-            "fingerprint": new_instance["metadata"]["fingerprint"]}
-    if sshkey:
-        metabody['items'].append({
-                    "key": "ssh-keys",
-                    "value": sshkey
-                })
-
-    if metadata:
-        metabody['items'].append(metadata)
-
-    
-    request = compute.instances().setMetadata(project=project, zone=zone, instance=name, body=metabody)
-    response = request.execute()
-
 
 # Application
 app = Flask(__name__)
@@ -453,14 +446,21 @@ def build_workout(build_data, workout_type):
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
-            if server['metadata'] == 'None' or server['metadata'] == 'none':
-                server['metadata'] = {"items": [{"topic": topic_name}]}
+            meta = {}
+            if server['metadata'] == 'None' \
+                    or server['metadata'] == 'none' \
+                    or server['metadata'] == None:
+                meta = {"items": [
+                    {"key": 'topic',
+                    "value": topic_name}]}
             else:
-                server['metadata'].append(topic_name)
+                meta = server['metadata']
+                meta['items'].append({"key": 'topic',
+                                      "value": topic_name})
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
                                          server['machine_type'], server['network_routing'], nics, server['tags'],
-                                         server['metadata'], sshkey, guac_path)
+                                         meta, sshkey, guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
