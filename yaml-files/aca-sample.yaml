@@ -15,7 +15,7 @@ networks:
   - name: aca-network
     subnets:
       - name: default
-        ip_subnet: 10.1.0.0/24
+        ip_subnet: 10.1.1.0/24
 
 servers:
   - name: cybergym-labentry
