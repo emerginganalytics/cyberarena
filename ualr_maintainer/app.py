@@ -289,8 +289,6 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
                     "value": sshkey
                 })
 
-    print(config['metadata'])
-
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
@@ -503,10 +501,9 @@ def build_workout(build_data, workout_type):
 
         stop_workout(generated_workout_ID)
 
-    # time.sleep(120)
+    time.sleep(60)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
-    # add time for guacamole setup for each team
     # for i in range(len(list_ext_ip)):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     unit['workouts'] = workout_ids
