@@ -82,6 +82,7 @@ def start_workout(workout_id):
                                 if item == 'labentry':
                                     ip_address = started_vm['networkInterfaces'][0]['accessConfigs'][0]['natIP']
                                     register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
+            time.sleep(30)
             print("Finished starting %s" % workout_id)
         return True
     except():
