@@ -399,6 +399,7 @@ def build_workout(build_data, workout_type):
 
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
+    print("Creating unit %s" % (unit_id))
     store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type,
                     student_instructions_url, y['workout']['workout_description'])
 
@@ -536,7 +537,7 @@ def landing_page(workout_id):
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, shutoff=shutoff, workout_id=workout_id,
+                               guac_path=guac_path, expiration=expiration, instructions=unit['student_instructions_url'], shutoff=shutoff, workout_id=workout_id,
                                running=workout['running'])
     else:
         return render_template('no_workout.html')
