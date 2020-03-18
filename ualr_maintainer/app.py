@@ -501,7 +501,6 @@ def build_workout(build_data, workout_type):
 
         stop_workout(generated_workout_ID)
 
-    time.sleep(60)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
     # for i in range(len(list_ext_ip)):
