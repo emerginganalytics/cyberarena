@@ -536,9 +536,12 @@ def landing_page(workout_id):
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
+        student_instructions_url = None
+        if 'student_instructions_url' in unit:
+            student_instructions_url = unit['student_instructions_url']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, instructions=unit['student_instructions_url'], shutoff=shutoff, workout_id=workout_id,
-                               running=workout['running'])
+                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id,
+                                   running=workout['running'])
     else:
         return render_template('no_workout.html')
 
