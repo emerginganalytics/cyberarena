@@ -29,8 +29,8 @@ servers:
         internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
-  - name: cybergym-phishing
-    image: image-promise-vnc
+  - name: cybergym-firewall
+    image: image-cybergym-vnc
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["http-server", "attacker", "vnc-server"]}

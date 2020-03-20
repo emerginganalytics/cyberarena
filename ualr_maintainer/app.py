@@ -58,6 +58,8 @@ def create_subscriber(topic_name):  # workout_topic = create_pub_sub_topic.topic
     timeout = 10.0
     subscriber = pubsub_v1.SubscriberClient()
 
+    # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
+
     subscription_path = subscriber.subscription_path(project, topic_name)
 
     def callback(message):

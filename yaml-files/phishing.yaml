@@ -30,7 +30,7 @@ servers:
         subnet: default
         external_NAT: true
   - name: cybergym-phishing
-    image: image-promise-vnc
+    image: image-cybergym-vnc
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["http-server", "attacker", "vnc-server"]}
