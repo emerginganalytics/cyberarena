@@ -4,10 +4,10 @@
 ---
 ---
 ## [ Requirements ]:
-Python3.5 or greater
+Python3.5 or greater (preferably 3.8)
 
-Python library:
-google-cloud-pubsub   
+Python Requirements:
+pip3 install -r requirements.txt
 
 PubSub Service .json key:   
 ```
@@ -18,8 +18,6 @@ Even though this key only has access to Publish to the Cloud, be sure to store i
 This script can be used with any workout. In order for the script to work properly, you'll need to make
 sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json
 file location. 
-  
-***If you're running on Windows systems, replace os.uname()[1] with platform.uname()[1]***
   
 Example workout publish calls:    
 
