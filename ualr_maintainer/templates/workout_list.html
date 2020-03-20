@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-
+{% block title %}Unit {{ unit_id }}{% endblock %}
 {% block content %}
     <p>Here are the links to your {{ workout_type }} workouts. This page will be available until your workouts expire, so save the link for your reference.</p>
     <ol class="teams">
         {% for workout in workout_list %}
-            <a href="/landing/{{ workout }}"><li class="teams">/landing/{{ workout }}</li></a>
+            <a href="/landing/{{ workout }}" target="_blank"><li class="teams">/landing/{{ workout }}</li></a>
         {% endfor %}
     </ol>
     <div style="padding:1em;">

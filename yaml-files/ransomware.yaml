@@ -1,0 +1,56 @@
+version: '1'
+
+
+workout:
+  name: ransomware
+  workout_description: 'Simulate ransomware attack on end user.'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "cybergym-public"
+  project_api_key_type: cloud
+  flag_location: 
+
+networks:
+- name: external-network
+  subnets:
+    - name: default
+      ip-subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-ransomware
+    image: image-cybergym-ransomware
+    machine_type: "n1-standard-2"
+    network_routing: false
+    tags: {items: ["http-server", "labentry"]}
+    metadata: none
+    nics:
+      - network: default
+        internal_IP: 10.1.1.18
+        subnet: cybergym-internal
+        external_NAT: # boolean value
+
+# List network routes. Multiple routes may be listed using YAML block sequence format.
+# If no routes are needed, delete all sub-entries under 'routes:' and leave it empty
+routes:
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: external-netowrk
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80, 8080, 443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
+- name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]

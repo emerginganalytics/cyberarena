@@ -94,7 +94,7 @@ def store_instructor_info(email):
 
     ds_client.put(new_instructor)
 
-def store_unit_info(id, email, name, ts, workout_type, description):
+def store_unit_info(id, email, name, ts, workout_type, description, student_instructions_url):
 
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
@@ -104,6 +104,7 @@ def store_unit_info(id, email, name, ts, workout_type, description):
         "timestamp": ts,
         "workout_type": workout_type,
         "description": description,
+        "student_instructions_url": student_instructions_url,
         "workouts": []
     })
 
@@ -229,7 +230,7 @@ def create_route(project, zone, route):
 
 
 def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, metadata=None, sshkey=None, guac_path=None):
+                                 networkRouting, networks, tags, metadata, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -284,6 +285,12 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         'metadata': metadata
     }
 
+    if sshkey:
+        config['metadata']['items'].append({
+                    "key": "ssh-keys",
+                    "value": sshkey
+                })
+
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
@@ -314,20 +321,6 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
     if guac_path:
         register_workout_server(workout, name, guac_path)
-
-    if sshkey:
-        ssh_key_body = {
-            "items": [
-                {
-                    "key": "ssh-keys",
-                    "value": sshkey
-                }
-            ],
-            "fingerprint": new_instance["metadata"]["fingerprint"]
-        }
-        request = compute.instances().setMetadata(project=project, zone=zone, instance=name, body=ssh_key_body)
-        response = request.execute()
-
 
 # Application
 app = Flask(__name__)
@@ -400,15 +393,24 @@ def build_workout(build_data, workout_type):
     # we have to store each labentry ext IP and send it to the user
     workout_ids = []
 
+    # To do: Pull all of the yaml defaults into a separate function
+    if "student_instructions_url" in y['workout']:
+        student_instructions_url = y['workout']['student_instructions_url']
+    else:
+        student_instructions_url = None
+
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
-    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type, y['workout']['workout_description'])
+    print("Creating unit %s" % (unit_id))
+    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type,
+                    student_instructions_url, y['workout']['workout_description'])
 
     # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         topic_name = create_workout_topic(generated_workout_ID, workout_type)
+        create_subscriber(topic_name)
         store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts, topic_name, flag)
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
@@ -453,9 +455,31 @@ def build_workout(build_data, workout_type):
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
+            if "machine_type" in server:
+                machine_type = server["machine_type"]
+            else:
+                machine_type = "n1-standard-1"
+
+            if "network_routing" in server:
+                network_routing = server["network_routing"]
+            else:
+                network_routing = False
+
+            meta = {}
+            if "metadata" not in server or server['metadata'] == 'None' \
+                    or server['metadata'] == 'none' \
+                    or server['metadata'] == None:
+                meta = {"items": [
+                    {"key": 'topic',
+                    "value": topic_name}]}
+            else:
+                meta = server['metadata']
+                meta['items'].append({"key": 'topic',
+                                      "value": topic_name})
+
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         server['machine_type'], server['network_routing'], nics, server['tags'],
-                                         server['metadata'], sshkey, guac_path)
+                                         machine_type, network_routing, nics, server['tags'],
+                                         meta, sshkey, guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')
@@ -480,10 +504,8 @@ def build_workout(build_data, workout_type):
 
         stop_workout(generated_workout_ID)
 
-    # time.sleep(120)
     # send_email(build_data['email'], build_data['type'], list_ext_ip)
 
-    # add time for guacamole setup for each team
     # for i in range(len(list_ext_ip)):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     unit['workouts'] = workout_ids
@@ -516,9 +538,12 @@ def landing_page(workout_id):
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
+        student_instructions_url = None
+        if 'student_instructions_url' in unit:
+            student_instructions_url = unit['student_instructions_url']
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, shutoff=shutoff, workout_id=workout_id,
-                               running=workout['running'])
+                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id,
+                                   running=workout['running'])
     else:
         return render_template('no_workout.html')
 
@@ -624,7 +649,6 @@ def reset_all():
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
-
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)

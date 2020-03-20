@@ -40,28 +40,28 @@ servers:
         internal_IP: 10.1.1.253
         subnet: default
         external_NAT: false
-    - name: ce-linux
-      image: ce-linux-boot-image-002
-      machine_type: "n1-standard-1"
-      network_routing: false
-      tags: none
-      metadata: none
-      nics:
-        - network: external-network
-          internal_IP: 10.1.1.111
-          subnet: default
-          external_NAT: false
-    - name: cd-windows
-      image: ce-windows-boot-image-002
-      machine_type: "n1-standard-1"
-      network_routing: false
-      tags: none
-      metadata: none
-      nics:
-        - network: external-network
-          internal_IP: 10.1.1.115
-          subnet: default
-          external_NAT: false
+  - name: ce-linux
+    image: ce-linux-boot-image-002
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: none
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.111
+        subnet: default
+        external_NAT: false
+  - name: cd-windows
+    image: ce-windows-boot-image-002
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: none
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.115
+        subnet: default
+        external_NAT: false
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:
@@ -69,7 +69,7 @@ routes:
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
   - name: allow-http
-    network: external-netowrk
+    network: external-network
     target_tags: ["http-server"]
     protocol: none
     ports: ["tcp/80, 8080, 443"]
