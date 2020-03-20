@@ -1,0 +1,3 @@
+google-api-core
+gooogle-compute-engine
+google-cloud-pubsub
