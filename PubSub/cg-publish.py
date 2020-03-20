@@ -3,18 +3,18 @@ from google.cloud import pubsub_v1
 
 import base64 as b64
 import os
-import platform
 import requests
 import sys
 
 # NOTE change environment = .json system location
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '<json file location>'
 
-# parsing hostname to determine workout_ID and team number; type=sys.arv[1]
-name = os.uname()[1]
-# If on Windows, use this line instead:
-# name = platform.uname()[1]
-data = name.split("-")
+headers = {
+    'Metadata-Flavor': 'Google',
+}
+response = requests.get('http://metadata.google.internal/computeMetadata/v1/instance/name', \
+                        headers=headers)
+data = ((response.content).decode('utf-8')).split('-')
 
 w_id = data[0]
 w_type = sys.argv[1]
