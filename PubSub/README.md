@@ -4,7 +4,7 @@
 ---
 ---
 ## [ Requirements ]:
-Python3.5 or greater (preferably 3.8)
+Python3.6 or greater (preferably 3.8)
 
 Python Requirements:
 pip3 install -r requirements.txt
