@@ -1,14 +1,18 @@
 {% extends "base.html" %}
-
+{% block title %}Workout {{ workout_id }}{% endblock %}
 {% block content %}
     <div id="workout_id" hidden>{{ workout_id }}</div>
     <h2>Description</h2>
     <p>{{ description }}</p>
+    {% if instructions!=None %}
+        <a href="{{ instructions }}" target="_blank">Instructions</a>
+    {% endif %}
+
     <h2>Workout Servers</h2>
     {% if guac_path==None %}
-        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
+        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
     {% else %}
-        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
+        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
     {% endif %}
 
     <h2>Workout Control</h2>

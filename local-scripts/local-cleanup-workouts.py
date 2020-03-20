@@ -77,6 +77,7 @@ def delete_network(workout_id):
 
 
 def delete_specific_network(workout_id):
+    print('Beginning network delete for %s' % workout_id)
     if delete_firewall_rules(workout_id):
         if delete_subnetworks(workout_id):
             if delete_network(workout_id):
@@ -86,6 +87,6 @@ def delete_specific_network(workout_id):
 
 # The main function is only for debugging. Do not include this line in the cloud function
 # delete_workouts(None, None)
-specific_workouts = ['cs4360ehr-pp', 'cs4360for-pp', 'cs4360her-jk', 'cs4360jai-jk', 'cs4360lov-jk', 'cs4360may-aq', 'cs4360may-lg', 'cs4360swhi-kp', 'cs4360teamdst-pp', 'cs4360teamzj-pp', 'ahjgyc']
+specific_workouts = ['zhwruu', 'zwivew']
 for workout in specific_workouts:
     delete_specific_network(workout)
