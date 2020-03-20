@@ -14,6 +14,12 @@ PubSub Service .json key:
 Go to IAM & Admin > Service Accounts > cybergym-publisher@... > edit > create key
 ```
 Even though this key only has access to Publish to the Cloud, be sure to store it in a safe place.
+
+**Currently, cg-publish and .json are stored in these directories:**
+  ```
+  Linux dir = /usr/local/bin/cg-publish.py | /usr/local/lib/...json
+  Windows = C:\Data\Pub\[both .py and .json]
+  ```
 ## [ cg-publish.py ]:   
 This script can be used with any workout. In order for the script to work properly, you'll need to make
 sure google-service.json file is downloaded on each machine. Modify the cg-publish.py to point to the json

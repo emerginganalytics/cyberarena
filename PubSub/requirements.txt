@@ -1,3 +1,2 @@
 google-api-core
-google-compute-engine
 google-cloud-pubsub
