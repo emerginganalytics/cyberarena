@@ -41,7 +41,7 @@ def flag_generator():
 
 
 # TODO Identify where to call create_pub_sub_topic() and create_subscriber()
-# Create Workout Topic based on id and type[name]
+# Create Workout Topic Based on ID and Type[Name]
 def create_workout_topic(workout_id, workout_type):
     publisher = pubsub_v1.PublisherClient()
 
@@ -53,14 +53,29 @@ def create_workout_topic(workout_id, workout_type):
     return topic_name
 
 
-# Create Subscriber for each workout Topic
-def create_subscriber(topic_name):  # workout_topic = create_pub_sub_topic.topic_path
-    timeout = 10.0
+# Creates the Subscription for each Workout Topic
+def create_subscription(topic_name):
     subscriber = pubsub_v1.SubscriberClient()
 
     # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
+    topic_path = subscriber.topic_path(project, topic_name)
 
-    subscription_path = subscriber.subscription_path(project, topic_name)
+    subscription_path = subscriber.subscription_path(
+        project, topic_name
+    )
+    create_subscription = subscriber.create_subscription(
+        subscription_path, topic_path
+    )
+    return subscription_path
+
+
+# Listens for Messages on Subscription_Path
+def subscription(subscription_path):  # workout_topic = create_pub_sub_topic.topic_path
+    subscriber = pubsub_v1.SubscriberClient()
+    timeout = 10.0
+
+    # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
+    # subscription_path = subscriber.subscription_path(project, topic_name)
 
     def callback(message):
         print("Received message: {}".format(message.data))
@@ -74,15 +89,14 @@ def create_subscriber(topic_name):  # workout_topic = create_pub_sub_topic.topic
         subscription_path, callback=callback
     )
     print("Listening for message on {}..\n".format(subscription_path))
-    # subscription = subscriber.create_subscription(subscription_path, workout_topic)
+    # If no message, sleep and retry until
     try:
-        streaming_pull_future.result(timeout=timeout)
+        streaming_pull_future(timeout=timeout)
     except Exception as e:
-        streaming_pull_future.cancel()
         print(
-            "Listening for messages on {} threw an exception: {}".format(topic_name, e)
+            "Listening for messages on {} threw an exception: {}".format(subscription_path, e)
         )
-
+        time.sleep(180)
 
 # --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
@@ -124,7 +138,7 @@ def get_unit_workouts(unit_id):
 # NOTICE: Added topic_name and flag entities to store_workout_info()
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, flag):
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, subscription_path, flag):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -140,6 +154,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'running': False,
         'servers': [],
         'topic_name': topic_name,
+        'subscription_path': subscription_path,
         'flag': flag
     })
 
@@ -410,8 +425,11 @@ def build_workout(build_data, workout_type):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         topic_name = create_workout_topic(generated_workout_ID, workout_type)
-        create_subscriber(topic_name)
-        store_workout_info(generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type, ts, topic_name, flag)
+        create_subscription(topic_name)
+        store_workout_info(
+            generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type,
+            ts, topic_name, create_subscription, flag
+        )
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
         print('Creating networks')
@@ -513,15 +531,17 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
+
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
-    # TODO: Add Subscription based off datastore workout topic_path, topic_name
-    #  create_subscriber(workout_topic, topic_name)
-    # create_subscriber(workout['topic_name'])
-
+    subscription(workout['subscription_path'])
+    '''
+    if (workout['complete']):
+        request.POST(workout['flag'])
+    '''
     if (workout):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
