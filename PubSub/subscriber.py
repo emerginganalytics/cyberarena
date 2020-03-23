@@ -46,17 +46,17 @@ def create_subscriber(workout_id, workout_type):  # workout_topic = create_pub_s
 
     # If we get a message, break the loop; If false, retry in 3 minutes
     def pull_message():
-        try:
-            streaming_pull_future.result(timeout=timeout)
-        except Exception as e:
-            print(
-               "Listening for messages on {} threw an exception: {}".format(topic_name, e)
-            )
-            streaming_pull_future.cancel()
-            print('Pull canceled. Waiting 5 seconds ...')
+        while True:
+            try:
+                streaming_pull_future.result(timeout=timeout)
+            except Exception as e:
+                print(
+                   "Listening for messages on {} threw an exception: {}".format(topic_name, e)
+                )
+                streaming_pull_future.cancel()
+                print('Pull canceled. Waiting 5 seconds ...')
 
-            time.sleep(3)
-            streaming_pull_future.result(timeout=timeout)
+                time.sleep(5)
 
     pull_message()
 
