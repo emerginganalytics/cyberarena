@@ -44,7 +44,7 @@ def create_subscriber(workout_id, workout_type):  # workout_topic = create_pub_s
     print("Listening for message on {}..\n".format(subscription))
     # subscription = subscriber.create_subscription(subscription_path, workout_topic)
 
-    # If we get a message, break the loop; If false, retry in 3 minutes
+    # TODO: If we get a message, break the loop; If false, retry in 3 minutes
     def pull_message():
         while True:
             try:
