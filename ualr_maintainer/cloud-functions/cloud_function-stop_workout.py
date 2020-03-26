@@ -50,4 +50,29 @@ def stop_workouts(event, context):
         ds_client.put(workout)
         print('Stopped servers for workout %s' % workout_id)
 
+    # State change errors may occur in the application. In those cases, check to see if there are any non-expired
+    # servers with a running state of false, but who have servers running. We want to stop these servers as well.
+    query_workouts = ds_client.query(kind='cybergym-workout')
+    query_workouts.add_filter("resources_deleted", "=", False)
+    query_workouts.add_filter("running", "=", False)
+    for workout in list(query_workouts.fetch()):
+        workout_id = workout.key.name
+        if workout_id == 'fuiufa':
+            a = 1
+        result = compute.instances().list(project=project, zone=zone,
+                                          filter='name = {}*'.format(workout_id)).execute()
+        try:
+            if 'items' in result:
+                for vm_instance in result['items']:
+                    response = compute.instances().get(project=project, zone=zone,
+                                                        instance=vm_instance["name"]).execute()
+                    if response["status"] != "TERMINATED":
+                        compute.instances().stop(project=project, zone=zone,
+                                                        instance=vm_instance["name"]).execute()
+            else:
+                print("No Virtual Machines to stop for workout %s" % workout_id)
+        except KeyError:
+            print("Error when stopping in finding key in workout %s" % workout_id)
+            pass
+
 stop_workouts(None, None)
