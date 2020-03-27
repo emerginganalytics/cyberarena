@@ -537,11 +537,11 @@ def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
-    subscription(workout['subscription_path'])
-    '''
-    if (workout['complete']):
-        request.POST(workout['flag'])
-    '''
+    # subscription(workout['subscription_path'])
+    # '''
+    # if (workout['complete']):
+    #     request.POST(workout['flag'])
+    # '''
     if (workout):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
