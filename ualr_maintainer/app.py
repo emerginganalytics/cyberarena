@@ -425,10 +425,10 @@ def build_workout(build_data, workout_type):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         topic_name = create_workout_topic(generated_workout_ID, workout_type)
-        create_subscription(topic_name)
+        sub_path = create_subscription(topic_name)
         store_workout_info(
             generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type,
-            ts, topic_name, create_subscription, flag
+            ts, topic_name, sub_path, flag
         )
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
