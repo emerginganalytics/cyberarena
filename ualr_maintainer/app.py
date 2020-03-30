@@ -63,8 +63,13 @@ def create_subscription(topic_name):
     subscription_path = subscriber.subscription_path(
         project, topic_name
     )
+
+    endpoint = '%spush' % (request.url_root)
+
+    push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
+
     subscriber.create_subscription(
-        subscription_path, topic_path
+        subscription_path, topic_path, push_config
     )
 
     def callback(message):
@@ -80,28 +85,6 @@ def create_subscription(topic_name):
 
     return subscription_path
 
-
-# Listens for Messages on Subscription_Path
-def subscription(subscription_path):  # workout_topic = create_pub_sub_topic.topic_path
-    subscriber = pubsub_v1.SubscriberClient()
-    timeout = 10.0
-
-    # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
-    # subscription_path = subscriber.subscription_path(project, topic_name)
-
-
-    streaming_pull_future = subscriber.subscribe(
-        subscription_path, callback=callback
-    )
-    print("Listening for message on {}..\n".format(subscription_path))
-    # If no message, sleep and retry until
-    # try:
-    #     streaming_pull_future(timeout=timeout)
-    # except Exception as e:
-    #     print(
-    #         "Listening for messages on {} threw an exception: {}".format(subscription_path, e)
-    #     )
-    #     time.sleep(180)
 
 # --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
@@ -536,17 +519,11 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
-
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
-    # subscription(workout['subscription_path'])
-    # '''
-    # if (workout['complete']):
-    #     request.POST(workout['flag'])
-    # '''
     if (workout):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
@@ -566,12 +543,14 @@ def landing_page(workout_id):
         student_instructions_url = None
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
+
+        topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
+
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id,
+                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
                                    running=workout['running'])
     else:
         return render_template('no_workout.html')
-
 
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
@@ -674,6 +653,16 @@ def reset_all():
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
+
+# For debugging of pub/sub
+@app.route('/publish', methods=['GET', 'POST'])
+def publish():
+    if (request.method == 'POST'):
+        topic = request.form['topic']
+        workout_id = request.form['workout_id']
+        publish_client = pubsub_v1.PublisherClient()
+        publish_client.publish(topic, b'This is a test', test='true')
+    return redirect("/landing/%s" % (workout_id))
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
