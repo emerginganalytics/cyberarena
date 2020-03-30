@@ -63,9 +63,21 @@ def create_subscription(topic_name):
     subscription_path = subscriber.subscription_path(
         project, topic_name
     )
-    create_subscription = subscriber.create_subscription(
+    subscriber.create_subscription(
         subscription_path, topic_path
     )
+
+    def callback(message):
+        print("Received message: {}".format(message.data))
+        if message.attributes:
+            print("Attributes:")
+            for key in message.attributes:
+                value = message.attributes.get(key)
+                print('{}: {}'.format(key, value))
+        message.ack()
+
+    future = subscriber.subscribe(subscription_path, callback)
+
     return subscription_path
 
 
@@ -77,26 +89,19 @@ def subscription(subscription_path):  # workout_topic = create_pub_sub_topic.top
     # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
     # subscription_path = subscriber.subscription_path(project, topic_name)
 
-    def callback(message):
-        print("Received message: {}".format(message.data))
-        if message.attributes:
-            print("Attributes:")
-            for key in message.attributes:
-                value = message.attributes.get(key)
-                print('{}: {}'.format(key, value))
-        message.ack()
+
     streaming_pull_future = subscriber.subscribe(
         subscription_path, callback=callback
     )
     print("Listening for message on {}..\n".format(subscription_path))
     # If no message, sleep and retry until
-    try:
-        streaming_pull_future(timeout=timeout)
-    except Exception as e:
-        print(
-            "Listening for messages on {} threw an exception: {}".format(subscription_path, e)
-        )
-        time.sleep(180)
+    # try:
+    #     streaming_pull_future(timeout=timeout)
+    # except Exception as e:
+    #     print(
+    #         "Listening for messages on {} threw an exception: {}".format(subscription_path, e)
+    #     )
+    #     time.sleep(180)
 
 # --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
