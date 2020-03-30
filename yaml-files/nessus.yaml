@@ -2,7 +2,7 @@ version: '1'
 
 workout:
   name: Nessus
-  workout_description: 'This is workout on a Windows Server that includes Nessus.'
+  workout_description: 'This is workout on a Windows Server that includes Nessus. In order to access Nessus go to a web broswer and go to 10.1.1.27:8834. The username is Cybergym and the password is Let's Workout.'
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
