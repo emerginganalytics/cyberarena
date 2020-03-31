@@ -64,12 +64,13 @@ def create_subscription(topic_name):
         project, topic_name
     )
 
-    endpoint = '%spush' % (request.url_root)
+    # endpoint = '%spush' % (request.url_root)
 
-    push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
+    # push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
 
+    # TODO: add push_config
     subscriber.create_subscription(
-        subscription_path, topic_path, push_config
+        subscription_path, topic_path
     )
 
     def callback(message):
