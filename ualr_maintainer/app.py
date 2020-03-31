@@ -545,7 +545,9 @@ def landing_page(workout_id):
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
 
-        topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
+        topic = None
+        if 'topic_name' in workout:
+            topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                    guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
