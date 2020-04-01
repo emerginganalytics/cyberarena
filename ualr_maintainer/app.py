@@ -65,12 +65,12 @@ def create_subscription(topic_name):
     )
 
     # endpoint = '%spush' % (request.url_root)
+    endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/push'
 
-    # push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
+    push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
 
-    # TODO: add push_config
     subscriber.create_subscription(
-        subscription_path, topic_path
+        subscription_path, topic_path, push_config
     )
 
     def callback(message):
@@ -657,6 +657,10 @@ def reset_all():
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
+
+@app.route('/push', methods=['POST'])
+def get_push():
+    return 'OK', 200
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
