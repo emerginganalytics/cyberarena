@@ -575,6 +575,7 @@ def start_vm():
             workout['run_hours'] = 2
         else:
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+        workout['running'] = True
         ds_client.put(workout)
 
         try:
