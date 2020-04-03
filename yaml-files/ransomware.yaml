@@ -22,13 +22,26 @@ servers:
     image: image-cybergym-ransomware
     machine_type: "n1-standard-2"
     network_routing: false
-    tags: {items: ["http-server", "labentry"]}
+    tags: {items: ["http-server", "dns", "allow-rdp"]}
     metadata: none
     nics:
       - network: default
         internal_IP: 10.1.1.18
         subnet: cybergym-internal
-        external_NAT: # boolean value
+        external_NAT: true
+
+  - name: cybergym-labentry
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "https-server", "guac-server", "vnc-server", "labentry"]}
+    metadata: none
+    guac_path: "MQBjAG15c3Fs"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
 
 # List network routes. Multiple routes may be listed using YAML block sequence format.
 # If no routes are needed, delete all sub-entries under 'routes:' and leave it empty
@@ -42,13 +55,19 @@ firewall_rules:
     protocol: none
     ports: ["tcp/80, 8080, 443"]
     source_ranges: ["0.0.0.0/0"]
+  - name: default-allow-internal-dns
+    network: external-network
+    target_tags: ["dns"]
+    protocol: none
+    ports: ["tcp/53","udp/53"]
+    source_ranges: ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","35.199.192.0/19"]
   - name: allow-rdp
     network: external-network
     target_tags: ["allow-rdp"]
     protocol: tcp
     ports: ["tcp/3306"]
     source_ranges: ["10.1.0.0/24"]
-- name: allow-all-local-external
+  - name: allow-all-local-external
     network: external-network
     target_tags: []
     protocol: tcp
