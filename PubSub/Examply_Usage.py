@@ -34,5 +34,3 @@ check_windows = check_win_perm()
 if check_linux and check_windows:
     print('[*] Publishing Results ...')
     os.system('python3 /usr/local/bin/cg-post.py permissions')
-~                                                                                                                                                                        
-~                                                                   
