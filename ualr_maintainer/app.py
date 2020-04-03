@@ -1,24 +1,15 @@
 import time
-import calendar
-import random
-import string
 import list_vm
 import start_workout
-import threading
 
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
-from workout_firewall_update import student_firewall_add
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
-from workout_build_functions import create_firewall_rules, create_route, create_instance_custom_image, build_workout
+from globals import ds_client, dns_suffix, project, workout_globals
+from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 
-import googleapiclient.discovery
 from flask import Flask, render_template, redirect, request
-from base64 import b64encode as b64
-from yaml import load, Loader
-
 from forms import CreateWorkoutForm
 
 # --------------------------- FLASK APP --------------------------
@@ -27,11 +18,13 @@ app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 
+# TODO: add something at default route to direct users to correct workout?
+# Default route
 @app.route('/')
 def invalid_workout():
     return render_template('no_workout.html')
 
-
+# Workout build route
 @app.route('/<workout_type>', methods=['GET', 'POST'])
 def index(workout_type):
     form=CreateWorkoutForm()
@@ -43,26 +36,23 @@ def index(workout_type):
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
 
-
+# TODO: Is this still in use?
 @app.route('/team_launcher')
 def team_launcher():
     return render_template('team_launcher.html')
 
-
+# TODO: Is this still in use?
 @app.route('/workout_done/<build_data>')
 def workout_done(build_data):
     return render_template('workout_done.html', build_data=build_data)
 
-
+# TODO: Is this still in use?
 @app.route('/listvm')
 def list_vm_instances():
     list_vm_test = list_vm.list_instances(project, 'us-central1-a')
     return render_template('list_instances.html', list_vm=list_vm_test)
 
-
-@app.route('/update', methods=['GET', 'POST'])
-
-
+# Student landing page route. Displays information and links for an individual workout
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
@@ -98,6 +88,7 @@ def landing_page(workout_id):
     else:
         return render_template('no_workout.html')
 
+# Instructor landing page. Displays information and links for a unit of workouts
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
@@ -109,6 +100,7 @@ def workout_list(unit_id):
         return render_template('no_workout.html')
 
 # TODO: add student_firewall_update call after workout starts
+# Called by start workout buttons on landing pages
 @app.route('/start_vm', methods=['GET', 'POST'])
 def start_vm():
     if (request.method == 'POST'):
@@ -128,6 +120,7 @@ def start_vm():
             start_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
+# Called by stop workout buttons on landing pages
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
     if (request.method == 'POST'):
@@ -139,6 +132,7 @@ def stop_vm():
             stop_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
+# Called by reset workout buttons on landing pages
 @app.route('/reset_vm', methods=['GET', 'POST'])
 def reset_vm():
     if (request.method == 'POST'):
@@ -150,7 +144,7 @@ def reset_vm():
             reset_workout(workout_id)
         return redirect("/landing/%s" % (workout_id))
 
-
+# Called by start workouts button on instructor landing. Starts all workouts in a unit.
 @app.route('/start_all', methods=['GET', 'POST'])
 def start_all():
     if (request.method == 'POST'):
@@ -173,7 +167,7 @@ def start_all():
 
         return redirect("/workout_list/%s" % (unit_id))
 
-
+# Called by stop workouts button on instructor landing page. Stops all workouts
 @app.route('/stop_all', methods=['GET', 'POST'])
 def stop_all():
     if (request.method == 'POST'):
@@ -187,7 +181,7 @@ def stop_all():
                 stop_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
-
+# Called by reset workouts button on instructor landing page. Resets all workouts.
 @app.route('/reset_all', methods=['GET', 'POST'])
 def reset_all():
     if (request.method == 'POST'):
@@ -201,6 +195,7 @@ def reset_all():
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
+# Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
 @app.route('/push', methods=['POST'])
 def get_push():
     return 'OK', 200

@@ -1,6 +1,7 @@
 from google.cloud import datastore
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
+from globals import ds_client, logger
 
+# Store information for an instructor. To be used when instructor login is complete
 def store_instructor_info(email):
     new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
 
@@ -10,6 +11,7 @@ def store_instructor_info(email):
 
     ds_client.put(new_instructor)
 
+# Store information for an individual unit.
 def store_unit_info(id, email, name, ts, workout_type, description, student_instructions_url):
 
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
@@ -26,7 +28,6 @@ def store_unit_info(id, email, name, ts, workout_type, description, student_inst
 
     ds_client.put(new_unit)
 
-
 # This function queries and returns all workout IDs for a given unit
 def get_unit_workouts(unit_id):
     unit_workouts = ds_client.query(kind='cybergym-workout')
@@ -36,8 +37,6 @@ def get_unit_workouts(unit_id):
         workout_list.append(workout.key.name)
 
     return workout_list
-
-# NOTICE: Added topic_name and flag entities to store_workout_info()
 
 # store workout info to google cloud datastore
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, subscription_path):

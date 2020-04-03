@@ -32,7 +32,7 @@ class workout_globals():
                 i += 1
 
         if not complete:
-            print("Timeout for operation %s" % operation_id)
+            logger.error("Timeout for operation %s" % operation_id)
             return False
         else:
             return True
