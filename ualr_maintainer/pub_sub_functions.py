@@ -1,5 +1,5 @@
 from google.cloud import pubsub_v1
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
+from globals import project
 
 # TODO Identify where to call create_pub_sub_topic() and create_subscriber()
 # Create Workout Topic Based on ID and Type[Name]

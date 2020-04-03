@@ -4,9 +4,9 @@ import random
 import string
 from yaml import load, Loader
 
-from globals import ds_client, dns_suffix, project, compute, workout_globals, storage_client, logger
+from globals import ds_client, project, compute, workout_globals, storage_client
 from dns_functions import add_dns_record, register_workout_server
-from datastore_functions import store_instructor_info, store_unit_info, store_workout_info
+from datastore_functions import store_unit_info, store_workout_info
 from pub_sub_functions import create_workout_topic, create_subscription
 from stop_workout import stop_workout
 

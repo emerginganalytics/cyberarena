@@ -3,11 +3,9 @@
 # network zone is the only one allowed for the workout.
 #
 
-import googleapiclient.discovery
 import ipaddress
 import time
 import calendar
-from google.cloud import datastore
 
 
 # Global variables for this function

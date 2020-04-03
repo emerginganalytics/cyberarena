@@ -1,4 +1,4 @@
-from globals import ds_client, project, compute, dnszone
+from globals import ds_client, project, compute
 
 # Global variables for this function
 zone = 'us-central1-a'
