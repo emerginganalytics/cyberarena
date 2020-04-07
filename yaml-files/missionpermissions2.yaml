@@ -1,7 +1,7 @@
 version: '1'
 
 workout:
-  name: missionpermission-windows
+  name: missionpermissions2
   workout_description: 'Learn About File Security Using Linux!'
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -17,27 +17,27 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: missionpermission-labentry 
+  - name: missionpermissions2-labentry 
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
     tags: {items: ["http-server","https-server", "attacker", "vnc-server", "labentry"]}
     metadata: none
-    guac_path: "NgBjAG15c3Fs"
+    guac_path: "MjcAYwBteXNxbA=="
     nics:
       - network: external-network
         internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
-  - name: missionpermission-windows16
-    image: image-promise-win-2016
+  - name: missionpermissions2-ubuntu18
+    image: image-cybergym-vnc
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["allow-rdp", "listener"]}
+    tags: {items: ["vnc-server", "listener"]}
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.11
+        internal_IP: 10.1.1.20
         subnet: default
         external_NAT: false
 
@@ -64,12 +64,6 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/5901-5909"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-rdp
-    network: external-network
-    target_tags: ["allow-rdp"]
-    protocol: tcp
-    ports: ["tcp/3306"]
-    source_ranges: ["10.1.0.0/24"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
