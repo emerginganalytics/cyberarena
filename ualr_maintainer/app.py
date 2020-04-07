@@ -208,7 +208,7 @@ def publish():
         topic = request.form['topic']
         workout_id = request.form['workout_id']
         publish_client = pubsub_v1.PublisherClient()
-        publish_client.publish(topic, b'%s-workout complete!' % (workout_id), workout_id=workout_id)
+        publish_client.publish(topic, ('%s-workout complete!' % (workout_id)).encode(), workout_id=workout_id)
     return redirect("/landing/%s" % (workout_id))
 
 if __name__ == '__main__':
