@@ -59,6 +59,15 @@
             </div>
         </form>
     </div>
+    <div>
+        <form action="/publish" method="post">
+            <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+            <input type="hidden" id="topic" name="topic" value="{{ topic }}">
+            <div class="btn-ctn">
+                    <button id="publish" class="waves-effect waves-light btn" >TEST PUBLISH</button>
+            </div>
+        </form>
+    </div>
 
     <div id="loading-msg"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>

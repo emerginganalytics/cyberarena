@@ -50,4 +50,5 @@ def stop_workouts(event, context):
         ds_client.put(workout)
         print('Stopped servers for workout %s' % workout_id)
 
+
 stop_workouts(None, None)
