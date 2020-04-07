@@ -63,19 +63,15 @@ def create_subscription(topic_name):
     subscription_path = subscriber.subscription_path(
         project, topic_name
     )
-    create_subscription = subscriber.create_subscription(
-        subscription_path, topic_path
+
+    # endpoint = '%spush' % (request.url_root)
+    endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/push'
+
+    push_config = pubsub_v1.types.PushConfig(push_endpoint=endpoint)
+
+    subscriber.create_subscription(
+        subscription_path, topic_path, push_config
     )
-    return subscription_path
-
-
-# Listens for Messages on Subscription_Path
-def subscription(subscription_path):  # workout_topic = create_pub_sub_topic.topic_path
-    subscriber = pubsub_v1.SubscriberClient()
-    timeout = 10.0
-
-    # topic_name = '{}-{}-workout'.format(workout_id, workout_type)
-    # subscription_path = subscriber.subscription_path(project, topic_name)
 
     def callback(message):
         print("Received message: {}".format(message.data))
@@ -85,18 +81,11 @@ def subscription(subscription_path):  # workout_topic = create_pub_sub_topic.top
                 value = message.attributes.get(key)
                 print('{}: {}'.format(key, value))
         message.ack()
-    streaming_pull_future = subscriber.subscribe(
-        subscription_path, callback=callback
-    )
-    print("Listening for message on {}..\n".format(subscription_path))
-    # If no message, sleep and retry until
-    try:
-        streaming_pull_future(timeout=timeout)
-    except Exception as e:
-        print(
-            "Listening for messages on {} threw an exception: {}".format(subscription_path, e)
-        )
-        time.sleep(180)
+
+    future = subscriber.subscribe(subscription_path, callback)
+
+    return subscription_path
+
 
 # --------------------------- FLASK APP --------------------------
 def store_instructor_info(email):
@@ -425,10 +414,10 @@ def build_workout(build_data, workout_type):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         topic_name = create_workout_topic(generated_workout_ID, workout_type)
-        create_subscription(topic_name)
+        sub_path = create_subscription(topic_name)
         store_workout_info(
             generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type,
-            ts, topic_name, create_subscription, flag
+            ts, topic_name, sub_path, flag
         )
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
@@ -531,17 +520,11 @@ def build_workout(build_data, workout_type):
 
     return unit_id
 
-
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
 
-    subscription(workout['subscription_path'])
-    '''
-    if (workout['complete']):
-        request.POST(workout['flag'])
-    '''
     if (workout):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
@@ -561,12 +544,16 @@ def landing_page(workout_id):
         student_instructions_url = None
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
+
+        topic = None
+        if 'topic_name' in workout:
+            topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
+
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id,
+                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
                                    running=workout['running'])
     else:
         return render_template('no_workout.html')
-
 
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
@@ -588,6 +575,7 @@ def start_vm():
             workout['run_hours'] = 2
         else:
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+        workout['running'] = True
         ds_client.put(workout)
 
         try:
@@ -669,6 +657,20 @@ def reset_all():
                 workout_globals.refresh_api()
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
+
+@app.route('/push', methods=['POST'])
+def get_push():
+    return 'OK', 200
+
+# For debugging of pub/sub
+@app.route('/publish', methods=['GET', 'POST'])
+def publish():
+    if (request.method == 'POST'):
+        topic = request.form['topic']
+        workout_id = request.form['workout_id']
+        publish_client = pubsub_v1.PublisherClient()
+        publish_client.publish(topic, b'%s-workout complete!' % (workout_id), workout_id=workout_id)
+    return redirect("/landing/%s" % (workout_id))
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)

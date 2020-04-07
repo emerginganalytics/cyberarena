@@ -1,8 +1,8 @@
 version: '1'
 
 workout:
-  name: missionpermission
-  workout_description: 'Learn About File Security'
+  name: missionpermission-linux
+  workout_description: 'Learn About File Security Using Linux!'
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -23,7 +23,7 @@ servers:
     network_routing: false
     tags: {items: ["http-server","https-server", "attacker", "vnc-server", "labentry"]}
     metadata: none
-    guac_path: "MQBjAG15c3Fs"
+    guac_path: "MjcAYwBteXNxbA=="
     nics:
       - network: external-network
         internal_IP: 10.1.1.18
@@ -38,17 +38,6 @@ servers:
     nics:
       - network: external-network
         internal_IP: 10.1.1.20
-        subnet: default
-        external_NAT: false
-  - name: missionpermission-windows16
-    image: image-promise-win-2016
-    machine_type: "n1-standard-1"
-    network_routing: false
-    tags: {items: ["allow-rdp", "listener"]}
-    metadata: none
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.11
         subnet: default
         external_NAT: false
 
@@ -75,18 +64,6 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/5901-5909"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-listener
-    network: external-network
-    target_tags: ["listener"]
-    protocol: tcp
-    ports: ["tcp/5555"]
-    source_ranges: ["10.1.1.0/24"]
-  - name: allow-rdp
-    network: external-network
-    target_tags: ["allow-rdp"]
-    protocol: tcp
-    ports: ["tcp/3306"]
-    source_ranges: ["10.1.0.0/24"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
