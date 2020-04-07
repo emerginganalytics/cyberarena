@@ -215,5 +215,9 @@ def publish():
         publish_client.publish(topic, ('%s-workout complete!' % (workout_id)).encode(), workout_id=workout_id)
     return redirect("/landing/%s" % (workout_id))
 
+@app.route('/privacy', methods=['GET'])
+def privacy():
+    return render_template('privacy.html')
+
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
