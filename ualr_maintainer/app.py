@@ -8,6 +8,7 @@ from reset_workout import reset_workout
 from globals import ds_client, dns_suffix, project, workout_globals
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
+from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 
 from flask import Flask, render_template, redirect, request
 from forms import CreateWorkoutForm
@@ -21,8 +22,11 @@ app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 # TODO: add something at default route to direct users to correct workout?
 # Default route
 @app.route('/')
-def invalid_workout():
-    return render_template('no_workout.html')
+def default_route():
+    assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
+    email, id = validate_assertion(assertion)
+    page = "<h1>Hello {}</h1>".format(email)
+    return page
 
 # Workout build route
 @app.route('/<workout_type>', methods=['GET', 'POST'])

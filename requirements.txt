@@ -10,3 +10,6 @@ google-api-python-client
 google-cloud-pubsub
 pyyaml
 flask-wtf
+cryptography==2.8
+python-jose[cryptography]==3.0.1
+requests==2.22.0
