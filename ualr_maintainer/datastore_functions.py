@@ -55,7 +55,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'running': False,
         'servers': [],
         'topic_name': topic_name,
-        'subscription_path': subscription_path
+        'subscription_path': subscription_path,
+        'complete': False
     })
 
     # insert a new user
