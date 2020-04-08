@@ -25,8 +25,7 @@ app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 def default_route():
     assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
     email, id = validate_assertion(assertion)
-    page = "<h1>Hello {}</h1>".format(email)
-    return page
+    return render_template('no_workout.html')
 
 # Workout build route
 @app.route('/<workout_type>', methods=['GET', 'POST'])
