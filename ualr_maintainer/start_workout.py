@@ -13,22 +13,17 @@ expired_workout = []
 zone = 'us-central1-a'
 region = 'us-central1'
 
+
 # Create a new DNS record for the server and add the information to the datastore for later management
-def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
+def register_workout_update(project, dnszone, workout_id, new_ip):
     service = googleapiclient.discovery.build('dns', 'v1')
 
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+    # First, get the existing workout DNS
+    response = service.resourceRecordSets().list(project=project, managedZone=dnszone,
+                                              name=workout_id + dns_suffix + ".").execute()
+    existing_rrset = response['rrsets']
     change_body = {
-        "deletions": [
-            {
-                "kind": "dns#resourceRecordSet",
-                "name": workout_id + dns_suffix + ".",
-                "rrdatas": [old_ip],
-                "type": "A",
-                "ttl": 30
-            }
-        ],
+        "deletions": existing_rrset,
         "additions": [
             {
                 "kind": "dns#resourceRecordSet",
@@ -41,7 +36,6 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
 
     # Try first to perform the DNS change, but in case the DNS did not previously exist, try again without the deletion change.
     try:
-        service
         request = service.changes().create(project=project, managedZone=dnszone, body=change_body).execute()
     except HttpError:
         try:
@@ -52,10 +46,12 @@ def register_workout_update(project, dnszone, workout_id, old_ip, new_ip):
             # the API call will throw an error. We ignore this case.
             pass
 
+    # Now update the parameters in the workout object
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
     workout["external_ip"] = new_ip
 
     ds_client.put(workout)
-
 
 
 def start_workout(workout_id):
@@ -82,7 +78,7 @@ def start_workout(workout_id):
                             for item in tags['items']:
                                 if item == 'labentry':
                                     ip_address = started_vm['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                                    register_workout_update(project, dnszone, workout_id, workout["external_ip"], ip_address)
+                                    register_workout_update(project, dnszone, workout_id, ip_address)
             time.sleep(30)
             print("Finished starting %s" % workout_id)
         return True
