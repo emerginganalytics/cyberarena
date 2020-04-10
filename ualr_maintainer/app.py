@@ -1,11 +1,13 @@
 import time
 import list_vm
 import start_workout
+import json
+import base64
 
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
-from globals import ds_client, dns_suffix, project, workout_globals
+from globals import ds_client, dns_suffix, project, workout_globals, logger
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
@@ -201,7 +203,27 @@ def reset_all():
 # Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
 @app.route('/push', methods=['POST'])
 def get_push():
-    return 'OK', 200
+    envelope = request.get_json()
+    if not envelope:
+        msg = 'no Pub/Sub message received'
+        print(f'error: {msg}')
+        return f'Bad Request: {msg}', 400
+
+    if not isinstance(envelope, dict) or 'message' not in envelope:
+        msg = 'invalid Pub/Sub message format'
+        print(f'error: {msg}')
+        return f'Bad Request: {msg}', 400
+    pubsub_message = envelope['message']
+    if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
+        payload = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
+        msg = payload.split('-')
+        workout_id = msg[0]
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        workout['complete'] = True
+        ds_client.put(workout)
+        return 'OK', 200
+    else:
+        return f'Bad Request', 400
 
 # For debugging of pub/sub
 from google.cloud import pubsub_v1
@@ -210,8 +232,12 @@ def publish():
     if (request.method == 'POST'):
         topic = request.form['topic']
         workout_id = request.form['workout_id']
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        print(workout)
         publish_client = pubsub_v1.PublisherClient()
         publish_client.publish(topic, ('%s-workout complete!' % (workout_id)).encode(), workout_id=workout_id)
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        print(workout)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])
