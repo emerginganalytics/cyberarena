@@ -244,6 +244,10 @@ def build_workout(build_data, workout_type):
             if "guac_path" in server:
                 guac_path = server['guac_path']
 
+            tags = None
+            if "tags" in server:
+                tags = server['tags']
+
             if "machine_type" in server:
                 machine_type = server["machine_type"]
             else:
@@ -267,7 +271,7 @@ def build_workout(build_data, workout_type):
                                       "value": topic_name})
 
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         machine_type, network_routing, nics, server['tags'],
+                                         machine_type, network_routing, nics, tags,
                                          meta, sshkey, guac_path)
 
         # Create all of the network routes and firewall rules

@@ -1,0 +1,47 @@
+version: '1'
+
+workout:
+  name: "Red Team"
+  workout_description: "ACA Red Team Vulnerability Analysis"
+  project_name: acapte
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "aca-bootcamp-public"
+
+networks:
+  - name: redteam-network
+    subnets:
+      - name: default
+        ip_subnet: 10.0.0.0/24
+
+servers:
+  - name: cybergym-labentry
+    image: image-aca-cybergym-labentry
+    tags: {items: ["http-server", "https-server", "labentry"]}
+    nics:
+      - network: redteam-network
+        internal_IP: 10.0.0.10
+        subnet: default
+        external_NAT: True
+  - name: redteam-win-jump
+    image: redteam-student
+    nics:
+      - network: redteam-network
+        internal_IP: 10.0.0.2
+        subnet: default
+        external_NAT: True
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: redteam-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: redteam-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.0.0.0/24"]
