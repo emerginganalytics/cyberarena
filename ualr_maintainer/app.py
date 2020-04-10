@@ -210,9 +210,8 @@ def publish():
     if (request.method == 'POST'):
         topic = request.form['topic']
         workout_id = request.form['workout_id']
-        workout_type = request.form['type']
         publish_client = pubsub_v1.PublisherClient()
-        publish_client.publish(topic, ('%s-%s-workout complete!' % (workout_id, workout_type)).encode(), workout_id=workout_id)
+        publish_client.publish(topic, ('%s-%s-workout complete!' % (workout_id)).encode(), workout_id=workout_id)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])
