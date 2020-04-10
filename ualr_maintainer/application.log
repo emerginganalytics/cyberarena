@@ -1,0 +1,17 @@
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 124-940-431
+INFO:werkzeug: * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 124-940-431
+INFO:werkzeug: * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO:werkzeug:127.0.0.1 - - [09/Apr/2020 17:48:50] "POST /publish HTTP/1.1" 302 -
+INFO:werkzeug:127.0.0.1 - - [09/Apr/2020 17:48:51] "GET /landing/tivjhn HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [09/Apr/2020 17:48:51] "GET /favicon.ico HTTP/1.1" 200 -
+INFO:werkzeug: * Restarting with stat
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 124-940-431
+INFO:werkzeug: * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+INFO:werkzeug: * Detected change in 'E:\\hailn\\Documents\\Programming\\cybergym\\ualr_maintainer\\globals.py', reloading
+INFO:werkzeug: * Restarting with stat
+INFO:werkzeug: * Restarting with stat
