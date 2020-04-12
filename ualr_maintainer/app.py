@@ -215,9 +215,10 @@ def get_push():
         return f'Bad Request: {msg}', 400
     pubsub_message = envelope['message']
     if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
-        payload = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
-        msg = payload.split('-')
-        workout_id = msg[0]
+        # payload = base64.b64decode(pubsub_message['data']).decode('utf-8').strip()
+        # msg = payload.split('-')
+        workout_id = pubsub_message['workout_id']
+        print(workout_id)
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
         workout['complete'] = True
         ds_client.put(workout)
@@ -232,12 +233,9 @@ def publish():
     if (request.method == 'POST'):
         topic = request.form['topic']
         workout_id = request.form['workout_id']
-        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        print(workout)
         publish_client = pubsub_v1.PublisherClient()
-        publish_client.publish(topic, ('%s-workout complete!' % (workout_id)).encode(), workout_id=workout_id)
-        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        print(workout)
+        msg_string = '%s-workout complete!' % workout_id
+        publish_client.publish(topic, data=msg_string.encode("utf-8"), workout_id=workout_id)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])
