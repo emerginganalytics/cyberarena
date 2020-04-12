@@ -11,6 +11,7 @@ storage_client = storage.Client()
 dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
+messages = []
 
 logger = logging.getLogger()
 
