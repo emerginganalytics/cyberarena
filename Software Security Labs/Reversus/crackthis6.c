@@ -14,7 +14,7 @@ int check(char *Str1, char *Str2)
 }	
 void encrypt(char inpString[]) 
 {   
-    char theValue = 'H'; 
+    char theValue = 'N'; 
   
     int len = strlen(inpString); 
   
@@ -25,7 +25,7 @@ void encrypt(char inpString[])
 } 
 int main() 
 { 
-    char encodedValue[] = ";-+:-<8);;?':,"; 
+    char encodedValue[] = "=+-<+:>/==9!<*"; 
 	char storeValue[20];
 	printf("What's the valid authentication code? \n");
 	gets(storeValue);
