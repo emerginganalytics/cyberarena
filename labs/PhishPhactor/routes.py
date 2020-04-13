@@ -1,8 +1,6 @@
-# Routes for pseudo US Bank web page
-# No affiliation to US bank physical page
 from app import app
 from flask import redirect, request, render_template, abort, jsonify, make_response
-
+import time
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -80,6 +78,23 @@ def fake():
     page_template = 'flag.jinja'
     return render_template(page_template)
 
+
+@app.route('/totally-not-malware', methods=['GET', 'POST'])
+def download():
+    import os
+    page_template = 'download.jinja'
+
+    if request.method == 'GET':
+        time.sleep(10)
+        os.system("python3 /usr/local/bin/cg-publish.py phishing")
+
+    return render_template(page_template)
+
+
+@app.route('/nope')
+def nope():
+    page_template = 'nope.jinja'
+    return render_template(page_template)
 
 @app.route('/logout')
 def logout():
