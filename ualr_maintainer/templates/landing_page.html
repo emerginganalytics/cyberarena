@@ -65,6 +65,14 @@
             <input type="hidden" id="topic" name="topic" value="{{ topic }}">
             <div class="btn-ctn">
                     <button id="publish" class="waves-effect waves-light btn" >TEST PUBLISH</button>
+                {% if complete %}
+                    <h2 style="color: green;">&#10004;</h2>
+                {% else %}
+                    <h2 style="color: red;">&#10008;</h2>
+                {% endif %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
             </div>
         </form>
     </div>
