@@ -3,6 +3,8 @@ version: '1'
 workout:
   name: mobileforensics
   workout_description: 'Perform forensic analysis on a mobile phone image'
+  teacher_instructions_url:
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MobileForensicsInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
