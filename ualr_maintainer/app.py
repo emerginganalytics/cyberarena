@@ -216,12 +216,15 @@ def complete_verification():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
         if (workout_request["token"] == workout_token):
+            print("Completion token matches. Setting the workout to complete.")
             workout_id = workout_request["workout_id"]
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             workout["complete"] = True
             ds_client.put(workout)
             print(workout_id)
             return 'OK', 200
+        else:
+            print("In complete_verification: Completion token does NOT match! Aborting")
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
