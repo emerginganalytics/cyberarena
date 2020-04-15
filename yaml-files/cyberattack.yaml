@@ -3,6 +3,8 @@ version: '1'
 workout:
   name: cyberattack
   workout_description: 'Experience a botnet cyber-attack'
+  teacher_instructions_url:
+  student_instructions_url: "https://storage.cloud.google.com/ualr-cybersecurity_cloudbuild/student-instructions/CyberAttackWorkoutStudentInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
