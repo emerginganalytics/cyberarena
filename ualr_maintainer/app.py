@@ -101,8 +101,6 @@ def workout_list(unit_id):
     for workout in workout_list:
         wkt = ds_client.get(ds_client.key('cybergym-workout', workout))
         complete_list.append(wkt["complete"])
-
-    print(complete_list)
     if unit and len(workout_list) > 0:
         return render_template('workout_list.html', complete_list=complete_list, workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
     else:
@@ -205,7 +203,7 @@ def reset_all():
         return redirect("/workout_list/%s" % (unit_id))
 
 # Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
-@app.route('/push', methods=['POST'])
+@app.route('/complete', methods=['POST'])
 def get_push():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
