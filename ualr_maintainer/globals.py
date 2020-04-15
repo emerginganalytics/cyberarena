@@ -11,8 +11,9 @@ storage_client = storage.Client()
 dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
-messages = []
-
+workout_token = 'RG987S1GVNKYRYHYA'
+#post_endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/push'
+post_endpoint = 'http://localhost:8080/push'
 logger = logging.getLogger()
 
 class workout_globals():

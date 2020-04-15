@@ -1,18 +1,17 @@
 import time
 import list_vm
 import start_workout
-import json
-import base64
+import requests
 
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
-from globals import ds_client, dns_suffix, project, workout_globals, logger, messages
+from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm
 
 # --------------------------- FLASK APP --------------------------
@@ -89,7 +88,7 @@ def landing_page(workout_id):
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                    guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
-                                   running=workout['running'], complete=workout['complete'], messages=messages)
+                                   running=workout['running'], complete=workout['complete'])
     else:
         return render_template('no_workout.html')
 
@@ -203,37 +202,25 @@ def reset_all():
 # Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
 @app.route('/push', methods=['POST'])
 def get_push():
-    envelope = json.loads(request.data.decode('utf-8'))
-    if not envelope:
-        msg = 'no Pub/Sub message received'
-        return f'Bad Request: {msg}', 400
-
-    if not isinstance(envelope, dict) or 'message' not in envelope:
-        msg = 'invalid Pub/Sub message format'
-        return f'Bad Request: {msg}', 400
-    pubsub_message = envelope['message']
-    if isinstance(pubsub_message, dict) and 'data' in pubsub_message:
-        payload = base64.b64decode(envelope['message']['data'])
-        messages.append(payload)
-        # wid = payload.split('-')
-        # workout_id = wid[0]
-        # workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        # workout['complete'] = True
-        # ds_client.put(workout)
-        return 'OK', 200
-    else:
-        return f'Bad Request', 400
+    if (request.method == 'POST'):
+        workout_request = request.get_json(force=True)
+        if (workout_request["token"] == workout_token):
+            workout_id = workout_request["workout_id"]
+            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+            workout["complete"] = True
+            ds_client.put(workout)
+            print(workout_id)
+            return 'OK', 200
 
 # For debugging of pub/sub
-from google.cloud import pubsub_v1
 @app.route('/publish', methods=['GET', 'POST'])
 def publish():
     if (request.method == 'POST'):
-        topic = request.form['topic']
         workout_id = request.form['workout_id']
-        publish_client = pubsub_v1.PublisherClient()
-        msg_string = '%s-workout complete!' % workout_id
-        publish_client.publish(topic, data=msg_string.encode("utf-8"))
+        msg = {"token": workout_token,
+               "workout_id": workout_id}
+        res = requests.post(post_endpoint, json=msg)
+        print(res)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])
