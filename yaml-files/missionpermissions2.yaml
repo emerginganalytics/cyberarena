@@ -39,7 +39,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.20
         subnet: default
-        external_NAT: false
+        external_NAT: true
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:
