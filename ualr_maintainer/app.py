@@ -82,13 +82,18 @@ def landing_page(workout_id):
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
 
+        complete = None
+        if 'complete' in workout:
+            complete = workout['complete']
+
         topic = None
         if 'topic_name' in workout:
             topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
-                                   running=workout['running'], complete=workout['complete'])
+                               guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
+                               shutoff=shutoff, workout_id=workout_id, topic=topic, running=workout['running'],
+                               complete=complete)
     else:
         return render_template('no_workout.html')
 
@@ -206,8 +211,8 @@ def reset_all():
         return redirect("/workout_list/%s" % (unit_id))
 
 # Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
-@app.route('/push', methods=['POST'])
-def get_push():
+@app.route('/complete', methods=['POST'])
+def complete_verification():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
         if (workout_request["token"] == workout_token):
