@@ -97,9 +97,14 @@ def landing_page(workout_id):
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     workout_list = get_unit_workouts(unit_id)
+    complete_list = []
+    for workout in workout_list:
+        wkt = ds_client.get(ds_client.key('cybergym-workout', workout))
+        complete_list.append(wkt["complete"])
 
+    print(complete_list)
     if unit and len(workout_list) > 0:
-        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
+        return render_template('workout_list.html', complete_list=complete_list, workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
@@ -209,8 +214,9 @@ def get_push():
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             workout["complete"] = True
             ds_client.put(workout)
-            print(workout_id)
             return 'OK', 200
+        return 'Invalid token', 400
+    return 'Invalid request', 400
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
@@ -220,7 +226,6 @@ def publish():
         msg = {"token": workout_token,
                "workout_id": workout_id}
         res = requests.post(post_endpoint, json=msg)
-        print(res)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])

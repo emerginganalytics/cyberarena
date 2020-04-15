@@ -13,6 +13,8 @@ project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 #post_endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/push'
+
+# Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/push'
 logger = logging.getLogger()
 
