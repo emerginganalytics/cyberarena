@@ -4,15 +4,13 @@ import requests
 import sys
 
 token = "RG987S1GVNKYRYHYA"
-URL = "http://buildthewarrior.cybergym-eac-ualr.org/push"
-w_type = sys.argv[1]
+URL = "http://buildthewarrior.cybergym-eac-ualr.org/complete"
 
 # Parse workout ID from Machine Metatdata
 headers = {
     'Metadata-Flavor': 'Google',
 }
-metadata = requests.get('http://metadata.google.internal/computeMetadata/v1/instance/name', \
-                        headers=headers)
+metadata = requests.get('http://metadata.google.internal/computeMetadata/v1/instance/name', headers=headers)
 data = ((metadata.content).decode('utf-8')).split('-')
 w_id = data[0]
 
@@ -22,3 +20,5 @@ workout = {
 }
 
 publish = requests.post(URL, json=workout)
+print('[*] POSTING to {} ...'.format(URL))
+print(publish)
