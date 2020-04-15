@@ -185,11 +185,16 @@ def build_workout(build_data, workout_type):
     else:
         student_instructions_url = None
 
+    if 'workout_description' in y['workout']:
+        workout_description = y['workout']['workout_description']
+    else:
+        workout_description = None
+
     ts = str(calendar.timegm(time.gmtime()))
     unit_id = randomStringDigits()
     print("Creating unit %s" % (unit_id))
     store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type,
-                    student_instructions_url, y['workout']['workout_description'])
+                    student_instructions_url, workout_description)
 
     # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
     for i in range(1, num_team+1):

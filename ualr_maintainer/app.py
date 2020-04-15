@@ -98,8 +98,14 @@ def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     workout_list = get_unit_workouts(unit_id)
 
+    teacher_instructions_url = None
+    if 'teacher_instructions_url' in unit:
+        teacher_instructions_url = unit['teacher_instructions_url']
+
     if unit and len(workout_list) > 0:
-        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
+        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id,
+                               description=unit['description'], instructions=teacher_instructions_url,
+                               workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
