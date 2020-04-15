@@ -1,44 +1,24 @@
 #!/usr/bin/python3
-from google.cloud import pubsub_v1
-
 import base64 as b64
-import os
 import requests
 import sys
 
-# NOTE change environment = .json system location
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '<json file location>'
+token = "RG987S1GVNKYRYHYA"
+URL = "http://buildthewarrior.cybergym-eac-ualr.org/push"
+w_type = sys.argv[1]
 
+# Parse workout ID from Machine Metatdata
 headers = {
     'Metadata-Flavor': 'Google',
 }
-response = requests.get('http://metadata.google.internal/computeMetadata/v1/instance/name', \
+metadata = requests.get('http://metadata.google.internal/computeMetadata/v1/instance/name', \
                         headers=headers)
-data = ((response.content).decode('utf-8')).split('-')
-
+data = ((metadata.content).decode('utf-8')).split('-')
 w_id = data[0]
-w_type = sys.argv[1]
 
-w_string = '{}-{} workout: complete!'.format(w_id, w_type)
-message = b64.b64encode(w_string.encode('utf-8'))
+workout = {
+    "workout_id": w_id,
+    "token": token,
+}
 
-# create publish session and publish message
-publisher = pubsub_v1.PublisherClient()
-topic_path = publisher.topic_path('ualr-cybersecurity', \
-        '{}-{}-workout'.format(w_id, w_type))
-
-# error handling
-def get_callback(future, data):
-    def callback(future):
-        try:
-            print(future.result())
-        except: # noqa
-            print("Please handle {} for {}.".format(future.exception(), data))
-    return callback
-
-future = publisher.publish(topic_path, data=message)
-future.add_done_callback(get_callback(future, message))
-
-# test values
-print('[*] Publishing workout status ...')
-print('[*] message: {}'.format(message))
+publish = requests.post(URL, json=workout)
