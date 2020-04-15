@@ -26,5 +26,6 @@ Foreach ($User in $Users){
 If ($Count -eq 4) {
     Write-Host "[+] Workout Complete!"
     Write-Host "[*] Posting Results ..."
-    python C:\Data\MissionPermission\Mission_Permission.py 10.128.0.20 "Windows Secure!"
-}
+    python C:\Data\Pub\cg-publish.py missionpermissions
+    
+   }
