@@ -1,3 +1,6 @@
+# These functions are deprecated from when we attempted to use pubsub for
+# flag generation and completion.
+
 from google.cloud import pubsub_v1
 from globals import project
 

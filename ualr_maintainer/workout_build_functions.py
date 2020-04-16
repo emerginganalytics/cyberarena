@@ -2,13 +2,14 @@ import time
 import calendar
 import random
 import string
+import logging
 from yaml import load, Loader
 
 from globals import ds_client, project, compute, workout_globals, storage_client
 from dns_functions import add_dns_record, register_workout_server
 from datastore_functions import store_unit_info, store_workout_info
-from pub_sub_functions import create_workout_topic, create_subscription
 from stop_workout import stop_workout
+
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -56,7 +57,7 @@ def create_route(project, zone, route):
 
 
 def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, metadata, sshkey=None, guac_path=None):
+                                 networkRouting, networks, tags, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -106,9 +107,6 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
                 'https://www.googleapis.com/auth/logging.write'
             ]
         }],
-        # Metadata is readable from the instance and allows you to
-        # pass configuration from deployment scripts to instances.
-        'metadata': metadata
     }
 
     if sshkey:
@@ -200,11 +198,9 @@ def build_workout(build_data, workout_type):
     for i in range(1, num_team+1):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
-        topic_name = create_workout_topic(generated_workout_ID, workout_type)
-        sub_path = create_subscription(topic_name)
         store_workout_info(
             generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type,
-            ts, topic_name, sub_path
+            ts
         )
         print('Creating workout id %s' % (generated_workout_ID))
         # Create the networks and subnets
@@ -263,21 +259,8 @@ def build_workout(build_data, workout_type):
             else:
                 network_routing = False
 
-            meta = {}
-            if "metadata" not in server or server['metadata'] == 'None' \
-                    or server['metadata'] == 'none' \
-                    or server['metadata'] == None:
-                meta = {"items": [
-                    {"key": 'topic',
-                    "value": topic_name}]}
-            else:
-                meta = server['metadata']
-                meta['items'].append({"key": 'topic',
-                                      "value": topic_name})
-
             create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         machine_type, network_routing, nics, tags,
-                                         meta, sshkey, guac_path)
+                                         machine_type, network_routing, nics, tags, sshkey, guac_path)
 
         # Create all of the network routes and firewall rules
         print('Creating network routes and firewall rules')

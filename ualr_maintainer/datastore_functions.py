@@ -39,7 +39,7 @@ def get_unit_workouts(unit_id):
     return workout_list
 
 # store workout info to google cloud datastore
-def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp, topic_name, subscription_path):
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, timestamp):
     # create a new user
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -54,8 +54,6 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'resources_deleted': False,
         'running': False,
         'servers': [],
-        'topic_name': topic_name,
-        'subscription_path': subscription_path,
         'complete': False
     })
 
