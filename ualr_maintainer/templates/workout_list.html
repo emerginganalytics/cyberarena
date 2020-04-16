@@ -2,18 +2,16 @@
 {% block title %}Unit {{ unit_id }}{% endblock %}
 {% block content %}
     <p>Here are the links to your {{ workout_type }} workouts. This page will be available until your workouts expire, so save the link for your reference.</p>
-    <table class="teams">
-        <tr><th>Team</th><th>Workout Link</th><th>Complete</th></tr>
+    <h2>Description</h2>
+    <p>{{ description }}</p>
+    {% if instructions!=None %}
+        <a href="{{ instructions }}" target="_blank">Teacher Instructions</a>
+    {% endif %}
+    <ol class="teams">
         {% for workout in workout_list %}
-            <tr><td>Team {{ loop.index }}</td><td><a href="/landing/{{ workout }}" target="_blank">/landing/{{ workout }}</a></td><td>
-                {% if complete_list[loop.index - 1] %}
-                    <h2 style="color: green;">&#10004;</h2>
-                {% else %}
-                    <h2 style="color: red;">&#10008;</h2>
-                {% endif %}
-            </td></tr>
+            <a href="/landing/{{ workout }}" target="_blank"><li class="teams">/landing/{{ workout }}</li></a>
         {% endfor %}
-    </table>
+    </ol>
     <div style="padding:1em;">
         <form action="/start_all" method="post">
             <div class="input-field col s12" >

@@ -82,13 +82,18 @@ def landing_page(workout_id):
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
 
+        complete = None
+        if 'complete' in workout:
+            complete = workout['complete']
+
         topic = None
         if 'topic_name' in workout:
             topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                                   guac_path=guac_path, expiration=expiration, instructions=student_instructions_url, shutoff=shutoff, workout_id=workout_id, topic=topic,
-                                   running=workout['running'], complete=workout['complete'])
+                               guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
+                               shutoff=shutoff, workout_id=workout_id, topic=topic, running=workout['running'],
+                               complete=complete)
     else:
         return render_template('no_workout.html')
 
@@ -97,12 +102,15 @@ def landing_page(workout_id):
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     workout_list = get_unit_workouts(unit_id)
-    complete_list = []
-    for workout in workout_list:
-        wkt = ds_client.get(ds_client.key('cybergym-workout', workout))
-        complete_list.append(wkt["complete"])
+
+    teacher_instructions_url = None
+    if 'teacher_instructions_url' in unit:
+        teacher_instructions_url = unit['teacher_instructions_url']
+
     if unit and len(workout_list) > 0:
-        return render_template('workout_list.html', complete_list=complete_list, workout_list=workout_list, unit_id=unit_id, workout_type=unit['workout_type'])
+        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id,
+                               description=unit['description'], instructions=teacher_instructions_url,
+                               workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
 
@@ -204,17 +212,19 @@ def reset_all():
 
 # Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
 @app.route('/complete', methods=['POST'])
-def get_push():
+def complete_verification():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
         if (workout_request["token"] == workout_token):
+            print("Completion token matches. Setting the workout to complete.")
             workout_id = workout_request["workout_id"]
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             workout["complete"] = True
             ds_client.put(workout)
+            print(workout_id)
             return 'OK', 200
-        return 'Invalid token', 400
-    return 'Invalid request', 400
+        else:
+            print("In complete_verification: Completion token does NOT match! Aborting")
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
@@ -224,6 +234,7 @@ def publish():
         msg = {"token": workout_token,
                "workout_id": workout_id}
         res = requests.post(post_endpoint, json=msg)
+        print(res)
     return redirect("/landing/%s" % (workout_id))
 
 @app.route('/privacy', methods=['GET'])

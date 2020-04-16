@@ -12,7 +12,7 @@ def store_instructor_info(email):
     ds_client.put(new_instructor)
 
 # Store information for an individual unit.
-def store_unit_info(id, email, name, ts, workout_type, description, student_instructions_url):
+def store_unit_info(id, email, name, ts, workout_type, student_instructions_url, workout_description):
 
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
@@ -21,7 +21,7 @@ def store_unit_info(id, email, name, ts, workout_type, description, student_inst
         "instructor_id": email,
         "timestamp": ts,
         "workout_type": workout_type,
-        "description": description,
+        "description": workout_description,
         "student_instructions_url": student_instructions_url,
         "workouts": []
     })
