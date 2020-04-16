@@ -1,0 +1,66 @@
+version: '1'
+
+workout:
+  name: reversus
+  workout_description: 'Learn about reverse engineering'
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "cybergym-public"
+  project_api_key_type: cloud
+  flag_location:
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-labentry 
+    image: image-labentry
+    machine_type: "n1-standard-1" 
+    network_routing: false
+    tags: {items: ["http-server", "labentry"]}
+    metadata: none
+    guac_path: "MgBjAG15c3Fs"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: cybergym-windows-16
+    image: image-promise-win-2016
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-rdp"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.20
+        subnet: default
+        external_NAT: true
+
+# List network routes. Multiple routes may be listed using YAML block sequence format
+routes:
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80, 8080, 443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
+- name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
