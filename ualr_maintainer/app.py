@@ -12,7 +12,7 @@ from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 
 from flask import Flask, render_template, redirect, request, jsonify
-from forms import CreateWorkoutForm
+from forms import CreateWorkoutForm, CreateExpoForm
 
 # --------------------------- FLASK APP --------------------------
 
@@ -31,6 +31,7 @@ def default_route():
 # Workout build route
 @app.route('/<workout_type>', methods=['GET', 'POST'])
 def index(workout_type):
+    logger.info('Request for workout type %s' % workout_type)
     form=CreateWorkoutForm()
     if form.validate_on_submit():
         unit_id = build_workout(form, workout_type)
@@ -86,13 +87,10 @@ def landing_page(workout_id):
         if 'complete' in workout:
             complete = workout['complete']
 
-        topic = None
-        if 'topic_name' in workout:
-            topic = 'projects/%s/topics/%s' % (project, workout['topic_name'])
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
-                               shutoff=shutoff, workout_id=workout_id, topic=topic, running=workout['running'],
+                               shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete)
     else:
         return render_template('no_workout.html')
@@ -216,15 +214,15 @@ def complete_verification():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
         if (workout_request["token"] == workout_token):
-            app.logger.info("Completion token matches. Setting the workout to complete.")
+            logger.info("Completion token matches. Setting the workout to complete.")
             workout_id = workout_request["workout_id"]
             workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
             workout["complete"] = True
             ds_client.put(workout)
-            print(workout_id)
+            logger.info('%s workout is marked complete.' % workout_id)
             return 'OK', 200
         else:
-            app.logger.info("In complete_verification: Completion token does NOT match! Aborting")
+            logger.info("In complete_verification: Completion token does NOT match! Aborting")
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
@@ -240,6 +238,17 @@ def publish():
 @app.route('/privacy', methods=['GET'])
 def privacy():
     return render_template('privacy.html')
+
+@app.route('/Xv9RxioJIE0Zdk8FFJh7naJQtVG/<workout_type>', methods=['GET', 'POST'])
+def expo(workout_type):
+    form = CreateExpoForm()
+    if form.validate_on_submit():
+        unit_id = build_workout(form, workout_type)
+        if unit_id == False:
+            return render_template('no_workout.html')
+        url = '/workout_list/%s' % (unit_id)
+        return redirect(url)
+    return render_template('expo_page.html', form=form, workout_type=workout_type)
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080)
