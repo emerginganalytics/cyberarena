@@ -3,8 +3,8 @@ import base64 as b64
 import requests
 import sys
 
-token = "RG987S1GVNKYRYHYA"
-URL = "http://buildthewarrior.cybergym-eac-ualr.org/complete"
+token = "<token_value>"
+URL = "https://buildthewarrior.cybergym-eac-ualr.org/complete"
 
 # Parse workout ID from Machine Metatdata
 headers = {
