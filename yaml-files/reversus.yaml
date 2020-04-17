@@ -37,7 +37,7 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.20
+        internal_IP: 10.1.1.11
         subnet: default
         external_NAT: true
 
