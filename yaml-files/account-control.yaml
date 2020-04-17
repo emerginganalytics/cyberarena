@@ -3,7 +3,8 @@ version: '1'
 workout:
   name: AccountControl
   workout_description: 'This workout teaches students how to edit file permissions and assign users to a group.'
-  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/AccountControlStudent.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/AccountControlWorkoutStudentInstructions.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/AccountControlWorkoutTeacherInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
