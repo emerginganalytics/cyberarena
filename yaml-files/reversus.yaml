@@ -26,7 +26,7 @@ servers:
     guac_path: "NgBjAG15c3Fs"
     nics:
       - network: external-network
-        internal_IP: 10.1.1.10
+        internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
   - name: reversus-windows-16
@@ -39,7 +39,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.11
         subnet: default
-        external_NAT: true
+        external_NAT: false
 
 # List network routes. Multiple routes may be listed using YAML block sequence format
 routes:
