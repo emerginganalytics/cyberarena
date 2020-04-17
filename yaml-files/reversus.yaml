@@ -3,6 +3,8 @@ version: '1'
 workout:
   name: reversus
   workout_description: 'Learn about reverse engineering'
+  teacher_instructions_url: "https://drive.google.com/open?id=1AJYS7s3dt5rbdilE945vtbI1dSi5qRxV"
+  student_instructions_url: "https://drive.google.com/open?id=11aOnlEtvxIH_L-9fLDPuvwTozylcwuQq"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
