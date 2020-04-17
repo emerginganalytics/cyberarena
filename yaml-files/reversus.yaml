@@ -17,19 +17,19 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-labentry 
+  - name: reversus-labentry 
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
     tags: {items: ["http-server", "labentry"]}
     metadata: none
-    guac_path: "MgBjAG15c3Fs"
+    guac_path: "NgBjAG15c3Fs"
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
         subnet: default
         external_NAT: true
-  - name: cybergym-windows-16
+  - name: reversus-windows-16
     image: image-promise-win-2016
     machine_type: "n1-standard-1"
     network_routing: false
