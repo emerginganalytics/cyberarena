@@ -66,3 +66,15 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-https
+    network: external-network
+    target_tags: ["https-server"]
+    protocol: none
+    ports: ["tcp/443"]
+    source_ranges: ["0.0.0.0/0"]

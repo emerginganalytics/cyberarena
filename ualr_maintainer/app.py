@@ -208,7 +208,7 @@ def reset_all():
                 reset_workout(workout_id)
         return redirect("/workout_list/%s" % (unit_id))
 
-# Pub/sub subscription route. Accepts messages from pub/sub server, updates workout datastore, and returns acknowledgement.
+# Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 @app.route('/complete', methods=['POST'])
 def complete_verification():
     if (request.method == 'POST'):
