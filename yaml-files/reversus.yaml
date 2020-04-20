@@ -3,6 +3,8 @@ version: '1'
 workout:
   name: reversus
   workout_description: 'Learn about reverse engineering'
+  teacher_workout_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/Reversus.pdf?authuser=2"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ReversusStudentInstructions.pdf?authuser=2"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
