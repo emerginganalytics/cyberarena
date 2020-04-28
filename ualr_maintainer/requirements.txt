@@ -13,3 +13,4 @@ flask-wtf
 cryptography==2.8
 python-jose[cryptography]==3.0.1
 requests==2.22.0
+email-validator==1.0.5
