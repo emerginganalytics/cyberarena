@@ -34,7 +34,12 @@ def get_unit_workouts(unit_id):
     unit_workouts.add_filter("unit_id", "=", unit_id)
     workout_list = []
     for workout in list(unit_workouts.fetch()):
-        workout_list.append(workout.key.name)
+        workout_instance = workout = ds_client.get(workout.key)
+        workout_info = {
+            'name': workout.key.name,
+            'running': workout_instance['running']
+        }
+        workout_list.append(workout_info)
 
     return workout_list
 
