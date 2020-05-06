@@ -1,0 +1,9 @@
+flask
+google-cloud-storage
+google-cloud-datastore
+google-api-python-client
+google-cloud-pubsub
+pyyaml
+cryptography==2.8
+python-jose[cryptography]==3.0.1
+requests==2.22.0
