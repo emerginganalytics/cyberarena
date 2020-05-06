@@ -23,7 +23,8 @@ def store_unit_info(id, email, name, ts, workout_type, student_instructions_url,
         "workout_type": workout_type,
         "description": workout_description,
         "student_instructions_url": student_instructions_url,
-        "workouts": []
+        "workouts": [],
+        "ready": False
     })
 
     ds_client.put(new_unit)

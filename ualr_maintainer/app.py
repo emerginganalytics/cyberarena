@@ -7,6 +7,7 @@ from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
 from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
+from utilities.pubsub_functions import *
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
@@ -241,6 +242,12 @@ def privacy():
 
 @app.route('/Xv9RxioJIE0Zdk8FFJh7naJQtVG/<workout_type>', methods=['GET', 'POST'])
 def expo(workout_type):
+    """ Temporary workout page for the online signature experience expo
+    Args:
+         Workout_type - The workout name and yaml file name to build
+    Returns:
+        An expo page for several people to participate in a workout at once.
+    """
     form = CreateExpoForm()
     if form.validate_on_submit():
         unit_id = build_workout(form, workout_type)
