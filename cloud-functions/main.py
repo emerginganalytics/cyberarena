@@ -5,9 +5,9 @@ import string
 from yaml import load, Loader
 
 from cloud_function_globals import ds_client, project, compute, workout_globals, storage_client
-from dns_functions import add_dns_record, register_workout_server
-from datastore_functions import store_unit_info, store_workout_info
-from stop_workout import stop_workout
+from common.dns_functions import add_dns_record, register_workout_server
+from common.datastore_functions import store_unit_info, store_workout_info
+from common.stop_workout import stop_workout
 
 
 # create random strings --> will be used to create random workoutID
