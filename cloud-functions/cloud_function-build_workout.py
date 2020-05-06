@@ -148,36 +148,31 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         register_workout_server(workout, name, guac_path)
 
 
-def validate_workout_request(request):
-    valid_dict = ['workout_type', 'unit_id', 'num_team', 'length', 'email', 'unit_name']
-    return_dict = {}
-
-    request_json = request.get_json(silent=True)
-
-    for val in valid_dict:
-        if request_json and val in request_json:
-            return_dict[val] = request_json[val]
-        else:
-            raise ValueError("JSON is invalid, or missing a 'workout_type' property")
-
-    return return_dict
-
-
-def build_workout(request):
-    """ Responds to an HTTP request using data from the request body parsed
-    according to the "content-type" header.
+def build_workout(event, context):
+    """ Responds to a pub/sub event in which the user has included
     Args:
-        request (flask.Request): The request object which includes all of the workout build information
+         event (dict):  The dictionary with data specific to this type of
+         event. The `data` field contains the PubsubMessage message. The
+         `attributes` field will contain custom attributes if there are any.
+         context (google.cloud.functions.Context): The Cloud Functions event
+         metadata. The `event_id` field contains the Pub/Sub message ID. The
+         `timestamp` field contains the publish time.
     Returns:
-        A response object with the status of the workout build
+        A success status
     """
-    request_dict = validate_workout_request(request)
-    workout_type = request_dict['workout_type']
-    unit_id = request_dict['unit_id']
-    num_team = int(request_dict['num_team'])
-    workout_length = int(request_dict['length'])
-    email = request_dict['email']
-    unit_name = request_dict['unit_name']
+    pubsub_valid = True
+    workout_type = event['attributes']['workout_type'] if 'workout_type' in event['attributes'] else None
+    unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
+    num_team = int(event['attributes']['num_team']) if 'num_team' in event['attributes'] else None
+    workout_length = int(event['attributes']['length']) if 'length' in event['attributes'] else None
+    email = event['attributes']['email'] if 'email' in event['attributes'] else None
+    unit_name = event['attributes']['unit_name'] if 'unit_name' in event['attributes'] else None
+
+    if not workout_type or not unit_id or not num_team or not workout_length:
+        if context:
+            print("""Invalid fields for pubsub message triggered by messageId {} published at {}
+            """.format(context.event_id, context.timestamp))
+        return False
 
     # Open and read YAML file
     print('Loading config file')
@@ -318,11 +313,12 @@ def build_workout(request):
     unit['workouts'] = workout_ids
     ds_client.put(unit)
 
-    return unit_id
+    if context:
+        print("""Workout of type {} has completed for user {}. This was triggered by PubSub messageId {} published at {}
+        """.format(workout_name, email, context.event_id, context.timestamp))
 
 
-def test_build_workout():
-    data = \
+data = \
         {
             'workout_type': 'cyberattack',
             'unit_id': '123456',
@@ -331,11 +327,10 @@ def test_build_workout():
             'email': 'pdhuff@ualr.edu',
             'unit_name': 'Testing JSON'
         }
-    req = Mock(get_json=Mock(return_value=data), args=data)
 
 
-    # Call tested function
-    assert build_workout(req)
+# Call tested function
+event = {'attributes': data}
 
-
-test_build_workout()
+# For local testing
+build_workout(event, None)
