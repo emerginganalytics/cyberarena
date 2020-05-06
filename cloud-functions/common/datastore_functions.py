@@ -1,5 +1,5 @@
 from google.cloud import datastore
-from globals import ds_client, logger
+from common.globals import ds_client
 
 # Store information for an instructor. To be used when instructor login is complete
 def store_instructor_info(email):
