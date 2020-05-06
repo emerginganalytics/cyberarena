@@ -1,5 +1,5 @@
 import googleapiclient.discovery
-from globals import ds_client, dns_suffix
+from common.globals import ds_client, dns_suffix
 
 # Create a new DNS record for the server and
 def add_dns_record(project, dnszone, workout_id, ip_address):
