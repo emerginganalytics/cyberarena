@@ -44,4 +44,4 @@ data = \
             'unit_name': 'Testing JSON'
         }
 event = {'attributes': data}
-build_workout(event, None)
+cloud_fn_build_workout(event, None)
