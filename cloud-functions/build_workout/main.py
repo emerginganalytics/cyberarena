@@ -1,5 +1,3 @@
-from flask import request
-from unittest.mock import Mock
 import time
 import calendar
 import random
@@ -15,6 +13,7 @@ from stop_workout import stop_workout
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
+
 
 def create_firewall_rules(project, firewall_rules):
     for rule in firewall_rules:
