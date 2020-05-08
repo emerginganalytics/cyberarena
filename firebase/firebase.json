@@ -1,0 +1,19 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+			"run": {
+			  "serviceId": "cybergym-v2",  // "service name" (from when you deployed the container image)
+			  "region": "us-central1"     // optional (if omitted, default is us-central1)
+			}
+		}
+    ]
+  }
+}
