@@ -3,8 +3,8 @@ version: '1'
 workout:
   name: missionpermissions2
   workout_description: 'Learn About File Security Using Linux!'
-  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/MissionPermissions2.pdf?authuser=2"
-  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissions2.pdf?authuser=2"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/MissionPermissions2.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissions2.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"

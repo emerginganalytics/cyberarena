@@ -3,6 +3,8 @@ version: '1'
 workout:
   name: phishing
   workout_description: 'Experience the dangers of a phishing attack'
+  teacher_instructions_url: 'https://storage.cloud.google.com/teacher_workout_instructions_84jf627/PasswordPolicyWorkoutTeacherInstructions.pdf'
+  student_instructions_url: 'https://storage.cloud.google.com/student_workout_instructions_tgd4419/PhishingWorkoutStudentInstructions.pdf'
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -39,7 +41,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.20
         subnet: default
-        external_NAT: false
+        external_NAT: true
 
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
