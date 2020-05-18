@@ -1,5 +1,5 @@
 from app import app
-from flask import redirect, request, render_template, abort, jsonify, make_response, status
+from flask import redirect, request, render_template, abort, jsonify, make_response
 import time
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -80,12 +80,12 @@ def fake():
     page_template = 'flag.jinja'
     if request.method == 'POST':
        os.system("python3 /usr/local/bin/cg-publish.py phishing")
-       return redirect('totally-not-malware')
+       return redirect('/totally-not-malware')
     else:
         return render_template(page_template)
 
 
-@app.route('/totally-not-malware', methods=['GET', 'POST'])
+@app.route('/totally-not-malware', methods=['GET'])
 def download():
     page_template = 'download.jinja'
 
