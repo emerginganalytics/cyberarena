@@ -2,7 +2,7 @@ version: '1'
 
 workout:
   name: missionpermissions
-  workout_description: 'Learn About File Security Using Linux!'
+  workout_description: 'Learn About File Security Using Windows!'
   teacher_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissionsWorkoutStudentInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissionsWorkoutStudentInstructions.pdf"
   project_name: ualr-cybersecurity
