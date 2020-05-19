@@ -1,0 +1,76 @@
+version: '1'
+
+workout:
+  name: wireshark
+  workout_description: 'Learn how to analyze network packets and understand the inherent insecurity of many
+ network protocols'
+  teacher_instructions_url:
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ReconWithWiresharkWorkoutInstructions.pdf"
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "cybergym-public"
+  project_api_key_type: cloud
+  flag_location:
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-labentry
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "https-server", "labentry"]}
+    metadata: none
+    guac_path: "MgBjAG15c3Fs"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: True
+  - name: cybergym-wireshark
+    image: image-cybergym-wireshark
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server","https-server", "guac-server", "vnc-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.9
+        subnet: default
+        external_NAT: True
+  - name: cybergym-classified
+    image: image-cybergym-classified
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "attacker", "listener", "guac-server", "vnc-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.33
+        subnet: default
+        external_NAT: True
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,"tcp/8080","tcp/443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
