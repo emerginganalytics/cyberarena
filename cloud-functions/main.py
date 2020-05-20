@@ -33,6 +33,8 @@ def cloud_fn_build_workout(event, context):
         """.format(workout_type, email, context.event_id, context.timestamp))
 
 
+
+
 # For local testing
 data = \
         {
