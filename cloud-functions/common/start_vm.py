@@ -1,9 +1,9 @@
-from common.globals import project, dnszone, compute
+from common.globals import project, dnszone, dsclient, storage_client, workout_globals, compute
 
 def start_vm(workout_id):
     zone = 'us-central1-a'
     region = 'us-central1'
-    
+
     print("Starting workout %s" % workout_id)
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
