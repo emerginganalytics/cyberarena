@@ -60,7 +60,9 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'resources_deleted': False,
         'running': False,
         'servers': [],
-        'complete': False
+        'complete': False,
+        'password': '',
+        'pass_hash': '',
     })
 
     # insert a new user
