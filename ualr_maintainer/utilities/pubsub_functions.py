@@ -1,8 +1,8 @@
 from google.cloud import pubsub_v1
-from common.globals import project
+# from common.globals import project
 
-
-def pub_build_request_msg(workout, unit_id, num_team, length, email, unit_name):
+project = 'ualr-cybersecurity'
+def pub_build_request_msg(workout_type, unit_id, num_team, length, email, unit_name):
     """ Publishes to the project pubsub topic build-workouts, which gets processed by
         a cloud function to build the designated workout.
     Args:
@@ -15,7 +15,7 @@ def pub_build_request_msg(workout, unit_id, num_team, length, email, unit_name):
 
     data = "Cyber Gym Build Request"
     future = publisher.publish(topic_path, data=data.encode("utf-8"),
-                      workout=workout,
+                      workout_type=workout_type,
                       unit_id=unit_id,
                       num_team=str(num_team),
                       length=str(length),
@@ -25,4 +25,18 @@ def pub_build_request_msg(workout, unit_id, num_team, length, email, unit_name):
     print(future.result())
 
 
-pub_build_request_msg('cyberattack', '654321', '1', '1', 'pdhuff@ualr.edu', 'Testing')
+def pub_start_vm(workout_id):
+    topic_name = "start-vm"
+
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project, topic_name)
+
+    data = "Cyber Gym VM Start Request"
+    future = publisher.publish(topic_path, data=data.encode("utf-8"), workout_id=workout_id)
+
+    print(future.result())
+
+
+# pub_build_request_msg('cyberattack', '654321', '1', '1', 'pdhuff@ualr.edu', 'Testing')
+pub_start_vm('1234')
+

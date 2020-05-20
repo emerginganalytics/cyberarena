@@ -8,7 +8,7 @@ from start_workout import start_workout
 from reset_workout import reset_workout
 from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
 from utilities.pubsub_functions import *
-from workout_build_functions import build_workout
+from workout_build_functions import build_workout, randomStringDigits
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 
@@ -35,7 +35,10 @@ def index(workout_type):
     logger.info('Request for workout type %s' % workout_type)
     form=CreateWorkoutForm()
     if form.validate_on_submit():
-        unit_id = build_workout(form, workout_type)
+        unit_id = randomStringDigits()
+        pub_build_request_msg(workout_type, unit_id, 
+            form.team.data, form.length.data, form.email.data, form.unit.data)
+        # unit_id = build_workout(form, workout_type)
         if unit_id == False:
             return render_template('no_workout.html')
         url = '/workout_list/%s' % (unit_id)
@@ -128,7 +131,8 @@ def start_vm():
         ds_client.put(workout)
 
         try:
-            start_workout(workout_id)
+            pub_start_vm(workout_id)
+            # start_workout(workout_id)
         except:
             compute = workout_globals.refresh_api()
             start_workout(workout_id)

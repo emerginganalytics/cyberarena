@@ -146,7 +146,7 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
     if guac_path:
         register_workout_server(workout, name, guac_path)
 
-def build_workout(build_data, workout_type):
+def build_workout(workout_type, num_team, length, unit_id, email, unit_name):
 
     # Open and read YAML file
     print('Loading config file')
@@ -166,11 +166,11 @@ def build_workout(build_data, workout_type):
     dnszone = y['workout']['dnszone']
 
     # create random number specific to the workout (6 characters by default)
-    num_team = int(build_data.team.data)
+    num_team = int(team)
     if num_team > 10:
         num_team = 10
 
-    build_length = int(build_data.length.data)
+    build_length = int(length)
     if build_length > 7:
         build_length = 7
 
@@ -189,9 +189,9 @@ def build_workout(build_data, workout_type):
         workout_description = None
 
     ts = str(calendar.timegm(time.gmtime()))
-    unit_id = randomStringDigits()
+    # unit_id = randomStringDigits()
     print("Creating unit %s" % (unit_id))
-    store_unit_info(unit_id, build_data.email.data, build_data.unit.data, ts, workout_type,
+    store_unit_info(unit_id, email, unit_name, ts, workout_type,
                     student_instructions_url, workout_description)
 
     # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
@@ -199,7 +199,7 @@ def build_workout(build_data, workout_type):
         generated_workout_ID = randomStringDigits()
         workout_ids.append(generated_workout_ID)
         store_workout_info(
-            generated_workout_ID, unit_id, build_data.email.data, build_data.length.data, workout_type,
+            generated_workout_ID, unit_id, email, length, workout_type,
             ts
         )
         print('Creating workout id %s' % (generated_workout_ID))
