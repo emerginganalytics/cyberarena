@@ -1,4 +1,5 @@
 from common.build_workout import build_workout
+from common.start_vm import start_vm
 
 
 def cloud_fn_build_workout(event, context):
@@ -32,7 +33,18 @@ def cloud_fn_build_workout(event, context):
         print("""Workout of type {} has completed for user {}. This was triggered by PubSub messageId {} published at {}
         """.format(workout_type, email, context.event_id, context.timestamp))
 
+def cloud_fn_start_vm(event, context):
+    workout_id = event['attributes']['workout_id'] if 'workout_id' in event['attributes'] else None
 
+    if not workout_id:
+        if context:
+            print("Invalid fields for pubsub message triggered by messageId{} published at {}".format(context.event_id, context.timestamp))
+        return False
+
+    start_vm(workout_id)
+
+    
+    
 
 
 # For local testing

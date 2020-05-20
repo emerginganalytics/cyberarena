@@ -1,13 +1,5 @@
-def cloud_fn_start_vm(event,context):
+def start_vm(workout_id):
 
-    workout_id = event['attributes']['workout_id'] if 'workout_id' in event['attributes'] else None
-
-    if not workout_id:
-        if context:
-            print("Invalid fields for pubsub message triggered by messageId{} published at {}".format(context.event_id, context.timestamp))
-        return False
-    
-    
     print("Starting workout %s" % workout_id)
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
