@@ -54,7 +54,7 @@ def register_workout_update(project, dnszone, workout_id, new_ip):
     ds_client.put(workout)
 
 
-def start_workout(workout_id):
+def start_vm(workout_id):
     print("Starting workout %s" % workout_id)
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
