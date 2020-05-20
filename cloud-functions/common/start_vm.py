@@ -1,4 +1,4 @@
-from common.globals import project, dnszone, dsclient, storage_client, workout_globals, compute
+from common.globals import project, dnszone, ds_client, storage_client, workout_globals, compute
 
 def start_vm(workout_id):
     zone = 'us-central1-a'
