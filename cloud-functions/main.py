@@ -43,19 +43,26 @@ def cloud_fn_start_vm(event, context):
 
     start_vm(workout_id)
 
-    
+
+# Cloud VM Function Testing
+# data = \
+#     {
+#         'workout_id': 'csmymq'
+#     }
+# event = {'attributes': data}
+# cloud_fn_start_vm(event, None)
     
 
 
 # For local testing
-data = \
-        {
-            'workout_type': 'cyberattack',
-            'unit_id': '123456',
-            'num_team': '1',
-            'length': '1',
-            'email': 'pdhuff@ualr.edu',
-            'unit_name': 'Testing JSON'
-        }
-event = {'attributes': data}
-cloud_fn_build_workout(event, None)
+# data = \
+#         {
+#             'workout_type': 'cyberattack',
+#             'unit_id': '123456',
+#             'num_team': '1',
+#             'length': '1',
+#             'email': 'pdhuff@ualr.edu',
+#             'unit_name': 'Testing JSON'
+#         }
+# event = {'attributes': data}
+# cloud_fn_build_workout(event, None)

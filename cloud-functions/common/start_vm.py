@@ -3,7 +3,7 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from common.globals import ds_client, project, compute, dnszone, dns_suffix
+from common.globals import ds_client, project, compute, dnszone, dns_suffix, workout_globals
 import time
 import calendar
 from googleapiclient.errors import HttpError
