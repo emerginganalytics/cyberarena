@@ -9,10 +9,10 @@
     {% endif %}
     <ol class="teams">
         {% for workout in workout_list %}
-            {% if workout.running%}
-                <a style="color:red" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+            {% if build_type == "container" %}
+                <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
             {% else %}
-                <a href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                <a style="color:red" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
             {% endif %}
         {% endfor %}
     </ol>

@@ -14,24 +14,12 @@ def cloud_fn_build_workout(event, context):
     Returns:
         A success status
     """
-    workout_type = event['attributes']['workout_type'] if 'workout_type' in event['attributes'] else None
-    unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
-    num_team = int(event['attributes']['num_team']) if 'num_team' in event['attributes'] else None
-    workout_length = int(event['attributes']['length']) if 'length' in event['attributes'] else None
-    email = event['attributes']['email'] if 'email' in event['attributes'] else None
-    unit_name = event['attributes']['unit_name'] if 'unit_name' in event['attributes'] else None
-
-    if not workout_type or not unit_id or not num_team or not workout_length:
-        if context:
-            print("""Invalid fields for pubsub message triggered by messageId {} published at {}
-            """.format(context.event_id, context.timestamp))
-        return False
-
-    build_workout(workout_type, int(num_team), int(workout_length), unit_id, email, unit_name)
+    workout_id = event['attributes']['workout_id'] if 'workout_id' in event['attributes'] else None
+    build_workout(workout_id)
 
     if context:
-        print("""Workout of type {} has completed for user {}. This was triggered by PubSub messageId {} published at {}
-        """.format(workout_type, email, context.event_id, context.timestamp))
+        print("""Workout %s has completed.""".format(workout_id))
+
 
 def cloud_fn_start_vm(event, context):
     workout_id = event['attributes']['workout_id'] if 'workout_id' in event['attributes'] else None

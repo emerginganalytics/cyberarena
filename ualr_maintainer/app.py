@@ -8,9 +8,11 @@ from start_workout import start_workout
 from reset_workout import reset_workout
 from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
 from utilities.pubsub_functions import *
-from workout_build_functions import build_workout, randomStringDigits
+from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
+from utilities.yaml_functions import parse_workout_yaml
+from utilities.datastore_functions import process_workout_yaml
 
 from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm, CreateExpoForm
@@ -33,12 +35,13 @@ def default_route():
 @app.route('/<workout_type>', methods=['GET', 'POST'])
 def index(workout_type):
     logger.info('Request for workout type %s' % workout_type)
-    form=CreateWorkoutForm()
+    form = CreateWorkoutForm()
     if form.validate_on_submit():
-        unit_id = randomStringDigits()
-        pub_build_request_msg(workout_type, unit_id, 
-            form.team.data, form.length.data, form.email.data, form.unit.data)
-        # unit_id = build_workout(form, workout_type)
+        yaml_string = parse_workout_yaml(workout_type)
+        unit_id, build_type = process_workout_yaml(yaml_string, workout_type, form.unit.data,
+                                                     form.team.data, form.length.data, form.email.data)
+        if build_type == "compute":
+            pub_build_request_msg(unit_id)
         if unit_id == False:
             return render_template('no_workout.html')
         url = '/workout_list/%s' % (unit_id)
@@ -103,6 +106,8 @@ def landing_page(workout_id):
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    build_type = unit['build_type']
+    workout_url_path = unit['workout_url_path']
     workout_list = get_unit_workouts(unit_id)
 
     teacher_instructions_url = None
@@ -110,7 +115,8 @@ def workout_list(unit_id):
         teacher_instructions_url = unit['teacher_instructions_url']
 
     if unit and len(workout_list) > 0:
-        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id,
+        return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
+                               workout_list=workout_list, unit_id=unit_id,
                                description=unit['description'], instructions=teacher_instructions_url,
                                workout_type=unit['workout_type'])
     else:
