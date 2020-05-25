@@ -2,11 +2,11 @@ from google.cloud import pubsub_v1
 # from common.globals import project
 
 project = 'ualr-cybersecurity'
-def pub_build_request_msg(workout_type, unit_id, num_team, length, email, unit_name):
-    """ Publishes to the project pubsub topic build-workouts, which gets processed by
-        a cloud function to build the designated workout.
-    Args:
-         The parameters are the minimal necessary to build a new workout for a class.
+def pub_build_request_msg(workout_id):
+    """
+    Simple pub/sub message to build a workout specified through the workout_id in the Datastore object
+    :param workout_id:
+    :return:
     """
     topic_name = "build-workouts"
 
@@ -14,13 +14,7 @@ def pub_build_request_msg(workout_type, unit_id, num_team, length, email, unit_n
     topic_path = publisher.topic_path(project, topic_name)
 
     data = "Cyber Gym Build Request"
-    future = publisher.publish(topic_path, data=data.encode("utf-8"),
-                      workout_type=workout_type,
-                      unit_id=unit_id,
-                      num_team=str(num_team),
-                      length=str(length),
-                      email=email,
-                      unit_name=unit_name)
+    future = publisher.publish(topic_path, data=data.encode("utf-8"), workout_id=workout_id)
 
     print(future.result())
 

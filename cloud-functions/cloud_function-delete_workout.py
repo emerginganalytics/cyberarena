@@ -148,9 +148,9 @@ def delete_specific_workout(workout_id, workout):
 
 
 def delete_workouts(event, context):
-    # Only process the workouts from the last month. 2628000 is the number of seconds in a month
+    # Only process the workouts from the last 4 months. 10512000 is the number of seconds in a month
     query_old_workouts = ds_client.query(kind='cybergym-workout')
-    query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 2628000))
+    query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
     for workout in list(query_old_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
@@ -182,11 +182,5 @@ def delete_workouts(event, context):
                 ds_client.delete(workout.key)
                 print("Finished deleting workout %s" % workout_id)
 
-
-# The main function is only for debugging. Do not include this line in the cloud function
-# delete_workouts(None, None)
-specific_workouts = ['cs4360dit-pp']
-for workout in specific_workouts:
-    delete_specific_workout(workout)
 
 delete_workouts(None, None)

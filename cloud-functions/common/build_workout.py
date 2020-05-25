@@ -2,11 +2,9 @@ import time
 import calendar
 import random
 import string
-from yaml import load, Loader
 
-from common.globals import ds_client, project, compute, workout_globals, storage_client
+from common.globals import ds_client, project, compute, region, zone, dnszone
 from common.dns_functions import add_dns_record, register_workout_server
-from common.datastore_functions import store_unit_info, store_workout_info
 from common.stop_workout import stop_workout
 
 # create random strings --> will be used to create random workoutID
@@ -146,143 +144,69 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         register_workout_server(workout, name, guac_path)
 
 
-def build_workout(workout_type, num_team, workout_length, unit_id, email, unit_name):
-    # Open and read YAML file
-    print('Loading config file')
-    # get bucket with name
-    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
-    # get bucket data as blob
-    blob = bucket.get_blob(workout_globals.yaml_folder + workout_type + ".yaml")
-    if blob == None:
-        return False
-    # convert to string
-    yaml_from_bucket = blob.download_as_string()
-    y = load(yaml_from_bucket, Loader=Loader)
+def build_workout(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    # Create the networks and subnets
+    print('Creating networks')
+    for network in workout['networks']:
+        network_body = {"name": "%s-%s" % (workout_id, network['name']),
+                        "autoCreateSubnetworks": False,
+                        "region": region}
+        response = compute.networks().insert(project=project, body=network_body).execute()
+        compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+        time.sleep(10)
+        for subnet in network['subnets']:
+            subnetwork_body = {
+                "name": "%s-%s" % (network_body['name'], subnet['name']),
+                "network": "projects/%s/global/networks/%s" % (project, network_body['name']),
+                "ipCidrRange": subnet['ip_subnet']
+            }
+            response = compute.subnetworks().insert(project=project, region=region,
+                                                    body=subnetwork_body).execute()
+            compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
 
-    workout_name = y['workout']['name']
-    region = y['workout']['region']
-    zone = y['workout']['zone']
-    dnszone = y['workout']['dnszone']
+    # Now create the servers
+    print('Creating servers')
+    for server in workout['servers']:
+        server_name = "%s-%s" % (workout_id, server['name'])
+        sshkey = server["sshkey"]
+        guac_path = server['guac_path']
+        tags = server['tags']
+        machine_type = server["machine_type"]
+        network_routing = server["network_routing"]
+        nics = []
+        for n in server['nics']:
+            nic = {
+                "network": "%s-%s" % (workout_id, n['network']),
+                "internal_IP": n['internal_IP'],
+                "subnet": "%s-%s-%s" % (workout_id, n['network'], n['subnet']),
+                "external_NAT": n['external_NAT']
+            }
+            nics.append(nic)
 
-    # create random number specific to the workout (6 characters by default)
-    if num_team > 10:
-        num_team = 10
+        create_instance_custom_image(compute, project, zone, dnszone, workout_id, server_name, server['image'],
+                                     machine_type, network_routing, nics, tags, sshkey, guac_path)
 
-    if workout_length > 7:
-        workout_length = 7
+    # Create all of the network routes and firewall rules
+    print('Creating network routes and firewall rules')
+    if 'routes' in workout and workout['routes']:
+        for route in workout['routes']:
+            r = {"name": "%s-%s" % (workout_id, route['name']),
+                 "network": "%s-%s" % (workout_id, route['network']),
+                 "destRange": route['dest_range'],
+                 "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
+            create_route(project, zone, r)
 
-    # we have to store each labentry ext IP and send it to the user
-    workout_ids = []
+    firewall_rules = []
+    for rule in workout['firewall_rules']:
+        firewall_rules.append({"name": "%s-%s" % (workout_id, rule['name']),
+                               "network": "%s-%s" % (workout_id, rule['network']),
+                               "targetTags": rule['target_tags'],
+                               "protocol": rule['protocol'],
+                               "ports": rule['ports'],
+                               "sourceRanges": rule['source_ranges']})
 
-    # To do: Pull all of the yaml defaults into a separate function
-    if "student_instructions_url" in y['workout']:
-        student_instructions_url = y['workout']['student_instructions_url']
-    else:
-        student_instructions_url = None
+    create_firewall_rules(project, firewall_rules)
 
-    if 'workout_description' in y['workout']:
-        workout_description = y['workout']['workout_description']
-    else:
-        workout_description = None
-
-    ts = str(calendar.timegm(time.gmtime()))
-    print("Creating unit %s" % (unit_id))
-    store_unit_info(unit_id, email, unit_name, ts, workout_type,
-                    student_instructions_url, workout_description)
-
-    # NOTE: Added topic_name and flag entities to store_workout_info() call // For PUBSUB
-    for i in range(1, num_team+1):
-        generated_workout_ID = randomStringDigits()
-        workout_ids.append(generated_workout_ID)
-        store_workout_info(
-            generated_workout_ID, unit_id, email, workout_length, workout_type,
-            ts
-        )
-        print('Creating workout id %s' % (generated_workout_ID))
-        # Create the networks and subnets
-        print('Creating networks')
-        for network in y['networks']:
-            network_body = {"name": "%s-%s" % (generated_workout_ID, network['name']),
-                            "autoCreateSubnetworks": False,
-                            "region": region}
-            response = compute.networks().insert(project=project, body=network_body).execute()
-            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
-            time.sleep(10)
-            for subnet in network['subnets']:
-                subnetwork_body = {
-                    "name": "%s-%s" % (network_body['name'], subnet['name']),
-                    "network": "projects/%s/global/networks/%s" % (project, network_body['name']),
-                    "ipCidrRange": subnet['ip_subnet']
-                }
-                response = compute.subnetworks().insert(project=project, region=region,
-                                                        body=subnetwork_body).execute()
-                compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
-
-        # Now create the servers
-        print('Creating servers')
-        for server in y['servers']:
-            server_name = "%s-%s" % (generated_workout_ID, server['name'])
-            nics = []
-            for n in server['nics']:
-                nic = {
-                    "network": "%s-%s" % (generated_workout_ID, n['network']),
-                    "internal_IP": n['internal_IP'],
-                    "subnet": "%s-%s-%s" % (generated_workout_ID, n['network'], n['subnet']),
-                    "external_NAT": n['external_NAT']
-                }
-                nics.append(nic)
-
-            # The ssh keys are included with some servers for local authentication within the network
-            sshkey = None
-            if "sshkey" in server:
-                sshkey = server["sshkey"]
-
-            guac_path = None
-            if "guac_path" in server:
-                guac_path = server['guac_path']
-
-            tags = None
-            if "tags" in server:
-                tags = server['tags']
-
-            if "machine_type" in server:
-                machine_type = server["machine_type"]
-            else:
-                machine_type = "n1-standard-1"
-
-            if "network_routing" in server:
-                network_routing = server["network_routing"]
-            else:
-                network_routing = False
-
-            create_instance_custom_image(compute, project, zone, dnszone, generated_workout_ID, server_name, server['image'],
-                                         machine_type, network_routing, nics, tags, sshkey, guac_path)
-
-        # Create all of the network routes and firewall rules
-        print('Creating network routes and firewall rules')
-        if 'routes' in y and y['routes']:
-            for route in y['routes']:
-                r = {"name": "%s-%s" % (generated_workout_ID, route['name']),
-                     "network": "%s-%s" % (generated_workout_ID, route['network']),
-                     "destRange": route['dest_range'],
-                     "nextHopInstance": "%s-%s" % (generated_workout_ID, route['next_hop_instance'])}
-                create_route(project, zone, r)
-
-        firewall_rules = []
-        for rule in y['firewall_rules']:
-            firewall_rules.append({"name": "%s-%s" % (generated_workout_ID, rule['name']),
-                                   "network": "%s-%s" % (generated_workout_ID, rule['network']),
-                                   "targetTags": rule['target_tags'],
-                                   "protocol": rule['protocol'],
-                                   "ports": rule['ports'],
-                                   "sourceRanges": rule['source_ranges']})
-
-        create_firewall_rules(project, firewall_rules)
-
-        stop_workout(generated_workout_ID)
-
-        # for i in range(len(list_ext_ip)):
-        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        unit['workouts'] = workout_ids
-        unit['ready'] = True
-        ds_client.put(unit)
+    stop_workout(workout_id)
