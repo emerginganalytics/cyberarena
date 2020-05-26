@@ -14,7 +14,7 @@ def home():
 
 @app.route("/login", methods=["GET", "POST"])
 def do_admin_login():
-    if request.form['psw'] == 'password' and request.form['username'] == 'admin':
+    if request.form['psw'] == 'cyberSecret42' and request.form['username'] == 'admin':
         session['logged_in'] = True
     else:
         flash('Incorrect Password')
@@ -30,6 +30,12 @@ def flag():
 def logout():
     session['logged_in'] = False
     return home()
+
+
+@app.route("/workouts", methods=["POST"])
+def workouts():
+    session['logged_in'] = True
+    return render_template('workouts.html')
 
 
 if __name__ == "__main__":
