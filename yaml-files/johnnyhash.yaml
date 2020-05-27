@@ -14,3 +14,9 @@ workout:
 container_info:
   correct_password: ''
   correct_password_hash: ''
+
+assessment:
+  type: level
+  questions:
+    - type: input-flag
+      flag: auto-generated
