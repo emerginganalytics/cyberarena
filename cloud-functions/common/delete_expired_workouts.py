@@ -180,18 +180,20 @@ def delete_workouts():
     for workout in list(query_old_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
-        if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
-            workout_id = None
-            if workout.key.name:
-                workout_id = workout.key.name
-            elif "workout_ID" in workout:
-                workout_id = workout["workout_ID"]
+        if 'build_type' in workout:
+            if workout['build_type'] != 'container':
+                if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
+                    workout_id = None
+                    if workout.key.name:
+                        workout_id = workout.key.name
+                    elif "workout_ID" in workout:
+                        workout_id = workout["workout_ID"]
 
-            if workout_id:
-                print('Deleting resources from workout %s' % workout_id)
-                if delete_specific_workout(workout_id, workout):
-                    workout['resources_deleted'] = True
-                    ds_client.put(workout)
+                    if workout_id:
+                        print('Deleting resources from workout %s' % workout_id)
+                        if delete_specific_workout(workout_id, workout):
+                            workout['resources_deleted'] = True
+                            ds_client.put(workout)
 
     query_misfit_workouts = ds_client.query(kind='cybergym-workout')
     query_misfit_workouts.add_filter("misfit", "=", True)
