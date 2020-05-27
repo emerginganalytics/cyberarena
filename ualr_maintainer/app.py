@@ -40,29 +40,16 @@ def index(workout_type):
         yaml_string = parse_workout_yaml(workout_type)
         unit_id, build_type = process_workout_yaml(yaml_string, workout_type, form.unit.data,
                                                      form.team.data, form.length.data, form.email.data)
-        if build_type == "compute":
-            pub_build_request_msg(unit_id)
+
         if unit_id == False:
             return render_template('no_workout.html')
+        elif build_type == "compute":
+            pub_build_request_msg(unit_id)
+
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
 
-# TODO: Is this still in use?
-@app.route('/team_launcher')
-def team_launcher():
-    return render_template('team_launcher.html')
-
-# TODO: Is this still in use?
-@app.route('/workout_done/<build_data>')
-def workout_done(build_data):
-    return render_template('workout_done.html', build_data=build_data)
-
-# TODO: Is this still in use?
-@app.route('/listvm')
-def list_vm_instances():
-    list_vm_test = list_vm.list_instances(project, 'us-central1-a')
-    return render_template('list_instances.html', list_vm=list_vm_test)
 
 # Student landing page route. Displays information and links for an individual workout
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
