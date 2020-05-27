@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}Unit {{ unit_id }}{% endblock %}
+<script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+
 {% block content %}
     <p>To begin, click on an available team below. Red teams mean the workout is already in use.</p>
     <h2>Description</h2>
@@ -12,7 +15,11 @@
             {% if build_type == "container" %}
                 <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
             {% else %}
-                <a style="color:red" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                {% if workout["running"] == "True" %}
+                    <a style="color:green" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                {% else %}
+                    <a style="color:red" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                {% endif %}
             {% endif %}
         {% endfor %}
     </ol>
@@ -58,5 +65,8 @@
                     '</br><div class="loader"></div>');
             });
         });
+
+        setInterval(check_workout_status( {{ unit_id |safe }}, 30000))
+
     </script>
 {% endblock %}
