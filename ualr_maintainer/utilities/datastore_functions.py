@@ -182,8 +182,7 @@ def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_
         'workout_url_path': workout_url_path,
         "description": workout_description,
         "teacher_instructions_url": teacher_instructions_url,
-        "workouts": [],
-        "ready": False
+        "workouts": []
     })
 
     ds_client.put(new_unit)
