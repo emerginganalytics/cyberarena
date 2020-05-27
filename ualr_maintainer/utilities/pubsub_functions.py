@@ -1,5 +1,8 @@
 from google.cloud import pubsub_v1
+from google.cloud.pubsub import types
+
 from utilities.datastore_functions import get_unit_workouts
+from time import sleep
 
 # from common.globals import project
 
@@ -15,11 +18,9 @@ def pub_build_request_msg(unit_id):
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project, topic_name)
 
-    data = "Cyber Gym Build Request".encode("utf-8")
-
     workouts = get_unit_workouts(unit_id)
     for workout in workouts:
-        future = publisher.publish(topic_path, data=data, workout_id=workout['name'])
+        future = publisher.publish(topic_path, data=b'Cyber Gym Workout', workout_id=workout['name'])
         print(future.result())
 
 

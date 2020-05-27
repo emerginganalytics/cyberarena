@@ -18,7 +18,7 @@ def cloud_fn_build_workout(event, context):
     build_workout(workout_id)
 
     if context:
-        print("""Workout %s has completed.""".format(workout_id))
+        print("Workout %s has completed." % workout_id)
 
 
 def cloud_fn_start_vm(event, context):
