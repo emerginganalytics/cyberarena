@@ -1,9 +1,9 @@
 version: '1'
 
 workout:
-  name: BufferOverflow
-  workout_description: 'Learn about a basic buffer overflow exploit.'
-  teacher_workout_instructions_url: 
+  name: publicprivate
+  workout_description: 'Learn about public and private keys used in encryption.'
+  teacher_workout_instructions_url:
   student_instructions_url:
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -19,7 +19,7 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: overflow-labentry 
+  - name: publicprivate-labentry 
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
@@ -31,15 +31,15 @@ servers:
         internal_IP: 10.1.1.10
         subnet: default
         external_NAT: true
-  - name: cybergym-bufferoverflow
-    image: image-cybergym-bufferoverflow
+  - name: cybergym-publicprivate
+    image: image-promise-win2016-publicprivate
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["allow-vnc"]}
+    tags: {items: ["allow-rdp"]}
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.35
+        internal_IP: 10.1.1.20
         subnet: default
         external_NAT: true
 
@@ -54,18 +54,18 @@ firewall_rules:
     protocol: none
     ports: ["tcp/80", "tcp/8080", "tcp/443"]
     source_ranges: ["0.0.0.0/0"]
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
-  - name: allow-vnc
-    network: external-network
-    target_tags: ["vnc-server"]
-    protocol: tcp
-    ports: ["tcp/5901-5909"]
-    source_ranges: ["0.0.0.0/0"]
   - name: allow-https
     network: external-network
     target_tags: ["https-server"]

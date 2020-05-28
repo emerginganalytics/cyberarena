@@ -1,6 +1,6 @@
 from google.cloud import datastore
 from globals import ds_client, logger
-
+from flask import jsonify
 # Store information for an instructor. To be used when instructor login is complete
 def store_instructor_info(email):
     new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
@@ -36,12 +36,15 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = None
+        running = complete = None
         if 'running' in workout_instance:
             running = workout_instance['running']
+        if 'complete' in workout_instance:
+            complete = workout_instance['complete']
         workout_info = {
             'name': workout.key.name,
-            'running': running
+            'running': running,
+            'complete': complete
         }
         workout_list.append(workout_info)
 

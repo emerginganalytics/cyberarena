@@ -1,4 +1,5 @@
 google.cloud
+google-api-core
 google-cloud-storage
 google-cloud-datastore
 google-api-python-client

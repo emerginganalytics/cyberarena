@@ -210,3 +210,6 @@ def build_workout(workout_id):
     create_firewall_rules(project, firewall_rules)
 
     stop_workout(workout_id)
+
+    workout['complete'] = True
+    ds_client.put(workout)

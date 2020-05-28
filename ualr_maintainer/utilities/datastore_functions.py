@@ -37,6 +37,9 @@ def add_yaml_defaults(yaml_contents):
         yaml_contents['container_info'] = None
 
     if yaml_contents['workout']['build_type'] == 'compute':
+        if 'routes' not in yaml_contents:
+            yaml_contents['routes'] = None
+
         server_cnt = len(yaml_contents['servers'])
         for i in range(server_cnt):
             if 'sshkey' not in yaml_contents['servers'][i]:
@@ -179,8 +182,7 @@ def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_
         'workout_url_path': workout_url_path,
         "description": workout_description,
         "teacher_instructions_url": teacher_instructions_url,
-        "workouts": [],
-        "ready": False
+        "workouts": []
     })
 
     ds_client.put(new_unit)
