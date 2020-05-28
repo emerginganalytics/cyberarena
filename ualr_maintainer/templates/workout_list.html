@@ -15,10 +15,10 @@
             {% if build_type == "container" %}
                 <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
             {% else %}
-                {% if workout["running"] == "True" %}
-                    <a style="color:green" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                {% if workout["complete"] == True %}
+                    <a style="color:green" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
                 {% else %}
-                    <a style="color:red" href="/landing/{{ workout.name }}" target="_blank"><li class="teams">/landing/{{ workout.name }}</li></a>
+                    <a style="color:red" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
                 {% endif %}
             {% endif %}
         {% endfor %}
@@ -65,8 +65,33 @@
                     '</br><div class="loader"></div>');
             });
         });
+    
+        function check_workout_status(unit_id){
+            
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                url: "/workout_list/" + unit_id,
+                traditional: "true",
+                data: JSON.stringify({
+                    "unit_id": unit_id,
+                }),
+                dataType: "json",
+                success: function(data){
+                    for (i = 0; i < data.length; i++){
+                        if(data[i]['complete'] == true){
+                            var link = document.getElementById("vm-status-" + data[i]['name']);
+                            link.style.color = 'green';
 
-        setInterval(check_workout_status( {{ unit_id |safe }}, 30000))
-
+                        }
+                    }
+                },
+            });
+    
+        }
+        setInterval(function(){
+            check_workout_status( "{{ unit_id }}");
+        }, 30000);
+    
     </script>
 {% endblock %}
