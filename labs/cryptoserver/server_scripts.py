@@ -12,7 +12,7 @@ project = 'ualr-cybersecurity'
 
 
 def publish_status(workout_id):
-    token = "RG987S1GVNKYRYHYA"
+    token = "<TOKEN>"
     URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 
     status = {
