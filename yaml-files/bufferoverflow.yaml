@@ -32,7 +32,7 @@ servers:
         subnet: default
         external_NAT: true
   - name: cybergym-bufferoverflow
-    image: ubuntu-1910-eoan-v20200107
+    image: image-cybergym-bufferoverflow
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["allow-vnc"]}

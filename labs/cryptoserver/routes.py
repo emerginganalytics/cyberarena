@@ -1,29 +1,82 @@
-# Things to show:
-# - Simple GET/POST form
-# - Simple AJAX form
-# - Getting variables from URL in routes and templates
 from app import app
+from caesarcipher import CaesarCipher
 from flask import redirect, request, render_template, abort, jsonify, make_response
+from server_scripts import publish_status, gen_pass, ds_client, set_ciphers, check_caesar
 from werkzeug.utils import secure_filename
 
-import io
+import binascii
+import base64 as b64
 import hashlib
+import io
+import os
 
 
-@app.route('/')
-def home():
-    return 'So far this doesnt do anything'
+@app.route('/<workout_id>')
+def home(workout_id):
+    page_template = 'pages/home.jinja'
+    return render_template(page_template, workout_id=workout_id)
 
 
-@app.route('/hashing_algorithms')
-def hashing_algorithms():
+# TODO: Need to reformat to ajax requests vs normal HTTP POST
+# TODO: Restrict students from submitting decrypted messages
+#       without filling all fields!!
+@app.route('/caesar/<workout_id>', methods=['GET', 'POST'])
+def caesar(workout_id):
+    page_template = 'pages/cipher.jinja'
+
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    # Only valid workouts can access
+    if workout:
+        if workout['type'] == 'johnnycipher':
+            # If one cipher is empty, assume the rest are empty and generate new cipher list
+            if workout['container_info']['cipher_one']['cipher'] == '':
+                set_ciphers(workout_id)
+            else:
+                firstcipher = b64.b64decode(workout['container_info']['cipher_one']['cipher']).decode('UTF-8')
+                secondcipher = b64.b64decode(workout['container_info']['cipher_two']['cipher']).decode('UTF-8')
+                thirdcipher = b64.b64decode(workout['container_info']['cipher_three']['cipher']).decode('UTF-8')
+
+                if request.method == 'GET':
+                    return render_template(
+                        page_template,
+                        workout_id=workout_id,
+                        firstcipher=firstcipher,
+                        secondcipher=secondcipher,
+                        thirdcipher=thirdcipher,
+                    )
+                elif request.method == 'POST':
+                    plaintext = request.get_json()
+
+                    status = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
+                    print('Results of check: {}'.format(status))
+                    return jsonify(status)
+        else:
+            return redirect('/invalid')
+
+
+@app.route('/ajax_calculate_caesar/<workout_id>', methods=['POST'])
+def ajax_calculate_caesar(workout_id):
+    # Returns deciphered message
+    encrypted_message = request.get_json()
+
+    key = int(encrypted_message['key'])
+    message = str(encrypted_message['ciphertext'])
+    plaintext = CaesarCipher(message, offset=key).decoded
+
+    return jsonify({'plaintext': plaintext})
+
+
+@app.route('/hashing_algorithms/<workout_id>', methods=['GET'])
+def hashing_algorithms(workout_id):
     page_template = 'pages/hashing_algorithms.jinja'
 
-    return render_template(page_template)
+    return render_template(page_template, workout_id=workout_id,)
 
 
-@app.route('/ajax_calculate_unsalted_hash', methods=['POST'])
-def ajax_calculate_unsalted_hash():
+@app.route('/ajax_calculate_unsalted_hash/<workout_id>', methods=['POST'])
+def ajax_calculate_unsalted_hash(workout_id):
     plaintext_password = request.get_json()
 
     hashed_password = hashlib.sha256(plaintext_password.encode('utf-8')).hexdigest()
@@ -33,104 +86,168 @@ def ajax_calculate_unsalted_hash():
     return jsonify({'hashed_password': hashed_password})
 
 
-@app.route('/md5_page', methods=['GET', 'POST'])
-def md5_page():
+@app.route('/ajax_calculate_salted_hash/<workout_id>', methods=['POST'])
+def ajax_calculate_salted_hash(workout_id):
+    rand_salt = binascii.hexlify(os.urandom(16))
+
+    second_plaintext = request.get_json()
+
+    calculated_hash = hashlib.sha256(second_plaintext.encode('utf-8') + rand_salt).hexdigest()
+
+    salted_hash_password = calculated_hash + ' : ' + rand_salt.decode()
+
+    print(salted_hash_password)
+
+    return jsonify({'salted_hash_password': salted_hash_password})
+
+
+@app.route('/md5_page/<workout_id>', methods=['GET', 'POST'])
+def md5_page(workout_id):
+    # TODO: Build page similar to CG-Landing. Pass : Hash will be stored in datastore.
     page_template = 'pages/md5_page.jinja'
 
-    if request.method == 'GET':
-        return render_template(page_template)
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
 
-    elif request.method == 'POST':
-        if 'password_file' not in request.files:
-            # User did not submit a file.  Show error and let them upload again
-            return render_template(
-                page_template,
-                upload_error="You must choose a file to upload",
-            )
-        else:
-            # Check to be sure that the user has submitted a file.
-            input_file = request.files['password_file']
+    # Only valid workouts should access page
+    if workout:
+        # Valid workout_id and type:
+        if workout['type'] == 'johnnyhash':
+            # If first time visiting the page, generate password/hash
+            if workout['container_info']['correct_password'] == '':
+                gen_pass(workout_id)
+            else:
+                if request.method == 'GET':
+                    return render_template(
+                        page_template,
+                        pass_hash=workout['container_info']['correct_password_hash'],
+                        workout_id=workout_id
+                    )
+                elif request.method == 'POST':
+                    if 'password_file' not in request.files:
+                        # User did not submit a file.  Show error and let them upload again
+                        return render_template(
+                            page_template,
+                            upload_error="You must choose a file to upload",
+                            workout_id=workout_id,
+                            pass_hash=workout['container_info']['correct_password_hash']
+                        )
+                    else:
+                        # Check to be sure that the user has submitted a file.
+                        input_file = request.files['password_file']
 
-            if input_file.filename == '':
-                # User has submitted a blank file.  Show error and let them upload again.
-                return render_template(
-                    page_template,
-                    upload_error="You must choose a file to upload",
-                )
+                        if input_file.filename == '':
+                            # User has submitted a blank file.  Show error and let them upload again.
+                            return render_template(
+                                page_template,
+                                upload_error="You must choose a file to upload",
+                                pass_hash=workout['container_info']['correct_password_hash'],
+                                workout_id=workout_id,
+                            )
 
-            # At this point, we have a csv file to process
-            raw_input = io.StringIO(input_file.stream.read().decode("UTF8"), newline=None)
+                        # At this point, we have a csv file to process
+                        raw_input = io.StringIO(input_file.stream.read().decode("UTF8"), newline=None)
 
-            passwords = raw_input.read().split('\n')
+                        passwords = raw_input.read().split('\n')
+                        hashes = []
 
-            hashes = []
+                        for password in passwords:
+                            hashes.append({
+                                'plaintext': password,
+                                'hash': hashlib.md5(password.encode('utf-8')).hexdigest()
+                            })
 
-            for password in passwords:
-                hashes.append({
-                    'plaintext': password,
-                    'hash': hashlib.md5(password.encode('utf-8')).hexdigest()
-                })
+                        return render_template(
+                            page_template,
+                            hashed_passwords=hashes,
+                            pass_hash=workout['container_info']['correct_password_hash'],
+                            workout_id=workout_id,
+                        )
+        else:  # Valid workout_id, but not correct workout type
+            return redirect('/invalid')
+    else:  # Workout ID doesn't exist ...
+        return redirect('/invalid')
 
-            return render_template(
-                page_template,
-                hashed_passwords=hashes,
-            )
 
-
-@app.route('/hidden')
-def hidden():
+@app.route('/hidden/<workout_id>')
+def hidden(workout_id):
     # This application sets a cookie with the key "logged_in" to true when a user has authenticated
     # They must be authenticated before viewing this page
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
     logged_in = request.cookies.get('logged_in', None)
-    if logged_in is None or logged_in != 'true':
-        return redirect('/login')
+
+    if workout:
+        if logged_in is None or logged_in != 'true':
+            return redirect('/login/{}'.format(workout_id))
+        else:
+            page_template = 'pages/hidden.jinja'
+
+            return render_template(page_template, workout_id=workout_id)
     else:
-        page_template = 'pages/hidden.jinja'
-
-        return render_template(page_template)
+        return redirect('/invalid')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/login/<workout_id>', methods=['GET', 'POST'])
+def login(workout_id):
     page_template = 'pages/login.jinja'
 
-    if request.method == 'GET':
-        return render_template(page_template)
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
 
-    elif request.method == 'POST':
-        username = request.form.get('username', None)
-        password = request.form.get('password', None)
+    # Only valid workouts should access page
+    if not workout:
+        return redirect('/invalid')
+    else:
+        if workout['type'] == 'johnnyhash':
+            if request.method == 'GET':
+                return render_template(page_template, workout_id=workout_id)
+            elif request.method == 'POST':
+                username = request.form.get('username', None)
+                password = request.form.get('password', None)
 
-        print(username, password)
+                print(username, password)
 
-        if username is None or password is None:
-            login_error = 'You must submit a username and password'
+                if username is None or password is None:
+                    login_error = 'You must submit a username and password'
 
-            return render_template(
-                page_template,
-                login_error=login_error
-            )
-        elif username == 'admin' and password == 'password':
-            # These are the correct credentials, so the cookie for "logged_in" is set to true
-            resp = make_response(redirect('/hidden'))
-            resp.set_cookie('logged_in', 'true')
+                    return render_template(
+                        page_template,
+                        login_error=login_error,
+                        workout_id=workout_id,
+                    )
+                elif username == 'johnny' and password == workout['container_info']['correct_password']:
+                    # These are the correct credentials, so the cookie for "logged_in" is set to true
+                    resp = make_response(redirect('/hidden/{}'.format(workout_id)))
+                    resp.set_cookie('logged_in', 'true')
+                    publish_status(workout_id)
 
-            return resp
+                    return resp
+                else:
+                    login_error = 'Please check your username and password and try again'
+
+                    return render_template(
+                        page_template,
+                        login_error=login_error,
+                        workout_id=workout_id,
+                    )
         else:
-            login_error = 'Please check your username and password and try again'
-
-            return render_template(
-                page_template,
-                login_error=login_error,
-            )
+            return redirect('/invalid')
 
 
-@app.route('/logout')
-def logout():
+@app.route('/logout/<workout_id>')
+def logout(workout_id):
     # To log a user out, we just need to delete the cookie for "logged_in"
     # Setting a cookie that expires at time 0 is the simplest way to delete a cookie
 
-    resp = make_response(redirect('/login'))
+    resp = make_response(redirect('/login/{}'.format(workout_id)))
     resp.set_cookie('logged_in', 'false', expires=0)
 
     return resp
+
+
+@app.route('/invalid', methods=['GET'])
+def invalid():
+    template = '/pages/invalid_workout.html'
+    return render_template(template)
