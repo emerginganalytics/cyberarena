@@ -1,4 +1,5 @@
 from common.build_workout import build_workout
+from common.delete_expired_workouts import delete_workouts
 from common.start_vm import start_vm
 
 
@@ -18,7 +19,7 @@ def cloud_fn_build_workout(event, context):
     build_workout(workout_id)
 
     if context:
-        print("""Workout %s has completed.""".format(workout_id))
+        print("Workout %s has completed." % workout_id)
 
 
 def cloud_fn_start_vm(event, context):
@@ -30,6 +31,16 @@ def cloud_fn_start_vm(event, context):
         return False
 
     start_vm(workout_id)
+
+
+def cloud_fn_delete_expired_workout(event, context):
+    """
+    Cloud function calls a local function to delete all expired and misfit workouts in the project.
+    :param event: No data is passed to this function
+    :param context: No data is passed to this function
+    :return:
+    """
+    delete_workouts()
 
 
 # Cloud VM Function Testing

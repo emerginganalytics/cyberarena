@@ -57,3 +57,28 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: "level/percent"
+  questions:
+    - required: True
+      type: "upload"
+      question: "Upload a screen shot of your botnet running"
+    - required: False
+      type: "upload"
+      question: "Upload a screen shot of your botnet taking a screen shot of the victim computer"
+    - required: False
+      type: "input-flag"
+      question: "Enter the flag for level 3"
+      flag: "auto-generated"
+    - required: False
+      type: "auto"
+      key: "1TccG1J"
+      question: "This will automatically be marked complete when you have completed the mission"
+      script: "cyberattack-1"
+      server: cybergym-victim
+      operating-system: windows
+      complete: False
+
+
+
