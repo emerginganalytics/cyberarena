@@ -6,11 +6,9 @@ workout:
   workout_description: 'Crack a Password'
   teacher_instructions_url: ""
   student_instructions_url: ""
-  workout_url_path: 'https://cybergym-jonnyhash-v7k2apwaqa-uc.a.run.app'
+  workout_url_path: 'https://cybergym-johnnyhash-v7k2apwaqa-uc.a.run.app/md5_page'
   project_name: ualr-cybersecurity
-  # For this workout, I think you could randomly pick the password in the application, and store the correct one
-  # in the following variables
-
+ 
 container_info:
   correct_password: ''
   correct_password_hash: ''
