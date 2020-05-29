@@ -8,13 +8,15 @@ from start_workout import start_workout
 from reset_workout import reset_workout
 from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
 from utilities.pubsub_functions import *
-from workout_build_functions import build_workout, randomStringDigits
+from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
+from utilities.yaml_functions import parse_workout_yaml
+from utilities.datastore_functions import process_workout_yaml
 
 from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm, CreateExpoForm
-
+import json
 # --------------------------- FLASK APP --------------------------
 
 app = Flask(__name__)
@@ -33,33 +35,21 @@ def default_route():
 @app.route('/<workout_type>', methods=['GET', 'POST'])
 def index(workout_type):
     logger.info('Request for workout type %s' % workout_type)
-    form=CreateWorkoutForm()
+    form = CreateWorkoutForm()
     if form.validate_on_submit():
-        unit_id = randomStringDigits()
-        pub_build_request_msg(workout_type, unit_id, 
-            form.team.data, form.length.data, form.email.data, form.unit.data)
-        # unit_id = build_workout(form, workout_type)
+        yaml_string = parse_workout_yaml(workout_type)
+        unit_id, build_type = process_workout_yaml(yaml_string, workout_type, form.unit.data,
+                                                     form.team.data, form.length.data, form.email.data)
+
         if unit_id == False:
             return render_template('no_workout.html')
+        elif build_type == "compute":
+            pub_build_request_msg(unit_id)
+
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
 
-# TODO: Is this still in use?
-@app.route('/team_launcher')
-def team_launcher():
-    return render_template('team_launcher.html')
-
-# TODO: Is this still in use?
-@app.route('/workout_done/<build_data>')
-def workout_done(build_data):
-    return render_template('workout_done.html', build_data=build_data)
-
-# TODO: Is this still in use?
-@app.route('/listvm')
-def list_vm_instances():
-    list_vm_test = list_vm.list_instances(project, 'us-central1-a')
-    return render_template('list_instances.html', list_vm=list_vm_test)
 
 # Student landing page route. Displays information and links for an individual workout
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
@@ -103,14 +93,20 @@ def landing_page(workout_id):
 @app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    build_type = unit['build_type']
+    workout_url_path = unit['workout_url_path']
     workout_list = get_unit_workouts(unit_id)
 
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
 
-    if unit and len(workout_list) > 0:
-        return render_template('workout_list.html', workout_list=workout_list, unit_id=unit_id,
+    if (request.method=="POST"):
+        return json.dumps(workout_list)
+        
+    if unit and len(str(workout_list)) > 0:
+        return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
+                               workout_list=workout_list, unit_id=unit_id,
                                description=unit['description'], instructions=teacher_instructions_url,
                                workout_type=unit['workout_type'])
     else:
@@ -260,6 +256,22 @@ def expo(workout_type):
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('expo_page.html', form=form, workout_type=workout_type)
+
+# #Checks the status of the workouts in a unit
+# @app.route('/check_workouts/<unit_id>', methods=['POST'])
+# def check_workouts(unit_id):
+#     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+
+#     workout_list = get_unit_workouts(unit_id)
+#     teacher_instructions_url = None
+#     if 'teacher_instructions_url' in unit:
+#         teacher_instructions_url = unit['teacher_instructions_url']
+
+#     if unit and len(workout_list) > 0:
+#         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
+#                                workout_list=workout_list, unit_id=unit_id,
+#                                description=unit['description'], instructions=teacher_instructions_url,
+#                                workout_type=unit['workout_type'])
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)

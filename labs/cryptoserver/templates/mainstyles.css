@@ -246,6 +246,25 @@ font-family: Arial;
 /*background-color: #3498DB;*/
 padding: 5px;
 }
+.caesar-form{
+    text-align: center;
+}
+.caesar-form-btn {
+    border: 2px solid transparent;
+    background: #3498DB;
+    color: #ffffff;
+    font-size: 16px;
+    line-height: 25px;
+    padding: 10px 0;
+    text-decoration: none;
+    text-shadow: none;
+    border-radius: 3px;
+    box-shadow: none;
+    transition: 0.25s;
+    display: block;
+    width: 250px;
+    margin: 0 auto;
+}
 .login {
 margin: 20px auto;
 width: 300px;

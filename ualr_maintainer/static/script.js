@@ -102,3 +102,21 @@ $("#start-vm").click(function () {
     });
 
 });
+
+
+function check_workout_status(unit_id){
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        url: "/workout_list/" + unit_id,
+        traditional: "true",
+        data: JSON.stringify({
+            "unit_id": unit_id,
+        }),
+        dataType: "json",
+        success: function(data){
+            console.log("Testing")
+        }
+    });
+}

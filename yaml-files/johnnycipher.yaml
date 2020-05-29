@@ -1,0 +1,24 @@
+version: '1'
+
+workout:
+  name: "Johnny Cipher"
+  build_type: "container"
+  workout_description: 'Intro to Cryptography'
+  teacher_instructions_url: ""
+  student_instructions_url: ""
+  workout_url_path: 'https://cybergym-johnnyhash-v7k2apwaqa-uc.a.run.app/caesar'
+  project_name: ualr-cybersecurity
+ 
+container_info:
+  cipher_one:
+    cipher: ''
+    key: ''
+    status: 'False'
+  cipher_two:
+    cipher: ''
+    key: ''
+    status: 'False'
+  cipher_three:
+    cipher: ''
+    key: ''
+    status: 'False'

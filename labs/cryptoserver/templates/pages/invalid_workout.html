@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="description" content="UA Little Rock Cyber Gym"/>
  	<meta name="author" content="UA Little Rock"/>
-    <title>Cyber Gym</title>
+    <title>Cyber Gym - {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
@@ -116,40 +116,19 @@
       content: "Team " counter(elementcounter) ": ";
       counter-increment: elementcounter;
       font-weight: bold;
-}
+    }
+
+    td {
+        text-align: center;
+    }
 </style>
 
 <body id="homePage" data-spy="scroll" data-target=".navbar" data-offset="50" class="bg-1">
-<nav class="navbar navbar-default navbar-fixed-top">
-  	<div class="container-fluid">
-    		<div class="navbar-header">
-      			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navBar">
-        			<span class="icon-bar"></span>
-        			<span class="icon-bar"></span>
-        			<span class="icon-bar"></span>
-      			</button>
-    		</div>
-    		<div class="collapse navbar-collapse" id="navBar">
-      			<ul class="nav navbar-nav navbar-right">
-       				<li><a>HOME</a></li>
-        			<li><a href="{{ url_for('team_launcher') }}">TEAM LAUNCHER</a></li>
-      			</ul>
-    		</div>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
-            <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a href="dos">DOS</a></li>
-            <li><a href="xss">XSS</a></li>
-            <li><a href="spoof">Spoof</a></li>
-          </ul>
-  	</div>
-</nav>
     <div id="workout-form" class='container-fluid form-ctn'>
         <div class="center">
-            <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+            <img src="/static/img/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
             {% block content %}{% endblock %}
+            <p>You have reached this page by error. Please verify you are meant to go here.</p>
         </div>
     </div>
 
