@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<title>Reflected XSS</title>
+<title>Domain-Object Model(DOM) XSS</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
@@ -11,38 +11,44 @@
 .w3-sidebar a {font-family: "Roboto", sans-serif}
 body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
 </style>
-<body class="w3-content" style="max-width:90%">
+<body class="w3-content" style="max-width:100%">
 
 <!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:3;width:10%;background-color:red;" id="mySidebar">
+<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:-1;width:10%;" id="mySidebar">
     <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
       <a href="{{url_for('xss_d')}}" class="w3-bar-item w3-button">Domain Object Model Cross-Site Scripting </a>
       <a href="{{url_for('xss_r')}}" class="w3-bar-item w3-button">Reflected Cross-Site Scripting</a>
       <a href="{{url_for('xss_s')}}" class="w3-bar-item w3-button">Stored Cross-Site Scripting </a>
   </div>
 </nav>
-
-<!-- Top menu on small screens -->
-<header class="w3-bar w3-top w3-hide-large w3-black w3-xlarge">
-  <div class="w3-bar-item w3-padding-24 w3-wide">UA Little Rock Cyber Gym</div>
-  <a href="javascript:void(0)" class="w3-bar-item w3-button w3-padding-24 w3-right" onclick="w3_open()"><i class="fa fa-bars"></i></a>
-</header>
-
-<!-- Overlay effect when opening sidebar on small screens -->
-<div class="w3-overlay w3-hide-large" onclick="w3_close()" style="cursor:pointer" title="close side menu" id="myOverlay"></div>
-
 <!-- !PAGE CONTENT! -->
-<div class="w3-main" style="margin-left:250px">
-    <!-- Push down content on small screens -->
-  <div class="w3-hide-large" style="margin-top:83px"></div>
-
-  <!-- Top header -->
-
+<div class="w3-top">
+  <div class="w3-black w3-xlarge" style="max-width:100%;margin:auto;">
+    <div class="w3-center w3-padding-16">UA Little Rock Classified Workouts</div>
+  </div>
+</div>
+<div class="w3-main" style="margin-left:15%;margin-top:5%">
+    <!-- Top header -->
   <header class="w3-container w3-xlarge">
-      <div class="w3-black w3-center w3-padding-24">UA Little Rock Classified</div>
     <p class="w3-left">Domain Object Model(DOM) Cross-Site Scripting</p>
   </header>
-    <p></p>
+ 		<p>Please choose a language:</p>
+		<form name="XSS" method="GET">
+			<select name="default">
+				<script>
+					if (document.location.href.indexOf("default=") >= 0) {
+						var lang = document.location.href.substring(document.location.href.indexOf("default=")+8);
+						document.write("<option value='" + lang + "'>" + decodeURI(lang) + "</option>");
+						document.write("<option value='' disabled='disabled'>----</option>");
+					}
+					document.write("<option value='English'>English</option>");
+					document.write("<option value='French'>French</option>");
+					document.write("<option value='Spanish'>Spanish</option>");
+					document.write("<option value='German'>German</option>");
+				</script>
+			</select>
+			<input type="submit" value="Select" />
+		</form>
   <!-- End page content -->
 </div>
 <script>
