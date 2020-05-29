@@ -1,0 +1,10 @@
+apache-libcloud
+pycryptodome
+jinja2
+Flask==1.0.3
+itsdangerous
+Click==7.0
+google-cloud-datastore
+google-api-python-client
+google-cloud-storage
+requests

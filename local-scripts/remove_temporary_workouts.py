@@ -84,6 +84,20 @@ def delete_subnetworks(workout_id):
         return True
 
 
+def long_delete_network(network, response):
+    max_tries = 3
+    i = 0
+    while 'error' in response and i < max_tries:
+        response = compute.networks().delete(project=project, network=network).execute()
+        compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+        response = compute.globalOperations().get(project=project, operation=response["id"]).execute()
+        i += 1
+
+    if i < max_tries:
+        return True
+    else:
+        return False
+
 def delete_network(workout_id):
     try:
         # First delete any routes specific to the workout
@@ -100,7 +114,13 @@ def delete_network(workout_id):
         result = compute.networks().list(project=project, filter='name = {}*'.format(workout_id)).execute()
         if 'items' in result:
             for network in result['items']:
-                compute.networks().delete(project=project, network=network["name"]).execute()
+                # Networks are not being deleted because the operation occurs too fast.
+                response = compute.networks().delete(project=project, network=network["name"]).execute()
+                compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+                response = compute.globalOperations().get(project=project, operation=response["id"]).execute()
+                if 'error' in response:
+                     if not long_delete_network(network["name"], response):
+                         return False
         return True
     except():
         print("Error in deleting network for %s" % workout_id)
@@ -146,11 +166,10 @@ def delete_specific_workout(workout_id, workout):
         return False
 
 
-
-def delete_workouts(event, context):
+def delete_temporary_workouts(duration_hours):
     # Only process the workouts from the last 4 months. 10512000 is the number of seconds in a month
     query_old_workouts = ds_client.query(kind='cybergym-workout')
-    query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
+    query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - duration_hours*3600))
     for workout in list(query_old_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
@@ -167,20 +186,19 @@ def delete_workouts(event, context):
                     workout['resources_deleted'] = True
                     ds_client.put(workout)
 
-    query_misfit_workouts = ds_client.query(kind='cybergym-workout')
-    query_misfit_workouts.add_filter("misfit", "=", True)
-    for workout in list(query_misfit_workouts.fetch()):
-        workout_id = None
-        if workout.key.name:
-            workout_id = workout.key.name
-        elif "workout_ID" in workout:
-            workout_id = workout["workout_ID"]
 
-        if workout_id:
-            print('Deleting resources from workout %s' % workout_id)
-            if delete_specific_workout(workout_id, workout):
-                ds_client.delete(workout.key)
-                print("Finished deleting workout %s" % workout_id)
+def set_expiration(endtime, duration, user_email):
+    starttime = endtime - duration*3600
+
+    query_workouts = ds_client.query(kind='cybergym-workout')
+    query_workouts.add_filter("timestamp", ">", str(starttime))
+    query_workouts.add_filter("timestamp", "<", str(endtime))
+    for workout in list(query_workouts.fetch()):
+        if workout['user_email'] == user_email:
+            workout['expiration'] = 0
+            ds_client.put(workout)
 
 
-delete_workouts(None, None)
+duration_hours = 1
+set_expiration(endtime=1590617890, duration=duration_hours, user_email='pdhuff@ualr.edu')
+delete_temporary_workouts(duration_hours=duration_hours)

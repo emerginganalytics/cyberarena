@@ -6,6 +6,7 @@ from google.cloud import datastore, storage
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
+region = 'us-central1'
 # dns_suffix = ".acactb.com"
 # project = 'acapte'
 # dnszone = 'aca-bootcamp-public'

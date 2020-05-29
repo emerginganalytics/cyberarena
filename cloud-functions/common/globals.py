@@ -9,6 +9,8 @@ dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
+region = 'us-central1'
+zone = 'us-central1-a'
 #post_endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 
 # Use this for debugging. Uncomment the above endpoint for final environment.

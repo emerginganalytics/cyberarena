@@ -1,24 +1,85 @@
 {% extends 'pages/index.jinja' %}
 
+{% block navblock %}
+    {% if workout_id %}
+        <a href="/md5_page/{{ workout_id }}" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+            <i class="fa fa-laptop w3-xxlarge"></i>
+            <p>MD5</p>
+        </a>
+        <a href="/login/{{ workout_id }}" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+            <i class="fa fa-user-circle-o w3-xxlarge"></i>
+            <p>LOGIN</p>
+        </a>
+    {% endif %}
+{% endblock navblock %}
+
+{% block picture %}
+    <style>
+    img {
+        height: auto;
+        width: 80%;
+    }
+    </style>
+      <!-- Header/Home -->
+      <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
+       <img src="/static/img/sinister_alt_banner.jpg" alt="a bigger thing" class="w3-image">
+      </header>
+{% endblock picture %}
+
 {% block content %}
+    <div class="w3-padding-large" id="main">
 <!-- Page Content -->
     {#  <!-- Exercise Details Section --> #}
-        <h2 class="w3-text-light-grey">This exercise...</h2>
-        <hr style="width:200px" class="w3-opacity">
-        <p>
-            In this exercise, you will take the given hash and compare it to the generated hashes for
-            all possible passwords. First list and save all of your guesses for the password into the file, "password_list.txt".
-            Next you want to upload the file to the site using the button below, hit submit, and see what the results are!
-            For sake of simplicity (and time), we will be using an unsalted, MD5 hashing algorithm.
-            If the given hash and the generated hash are equivalent, then you have found the password! <br>I wonder
-            where that password can be used?
-            <br>
-            <br>
-            MD5 is another hashing algorithm used to secure data, primarily, passwords. When talking of security, the MD5
-            algorithm is now considered obsolete and has been replaced by more secure methods such as SHA256, RipeMD, WHIRLPOOL,
-            just to name a few. I bet Jonny wishes he had chosen a different method.
-        </p>
+        <div class="w3-content w3-padding-16">
+            <h2 class="w3-text-light-grey">Hash It Out...</h2>
+            <hr style="width:200px" class="w3-opacity">
 
+            <p>
+                Johnny from IT has been having too much fun at work today and the boss wants you to check his work.
+                To avoid confrontation, after Johnny leaves, see if you can find out<br /> what's so funny. All
+                that you are given is his username, johnny, and this MD5 hash, <i>"{{ pass_hash }}"</i>. You take a
+                look at his desk and you are fairly certain you have enough information to guess what his password is.<br>
+            </p>
+            <h4 class="w3-text-blue-grey">Johnny's Desk: </h4>
+        </div>
+        <div class="w3-content w3-padding-32">
+            <img id="clue_image" src="/static/img/clue.jpg" alt="desk" class="w3-image">
+        </div>
+        <div class="w3-content w3-padding-16">
+        <h3 class="w3-text-blue-grey">A little Guidance...</h3>
+        <p>
+                 <div class="w3-padding-16 w3-content w3-left-align ">
+                    <h5>Company Password Policy</h5>
+                    <p>
+                        Passwords: <br>
+                        1. Must contain whole words only <br>
+                        2. Be a <i>minimum</i> of eight characters long<br>
+                        3. Must contain at <i>least</i> one upper-case letter<br>
+                        4. Must contain at least one digit<br>
+                    </p>
+                </div>
+            And since Johnny isn't too imaginative, you should be able to guess the right password that meets the policy
+            demands.<br>
+            {#
+            <h5 class="w3-text-blue-grey">How do I know I have the right password?</h5>
+            You will take the given hash and compare it to the generated hashes for all possible passwords. <br>
+            First list and save all of your guesses for the password into the file, "password_list.txt". Be sure to hit
+            enter between each guessed password. Next you want to upload the file to the site using the choose file
+            then upload file buttons below. Let's see what those results are! For sake of simplicity (and time), we will
+            be using an unsalted, MD5 hashing algorithm. If the given hash and the generated hash are equivalent, then
+            you have found the password! <br> Enter the matching password and provided user into the login page to see
+            what Johnny is hiding. #}
+            <h5 class="w3-text-blue-grey">How do I know I have the right password?</h5>
+            List all possible password combination in a <i>.txt</i> file hitting enter between each entry.<br>
+            Upload the file using the form below to calculate the hash for each password. For sake of simplicity
+            (and time), we will be using an unsalted, MD5 hashing hashing algorithm. If the given hash and the generated
+            has are equivalent, you have found the password! <br> Now if only there was a place to login with these
+                credentials ...
+            <br>
+            <br>
+
+        </p>
+    </div>
         <!-- MD5 Generator Section -->
         <div class="w3-padding-64 w3-content w3-text-grey" id="generator">
             <h2 class="w3-text-light-grey">MD5 Generator</h2>
@@ -41,17 +102,29 @@
                     </tr>
                     {% endfor %}
                     </tbody>
-                    </table>
+                    </table><br>
+                <p>Upload another file:</p>
 
+                    {% if upload_error %}
+                    <div class="alert alert-danger" role="alert">{{upload_error}}</div>
+                    {% endif %}
+                <form method="POST" action="{{ request.path }}" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="password_file">Choose the .txt file from your computer.</label>
+                    <input type="file" class="form-control-file" name="password_file" id="password_file" />
+                    <br />
+                    <input type="submit" class="btn btn-primary btn-sm" value="Upload File" />
+                </div>
+                </form>
                 {% else %}
-                <p>Choose the password_list.txt document on your computer and click submit:</p>
+                <p>Choose the password_list.txt document on your computer and click upload:</p>
 
                 {% if upload_error %}
                 <div class="alert alert-danger" role="alert">{{upload_error}}</div>
                 {% endif %}
                 <form method="POST" action="{{ request.path }}" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="password_file">Choose a CSV file from your computer.</label>
+                    <label for="password_file">Choose the .txt file from your computer.</label>
                     <input type="file" class="form-control-file" name="password_file" id="password_file" />
                     <br />
                     <input type="submit" class="btn btn-primary btn-sm" value="Upload File" />
@@ -59,5 +132,17 @@
                 </form>
                 {% endif %}
             </div>
+            </div>
         </div>
+        <div class="w3-content w3-padding-16">
+            <p>
+                MD5 is another hashing algorithm used to secure data, primarily, passwords. When talking of password
+                security, the MD5 algorithm is now considered obsolete and has been replaced by more secure methods such
+                as SHA256, RipeMD, and WHIRLPOOL, just to name a few. I bet Johnny wishes he had chosen a different
+                method...
+            </p>
+        </div>
+    </div>
 {% endblock content %}
+
+{% block js_block %}{% endblock js_block %}
