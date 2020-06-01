@@ -13,12 +13,18 @@ container_info:
   cipher_one:
     cipher: ''
     key: ''
-    status: 'False'
+    status: False
   cipher_two:
     cipher: ''
     key: ''
-    status: 'False'
+    status: False
   cipher_three:
     cipher: ''
     key: ''
-    status: 'False'
+    status: False
+
+assessment:
+  type: "level"
+  questions:
+    - type: auto
+    - complete: False
