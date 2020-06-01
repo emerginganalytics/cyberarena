@@ -166,6 +166,6 @@ def check_caesar(workout_id, submission, check):
     if status['cipher1']['status'] and status['cipher2']['status'] and status['cipher3']['status']:
         print('[+] All ciphers are correct!')
         publish_status(workout_id)
-
+ 
     return status
 

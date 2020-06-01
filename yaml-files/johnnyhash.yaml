@@ -16,5 +16,5 @@ container_info:
 assessment:
   type: level
   questions:
-    - type: input-flag
-      flag: auto-generated
+    - type: auto
+      complete: False
