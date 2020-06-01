@@ -24,8 +24,6 @@
 
 {% block content %}
 
-{# all code including jquery.js taken from open source site: http://davidbau.com/javascript/learn/05-cipher.html  #}
-
 {# <body style="text-align:center;margin:60px"> #}
 <div class="w3-padding-16" style="text-align: center" id="main">
     <h2>Caesar Cipher</h2>
@@ -77,6 +75,7 @@
 
 {% endblock content %}
 {% block js_block %}
+    {# AJAX to display Decrypted Cipher #}
      <script>
             $('#button_decrypt').on('click', function() {
                const encrypted = $('#ciphertext').val();
@@ -108,7 +107,7 @@
                 results_div.html(html_string);
             }
      </script>
-    {#  <script src="/static/js/jquery.js"></script> #}
+    {# AJAX to check cipher submissions and change CSS based on results #}
      <script>
             $('#button_cipher1').on('click', function() {
                const message = $('#cipher1').val();
@@ -120,7 +119,7 @@
                   contentType : 'application/json',
                   success : function(data) {
                       console.log('AJAX Success!');
-                      display_submission(data)
+                      display_cipher1_submission(data['status1'], data['message1']);
                   },
                    error : function(e) {
                       console.log('AJAX Error!');
@@ -128,11 +127,11 @@
                    }
                });
             });
-            function display_submission(submission) {
+            function display_cipher1_submission(sub_status1, sub_message1) {
                 let results_input = $('#cipher1');
 
-                if (submission['cipher1']['status'] === true)
-                    results_input.html(submission['cipher1']['cipher']);
+                if (sub_status1 === true)
+                    results_input.html(sub_message1);
                     results_input.css('background-color', '#4CAF50');
             }
      </script>
@@ -147,6 +146,7 @@
                   contentType : 'application/json',
                   success : function(data) {
                       console.log('AJAX Success!');
+                      display_cipher2_submission(data['status2'], data['message2']);
                   },
                    error : function(e) {
                       console.log('AJAX Error!');
@@ -154,11 +154,11 @@
                    }
                });
             });
-            function display_submission(submission) {
+            function display_cipher2_submission(sub_status2, sub_message2) {
                 let results_input = $('#cipher2');
 
-                if (submission['cipher2']['status'] === true)
-                    results_input.html(submission['cipher2']['cipher']);
+                if (sub_status2 === true)
+                    results_input.html(sub_message2);
                     results_input.css('background-color', '#4CAF50');
             }
      </script>
@@ -173,6 +173,7 @@
                   contentType : 'application/json',
                   success : function(data) {
                       console.log('AJAX Success!');
+                      display_cipher3_submission(data['status3'], data['message3']);
                   },
                    error : function(e) {
                       console.log('AJAX Error!');
@@ -180,11 +181,11 @@
                    }
                });
             });
-            function display_submission(submission) {
+            function display_cipher3_submission(sub_status3, sub_message3) {
                 let results_input = $('#cipher3');
 
-                if (submission['cipher3']['status'] === true)
-                    results_input.html(submission['cipher3']['cipher']);
+                if (sub_status3 === true)
+                    results_input.html(sub_message3);
                     results_input.css('background-color', '#4CAF50');
             }
      </script>

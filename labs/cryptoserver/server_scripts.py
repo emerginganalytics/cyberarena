@@ -11,8 +11,9 @@ ds_client = datastore.Client()
 project = 'ualr-cybersecurity'
 
 
+# TODO: Update script to work with Cloud Run Environment
 def publish_status(workout_id):
-    token = "<TOKEN>"
+    token = "RG987S1GVNKYRYHYA"
     URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 
     status = {
@@ -78,11 +79,11 @@ def set_md5_pass(workout_id, password):
 
 '''
     ######### Johnny Hash: Caesar Cipher ###########
-    set_ciphers generates a dictionary of casesar cipher 
-    base64 value of that cipher and stores the base64
+    set_ciphers generates a dictionary of casesar ciphers 
+    and associated keys and stores the result
     value in the CyberGym Datastore. The cipher page
-    will pull from the Datastore, decode from base64,
-    and finally compare the clear text values.
+    will pull from the Datastore
+    and compare the clear text values.
     ###############################################
 '''
 def set_ciphers(workout_id):
@@ -115,14 +116,13 @@ def set_ciphers(workout_id):
     for pos in range(len(clear_text)):
         key = random.randrange(1, 25)
         cipher_string = CaesarCipher(clear_text[pos], offset=key).encoded
-        cipher = b64.b64encode(cipher_string.encode('UTF-8'))
 
-        ciphers = {
+        cipher = {
             'key': key,
-            'cipher': cipher,
+            'cipher': cipher_string,
             'status': False,
         }
-        result.append(ciphers)
+        result.append(cipher)
 
     # Selects 3 unique ciphers from list
     cipher_list = random.sample(result, k=3)
@@ -137,35 +137,54 @@ def set_ciphers(workout_id):
 
 def check_caesar(workout_id, submission, check):
     # Submission is the plaintext cipher sent from student
-    # Cipher_list is the cipher list that is stored in Datastore
+    # Cipher_list is the data that is stored in Datastore
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    status = {
+    # data dict is passed back to page as JSON object
+    data = {
         'cipher1': workout['container_info']['cipher_one'],
         'cipher2': workout['container_info']['cipher_two'],
         'cipher3': workout['container_info']['cipher_three'],
     }
+    '''
+    # Decode cipher string for processing later
+    data['cipher1']['cipher'] = b64.b64decode(data['cipher1']['cipher']).decode('UTF-8')
+    data['cipher2']['cipher'] = b64.b64decode(data['cipher2']['cipher']).decode('UTF-8')
+    data['cipher3']['cipher'] = b64.b64decode(data['cipher3']['cipher']).decode('UTF-8')
+    '''
+    # Cipher list is what we compare submissions to
     cipher_list = []
 
-    for message in workout['container_info']:
-        decoded = (b64.b64decode(message['cipher']).decode('UTF-8'))
-        plaintext = CaesarCipher(decoded, offset=message['key']).decoded
-        cipher_list.append(plaintext)
+    # Decode Stored Ciphers and append to a plaintext list
+    decoded = workout['container_info']['cipher_one']['cipher']
+    plaintext = CaesarCipher(decoded, offset=workout['container_info']['cipher_one']['key']).decoded
+    cipher_list.append(plaintext)
 
-    # Possibly Restrict Students from POSTING without all 3 field filled
+    decoded2 = workout['container_info']['cipher_two']['cipher']
+    plaintext2 = CaesarCipher(decoded2, offset=workout['container_info']['cipher_two']['key']).decoded
+    cipher_list.append(plaintext2)
+
+    decoded3 = workout['container_info']['cipher_three']['cipher']
+    plaintext3 = CaesarCipher(decoded3, offset=workout['container_info']['cipher_three']['key']).decoded
+    cipher_list.append(plaintext3)
+
+    # Check if submission exists within cipher_list and update status if correct
     if check == 1 and submission in cipher_list:
-        status['cipher1']['status'] = True
-    if check == 2 and submission in cipher_list:
-        status['cipher2']['status'] = True
-    if check == 3 and submission in cipher_list:
-        status['cipher3']['status'] = True
-    # Update Datastore:
-    ds_client.put(status)
+        data['cipher1']['status'] = True
+        workout['container_info']['cipher_one']['status'] = data['cipher1']['status']
+    elif check == 2 and submission in cipher_list:
+        data['cipher2']['status'] = True
+        workout['container_info']['cipher_two']['status'] = data['cipher2']['status']
+    elif check == 3 and submission in cipher_list:
+        data['cipher3']['status'] = True
+        workout['container_info']['cipher_three']['status'] = data['cipher3']['status']
 
-    if status['cipher1']['status'] and status['cipher2']['status'] and status['cipher3']['status']:
+    # Update Datastore
+    ds_client.put(workout)
+
+    if data['cipher1']['status'] and data['cipher2']['status'] and data['cipher3']['status']:
         print('[+] All ciphers are correct!')
         publish_status(workout_id)
- 
-    return status
 
+    return data

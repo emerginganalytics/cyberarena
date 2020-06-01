@@ -8,6 +8,7 @@ import binascii
 import base64 as b64
 import hashlib
 import io
+import json
 import os
 
 
@@ -34,9 +35,9 @@ def caesar(workout_id):
             if workout['container_info']['cipher_one']['cipher'] == '':
                 set_ciphers(workout_id)
             else:
-                firstcipher = b64.b64decode(workout['container_info']['cipher_one']['cipher']).decode('UTF-8')
-                secondcipher = b64.b64decode(workout['container_info']['cipher_two']['cipher']).decode('UTF-8')
-                thirdcipher = b64.b64decode(workout['container_info']['cipher_three']['cipher']).decode('UTF-8')
+                firstcipher = workout['container_info']['cipher_one']['cipher']
+                secondcipher = workout['container_info']['cipher_two']['cipher']
+                thirdcipher = workout['container_info']['cipher_three']['cipher']
 
                 if request.method == 'GET':
                     return render_template(
@@ -49,9 +50,16 @@ def caesar(workout_id):
                 elif request.method == 'POST':
                     plaintext = request.get_json()
 
-                    status = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
-                    print('Results of check: {}'.format(status))
-                    return jsonify(status)
+                    data = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
+
+                    return jsonify({
+                        'message1': data['cipher1']['cipher'],
+                        'status1':  data['cipher1']['status'],
+                        'message2': data['cipher2']['cipher'],
+                        'status2':  data['cipher2']['status'],
+                        'message3': data['cipher3']['cipher'],
+                        'status3':  data['cipher3']['status'],
+                    })
         else:
             return redirect('/invalid')
 
@@ -196,7 +204,7 @@ def login(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    # Only valid workouts should access page
+    # Check if valid workout and valid workout type
     if not workout:
         return redirect('/invalid')
     else:
