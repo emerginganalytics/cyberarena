@@ -18,9 +18,6 @@ def home(workout_id):
     return render_template(page_template, workout_id=workout_id)
 
 
-# TODO: Need to reformat to ajax requests vs normal HTTP POST
-# TODO: Restrict students from submitting decrypted messages
-#       without filling all fields!!
 @app.route('/caesar/<workout_id>', methods=['GET', 'POST'])
 def caesar(workout_id):
     page_template = 'pages/cipher.jinja'

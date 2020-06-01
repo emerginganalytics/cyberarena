@@ -13,7 +13,7 @@ project = 'ualr-cybersecurity'
 
 # TODO: Update script to work with Cloud Run Environment
 def publish_status(workout_id):
-    token = "RG987S1GVNKYRYHYA"
+    token = "<TOKEN>"
     URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 
     status = {
@@ -147,26 +147,20 @@ def check_caesar(workout_id, submission, check):
         'cipher2': workout['container_info']['cipher_two'],
         'cipher3': workout['container_info']['cipher_three'],
     }
-    '''
-    # Decode cipher string for processing later
-    data['cipher1']['cipher'] = b64.b64decode(data['cipher1']['cipher']).decode('UTF-8')
-    data['cipher2']['cipher'] = b64.b64decode(data['cipher2']['cipher']).decode('UTF-8')
-    data['cipher3']['cipher'] = b64.b64decode(data['cipher3']['cipher']).decode('UTF-8')
-    '''
     # Cipher list is what we compare submissions to
     cipher_list = []
 
-    # Decode Stored Ciphers and append to a plaintext list
-    decoded = workout['container_info']['cipher_one']['cipher']
-    plaintext = CaesarCipher(decoded, offset=workout['container_info']['cipher_one']['key']).decoded
+    # Decrypt and append stored ciphers to a plaintext list
+    ciphertext = workout['container_info']['cipher_one']['cipher']
+    plaintext = CaesarCipher(ciphertext, offset=workout['container_info']['cipher_one']['key']).decoded
     cipher_list.append(plaintext)
 
-    decoded2 = workout['container_info']['cipher_two']['cipher']
-    plaintext2 = CaesarCipher(decoded2, offset=workout['container_info']['cipher_two']['key']).decoded
+    ciphertext2 = workout['container_info']['cipher_two']['cipher']
+    plaintext2 = CaesarCipher(ciphertext2, offset=workout['container_info']['cipher_two']['key']).decoded
     cipher_list.append(plaintext2)
 
-    decoded3 = workout['container_info']['cipher_three']['cipher']
-    plaintext3 = CaesarCipher(decoded3, offset=workout['container_info']['cipher_three']['key']).decoded
+    ciphertext3 = workout['container_info']['cipher_three']['cipher']
+    plaintext3 = CaesarCipher(ciphertext3, offset=workout['container_info']['cipher_three']['key']).decoded
     cipher_list.append(plaintext3)
 
     # Check if submission exists within cipher_list and update status if correct
