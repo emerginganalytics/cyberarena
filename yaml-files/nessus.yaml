@@ -2,7 +2,9 @@ version: '1'
 
 workout:
   name: Nessus
-  workout_description: 'This is workout on a Windows Server that includes Nessus. In order to access Nessus go to a web broswer and go to 10.1.1.27:8834. The username is Cybergym and the password is Let's Workout.'
+  workout_description: 'This workout teaches the basics of scanning to students.'
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/NessusWorkoutStudentInstructions.pdf"
+  instructor_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/NessusTeacherWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -78,3 +80,21 @@ firewall_rules:
     protocol: none
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
+
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of your scan result"
+    - type: input
+      question: "What version of Windows is used on the scanned system?"
+      answer: "Window Server 2019 Datacenter"
+    - type: input
+      question: "What KB patch on the Remediations tab is recommended to install?"
+      answer: "KB4551853"
+    - type: input
+      question: "What is the date and year for the critical vulnerability for the Microsoft .NET Framework?"
+      answer: "January 2020"
+    - type: input
+      question: "What version of Adobe Flash Player is recommended to upgrade to?"
+      answer: "23.0.0.330"
