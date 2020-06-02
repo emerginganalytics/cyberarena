@@ -85,7 +85,7 @@ def landing_page(workout_id):
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete)
+                               complete=complete, workout_type=workout['type'])
     else:
         return render_template('no_workout.html')
 
