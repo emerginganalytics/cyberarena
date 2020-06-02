@@ -4,7 +4,7 @@ workout:
   name: "Johnny Hash"
   build_type: "container"
   workout_description: 'Crack a Password'
-  teacher_instructions_url: ""
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/JohnnyHashTeacherWorkoutInstructions.pdf"
   student_instructions_url: ""
   workout_url_path: 'https://cybergym-johnnyhash-v7k2apwaqa-uc.a.run.app/md5_page'
   project_name: ualr-cybersecurity
