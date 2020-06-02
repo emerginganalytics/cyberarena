@@ -59,6 +59,8 @@ def caesar(workout_id):
                     })
         else:
             return redirect('/invalid')
+    else:
+        return redirect('/invalid')
 
 
 @app.route('/ajax_calculate_caesar/<workout_id>', methods=['POST'])
