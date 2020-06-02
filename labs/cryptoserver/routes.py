@@ -28,7 +28,7 @@ def loader(workout_id):
                 set_ciphers(workout_id)
             return redirect('/caesar/' + workout_id)
         elif workout['type'] == 'johnnyhash':
-            if workout['container_info']['correct_pass'] == '':
+            if workout['container_info']['correct_password'] == '':
                 gen_pass(workout_id)
             return redirect('/md5_page/' + workout_id)
     else:
