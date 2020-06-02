@@ -5,10 +5,8 @@ from server_scripts import publish_status, gen_pass, ds_client, set_ciphers, che
 from werkzeug.utils import secure_filename
 
 import binascii
-import base64 as b64
 import hashlib
 import io
-import json
 import os
 
 
@@ -16,6 +14,25 @@ import os
 def home(workout_id):
     page_template = 'pages/home.jinja'
     return render_template(page_template, workout_id=workout_id)
+
+
+# Temporary fix to Flask view errors ...
+@app.route('/loader/<workout_id>')
+def loader(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout:
+        if workout['type'] == 'johnnycipher':
+            if workout['container_info']['cipher_one']['cipher'] == '':
+                set_ciphers(workout_id)
+            return redirect('/caesar/' + workout_id)
+        elif workout['type'] == 'johnnyhash':
+            if workout['container_info']['correct_pass'] == '':
+                gen_pass(workout_id)
+            return redirect('/md5_page/' + workout_id)
+    else:
+        return redirect('/invalid')
 
 
 @app.route('/caesar/<workout_id>', methods=['GET', 'POST'])
@@ -28,35 +45,30 @@ def caesar(workout_id):
     # Only valid workouts can access
     if workout:
         if workout['type'] == 'johnnycipher':
-            # If one cipher is empty, assume the rest are empty and generate new cipher list
-            if workout['container_info']['cipher_one']['cipher'] == '':
-                set_ciphers(workout_id)
-            else:
-                firstcipher = workout['container_info']['cipher_one']['cipher']
-                secondcipher = workout['container_info']['cipher_two']['cipher']
-                thirdcipher = workout['container_info']['cipher_three']['cipher']
+            firstcipher = workout['container_info']['cipher_one']['cipher']
+            secondcipher = workout['container_info']['cipher_two']['cipher']
+            thirdcipher = workout['container_info']['cipher_three']['cipher']
 
-                if request.method == 'GET':
-                    return render_template(
-                        page_template,
-                        workout_id=workout_id,
-                        firstcipher=firstcipher,
-                        secondcipher=secondcipher,
-                        thirdcipher=thirdcipher,
-                    )
-                elif request.method == 'POST':
-                    plaintext = request.get_json()
+            if request.method == 'GET':
+                return render_template(
+                    page_template,
+                    workout_id=workout_id,
+                    firstcipher=firstcipher,
+                    secondcipher=secondcipher,
+                    thirdcipher=thirdcipher,
+                )
+            elif request.method == 'POST':
+                plaintext = request.get_json()
+                data = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
 
-                    data = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
-
-                    return jsonify({
-                        'message1': data['cipher1']['cipher'],
-                        'status1':  data['cipher1']['status'],
-                        'message2': data['cipher2']['cipher'],
-                        'status2':  data['cipher2']['status'],
-                        'message3': data['cipher3']['cipher'],
-                        'status3':  data['cipher3']['status'],
-                    })
+                return jsonify({
+                    'message1': data['cipher1']['cipher'],
+                    'status1':  data['cipher1']['status'],
+                    'message2': data['cipher2']['cipher'],
+                    'status2':  data['cipher2']['status'],
+                    'message3': data['cipher3']['cipher'],
+                    'status3':  data['cipher3']['status'],
+                })
         else:
             return redirect('/invalid')
     else:
@@ -120,56 +132,52 @@ def md5_page(workout_id):
     if workout:
         # Valid workout_id and type:
         if workout['type'] == 'johnnyhash':
-            # If first time visiting the page, generate password/hash
-            if workout['container_info']['correct_password'] == '':
-                gen_pass(workout_id)
-            else:
-                if request.method == 'GET':
+            if request.method == 'GET':
+                return render_template(
+                    page_template,
+                    pass_hash=workout['container_info']['correct_password_hash'],
+                    workout_id=workout_id
+                )
+            elif request.method == 'POST':
+                if 'password_file' not in request.files:
+                    # User did not submit a file.  Show error and let them upload again
                     return render_template(
                         page_template,
-                        pass_hash=workout['container_info']['correct_password_hash'],
-                        workout_id=workout_id
+                        upload_error="You must choose a file to upload",
+                        workout_id=workout_id,
+                        pass_hash=workout['container_info']['correct_password_hash']
                     )
-                elif request.method == 'POST':
-                    if 'password_file' not in request.files:
-                        # User did not submit a file.  Show error and let them upload again
+                else:
+                    # Check to be sure that the user has submitted a file.
+                    input_file = request.files['password_file']
+
+                    if input_file.filename == '':
+                        # User has submitted a blank file.  Show error and let them upload again.
                         return render_template(
                             page_template,
                             upload_error="You must choose a file to upload",
-                            workout_id=workout_id,
-                            pass_hash=workout['container_info']['correct_password_hash']
-                        )
-                    else:
-                        # Check to be sure that the user has submitted a file.
-                        input_file = request.files['password_file']
-
-                        if input_file.filename == '':
-                            # User has submitted a blank file.  Show error and let them upload again.
-                            return render_template(
-                                page_template,
-                                upload_error="You must choose a file to upload",
-                                pass_hash=workout['container_info']['correct_password_hash'],
-                                workout_id=workout_id,
-                            )
-
-                        # At this point, we have a csv file to process
-                        raw_input = io.StringIO(input_file.stream.read().decode("UTF8"), newline=None)
-
-                        passwords = raw_input.read().split('\n')
-                        hashes = []
-
-                        for password in passwords:
-                            hashes.append({
-                                'plaintext': password,
-                                'hash': hashlib.md5(password.encode('utf-8')).hexdigest()
-                            })
-
-                        return render_template(
-                            page_template,
-                            hashed_passwords=hashes,
                             pass_hash=workout['container_info']['correct_password_hash'],
                             workout_id=workout_id,
                         )
+
+                    # At this point, we have a csv file to process
+                    raw_input = io.StringIO(input_file.stream.read().decode("UTF8"), newline=None)
+
+                    passwords = raw_input.read().split('\n')
+                    hashes = []
+
+                    for password in passwords:
+                        hashes.append({
+                            'plaintext': password,
+                            'hash': hashlib.md5(password.encode('utf-8')).hexdigest()
+                        })
+
+                    return render_template(
+                        page_template,
+                        hashed_passwords=hashes,
+                        pass_hash=workout['container_info']['correct_password_hash'],
+                        workout_id=workout_id,
+                    )
         else:  # Valid workout_id, but not correct workout type
             return redirect('/invalid')
     else:  # Workout ID doesn't exist ...
