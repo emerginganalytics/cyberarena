@@ -210,10 +210,27 @@ def reset_all():
         return redirect("/workout_list/%s" % (unit_id))
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
+# Request data in form {'workout_id': workout_id, 'token': token,}
 @app.route('/complete', methods=['POST'])
 def complete_verification():
     if (request.method == 'POST'):
         workout_request = request.get_json(force=True)
+
+        workout_id = workout_request['workout_id']
+        token = workout_request['token']
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+
+        token_exists = next(item for item in workout['assessment']['questions'] if item['key'] == token)
+        token_pos = next((i for i, item in enumerate(workout['assessment']['questions']) if item['key'] == token), None)
+        if token_exists:
+            logger.info("Completion token matches. Setting the workout question %d to complete." % token_pos)
+            workout['assessment']['questions'][token_pos]['complete'] = True
+            ds_client.put(workout)
+            logger.info('%s workout question %d marked complete.' % (workout_id, token_pos+1))
+            return 'OK', 200
+        else:
+            logger.info("In complete_verification: Completion key %s does NOT exist in assessment dict! Aborting" % token)
+    '''
         if (workout_request["token"] == workout_token):
             logger.info("Completion token matches. Setting the workout to complete.")
             workout_id = workout_request["workout_id"]
@@ -224,6 +241,7 @@ def complete_verification():
             return 'OK', 200
         else:
             logger.info("In complete_verification: Completion token does NOT match! Aborting")
+    '''
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
