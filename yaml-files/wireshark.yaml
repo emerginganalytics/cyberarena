@@ -4,7 +4,7 @@ workout:
   name: wireshark
   workout_description: 'Learn how to analyze network packets and understand the inherent insecurity of many
  network protocols'
-  teacher_instructions_url:
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/ReconWithWiresharkWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ReconWithWiresharkWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -74,3 +74,12 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of the captured password from Wireshark"
+    - type: input
+      question: "What is the password to the admin user?"
+      answer: "cyberSecret42"
