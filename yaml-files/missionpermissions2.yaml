@@ -82,4 +82,4 @@ assessment:
       script: "MissionPermissions2.py"
       server: missionpermissions2-ubuntu18
       operating-system: linux
-      complete: False 
+      complete: False
