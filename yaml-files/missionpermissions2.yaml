@@ -72,3 +72,14 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "nA824wazosyssPb1"
+      question: "Final task for Mission: Permissions 2"
+      script: "MissionPermissions2.py"
+      server: missionpermissions2-ubuntu18
+      operating-system: linux
+      complete: False 

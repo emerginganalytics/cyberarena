@@ -78,3 +78,14 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "ZyjHZdInbnp1iES3"
+      question: "Final task for Mission: Permissions"
+      script: "MissionPermissions.ps1"
+      server: missionpermissions2-windows16
+      operating-system: windows
+      complete: False
