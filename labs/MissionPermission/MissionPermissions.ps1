@@ -2,8 +2,10 @@
     Powershell Script to check Mission: Permission Status
 #>
 
+
 $Target_Folder = 'C:\Users\workout\Desktop\Protect_Me'
 $Users = (Get-Acl -Path $Target_Folder).Access.IdentityReference
+$Permissions = (Get-Acl -Path $Target_Folder).Access.FileSystemRights
 $Count = 0
 
 Foreach ($User in $Users){
@@ -23,9 +25,15 @@ Foreach ($User in $Users){
     } 
 }
 
+
+$request_body = @{
+    "workout_id"= $Env:WORKOUTID
+    "token"= $Env:WORKOUTKEY_1
+} | ConvertTo-Json
+
+
 If ($Count -eq 4) {
     Write-Host "[+] Workout Complete!"
     Write-Host "[*] Posting Results ..."
-    python C:\Data\Pub\cg-publish.py missionpermissions
-    
-   }
+    Invoke-WebRequest -UseBasicParsing https://buildthewarrior.cybergym-eac-ualr.org/complete -ContentType "application/json" -Method POST -Body $request_body
+}
