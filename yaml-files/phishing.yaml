@@ -58,3 +58,14 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.0.0/16"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "hxHXan1FFTKaXRkZ"
+      question: "Final Task for Phishing workout"
+      script:
+      server: cybergym-phishing
+      operating-system: linux
+      complete: False
