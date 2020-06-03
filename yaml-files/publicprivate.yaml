@@ -28,18 +28,18 @@ servers:
     guac_path: "NgBjAG15c3Fs"
     nics:
       - network: external-network
-        internal_IP: 10.1.1.10
+        internal_IP: 10.1.1.18
         subnet: default
         external_NAT: true
   - name: cybergym-publicprivate
-    image: image-promise-win2016-publicprivate
+    image: image-promise-win-2016
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["allow-rdp"]}
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.20
+        internal_IP: 10.1.1.11
         subnet: default
         external_NAT: true
 
@@ -66,6 +66,12 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
   - name: allow-https
     network: external-network
     target_tags: ["https-server"]
