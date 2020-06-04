@@ -82,8 +82,10 @@ firewall_rules:
   source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
   
   
-  assessment:
-  type: level
-  questions:
-    - type: auto
+  - type: auto
+      key: "1TccG1J"
+      question: "This will automatically be marked complete when you have completed the mission"
+      script: "cyberattack-1"
+      server: cybergym-ransomware
+      operating-system: windows
       complete: False
