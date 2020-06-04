@@ -13,18 +13,25 @@ container_info:
   cipher_one:
     cipher: ''
     key: ''
-    status: False
   cipher_two:
     cipher: ''
-    key: ''
-    status: False
+    key: ''  
   cipher_three:
     cipher: ''
     key: ''
-    status: False
 
 assessment:
   type: "level"
   questions:
     - type: auto
-    - complete: False
+      key: "4z8I9cIx0nKLuE9T"
+      question: "Ciphertext 1"
+      complete: False
+    - type: auto
+      key: "AzSnaExBpmk2b5zz"
+      question: "Ciphertext 2"
+      complete: False
+    - type: auto
+      key: "g2ezV2exgJmpTRtx"
+      question: "Ciphertext 3"
+      complete: False

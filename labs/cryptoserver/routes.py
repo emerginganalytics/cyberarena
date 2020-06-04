@@ -1,8 +1,7 @@
 from app import app
 from caesarcipher import CaesarCipher
-from flask import redirect, request, render_template, abort, jsonify, make_response
+from flask import redirect, request, render_template, jsonify, make_response
 from server_scripts import publish_status, gen_pass, ds_client, set_ciphers, check_caesar
-from werkzeug.utils import secure_filename
 
 import binascii
 import hashlib
@@ -16,7 +15,7 @@ def home(workout_id):
     return render_template(page_template, workout_id=workout_id)
 
 
-# Temporary fix to Flask view errors ...
+# Generates values based on workout
 @app.route('/loader/<workout_id>')
 def loader(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
@@ -59,6 +58,7 @@ def caesar(workout_id):
                 )
             elif request.method == 'POST':
                 plaintext = request.get_json()
+                # ['id'] helps determine which cipher is to be evaluated
                 data = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
 
                 return jsonify({
@@ -122,7 +122,6 @@ def ajax_calculate_salted_hash(workout_id):
 
 @app.route('/md5_page/<workout_id>', methods=['GET', 'POST'])
 def md5_page(workout_id):
-    # TODO: Build page similar to CG-Landing. Pass : Hash will be stored in datastore.
     page_template = 'pages/md5_page.jinja'
 
     key = ds_client.key('cybergym-workout', workout_id)
@@ -186,7 +185,7 @@ def md5_page(workout_id):
 
 @app.route('/hidden/<workout_id>')
 def hidden(workout_id):
-    # This application sets a cookie with the key "logged_in" to true when a user has authenticated
+    # This portion sets a cookie with the key "logged_in" to true when a user has authenticated
     # They must be authenticated before viewing this page
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
@@ -236,7 +235,9 @@ def login(workout_id):
                     # These are the correct credentials, so the cookie for "logged_in" is set to true
                     resp = make_response(redirect('/hidden/{}'.format(workout_id)))
                     resp.set_cookie('logged_in', 'true')
-                    publish_status(workout_id)
+
+                    workout_token = workout['assessment']['questions'][0]['key']
+                    publish_status(workout_id, workout_token)
 
                     return resp
                 else:
