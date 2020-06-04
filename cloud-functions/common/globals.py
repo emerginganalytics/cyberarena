@@ -20,14 +20,14 @@ class workout_globals():
     MAX_RUN_HOURS = 10
     yaml_bucket = project + '_cloudbuild'
     yaml_folder = 'yaml-build-files/'
-    windows_startup_script_env = 'setx WORKOUTID {env_workoutid}\n'
-    windows_startup_script_task = 'setx WORKOUTKEY_{q_number} {env_workoutkey}\n' \
+    windows_startup_script_env = 'set WORKOUTID={env_workoutid}\n'
+    windows_startup_script_task = 'set WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
                                   'schtasks /Create /SC MINUTE /TN {script_name} /TR {script_path}'
-    linux_startup_script_env = 'export WORKOUTID={env_workoutid}\n'
-    linux_startup_script_task = 'export WORKOUTKEY={q_number} {env_workoutkey}\n' \
-                                  'gsutil cp ' + script_repository + '{script} /usr/bin/\n' \
-                                  'schtasks /Create /SC MINUTE /TN {script_name} /TR {script_path}'
+    linux_startup_script_env = '#! /bin/bash\nexport WORKOUTID={env_workoutid}\n(crontab -l 2>/dev/null; echo "*/5 * * * * /usr/bin/{script}") | crontab -'
+    linux_startup_script_task = 'export WORKOUTKEY{q_number}={env_workoutkey}\n' \
+                                  'gsutil cp ' + script_repository + '{script} /usr/bin\n' \
+                                  '(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/{script}") | crontab -'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):

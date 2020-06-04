@@ -36,6 +36,21 @@ def get_startup_scripts(workout_id, assessment):
                                                                                    script_name='Assess' + str(i),
                                                                                    script=script,
                                                                                    script_path=script)
-                startup_scripts[question['server']]['value'] += assess_script
+
+            else:
+                if question['server'] not in startup_scripts:
+                    script = workout_globals.linux_startup_script_env.format(env_workoutid=workout_id)
+                    startup_scripts[question['server']] = {
+                            'key': 'startup-script',
+                            'value': script
+                        }
+                if 'script_language' in question and question['script_language'] == 'python':
+                    script = 'python {script}'.format(script=question['script'])
+                else:
+                    script = question['script']
+                assess_script = workout_globals.linux_startup_script_task.format(env_workoutkey=question['key'],
+                                                                                   q_number=i,
+                                                                                   script=script)
+            startup_scripts[question['server']]['value'] += assess_script
             i += 1
         return startup_scripts
