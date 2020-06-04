@@ -17,4 +17,9 @@ assessment:
   type: level
   questions:
     - type: auto
+      key: "IAOWMRYnJYIRD71r"
+      question: "Correct Password Found!"
+      script:
+      server:
+      operating-system:
       complete: False
