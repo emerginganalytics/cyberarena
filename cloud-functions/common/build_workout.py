@@ -228,5 +228,3 @@ def build_workout(workout_id):
 
     workout['complete'] = True
     ds_client.put(workout)
-
-build_workout('botiarhlpu')
