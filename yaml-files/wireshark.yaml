@@ -36,7 +36,7 @@ servers:
     image: image-cybergym-wireshark
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["http-server","https-server", "guac-server", "vnc-server"]}
+    tags: {items: ["http-server","https-server", "guac-server", "vnc-server","allow-ftp"]}
     metadata: none
     nics:
       - network: external-network
@@ -47,7 +47,7 @@ servers:
     image: image-cybergym-classified
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["http-server", "attacker", "listener", "guac-server", "vnc-server"]}
+    tags: {items: ["http-server", "attacker", "listener", "guac-server", "vnc-server", "allow-ftp"]}
     metadata: none
     nics:
       - network: external-network
