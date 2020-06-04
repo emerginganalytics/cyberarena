@@ -36,6 +36,9 @@ def add_yaml_defaults(yaml_contents):
     if 'container_info' not in yaml_contents:
         yaml_contents['container_info'] = None
 
+    if 'assessment' not in yaml_contents:
+        yaml_contents['assessment'] = None
+
     if yaml_contents['workout']['build_type'] == 'compute':
         if 'routes' not in yaml_contents:
             yaml_contents['routes'] = None
@@ -98,23 +101,26 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
 
     if build_type == 'container':
         container_info = y['container_info']
+        assessment = y['assessment']
         for i in range(1, num_team + 1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
             store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
                                     student_instructions_url=student_instructions_url,
-                                    container_info=container_info)
+                                    container_info=container_info, assessment=assessment)
     elif build_type == 'compute':
         networks = y['networks']
         servers = y['servers']
         routes = y['routes']
         firewall_rules = y['firewall_rules']
+        assessment = y['assessment']
         for i in range(1, num_team+1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
             store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
                                workout_duration=workout_length, workout_type=workout_type,
-                               networks=networks, servers=servers, routes=routes, firewall_rules=firewall_rules)
+                               networks=networks, servers=servers, routes=routes,
+                               firewall_rules=firewall_rules, assessment=assessment)
 
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     unit['workouts'] = workout_ids
@@ -124,7 +130,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     return unit_id, build_type
 
 
-def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info):
+def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -135,14 +141,15 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
         'student_instructions_url': student_instructions_url,
         'timestamp': ts,
         'complete': False,
-        'container_info': container_info
+        'container_info': container_info,
+        'assessment': assessment
     })
 
     ds_client.put(new_workout)
 
 
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks,
-                       servers, routes, firewall_rules):
+                       servers, routes, firewall_rules, assessment):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -161,6 +168,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'servers': servers,
         'routes': routes,
         'firewall_rules': firewall_rules,
+        'assessment': assessment,
         'complete': False
     })
 
