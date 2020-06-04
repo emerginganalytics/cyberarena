@@ -24,6 +24,10 @@ class workout_globals():
     windows_startup_script_task = 'setx WORKOUTKEY_{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
                                   'schtasks /Create /SC MINUTE /TN {script_name} /TR {script_path}'
+    linux_startup_script_env = 'export WORKOUTID={env_workoutid}\n'
+    linux_startup_script_task = 'export WORKOUTKEY={q_number} {env_workoutkey}\n' \
+                                  'gsutil cp ' + script_repository + '{script} /usr/bin/\n' \
+                                  'schtasks /Create /SC MINUTE /TN {script_name} /TR {script_path}'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):
