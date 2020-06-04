@@ -11,7 +11,7 @@ dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 region = 'us-central1'
 zone = 'us-central1-a'
-#post_endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
+script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 
 # Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/complete'
@@ -20,6 +20,10 @@ class workout_globals():
     MAX_RUN_HOURS = 10
     yaml_bucket = project + '_cloudbuild'
     yaml_folder = 'yaml-build-files/'
+    windows_startup_script_env = 'setx WORKOUTID {env_workoutid}\n'
+    windows_startup_script_task = 'setx WORKOUTKEY_{q_number} {env_workoutkey}\n' \
+                                  'call gsutil cp ' + script_repository + '{script} .\n' \
+                                  'schtasks /Create /SC MINUTE /TN {script_name} /TR {script_path}'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):

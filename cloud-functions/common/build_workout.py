@@ -1,11 +1,11 @@
 import time
-import calendar
 import random
 import string
 
 from common.globals import ds_client, project, compute, region, zone, dnszone
 from common.dns_functions import add_dns_record, register_workout_server
 from common.stop_workout import stop_workout
+from common.assessment_functions import get_startup_scripts
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
@@ -53,8 +53,8 @@ def create_route(project, zone, route):
     compute.routes().insert(project=project, body=route_body).execute()
 
 
-def create_instance_custom_image(compute, project, zone, dnszone, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, sshkey=None, guac_path=None):
+def create_instance_custom_image(compute, workout, name, custom_image, machine_type,
+                                 networkRouting, networks, tags, meta_data, sshkey=None, guac_path=None):
 
     image_response = compute.images().get(project=project, image=custom_image).execute()
     source_disk_image = image_response['selfLink']
@@ -106,11 +106,13 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
         }],
     }
 
+    if meta_data:
+        config['metadata'] = {'items': meta_data}
     if sshkey:
-        config['metadata']['items'].append({
-                    "key": "ssh-keys",
-                    "value": sshkey
-                })
+        if 'items' in meta_data:
+            config['metadata']['items'].append({"key": "ssh-keys", "value": sshkey})
+        else:
+            config['metadata'] = {'items': {"key": "ssh-keys", "value": sshkey}}
 
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
@@ -145,8 +147,15 @@ def create_instance_custom_image(compute, project, zone, dnszone, workout, name,
 
 
 def build_workout(workout_id):
+    """
+    Builds a workout compute environment according to the specification referenced in the datastore with key workout_id
+    :param workout_id: The workout_id key in the datastore holding the build specification
+    :return: None
+    """
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
+    # Parse the assessment specification to obtain any startup scripts for the workout.
+    startup_scripts = get_startup_scripts(workout_id=workout_id, assessment=workout['assessment'])
     # Create the networks and subnets
     print('Creating networks')
     for network in workout['networks']:
@@ -184,9 +193,15 @@ def build_workout(workout_id):
                 "external_NAT": n['external_NAT']
             }
             nics.append(nic)
+        # Add the startup script for assessment as metadata if it exists
+        meta_data = None
+        if server['name'] in startup_scripts:
+            meta_data = startup_scripts[server['name']]
 
-        create_instance_custom_image(compute, project, zone, dnszone, workout_id, server_name, server['image'],
-                                     machine_type, network_routing, nics, tags, sshkey, guac_path)
+        create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
+                                     custom_image=server['image'], machine_type=machine_type,
+                                     networkRouting=network_routing, networks=nics, tags=tags,
+                                     meta_data=meta_data, sshkey=sshkey, guac_path=guac_path)
 
     # Create all of the network routes and firewall rules
     print('Creating network routes and firewall rules')
@@ -213,3 +228,5 @@ def build_workout(workout_id):
 
     workout['complete'] = True
     ds_client.put(workout)
+
+build_workout('botiarhlpu')
