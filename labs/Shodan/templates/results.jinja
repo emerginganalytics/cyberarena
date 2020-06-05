@@ -1,0 +1,36 @@
+{% extends "base_template.jinja" %}
+{% block head %}<script src="../static/js/main.js"></script>{% endblock %}
+{% block title%}Cybergym Shodan Exploration{% endblock %}
+
+{% block content %}
+{# {% include "index.jinja" %} #}
+<div class='content_header'>
+
+    <h2 style="text-align:center;">Data for {{ resultInfo["ip_str"]}}</h2>
+</div>
+<div class="container result_overview">
+    <table style="margin:auto;">
+    {% for entry in resultInfo %}
+        <tr>
+            <td>{{ entry }}</td>
+            {% if entry == "data" or entry == "screenshot" %}
+                {# <td><a href="{{ url_for('data', rawData='%s') %resultInfo[entry]|e}}">Click to view raw data</a></td> #}
+                <td>
+                <form action="/data/" method="POST">
+                    <input type="hidden" name="data" value="{{ resultInfo[entry]|e }}" />
+                    <input type="submit" value="Click to view raw data">
+                </form>
+                </td>
+            {% else %} 
+                <td>{{ resultInfo[entry]|e }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </table>
+    {% if resultInfo["screenshot"] %}
+    <img src="data:image/jpeg;base64, {{ resultInfo['screenshot'] }} " />
+    {% endif %}
+
+</div>
+{% endblock %}
+

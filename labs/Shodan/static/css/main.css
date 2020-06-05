@@ -1,0 +1,44 @@
+*{
+    padding:0;
+
+}
+html{
+    width:80%;
+    margin:auto;
+}
+
+.shodan_result_list{
+    margin-top:5%;
+}
+
+.shodan_result{
+    border: 1px solid black;
+    margin: auto;
+    list-style:none;
+}
+
+/* h1{
+    text-align: center;
+} */
+
+#page_heading{
+    text-align:center;
+}
+
+.search_form{
+    margin:auto;
+    text-align:center;
+}
+
+.result_overview{
+    align-content:center;
+}
+
+table{
+    border: 1px solid black;
+}
+
+td{
+    border: 1px solid black;
+    overflow-x: auto;
+}
