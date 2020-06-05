@@ -1,0 +1,47 @@
+{# {% extends "base.html" %}  #}
+{% extends "base_template.jinja" %}
+{% block content %}
+<div class="container">
+
+<div class='workout_info'>
+    <h3>Shodan Info</h3>
+</div>
+
+<div class='search_form container'>
+<form method="POST" action="{{ request.path }}">
+    <input type='text' placeholder='Enter query here' name='shodan_query'>
+    <input type='hidden' value='1' name='page_number'/>
+    <button type='submit'>Search</button>
+</form>
+
+</div>
+
+    <div class='shodan_result_list container'>
+    {% if resultCount %}
+        {% if resultCount["total"] %}
+            <h4>{{ resultCount["total"] }} matches found</h4> 
+        {% endif %}
+        {%for match in shodanResults['matches']%}  
+            <div class='shodan_result container'>
+                <a href="{{ '/results/%s'%match['ip_str'] }}"> {{ match['ip_str']}} </a>
+                <li>{{ match['isp'] }}</li>
+                <li>Port: {{ match['port'] }}</li>
+                <li>Location: 
+                    {% if match['state'] %}
+                        {{ match['state'] }},
+                    {% endif %}
+                    {% if match['location']['city'] %}
+                        {{ match['location']['city'] }},
+                    {% endif %}
+                     {{match['location']['country_name']}}
+                </li>
+                <li>Server: {{ match['server'] }}</li>
+            </div>
+        {%endfor%} 
+        {# <form class='result_navigation_form' action='{{ request.path }}' method="POST">
+        <p>{{ query }}</p>
+        <
+        </form> #}
+    {% endif %}
+    </div> {# shodan_result_list #}
+{% endblock %}
