@@ -56,9 +56,11 @@
             <li class='nav-item'>
                 <a class='nav-link' data-toggle="tab" href='#instructions'>Workout Instructions</a>
             </li>
+            {% if assessment %}
             <li class='nav-item'>
                 <a class='nav-link' data-toggle="tab" href='#assessment'>Assessment</a>
             </li>
+            {% endif %}
         </ul>
         <div class='tab-content col-sm-9'>
             <div id='workout_controls' class='container tab-pane active'>
@@ -124,9 +126,6 @@
                 </div>
 
 
-
-
-
                 </p>
             </div> <!--Controls-->
             <div id="workout_id" hidden>{{ workout_id }}</div>
@@ -165,6 +164,24 @@
                     });
                 </script>
             </div> <!--Workout info container-->
+            <div class='container tab-pane fade' id='assessment'>
+                <form class='workout_assessment_form' action=''>
+                {% if assessment %}
+                    {% for question in assessment%}
+                        <input type="hidden" name="question_number_{{ loop.index }}" />
+                        <br><h3>{{ loop.index }}</h3>
+                        {% if question['type'] == 'input' %}
+                            {{ question['question'] }}<br>
+                            <input type='text' />
+                        {% elif question['type'] == 'upload' %}
+                            {{ question['question'] }}<br>
+                            <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <button type='submit'>Submit</button>
+                </form>
+            </div>
         </div> <!--tab-content-->
         </div>
     </div> <!--Main Container-->

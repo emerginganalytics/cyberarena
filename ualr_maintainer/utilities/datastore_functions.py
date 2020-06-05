@@ -81,6 +81,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     teacher_instructions_url = y['workout']['teacher_instructions_url']
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
+    assessment = y['assessment']
 
 
     # create random number specific to the workout (6 characters by default)
@@ -142,7 +143,7 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
         'timestamp': ts,
         'complete': False,
         'container_info': container_info,
-        'assessment': assessment
+        'assessment': assessment,
     })
 
     ds_client.put(new_workout)
@@ -202,10 +203,12 @@ def get_unit_workouts(unit_id):
     unit_workouts.add_filter("unit_id", "=", unit_id)
     workout_list = []
     for workout in list(unit_workouts.fetch()):
+
         workout_instance = workout = ds_client.get(workout.key)
         workout_info = {
             'name': workout.key.name,
-            'running': workout_instance['running']
+            # 'running': workout_instance['running'],
+            'complete': workout_instance['complete'],
         }
         workout_list.append(workout_info)
 
