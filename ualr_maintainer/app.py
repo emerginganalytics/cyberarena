@@ -81,11 +81,24 @@ def landing_page(workout_id):
         if 'complete' in workout:
             complete = workout['complete']
 
+        assessment = None
+        if 'assessment' in workout:
+            question_list = []
+            assessment_type = workout['assessment']['type']
+            for question in workout['assessment']['questions']:
+                question_dict = {}
+                question_dict['question'] = question['question']
+                if(question['type'] != 'upload'):
+                    question_dict['answer'] = question['answer']
+                question_dict['type'] = question['type']
+                question_list.append(question_dict)
+            assessment = question_list
+
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'])
+                               complete=complete, workout_type=workout['type'], assessment=assessment)
     else:
         return render_template('no_workout.html')
 
