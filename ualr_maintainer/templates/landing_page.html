@@ -165,21 +165,20 @@
                 </script>
             </div> <!--Workout info container-->
             <div class='container tab-pane fade' id='assessment'>
-                <form class='workout_assessment_form' action=''>
-                {% if assessment %}
-                    {% for question in assessment%}
-                        <input type="hidden" name="question_number_{{ loop.index }}" />
-                        <br><h3>{{ loop.index }}</h3>
-                        {% if question['type'] == 'input' %}
-                            {{ question['question'] }}<br>
-                            <input type='text' />
-                        {% elif question['type'] == 'upload' %}
-                            {{ question['question'] }}<br>
-                            <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                <button type='submit'>Submit</button>
+                <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST">
+                    {% if assessment %}
+                        {% for question in assessment%}
+                            {% if question['type'] == 'input' %}
+                                <input type="hidden" name="question" value="{{ question['question'] }}" />
+                                {{ question['question'] }}<br>
+                                <input type='text' name="answer" />
+                            {% elif question['type'] == 'upload' %}
+                                {{ question['question'] }}<br>
+                                <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    <button type='submit'>Submit</button>
                 </form>
             </div>
         </div> <!--tab-content-->
