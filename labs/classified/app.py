@@ -12,7 +12,10 @@ import onetimepass
 import pyqrcode
 import os
 import base64
+
+# application instance
 app = Flask(__name__)
+app.config.from_object('config')
 app.secret_key = os.urandom(12)
 
 
@@ -125,36 +128,38 @@ def xss_s():
     return render_template('xss_s.html')
 
 
-@app.route('/workouts/two-factor-home')
-def index():
-    return render_template('two_factor.html')
+@app.route('/workouts/tfh')
+def twofactorhome():
+    return render_template('welcome.html')
 
-@app.route('/twofactor')
+
+@app.route('/workouts/tfh/twofactor')
 def two_factor_setup():
     if 'username' not in session:
-        return redirect(index)
+        return redirect(twofactorhome)
     user = User.query.filter_by(username=session['username']).first()
     if user is None:
-        return redirect(index)
+        return redirect(twofactorhome)
+    # since this page contains the sensitive qrcode, make sure the browser
+    # does not cache it
     return render_template('two-factor-setup.html'), 200, {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'}
 
 
-
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/workouts/tfh/register', methods=['GET', 'POST'])
 def register():
     """User registration route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(register)
+        return redirect(twofactorhome)
     form = RegisterForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None:
             flash('Username already exists.')
-            return redirect(register)
+            return redirect(twofactorhome)
         # add new user to the database
         user = User(username=form.username.data, password=form.password.data)
         db.session.add(user)
@@ -174,13 +179,13 @@ def qrcode():
     if user is None:
         abort(404)
 
-
+    # for added security, remove username from session
     del session['username']
 
-
+    # render qrcode for FreeTOTP
     url = pyqrcode.create(user.get_totp_uri())
     stream = BytesIO()
-    url.svg(stream, scale=5)
+    url.svg(stream, scale=3)
     return stream.getvalue(), 200, {
         'Content-Type': 'image/svg+xml',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -188,12 +193,12 @@ def qrcode():
         'Expires': '0'}
 
 
-@app.route('/workouts/login', methods=['GET', 'POST'])
+@app.route('/workouts/tfh/login', methods=['GET', 'POST'])
 def login():
     """User login route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(index)
+        return redirect(twofactorhome)
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -205,15 +210,15 @@ def login():
         # log user in
         login_user(user)
         flash('You are now logged in!')
-        return redirect(index)
+        return redirect(twofactorhome)
     return render_template('login.html', form=form)
 
 
-@app.route('/workouts/logout')
+@app.route('/workouts/tfh/logout')
 def logout():
     """User logout route."""
     logout_user()
-    return redirect(index)
+    return redirect(twofactorhome)
 
 
 # create database tables if they don't exist yet
