@@ -1,61 +1,10 @@
-<!DOCTYPE html>
-<html>
-<title>Domain-Object Model(DOM) XSS</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-.w3-sidebar a {font-family: "Roboto", sans-serif}
-body,h1,h2,h3,h4,h5,h6,.w3-wide {font-family: "Montserrat", sans-serif;}
-</style>
-<body class="w3-content" style="max-width:100%">
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-<!-- Sidebar/menu -->
-<nav class="w3-sidebar w3-bar-block w3-white w3-collapse w3-top" style="z-index:-1;width:10%;" id="mySidebar">
-    <div class="w3-padding-64 w3-large w3-text-grey" style="font-weight:bold">
-      <a href="{{url_for('xss_d')}}" class="w3-bar-item w3-button">Captcha </a>
-  </div>
-</nav>
-<!-- !PAGE CONTENT! -->
-<div class="w3-top">
-  <div class="w3-black w3-xlarge" style="max-width:100%;margin:auto;">
-    <div class="w3-center w3-padding-16">UA Little Rock Classified Workouts</div>
-  </div>
-</div>
-<div class="w3-main" style="margin-left:15%;margin-top:5%">
-    <!-- Top header -->
-  <header class="w3-container w3-xlarge">
-    <p class="w3-left">Two Factor Authentication</p>
-  </header>
- 	<div class="container">
-  <form>
-    <div class="row">
-     <div>
-        <input type="text" name="username" placeholder="Username" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <input type="submit" value="Login">
-      </div>
-
-    </div>
-  </form>
-</div>
-  <!-- End page content -->
-</div>
-<script>
-// Open and close sidebar
-function w3_open() {
-  document.getElementById("mySidebar").style.display = "block";
-  document.getElementById("myOverlay").style.display = "block";
-}
-
-function w3_close() {
-  document.getElementById("mySidebar").style.display = "none";
-  document.getElementById("myOverlay").style.display = "none";
-}
-</script>
-
-</body>
-</html>
+{% block page_content %}
+    <h1>Register</h1>
+    <p>Before you submit this form, please ensure you have <a href="https://fedorahosted.org/freeotp/">FreeOTP</a> installed on your smartphone, as you will need it to complete your registration. Download from <a href="https://itunes.apple.com/us/app/freeotp/id872559395">iTunes</a> | <a href="https://play.google.com/store/apps/details?id=org.fedorahosted.freeotp">Google Play</a></p>
+    {{ wtf.quick_form(form) }}
+    <br>
+    <div class="alert alert-danger" role="alert">Note: The next page will show sensitive information. Make sure nobody can see your screen before pressing the Register button.</div>
+{% endblock %}
