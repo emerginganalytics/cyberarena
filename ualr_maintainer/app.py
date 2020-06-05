@@ -88,7 +88,7 @@ def landing_page(workout_id):
             for question in workout['assessment']['questions']:
                 question_dict = {}
                 question_dict['question'] = question['question']
-                if(question['type'] != 'upload'):
+                if(question['type'] == 'input'):
                     question_dict['answer'] = question['answer']
                 question_dict['type'] = question['type']
                 question_list.append(question_dict)
@@ -98,11 +98,9 @@ def landing_page(workout_id):
             valid_answers = []
 
             for i in range(len(assessment)):
-                if(assessment[i].get('type') != 'upload'):
+                if(assessment[i].get('type') == 'upload'):
                     valid_answers.append(assessment[i].get('answer'))
-            # print(valid_answers)
             assessment_answers = request.form.getlist('answer')
-            # print(assessment_answers)
             assessment_questions = request.form.getlist('question')
 
             for i in range(len(assessment_answers)):
@@ -114,11 +112,9 @@ def landing_page(workout_id):
                 valid_answers.append(assessment[i].get('answer'))
                 user_answer = str(user_input['answer'])
                 true_answer = str(assessment[i].get('answer'))
-                print(valid_answers[i], user_answer)
                 if(user_answer.lower() == valid_answers[i].lower()):
                     print('Correct answer submitted')
 
-            # print(assessment_request)
             return str(assessment_answers)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
