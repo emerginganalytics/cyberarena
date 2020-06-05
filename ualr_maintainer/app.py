@@ -94,6 +94,32 @@ def landing_page(workout_id):
                 question_list.append(question_dict)
             assessment = question_list
 
+        if(request.method == "POST"):
+            valid_answers = []
+
+            for i in range(len(assessment)):
+                if(assessment[i].get('type') != 'upload'):
+                    valid_answers.append(assessment[i].get('answer'))
+            # print(valid_answers)
+            assessment_answers = request.form.getlist('answer')
+            # print(assessment_answers)
+            assessment_questions = request.form.getlist('question')
+
+            for i in range(len(assessment_answers)):
+                user_input = {
+                    "question":assessment_questions[i],
+                    "answer":assessment_answers[i]
+                }
+
+                valid_answers.append(assessment[i].get('answer'))
+                user_answer = str(user_input['answer'])
+                true_answer = str(assessment[i].get('answer'))
+                print(valid_answers[i], user_answer)
+                if(user_answer.lower() == valid_answers[i].lower()):
+                    print('Correct answer submitted')
+
+            # print(assessment_request)
+            return str(assessment_answers)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
