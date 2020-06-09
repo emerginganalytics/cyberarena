@@ -84,7 +84,8 @@ def landing_page(workout_id):
         assessment = None
         if 'assessment' in workout:
             question_list = []
-            assessment_type = workout['assessment']['type']
+            if workout['assessment']['type']:
+                assessment_type = workout['assessment']['type']
             for question in workout['assessment']['questions']:
                 question_dict = {}
                 question_dict['question'] = question['question']
@@ -96,9 +97,9 @@ def landing_page(workout_id):
 
         if(request.method == "POST"):
             valid_answers = []
-
+            num_correct = 0
             for i in range(len(assessment)):
-                if(assessment[i].get('type') == 'upload'):
+                if(assessment[i].get('type') != 'upload'):
                     valid_answers.append(assessment[i].get('answer'))
             assessment_answers = request.form.getlist('answer')
             assessment_questions = request.form.getlist('question')
@@ -112,10 +113,16 @@ def landing_page(workout_id):
                 valid_answers.append(assessment[i].get('answer'))
                 user_answer = str(user_input['answer'])
                 true_answer = str(assessment[i].get('answer'))
-                if(user_answer.lower() == valid_answers[i].lower()):
-                    print('Correct answer submitted')
 
-            return str(assessment_answers)
+                if(user_answer.lower() == valid_answers[i].lower()):
+                    num_correct += 1
+                
+            percentage_correct = num_correct / len(assessment_questions) * 100
+
+            return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
+                               guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
+                               shutoff=shutoff, workout_id=workout_id, running=workout['running'],
+                               complete=complete, workout_type=workout['type'], assessment=assessment, score=percentage_correct)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
