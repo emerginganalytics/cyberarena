@@ -28,16 +28,17 @@ def get_startup_scripts(workout_id, assessment):
                             'value': script
                         }
                 if 'script_language' in question and question['script_language'] == 'python':
-                    script = 'python {script}'.format(script=question['script'])
+                    script_command = 'python {script}'.format(script=question['script'])
                 elif 'script_language' in question and question['script_language'] == 'powershell':
-                    script = 'powershell.exe -File ./{script}'.format(script=question['script'])
+                    script_command = 'powershell.exe -File ./{script}'.format(script=question['script'])
+                    script_command = f'"{script_command}"'
                 else:
-                    script = question['script']
+                    script_command = question['script']
                 assess_script = workout_globals.windows_startup_script_task.format(env_workoutkey=question['key'],
                                                                                    q_number=i,
                                                                                    script_name='Assess' + str(i),
-                                                                                   script=script,
-                                                                                   script_path=script)
+                                                                                   script=question['script'],
+                                                                                   script_command=script_command)
 
             else:
                 if question['server'] not in startup_scripts:
