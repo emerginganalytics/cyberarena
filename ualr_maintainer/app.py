@@ -118,6 +118,9 @@ def landing_page(workout_id):
                     num_correct += 1
                 
             percentage_correct = num_correct / len(assessment_questions) * 100
+            workout['submitted_answers'] = assessment_answers
+            workout['assessment_score'] = percentage_correct
+            ds_client.put(workout)
 
             return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
