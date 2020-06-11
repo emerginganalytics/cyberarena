@@ -165,8 +165,11 @@ def delete_specific_workout(workout_id, workout):
             print("workout %s has no external IP address" % workout_id)
             pass
         if delete_vms(workout_id):
+            time.sleep(5)
             if delete_firewall_rules(workout_id):
+                time.sleep(5)
                 if delete_subnetworks(workout_id):
+                    time.sleep(5)
                     if delete_network(workout_id):
                         return True
 
