@@ -154,6 +154,11 @@ def build_workout(workout_id):
     """
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
+    # This can sometimes happen when debugging a workout ID and the Datastore record no longer exists.
+    if not workout:
+        print('No workout for %s exists in the data store' % workout_id)
+        return
+
     # Parse the assessment specification to obtain any startup scripts for the workout.
     startup_scripts = None
     if workout['assessment']:
@@ -231,4 +236,4 @@ def build_workout(workout_id):
     workout['complete'] = True
     ds_client.put(workout)
 
-build_workout('wuuxzcvoav')
+# build_workout('wuuxzcvoav')
