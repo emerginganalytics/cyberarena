@@ -18,6 +18,7 @@ def get_startup_scripts(workout_id, assessment):
     """
     startup_scripts = {}
     i = 0
+
     for question in assessment['questions']:
         if question['type'] == 'auto':
             if question['operating-system'] == 'windows':

@@ -12,7 +12,7 @@ workout:
 # For student servers, these will be replicated to the number of
 # students specified by the instructor. These student servers can
 # be in the same network, which is the preferred and default build,
-# but they can alos have distinct networks.
+# but they can also have distinct networks.
 # The student network is named 'student-network' or student-network-#'
 student-servers:
   - name: student-workstation
