@@ -28,7 +28,7 @@ Foreach ($User in $Users){
 
 $request_body = @{
     "workout_id"= $Env:WORKOUTID
-    "token"= $Env:WORKOUTKEY_1
+    "token"= $Env:WORKOUTKEY0
 } | ConvertTo-Json
 
 

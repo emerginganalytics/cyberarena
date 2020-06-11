@@ -59,7 +59,7 @@ def verify():
 # Publishes workout completion status
 def publish():
     # Get values from Environment Variables
-    TOKEN = os.environ.get('WORKOUTKEY_1')
+    TOKEN = os.environ.get('WORKOUTKEY0')
     WORKOUT_ID = os.environ.get('WORKOUTID')
 
     workout = {
@@ -79,5 +79,3 @@ if not verify():
         log('Incomplete')
 else:
     log('Redundant')
-  
-
