@@ -174,26 +174,44 @@ def delete_specific_workout(workout_id, workout):
 
 
 def delete_workouts():
+    """
+    Queries the data store for workouts which have expired. Workout expiration is defined during the build
+    process based on the number of days an instructor needs the workout to be available. Resources to delete include
+    servers, networks, routes, firewall-rules and DNS names. The deletion of resources is based on a unique
+    identifier for the workout. Every built resource uses this for a prefix.
+    Deletion must occur in a given order with networks being deleted last.
+
+    There is also a mechanism to delete what we refer to as misfit workouts. This is simply a boolean in the data store
+    to indicate when a workout was created by a mistake or some other error in processing.
+
+    This function is intended to be consumed through cloud_fn_delete_expired_workout and tied to a pubsub topic
+    triggered by a cloud scheduler to run every 15 minutes or more.
+    :return: None
+    """
     # Only process the workouts from the last 4 months. 10512000 is the number of seconds in a month
     query_old_workouts = ds_client.query(kind='cybergym-workout')
     query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
     for workout in list(query_old_workouts.fetch()):
         if 'resources_deleted' not in workout:
             workout['resources_deleted'] = False
-        if 'build_type' in workout:
-            if workout['build_type'] != 'container':
-                if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
-                    workout_id = None
-                    if workout.key.name:
-                        workout_id = workout.key.name
-                    elif "workout_ID" in workout:
-                        workout_id = workout["workout_ID"]
 
-                    if workout_id:
-                        print('Deleting resources from workout %s' % workout_id)
-                        if delete_specific_workout(workout_id, workout):
-                            workout['resources_deleted'] = True
-                            ds_client.put(workout)
+        container_type = False
+        if 'build_type' in workout and workout['build_type'] == 'container':
+            container_type = True
+
+        if not container_type:
+            if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
+                workout_id = None
+                if workout.key.name:
+                    workout_id = workout.key.name
+                elif "workout_ID" in workout:
+                    workout_id = workout["workout_ID"]
+
+                if workout_id:
+                    print('Deleting resources from workout %s' % workout_id)
+                    if delete_specific_workout(workout_id, workout):
+                        workout['resources_deleted'] = True
+                        ds_client.put(workout)
 
     query_misfit_workouts = ds_client.query(kind='cybergym-workout')
     query_misfit_workouts.add_filter("misfit", "=", True)
