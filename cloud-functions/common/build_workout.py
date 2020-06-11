@@ -155,7 +155,9 @@ def build_workout(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     # Parse the assessment specification to obtain any startup scripts for the workout.
-    startup_scripts = get_startup_scripts(workout_id=workout_id, assessment=workout['assessment'])
+    startup_scripts = None
+    if workout['assessment']:
+        startup_scripts = get_startup_scripts(workout_id=workout_id, assessment=workout['assessment'])
     # Create the networks and subnets
     print('Creating networks')
     for network in workout['networks']:
@@ -195,7 +197,7 @@ def build_workout(workout_id):
             nics.append(nic)
         # Add the startup script for assessment as metadata if it exists
         meta_data = None
-        if server['name'] in startup_scripts:
+        if startup_scripts and server['name'] in startup_scripts:
             meta_data = startup_scripts[server['name']]
 
         create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
@@ -228,3 +230,5 @@ def build_workout(workout_id):
 
     workout['complete'] = True
     ds_client.put(workout)
+
+build_workout('wuuxzcvoav')
