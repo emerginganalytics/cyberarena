@@ -57,4 +57,7 @@ def get_startup_scripts(workout_id, assessment):
                                                                                    script=script)
             startup_scripts[question['server']]['value'] += assess_script
             i += 1
+
+        if len(startup_scripts) == 0:
+            startup_scripts = None
         return startup_scripts
