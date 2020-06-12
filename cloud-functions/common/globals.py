@@ -24,7 +24,7 @@ class workout_globals():
     windows_startup_script_task = 'setx /m WORKOUTKEY{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
                                   'schtasks /Create /SC MINUTE /TN {script_name} /RU System /TR {script_command}'
-    linux_startup_script_env = '#! /bin/bash\nexport WORKOUTID={env_workoutid}\n(crontab -l 2>/dev/null; echo "*/5 * * * * /usr/bin/{script}") | crontab -'
+    linux_startup_script_env = '#! /bin/bash\nexport WORKOUTID={env_workoutid}\n'
     linux_startup_script_task = 'export WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                   'gsutil cp ' + script_repository + '{script} /usr/bin\n' \
                                   '(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/{script}") | crontab -'
