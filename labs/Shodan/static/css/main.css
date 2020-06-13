@@ -2,43 +2,292 @@
     padding:0;
 
 }
-html{
-    width:80%;
-    margin:auto;
+
+/* ########################################  */
+/* Background Image */
+/* ########################################  */
+html {
+    background: url("/static/Imgs/hexagon_background.jpg") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }
 
-.shodan_result_list{
+/* ########################################  */
+/* Main Body Styles */
+/* ########################################  */
+h1, h2, h3, h4, h5, h6, header, title {
+    font-family: "Roboto Thin", "Roboto Light", "Arial Narrow";
+    font-kerning: auto;
+    letter-spacing: 3px;
+    font-weight: bold;
+}
+.body {
+    width: 80%;
+    margin: 0px auto;
+    background-color: white;
+    min-height: 400px;
+    min-width: 500px;
+    max-width: 1100px;
+    max-height: 80%;
+    box-shadow: 1px 20px 20px 15px #000000;
+    padding-bottom: 20px;
+}
+.main-content {
+    width: 80%;
+    padding: 10px;
+    margin: auto;
+}
+.main-content > p {
+    word-wrap: break-word;
+}
+img#headerImg {
+    display: block;
+    width: 100%;
+    max-width: 1110px;
+    margin: 0px auto;
+    background-position: center;
+    box-shadow: 1px 20px 20px -20px #000000;
+    border: 1px solid #dddd;
+    border-radius: 5px;
+    padding: 5px;
+    height: auto;
+}
+
+/* ########################################  */
+/* Shodan Query Styles */
+/* ########################################  */
+#shodanQuery {
+    width: 70%;
+}
+.shodan_result_list {
     margin-top:5%;
 }
-
-.shodan_result{
+.shodan_result {
     border: 1px solid black;
     margin: auto;
     list-style:none;
 }
-
-/* h1{
-    text-align: center;
-} */
-
-#page_heading{
+.shodan_result.container:hover {
+    background-color: #dedede;
+}
+#page_heading {
     text-align:center;
 }
-
-.search_form{
+.search_form {
     margin:auto;
     text-align:center;
 }
-
-.result_overview{
-    align-content:center;
+.result_overview {
+    align-content: center;
+    margin: auto;
 }
 
-table{
-    border: 1px solid black;
+/* ########################################  */
+/* Button Styles */
+/* ########################################  */
+input[type=submit], button[type=submit], button[id=queryBtn] {
+    background-color: whitesmoke;
+    padding: 2px 5px 2px 5px;
+    color: black;
+    margin: 2px;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px #1d1d1d;
+}
+input[type=submit]:hover, button[type=submit]:hover, button[id=queryBtn]:hover {
+    background-color: #69b2ec;
+    color: black;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+input[type=submit]:hover, button[type=submit]:hover, button[id=queryBtn]:hover {
+    box-shadow: 0 1px 1px 0 #2d2d2d;
+    transform: translateY(1px);
 }
 
-td{
+/* ########################################  */
+/*  Query Sheet Table Styles                 */
+/* ########################################  */
+.query_modal {
+    width: 70%;
+}
+.query_modal_table {
+    border: 1px solid #1b03a3;
+    padding: 10px 5px 10px 5px;
+    table-layout: fixed;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 4px;
+    background: url("/static/Imgs/query_sheet_background.jpg") no-repeat center center ;
+    contain: content;
+}
+caption {
+    text-align:center;
+    caption-side: top;
+    font-size: 24px;
+    color: white;
+}
+th {
+    padding: 10px 5px 10px 5px;
     border: 1px solid black;
-    overflow-x: auto;
+    font-weight: bolder;
+    background-color: #e7ded7;
+}
+.query_modal_col:nth-child(1) {
+    width: 200px;
+}
+.query_modal_col:nth-child(2) {
+    width: 300px;
+}
+.query_modal_tr  {
+    border: 1px solid black;
+    word-break: normal;
+    text-align: left;
+    padding: 5px 10px 5px 10px;
+}
+
+/* ########################################  */
+/*  Results Table Styles                     */
+/* ########################################  */
+table {
+    border: 1px solid black;
+    padding: 10px 5px 10px 5px;
+    table-layout: fixed;
+    margin-left: auto;
+    margin-right: auto;
+}
+col {
+    width: 350px;
+}
+td {
+    border: 1px solid black;
+    overflow-x: hidden;
+    text-align: left;
+    padding: 5px 10px 5px 10px;
+}
+tr:hover, td:hover {
+    background-color: #dedede;
+}
+
+/* ########################################  */
+/* Screenshot Img and Img Modal Styles */
+/* ########################################  */
+.screenshot_div {
+    padding-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#resultImg {
+    border: 1px solid #dddd;
+    border-radius: 5px;
+    padding: 5px;
+    max-width: 100%;
+    height: auto;
+    margin: auto;
+    display: block;
+}
+.image_modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+/* Modal Content (Image) */
+.modal_content {
+  margin: auto;
+  display: block;
+  width: 80%;
+  max-width: 900px;
+}
+/* Add Animation - Zoom in the Modal */
+.modal_content {
+  animation-name: zoom;
+  animation-duration: 0.6s;
+}
+@keyframes zoom {
+  from {transform:scale(0)}
+  to {transform:scale(1)}
+}
+/* The Close Button */
+.close_modal {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.close_modal:hover,
+.close_modal:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+  .modal-content {
+    width: 100%;
+  }
+}
+
+/* ########################################  */
+/* Query Cheat Sheet Modal Styles */
+/* ########################################  */
+.query_modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 100px; /* Location of the box */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.9); /* Black w/ opacity */
+}
+/* Modal Content (Image) */
+.query_modal_content {
+  margin: auto;
+  display: block;
+  width: 80%;
+}
+/* Add Animation - Zoom in the Modal */
+.query_modal_content {
+  animation-name: query_zoom;
+  animation-duration: 0.6s;
+}
+@keyframes query_zoom {
+  from {transform:scale(0)}
+  to {transform:scale(1)}
+}
+/* The Close Button */
+.close_query_modal {
+  position: absolute;
+  top: 15px;
+  right: 35px;
+  color: #f1f1f1;
+  font-size: 40px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.close_query_modal:hover,
+.close_query_modal:focus {
+  color: #bbb;
+  text-decoration: none;
+  cursor: pointer;
+}
+/* 100% Image Width on Smaller Screens */
+@media only screen and (max-width: 700px){
+  .query_modal_content {
+    width: 100%;
+  }
 }
