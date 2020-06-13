@@ -1,16 +1,17 @@
-{% extends "base_template.jinja" %}
+{% extends 'base_template.jinja' %}
 {% block head %}<script src="../static/js/main.js"></script>{% endblock %}
-{% block title%}Cybergym Shodan Exploration{% endblock %}
+{% block title%}CyberGym Shodan Lite{% endblock %}
 
 {% block content %}
-{# {% include "index.jinja" %} #}
 <div class='content_header'>
-
     <h2 style="text-align:center;">Data for {{ resultInfo["ip_str"]}}</h2>
 </div>
-<div class="container result_overview">
-    <table style="margin:auto;">
+<div class="container result_overview" style="padding-bottom: 10px">
+    <table>
     {% for entry in resultInfo %}
+        <colgroup>
+        <col>
+        </colgroup>
         <tr>
             <td>{{ entry }}</td>
             {% if entry == "data" or entry == "screenshot" %}
@@ -18,7 +19,7 @@
                 <td>
                 <form action="/data/" method="POST">
                     <input type="hidden" name="data" value="{{ resultInfo[entry]|e }}" />
-                    <input type="submit" value="Click to view raw data">
+                    <input id="rawData" type="submit" value="Click to view raw data">
                 </form>
                 </td>
             {% else %} 
@@ -28,9 +29,37 @@
     {% endfor %}
     </table>
     {% if resultInfo["screenshot"] %}
-    <img src="data:image/jpeg;base64, {{ resultInfo['screenshot'] }} " />
+    <div class="screenshot_div">
+        <img src="data:image/jpeg;base64, {{ resultInfo['screenshot'] }} " id="resultImg" />
+    </div>
+    <div class="image_modal" id="imageModal">
+        <span class="close_modal">&times;</span>
+        <img class="modal_content" id="img01" />
+    </div>
     {% endif %}
-
 </div>
 {% endblock %}
+{% block js_block %}
+    <script>
+        // Get the modal
+        var modal = document.getElementById("imageModal");
+
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        var img = document.getElementById("resultImg");
+        var modalImg = document.getElementById("img01");
+        img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+        }
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close_modal")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+    </script>
+{% endblock js_block %}
+
 
