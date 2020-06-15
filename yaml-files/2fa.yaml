@@ -1,10 +1,10 @@
 version: '1'
 
 workout:
-  name: dos
-  workout_description: 'Perform a Denial of Service attack against a computer in your network and observe the impact on the computer'
-  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/DOSWorkoutTeacherInstructions.pdf"
-  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/DOSWorkoutInstructions.pdf"
+  name: 2fa
+  workout_description: 'Walk through the set up of a software one-time password and log in to a web application'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/TwoStepAuthenticationWorkoutTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/TwoStepAuthenticationWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -19,7 +19,7 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-dos-labentry
+  - name: cybergym-2fa-labentry
     image: image-labentry
     machine_type: "n1-standard-1"
     network_routing: false
