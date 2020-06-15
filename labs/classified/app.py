@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash, request, session, abort
+from flask import Flask, render_template, redirect, flash, request, session, abort, url_for
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -8,10 +8,13 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import Required, Length, EqualTo
+from server_scripts import ds_client
+
 import onetimepass
 import pyqrcode
 import os
 import base64
+
 
 # application instance
 app = Flask(__name__)
@@ -26,6 +29,7 @@ lm = LoginManager(app)
 
 
 class User(UserMixin, db.Model):
+    """User model."""
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True)
@@ -50,7 +54,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_totp_uri(self):
-        return 'otpauth://totp/2FA-Demo:{0}?secret={1}&issuer=2FA-Demo' \
+        return 'otpauth://totp/CyberGym:{0}?secret={1}&issuer=CyberGym2FA' \
             .format(self.username, self.otp_secret)
 
     def verify_totp(self, token):
@@ -80,12 +84,29 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-@app.route('/')
-def home():
+@app.route('/<workout_id>')
+def home(workout_id):
     if not session.get('logged_in'):
-        return render_template('index.html')
+        return render_template('index.html', workout_id=workout_id)
     else:
-        return render_template('workouts.html')
+        return render_template('workouts.html', workout_id=workout_id)
+
+
+# Generates values based on workout
+@app.route('/loader/<workout_id>')
+def loader(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout:
+        if workout['type'] == 'wireshark':
+            return redirect('/home/' + workout_id)
+        elif workout['type'] == 'xss':
+            return redirect('/workouts/xss/' + workout_id)
+        elif workout['type'] == '2fa':
+            return redirect('/workouts/tfh/' + workout_id)
+    else:
+        return redirect('/invalid')
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -97,9 +118,9 @@ def do_admin_login():
     return home()
 
 
-@app.route("/flag", methods=["POST"])
-def flag():
-    return render_template('flag.html')
+@app.route("/flag/<workout_id>", methods=["POST"])
+def flag(workout_id):
+    return render_template('flag.html', workout_id=workout_id)
 
 
 @app.route("/logout", methods=["GET", "POST"])
@@ -108,58 +129,33 @@ def admin_logout():
     return home()
 
 
-@app.route("/workouts", methods=["POST"])
-def workouts():
-    return render_template('workouts.html')
+@app.route("/workouts/<workout_id>", methods=["POST"])
+def workouts(workout_id):
+    return render_template('workouts.html', workout_id=workout_id)
 
 
-@app.route("/workouts/xss_d", methods=["GET", "POST"])
-def xss_d():
-    return render_template('xss_d.html')
+@app.route("/workouts/xss/<workout_id>", methods=["GET", "POST"])
+def xss(workout_id):
+    return render_template('xss_d.html', workout_id=workout_id)
 
 
-@app.route("/workouts/xss_r", methods=["GET", "POST"])
-def xss_r():
-    return render_template('xss_r.html')
-
-
-@app.route("/workouts/xss_s", methods=["GET", "POST"])
-def xss_s():
-    return render_template('xss_s.html')
-
-
-@app.route('/workouts/tfh')
-def twofactorhome():
+@app.route('/workouts/tfh/<workout_id>')
+def twofactorhome(workout_id):
     return render_template('welcome.html')
 
 
-@app.route('/workouts/tfh/twofactor')
-def two_factor_setup():
-    if 'username' not in session:
-        return redirect(twofactorhome)
-    user = User.query.filter_by(username=session['username']).first()
-    if user is None:
-        return redirect(twofactorhome)
-    # since this page contains the sensitive qrcode, make sure the browser
-    # does not cache it
-    return render_template('two-factor-setup.html'), 200, {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'}
-
-
-@app.route('/workouts/tfh/register', methods=['GET', 'POST'])
-def register():
+@app.route('/workouts/tfh/register/<workout_id>', methods=['GET', 'POST'])
+def register(workout_id):
     """User registration route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(twofactorhome)
+        return redirect(url_for('twofactorhome'))
     form = RegisterForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None:
             flash('Username already exists.')
-            return redirect(twofactorhome)
+            return redirect(url_for('register'))
         # add new user to the database
         user = User(username=form.username.data, password=form.password.data)
         db.session.add(user)
@@ -167,8 +163,23 @@ def register():
 
         # redirect to the two-factor auth page, passing username in session
         session['username'] = user.username
-        return redirect(two_factor_setup)
-    return render_template('register.html', form=form)
+        return redirect(url_for('two_factor_setup'))
+    return render_template('register.html', form=form, workout_id=workout_id)
+
+
+@app.route('/workouts/tfh/twofactor')
+def two_factor_setup():
+    if 'username' not in session:
+        return redirect(url_for('twofactorhome'))
+    user = User.query.filter_by(username=session['username']).first()
+    if user is None:
+        return redirect(url_for('twofactorhome'))
+    # since this page contains the sensitive qrcode, make sure the browser
+    # does not cache it
+    return render_template('two-factor-setup.html'), 200, {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'}
 
 
 @app.route('/qrcode')
@@ -198,31 +209,32 @@ def login():
     """User login route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(twofactorhome)
+        return redirect(url_for('twofactorhome'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.verify_password(form.password.data) or \
                 not user.verify_totp(form.token.data):
             flash('Invalid username, password or token.')
-            return redirect(login)
+            return redirect(url_for('login'))
 
         # log user in
         login_user(user)
         flash('You are now logged in!')
-        return redirect(twofactorhome)
-    return render_template('login.html', form=form)
+        return redirect(url_for('twofactorhome'))
+    return render_template('login.html', form=form, workout_id=workout_id)
 
 
 @app.route('/workouts/tfh/logout')
 def logout():
     """User logout route."""
     logout_user()
-    return redirect(twofactorhome)
+    return redirect(url_for('twofactorhome'))
 
 
 # create database tables if they don't exist yet
 db.create_all()
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=4000)

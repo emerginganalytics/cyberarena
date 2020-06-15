@@ -16,3 +16,6 @@ visitor
 Werkzeug
 WTForms
 gunicorn
+google-cloud-datastore
+google-api-python-client
+google-cloud-storage

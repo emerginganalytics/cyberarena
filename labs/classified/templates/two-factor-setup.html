@@ -3,7 +3,7 @@
 
 {% block page_content %}
     <h1>Two Factor Authentication Setup</h1>
-    <p>You are almost done! Please start FreeOTP on your smartphone and scan the following QR Code with it:</p>
+    <p>Please use the installed token generation app on your smartphone and scan the following QR Code with it:</p>
     <p><img id="qrcode" src="{{ url_for('qrcode') }}"></p>
-    <p>I'm done, take me to the <a href="{{ url_for('login') }}">Login</a> page!</p>
+    <p>Click here when finished <a href="{{ url_for('login') }}">Login</a></p>
 {% endblock %}
