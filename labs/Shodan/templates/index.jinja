@@ -84,7 +84,7 @@
                 </tr>
                 <tr class="query_modal_tr">
                     <td colspan="2">Commands can be used by themselves for a broad search or in combination
-                        for a more precision. Put " " around strings or keywords to search for specifically that
+                        for more precision. Put " " around strings or keywords to search for specifically that
                         string.
                     </td>
                 </tr>
@@ -118,7 +118,7 @@
         {% endif %}
         {%for match in shodanResults['matches']%}
             <div class='shodan_result container'>
-                <a href="{{ '/results/%s'%match['ip_str'] }}"> {{ match['ip_str']}} </a>
+                <a href="{{ '/results/%s/%s'%(match['ip_str'], workoutid) }}"> {{ match['ip_str']}} </a>
                 <li>{{ match['isp'] }}</li>
                 <li>Port: {{ match['port'] }}</li>
                 <li>Location:
@@ -132,13 +132,10 @@
                 </li>
                 <li>Server: {{ match['server'] }}</li>
             </div>
-        {%endfor%}
-        {# <form class='result_navigation_form' action='{{ request.path }}' method="POST">
-        <p>{{ query }}</p>
-        <
-        </form> #}
+        {% endfor %}
     {% endif %}
     </div> {# shodan_result_list #}
+    </div>
 {% endblock %}
 {% block js_block %}
     {# JS for Query Reference Page Modal #}
