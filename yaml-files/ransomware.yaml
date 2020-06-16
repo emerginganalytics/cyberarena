@@ -84,9 +84,9 @@ assessment:
   type: level
   questions:  
     - type: auto
-        key: "1TccG1J"
-        question: "This will automatically be marked complete when you have completed the mission"
-        script: "cyberattack-1"
-        server: cybergym-ransomware
-        operating-system: windows
-        complete: False
+      key: "1TccG1J"
+      question: "This will automatically be marked complete when you have completed the mission"
+      script: "cyberattack-1"
+      server: cybergym-ransomware
+      operating-system: windows
+      complete: False
