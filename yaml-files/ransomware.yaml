@@ -10,13 +10,13 @@ workout:
   zone: "us-central1-a"
   dnszone: "cybergym-public"
   project_api_key_type: cloud
-  flag_location: 
+  flag_location:
 
 networks:
-- name: external-network
-  subnets:
-    - name: default
-      ip-subnet: 10.1.1.0/24
+  - name: external-network
+    subnets:
+      - name: default
+        ip-subnet: 10.1.1.0/24
 
 servers:
   - name: cybergym-ransomware
@@ -30,7 +30,6 @@ servers:
         internal_IP: 10.1.1.34
         subnet: default
         external_NAT: true
-
   - name: cybergym-labentry
     image: image-labentry
     machine_type: "n1-standard-1"
@@ -50,42 +49,44 @@ routes:
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
-- name: default-allow-http
-  network: external-network
-  target_tags: ["http-server"]
-  protocol: none
-  ports: ["tcp/80"]
-  source_ranges: ["0.0.0.0/0"]
-- name: default-allow-https
-  network: external-network
-  target_tags: ["https-server"]
-  protocol: none
-  ports: ["tcp/443"]
-  source_ranges: ["0.0.0.0/0"]
-- name: default-allow-internal-dns
-  network: external-network
-  target_tags: ["dns"]
-  protocol: none
-  ports: ["tcp/53","udp/53"]
-  source_ranges: ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","35.199.192.0/19"]
-- name: default-network-allow
-  network: external-network
-  target_tags: []
-  protocol: none
-  ports: ["tcp/22","tcp/3389","tcp/80","tcp/443","tcp/5901-5906","tcp/8080","tcp/8000"]
-  source_ranges: ["0.0.0.0/0"]
-- name: default-network-internal-allow
-  network: external-network
-  target_tags: []
-  protocol: none
-  ports: ["tcp/any", "udp/any", "icmp/any"]
-  source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
+  - name: default-allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: default-allow-https
+    network: external-network
+    target_tags: ["https-server"]
+    protocol: none
+    ports: ["tcp/443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: default-allow-internal-dns
+    network: external-network
+    target_tags: ["dns"]
+    protocol: none
+    ports: ["tcp/53","udp/53"]
+    source_ranges: ["10.0.0.0/8","172.16.0.0/12","192.168.0.0/16","35.199.192.0/19"]
+  - name: default-network-allow
+    network: external-network
+    target_tags: []
+    protocol: none
+    ports: ["tcp/22","tcp/3389","tcp/80","tcp/443","tcp/5901-5906","tcp/8080","tcp/8000"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: default-network-internal-allow
+    network: external-network
+    target_tags: []
+    protocol: none
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
   
-  
-  - type: auto
-      key: "1TccG1J"
-      question: "This will automatically be marked complete when you have completed the mission"
-      script: "cyberattack-1"
-      server: cybergym-ransomware
-      operating-system: windows
-      complete: False
+assessment:
+  type: level
+  questions:  
+    - type: auto
+        key: "1TccG1J"
+        question: "This will automatically be marked complete when you have completed the mission"
+        script: "cyberattack-1"
+        server: cybergym-ransomware
+        operating-system: windows
+        complete: False
