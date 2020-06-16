@@ -145,6 +145,10 @@ def workout_list(unit_id):
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
+    
+    student_instructions_url = None
+    if 'student_instructions_url' in unit:
+        student_instructions_url = unit['student_instructions_url']
 
     if (request.method=="POST"):
         return json.dumps(workout_list)
@@ -152,7 +156,7 @@ def workout_list(unit_id):
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
                                workout_list=workout_list, unit_id=unit_id,
-                               description=unit['description'], instructions=teacher_instructions_url,
+                               description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url,
                                workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')

@@ -13,14 +13,23 @@
     <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
 </head>
 <style>
-    body {
-            font-family: 'Montserrat', sans-serif;
-    }
-    h3, h4 {
-    		margin: 10px 0 30px 0;
-    		letter-spacing: 2px;  /* 10px */
-    		font-size: 20px;
-    		color: #111; /* #111 */
+  
+  html{
+    height:100%;
+    background: #6e2639; /* #2d2d30 */
+    color: #a7a9ac;
+  }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #6e2639; /* #2d2d30 */
+    color: #a7a9ac; /*#bdbdbd */
+    margin:1em;
+  }
+  h3, h4 {
+    margin: 10px 0 30px 0;
+    letter-spacing: 2px;  /* 10px */
+    font-size: 20px;
+    color: #111; /* #111 */
 	}
     .bg-1 {
             background: #6e2639; /* #2d2d30 */
@@ -33,7 +42,8 @@
 		    font-style: italic;
 	}
     .form-ctn {
-            width: 40%;
+            width: 70%;
+            margin:auto;
             margin-top: 10vh;
             -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
             box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
@@ -41,8 +51,26 @@
             background-color: white;
     }
     .btn-ctn {
-            text-align: center;
-            margin-top: 5vh;
+        text-align: center;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    .btn{
+      background-color:#6e2639;
+      color:white;
+      width:100%;
+    }
+    .btn:hover{
+      color:#6e2639;
+      background-color:white;
+    }
+    .btn:focus{
+      color:#6e2639;
+      background-color:white;
+    }
+    .control_button{
+      margin-top:2%;
+      text-align:center;
     }
     .input-field {
             margin-top: 5vh;
@@ -72,6 +100,10 @@
     		border-color: transparent;
   	}
 
+    .landing_container{
+      margin:auto;
+      background-color:white;
+    }
     .left {
         display: block;
         margin-left: 10vh;
@@ -118,43 +150,42 @@
       font-weight: bold;
     }
 
-    td {
+    td, th {
         text-align: center;
+        border: 1px solid black;
     }
 </style>
 
-<body id="homePage" data-spy="scroll" data-target=".navbar" data-offset="50" class="bg-1">
-<nav class="navbar navbar-default navbar-fixed-top">
-  	<div class="container-fluid">
-    		<div class="navbar-header">
-      			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navBar">
-        			<span class="icon-bar"></span>
-        			<span class="icon-bar"></span>
-        			<span class="icon-bar"></span>
-      			</button>
-    		</div>
-    		<div class="collapse navbar-collapse" id="navBar">
-      			<ul class="nav navbar-nav navbar-right">
-       				<li><a>HOME</a></li>
-      			</ul>
-    		</div>
-        <li class="dropdown">
-          <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
-            <span class="caret"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <li><a href="dos">DOS</a></li>
-            <li><a href="xss">XSS</a></li>
-            <li><a href="spoof">Spoof</a></li>
-          </ul>
-  	</div>
-</nav>
-    <div id="workout-form" class='container-fluid form-ctn'>
-        <div class="center">
-            <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
-            {% block content %}{% endblock %}
-        </div>
-    </div>
+<body id="homePage">
+  <!-- <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container-fluid">
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navBar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+          </div>
+          <div class="collapse navbar-collapse" id="navBar">
+              <ul class="nav navbar-nav navbar-right">
+                <li><a>HOME</a></li>
+              </ul>
+          </div>
+          <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#">MORE
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="dos">DOS</a></li>
+              <li><a href="xss">XSS</a></li>
+              <li><a href="spoof">Spoof</a></li>
+            </ul>
+      </div>
+  </nav> -->
+  <div id="workout-form" class='landing_container col-lg-12'>
+          <!-- <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/> -->
+          {% block content %}{% endblock %}
+  </div>
 
 <footer class="text-center">
 	<br><br>
