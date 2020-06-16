@@ -1,62 +1,112 @@
 {% extends "base.html" %}
+
 {% block title %}Unit {{ unit_id }}{% endblock %}
-<script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
 
 {% block content %}
-    <p>To begin, click on an available team below. Red teams mean the workout is already in use.</p>
-    <h2>Description</h2>
-    <p>{{ description }}</p>
-    {% if instructions!=None %}
-        <a href="{{ instructions }}" target="_blank">Teacher Instructions</a>
-    {% endif %}
-    <ol class="teams">
-        {% for workout in workout_list %}
-            {% if build_type == "container" %}
-                {% if workout['complete'] == True %}
-                <a style="color:green" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
-                {% else %}
-                <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
-                {% endif %}
-            {% else %}
-                {% if workout["complete"] == True %}
-                    <a style="color:green" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
-                {% else %}
-                    <a style="color:red" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-    </ol>
-    <div style="padding:1em;">
-        <form action="/start_all" method="post">
-            <div class="input-field col s12" >
-                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
-                    <input type="number" id="time" name="time" value="2" min="1" max="10">
-                    <label>How long should the workout run (1 - 10 hours)?</label>
+<script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+<style>
+    .landing_content .btn, table{
+        width:75%;
+    }
+</style>
+    <div class="row">
+        <div class='controls col-lg-2' style="border: 1px solid black">
+            <div id="logo" class="center">
+                <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
             </div>
-            <div class="btn-ctn">
-                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUTS</button>
-            </div>
-        </form>
-    </div>
-    <div>
-        <form action="/stop_all" method="post">
-            <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
-            <div class="btn-ctn">
-                    <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
-            </div>
-        </form>
-    </div>
-    <div>
-        <form action="/reset_all" method="post">
-            <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
-            <div class="btn-ctn">
-                    <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUTS</button>
-            </div>
-        </form>
-    </div>
-        </div>
+            <div class="control_button">
+                <form action="/start_all" method="post">
+                    <div class="input-field" >
+                        <label>How long should the workout run (1 - 10 hours)?</label>
+                        <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                        <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;text-align:center;">
 
+                    </div>
+                    <div class="btn-ctn">
+                            <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/stop_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                    <div class="btn-ctn">
+                            <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/reset_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                    <div class="btn-ctn">
+                            <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class='landing_content col-lg-10' style="margin-top:1em;padding:1em;">
+
+            <h2>Description</h2>
+            <p>{{ description }}</p>
+            {% if instructions!=None %}
+                <a href="{{ instructions }}" target="_blank">Teacher Instructions</a>
+            {% endif %}
+            <p>To begin, click on an available team below. </p>
+            <ol class="teams">
+                {% for workout in workout_list %}
+                <a style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Team {{ workout.name }} </a>
+                <div class="collapse" id="team_collapse_{{workout.name}}">
+                    <table>
+                        <tr>
+                            <th>Workout Id</th>
+                            {% if build_type == "container" %}
+                            <th>Workout URL</th>
+                            {% else %}
+                            <th>Workout Landing Page</th>
+                            <th>Running</th>
+                            {% endif %}
+                            <th>Complete</th>
+                            {% if workout["student_instruction_url"] %}
+                            <th>Student Instructions</th>
+                            {% endif %}
+
+
+                        </tr>
+                        <tr>
+                            <!-- <td>{{workout["workout_id"]}}</td> -->
+                            <td>{{workout.name}}</td>
+                            {% if build_type == "container" %}
+                            <td>{{ workout_url_path + '/' + workout.name }}</td>
+                            {% else %}
+                            <td><a href="/landing/{{workout.name}}">Landing Page</a></td>
+                            <td>{{workout["running"]}}</td>
+                            {% endif %}
+                            <td>{{workout["complete"]}}</td>
+                            {% if workout["student_instruction_url"] %}
+                            <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
+                            {% endif %}
+
+                        </tr>
+                    </table>
+                </div>
+                    <!-- {% if build_type == "container" %}
+                        {% if workout['complete'] == True %}
+                        <a style="color:green" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
+                        {% else %}
+                        <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
+                        {% endif %}
+                    {% else %}
+                        {% if workout["complete"] == True %}
+                            <a style="color:green" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
+                        {% else %}
+                            <a style="color:red" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
+                        {% endif %}
+                    {% endif %} -->
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
     <div id="loading-msg"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script>
@@ -93,9 +143,10 @@
             });
     
         }
+        /*
         setInterval(function(){
             check_workout_status( "{{ unit_id }}");
         }, 30000);
-    
+        */
     </script>
 {% endblock %}
