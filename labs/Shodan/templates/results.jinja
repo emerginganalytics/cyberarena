@@ -17,7 +17,7 @@
             {% if entry == "data" or entry == "screenshot" %}
                 {# <td><a href="{{ url_for('data', rawData='%s') %resultInfo[entry]|e}}">Click to view raw data</a></td> #}
                 <td>
-                <form action="/data/" method="POST">
+                <form action="/data/{{ workoutid }}" method="POST">
                     <input type="hidden" name="data" value="{{ resultInfo[entry]|e }}" />
                     <input id="rawData" type="submit" value="Click to view raw data">
                 </form>

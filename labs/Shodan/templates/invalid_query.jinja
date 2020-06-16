@@ -1,17 +1,17 @@
 {# {% extends "base.html" %}  #}
 {% extends "base_template.jinja" %}
 {% block content %}
-<div class="container">
+    <div class="container">
 
-<div class='workout_info'>
+    <div class='workout_info'>
         <br>
         <h3>Shodan Info</h3>
         <br>
         <button id="queryBtn">Query Overview</button>
-        <p><br></p>
+        <br>
+        <p>Invalid query! Make sure you have typed your query correctly!</p>
     </div>
-
-    {# Creates Modal for Shodan Quick Reference page #}
+{# Creates Modal for Shodan Quick Reference page #}
     <div id="queryModal" class="query_modal">
         <div class="query_modal_content">
             <span class="close_query_modal">&times;</span>
@@ -84,7 +84,7 @@
                 </tr>
                 <tr class="query_modal_tr">
                     <td colspan="2">Commands can be used by themselves for a broad search or in combination
-                        for a more precision. Put " " around strings or keywords to search for specifically that
+                        for more precision. Put " " around strings or keywords to search for specifically that
                         string.
                     </td>
                 </tr>
@@ -102,47 +102,63 @@
         </div>
     </div>
 
-<div class='search_form container'>
-<form method="POST" action="{{ request.path }}">
-    <input type='text' placeholder='Enter query here' name='shodan_query' id="shodanQuery">
-    <input type='hidden' value='1' name='page_number'/>
-    <button type='submit'>Search</button>
-</form>
+    <div class='search_form container'>
+    <form method="POST" action="{{ request.path }}">
+        <input type='text' placeholder='Enter query here' name='shodan_query' id="shodanQuery">
+        <input type='hidden' value='1' name='page_number'/>
+        <button type='submit'>Search</button>
+    </form>
 
-</div>
+    </div>
 
-    <div class='shodan_result_list container'>
-    {% if resultCount %}
-        {% if resultCount["total"] %}
-            <h4>{{ resultCount["total"] }} matches found</h4> 
+        <div class='shodan_result_list container'>
+        {% if resultCount %}
+            {% if resultCount["total"] %}
+                <h4>{{ resultCount["total"] }} matches found</h4>
+            {% endif %}
+            {%for match in shodanResults['matches']%}
+                <div class='shodan_result container'>
+                    <a href="{{ '/results/%s/%s'%(match['ip_str'], workoutid) }}"> {{ match['ip_str']}} </a>
+                    <li>{{ match['isp'] }}</li>
+                    <li>Port: {{ match['port'] }}</li>
+                    <li>Location:
+                        {% if match['state'] %}
+                            {{ match['state'] }},
+                        {% endif %}
+                        {% if match['location']['city'] %}
+                            {{ match['location']['city'] }},
+                        {% endif %}
+                         {{match['location']['country_name']}}
+                    </li>
+                    <li>Server: {{ match['server'] }}</li>
+                </div>
+            {%endfor%}
         {% endif %}
-        {%for match in shodanResults['matches']%}  
-            <div class='shodan_result container'>
-                <a href="{{ '/results/%s'%match['ip_str'] }}"> {{ match['ip_str']}} </a>
-                <li>{{ match['isp'] }}</li>
-                <li>Port: {{ match['port'] }}</li>
-                <li>Location: 
-                    {% if match['state'] %}
-                        {{ match['state'] }},
-                    {% endif %}
-                    {% if match['location']['city'] %}
-                        {{ match['location']['city'] }},
-                    {% endif %}
-                     {{match['location']['country_name']}}
-                </li>
-                <li>Server: {{ match['server'] }}</li>
-            </div>
-        {%endfor%} 
-        {# <form class='result_navigation_form' action='{{ request.path }}' method="POST">
-        <p>{{ query }}</p>
-        <
-        </form> #}
-    {% endif %}
-    </div> {# shodan_result_list #}
+        </div> {# shodan_result_list #}
+    </div>
 {% endblock %}
-
 {% block js_block %}
-  {# JS for Query Reference Page Modal #}
+    <script>
+        // Get the modal
+        var modal = document.getElementById("imageModal");
+
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        var img = document.getElementById("resultImg");
+        var modalImg = document.getElementById("img01");
+        img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+        }
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close_modal")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+    </script>
+    {# JS for Query Reference Page Modal #}
      <script>
             // Get the modal
             var modal = document.getElementById("queryModal");

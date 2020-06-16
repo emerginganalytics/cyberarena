@@ -1,2 +1,9 @@
 shodan
 flask
+google-cloud
+google-cloud-core[grpc]
+google-api-python-client
+google-cloud-datastore
+google-cloud-storage
+grpcio
+requests
