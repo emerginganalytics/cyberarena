@@ -1,7 +1,7 @@
 from common.build_workout import build_workout
 from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
-from common.stop_workout import stop_everything
+from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts
 
 
 def cloud_fn_build_workout(event, context):
@@ -72,6 +72,26 @@ def cloud_fn_stop_all_servers(event, context):
     :return:
     """
     stop_everything()
+
+
+def cloud_fn_stop_lapsed_workouts(event, context):
+    """
+    Stops expired workouts based on the current time and the number of hours specified to run in the datastore
+    :param event: No data is passed to this function
+    :param context: No data is passed to this function
+    :return:
+    """
+    stop_lapsed_workouts()
+
+
+def cloud_fn_stop_lapsed_arenas(event, context):
+    """
+    Stops expired arenas based on the current time and the number of hours specified to run in the datastore
+    :param event: No data is passed to this function
+    :param context: No data is passed to this function
+    :return:
+    """
+    stop_lapsed_arenas()
 
 # Cloud VM Function Testing
 # data = \

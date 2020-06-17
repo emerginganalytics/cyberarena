@@ -4,7 +4,7 @@ import string
 
 from common.globals import ds_client, project, compute, region, zone, workout_globals, guac_password
 from common.dns_functions import add_dns_record, register_workout_server
-from common.stop_workout import stop_workout, stop_arena
+from common.stop_compute import stop_workout, stop_arena
 from common.assessment_functions import get_startup_scripts
 from common.networking_functions import create_network, create_route, create_firewall_rules
 from common.compute_functions import create_instance_custom_image, get_server_ext_address
