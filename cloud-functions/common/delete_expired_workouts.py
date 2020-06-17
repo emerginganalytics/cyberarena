@@ -238,7 +238,11 @@ def delete_workouts():
         if 'build_type' in workout and workout['build_type'] == 'container':
             container_type = True
 
-        if not container_type:
+        arena_type = False
+        if 'build_type' in workout and workout['build_type'] == 'arena':
+            arena_type = True
+
+        if not container_type and not arena_type and 'expiration' in workout:
             if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
                 workout_id = None
                 if workout.key.name:
@@ -305,4 +309,4 @@ def delete_arenas():
             print("Finished deleting arena %s" % arena_id)
 
 # delete_workouts()
-delete_arenas()
+# delete_arenas()
