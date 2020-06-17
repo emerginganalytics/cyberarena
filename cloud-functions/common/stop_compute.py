@@ -1,3 +1,5 @@
+import time, calendar
+
 from common.globals import ds_client, project, compute
 
 # Global variables for this function
@@ -69,3 +71,39 @@ def stop_arena(unit_id):
             print("Workout servers stopped for %s" % workout_id)
         else:
             print("No workout servers to stop for %s" % workout_id)
+
+
+def stop_lapsed_workouts():
+    # Get the current time to compare with the start time to see if a workout needs to stop
+    ts = calendar.timegm(time.gmtime())
+
+    # Query all workouts which have not been deleted
+    query_workouts = ds_client.query(kind='cybergym-workout')
+    query_workouts.add_filter("running", "=", True)
+    for workout in list(query_workouts.fetch()):
+        if "start_time" in workout and "run_hours" in workout:
+            workout_id = workout.key.name
+            start_time = int(workout.get('start_time', 0))
+            run_hours = int(workout.get('run_hours', 0))
+
+            # Stop the workout servers if the run time has exceeded the request
+            if ts - start_time >= run_hours * 3600:
+                stop_workout(workout_id)
+
+
+def stop_lapsed_arenas():
+    # Get the current time to compare with the start time to see if a workout needs to stop
+    ts = calendar.timegm(time.gmtime())
+
+    # Query all workouts which have not been deleted
+    query_units = ds_client.query(kind='cybergym-unit')
+    query_units.add_filter("arena.running", "=", True)
+    for unit in list(query_units.fetch()):
+        if 'arena' in unit and "start_time" in unit['arena'] and "run_hours" in unit['arena']:
+            unit_id = unit.key.name
+            start_time = int(unit.get('start_time', 0))
+            run_hours = int(unit.get('run_hours', 0))
+
+            # Stop the workout servers if the run time has exceeded the request
+            if ts - start_time >= run_hours * 3600:
+                stop_arena(unit_id)
