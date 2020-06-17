@@ -36,15 +36,19 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = complete = None
+        running = complete = submitted_answers = None
         if 'running' in workout_instance:
             running = workout_instance['running']
         if 'complete' in workout_instance:
             complete = workout_instance['complete']
+        if 'submitted_answers' in workout_instance:
+            submitted_answers = workout_instance['submitted_answers']
+            
         workout_info = {
             'name': workout.key.name,
             'running': running,
-            'complete': complete
+            'complete': complete,
+            'submitted_answers': submitted_answers,
         }
         workout_list.append(workout_info)
 

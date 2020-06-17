@@ -59,37 +59,62 @@
                 <div class="collapse" id="team_collapse_{{workout.name}}">
                     <table>
                         <tr>
-                            <th>Workout Id</th>
                             {% if build_type == "container" %}
                             <th>Workout URL</th>
                             {% else %}
                             <th>Workout Landing Page</th>
-                            <th>Running</th>
                             {% endif %}
-                            <th>Complete</th>
                             {% if workout["student_instruction_url"] %}
                             <th>Student Instructions</th>
                             {% endif %}
-
-
+                            <th>Assessment Submissions</th>
                         </tr>
                         <tr>
-                            <!-- <td>{{workout["workout_id"]}}</td> -->
-                            <td>{{workout.name}}</td>
                             {% if build_type == "container" %}
                             <td>{{ workout_url_path + '/' + workout.name }}</td>
                             {% else %}
                             <td><a href="/landing/{{workout.name}}">Landing Page</a></td>
-                            <td>{{workout["running"]}}</td>
                             {% endif %}
-                            <td>{{workout["complete"]}}</td>
                             {% if workout["student_instruction_url"] %}
                             <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
                             {% endif %}
-
+                            <td>
+                                {% if workout['submitted_answers'] %}
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
+                                    View Assessment Submission
+                                </button>
+                                <!-- <a href="" onclick="show_answers({{workout.name}})">Click to show submitted answers</a> -->
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
                         </tr>
                     </table>
                 </div>
+                {% if workout["submitted_answers"] %}
+                <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                    <div class="modal-dialog" role="document" style="max-width:100%;">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Assessment results for {{workout.name}}</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <ol>
+                                {% for question in workout["submitted_answers"] %}
+                                    <li>{{question}}</li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                        <div class="modal-footer" style="justify-content:center;">
+                          <button type="button" class="btn" data-dismiss="modal">Close</button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                {% endif %}
                     <!-- {% if build_type == "container" %}
                         {% if workout['complete'] == True %}
                         <a style="color:green" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
