@@ -100,13 +100,14 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
     assessment = y['assessment']
-    student_servers = y['student-servers']['servers']
+    if build_type == 'arena':
+        student_servers = y['student-servers']['servers']
 
-    if num_team > 10:
-        num_team = 10
+    if num_team > workout_globals.max_num_workouts:
+        num_team = workout_globals.max_num_workouts
 
-    if workout_length > 60:
-        workout_length = 60
+    if workout_length > workout_globals.max_workout_len:
+        workout_length = workout_globals.max_workout_len
 
     workout_ids = []
     ts = str(calendar.timegm(time.gmtime()))

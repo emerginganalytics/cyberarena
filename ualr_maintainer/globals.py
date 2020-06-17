@@ -29,7 +29,8 @@ class workout_globals():
     windows_startup_script_task = 'setx WORKOUTKEY_{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
                                   'schtasks /Create /SC MINUTE /TN {script_name} /TR .\\{script}'
-
+    max_workout_len = 30
+    max_num_workouts = 30
 
     @staticmethod
     def extended_wait(project, zone, operation_id):
