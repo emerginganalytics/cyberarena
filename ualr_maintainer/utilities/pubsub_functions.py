@@ -7,7 +7,7 @@ from time import sleep
 
 
 project = 'ualr-cybersecurity'
-def pub_build_request_msg(unit_id, topic_name=workout_globals.ps_build_workout_topic):
+def pub_build_request_msg(unit_id, topic_name):
     """
     Simple pub/sub message to build a workout specified through the workout_id in the Datastore object
     :param workout_id:
