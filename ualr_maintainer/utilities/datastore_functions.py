@@ -12,6 +12,24 @@ def randomStringDigits(stringLength=10):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
 
+def add_server_defaults(servers):
+    server_cnt = len(servers)
+    for i in range(server_cnt):
+        if 'sshkey' not in servers[i]:
+            servers[i]["sshkey"] = None
+        if 'guac_path' not in servers[i]:
+            servers[i]["guac_path"] = None
+        if 'tags' not in servers[i]:
+            servers[i]["tags"] = None
+        if 'machine_type' not in servers[i]:
+            servers[i]["machine_type"] = 'n1-standard-1'
+        if 'network_routing' not in servers[i]:
+            servers[i]["network_routing"] = False
+        if 'nics' not in servers[i]:
+            servers[i]['nics'] = None
+    return servers
+
+
 def add_yaml_defaults(yaml_contents):
     """
     Add default values to the yaml. This prevents users from having to fully complete the yaml
@@ -39,22 +57,22 @@ def add_yaml_defaults(yaml_contents):
     if 'assessment' not in yaml_contents:
         yaml_contents['assessment'] = None
 
-    if yaml_contents['workout']['build_type'] == 'compute':
+    if 'student-servers' not in yaml_contents:
+        yaml_contents['student-servers'] = None
+
+    if yaml_contents['workout']['build_type'] == 'compute' or yaml_contents['workout']['build_type'] == 'arena':
         if 'routes' not in yaml_contents:
             yaml_contents['routes'] = None
 
-        server_cnt = len(yaml_contents['servers'])
-        for i in range(server_cnt):
-            if 'sshkey' not in yaml_contents['servers'][i]:
-                yaml_contents['servers'][i]["sshkey"] = None
-            if 'guac_path' not in yaml_contents['servers'][i]:
-                yaml_contents['servers'][i]["guac_path"] = None
-            if 'tags' not in yaml_contents['servers'][i]:
-                yaml_contents['servers'][i]["tags"] = None
-            if 'machine_type' not in yaml_contents['servers'][i]:
-                yaml_contents['servers'][i]["machine_type"] = 'n1-standard-1'
-            if 'network_routing' not in yaml_contents['servers'][i]:
-                yaml_contents['servers'][i]["network_routing"] = False
+        if yaml_contents['workout']['build_type'] == 'arena':
+            yaml_contents['additional-servers'] = add_server_defaults(yaml_contents['additional-servers'])
+            yaml_contents['student-servers']['servers'] = add_server_defaults(yaml_contents['student-servers']['servers'])
+            if 'student_entry_username' not in yaml_contents['student-servers']:
+                yaml_contents['student-servers']['student_entry_username'] = None
+            if 'student_entry_password' not in yaml_contents['student-servers']:
+                yaml_contents['student-servers']['student_entry_password'] = None
+        else:
+            yaml_contents['servers'] = add_server_defaults(yaml_contents['servers'])
 
     return yaml_contents
 
@@ -82,18 +100,15 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
     assessment = y['assessment']
+    student_servers = y['student-servers']['servers']
 
-
-    # create random number specific to the workout (6 characters by default)
     if num_team > 10:
         num_team = 10
 
-    if workout_length > 7:
-        workout_length = 7
+    if workout_length > 60:
+        workout_length = 60
 
-    # we have to store each labentry ext IP and send it to the user
     workout_ids = []
-
     ts = str(calendar.timegm(time.gmtime()))
     print("Creating unit %s" % (unit_id))
     store_unit_info(id=unit_id, email=email, unit_name=unit_name, workout_name=workout_name, build_type=build_type,
@@ -102,7 +117,6 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
 
     if build_type == 'container':
         container_info = y['container_info']
-        assessment = y['assessment']
         for i in range(1, num_team + 1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
@@ -114,14 +128,33 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         servers = y['servers']
         routes = y['routes']
         firewall_rules = y['firewall_rules']
-        assessment = y['assessment']
         for i in range(1, num_team+1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
             store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
                                workout_duration=workout_length, workout_type=workout_type,
                                networks=networks, servers=servers, routes=routes,
-                               firewall_rules=firewall_rules, assessment=assessment)
+                               firewall_rules=firewall_rules, assessment=assessment,
+                               student_instructions_url=student_instructions_url)
+    elif build_type == 'arena':
+        networks = y['additional-networks']
+        servers = y['additional-servers']
+        routes = y['routes']
+        firewall_rules = y['firewall_rules']
+        student_entry = y['student-servers']['student_entry']
+        student_entry_type = y['student-servers']['student_entry_type']
+        student_entry_username = y['student-servers']['student_entry_username']
+        student_entry_password = y['student-servers']['student_entry_password']
+        network_type = y['student-servers']['network_type']
+        add_arena_to_unit(unit_id=unit_id, workout_duration=workout_length, timestamp=ts, networks=networks,
+                          servers=servers, routes=routes, firewall_rules=firewall_rules,
+                          student_entry=student_entry, student_entry_type=student_entry_type, network_type=network_type,
+                          student_entry_username=student_entry_username, student_entry_password=student_entry_password)
+        for i in range(1, num_team+1):
+            workout_id = randomStringDigits()
+            workout_ids.append(workout_id)
+            store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers,
+                                timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment)
 
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     unit['workouts'] = workout_ids
@@ -150,13 +183,14 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
 
 
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks,
-                       servers, routes, firewall_rules, assessment):
+                       servers, routes, firewall_rules, assessment, student_instructions_url):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
     new_workout.update({
         'unit_id': unit_id,
         'user_email': user_mail,
+        'student_instructions_url': student_instructions_url,
         'expiration': workout_duration,
         'type': workout_type,
         'start_time': ts,
@@ -195,6 +229,65 @@ def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_
     })
 
     ds_client.put(new_unit)
+
+
+def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, servers, routes, firewall_rules,
+                      student_entry, student_entry_type, network_type, student_entry_username,
+                      student_entry_password):
+    """
+    Adds the necessary build components to the unit to build a common network in which all students can interact.
+    :param unit_id: The unit in which to add the arena build
+    :param workout_duration: The number of days before deleting this arena
+    :param start_time: Used for calculating how long an arena has run
+    :param networks: The network to build for this arena
+    :param servers: The servers to build for this arena
+    :param routes: The routes to include for this arena
+    :param firewall_rules: The firewall rules to add for the arena
+    :param student_entry*: Parameters for building the guacamole connections through startup scripts
+    :return: None
+    """
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+
+    unit['arena'] = {
+        'expiration': workout_duration,
+        'start_time': timestamp,
+        'run_hours': 0,
+        'timestamp': timestamp,
+        'resources_deleted': False,
+        'running': False,
+        'misfit': False,
+        'networks': networks,
+        'servers': servers,
+        'routes': routes,
+        'firewall_rules': firewall_rules,
+        'student_entry': student_entry,
+        'student_entry_type': student_entry_type,
+        'student_entry_username': student_entry_username,
+        'student_entry_password': student_entry_password,
+        'student_network_type': network_type
+    }
+
+    ds_client.put(unit)
+
+
+def store_arena_workout(workout_id, unit_id, timestamp, student_servers, student_instructions_url,
+                        assessment):
+    new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
+
+    new_workout.update({
+        'unit_id': unit_id,
+        'type': 'arena',
+        'student_instructions_url': student_instructions_url,
+        'start_time': timestamp,
+        'run_hours': 0,
+        'timestamp': timestamp,
+        'running': False,
+        'misfit': False,
+        'assessment': assessment,
+        'student_servers': student_servers,
+    })
+
+    ds_client.put(new_workout)
 
 
 # This function queries and returns all workout IDs for a given unit

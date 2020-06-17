@@ -43,8 +43,10 @@ def index(workout_type):
 
         if unit_id == False:
             return render_template('no_workout.html')
-        elif build_type == "compute":
-            pub_build_request_msg(unit_id)
+        elif build_type == 'compute':
+            pub_build_request_msg(unit_id=unit_id, topic_name='build_workouts')
+        elif build_type == 'arena':
+            pub_build_request_msg(unit_id=unit_id, topic_name='build_arena')
 
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)

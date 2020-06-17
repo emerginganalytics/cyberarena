@@ -176,6 +176,42 @@ def delete_specific_workout(workout_id, workout):
         return False
 
 
+def delete_specific_arena(unit_id, unit):
+    """
+    Arenas are unique in having both resources at the unit level and individual workout resources. This
+    function addresses those differences
+    :param arena_id: The Unit_ID of this arena
+    :return:
+    """
+    try:
+        delete_dns(unit_id, unit["external_ip"])
+    except HttpError:
+        print("DNS record does not exist")
+        pass
+    except KeyError:
+        print("workout %s has no external IP address" % unit_id)
+        pass
+    
+    # First delete all servers associated with this unit
+    delete_vms(unit_id)
+    for workout_id in unit['workouts']:
+        delete_vms(workout_id)
+    time.sleep(5)
+    # Now delete all of the network elements
+    delete_firewall_rules(unit_id)
+    for workout_id in unit['workouts']:
+        delete_firewall_rules(workout_id)
+    time.sleep(5)
+    delete_subnetworks(unit_id)
+    for workout_id in unit['workouts']:
+        delete_subnetworks(workout_id)
+    time.sleep(5)
+    delete_network(unit_id)
+    for workout_id in unit['workouts']:
+        delete_network(workout_id)
+    return True
+
+
 def delete_workouts():
     """
     Queries the data store for workouts which have expired. Workout expiration is defined during the build
@@ -232,4 +268,41 @@ def delete_workouts():
                 print("Finished deleting workout %s" % workout_id)
 
 
-delete_workouts()
+def delete_arenas():
+    """
+    It is common for cloud functions to time out when deleting several workouts. This adds an additional work thread
+    to delete arenas similar to the delete_workouts() function
+    :return:
+    """
+    query_old_arenas = ds_client.query(kind='cybergym-unit')
+    query_old_arenas.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
+    for arena in list(query_old_arenas.fetch()):
+        arena_type = False
+        if 'build_type' in arena and arena['build_type'] == 'arena':
+            arena_type = True
+
+        if arena_type:
+            try:
+                if workout_age(arena['timestamp']) >= int(arena['expiration']) and not arena['resources_deleted']:
+                    arena_id = arena.key.name
+                    print('Deleting resources from arena %s' % arena_id)
+                    if delete_specific_arena(arena_id, arena):
+                        arena['resources_deleted'] = True
+                        ds_client.put(arena)
+            except KeyError:
+                arena['resources_deleted'] = True
+                ds_client.put(arena)
+
+    # Delete any misfit arenas
+    query_misfit_arenas = ds_client.query(kind='cybergym-unit')
+    query_misfit_arenas.add_filter("misfit", "=", True)
+    for arena in list(query_misfit_arenas.fetch()):
+        arena_id = arena.key.name
+
+        print('Deleting resources from arena %s' % arena_id)
+        if delete_specific_arena(arena_id, arena):
+            ds_client.delete(arena.key)
+            print("Finished deleting arena %s" % arena_id)
+
+# delete_workouts()
+delete_arenas()
