@@ -84,7 +84,7 @@ def landing_page(workout_id):
             complete = workout['complete']
 
         assessment = None
-        if 'assessment' in workout:
+        if workout['assessment']:
             question_list = []
             if workout['assessment']['type']:
                 assessment_type = workout['assessment']['type']
