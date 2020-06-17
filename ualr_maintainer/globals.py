@@ -31,6 +31,8 @@ class workout_globals():
                                   'schtasks /Create /SC MINUTE /TN {script_name} /TR .\\{script}'
     max_workout_len = 30
     max_num_workouts = 30
+    ps_build_workout_topic = 'build-workouts'
+    ps_build_arena_topic = 'build_arena'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):
