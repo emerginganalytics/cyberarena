@@ -49,7 +49,7 @@ def get_startup_scripts(workout_id, assessment):
                             'value': script
                         }
                 if 'script_language' in question and question['script_language'] == 'python':
-                    script = 'python {script}'.format(script=question['script'])
+                    script = 'python3 {script}'.format(script=question['script'])
                 else:
                     script = question['script']
                 assess_script = workout_globals.linux_startup_script_task.format(env_workoutkey=question['key'],

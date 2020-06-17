@@ -2,12 +2,8 @@ version: '1'
 
 workout:
   name: 'Trojan Arena'
-  type: arena
-  workout_description: 'Capture the Flag Competition'
-  project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
-  dnszone: "cybergym-public"
+  build_type: arena
+  workout_description: 'Head to head capture-the-flag style competition.'
 
 # For student servers, these will be replicated to the number of
 # students specified by the instructor. These student servers can
@@ -15,64 +11,39 @@ workout:
 # but they can also have distinct networks.
 # The student network is named 'student-network' or student-network-#'
 student-servers:
-  - name: student-workstation
-    image: <FILLIN>
-    machine_type: "n1-standard-1"
-    network_type: same(default) | distinct
+  student_entry: student-workstation
+  student_entry_type: rdp
+  student_entry_username: cybergym
+  student_entry_password: 'ChooseAnAlphaNumericPassword1'
+  network_type: same
+  servers:
+    - name: student-workstation
+      image: image-promise-win-16
+      machine_type: n1-standard-1
 
 # If additional networks are needed for servers, these are added here.
+# Do not use 10.1.0.0/16. This is reserved for students
 additional-networks:
-  - name: external-network
-    subnets:
-      - name: default
-        ip_subnet: 10.1.0.0/24
-  - name: internal-network
-    subnets:
-      - name: default
-        ip_subnet: 10.1.1.0/24
 
-# Servers for the arena are added here. 
+# Servers for the arena are added here.
 additional-servers:
   - name: cybergym-arena-server
-    image: <FILLIN>
-    machine_type: "n1-standard-1"
-    network_routing: false
-    tags: {items: ["http-server"]}
-    metadata: none
-    nics:
-      - network: student-network
-        internal_IP: 10.1.0.100
-        subnet: default
-        external_NAT: false
+    image:  image-cybergym-vnc
+    machine_type: n1-standard-1
+    tags: {items: ['http-server']}
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
-  - name: default-internal-fortinet
-    network: internal-network
-    dest_range: "0.0.0.0/0"
-    next_hop_instance: cybergym-fortinet-fortigate
-  - name: external-to-internal
-    network: external-network
-    dest_range: "10.1.1.0/24"
-    next_hop_instance: cybergym-fortinet-fortigate
 
 # Any additional firewall rules are added here. Note: student firewall rules are added by default
 firewall_rules:
   - name: allow-http
-    network: external-network
     target_tags: ["http-server"]
     protocol: none
     ports: ["tcp/80,8080,443"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-all-local-external
-    network: external-network
-    target_tags: []
-    protocol: tcp
-    ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.0.0/16"]
-  - name: allow-all-local-internal
-    network: internal-network
-    target_tags: []
-    protocol: tcp
-    ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.0.0/16"]
+  - name: allow-ssh
+    target_tags: ["student-entry"]
+    protocol: none
+    ports: ["tcp/22"]
+    source_ranges: ["0.0.0.0/0"]

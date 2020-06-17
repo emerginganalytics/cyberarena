@@ -12,6 +12,7 @@ workout_token = 'RG987S1GVNKYRYHYA'
 region = 'us-central1'
 zone = 'us-central1-a'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
+guac_password = 'promiseme'
 
 # Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/complete'
@@ -28,6 +29,36 @@ class workout_globals():
     linux_startup_script_task = 'export WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                   'gsutil cp ' + script_repository + '{script} /usr/bin\n' \
                                   '(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/{script}") | crontab -'
+
+    # These next few constants build the startup scripts for guacamole. This is VERY helpful!
+    # The elusive Apache Guacamole documentation for the SQL commands are here: https://guacamole.apache.org/doc/gug/jdbc-auth.html
+    guac_startup_begin = \
+        '#!/bin/bash\n' \
+        'mysql -u guacamole_user -p{guacdb_password} -D guacamole_db <<MY_QUERY\n'
+    guac_startup_user_add = \
+        'SET @salt = UNHEX(SHA2(UUID(), 256));\n' \
+        'INSERT INTO guacamole_entity (name, type) VALUES (\'{user}\', \'USER\');\n' \
+        'SELECT entity_id INTO @entity_id FROM guacamole_entity WHERE name = \'{user}\';\n' \
+        'INSERT INTO guacamole_user (entity_id, password_salt, password_hash, password_date) ' \
+        'VALUES (@entity_id, @salt, UNHEX(SHA2(CONCAT(\'{guac_password}\', HEX(@salt)), 256)), \'2020-06-12 00:00:00\');\n'
+    guac_startup_vnc = \
+        'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'vnc\');\n' \
+        'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'hostname\', \'{ip}\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{vnc_password\");\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'5901\');\n'
+    guac_startup_rdp = \
+        'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'rdp\');\n' \
+        'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'hostname\', \'{ip}\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{rdp_password}\");\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'3389\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'username\', \'{rdp_username}\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'security\', \'nla\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'ignore-cert\', \'true\');\n'
+    guac_startup_join_connection_user = \
+        'INSERT INTO guacamole_connection_permission (entity_id, connection_id, permission) VALUES (@entity_id, @connection_id, \'READ\');\n'
+    guac_startup_end = 'MY_QUERY\n'
 
     @staticmethod
     def extended_wait(project, zone, operation_id):

@@ -1,6 +1,7 @@
 from common.build_workout import build_workout
-from common.delete_expired_workouts import delete_workouts
-from common.start_vm import start_vm
+from common.delete_expired_workouts import delete_workouts, delete_arenas
+from common.start_vm import start_vm, start_arena
+from common.stop_workout import stop_everything
 
 
 def cloud_fn_build_workout(event, context):
@@ -33,6 +34,17 @@ def cloud_fn_start_vm(event, context):
     start_vm(workout_id)
 
 
+def cloud_fn_start_arena(event, context):
+    unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
+
+    if not unit_id:
+        if context:
+            print("Invalid fields for pubsub message triggered by messageId{} published at {}".format(context.event_id, context.timestamp))
+        return False
+
+    start_arena(unit_id)
+
+
 def cloud_fn_delete_expired_workout(event, context):
     """
     Cloud function calls a local function to delete all expired and misfit workouts in the project.
@@ -42,6 +54,24 @@ def cloud_fn_delete_expired_workout(event, context):
     """
     delete_workouts()
 
+
+def cloud_fn_delete_expired_arenas(event, context):
+    """
+    Cloud function calls a local function to delete all expired and misfit workouts in the project.
+    :param event: No data is passed to this function
+    :param context: No data is passed to this function
+    :return:
+    """
+    delete_arenas()
+
+def cloud_fn_stop_all_servers(event, context):
+    """
+    Simply stops all servers in the project. This is meant to run once a day.
+    :param event: No data is passed to this function
+    :param context: No data is passed to this function
+    :return:
+    """
+    stop_everything()
 
 # Cloud VM Function Testing
 # data = \
