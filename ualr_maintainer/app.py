@@ -44,7 +44,7 @@ def index(workout_type):
         if unit_id == False:
             return render_template('no_workout.html')
         elif build_type == 'compute':
-            pub_build_request_msg(unit_id=unit_id, topic_name='build_workouts')
+            pub_build_request_msg(unit_id=unit_id, topic_name='build-workouts')
         elif build_type == 'arena':
             pub_build_request_msg(unit_id=unit_id, topic_name='build_arena')
 
