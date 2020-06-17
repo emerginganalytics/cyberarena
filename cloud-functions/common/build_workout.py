@@ -105,4 +105,4 @@ def build_workout(workout_id):
     ds_client.put(workout)
 
 
-# build_workout('wqgvfvrnis')
+build_workout('wsjronrgyk')

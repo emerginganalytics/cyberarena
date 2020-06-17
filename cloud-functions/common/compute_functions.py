@@ -1,4 +1,6 @@
 import time
+from socket import timeout
+
 from common.globals import project, zone, dnszone, ds_client, compute
 from common.dns_functions import add_dns_record, register_workout_server
 
@@ -95,7 +97,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     response = compute.instances().insert(project=project, zone=zone, body=config).execute()
     try:
         compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-    except:
+    except timeout:
         compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
     if tags:
