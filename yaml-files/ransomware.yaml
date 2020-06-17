@@ -29,7 +29,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.34
         subnet: default
-        external_NAT: true
+        external_NAT: false
   - name: cybergym-labentry
     image: image-labentry
     machine_type: "n1-standard-1"
