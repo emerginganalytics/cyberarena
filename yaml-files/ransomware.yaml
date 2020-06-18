@@ -36,7 +36,7 @@ servers:
     network_routing: false
     tags: {items: ["http-server", "https-server", "guac-server", "vnc-server", "labentry"]}
     metadata: none
-    guac_path: "MQBjAG15c3Fs"
+    guac_path: "MzMAYwBteXNxbA=="
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
