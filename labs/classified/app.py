@@ -89,7 +89,7 @@ def home(workout_id):
     if not session.get('logged_in'):
         return render_template('index.html', workout_id=workout_id)
     else:
-        return render_template('workouts.html', workout_id=workout_id)
+        return render_template('flag.html', workout_id=workout_id)
 
 
 # Generates values based on workout
@@ -99,7 +99,7 @@ def loader(workout_id):
     workout = ds_client.get(key)
 
     if workout:
-        if workout['type'] == 'wireshark':
+        if workout['type'] == 'wireshark' or 'dos':
             return redirect('/home/' + workout_id)
         elif workout['type'] == 'xss':
             return redirect('/workouts/xss/' + workout_id)
@@ -141,7 +141,7 @@ def xss(workout_id):
 
 @app.route('/workouts/tfh/<workout_id>')
 def twofactorhome(workout_id):
-    return render_template('welcome.html')
+    return render_template('welcome.html', workout_id=workout_id)
 
 
 @app.route('/workouts/tfh/register/<workout_id>', methods=['GET', 'POST'])
@@ -149,13 +149,13 @@ def register(workout_id):
     """User registration route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome'))
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
     form = RegisterForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None:
             flash('Username already exists.')
-            return redirect(url_for('register'))
+            return redirect(url_for('register', workout_id=workout_id))
         # add new user to the database
         user = User(username=form.username.data, password=form.password.data)
         db.session.add(user)
@@ -163,20 +163,20 @@ def register(workout_id):
 
         # redirect to the two-factor auth page, passing username in session
         session['username'] = user.username
-        return redirect(url_for('two_factor_setup'))
+        return redirect(url_for('two_factor_setup', workout_id=workout_id))
     return render_template('register.html', form=form, workout_id=workout_id)
 
 
-@app.route('/workouts/tfh/twofactor')
-def two_factor_setup():
+@app.route('/workouts/tfh/twofactor/<workout_id>')
+def two_factor_setup(workout_id):
     if 'username' not in session:
-        return redirect(url_for('twofactorhome'))
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
     user = User.query.filter_by(username=session['username']).first()
     if user is None:
-        return redirect(url_for('twofactorhome'))
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
     # since this page contains the sensitive qrcode, make sure the browser
     # does not cache it
-    return render_template('two-factor-setup.html'), 200, {
+    return render_template('two-factor-setup.html', workout_id=workout_id), 200, {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'}
@@ -204,32 +204,32 @@ def qrcode():
         'Expires': '0'}
 
 
-@app.route('/workouts/tfh/login', methods=['GET', 'POST'])
-def login():
+@app.route('/workouts/tfh/login/<workout_id>', methods=['GET', 'POST'])
+def login(workout_id):
     """User login route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome'))
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.verify_password(form.password.data) or \
                 not user.verify_totp(form.token.data):
             flash('Invalid username, password or token.')
-            return redirect(url_for('login'))
+            return redirect(url_for('login', workout_id=workout_id))
 
         # log user in
         login_user(user)
         flash('You are now logged in!')
-        return redirect(url_for('twofactorhome'))
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
     return render_template('login.html', form=form, workout_id=workout_id)
 
 
-@app.route('/workouts/tfh/logout')
-def logout():
+@app.route('/workouts/tfh/logout/<workout_id>')
+def logout(workout_id):
     """User logout route."""
     logout_user()
-    return redirect(url_for('twofactorhome'))
+    return redirect(url_for('twofactorhome', workout_id=workout_id))
 
 
 # create database tables if they don't exist yet
