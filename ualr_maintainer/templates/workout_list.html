@@ -49,8 +49,8 @@
 
             <h2>Description</h2>
             <p>{{ description }}</p>
-            {% if instructions!=None %}
-                <a href="{{ instructions }}" target="_blank">Teacher Instructions</a>
+            {% if teacher_instructions %}
+                <a href="{{ teacher_instructions }}">Teacher Instructions</a>
             {% endif %}
             <p>To begin, click on an available team below. </p>
             <ol class="teams">
@@ -167,10 +167,10 @@
             });
     
         }
-        /*
+        
         setInterval(function(){
             check_workout_status( "{{ unit_id }}");
         }, 30000);
-        */
+        
     </script>
 {% endblock %}
