@@ -79,6 +79,10 @@ def landing_page(workout_id):
         if 'student_instructions_url' in unit:
             student_instructions_url = unit['student_instructions_url']
 
+        teacher_instructions_url = None
+        if 'teacher_instructions_url' in unit:
+            teacjer_instructions_url = unit['teacher_instructions_url']
+
         complete = None
         if 'complete' in workout:
             complete = workout['complete']
@@ -86,6 +90,7 @@ def landing_page(workout_id):
         assessment = None
         if workout['assessment']:
             question_list = []
+
             if workout['assessment']['type']:
                 assessment_type = workout['assessment']['type']
             for question in workout['assessment']['questions']:
@@ -125,12 +130,14 @@ def landing_page(workout_id):
             ds_client.put(workout)
 
             return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
+                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
+                               teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete, workout_type=workout['type'], assessment=assessment, score=percentage_correct)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, instructions=student_instructions_url,
+                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
+                               teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete, workout_type=workout['type'], assessment=assessment)
     else:
