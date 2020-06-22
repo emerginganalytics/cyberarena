@@ -12,6 +12,8 @@ workout:
   dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location:
+  build_type: "compute"
+
 
 networks:
   - name: external-network
