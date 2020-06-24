@@ -81,9 +81,9 @@
                 {% if running %}
                 <h2>Workout Servers</h2>
                     {% if guac_path==None %}
-                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!<span style="text-transform: uppercase">{{ workout_id }}</span></a>
                     {% else %}
-                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Workout ID: <span style="text-transform: uppercase">{{ workout_id }}</span></a>
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!<span style="text-transform: uppercase">{{ workout_id }}</span></a>
                     {% endif %}
                 {% endif %}
                 <br>
@@ -119,19 +119,14 @@
 
                     function reveal_assessment(){
                         $(".workout_assessment_form").fadeToggle();
-                        if(document.getElementById('assessment_dropdown_control').innerHTML.toString() == "&#x25B6;   Assessment"){
-                            document.getElementById('assessment_dropdown_control').innerHTML = "&#x25BC   Assessment";
-                        }else{
-                            document.getElementById('assessment_dropdown_control').innerHTML == "&#x25B6;   Assessment";
-                        }
                     }
                     
                 </script>
             </div> <!--Workout info container-->
                 {% if assessment %}
                 <div class='container' id='assessment'>
-                    <a class='landing_dropdown' id='assessment_dropdown_control' onclick="reveal_assessment()">&#x25B6;   Assessment</a><br>
-                    <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none;">
+                    <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
+                    <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;">
                     {% for question in assessment%}
                         {% if question['type'] == 'input' %}
                             <div class='question_group'>
@@ -185,5 +180,6 @@
                     });
                 });
         </script>
-        {% endblock %}
+    </div>
+{% endblock %}
     <!-- </html> -->
