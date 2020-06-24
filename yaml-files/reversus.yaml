@@ -32,7 +32,7 @@ servers:
         subnet: default
         external_NAT: true
   - name: reversus-windows-16
-    image: image-promise-win-2016
+    image: image-promise-win-16
     machine_type: "n1-standard-1"
     network_routing: false
     tags: {items: ["allow-rdp"]}
@@ -78,3 +78,8 @@ firewall_rules:
     protocol: none
     ports: ["tcp/443"]
     source_ranges: ["0.0.0.0/0"]
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of the validation code from crackthis1"
