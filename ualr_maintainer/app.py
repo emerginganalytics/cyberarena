@@ -88,19 +88,22 @@ def landing_page(workout_id):
             complete = workout['complete']
 
         assessment = None
-        if workout['assessment']:
-            question_list = []
+        if 'assessment' in workout:
+            try:
+                question_list = []
 
-            if workout['assessment']['type']:
-                assessment_type = workout['assessment']['type']
-            for question in workout['assessment']['questions']:
-                question_dict = {}
-                question_dict['question'] = question['question']
-                if(question['type'] == 'input'):
-                    question_dict['answer'] = question['answer']
-                question_dict['type'] = question['type']
-                question_list.append(question_dict)
-            assessment = question_list
+                if 'type' in workout['assessment']:
+                    assessment_type = workout['assessment']['type']
+                for question in workout['assessment']['questions']:
+                    question_dict = {}
+                    question_dict['question'] = question['question']
+                    if(question['type'] == 'input'):
+                        question_dict['answer'] = question['answer']
+                    question_dict['type'] = question['type']
+                    question_list.append(question_dict)
+                assessment = question_list
+            except TypeError:
+                print('assessment not defined')
 
         if(request.method == "POST"):
             valid_answers = []

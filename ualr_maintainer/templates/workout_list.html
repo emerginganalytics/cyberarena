@@ -31,7 +31,7 @@
             <div class="control_button">
                 <form action="/stop_all" method="post">
                     <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
-                    <div class="btn-ctn">
+                    <div class="btn-ctn ">
                             <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
                     </div>
                 </form>
@@ -52,10 +52,13 @@
             {% if teacher_instructions %}
                 <a href="{{ teacher_instructions }}">Teacher Instructions</a>
             {% endif %}
-            <p>To begin, click on an available team below. </p>
+            <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             <ol class="teams">
                 {% for workout in workout_list %}
-                <a style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Team {{ workout.name }} </a>
+                {% if workout["complete"] == True %}
+                <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
+                {% else %}
+                <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
                 <div class="collapse" id="team_collapse_{{workout.name}}">
                     <table>
                         <tr>
@@ -73,7 +76,7 @@
                             {% if build_type == "container" %}
                             <td>{{ workout_url_path + '/' + workout.name }}</td>
                             {% else %}
-                            <td><a href="/landing/{{workout.name}}">Landing Page</a></td>
+                            <td><a href="/landing/{{workout.name}}" target="_blank">Landing Page</a></td>
                             {% endif %}
                             {% if workout["student_instruction_url"] %}
                             <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
@@ -114,19 +117,9 @@
                     </div>
                 </div>
                 {% endif %}
-                    <!-- {% if build_type == "container" %}
-                        {% if workout['complete'] == True %}
-                        <a style="color:green" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
-                        {% else %}
-                        <a style="color:red" href="{{ workout_url_path + '/' + workout.name }}" target="_blank"><li class="teams">{{ workout.name }}</li></a>
-                        {% endif %}
-                    {% else %}
-                        {% if workout["complete"] == True %}
-                            <a style="color:green" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
-                        {% else %}
-                            <a style="color:red" href="/landing/{{ workout.name }}" target="_blank" id='vm-status-{{ workout["name"] }}'><li class="teams">/landing/{{ workout.name }}</li></a>
-                        {% endif %}
-                    {% endif %} -->
+                
+                
+                {% endif %}
                 {% endfor %}
             </ol>
         </div>
@@ -158,8 +151,10 @@
                 success: function(data){
                     for (i = 0; i < data.length; i++){
                         if(data[i]['complete'] == true){
-                            var link = document.getElementById("vm-status-" + data[i]['name']);
-                            link.style.color = 'green';
+                            var link = document.getElementById("workout_link_" + data[i]['name']);
+                            link.classList.remove('btn-deactivated');
+                            link.className = "btn";
+                            link.href = '#team_collapse_' + data[i]['name'];
 
                         }
                     }
