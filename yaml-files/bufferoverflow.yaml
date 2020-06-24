@@ -3,8 +3,8 @@ version: '1'
 workout:
   name: BufferOverflow
   workout_description: 'Learn about a basic buffer overflow exploit.'
-  teacher_workout_instructions_url: 
-  student_instructions_url:
+  teacher_workout_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/BufferOverflowTeacher.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/BufferOverflow.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -26,7 +26,7 @@ servers:
     network_routing: false
     tags: {items: ["http-server", "labentry"]}
     metadata: none
-    guac_path: "MzUAYwBteXNxbA=="
+    guac_path: "NDAAYwBteXNxbA=="
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
@@ -40,7 +40,7 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.35
+        internal_IP: 10.1.1.44
         subnet: default
         external_NAT: true
 
@@ -73,3 +73,8 @@ firewall_rules:
     protocol: none
     ports: ["tcp/443"]
     source_ranges: ["0.0.0.0/0"]
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of message.txt's content"
