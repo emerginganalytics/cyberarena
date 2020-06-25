@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash, request, session, abort, url_for
+from flask import Flask, render_template, redirect, flash, request, session, abort, url_for, jsonify
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -7,14 +7,16 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, \
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import Required, Length, EqualTo
-from server_scripts import ds_client
+from wtforms.validators import DataRequired, Length, EqualTo
+from google.cloud import datastore
 
 import onetimepass
 import pyqrcode
 import os
 import base64
-
+import requests
+import random
+import string
 
 # application instance
 app = Flask(__name__)
@@ -69,19 +71,69 @@ def load_user(user_id):
 
 class RegisterForm(FlaskForm):
     """Registration form."""
-    username = StringField('Username', validators=[Required(), Length(1, 64)])
-    password = PasswordField('Password', validators=[Required()])
+    username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
+    password = PasswordField('Password', validators=[DataRequired()])
     password_again = PasswordField('Password again',
-                                   validators=[Required(), EqualTo('password')])
+                                   validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
 
 
 class LoginForm(FlaskForm):
     """Login form."""
-    username = StringField('Username', validators=[Required(), Length(1, 64)])
-    password = PasswordField('Password', validators=[Required()])
-    token = StringField('Token', validators=[Required(), Length(6, 6)])
+    username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    token = StringField('Token', validators=[DataRequired(), Length(6, 6)])
     submit = SubmitField('Login')
+
+
+ds_client = datastore.Client()
+project = 'ualr-cybersecurity'
+
+
+def set_workout_flag(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    flag_wireshark = 'CyberGym{'.join(random.choices(string.ascii_letters + string.digits, '}', k=16,))
+    workout['container_info']['wireshark_flag'] = flag_wireshark
+    ds_client.put(workout)
+    return flag_wireshark
+
+
+def publish_status(workout_id, workout_key):
+    url = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
+
+    status = {
+        "workout_id": workout_id,
+        "token": workout_key,
+    }
+
+    publish = requests.post(url, json=status)
+    print('[*] POSTING to {} ...'.format(url))
+    print(publish)
+
+
+def check_flag(workout_id, submission):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    # data is a dict list that is passed back to page as JSON object
+    status = workout['assessment']['questions']
+    data = {
+        'wireshark_flag': {
+            'flag': workout['container_info']['wireshark_flag'],
+            'status': status[2]['complete']
+        }
+    }
+
+    flag_wireshark = workout['container_info']['wireshark_flag']
+
+    if submission in flag_wireshark:
+        data['wireshark_flag']['status'] = True
+        workout_key = workout['assessment']['questions'][2]['1TkkG1J']
+        publish_status(workout_id, workout_key)
+
+    return data
 
 
 @app.route('/<workout_id>')
@@ -109,24 +161,57 @@ def loader(workout_id):
         return redirect('/invalid')
 
 
-@app.route("/login", methods=["GET", "POST"])
-def do_admin_login():
+@app.route("/login/<workout_id>", methods=["GET", "POST"])
+def do_admin_login(workout_id):
     if request.form['psw'] == 'cyberSecret42' and request.form['username'] == 'admin':
         session['logged_in'] = True
     else:
         flash('Incorrect Password')
-    return home()
+    return redirect(url_for('home', workout_id=workout_id))
 
 
-@app.route("/flag/<workout_id>", methods=["POST"])
+@app.route("/flag/<workout_id>", methods=["GET", "POST"])
 def flag(workout_id):
-    return render_template('flag.html', workout_id=workout_id)
+    page_template = 'flag.html'
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    # Only valid workouts can access
+    if workout:
+        if workout['type'] == 'wireshark':
+            wireshark_flag = workout['container_info']['wireshark_flag']
+
+            if request.method == 'GET':
+                return render_template(
+                    page_template,
+                    workout_id=workout_id,
+                    wireshark_flag=wireshark_flag
+                )
+            elif request.method == 'POST':
+                plaintext = request.get_json()
+                # ['id'] helps determine which cipher is to be evaluated
+                data = check_flag(workout_id, str(plaintext['flag']))
+
+                return jsonify({
+                    'message': data['wireshark_flag']['flag'],
+                    'status': data['wireshark_flag']['status'],
+                })
+        else:
+            return redirect('/invalid')
+    else:
+        return redirect('/invalid')
 
 
-@app.route("/logout", methods=["GET", "POST"])
-def admin_logout():
+@app.route('/invalid', methods=['GET'])
+def invalid():
+    template = 'invalid_workout.html'
+    return render_template(template)
+
+
+@app.route("/logout/<workout_id>", methods=["GET", "POST"])
+def admin_logout(workout_id):
     session['logged_in'] = False
-    return home()
+    return redirect(url_for('home', workout_id=workout_id))
 
 
 @app.route("/workouts/<workout_id>", methods=["POST"])
