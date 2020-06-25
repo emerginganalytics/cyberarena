@@ -10,6 +10,7 @@ workout:
   zone: "us-central1-a"
   dnszone: "cybergym-public"
   project_api_key_type: cloud
+  build_type: "compute"
   flag_location:
 
 networks: 
