@@ -18,7 +18,7 @@
   </div>
 <div id="id01" class="modal">
 
-  <form class="modal-content animate" action="{{url_for('do_admin_login')}}" method="POST">
+  <form class="modal-content animate" action="{{url_for('do_admin_login', workout_id=workout_id)}}" method="POST">
     <div class="imgcontainer">
       <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
       <img src="/static/CyberGymClassified.png" alt="Avatar" class="avatar">
@@ -41,7 +41,7 @@
   </form>
 </div>
   </div>
-
+{% block js_block %}
 <script>
 // Get the modal
 var modal = document.getElementById('id01');
@@ -53,6 +53,6 @@ window.onclick = function(event) {
     }
 }
 </script>
-
+{% endblock js_block %}
 </body>
 </html>

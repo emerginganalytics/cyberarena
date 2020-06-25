@@ -13,7 +13,6 @@ workout:
   flag_location:
   build_type: "compute"
 
-
 networks:
   - name: external-network
     subnets:

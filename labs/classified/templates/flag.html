@@ -3,8 +3,75 @@
 {% block title %}Wireshark Flag{% endblock %}
 
 {% block content %}
-<h1> <b> {{ flag }} </b></h1>
-<form action="{{url_for('admin_logout')}}" method="POST">
+    <div class="w3-section">
+        <div class="w3-section" id="workout_flag">
+            <label for="flag">Wireshark Flag</label>
+            <h1 id="flag_display"> </h1>
+            <input type="text" size='80' name="flag" id="flag" />
+        </div>
+    <div>
+            <p> Please enter the flag above to complete the workout</p>
+            <button id="flag_button">Check Flag</button>
+        </div>
+    </div>
+    <form action="{{url_for('admin_logout', workout_id=workout_id)}}" method="POST">
       <button type="submit">Logout</button>
-</form>
-{% block page_content %}
+    </form>
+{% endblock %}
+{% block js_block %}
+    {# AJAX to display Decrypted Cipher #}
+     <script>
+             const message = $('#flag_display').val();
+               $.ajax({
+                  type : 'POST',
+                  url : '/flag/{{ workout_id }}',
+                  data : JSON.stringify({flag : message}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_flag(data['message']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+             function display_flag(message) {
+                let results_div = $('#flag_display');
+
+                results_div.html('');
+
+                let html_string = 'Flag: ' + message + '<br />';
+                results_div.html(html_string);
+            }
+     </script>
+ {# AJAX to check flag #}
+     <script>
+            $('#flag_button').on('click', function() {
+               const message = $('#flag').val();
+               $.ajax({
+                  type : 'POST',
+                  url : '/flag/{{ workout_id }}',
+                  data : JSON.stringify({flag : message}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_flag_submission(data['status'], data['message']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_flag_submission(sub_status, sub_message) {
+                let results_input = $('#flag');
+
+                if (sub_status === true)
+                    results_input.html(sub_message);
+                    results_input.css('background-color', '#4CAF50');
+            }
+     </script>
+{% endblock %}

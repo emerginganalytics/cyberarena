@@ -14,7 +14,6 @@ workout:
   flag_location:
   build_type: "compute"
 
-
 networks:
   - name: external-network
     subnets:
@@ -92,10 +91,17 @@ firewall_rules:
     source_ranges: ["10.1.0.0/16"]
 
 assessment:
-  type: "percentage"
+  type: "level"
   questions:
-    - type: upload
-      question: "Upload a screen shot of the captured password from Wireshark"
-    - type: input
-      question: "What is the password to the admin user?"
+    - required: True
+      type: "input"
+      question: "What is the password for the admin user in the Cyber Gym Classified Web Application?"
       answer: "cyberSecret42"
+    - required: True
+      type: "upload"
+      question: "Upload a screen shot of the FTP message in Wireshark"
+    - required: True
+      type: auto
+      key: "1TkkG1J"
+      question: "Wireshark Flag"
+      complete: False
