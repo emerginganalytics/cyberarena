@@ -76,12 +76,12 @@ def landing_page(workout_id):
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
         student_instructions_url = None
-        if 'student_instructions_url' in unit:
-            student_instructions_url = unit['student_instructions_url']
+        if 'student_instructions_url' in workout:
+            student_instructions_url = workout['student_instructions_url']
 
         teacher_instructions_url = None
         if 'teacher_instructions_url' in unit:
-            teacjer_instructions_url = unit['teacher_instructions_url']
+            teacher_instructions_url = unit['teacher_instructions_url']
 
         complete = None
         if 'complete' in workout:

@@ -81,9 +81,9 @@
                 {% if running %}
                 <h2>Workout Servers</h2>
                     {% if guac_path==None %}
-                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!<span style="text-transform: uppercase">{{ workout_id }}</span></a>
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
                     {% else %}
-                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!<span style="text-transform: uppercase">{{ workout_id }}</span></a>
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!</a>
                     {% endif %}
                 {% endif %}
                 <br>
@@ -97,8 +97,7 @@
                 <!-- <h2>Description</h2> -->
                 <h2>{{ workout_type }} Workout</h2>
                 <p>{{ description }}</p><br>
-                {% if student_instructions!=None %}
-                    <h2>Workout Instructions</h2>
+                {% if student_instructions %}
                     <a href="{{ student_instructions }}" target="_blank" class='landing_dropdown'>Workout Instructions</a>
                 {% endif %}
 
@@ -124,29 +123,32 @@
                 </script>
             </div> <!--Workout info container-->
                 {% if assessment %}
-                <div class='container' id='assessment'>
-                    <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                    <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;">
-                    {% for question in assessment%}
-                        {% if question['type'] == 'input' %}
-                            <div class='question_group'>
-                                <input type="hidden" name="question" value="{{ question['question'] }}" />
+                    {% if assessment['type'] == 'percentage' %}
+                    <div class='container' id='assessment'>
+                        <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
+                        <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;">
+                        {% for question in assessment%}
+                            {% if question['type'] == 'input' %}
+                                <div class='question_group'>
+                                    <input type="hidden" name="question" value="{{ question['question'] }}" />
+                                    {{ question['question'] }}<br>
+                                    <input type='text' name="answer" />
+                                </div>
+                            {% elif question['type'] == 'upload' %}
+                                <div class='question_group'>
                                 {{ question['question'] }}<br>
-                                <input type='text' name="answer" />
-                            </div>
-                        {% elif question['type'] == 'upload' %}
-                            <div class='question_group'>
-                            {{ question['question'] }}<br>
-                            <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                    <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
+                                <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
+                    </div> <!--Assessment Dropdown-->
+                    {% endif %}
                 {% endif %}
                 
 
 
-        </div> <!--tab-content-->
+        
         </div>
     </div> <!--Main Container-->
 

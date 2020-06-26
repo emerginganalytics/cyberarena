@@ -96,7 +96,10 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     workout_name = y['workout']['name']
     build_type = y['workout']['build_type']
     workout_description = y['workout']['workout_description']
-    teacher_instructions_url = y['workout']['teacher_instructions_url']
+    if y['workout']['teacher_instructions_url']:
+        teacher_instructions_url = y['workout']['teacher_instructions_url']
+    elif y['workout']['instructor_instructions_url']:
+        teacher_instructions_url = y['workout']['instructor_instructions_url']
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
     assessment = y['assessment']
