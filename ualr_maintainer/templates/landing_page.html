@@ -123,7 +123,8 @@
                 </script>
             </div> <!--Workout info container-->
                 {% if assessment %}
-                    {% if assessment['type'] == 'percentage' %}
+                <br>
+                    {% if assessment_type == 'percentage' %}
                     <div class='container' id='assessment'>
                         <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
                         <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;">
