@@ -89,6 +89,7 @@ def landing_page(workout_id):
 
         assessment = None
         if 'assessment' in workout:
+            assessment = {}
             try:
                 question_list = []
 
@@ -104,6 +105,7 @@ def landing_page(workout_id):
                 assessment = question_list
             except TypeError:
                 print('assessment not defined')
+                print(assessment)
 
         if(request.method == "POST"):
             valid_answers = []
@@ -136,13 +138,14 @@ def landing_page(workout_id):
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'], assessment=assessment, score=percentage_correct)
+                               complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
+                               score=percentage_correct)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'], assessment=assessment)
+                               complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type)
     else:
         return render_template('no_workout.html')
 
