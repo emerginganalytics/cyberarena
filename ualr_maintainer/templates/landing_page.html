@@ -79,12 +79,13 @@
                 {% endif %} -->
 
                 {% if running %}
-                <h2>Workout Servers</h2>
+                <br><h2>Workout Servers</h2>
                     {% if guac_path==None %}
                         <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
                     {% else %}
                         <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!</a>
                     {% endif %}
+                        <p>*Machines may take a couple minutes to start</p>
                 {% endif %}
                 <br>
                 
@@ -127,7 +128,7 @@
                     {% if assessment_type == 'percentage' %}
                     <div class='container' id='assessment'>
                         <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                        <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;">
+                        <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
                         {% for question in assessment%}
                             {% if question['type'] == 'input' %}
                                 <div class='question_group'>
@@ -137,14 +138,19 @@
                                 </div>
                             {% elif question['type'] == 'upload' %}
                                 <div class='question_group'>
+                                <input type="hidden" name="upload" value="{{ question['question'] }}" />
                                 {{ question['question'] }}<br>
                                 <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
                                 </div>
                             {% endif %}
                         {% endfor %}
                         <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
+                        </form><br>
                     </div> <!--Assessment Dropdown-->
                     {% endif %}
+                {% endif %}
+                {% if user_uploads %}
+                    {{user_uploads}}
                 {% endif %}
                 
 
@@ -152,8 +158,6 @@
         
         </div>
     </div> <!--Main Container-->
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

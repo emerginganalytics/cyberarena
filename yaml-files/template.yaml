@@ -14,6 +14,8 @@ workout:
   name: # Name
   workout_description: # Enclose this in quotes. Include all relevant description and instructions for the workout here.
   project_name: ualr-cybersecurity
+  student_instructions_url:
+  teacher_instructions_url:
   region: # data center region -- this should match the desired region in Google Cloud (i.e., "us-central1")
   zone: # data center zone -- this should match the desired zone in Google Cloud (i.e., "us-central1-a")
   dnszone: "cybergym-public"

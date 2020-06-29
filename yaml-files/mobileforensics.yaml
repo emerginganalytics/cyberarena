@@ -3,7 +3,7 @@ version: '1'
 workout:
   name: mobileforensics
   workout_description: 'Perform forensic analysis on a mobile phone image'
-  teacher_instructions_url:
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/MobileForensicsInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MobileForensicsInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -67,3 +67,17 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: "percentage"
+  questions:
+    - type: input
+      question: "Identify the phone user’s full name"
+      answer: "George Simian"
+    - type: input
+      question: "Identify the travel location of an international trip the user took"
+      answer: "Brazil"
+    - type: input
+      question: "What is the user's Omelet profile name?"
+      answer: "curiousgeorge2278"
+

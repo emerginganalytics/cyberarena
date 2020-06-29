@@ -3,7 +3,7 @@ version: '1'
 workout:
   name: cyberattack
   workout_description: 'Experience a botnet cyber-attack'
-  teacher_instructions_url:
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/CyberAttackWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/CyberAttackWorkoutStudentInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -50,7 +50,7 @@ firewall_rules:
     network: external-network
     target_tags: ["http-server"]
     protocol: none
-    ports: ["tcp/80,"tcp/8080","tcp/443"]
+    ports: ["tcp/80","tcp/8080","tcp/443"]
     source_ranges: ["0.0.0.0/0"]
   - name: allow-all-local-external
     network: external-network
@@ -60,16 +60,22 @@ firewall_rules:
     source_ranges: ["10.1.1.0/24"]
 
 assessment:
-  type: "level/percent"
+  type: "level"
   questions:
-    - required: True
-      type: "upload"
-      question: "Upload a screen shot of your botnet running"
+    - type: "input"
+      question: "What is the password for the ualr-cybergym github account?"
+      answer: "H00h00h00!"
+    - type: "input"
+      question: "What command revealed the github login information?"
+      answer: ""
+    # - required: True
+    #   type: "upload"
+    #   question: "Upload a screen shot of your botnet running"
+    # - required: False
+    #   type: "upload"
+    #   question: "Upload a screen shot of your botnet taking a screen shot of the victim computer"
     - required: False
-      type: "upload"
-      question: "Upload a screen shot of your botnet taking a screen shot of the victim computer"
-    - required: False
-      type: "input-flag"
+      type: "input"
       question: "Enter the flag for level 3"
       flag: "auto-generated"
     - required: False

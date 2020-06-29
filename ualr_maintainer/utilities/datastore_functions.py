@@ -6,6 +6,7 @@ from yaml import load, Loader
 
 from google.cloud import datastore
 from globals import ds_client, storage_client, workout_globals
+from werkzeug.utils import secure_filename
 
 
 def randomStringDigits(stringLength=10):
@@ -96,10 +97,10 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     workout_name = y['workout']['name']
     build_type = y['workout']['build_type']
     workout_description = y['workout']['workout_description']
+    teacher_instructions_url = None
     if y['workout']['teacher_instructions_url']:
         teacher_instructions_url = y['workout']['teacher_instructions_url']
-    elif y['workout']['instructor_instructions_url']:
-        teacher_instructions_url = y['workout']['instructor_instructions_url']
+
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
     assessment = y['assessment']
@@ -310,3 +311,17 @@ def get_unit_workouts(unit_id):
         workout_list.append(workout_info)
 
     return workout_list
+
+#store user submitted screenshots in cloud bucket
+def store_student_uploads(workout_id, uploads):
+    bucket = storage_client.get_bucket('assessment-upload')
+    new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(uploads.filename))
+
+    new_blob.upload_from_file(uploads, content_type=uploads.content_type)
+
+        # new_blob.upload_from_file(filename, content_type=filename.content_type)
+
+def retrieve_student_uploads(workout_id):
+    bucket = storage_client.get_bucket('assessment-upload')
+    for blob in bucket.list_blobs():
+        print(blob)
