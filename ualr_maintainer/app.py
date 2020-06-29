@@ -133,8 +133,9 @@ def landing_page(workout_id):
                 user_answer = str(user_input['answer'])
                 true_answer = str(assessment[i].get('answer'))
 
-                if(user_answer.lower() == valid_answers[i].lower()):
-                    num_correct += 1
+                if valid_answers[i]:
+                    if(user_answer.lower() == valid_answers[i].lower()):
+                        num_correct += 1
                 
             percentage_correct = num_correct / len(assessment_questions) * 100
             workout['submitted_answers'] = assessment_answers
@@ -146,7 +147,7 @@ def landing_page(workout_id):
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
-                               score=percentage_correct, user_uploads=assessment_uploads)
+                               score=percentage_correct)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
