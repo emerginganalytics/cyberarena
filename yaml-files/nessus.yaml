@@ -4,7 +4,7 @@ workout:
   name: Nessus
   workout_description: 'This workout teaches the basics of scanning to students.'
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/NessusWorkoutStudentInstructions.pdf"
-  instructor_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/NessusTeacherWorkoutInstructions.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/NessusTeacherWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
@@ -85,8 +85,8 @@ firewall_rules:
 assessment:
   type: "percentage"
   questions:
-    - type: upload
-      question: "Upload a screen shot of your scan result"
+    # - type: upload
+    #   question: "Upload a screen shot of your scan result"
     - type: input
       question: "What version of Windows is used on the scanned system?"
       answer: "Window Server 2019 Datacenter"

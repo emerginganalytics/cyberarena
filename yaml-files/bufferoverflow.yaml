@@ -3,7 +3,7 @@ version: '1'
 workout:
   name: BufferOverflow
   workout_description: 'Learn about a basic buffer overflow exploit.'
-  teacher_workout_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/BufferOverflowTeacher.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/BufferOverflowTeacher.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/BufferOverflow.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"

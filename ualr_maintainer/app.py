@@ -12,7 +12,8 @@ from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 from utilities.yaml_functions import parse_workout_yaml
-from utilities.datastore_functions import process_workout_yaml
+from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads
+from werkzeug.utils import secure_filename
 
 from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm, CreateExpoForm
@@ -58,7 +59,7 @@ def index(workout_type):
 def landing_page(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
-
+    retrieve_student_uploads(workout_id)
     if (workout):
         expiration = time.strftime('%d %B %Y', (
             time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
@@ -87,7 +88,7 @@ def landing_page(workout_id):
         if 'complete' in workout:
             complete = workout['complete']
 
-        assessment = None
+        assessment = assessment_type = None
         if 'assessment' in workout:
             assessment = {}
             try:
@@ -116,13 +117,18 @@ def landing_page(workout_id):
             assessment_answers = request.form.getlist('answer')
             assessment_questions = request.form.getlist('question')
 
+            assessment_uploads = request.files['file_upload_test']
+            print(assessment_uploads)
+
+            store_student_uploads(workout_id, assessment_uploads)
+
             for i in range(len(assessment_answers)):
                 user_input = {
                     "question":assessment_questions[i],
                     "answer":assessment_answers[i]
                 }
 
-                valid_answers.append(assessment[i].get('answer'))
+                # valid_answers.append(assessment[i].get('answer'))
                 user_answer = str(user_input['answer'])
                 true_answer = str(assessment[i].get('answer'))
 
@@ -139,7 +145,7 @@ def landing_page(workout_id):
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
-                               score=percentage_correct)
+                               score=percentage_correct, user_uploads=assessment_uploads)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
@@ -230,7 +236,7 @@ def start_all():
         workout_list = get_unit_workouts(unit_id)
         t_list = []
         for workout_id in workout_list:
-            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id['name']))
             if 'time' not in request.form:
                 workout['run_hours'] = 2
             else:
@@ -238,10 +244,10 @@ def start_all():
             ds_client.put(workout)
 
             try:
-                start_workout(workout_id)
+                pub_start_vm(workout_id['name'])
             except:
                 workout_globals.refresh_api()
-                start_workout(workout_id)
+                start_workout(workout_id['name'])
 
         return redirect("/workout_list/%s" % (unit_id))
 
@@ -253,10 +259,10 @@ def stop_all():
         workout_list = get_unit_workouts(unit_id)
         for workout_id in workout_list:
             try:
-                stop_workout(workout_id)
+                stop_workout(workout_id['name'])
             except:
                 compute = workout_globals.refresh_api()
-                stop_workout(workout_id)
+                stop_workout(workout_id['name'])
         return redirect("/workout_list/%s" % (unit_id))
 
 # Called by reset workouts button on instructor landing page. Resets all workouts.
@@ -267,10 +273,10 @@ def reset_all():
         workout_list = get_unit_workouts(unit_id)
         for workout_id in workout_list:
             try:
-                reset_workout(workout_id)
+                reset_workout(workout_id['name'])
             except:
                 workout_globals.refresh_api()
-                reset_workout(workout_id)
+                reset_workout(workout_id['name'])
         return redirect("/workout_list/%s" % (unit_id))
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
@@ -339,21 +345,13 @@ def expo(workout_type):
         return redirect(url)
     return render_template('expo_page.html', form=form, workout_type=workout_type)
 
-# #Checks the status of the workouts in a unit
-# @app.route('/check_workouts/<unit_id>', methods=['POST'])
-# def check_workouts(unit_id):
-#     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+@app.route('/uploaded_content/<workout_id>', methods=['POST'])
+def uploaded_content(workout_id):
+    if(request.method == 'POST'):
+        bucket = storage_client.get_bucket('assessment-upload')
 
-#     workout_list = get_unit_workouts(unit_id)
-#     teacher_instructions_url = None
-#     if 'teacher_instructions_url' in unit:
-#         teacher_instructions_url = unit['teacher_instructions_url']
 
-#     if unit and len(workout_list) > 0:
-#         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
-#                                workout_list=workout_list, unit_id=unit_id,
-#                                description=unit['description'], instructions=teacher_instructions_url,
-#                                workout_type=unit['workout_type'])
+
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)
