@@ -100,7 +100,8 @@ def landing_page(workout_id):
                     question_dict = {}
                     question_dict['question'] = question['question']
                     if(question['type'] == 'input'):
-                        question_dict['answer'] = question['answer']
+                        if 'answer' in question:
+                            question_dict['answer'] = question['answer']
                     question_dict['type'] = question['type']
                     question_list.append(question_dict)
                 assessment = question_list
@@ -117,10 +118,10 @@ def landing_page(workout_id):
             assessment_answers = request.form.getlist('answer')
             assessment_questions = request.form.getlist('question')
 
-            assessment_uploads = request.files['file_upload_test']
-            print(assessment_uploads)
+            # assessment_uploads = request.files['file_upload_test']
+            # print(assessment_uploads)
 
-            store_student_uploads(workout_id, assessment_uploads)
+            # store_student_uploads(workout_id, assessment_uploads)
 
             for i in range(len(assessment_answers)):
                 user_input = {
