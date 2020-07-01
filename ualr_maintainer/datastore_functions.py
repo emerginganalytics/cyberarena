@@ -43,12 +43,15 @@ def get_unit_workouts(unit_id):
             complete = workout_instance['complete']
         if 'submitted_answers' in workout_instance:
             submitted_answers = workout_instance['submitted_answers']
+        if 'uploaded_files' in workout_instance:
+            uploaded_files = workout_instance['uploaded_files']
             
         workout_info = {
             'name': workout.key.name,
             'running': running,
             'complete': complete,
             'submitted_answers': submitted_answers,
+            'uploaded_files': uploaded_files
         }
         workout_list.append(workout_info)
 

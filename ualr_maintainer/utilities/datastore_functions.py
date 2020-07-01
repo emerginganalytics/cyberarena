@@ -315,13 +315,15 @@ def get_unit_workouts(unit_id):
 #store user submitted screenshots in cloud bucket
 def store_student_uploads(workout_id, uploads):
     bucket = storage_client.get_bucket('assessment-upload')
-    new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(uploads.filename))
-
-    new_blob.upload_from_file(uploads, content_type=uploads.content_type)
-
-        # new_blob.upload_from_file(filename, content_type=filename.content_type)
+    for index, blob in enumerate(uploads):
+        new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(str(index)))
+        new_blob.upload_from_file(blob, content_type=blob.content_type)
 
 def retrieve_student_uploads(workout_id):
-    bucket = storage_client.get_bucket('assessment-upload')
+    bucket = storage_client.bucket('assessment-upload')
+    file_list = []
     for blob in bucket.list_blobs():
-        print(blob)
+        if str(workout_id) in blob.name:
+            image_url = blob.public_url
+            file_list.append(image_url)
+    return file_list

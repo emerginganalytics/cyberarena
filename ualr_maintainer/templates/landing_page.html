@@ -138,9 +138,9 @@
                                 </div>
                             {% elif question['type'] == 'upload' %}
                                 <div class='question_group'>
-                                <input type="hidden" name="upload" value="{{ question['question'] }}" />
+                                <input type="hidden" name="upload_prompt" value="{{ question['question'] }}" />
                                 {{ question['question'] }}<br>
-                                <input type='file' id='assessment_file_upload' name='file_upload_test'><br><br>
+                                <input type='file' id='assessment_file_upload' name='file_upload'><br><br>
                                 </div>
                             {% endif %}
                         {% endfor %}
