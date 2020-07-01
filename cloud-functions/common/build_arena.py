@@ -287,3 +287,6 @@ def build_arena(unit_id):
 
     unit['complete'] = True
     ds_client.put(unit)
+
+
+build_arena('szllxvjrdt')
