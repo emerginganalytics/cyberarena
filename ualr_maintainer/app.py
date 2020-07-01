@@ -115,15 +115,18 @@ def landing_page(workout_id):
             for i in range(len(assessment)):
                 if(assessment[i].get('type') != 'upload'):
                     valid_answers.append(assessment[i].get('answer'))
+
             assessment_answers = request.form.getlist('answer')
             assessment_questions = request.form.getlist('question')
 
-            # assessment_uploads = request.files['file_upload_test']
-            # print(assessment_uploads)
+            assessment_upload_prompt = request.form.getlist('upload_prompt')
+            assessment_uploads = request.files.getlist('file_upload')
 
-            # store_student_uploads(workout_id, assessment_uploads)
+
+            store_student_uploads(workout_id, assessment_uploads)
 
             for i in range(len(assessment_answers)):
+                
                 user_input = {
                     "question":assessment_questions[i],
                     "answer":assessment_answers[i]
@@ -136,8 +139,19 @@ def landing_page(workout_id):
                 if valid_answers[i]:
                     if(user_answer.lower() == valid_answers[i].lower()):
                         num_correct += 1
-                
+
+            uploaded_files = []
+            urls = retrieve_student_uploads(workout_id)
+            for index, item in enumerate(assessment_uploads):#range(len(assessment_uploads)):
+                user_input = {
+                    "question": assessment_upload_prompt[index],
+                    "storage_url": urls[index]
+                }
+                uploaded_files.append(user_input)
+
+
             percentage_correct = num_correct / len(assessment_questions) * 100
+            workout['uploaded_files'] = uploaded_files
             workout['submitted_answers'] = assessment_answers
             workout['assessment_score'] = percentage_correct
             ds_client.put(workout)
@@ -164,7 +178,7 @@ def workout_list(unit_id):
     build_type = unit['build_type']
     workout_url_path = unit['workout_url_path']
     workout_list = get_unit_workouts(unit_id)
-
+    
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
@@ -176,6 +190,7 @@ def workout_list(unit_id):
     if (request.method=="POST"):
         return json.dumps(workout_list)
         
+    
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
                                workout_list=workout_list, unit_id=unit_id,
