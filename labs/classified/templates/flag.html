@@ -6,7 +6,7 @@
     <div class="w3-section">
         <div class="w3-section" id="workout_flag">
             <label for="flag">Wireshark Flag</label>
-            <h1 id="flag_display"> </h1>
+            <h1>{{ wireshark_flag }}</h1>
             <input type="text" size='80' name="flag" id="flag" />
         </div>
     <div>
@@ -19,33 +19,6 @@
     </form>
 {% endblock %}
 {% block js_block %}
-    {# AJAX to display Decrypted Cipher #}
-     <script>
-             const message = $('#flag_display').val();
-               $.ajax({
-                  type : 'POST',
-                  url : '/flag/{{ workout_id }}',
-                  data : JSON.stringify({flag : message}),
-                  dataType : 'json',
-                  contentType : 'application/json',
-                  success : function(data) {
-                      console.log('AJAX Success!');
-                      display_flag(data['message']);
-                  },
-                   error : function(e) {
-                      console.log('AJAX Error!');
-                      console.log(e)
-                   }
-               });
-             function display_flag(message) {
-                let results_div = $('#flag_display');
-
-                results_div.html('');
-
-                let html_string = 'Flag: ' + message + '<br />';
-                results_div.html(html_string);
-            }
-     </script>
  {# AJAX to check flag #}
      <script>
             $('#flag_button').on('click', function() {

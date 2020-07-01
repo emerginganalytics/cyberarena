@@ -94,7 +94,7 @@ def set_workout_flag(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    flag_wireshark = 'CyberGym{'.join(random.choices(string.ascii_letters + string.digits, '}', k=16,))
+    flag_wireshark = 'CyberGym{'.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
     workout['container_info']['wireshark_flag'] = flag_wireshark
     ds_client.put(workout)
     return flag_wireshark
@@ -141,7 +141,8 @@ def home(workout_id):
     if not session.get('logged_in'):
         return render_template('index.html', workout_id=workout_id)
     else:
-        return render_template('flag.html', workout_id=workout_id)
+        set_workout_flag(workout_id)
+        return redirect('/flag/' + workout_id)
 
 
 # Generates values based on workout
@@ -152,7 +153,7 @@ def loader(workout_id):
 
     if workout:
         if workout['type'] == 'wireshark' or 'dos':
-            return redirect('/home/' + workout_id)
+            return redirect('/' + workout_id)
         elif workout['type'] == 'xss':
             return redirect('/workouts/xss/' + workout_id)
         elif workout['type'] == '2fa':
@@ -189,7 +190,6 @@ def flag(workout_id):
                 )
             elif request.method == 'POST':
                 plaintext = request.get_json()
-                # ['id'] helps determine which cipher is to be evaluated
                 data = check_flag(workout_id, str(plaintext['flag']))
 
                 return jsonify({
