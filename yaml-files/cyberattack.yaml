@@ -33,7 +33,7 @@ servers:
         subnet: default
         external_NAT: True
   - name: cybergym-victim
-    image: image-promise-victim-win2012
+    image: image-cybergym-cyberattack
     machine_type: "n1-standard-1"
     network_routing: false
     tags: None
@@ -69,8 +69,11 @@ assessment:
       question: "When you open your command and control server, what is the local IP address listed in the host detail? (the short address)"
       answer: "10.1.1.11"
     - type: "input"
-      question: "In the command and control server, look for the command prompt in the COMMANDPROMPT section. What movie plays when you type telnet towel.blinkenlights.nl"
+      question: "In the command and control server, look for the command prompt in the COMMANDPROMPT section. What movie plays when you type: cmd /K start telnet towel.blinkenlights.nl"
       answer: "star wars"
     - type: "input"
       question: "What is the password for the ualr-cybergym github account?"
       answer: "H00h00h00!"
+    - type: "input"
+      question: "Come up with your own creative command to run on the botnet victim."
+      answer: none
