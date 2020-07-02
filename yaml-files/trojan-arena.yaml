@@ -47,3 +47,41 @@ firewall_rules:
     protocol: none
     ports: ["tcp/22"]
     source_ranges: ["0.0.0.0/0"]
+
+assessment:
+  type: "level"
+  questions:
+    - type: input
+      question: "Flag #1: Classified Website"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #2: Nessus Scan"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #3: SQL Injection"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #4: Hidden Website"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #5: Brute Force Password Attack"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #6: Steganography"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #7: Analysis"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: battle
+      key: "nA824wazosyssPb1"
+      script: "trojan-arena.py"
+      script-language: "python"
+      server: student-workstation
+      operating-system: linux
