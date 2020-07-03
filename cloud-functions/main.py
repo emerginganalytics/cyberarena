@@ -1,4 +1,5 @@
 from common.build_workout import build_workout
+from common.build_arena import build_arena
 from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts
@@ -21,6 +22,25 @@ def cloud_fn_build_workout(event, context):
 
     if context:
         print("Workout %s has completed." % workout_id)
+
+
+def cloud_fn_build_arena(event, context):
+    """ Responds to a pub/sub event in which the user has included
+    Args:
+         event (dict):  The dictionary with data specific to this type of
+         event. The `data` field contains the PubsubMessage message. The
+         `attributes` field will contain custom attributes if there are any.
+         context (google.cloud.functions.Context): The Cloud Functions event
+         metadata. The `event_id` field contains the Pub/Sub message ID. The
+         `timestamp` field contains the publish time.
+    Returns:
+        A success status
+    """
+    unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
+    build_arena(unit_id)
+
+    if context:
+        print("Workout %s has completed." % unit_id)
 
 
 def cloud_fn_start_vm(event, context):
