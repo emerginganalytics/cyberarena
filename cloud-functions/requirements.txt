@@ -7,3 +7,4 @@ google-cloud-pubsub
 pyyaml
 cryptography==2.8
 python-jose[cryptography]==3.0.1
+oauth2client
