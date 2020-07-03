@@ -60,7 +60,7 @@ firewall_rules:
     source_ranges: ["10.1.1.0/24"]
 
 assessment:
-  type: "level"
+  type: "percentage"
   questions:
     - type: "input"
       question: "How long does your botnet sleep before communicating with the command and control server?"

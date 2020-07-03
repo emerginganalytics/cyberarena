@@ -281,6 +281,14 @@ def build_arena(unit_id):
                                "ports": rule['ports'],
                                "sourceRanges": rule['source_ranges']})
 
+    # Create the default rules to allow traffic between student networks.
+    firewall_rules.append({"name": "%s-%s" % (unit_id, 'allow-all-internal'),
+                           "network": "%s-%s" % (unit_id, student_network_name),
+                           "targetTags": [],
+                           "protocol": 'tcp',
+                           "ports": ['tcp/any', 'udp/any', 'icmp/any'],
+                           "sourceRanges": [student_network_subnet]})
+
     create_firewall_rules(firewall_rules)
 
     stop_arena(unit_id)
@@ -289,4 +297,4 @@ def build_arena(unit_id):
     ds_client.put(unit)
 
 
-build_arena('szllxvjrdt')
+# build_arena('xokzdyqlsj')

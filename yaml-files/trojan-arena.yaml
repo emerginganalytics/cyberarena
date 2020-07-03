@@ -13,12 +13,12 @@ workout:
 student-servers:
   student_entry: student-workstation
   student_entry_type: rdp
-  student_entry_username: cybergym
-  student_entry_password: 'ChooseAnAlphaNumericPassword1'
+  student_entry_username: workout
+  student_entry_password: 'Md32Nlml_fCertZ6QZ-Oa'
   network_type: same
   servers:
     - name: student-workstation
-      image: image-promise-win-16
+      image: image-cybergym-arena-windows
       machine_type: n1-standard-1
 
 # If additional networks are needed for servers, these are added here.
@@ -79,9 +79,9 @@ assessment:
       question: "Flag #7: Analysis"
       answer: "<TYPE IN FLAG HERE>"
       points: 100
-    - type: battle
-      key: "nA824wazosyssPb1"
-      script: "trojan-arena.py"
-      script-language: "python"
-      server: student-workstation
-      operating-system: linux
+#    - type: battle
+#      key: "nA824wazosyssPb1"
+#      script: "trojan-arena.py"
+#      script-language: "python"
+#      server: student-workstation
+#      operating-system: linux
