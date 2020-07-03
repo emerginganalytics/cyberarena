@@ -73,11 +73,11 @@ assessment:
       points: 100
     - type: input
       question: "Flag #6: Steganography"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "X1NdIHZ!3#kU$ij2"
       points: 100
     - type: input
       question: "Flag #7: Analysis"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "p150wX!zjfWi1#rA"
       points: 100
 #    - type: battle
 #      key: "nA824wazosyssPb1"
