@@ -1,0 +1,37 @@
+<RCC>
+    <qresource prefix="/Icons/Keys/New">
+        <file>Icons/New/number_00_new.png</file>
+        <file>Icons/New/number_01_new.png</file>
+        <file>Icons/New/number_02_new.png</file>
+        <file>Icons/New/number_03_new.png</file>
+        <file>Icons/New/number_04_new.png</file>
+        <file>Icons/New/number_05_new.png</file>
+        <file>Icons/New/number_06_new.png</file>
+        <file>Icons/New/number_07_new.png</file>
+        <file>Icons/New/number_08_new.png</file>
+        <file>Icons/New/number_09_new.png</file>
+    </qresource>
+    <qresource prefix="/Icons/Keys/Worn">
+        <file>Icons/Worn/keypad-enter.png</file>
+        <file>Icons/Worn/number_00_worn.png</file>
+        <file>Icons/Worn/number_01_worn.png</file>
+        <file>Icons/Worn/number_02_worn.png</file>
+        <file>Icons/Worn/number_03_worn.png</file>
+        <file>Icons/Worn/number_04_worn.png</file>
+        <file>Icons/Worn/number_05_worn.png</file>
+        <file>Icons/Worn/number_06_worn.png</file>
+        <file>Icons/Worn/number_07_worn.png</file>
+        <file>Icons/Worn/number_08_worn.png</file>
+        <file>Icons/Worn/number_09_worn.png</file>
+    </qresource>
+    <qresource prefix="/Images">
+        <file>Icons/background.png</file>
+    </qresource>
+    <qresource prefix="/Fonts"/>
+    <qresource prefix="/">
+        <file>Fonts/DS-DIGI.TTF</file>
+        <file>Fonts/DS-DIGIB.TTF</file>
+        <file>Fonts/DS-DIGII.TTF</file>
+        <file>Fonts/DS-DIGIT.TTF</file>
+    </qresource>
+</RCC>
