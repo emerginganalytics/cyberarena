@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Keypad</class>
+ <widget class="QMainWindow" name="Keypad">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>350</width>
+    <height>570</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>350</width>
+    <height>570</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>350</width>
+    <height>570</height>
+   </size>
+  </property>
+  <property name="baseSize">
+   <size>
+    <width>350</width>
+    <height>570</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>DS-Digital</family>
+    <pointsize>60</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>TOP SECRET</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#Display {
+	font: 50pt &quot;DS-Digital&quot;;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>350</width>
+     <height>550</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>350</width>
+     <height>550</height>
+    </size>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>350</width>
+     <height>550</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <widget class="QPushButton" name="button_0">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>410</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_00_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_00_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="Enter">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>430</y>
+      <width>181</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/Worn/Icons/Worn/keypad-enter.png</normaloff>:/Icons/Keys/Worn/Icons/Worn/keypad-enter.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>200</width>
+      <height>200</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>320</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}
+QAbstractButton {
+	text-align: center;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/Worn/Icons/Worn/number_01_worn.png</normaloff>:/Icons/Keys/Worn/Icons/Worn/number_01_worn.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_2">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>320</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_02_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_02_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_3">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>320</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/Worn/Icons/Worn/number_03_worn.png</normaloff>:/Icons/Keys/Worn/Icons/Worn/number_03_worn.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_4">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>230</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_04_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_04_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_5">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>230</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/Worn/Icons/Worn/number_05_worn.png</normaloff>:/Icons/Keys/Worn/Icons/Worn/number_05_worn.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_6">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>230</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_06_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_06_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_7">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>140</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_07_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_07_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+    <property name="autoDefault">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_8">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>140</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/Worn/Icons/Worn/number_08_worn.png</normaloff>:/Icons/Keys/Worn/Icons/Worn/number_08_worn.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="button_9">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>140</y>
+      <width>81</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton { 
+	border-top: 3px white;
+	border-bottom: 3px white;
+	border-left: 3px white;
+	border-right: 3px white;
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="icon">
+     <iconset resource="Keypad_Resources.qrc">
+      <normaloff>:/Icons/Keys/New/Icons/New/number_09_new.png</normaloff>:/Icons/Keys/New/Icons/New/number_09_new.png</iconset>
+    </property>
+    <property name="iconSize">
+     <size>
+      <width>84</width>
+      <height>84</height>
+     </size>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="Display">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>331</width>
+      <height>101</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>DS-Digital</family>
+      <pointsize>50</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">#Display {
+	font: 50pt &quot;DS-Digital&quot;;
+	color: black;
+	background-color: rgb(210, 255, 255);
+}</string>
+    </property>
+    <property name="text">
+     <string>Enter Pin</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources>
+  <include location="Keypad_Resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
