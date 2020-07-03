@@ -10,6 +10,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
 from google.cloud import datastore
 
+
 import onetimepass
 import pyqrcode
 import os
@@ -94,10 +95,20 @@ def set_workout_flag(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    flag_wireshark = 'CyberGym{'.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
-    workout['container_info']['wireshark_flag'] = flag_wireshark
+    flag_dict = []
+    flag_wireshark = 'CyberGym{' + ''.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
+    print(flag_wireshark)
+
+    flag_data = {
+        'flag': flag_wireshark
+    }
+    flag_dict.append(flag_data)
+
+    final_flag = random.sample(flag_dict, k=1)
+    workout['container_info']['wireshark_flag'] = final_flag[0]
+
     ds_client.put(workout)
-    return flag_wireshark
+    return final_flag
 
 
 def publish_status(workout_id, workout_key):
@@ -138,6 +149,8 @@ def check_flag(workout_id, submission):
 
 @app.route('/<workout_id>')
 def home(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
     if not session.get('logged_in'):
         return render_template('index.html', workout_id=workout_id)
     else:
@@ -316,6 +329,13 @@ def logout(workout_id):
     logout_user()
     return redirect(url_for('twofactorhome', workout_id=workout_id))
 
+
+@app.route('/inspect/<workout_id>')
+def inspect(workout_id):
+    page_template = 'inspect.html'
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    return render_template(page_template, workout_id=workout_id)
 
 # create database tables if they don't exist yet
 db.create_all()

@@ -1,0 +1,101 @@
+{% block title %}<title>Inspect the Flag!</title>{% endblock %}
+{% block header %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <style>
+    body {
+        background-image: url("/static/bg_abstract.jpg");
+    }
+    </style>
+{% endblock %}
+{% block navbar %}
+
+{% endblock %}
+{% block page_content %}
+<div class="container mt-3" style="z-index:-1">
+  <!-- The Modal -->
+  <div class="modal fade" data-toggle="modal" data-target="#myModal" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title"><img src="/static/CyberGymClassified.png" style="width:40%;border-radius:50%;"
+                                       class="mx-auto d-block"/></h4>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+            <p style="text-align:center;">Welcome to the Cyber Gym Arena!</p> <br> <p style="text-indent:5%;">In this assignment,
+            you will need to find the hidden flag within the web page. Programmers and web developers are constantly
+            leaving information about different blocks of code inside their web applications. Anyone with access to the
+            code can view this information, which are also known as comments, and sometimes, developers can accidentally
+            leave sensitive information out in the open. In order to find the flag hidden inside the web source code,
+            you will need to use inspect element tool. </p>
+        </div>
+
+          <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger mx-auto d-block" data-dismiss="modal">Accept Challenge</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- Body Content -->
+    <div>
+    <h1 style ="text-align:center; color:white;"> Inspect the Flag!</h1>
+    </div>
+    <div class="container mt-0">
+        <div style="border-radius:25px;background-color:whitesmoke; height:auto; width:80%; box-shadow:2px 5px;
+         border: 1px solid;" class="mx-auto d-block">
+            <div style="padding:1.5em 1.5em 0;height:auto;">
+            <p style="text-indent:5%;font-size:1em;"> The boss at the Cyber Gym said there are a lot of boxes that
+                the interns need to unpack. He told us he was looking for a special item of interest in one of these boxes
+                and whoever found it first would be rewarded. When I asked him about the special item, he said we would
+                find out once we unpacked and assembled everything in the them. The only problem...the Cyber Gym just
+                received all of its new furniture and there are hundreds of boxes. Along with the other interns, I spent
+                all day unpacking and assembling desks, computers, chairs, and even this weird shrine to Rick Astley.
+                Apparently, that's not the special item of interest and there were a couple of boxes left that were
+                labeled &quot;Classified&quot;. After a bit of a brawl with the other interns, we opened one of the
+                boxes to reveal a note leading to this web page. It seems we have a couple more boxes to unpack...
+            </p>
+            </div>
+            <div style="height:auto;overflow:auto;">
+                <img src="/static/CyberGymClassifiedBoxes.png" alt="Boxes" class="mx-auto d-block" style="width:100%;
+                height:auto;"/>
+                <div><!--Oh there seems to be something in this box-->
+                    <div>
+                        <!--Wait a second...there's another box-->
+                        <div>
+                            <!--You know maybe I should reveal the true purpose for using the interns while they open up these boxes-->
+                            <div>
+                                <!--You see...I just told them there was a secret item of interest in them-->
+                                <div>
+                                    <!--I didn't need to say anything else...they just started opening and assembling the Cyber Gym furniture hoping to find this "secret" item-->
+                                    <div>
+                                        <!--Now the Cyber Gym is fully furnished and it only took one day! -->
+                                        <div>
+                                            <!--I'm the BEST BOSS EVER...anyways here is the flag CyberGym{iWwH8t4d5GcpZDQi} -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js_block %}
+<script>
+    $(document).ready(function(){
+        $("#myModal").modal('show');
+    });
+</script>
+{% endblock %}

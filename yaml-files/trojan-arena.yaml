@@ -53,7 +53,7 @@ assessment:
   questions:
     - type: input
       question: "Flag #1: Classified Website"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "CyberGym{iWwH8t4d5GcpZDQi}"
       points: 100
     - type: input
       question: "Flag #2: Nessus Scan"
@@ -61,7 +61,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #3: SQL Injection"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "CyberGym{jFt6EjlH6I8EcfBg}"
       points: 100
     - type: input
       question: "Flag #4: Hidden Website"
