@@ -69,7 +69,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #5: Brute Force Password Attack"
-      answer: "CyberGym{Pin_Test}"
+      answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
       question: "Flag #6: Steganography"
