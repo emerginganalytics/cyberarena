@@ -47,8 +47,7 @@ Keypad::keyPressed()
     /*
     * This function handles each buttonclick event. It takes
     * the object name and determines the appropriate value
-    * for each button. Since we are only handling 10 buttons,
-    * a simple if-else conditional is sufficient.
+    * for each button.
     *
     * The display is then updated with the new value appended
     * to the Keypad display. To simplify the workout, we
@@ -56,53 +55,26 @@ Keypad::keyPressed()
     * are entered, we keep only the first 4 entries.
     */
     QPushButton *button = (QPushButton *)sender();
-    int keyValue;
+    QString keyValue;
     QString displayVal = ui->Display->text();
 
-    // Set value for pressed button
-    if (button->objectName() == "button_0"){
-        keyValue = 0;
-    }
-    else if (button->objectName() == "button_1") {
-        keyValue = 1;
-    }
-    else if (button->objectName() == "button_2") {
-        keyValue = 2;
-    }
-    else if (button->objectName() == "button_3") {
-        keyValue = 3;
-    }
-    else if (button->objectName() == "button_4") {
-        keyValue = 4;
-    }
-    else if (button->objectName() == "button_5") {
-        keyValue = 5;
-    }
-    else if (button->objectName() == "button_6") {
-        keyValue = 6;
-    }
-    else if (button->objectName() == "button_7") {
-        keyValue = 7;
-    }
-    else if (button->objectName() == "button_8") {
-        keyValue = 8;
-    }
-    else if (button->objectName() == "button_9") {
-        keyValue = 9;
-    }
+    /* Split objectName into a StringList at the underscore.
+     * Set value for pressed button equal to the last value
+     * in the StringList.
+     * Example: button_5 is parsed to ['button', '5']
+     *          buttonElements[1] = '5'
+    */
+    QString buttonName = button->objectName();
+    QStringList buttonElements = buttonName.split("_");
+    keyValue = buttonElements[1];
+
     // restrict inputs of more than 4 digits
     if (displayVal.length() == 4){
         ui->Display->setText(displayVal);
     }
     else {
-        if((displayVal.toInt() == 0 || (displayVal.toInt() == 0))){
-            ui->Display->setText(QString::number(keyValue));
-        }
-        else {
-            QString newVal = displayVal + QString::number(keyValue);
-            int newDisplay = newVal.toInt();
-            ui->Display->setText(QString::number(newDisplay, 'g', 16));
-        }
+        QString newVal = displayVal + keyValue;
+        ui->Display->setText(newVal);
     }
 }
 
@@ -138,7 +110,7 @@ Keypad::login()
        // pop up dialog box with flag and then post to URL
        dialog->show();
        /* This will be used in later versions for auto-assessment */
-       post();
+       // post();
      }
    else {
        // Pop dialog box of login failed
