@@ -2,7 +2,6 @@
 #include "ui_keypad.h"
 #include "flagdialog.h"
 
-int displayVal = 0;
 
 Keypad::Keypad(QWidget *parent)
     : QMainWindow(parent)
@@ -22,7 +21,6 @@ Keypad::Keypad(QWidget *parent)
      * Establish connection to the appropriate
      * keys 0-9
     */
-    ui->Display->setText(QString::number(displayVal));
     QPushButton *keyButtons[10];
     for (int i = 0; i < 10; ++i)
     {
@@ -68,8 +66,15 @@ Keypad::keyPressed()
     QStringList buttonElements = buttonName.split("_");
     keyValue = buttonElements[1];
 
-    // restrict inputs of more than 4 digits
-    if (displayVal.length() == 4){
+     /* 
+      * If Display is showing a message, clear display first.
+      * Else restrict inputs of more than 4 digits 
+     */
+    if (!displayVal.toInt())
+    {
+        ui->Display->setText(keyValue);
+    }
+    else if (displayVal.length() >= 4){
         ui->Display->setText(displayVal);
     }
     else {
