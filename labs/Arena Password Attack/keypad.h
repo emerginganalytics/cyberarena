@@ -18,11 +18,9 @@
 #define KEYPAD_H
 
 #include <QMainWindow>
-/* Handling images */
-#include <QPixmap>
+#include <QPixmap>             /* Handling images */
 #include <QPainter>
-/* Handling POST Requests */
-#include <QJsonArray>
+#include <QJsonArray>          /* Handling POST Requests */
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -31,9 +29,8 @@
 #include <QNetworkReply>
 #include <QVariant>
 #include <QDebug>
-#include <cstdlib> /* Pulling ENV variables */
+#include <cstdlib>            /* Pulling ENV variables */
 #include <string>
-
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Keypad; }

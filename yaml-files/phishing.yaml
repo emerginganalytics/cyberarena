@@ -3,7 +3,7 @@ version: '1'
 workout:
   name: phishing
   workout_description: 'Experience the dangers of a phishing attack'
-  teacher_instructions_url: 'https://storage.cloud.google.com/teacher_workout_instructions_84jf627/PasswordPolicyWorkoutTeacherInstructions.pdf'
+  teacher_instructions_url: 'https://storage.cloud.google.com/teacher_workout_instructions_84jf627/PhishingWorkoutTeacherInstructions.pdf'
   student_instructions_url: 'https://storage.cloud.google.com/student_workout_instructions_tgd4419/PhishingWorkoutStudentInstructions.pdf'
   project_name: ualr-cybersecurity
   region: "us-central1"
@@ -23,7 +23,7 @@ servers:
     image: image-labentry
     machine_type: "n1-standard-1" 
     network_routing: false
-    tags: {items: ["labentry"]}
+    tags: {items: ["labentry", "vnc-server"]}
     metadata: none
     nics:
       - network: external-network
@@ -36,7 +36,7 @@ servers:
     network_routing: false
     tags: {items: ["http-server", "attacker", "vnc-server"]}
     metadata: none
-    guac_path: "MQBjAG15c3Fs"
+    guac_path: "MjcAYwBteXNxbA=="
     nics:
       - network: external-network
         internal_IP: 10.1.1.20
@@ -58,6 +58,12 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.0.0/16"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
 
 assessment:
   type: level
