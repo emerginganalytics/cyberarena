@@ -10,7 +10,6 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
 from google.cloud import datastore
 
-
 import onetimepass
 import pyqrcode
 import os
@@ -84,6 +83,13 @@ class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
     password = PasswordField('Password', validators=[DataRequired()])
     token = StringField('Token', validators=[DataRequired(), Length(6, 6)])
+    submit = SubmitField('Login')
+
+
+class SQLForm(FlaskForm):
+    """SQL Injection Login Form"""
+    username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 
@@ -330,12 +336,31 @@ def logout(workout_id):
     return redirect(url_for('twofactorhome', workout_id=workout_id))
 
 
-@app.route('/inspect/<workout_id>')
-def inspect(workout_id):
+@app.route('/inspect')
+def inspect():
     page_template = 'inspect.html'
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
-    return render_template(page_template, workout_id=workout_id)
+    return render_template(page_template)
+
+
+@app.route('/sql')
+def sql_injection():
+    page_template = 'sql.html'
+    if current_user.is_authenticated:
+        # if user is logged in we get out of here
+        return redirect(url_for('flag'))
+    form = SQLForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.verify_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('sql_injection'))
+
+        # log user in
+        login_user(user)
+        flash('You are now logged in!')
+        return redirect(url_for('flag'))
+    return render_template(page_template, form=form)
+
 
 # create database tables if they don't exist yet
 db.create_all()
