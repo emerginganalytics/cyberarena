@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title%} Workout {{ workout_id }} {% endblock %}
+    <script>
+        $(document).ready(function(){
+            $("assessment_reveal").click(function(){
+                $("#assessment_form").fadeIn();
+            })
+        })
+    </script>
+
+    {% block content%}
+    <div class='landing_container col-lg-12'>
+        <div class='row'>
+        <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+            <div id="workout-form" class='container-fluid'>
+                <div id="logo" class="center">
+                    <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
+                </div>
+            </div>
+            <br><h2>Workout Control</h2><br>
+                {% if running %}
+                <p>Workout status: <span style="color:green">RUNNING</span></p><br>
+                {% else %}
+                <p>Workout status: <span style="color:red">STOPPED</span></p><br>
+                {% endif %}
+                <p>Expiration date: {{ expiration }}</p><br>
+                <div class='control_button'>
+
+                    <form action="/start_vm" method="post">
+                        <div class="input-field" >
+                                <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                                <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;">
+                                <label>Run time (1 - 10 hours)</label>
+                        </div>
+                        <div class="btn-ctn">
+                            {% if running %}
+                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
+                            {% else %}
+                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class='control_button'>
+                    <form action="/stop_vm" method="post">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <div class="btn-ctn">
+                            {% if running %}
+                                <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
+                            {% else %}
+                                <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class='control_button'>
+                    <form action="/reset_vm" method="post">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <div class="btn-ctn">
+                                <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUT</button>
+                        </div>
+                    </form>
+            
+                </div>
+
+        </div>
+        <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+            <div id='workout_info' class='container' style="margin:0;">
+                <h2>Welcome to the Trojan Arena!</h2>
+
+                {% if score %}
+                <p>Assessment Results: {{ score }}</p>
+                <p>*Results may not be final</p>
+                {% endif %}
+                <!-- {% if complete %}
+                    <p>Workout complete: </p><p style="color: green;">&#10004;</p>
+                {% else %}
+                    <p>Workout complete: </p><h2 style="color: red;">&#10008;</h2>
+                {% endif %} -->
+
+                {% if running %}
+                <br><h2>Workout Servers</h2>
+                    {% if guac_path==None %}
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
+                    {% else %}
+                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!</a>
+                    {% endif %}
+                        <p>*Machines may take a couple minutes to start</p>
+                {% endif %}
+                <br>
+                
+
+
+                </p>
+            </div>
+            <div id="workout_id" hidden>{{ workout_id }}</div>
+            <div class='container' id='instructions' style="margin:0;">
+                <!-- <h2>Description</h2> -->
+                <h2>{{ workout_type }} Workout</h2>
+                <p>{{ description }}</p><br>
+                {% if student_instructions %}
+                    <a href="{{ student_instructions }}" target="_blank" class='landing_dropdown'>Workout Instructions</a>
+                {% endif %}
+
+
+
+                <div id="loading-msg"></div>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+                <script>
+                    $(document).ready(function(){
+                        $("form").submit(function(){
+                            $('#start-vm').attr('disabled','disabled');
+                            $('#stop-vm').attr('disabled','disabled');
+                            $('#reset-vm').attr('disabled','disabled');
+                            $("#loading-msg").html('Please wait while the process completes' +
+                                '</br><div class="loader"></div>');
+                        });
+                    });
+
+                    function reveal_assessment(){
+                        $(".workout_assessment_form").fadeToggle();
+                    }
+                    
+                </script>
+            </div> <!--Workout info container-->
+                {% if assessment %}
+                <br>
+                    
+                    <div class='container' id='assessment'>
+                        <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
+                        <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
+                        {% for question in assessment%}
+                            {% if question['type'] == 'input' %}
+                                <div class='question_group'>
+                                    <input type="hidden" name="question" value="{{ question['question'] }}" />
+                                    {{ question['question'] }}<br>
+                                    <input type='text' name="answer" />
+                                </div>
+                            {% elif question['type'] == 'upload' %}
+                                <div class='question_group'>
+                                <input type="hidden" name="upload_prompt" value="{{ question['question'] }}" />
+                                {{ question['question'] }}<br>
+                                <input type='file' id='assessment_file_upload' name='file_upload'><br><br>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
+                        </form><br>
+                    </div> <!--Assessment Dropdown-->
+                    
+                {% endif %}
+                {% if user_uploads %}
+                    {{user_uploads}}
+                {% endif %}
+                
+
+
+        
+        </div>
+    </div> <!--Main Container-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+         <script>
+                $(document).ready(function(){
+                    // Initialize Tooltip
+                    $('[data-toggle="tooltip"]').tooltip();
+    
+                    // Add smooth scrolling to all links in navbar + footer link
+                    $(".navbar a, footer a[href='#homePage']").on('click', function(event) {
+                        // Make sure this.hash has a value before overriding default behavior
+                        if (this.hash !== "") {
+                            // Prevent default anchor click behavior
+                            event.preventDefault();
+                                var hash = this.hash;
+    
+                                // Using jQuery's animate() method to add smooth page scroll
+                                // The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
+                                $('html, body').animate({
+                                scrollTop: $(hash).offset().top
+                                }, 900, function(){
+    
+                            // Add hash (#) to URL when done scrolling (default click behavior)
+                            window.location.hash = hash;
+                            });
+                        }
+                    });
+                });
+        </script>
+    </div>
+{% endblock %}
+    <!-- </html> -->
