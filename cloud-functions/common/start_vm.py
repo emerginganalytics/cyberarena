@@ -119,7 +119,8 @@ def start_arena(unit_id):
     student_entry = 'student-guacamole'
     server_name = f'{unit_id}-{student_entry}'
     ip_address = get_server_ext_address(server_name)
-    add_dns_record(unit_id, ip_address)
+    # add_dns_record(unit_id, ip_address)
+    register_workout_update(project, dnszone, unit_id, ip_address)
     key = ds_client.key('cybergym-unit', unit_id)
     build = ds_client.get(key)
     build["external_ip"] = ip_address
