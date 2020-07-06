@@ -36,7 +36,7 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = complete = submitted_answers = None
+        running = complete = submitted_answers = uploaded_files = None
         if 'running' in workout_instance:
             running = workout_instance['running']
         if 'complete' in workout_instance:

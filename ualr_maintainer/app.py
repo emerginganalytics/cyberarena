@@ -46,11 +46,13 @@ def index(workout_type):
             return render_template('no_workout.html')
         elif build_type == 'compute':
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_workout_topic)
+            url = '/workout_list/%s' % (unit_id)
+            return redirect(url)
         elif build_type == 'arena':
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_arena_topic)
+            url = '/arena_list/%s' % (unit_id)
+            return redirect(url)
 
-        url = '/workout_list/%s' % (unit_id)
-        return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type)
 
 
@@ -188,6 +190,8 @@ def workout_list(unit_id):
         student_instructions_url = unit['student_instructions_url']
 
     if (request.method=="POST"):
+        if build_type == 'arena':
+            return json.dumps(unit)
         return json.dumps(workout_list)
         
     
@@ -198,6 +202,64 @@ def workout_list(unit_id):
                                workout_type=unit['workout_type'])
     else:
         return render_template('no_workout.html')
+
+
+@app.route('/arena_list/<unit_id>', methods=['GET', 'POST'])
+def arena_list(unit_id):
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    build_type = unit['build_type']
+    workout_url_path = unit['workout_url_path']
+    workout_list = get_unit_workouts(unit_id)
+    
+    teacher_instructions_url = None
+    if 'teacher_instructions_url' in unit:
+        teacher_instructions_url = unit['teacher_instructions_url']
+    
+    student_instructions_url = None
+    if 'student_instructions_url' in unit:
+        student_instructions_url = unit['student_instructions_url']
+
+    if (request.method=="POST"):
+        return json.dumps(unit)
+
+    if unit:
+        return render_template('arena_list.html', teacher_instructions_url=teacher_instructions_url, workout_list=workout_list,
+                            student_instructions_url=student_instructions_url, description=unit['description'], unit_id=unit_id,
+        )
+        
+
+
+    return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
+                            workout_list=workout_list, unit_id=unit_id,
+                            description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url,
+                            workout_type=unit['workout_type'])
+
+
+@app.route('/arena_landing/<workout_id>', methods=['GET', 'POST'])
+def arena_landing(workout_id):
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+    
+    assessment = None
+    if 'assessment' in workout:
+        try:
+            question_list = []
+
+            if 'type' in workout['assessment']:
+                assessment_type = workout['assessment']['type']
+            for question in workout['assessment']['questions']:
+                question_dict = {}
+                question_dict['question'] = question['question']
+                if(question['type'] == 'input'):
+                    if 'answer' in question:
+                        question_dict['answer'] = question['answer']
+                question_dict['type'] = question['type']
+                question_list.append(question_dict)
+            assessment = question_list
+        except TypeError:
+            print('assessment not defined')
+            print(assessment)
+    return render_template('arena_landing.html', assessment=assessment)
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
@@ -259,7 +321,6 @@ def start_all():
             else:
                 workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
             ds_client.put(workout)
-
             try:
                 pub_start_vm(workout_id['name'])
             except:
@@ -267,6 +328,14 @@ def start_all():
                 start_workout(workout_id['name'])
 
         return redirect("/workout_list/%s" % (unit_id))
+
+@app.route('/start_arena', methods=['GET', 'POST'])
+def start_arena():
+    if request.method == 'POST':
+        unit_id = request.form['unit_id']
+        arena_list = get_unit_workouts(unit_id)
+        pub_start_vm(unit_id, 'start-arena')
+    return redirect('/arena_list/%s' % (unit_id))
 
 # Called by stop workouts button on instructor landing page. Stops all workouts
 @app.route('/stop_all', methods=['GET', 'POST'])
@@ -361,11 +430,6 @@ def expo(workout_type):
         url = '/workout_list/%s' % (unit_id)
         return redirect(url)
     return render_template('expo_page.html', form=form, workout_type=workout_type)
-
-@app.route('/uploaded_content/<workout_id>', methods=['POST'])
-def uploaded_content(workout_id):
-    if(request.method == 'POST'):
-        bucket = storage_client.get_bucket('assessment-upload')
 
 
 

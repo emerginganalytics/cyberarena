@@ -115,7 +115,8 @@ def start_arena(unit_id):
         start_vm(workout_id)
 
     # Create a DNS record for the arena with the new IP address
-    student_entry = unit['arena']['student_entry']
+    # student_entry = unit['arena']['student_entry']
+    student_entry = 'student-guacamole'
     server_name = f'{unit_id}-{student_entry}'
     ip_address = get_server_ext_address(server_name)
     add_dns_record(unit_id, ip_address)

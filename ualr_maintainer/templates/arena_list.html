@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Unit {{ unit_id }}{% endblock %}
+{% block title%}Arena {{unit_id}}{% endblock%}
 
 {% block content %}
 <script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -16,7 +16,7 @@
                 <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
             </div>
             <div class="control_button">
-                <form action="/start_all" method="post">
+                <form action="/start_arena" method="post">
                     <div class="input-field" >
                         <label>How long should the workout run (1 - 10 hours)?</label>
                         <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
@@ -24,7 +24,7 @@
 
                     </div>
                     <div class="btn-ctn">
-                            <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUTS</button>
+                            <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START ARENA</button>
                     </div>
                 </form>
             </div>
@@ -45,7 +45,7 @@
                 </form>
             </div>
         </div>
-        <div class='landing_content col-lg-10' style="margin-top:1em;padding:1em;" onload="check_workout_status('{{ unit_id }}')">
+        <div class='landing_content col-lg-10' style="margin-top:1em;padding:1em;">
 
             <h2>Description</h2>
             <p>{{ description }}</p>
@@ -53,7 +53,7 @@
                 <a href="{{ teacher_instructions }}">Teacher Instructions</a>
             {% endif %}
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
-            <ol class="teams">
+            <ol class="teams" onload="check_workout_status({{ unit_id }})">
                 {% for workout in workout_list %}
                 {% if workout["complete"] == True %}
                 <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
@@ -77,10 +77,10 @@
                             {% if build_type == "container" %}
                             <td>{{ workout_url_path + '/' + workout.name }}</td>
                             {% else %}
-                            <td><a href="/landing/{{workout.name}}" target="_blank">Landing Page</a></td>
+                            <td><a href="/arena_landing/{{workout.name}}" target="_blank">Landing Page</a></td>
                             {% endif %}
                             {% if workout["student_instruction_url"] %}
-                            <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
+                            <td><a href="{{workout['student_instruction_url']}}" target="_blank">Student Instructions</a></td>
                             {% endif %}
                             <td>
                                 {% if workout['submitted_answers'] %}
@@ -159,30 +159,29 @@
                     '</br><div class="loader"></div>');
             });
             check_workout_status("{{unit_id}}");
-
         });
-        
+    
         function check_workout_status(unit_id){
             
             $.ajax({
                 type: "POST",
                 contentType: "application/json;charset=utf-8",
-                url: "/workout_list/" + unit_id,
+                url: "/arena_list/" + unit_id,
                 traditional: "true",
                 data: JSON.stringify({
                     "unit_id": unit_id,
                 }),
                 dataType: "json",
                 success: function(data){
-                    for (i = 0; i < data.length; i++){
-                        if(data[i]['complete'] == true){
-                            var link = document.getElementById("workout_link_" + data[i]['name']);
+                    if(data['complete'] == true){
+                        for (i = 0; i < data['workouts'].length; i++){
+                            var link = document.getElementById("workout_link_" + data['workouts'][i]);
                             link.classList.remove('btn-deactivated');
-                            link.className = "btn";
-                            link.href = '#team_collapse_' + data[i]['name'];
-
+                            link.className = 'btn';
+                            link.href = '#team_collapse_' + data['workouts'][i];
                         }
                     }
+
                 },
             });
     
