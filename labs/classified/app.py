@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, flash, request, session, abort, url_for, jsonify
+from flask import Flask, render_template, redirect, flash, request, session, abort, url_for, jsonify, g
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
@@ -10,6 +10,8 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
 from google.cloud import datastore
 
+import hashlib
+import sqlite3
 import onetimepass
 import pyqrcode
 import os
@@ -28,6 +30,7 @@ app.secret_key = os.urandom(12)
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 lm = LoginManager(app)
+app.database = "bad.db"
 
 
 class User(UserMixin, db.Model):
@@ -151,6 +154,16 @@ def check_flag(workout_id, submission):
         publish_status(workout_id, workout_key)
 
     return data
+
+
+def connect_db():
+    return sqlite3.connect(app.database)
+
+
+def hash_pass(passw):
+    m = hashlib.md5()
+    m.update(passw.encode('utf-8'))
+    return m.hexdigest()
 
 
 @app.route('/<workout_id>')
@@ -345,26 +358,38 @@ def inspect():
 @app.route('/sql')
 def sql_injection():
     page_template = 'sql.html'
-    if current_user.is_authenticated:
-        # if user is logged in we get out of here
-        return redirect(url_for('flag'))
-    form = SQLForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.verify_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('sql_injection'))
+    return render_template(page_template)
 
-        # log user in
-        login_user(user)
-        flash('You are now logged in!')
-        return redirect(url_for('flag'))
-    return render_template(page_template, form=form)
+
+@app.route('/login_SQL', methods=['POST'])
+def login_sql():
+    if request.method == 'POST':
+        uname, pword = (request.json['username'], request.json['password'])
+        g.db = connect_db()
+        cur = g.db.execute("SELECT * FROM employees WHERE username = '%s' AND password = '%s'" %
+                           (uname, hash_pass(pword)))
+        if cur.fetchone():
+            result = {'status': 'success',
+                      'flag': 'CyberGym{jFt6EjlH6I8EcfBg}'}
+        else:
+            result = {'status': 'fail'}
+        g.db.close()
+        return jsonify(result)
 
 
 # create database tables if they don't exist yet
-db.create_all()
 
+# create db for 2fa
+db.create_all()
+# create bad database for SQL Injection
+if not os.path.exists(app.database):
+    with sqlite3.connect(app.database) as connection:
+        c = connection.cursor()
+        c.execute("""CREATE TABLE employees(username TEXT, password TEXT)""")
+        c.execute('INSERT INTO employees VALUES("RickAstley", "{}")'.format(hash_pass("NeverGonnaGiveYouUp")))
+        c.execute('INSERT INTO employees VALUES("SuperSecretClassifiedEmployee", "{}")'.format(hash_pass("password")))
+        c.execute('INSERT INTO employees VALUES("BigBossAdmin", "{}")'.format(hash_pass("kittycat222")))
+        connection.commit()
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0', port=4000)
