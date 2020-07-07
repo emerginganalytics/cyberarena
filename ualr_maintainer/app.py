@@ -259,6 +259,7 @@ def arena_landing(workout_id):
                     if 'answer' in question:
                         question_dict['answer'] = question['answer']
                 question_dict['type'] = question['type']
+                question_dict['point_value'] = question['points']
                 question_list.append(question_dict)
             assessment = question_list
         except TypeError:
@@ -267,35 +268,34 @@ def arena_landing(workout_id):
 
     if(request.method == "POST"):
         valid_answers = []
-        num_correct = 0
+        points = 0
         for i in range(len(assessment)):
             if(assessment[i].get('type') != 'upload'):
                 valid_answers.append(assessment[i].get('answer'))
 
         assessment_answers = request.form.getlist('answer')
         assessment_questions = request.form.getlist('question')
-        
+        assessment_points = request.form.getlist('point_value')
         for i in range(len(assessment_answers)):
             
             user_input = {
                 "question":assessment_questions[i],
-                "answer":assessment_answers[i]
+                "answer":assessment_answers[i], 
+                "points": assessment_points[i]
             }
-
-            # valid_answers.append(assessment[i].get('answer'))
             user_answer = str(user_input['answer'])
             true_answer = str(assessment[i].get('answer'))
 
             if valid_answers[i]:
                 if(user_answer.lower() == valid_answers[i].lower()):
-                    num_correct += 1
+                    points += int(user_input['points'])
         
-        percentage_correct = num_correct / len(assessment_questions) * 100
         workout['submitted_answers'] = assessment_answers
-        workout['assessment_score'] = percentage_correct
         ds_client.put(workout)
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id)
+
+
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
