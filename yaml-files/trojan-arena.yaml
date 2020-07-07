@@ -33,7 +33,7 @@ additional-servers:
   - name: cybergym-hidden
     image: image-cybergym-hiddensite
   - name: cybergym-nessus
-    image: image-cybergym-nessus
+    image: image-cybergym-nessus-arena
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
@@ -60,7 +60,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #2: Nessus Scan"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "CyberGym{normal_guest_account}"
       points: 100
     - type: input
       question: "Flag #3: SQL Injection"
