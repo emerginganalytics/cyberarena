@@ -60,7 +60,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #2: Nessus Scan"
-      answer: "CyberGym{normal_guest_account}"
+      answer: "CyberGym{guest}"
       points: 100
     - type: input
       question: "Flag #3: SQL Injection"
