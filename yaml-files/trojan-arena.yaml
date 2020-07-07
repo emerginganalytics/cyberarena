@@ -4,6 +4,7 @@ workout:
   name: 'Trojan Arena'
   build_type: arena
   workout_description: 'Head to head capture-the-flag style competition.'
+  student_instructions_url: 'TrojanArenaInstructions.pdf'
 
 # For student servers, these will be replicated to the number of
 # students specified by the instructor. These student servers can
@@ -27,10 +28,12 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-  - name: cybergym-arena-server
-    image:  image-cybergym-vnc
-    machine_type: n1-standard-1
-    tags: {items: ['http-server']}
+  - name: cybergym-classified
+    image: image-cybergym-classified
+  - name: cybergym-hidden
+    image: image-cybergym-hiddensite
+  - name: cybergym-nessus
+    image: image-cybergym-nessus
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:

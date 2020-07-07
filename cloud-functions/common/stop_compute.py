@@ -101,9 +101,11 @@ def stop_lapsed_arenas():
     for unit in list(query_units.fetch()):
         if 'arena' in unit and "start_time" in unit['arena'] and "run_hours" in unit['arena']:
             unit_id = unit.key.name
-            start_time = int(unit.get('start_time', 0))
-            run_hours = int(unit.get('run_hours', 0))
+            start_time = int(unit['arena'].get('start_time', 0))
+            run_hours = int(unit['arena'].get('run_hours', 0))
 
             # Stop the workout servers if the run time has exceeded the request
             if ts - start_time >= run_hours * 3600:
                 stop_arena(unit_id)
+
+# stop_lapsed_arenas()

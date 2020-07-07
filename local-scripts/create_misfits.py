@@ -17,4 +17,4 @@ def create_misfits(field, operator, filter):
         ds_client.put(workout)
 
 
-create_misfits('user_email', '=', 'paula.mcdougald@virtualarkansas.org')
+create_misfits('unit_id', '=', 'abenynrzka')
