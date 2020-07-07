@@ -369,18 +369,12 @@ def start_all():
 def start_arena():
     if request.method == 'POST':
         unit_id = request.form['unit_id']
-        arena_list = get_unit_workouts(unit_id)
         arena_unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        for arena_id in arena_list:
-            arena = ds_client.get(ds_client.key('cybergym-workout', arena_id['name']))
-            if 'time' not in request.form:
-                arena['run_hours'] = 2
-                arena_unit['run_hours'] = 2
-            else:
-                arena['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
-                arena_unit['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
-
-            ds_client.put(arena)
+        arena_unit['arena']['running'] = True
+        if 'time' not in request.form:
+            arena_unit['arena']['run_hours'] = 2
+        else:
+            arena_unit['arena']['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
         ds_client.put(arena_unit)
         pub_start_vm(unit_id, 'start-arena')
     return redirect('/arena_list/%s' % (unit_id))
