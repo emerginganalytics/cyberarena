@@ -71,7 +71,7 @@
                             {% if workout["student_instruction_url"] %}
                             <th>Student Instructions</th>
                             {% endif %}
-                            <th>Assessment Submissions</th>
+                            <th>Total Points</th>
                         </tr>
                         <tr>
                             {% if build_type == "container" %}
@@ -83,13 +83,16 @@
                             <td><a href="{{workout['student_instruction_url']}}" target="_blank">Student Instructions</a></td>
                             {% endif %}
                             <td>
-                                {% if workout['submitted_answers'] %}
+                                {% if workout['points'] %}
+                                <p>{{workout['points']}}</p>
+                                {% endif %}
+                                <!-- {% if workout['submitted_answers'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
                                     View Assessment Submission
                                 </button>
                                 {% else %}
                                 N/A
-                                {% endif %}
+                                {% endif %} -->
                             </td>
                         </tr>
                     </table>
