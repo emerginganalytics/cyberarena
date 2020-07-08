@@ -55,9 +55,15 @@
          border: 1px solid;" class="mx-auto d-block">
             <div style="padding:1.5em 1.5em 0;height:auto;">
                 <form action="?" method="POST" onsubmit="login();return false;">
-	                Username: <input type="text" id="uname" value=""/>
-                    Password: <input type="password" id="passw" value=""/>
+                    <div style = "height:auto;">
+	                <label for="uname">Username </label> <input type="text" id="uname" value=""/><br>
+                    </div>
+                    <div style="height:auto;">
+                    <label for="passw">Password </label> <input type="password" id="passw" value=""/><br>
+                        <div style="height:auto;">
 	                <input class="button" type="submit" value="Login" />
+                        </div>
+                    </div>
                 </form>
                 <br><br>
                 <p id="stat"></p>

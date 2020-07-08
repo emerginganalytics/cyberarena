@@ -8,7 +8,7 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
-from google.cloud import datastore
+# from google.cloud import datastore
 
 import hashlib
 import sqlite3
@@ -16,9 +16,9 @@ import onetimepass
 import pyqrcode
 import os
 import base64
-import requests
-import random
-import string
+# import requests
+# import random
+# import string
 
 # application instance
 app = Flask(__name__)
@@ -96,64 +96,64 @@ class SQLForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-ds_client = datastore.Client()
-project = 'ualr-cybersecurity'
+# ds_client = datastore.Client()
+# project = 'ualr-cybersecurity'
 
 
-def set_workout_flag(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+# def set_workout_flag(workout_id):
+#    key = ds_client.key('cybergym-workout', workout_id)
+#    workout = ds_client.get(key)
+#
+#   flag_dict = []
+#    flag_wireshark = 'CyberGym{' + ''.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
+#    print(flag_wireshark)
+#
+#    flag_data = {
+#        'flag': flag_wireshark
+#    }
+#    flag_dict.append(flag_data)
+#
+#    final_flag = random.sample(flag_dict, k=1)
+#    workout['container_info']['wireshark_flag'] = final_flag[0]
 
-    flag_dict = []
-    flag_wireshark = 'CyberGym{' + ''.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
-    print(flag_wireshark)
-
-    flag_data = {
-        'flag': flag_wireshark
-    }
-    flag_dict.append(flag_data)
-
-    final_flag = random.sample(flag_dict, k=1)
-    workout['container_info']['wireshark_flag'] = final_flag[0]
-
-    ds_client.put(workout)
-    return final_flag
-
-
-def publish_status(workout_id, workout_key):
-    url = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
-
-    status = {
-        "workout_id": workout_id,
-        "token": workout_key,
-    }
-
-    publish = requests.post(url, json=status)
-    print('[*] POSTING to {} ...'.format(url))
-    print(publish)
+#    ds_client.put(workout)
+#    return final_flag
 
 
-def check_flag(workout_id, submission):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+#def publish_status(workout_id, workout_key):
+#    url = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
+#
+#    status = {
+#        "workout_id": workout_id,
+#        "token": workout_key,
+#    }
+#
+#   publish = requests.post(url, json=status)
+#    print('[*] POSTING to {} ...'.format(url))
+#    print(publish)
 
-    # data is a dict list that is passed back to page as JSON object
-    status = workout['assessment']['questions']
-    data = {
-        'wireshark_flag': {
-            'flag': workout['container_info']['wireshark_flag'],
-            'status': status[2]['complete']
-        }
-    }
 
-    flag_wireshark = workout['container_info']['wireshark_flag']
-
-    if submission in flag_wireshark:
-        data['wireshark_flag']['status'] = True
-        workout_key = workout['assessment']['questions'][2]['1TkkG1J']
-        publish_status(workout_id, workout_key)
-
-    return data
+# def check_flag(workout_id, submission):
+#    key = ds_client.key('cybergym-workout', workout_id)
+#    workout = ds_client.get(key)
+#
+#    # data is a dict list that is passed back to page as JSON object
+#    status = workout['assessment']['questions']
+#    data = {
+#        'wireshark_flag': {
+#            'flag': workout['container_info']['wireshark_flag'],
+#            'status': status[2]['complete']
+#        }
+#    }
+#
+#    flag_wireshark = workout['container_info']['wireshark_flag']
+#
+#    if submission in flag_wireshark:
+#        data['wireshark_flag']['status'] = True
+#        workout_key = workout['assessment']['questions'][2]['1TkkG1J']
+#        publish_status(workout_id, workout_key)
+#
+#    return data
 
 
 def connect_db():
@@ -166,72 +166,69 @@ def hash_pass(passw):
     return m.hexdigest()
 
 
-@app.route('/<workout_id>')
-def home(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+@app.route('/')
+def home():
     if not session.get('logged_in'):
-        return render_template('index.html', workout_id=workout_id)
+        return render_template('index.html')
     else:
-        set_workout_flag(workout_id)
-        return redirect('/flag/' + workout_id)
+        return redirect('/flag')
 
 
 # Generates values based on workout
-@app.route('/loader/<workout_id>')
-def loader(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+# @app.route('/loader/<workout_id>')
+# def loader(workout_id):
+#    key = ds_client.key('cybergym-workout', workout_id)
+#    workout = ds_client.get(key)
+#
+#   if workout:
+#        if workout['type'] == 'wireshark' or 'dos':
+#            return redirect('/' + workout_id)
+#        elif workout['type'] == 'xss':
+#            return redirect('/workouts/xss/' + workout_id)
+#        elif workout['type'] == '2fa':
+#            return redirect('/workouts/tfh/' + workout_id)
+#    else:
+#        return redirect('/invalid')
 
-    if workout:
-        if workout['type'] == 'wireshark' or 'dos':
-            return redirect('/' + workout_id)
-        elif workout['type'] == 'xss':
-            return redirect('/workouts/xss/' + workout_id)
-        elif workout['type'] == '2fa':
-            return redirect('/workouts/tfh/' + workout_id)
-    else:
-        return redirect('/invalid')
 
-
-@app.route("/login/<workout_id>", methods=["GET", "POST"])
-def do_admin_login(workout_id):
+@app.route("/login", methods=["GET", "POST"])
+def do_admin_login():
     if request.form['psw'] == 'cyberSecret42' and request.form['username'] == 'admin':
         session['logged_in'] = True
     else:
         flash('Incorrect Password')
-    return redirect(url_for('home', workout_id=workout_id))
+    return redirect(url_for('home'))
 
 
-@app.route("/flag/<workout_id>", methods=["GET", "POST"])
-def flag(workout_id):
-    page_template = 'flag.html'
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
-
+# @app.route("/flag", methods=["GET", "POST"])
+# def flag(workout_id):
+#    page_template = 'flag.html'
+#    key = ds_client.key('cybergym-workout', workout_id)
+#    workout = ds_client.get(key)
+#
     # Only valid workouts can access
-    if workout:
-        if workout['type'] == 'wireshark':
-            wireshark_flag = workout['container_info']['wireshark_flag']
-
-            if request.method == 'GET':
-                return render_template(
-                    page_template,
-                    workout_id=workout_id,
-                    wireshark_flag=wireshark_flag
-                )
-            elif request.method == 'POST':
-                plaintext = request.get_json()
-                data = check_flag(workout_id, str(plaintext['flag']))
-
-                return jsonify({
-                    'message': data['wireshark_flag']['flag'],
-                    'status': data['wireshark_flag']['status'],
-                })
-        else:
-            return redirect('/invalid')
-    else:
-        return redirect('/invalid')
+#    if workout:
+#        if workout['type'] == 'wireshark':
+#            wireshark_flag = workout['container_info']['wireshark_flag']
+#
+#            if request.method == 'GET':
+#                return render_template(
+#                    page_template,
+#                    workout_id=workout_id,
+#                    wireshark_flag=wireshark_flag
+#                )
+#            elif request.method == 'POST':
+#                plaintext = request.get_json()
+#                data = check_flag(workout_id, str(plaintext['flag']))
+#
+#                return jsonify({
+#                    'message': data['wireshark_flag']['flag'],
+#                    'status': data['wireshark_flag']['status'],
+#                })
+#        else:
+#            return redirect('/invalid')
+#    else:
+#        return redirect('/invalid')
 
 
 @app.route('/invalid', methods=['GET'])
@@ -240,39 +237,39 @@ def invalid():
     return render_template(template)
 
 
-@app.route("/logout/<workout_id>", methods=["GET", "POST"])
-def admin_logout(workout_id):
+@app.route("/logout", methods=["GET", "POST"])
+def admin_logout():
     session['logged_in'] = False
-    return redirect(url_for('home', workout_id=workout_id))
+    return redirect(url_for('home'))
 
 
-@app.route("/workouts/<workout_id>", methods=["POST"])
-def workouts(workout_id):
-    return render_template('workouts.html', workout_id=workout_id)
+@app.route("/workouts", methods=["POST"])
+def workouts():
+    return render_template('workouts.html')
 
 
-@app.route("/workouts/xss/<workout_id>", methods=["GET", "POST"])
-def xss(workout_id):
-    return render_template('xss_d.html', workout_id=workout_id)
+@app.route("/workouts/xss", methods=["GET", "POST"])
+def xss():
+    return render_template('xss_d.html')
 
 
-@app.route('/workouts/tfh/<workout_id>')
-def twofactorhome(workout_id):
-    return render_template('welcome.html', workout_id=workout_id)
+@app.route('/workouts/tfh')
+def twofactorhome():
+    return render_template('welcome.html')
 
 
-@app.route('/workouts/tfh/register/<workout_id>', methods=['GET', 'POST'])
-def register(workout_id):
+@app.route('/workouts/tfh/register', methods=['GET', 'POST'])
+def register():
     """User registration route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome', workout_id=workout_id))
+        return redirect(url_for('twofactorhome'))
     form = RegisterForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is not None:
             flash('Username already exists.')
-            return redirect(url_for('register', workout_id=workout_id))
+            return redirect(url_for('register'))
         # add new user to the database
         user = User(username=form.username.data, password=form.password.data)
         db.session.add(user)
@@ -280,20 +277,20 @@ def register(workout_id):
 
         # redirect to the two-factor auth page, passing username in session
         session['username'] = user.username
-        return redirect(url_for('two_factor_setup', workout_id=workout_id))
-    return render_template('register.html', form=form, workout_id=workout_id)
+        return redirect(url_for('two_factor_setup'))
+    return render_template('register.html', form=form)
 
 
-@app.route('/workouts/tfh/twofactor/<workout_id>')
-def two_factor_setup(workout_id):
+@app.route('/workouts/tfh/twofactor')
+def two_factor_setup():
     if 'username' not in session:
-        return redirect(url_for('twofactorhome', workout_id=workout_id))
+        return redirect(url_for('twofactorhome'))
     user = User.query.filter_by(username=session['username']).first()
     if user is None:
-        return redirect(url_for('twofactorhome', workout_id=workout_id))
+        return redirect(url_for('twofactorhome'))
     # since this page contains the sensitive qrcode, make sure the browser
     # does not cache it
-    return render_template('two-factor-setup.html', workout_id=workout_id), 200, {
+    return render_template('two-factor-setup.html'), 200, {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
         'Expires': '0'}
@@ -321,32 +318,32 @@ def qrcode():
         'Expires': '0'}
 
 
-@app.route('/workouts/tfh/login/<workout_id>', methods=['GET', 'POST'])
-def login(workout_id):
+@app.route('/workouts/tfh/login', methods=['GET', 'POST'])
+def login():
     """User login route."""
     if current_user.is_authenticated:
         # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome', workout_id=workout_id))
+        return redirect(url_for('twofactorhome'))
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.verify_password(form.password.data) or \
                 not user.verify_totp(form.token.data):
             flash('Invalid username, password or token.')
-            return redirect(url_for('login', workout_id=workout_id))
+            return redirect(url_for('login'))
 
         # log user in
         login_user(user)
         flash('You are now logged in!')
-        return redirect(url_for('twofactorhome', workout_id=workout_id))
-    return render_template('login.html', form=form, workout_id=workout_id)
+        return redirect(url_for('twofactorhome'))
+    return render_template('login.html', form=form)
 
 
-@app.route('/workouts/tfh/logout/<workout_id>')
-def logout(workout_id):
+@app.route('/workouts/tfh/logout')
+def logout():
     """User logout route."""
     logout_user()
-    return redirect(url_for('twofactorhome', workout_id=workout_id))
+    return redirect(url_for('twofactorhome'))
 
 
 @app.route('/inspect')
