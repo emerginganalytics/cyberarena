@@ -53,6 +53,9 @@ def get_unit_workouts(unit_id):
             'submitted_answers': submitted_answers,
             'uploaded_files': uploaded_files
         }
+        if workout_instance['type'] == "arena":
+            if 'points' in workout_instance:
+                workout_info['points'] = workout_instance['points']
         workout_list.append(workout_info)
 
     return workout_list

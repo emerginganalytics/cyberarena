@@ -76,9 +76,7 @@
                                 '</br><div class="loader"></div>');
     
                             var form = $(this);
-                            var url = form.attr('action');
-                            alert(form.attr('class'));
-    
+                            var url = form.attr('action');    
     
                             $.ajax({
                                 type: "POST",
@@ -90,10 +88,10 @@
                                     //alert("Points gained" + data['points_gained']); // show response from the php script.
                                     $("#loading-msg").html("");
                                     if(data['answer_correct'] == true){
-                                        alert("correct answer");
+                                        alert("Correct answer");
                                         form.parent().fadeOut();
                                     }else{
-                                        alert("wrong answer");
+                                        alert("Incorrect Flag");
                                     }
                                 }
                                 });

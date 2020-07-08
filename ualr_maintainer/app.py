@@ -248,18 +248,23 @@ def arena_landing(workout_id):
             for question in workout['assessment']['questions']:
                 question_dict = {}
                 if(question['type'] == 'input'):
-                    if 'answer' in question and question['answer'] not in workout['submitted_answers']:
+                    if 'answer' in question:
                         question_dict['question'] = question['question']
                         question_dict['answer'] = question['answer']
                         question_dict['type'] = question['type']
                         question_dict['point_value'] = question['points']
                         question_list.append(question_dict)
+                        
+                #remove already submitted flag prompts to avoid double submission
+                if 'submitted_answers' in workout:
+                    for question in question_list:
+                        if question['answer'] in workout['submitted_answers']:
+                            question_list.remove(question)
             assessment = question_list
+
         except TypeError:
             print('assessment not defined')
-    if 'flags_found' in workout:
-        flags_found = workout['flags_found']
-    
+
 
     if(request.method == "POST"):
         valid_answers = []
@@ -277,17 +282,36 @@ def arena_landing(workout_id):
                 valid_answers.append(assessment[i].get('answer'))
         
         if flag_attempt in valid_answers:
+            
+            if 'submitted_answers' in workout:
+                if flag_attempt not in workout['submitted_answers']:
+                    workout['submitted_answers'].append(flag_attempt)
+                else: 
+                    response = {
+                    'answer_correct': False, 
+                    'points_gained': 0
+                    }
+                    return json.dumps(response)
+            else:
+                workout['submitted_answers'] = []
+                workout['submitted_answers'].append(flag_attempt)
             points += int(point_value)
-            workout['submitted_answers'].append(flag_attempt)
             response = {
              'answer_correct': True,
              'points_gained': points,   
             }
+            if 'points' in workout:
+                prev_score = workout['points']
+                prev_score += int(point_value)
+                workout['points'] = prev_score
+            else:
+                workout['points'] = int(point_value)
         else:
             response = {
                 'answer_correct': False, 
                 'points_gained': 0
             }
+
         ds_client.put(workout)
         return json.dumps(response)
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
