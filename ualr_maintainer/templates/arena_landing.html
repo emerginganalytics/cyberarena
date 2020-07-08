@@ -35,11 +35,7 @@
                 <p>Assessment Results: {{ score }}</p>
                 <p>*Results may not be final</p>
                 {% endif %}
-                <!-- {% if complete %}
-                    <p>Workout complete: </p><p style="color: green;">&#10004;</p>
-                {% else %}
-                    <p>Workout complete: </p><h2 style="color: red;">&#10008;</h2>
-                {% endif %} -->
+
 
                 {% if running %}
                 <br><h2>Workout Servers</h2>
@@ -51,14 +47,9 @@
                         <p>*Machines may take a couple minutes to start</p>
                 {% endif %}
                 <br>
-                
-
-
-                </p>
             </div>
             <div id="workout_id" hidden>{{ workout_id }}</div>
             <div class='container' id='instructions' style="margin:0;">
-                <!-- <h2>Description</h2> -->
                 <h2>{{ workout_type }} Workout</h2>
                 <p>Workout Username: {{guac_user}}</p>
                 <p>Workout Password: {{guac_pass}}</p>
@@ -71,44 +62,69 @@
                 <div id="loading-msg"></div>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
                 <script>
-                    $(document).ready(function(){
-                        $("form").submit(function(){
-                            $('#start-vm').attr('disabled','disabled');
-                            $('#stop-vm').attr('disabled','disabled');
-                            $('#reset-vm').attr('disabled','disabled');
-                            $("#loading-msg").html('Please wait while the process completes' +
-                                '</br><div class="loader"></div>');
-                        });
-                    });
 
                     function reveal_assessment(){
                         $(".workout_assessment_form").fadeToggle();
                     }
                     
+                    // this is the id of the form
+                    $(document).ready(function(){
+                        $(".flag_form").submit(function(e) {
+                            e.preventDefault(); // avoid to execute the actual submit of the form.
+    
+                            $("#loading-msg").html('Please wait while the process completes' +
+                                '</br><div class="loader"></div>');
+    
+                            var form = $(this);
+                            var url = form.attr('action');
+                            alert(form.attr('class'));
+    
+    
+                            $.ajax({
+                                type: "POST",
+                                url: url,
+                                data: form.serialize(), // serializes the form's elements.
+                                dataType: "json",
+                                success: function(data)
+                                {
+                                    //alert("Points gained" + data['points_gained']); // show response from the php script.
+                                    $("#loading-msg").html("");
+                                    if(data['answer_correct'] == true){
+                                        alert("correct answer");
+                                        form.parent().fadeOut();
+                                    }else{
+                                        alert("wrong answer");
+                                    }
+                                }
+                                });
+                        });
+                    });
+                    
+                    
                 </script>
             </div> <!--Workout info container-->
                 {% if assessment %}
-                <br>
-                    
+                    <br>
                     <div class='container' id='assessment'>
                         <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                        <form class='workout_assessment_form' action='/arena_landing/{{ arena_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
+                        <div class="workout_assessment_form" style="display:none;">
                         {% for question in assessment%}
                             {% if question['type'] == 'input' %}
-                                <div class='question_group'>
-                                    <input type="hidden" name="question" value="{{ question['question'] }}" />
-                                    {{ question['question'] }}<br>
-                                    <input type='text' name="answer" />
+                                <div class='question_group' style="margin:1em;border:1px solid black;">
+                                    <form class='flag_form' action='/arena_landing/{{ arena_id }}' method="POST" enctype="multipart/form-data">
+                                        <input type="hidden" name="question_index" value="{{ loop.index0 }}" />
+                                        <input type='hidden' name='point_value' value="{{question['point_value'] }}" />
+                                        {{ question['question'] }}<br>
+                                        <input class='user_input' type='text' name="answer" />
+                                        <button type='submit' class="btn" style="margin-top:0;text-align:center;" >Submit</button><br>
+                                    </form>
                                 </div>
                             {% endif %}
                         {% endfor %}
-                        <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
-                        </form><br>
+                        </div><br>
+                        
                     </div> <!--Assessment Dropdown-->
                     
-                {% endif %}
-                {% if user_uploads %}
-                    {{user_uploads}}
                 {% endif %}
                 
 

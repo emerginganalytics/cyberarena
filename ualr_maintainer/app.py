@@ -225,14 +225,7 @@ def arena_list(unit_id):
     if unit:
         return render_template('arena_list.html', teacher_instructions_url=teacher_instructions_url, workout_list=workout_list,
                             student_instructions_url=student_instructions_url, description=unit['description'], unit_id=unit_id,
-        )
-        
-
-
-    return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
-                            workout_list=workout_list, unit_id=unit_id,
-                            description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url,
-                            workout_type=unit['workout_type'])
+    )
 
 
 @app.route('/arena_landing/<workout_id>', methods=['GET', 'POST'])
@@ -240,7 +233,7 @@ def arena_landing(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
     
-    assessment = guac_user = guac_pass = None
+    assessment = guac_user = guac_pass = flags_found = None
 
     if 'workout_user' in workout:
         guac_user = workout['workout_user']
@@ -254,44 +247,49 @@ def arena_landing(workout_id):
                 assessment_type = workout['assessment']['type']
             for question in workout['assessment']['questions']:
                 question_dict = {}
-                question_dict['question'] = question['question']
                 if(question['type'] == 'input'):
-                    if 'answer' in question:
+                    if 'answer' in question and question['answer'] not in workout['submitted_answers']:
+                        question_dict['question'] = question['question']
                         question_dict['answer'] = question['answer']
-                question_dict['type'] = question['type']
-                question_dict['point_value'] = question['points']
-                question_list.append(question_dict)
+                        question_dict['type'] = question['type']
+                        question_dict['point_value'] = question['points']
+                        question_list.append(question_dict)
             assessment = question_list
         except TypeError:
             print('assessment not defined')
-            print(assessment)
+    if 'flags_found' in workout:
+        flags_found = workout['flags_found']
+    
 
     if(request.method == "POST"):
         valid_answers = []
         points = 0
+        response = {}
+
+        flag_attempt = request.form.get('answer')
+        print(str(flag_attempt))
+
+        question_index = request.form.get('question_index')
+        point_value = request.form.get('point_value')
+
         for i in range(len(assessment)):
             if(assessment[i].get('type') != 'upload'):
                 valid_answers.append(assessment[i].get('answer'))
-
-        assessment_answers = request.form.getlist('answer')
-        assessment_questions = request.form.getlist('question')
-        assessment_points = request.form.getlist('point_value')
-        for i in range(len(assessment_answers)):
-            
-            user_input = {
-                "question":assessment_questions[i],
-                "answer":assessment_answers[i], 
-                "points": assessment_points[i]
-            }
-            user_answer = str(user_input['answer'])
-            true_answer = str(assessment[i].get('answer'))
-
-            if valid_answers[i]:
-                if(user_answer.lower() == valid_answers[i].lower()):
-                    points += int(user_input['points'])
         
-        workout['submitted_answers'] = assessment_answers
+        if flag_attempt in valid_answers:
+            points += int(point_value)
+            workout['submitted_answers'].append(flag_attempt)
+            response = {
+             'answer_correct': True,
+             'points_gained': points,   
+            }
+        else:
+            response = {
+                'answer_correct': False, 
+                'points_gained': 0
+            }
         ds_client.put(workout)
+        return json.dumps(response)
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id)
 
@@ -369,12 +367,18 @@ def start_all():
 def start_arena():
     if request.method == 'POST':
         unit_id = request.form['unit_id']
+        arena_list = get_unit_workouts(unit_id)
         arena_unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-        arena_unit['arena']['running'] = True
-        if 'time' not in request.form:
-            arena_unit['arena']['run_hours'] = 2
-        else:
-            arena_unit['arena']['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+        for arena_id in arena_list:
+            arena = ds_client.get(ds_client.key('cybergym-workout', arena_id['name']))
+            if 'time' not in request.form:
+                arena['run_hours'] = 2
+                arena_unit['run_hours'] = 2
+            else:
+                arena['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+                arena_unit['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
+
+            ds_client.put(arena)
         ds_client.put(arena_unit)
         pub_start_vm(unit_id, 'start-arena')
     return redirect('/arena_list/%s' % (unit_id))
