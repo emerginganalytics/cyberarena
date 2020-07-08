@@ -28,8 +28,6 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-  - name: cybergym-classified
-    image: image-cybergym-classified
   - name: cybergym-hidden
     image: image-cybergym-hiddensite
   - name: cybergym-nessus

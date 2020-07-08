@@ -81,7 +81,7 @@ def stop_lapsed_workouts():
     query_workouts = ds_client.query(kind='cybergym-workout')
     query_workouts.add_filter("running", "=", True)
     for workout in list(query_workouts.fetch()):
-        if "start_time" in workout and "run_hours" in workout:
+        if "start_time" in workout and "run_hours" in workout and workout.get('type', 'arena') != 'arena':
             workout_id = workout.key.name
             start_time = int(workout.get('start_time', 0))
             run_hours = int(workout.get('run_hours', 0))
