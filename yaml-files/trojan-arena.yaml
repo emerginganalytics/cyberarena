@@ -28,10 +28,11 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-  - name: cybergym-hidden
-    image: image-cybergym-hiddensite
   - name: cybergym-nessus
     image: image-cybergym-nessus-arena
+  - name: cybergym-hidden
+    image: image-cybergym-hiddensite
+
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
@@ -54,23 +55,23 @@ assessment:
   questions:
     - type: input
       question: "Flag #1: Classified Website"
-      answer: "CyberGym{iWwH8t4d5GcpZDQi}"
+      answer: "iWwH8t4d5GcpZDQi"
       points: 100
     - type: input
       question: "Flag #2: Nessus Scan"
-      answer: "CyberGym{guest}"
+      answer: "guest"
       points: 100
     - type: input
       question: "Flag #3: SQL Injection"
-      answer: "CyberGym{jFt6EjlH6I8EcfBg}"
+      answer: "jFt6EjlH6I8EcfBg"
       points: 100
     - type: input
       question: "Flag #4: Hidden Website"
-      answer: "<TYPE IN FLAG HERE>"
+      answer: "arena_hidden_site"
       points: 100
     - type: input
       question: "Flag #5: Brute Force Password Attack"
-      answer: "CyberGym{Pin_Test}"
+      answer: "Pin_Test"
       points: 100
     - type: input
       question: "Flag #6: Steganography"
