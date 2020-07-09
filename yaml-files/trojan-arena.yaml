@@ -4,7 +4,7 @@ workout:
   name: 'Trojan Arena'
   build_type: arena
   workout_description: 'Head to head capture-the-flag style competition.'
-  student_instructions_url: 'TrojanArenaInstructions.pdf'
+  student_instructions_url: 'https://storage.googleapis.com/student_workout_instructions_tgd4419/TrojanArenaInstructions.pdf'
 
 # For student servers, these will be replicated to the number of
 # students specified by the instructor. These student servers can

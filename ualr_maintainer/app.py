@@ -228,8 +228,8 @@ def arena_list(unit_id):
         return json.dumps(unit)
 
     if unit:
-        return render_template('arena_list.html', teacher_instructions_url=teacher_instructions_url, workout_list=workout_list,
-                            student_instructions_url=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time
+        return render_template('arena_list.html', teacher_instructions=teacher_instructions_url, workout_list=workout_list,
+                            student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time
     )
 
 
@@ -238,6 +238,10 @@ def arena_landing(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
     
+    student_instructions_url = None
+    if 'student_instructions_url' in workout:
+        student_instructions_url = workout['student_instructions_url']
+
     assessment = guac_user = guac_pass = flags_found = None
 
     if 'workout_user' in workout:
@@ -341,7 +345,7 @@ def arena_landing(workout_id):
         return json.dumps(response)
 
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
-                        guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id)
+                        guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
 
 
 

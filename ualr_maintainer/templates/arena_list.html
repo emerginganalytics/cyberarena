@@ -56,6 +56,9 @@
             {% if teacher_instructions %}
                 <a href="{{ teacher_instructions }}">Teacher Instructions</a>
             {% endif %}
+            {% if student_instructions %}
+                <a href="{{ student_instructions }}">Student Instructions</a>
+            {% endif %}
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             <ol class="teams" onload="check_workout_status({{ unit_id }})">
                 {% for workout in workout_list %}
