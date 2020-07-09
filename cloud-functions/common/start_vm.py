@@ -94,7 +94,7 @@ def start_arena(unit_id):
     key = ds_client.key('cybergym-unit', unit_id)
     unit = ds_client.get(key)
     unit['arena']['running'] = True
-    unit['arena']['start_time'] = str(calendar.timegm(time.gmtime()))
+    unit['arena']['gm_start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(unit)
 
     result = compute.instances().list(project=project, zone=zone,

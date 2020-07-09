@@ -99,9 +99,9 @@ def stop_lapsed_arenas():
     query_units = ds_client.query(kind='cybergym-unit')
     query_units.add_filter("arena.running", "=", True)
     for unit in list(query_units.fetch()):
-        if 'arena' in unit and "start_time" in unit['arena'] and "run_hours" in unit['arena']:
+        if 'arena' in unit and "gm_start_time" in unit['arena'] and "run_hours" in unit['arena']:
             unit_id = unit.key.name
-            start_time = int(unit['arena'].get('start_time', 0))
+            start_time = int(unit['arena'].get('gm_start_time', 0))
             run_hours = int(unit['arena'].get('run_hours', 0))
 
             # Stop the workout servers if the run time has exceeded the request
