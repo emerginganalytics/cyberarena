@@ -49,6 +49,10 @@
 
             <h2>Description</h2>
             <p>{{ description }}</p>
+            {% if start_time %}
+            <h3>Start Time: {{start_time}} UTC</h3>
+            {% endif %}
+
             {% if teacher_instructions %}
                 <a href="{{ teacher_instructions }}">Teacher Instructions</a>
             {% endif %}
@@ -68,10 +72,8 @@
                             {% else %}
                             <th>Workout Landing Page</th>
                             {% endif %}
-                            {% if workout["student_instruction_url"] %}
-                            <th>Student Instructions</th>
-                            {% endif %}
                             <th>Total Points</th>
+                            <th>Submission History</th>
                         </tr>
                         <tr>
                             {% if build_type == "container" %}
@@ -79,20 +81,21 @@
                             {% else %}
                             <td><a href="/arena_landing/{{workout.name}}" target="_blank">Landing Page</a></td>
                             {% endif %}
-                            {% if workout["student_instruction_url"] %}
-                            <td><a href="{{workout['student_instruction_url']}}" target="_blank">Student Instructions</a></td>
-                            {% endif %}
                             <td>
                                 {% if workout['points'] %}
                                 <p>{{workout['points']}}</p>
+                                {% else %}
+                                <p>0</p>
                                 {% endif %}
-                                <!-- {% if workout['submitted_answers'] %}
+                            </td>
+                            <td>
+                                {% if workout['submitted_answers'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
-                                    View Assessment Submission
+                                    View Submission History
                                 </button>
                                 {% else %}
                                 N/A
-                                {% endif %} -->
+                                {% endif %}
                             </td>
                         </tr>
                     </table>
@@ -102,25 +105,32 @@
                         <div class="modal-dialog" role="document" style="max-width:100%;">
                         <div class="modal-content">
                             <div class="modal-header">
-                            <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Assessment results for {{workout.name}}</h5>
+                            <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Submission history for arena {{workout.name}}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                             </div>
                             <div class="modal-body">
-                                <ul class="nav nav-pills" style='justify-content: space-around;'>
+                                <!-- <ul class="nav nav-pills" style='justify-content: space-around;'>
                                     <li class="active"><a data-toggle="pill" class='btn' href="#text_input" style='width:100%;'>Text Answers</a></li>
                                     {% if workout["uploaded_files"] %}
                                     <li><a data-toggle="pill" class='btn' href="#file_uploads" style='width:100%;'>File Uploads</a></li>
                                     {% endif %}
-                                </ul>
+                                </ul> -->
                                 <div class='tab-content'>
                                     <div id='text_input' class='tab-pane active fadeIn'>
-                                        <ol>
+                                        <table>
+                                            <tr>
+                                                <th>Flag</th>
+                                                <th>Submission Time</th>
+                                            </tr>
                                             {% for question in workout["submitted_answers"] %}
-                                                <li>{{question}}</li>
+                                                <tr>
+                                                    <td>{{question['answer']}}</td>
+                                                    <td>{{question['timestamp']}} UTC</td>
+                                                </tr>
                                             {% endfor %}
-                                        </ol>
+                                        </table>
                                     </div>
                                     {% if workout['uploaded_files'] %}
                                         <div id='file_uploads' style='text-align:center;' class="tab-pane fade">
