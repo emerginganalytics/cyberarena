@@ -110,7 +110,7 @@
                             {% if question['type'] == 'input' %}
                                 <div class='question_group' style="margin:1em;border:1px solid black;">
                                     <form class='flag_form' action='/arena_landing/{{ arena_id }}' method="POST" enctype="multipart/form-data">
-                                        <input type="hidden" name="question_index" value="{{ loop.index0 }}" />
+                                        <input type="hidden" name="question_content" value="{{ question['question']}}" />
                                         <input type='hidden' name='point_value' value="{{question['point_value'] }}" />
                                         {{ question['question'] }}<br>
                                         <input class='user_input' type='text' name="answer" />

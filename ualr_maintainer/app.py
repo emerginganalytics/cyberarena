@@ -14,6 +14,7 @@ from identity_aware_proxy import certs, get_metadata, validate_assertion, audien
 from utilities.yaml_functions import parse_workout_yaml
 from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads
 from werkzeug.utils import secure_filename
+from calendar import timegm
 
 from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm, CreateExpoForm
@@ -219,12 +220,16 @@ def arena_list(unit_id):
     if 'student_instructions_url' in unit:
         student_instructions_url = unit['student_instructions_url']
 
+    start_time = None
+    if'start_time' in unit:
+        start_time = unit['start_time']
+        # start_time = time.gmtime(start_time)
     if (request.method=="POST"):
         return json.dumps(unit)
 
     if unit:
         return render_template('arena_list.html', teacher_instructions_url=teacher_instructions_url, workout_list=workout_list,
-                            student_instructions_url=student_instructions_url, description=unit['description'], unit_id=unit_id,
+                            student_instructions_url=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time
     )
 
 
@@ -254,58 +259,78 @@ def arena_landing(workout_id):
                         question_dict['type'] = question['type']
                         question_dict['point_value'] = question['points']
                         question_list.append(question_dict)
-                        
+
                 #remove already submitted flag prompts to avoid double submission
                 if 'submitted_answers' in workout:
                     for question in question_list:
-                        if question['answer'] in workout['submitted_answers']:
-                            question_list.remove(question)
+                        for answer_group in workout['submitted_answers']:
+                            if answer_group['answer'] == question['answer']:
+                                question_list.remove(question)
             assessment = question_list
 
         except TypeError:
             print('assessment not defined')
 
-
     if(request.method == "POST"):
         valid_answers = []
         points = 0
         response = {}
-
+        answer_found = False
         flag_attempt = request.form.get('answer')
-        print(str(flag_attempt))
 
-        question_index = request.form.get('question_index')
-        point_value = request.form.get('point_value')
-
+        question_key = request.form.get('question_content')
+        point_value = int(request.form.get('point_value'))
         for i in range(len(assessment)):
-            if(assessment[i].get('type') != 'upload'):
-                valid_answers.append(assessment[i].get('answer'))
+            if question_key == assessment[i].get('question') and flag_attempt == assessment[i].get('answer'):
+                answer_found = True
+                # if(assessment[i].get('type') != 'upload'):
+                # valid_answers.append(assessment[i].get('answer'))
         
-        if flag_attempt in valid_answers:
-            
+        # if flag_attempt in valid_answers:
+        if answer_found:
+            answer_time = time.gmtime(time.time())
+            time_string = str(answer_time[3]) + ":" + str(answer_time[4]) + ":" + str(answer_time[5])
+
+            answer_time_dict = {
+                'answer': flag_attempt,
+                'timestamp': time_string
+            }
+
+            #check if the answer is a duplicate
             if 'submitted_answers' in workout:
-                if flag_attempt not in workout['submitted_answers']:
-                    workout['submitted_answers'].append(flag_attempt)
-                else: 
-                    response = {
-                    'answer_correct': False, 
-                    'points_gained': 0
-                    }
-                    return json.dumps(response)
+                workout['submitted_answers'].append(answer_time_dict)
+
             else:
                 workout['submitted_answers'] = []
-                workout['submitted_answers'].append(flag_attempt)
+                workout['submitted_answers'].append(answer_time_dict)
             points += int(point_value)
             response = {
-             'answer_correct': True,
-             'points_gained': points,   
+            'answer_correct': True,
+            'points_gained': points,   
             }
+            #check if this is the first time this flag has been found
+            if 'found_flags' in unit:
+                if flag_attempt in unit['found_flags']:
+                    print("flag already found")
+                else:
+                    unit['found_flags'].append(flag_attempt)
+                    point_value += 50
+                    ds_client.put(unit)
+            else:
+                unit['found_flags'] = []
+                unit['found_flags'].append(flag_attempt)
+                point_value += 50
+                ds_client.put(unit)
+
             if 'points' in workout:
                 prev_score = workout['points']
-                prev_score += int(point_value)
+                prev_score += point_value
                 workout['points'] = prev_score
             else:
-                workout['points'] = int(point_value)
+                workout['points'] = point_value
+            
+
+
         else:
             response = {
                 'answer_correct': False, 
@@ -314,6 +339,7 @@ def arena_landing(workout_id):
 
         ds_client.put(workout)
         return json.dumps(response)
+
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id)
 
@@ -403,6 +429,10 @@ def start_arena():
                 arena_unit['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
 
             ds_client.put(arena)
+        start_time = time.gmtime(time.time())
+        time_string = str(start_time[3]) + ":" + str(start_time[4]) + ":" + str(start_time[5])
+        print(time_string)
+        arena_unit['start_time'] = time_string
         ds_client.put(arena_unit)
         pub_start_vm(unit_id, 'start-arena')
     return redirect('/arena_list/%s' % (unit_id))
