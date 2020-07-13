@@ -31,6 +31,10 @@
 #include <QDebug>
 #include <cstdlib>            /* Pulling ENV variables */
 #include <string>
+#include <algorithm>          /* std::find */
+#include <vector>
+#include <stdlib.h>           /* srand, rand */
+#include <time.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Keypad; }
@@ -47,6 +51,11 @@ public:
 private:
     Ui::Keypad *ui;
     void post();
+    void setPin();
+
+    QString pin = "";
+    std::vector<int> stored_pin = {};
+    bool button_pressed = false;
 
 private slots:
     void keyPressed();
