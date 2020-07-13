@@ -278,34 +278,36 @@ def delete_arenas():
     to delete arenas similar to the delete_workouts() function
     :return:
     """
-    query_old_arenas = ds_client.query(kind='cybergym-unit')
-    query_old_arenas.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
-    for arena in list(query_old_arenas.fetch()):
+    query_old_units = ds_client.query(kind='cybergym-unit')
+    query_old_units.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
+    for unit in list(query_old_units.fetch()):
         arena_type = False
-        if 'build_type' in arena and arena['build_type'] == 'arena':
+        if 'build_type' in unit and unit['build_type'] == 'arena':
             arena_type = True
 
         if arena_type:
             try:
-                if workout_age(arena['timestamp']) >= int(arena['expiration']) and not arena['resources_deleted']:
-                    arena_id = arena.key.name
+                arena = unit['arena']
+                if workout_age(arena['timestamp']) >= int(arena['expiration']) \
+                        and not arena['resources_deleted']:
+                    arena_id = unit.key.name
                     print('Deleting resources from arena %s' % arena_id)
-                    if delete_specific_arena(arena_id, arena):
+                    if delete_specific_arena(arena_id, unit):
                         arena['resources_deleted'] = True
-                        ds_client.put(arena)
+                        ds_client.put(unit)
             except KeyError:
-                arena['resources_deleted'] = True
-                ds_client.put(arena)
+                unit['arena'] = {'resources_deleted': True}
+                ds_client.put(unit)
 
     # Delete any misfit arenas
     query_misfit_arenas = ds_client.query(kind='cybergym-unit')
     query_misfit_arenas.add_filter("misfit", "=", True)
-    for arena in list(query_misfit_arenas.fetch()):
-        arena_id = arena.key.name
+    for unit in list(query_misfit_arenas.fetch()):
+        arena_id = unit.key.name
 
         print('Deleting resources from arena %s' % arena_id)
-        if delete_specific_arena(arena_id, arena):
-            ds_client.delete(arena.key)
+        if delete_specific_arena(arena_id, unit):
+            ds_client.delete(unit.key)
             print("Finished deleting arena %s" % arena_id)
 
 # delete_workouts()
