@@ -1,0 +1,80 @@
+version: '1'
+
+workout:
+  name: HiddenSite
+  workout_description: 'Find a hidden website'
+  teacher_instructions_url: 
+  student_instructions_url: https://storage.cloud.google.com/student_workout_instructions_tgd4419/hiddensite.pdf
+  project_name: ualr-cybersecurity
+  region: "us-central1"
+  zone: "us-central1-a"
+  dnszone: "cybergym-public"
+  project_api_key_type: cloud
+  flag_location:
+  build_type: "compute"
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-hiddensite-labentry 
+    image: image-labentry
+    machine_type: "n1-standard-1" 
+    network_routing: false
+    tags: {items: ["http-server", "labentry"]}
+    metadata: none
+    guac_path: "NDEAYwBteXNxbA=="
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: cybergym-hiddensite
+    image: image-cybergym-hiddensite
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-vnc"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.50
+        subnet: default
+        external_NAT: true
+
+# List network routes. Multiple routes may be listed using YAML block sequence format
+routes:
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80", "tcp/8080", "tcp/443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+  - name: allow-vnc
+    network: external-network
+    target_tags: ["vnc-server"]
+    protocol: tcp
+    ports: ["tcp/5901-5909"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-https
+    network: external-network
+    target_tags: ["https-server"]
+    protocol: none
+    ports: ["tcp/443"]
+    source_ranges: ["0.0.0.0/0"]
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of the hidden site once you've found it."
