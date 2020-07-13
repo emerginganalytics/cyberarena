@@ -13,8 +13,10 @@ def create_misfits(field, operator, filter):
     query_workouts = ds_client.query(kind='cybergym-workout')
     query_workouts.add_filter(field, operator, filter)
     for workout in list(query_workouts.fetch()):
-        workout['misfit'] = True
-        ds_client.put(workout)
+        if int(workout['timestamp']) > 1593959440:
+            #workout['misfit'] = True
+            workout['expiration'] = 1
+            ds_client.put(workout)
 
 
-create_misfits('unit_id', '=', 'abenynrzka')
+create_misfits('type', '=', 'mobileforensics')
