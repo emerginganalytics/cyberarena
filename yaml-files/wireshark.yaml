@@ -101,7 +101,6 @@ assessment:
       type: "upload"
       question: "Upload a screen shot of the FTP message in Wireshark"
     - required: True
-      type: auto
-      key: "1TkkG1J"
+      type: input-flag
       question: "Wireshark Flag"
-      complete: False
+      flag: "CyberGym{Classified_Shark_Week}"

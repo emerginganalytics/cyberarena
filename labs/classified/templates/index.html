@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-<link rel="stylesheet" href="{{ url_for('static',    filename='css/template.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
 <body>
 <div class="bgimg w3-display-container w3-animate-opacity w3-text-white">
   <div class="w3-display-topleft w3-padding-large w3-xlarge">
@@ -18,7 +18,7 @@
   </div>
 <div id="id01" class="modal">
 
-  <form class="modal-content animate" action="{{url_for('do_admin_login', workout_id=workout_id)}}" method="POST">
+  <form class="modal-content animate" action="{{url_for('do_admin_login')}}" method="POST">
     <div class="imgcontainer">
       <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
       <img src="/static/CyberGymClassified.png" alt="Avatar" class="avatar">
@@ -26,10 +26,10 @@
 
     <div class="container" >
       <label for="username"><b>Username</b></label>
-      <input type="text" name="username" placeholder="Enter Username"required>
+      <input type="text" name="username" autocomplete="off" placeholder="Enter Username"required>
 
       <label for="password"><b>Password</b></label>
-      <input type="password" placeholder="Enter Password" name="psw" required>
+      <input type="password" placeholder="Enter Password" autocomplete="off" name="psw" required>
 
       <button type="submit">Login</button>
 

@@ -12,18 +12,18 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ url_for('twofactorhome', workout_id=workout_id) }}">Two Factor Authentication</a>
+            <a class="navbar-brand" href="{{ url_for('twofactorhome') }}">Two Factor Authentication</a>
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{ url_for('twofactorhome', workout_id=workout_id )}}">Home</a></li>
-                <li><a href="{{ url_for('home', workout_id=workout_id) }}">Workouts</a></li>
+                <li><a href="{{ url_for('twofactorhome')}}">Home</a></li>
+                <li><a href="{{ url_for('home') }}">Workouts</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {% if current_user.is_authenticated %}
-                <li><a href="{{ url_for('logout', workout_id=workout_id) }}">Log Out</a></li>
+                <li><a href="{{ url_for('logout') }}">Log Out</a></li>
                 {% else %}
-                <li><a href="{{ url_for('login', workout_id=workout_id) }}">Log In</a></li>
+                <li><a href="{{ url_for('login') }}">Log In</a></li>
                 {% endif %}
             </ul>
         </div>

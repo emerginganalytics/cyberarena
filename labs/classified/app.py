@@ -2,13 +2,11 @@ from flask import Flask, render_template, redirect, flash, request, session, abo
 from io import BytesIO
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_user, logout_user, \
-    current_user
+from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
-# from google.cloud import datastore
 
 import hashlib
 import sqlite3
@@ -16,9 +14,7 @@ import onetimepass
 import pyqrcode
 import os
 import base64
-# import requests
-# import random
-# import string
+
 
 # application instance
 app = Flask(__name__)
@@ -59,8 +55,7 @@ class User(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
     def get_totp_uri(self):
-        return 'otpauth://totp/CyberGym:{0}?secret={1}&issuer=CyberGym2FA' \
-            .format(self.username, self.otp_secret)
+        return 'otpauth://totp/CyberGym:{0}?secret={1}&issuer=CyberGym2FA'.format(self.username, self.otp_secret)
 
     def verify_totp(self, token):
         return onetimepass.valid_totp(token, self.otp_secret)
@@ -89,73 +84,6 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Login')
 
 
-class SQLForm(FlaskForm):
-    """SQL Injection Login Form"""
-    username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-
-# ds_client = datastore.Client()
-# project = 'ualr-cybersecurity'
-
-
-# def set_workout_flag(workout_id):
-#    key = ds_client.key('cybergym-workout', workout_id)
-#    workout = ds_client.get(key)
-#
-#   flag_dict = []
-#    flag_wireshark = 'CyberGym{' + ''.join(random.choices(string.ascii_letters + string.digits, k=16,)) + '}'
-#    print(flag_wireshark)
-#
-#    flag_data = {
-#        'flag': flag_wireshark
-#    }
-#    flag_dict.append(flag_data)
-#
-#    final_flag = random.sample(flag_dict, k=1)
-#    workout['container_info']['wireshark_flag'] = final_flag[0]
-
-#    ds_client.put(workout)
-#    return final_flag
-
-
-#def publish_status(workout_id, workout_key):
-#    url = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
-#
-#    status = {
-#        "workout_id": workout_id,
-#        "token": workout_key,
-#    }
-#
-#   publish = requests.post(url, json=status)
-#    print('[*] POSTING to {} ...'.format(url))
-#    print(publish)
-
-
-# def check_flag(workout_id, submission):
-#    key = ds_client.key('cybergym-workout', workout_id)
-#    workout = ds_client.get(key)
-#
-#    # data is a dict list that is passed back to page as JSON object
-#    status = workout['assessment']['questions']
-#    data = {
-#        'wireshark_flag': {
-#            'flag': workout['container_info']['wireshark_flag'],
-#            'status': status[2]['complete']
-#        }
-#    }
-#
-#    flag_wireshark = workout['container_info']['wireshark_flag']
-#
-#    if submission in flag_wireshark:
-#        data['wireshark_flag']['status'] = True
-#        workout_key = workout['assessment']['questions'][2]['1TkkG1J']
-#        publish_status(workout_id, workout_key)
-#
-#    return data
-
-
 def connect_db():
     return sqlite3.connect(app.database)
 
@@ -171,24 +99,8 @@ def home():
     if not session.get('logged_in'):
         return render_template('index.html')
     else:
-        return redirect('/flag')
-
-
-# Generates values based on workout
-# @app.route('/loader/<workout_id>')
-# def loader(workout_id):
-#    key = ds_client.key('cybergym-workout', workout_id)
-#    workout = ds_client.get(key)
-#
-#   if workout:
-#        if workout['type'] == 'wireshark' or 'dos':
-#            return redirect('/' + workout_id)
-#        elif workout['type'] == 'xss':
-#            return redirect('/workouts/xss/' + workout_id)
-#        elif workout['type'] == '2fa':
-#            return redirect('/workouts/tfh/' + workout_id)
-#    else:
-#        return redirect('/invalid')
+        wireshark_flag = "CyberGym{Classified_Shark_Week}"
+        return render_template('flag.html', wireshark_flag=wireshark_flag)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -198,37 +110,6 @@ def do_admin_login():
     else:
         flash('Incorrect Password')
     return redirect(url_for('home'))
-
-
-# @app.route("/flag", methods=["GET", "POST"])
-# def flag(workout_id):
-#    page_template = 'flag.html'
-#    key = ds_client.key('cybergym-workout', workout_id)
-#    workout = ds_client.get(key)
-#
-    # Only valid workouts can access
-#    if workout:
-#        if workout['type'] == 'wireshark':
-#            wireshark_flag = workout['container_info']['wireshark_flag']
-#
-#            if request.method == 'GET':
-#                return render_template(
-#                    page_template,
-#                    workout_id=workout_id,
-#                    wireshark_flag=wireshark_flag
-#                )
-#            elif request.method == 'POST':
-#                plaintext = request.get_json()
-#                data = check_flag(workout_id, str(plaintext['flag']))
-#
-#                return jsonify({
-#                    'message': data['wireshark_flag']['flag'],
-#                    'status': data['wireshark_flag']['status'],
-#                })
-#        else:
-#            return redirect('/invalid')
-#    else:
-#        return redirect('/invalid')
 
 
 @app.route('/invalid', methods=['GET'])
@@ -250,12 +131,19 @@ def workouts():
 
 @app.route("/workouts/xss", methods=["GET", "POST"])
 def xss():
-    return render_template('xss_d.html')
+    page_template = 'xss.html'
+    comments = []
+    if request.method == 'POST':
+        comment = request.form['comment']
+        comments.append(comment)
+    return render_template(page_template, comments=comments)
 
 
 @app.route('/workouts/tfh')
 def twofactorhome():
-    return render_template('welcome.html')
+    page_template = 'welcome.html'
+    flag = 'CyberGym{Classified_Authentication}'
+    return render_template(page_template, flag=flag)
 
 
 @app.route('/workouts/tfh/register', methods=['GET', 'POST'])
@@ -372,6 +260,18 @@ def login_sql():
             result = {'status': 'fail'}
         g.db.close()
         return jsonify(result)
+
+# TODO: Update invalid.html to be pretty and show errors
+@app.errorhandler(404)
+def page_not_found_error(error):
+    page_template = 'invalid_workout.html'
+    return render_template(page_template, error=error)
+
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    page_template = 'invalid_workout.html'
+    return render_template(page_template, error=error)
 
 
 # create database tables if they don't exist yet
