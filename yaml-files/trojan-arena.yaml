@@ -81,6 +81,10 @@ assessment:
       question: "Flag #7: Analysis"
       answer: "p150wX!zjfWi1#rA"
       points: 100
+    - type: input
+      question: "Flag #8: Arena Snake"
+      answer: "Arena_Snake_Champion"
+      points: 100
 #    - type: battle
 #      key: "nA824wazosyssPb1"
 #      script: "trojan-arena.py"
