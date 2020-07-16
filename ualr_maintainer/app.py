@@ -228,9 +228,8 @@ def arena_list(unit_id):
         return json.dumps(unit)
 
     if unit:
-        return render_template('arena_list.html', teacher_instructions=teacher_instructions_url, workout_list=workout_list,
-                            student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time
-    )
+        return render_template('arena_list.html', unit_teams=unit['teams'], teacher_instructions=teacher_instructions_url, workout_list=workout_list,
+                            student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time)
 
 
 @app.route('/arena_landing/<workout_id>', methods=['GET', 'POST'])
@@ -294,7 +293,13 @@ def arena_landing(workout_id):
         if answer_found:
             answer_time = time.gmtime(time.time())
             time_string = str(answer_time[3]) + ":" + str(answer_time[4]) + ":" + str(answer_time[5])
+            team_query = ds_client.query(kind='cybergym-workout')
+            team_query.add_filter('teacher_email', '=', workout['teacher_email'])
+            team_query.add_filter('unit_id', '=', workout['unit_id'])
+            team_members = []
 
+            for team_member in list(team_query.fetch()):
+                team_members.append(team_member)
             answer_time_dict = {
                 'answer': flag_attempt,
                 'timestamp': time_string
@@ -302,7 +307,14 @@ def arena_landing(workout_id):
 
             #check if the answer is a duplicate
             if 'submitted_answers' in workout:
-                workout['submitted_answers'].append(answer_time_dict)
+                if flag_attempt not in workout['submitted_answers']:
+                    workout['submitted_answers'].append(answer_time_dict)
+                else:
+                    response = {
+                        'answer_correct': True,
+                        'points_gained':0,
+                    }
+                    return json.dumps(response)
 
             else:
                 workout['submitted_answers'] = []
@@ -326,22 +338,27 @@ def arena_landing(workout_id):
                 point_value += 50
                 ds_client.put(unit)
 
-            if 'points' in workout:
-                prev_score = workout['points']
-                prev_score += point_value
-                workout['points'] = prev_score
-            else:
-                workout['points'] = point_value
-            
-
-
+            for member in team_members:
+                if 'points' in member:
+                    prev_score = member['points']
+                    prev_score += point_value
+                    member['points'] = prev_score
+                else:
+                    member['points'] = point_value
+                member['submitted_answers'] = workout['submitted_answers']
+                ds_client.put(member)
         else:
-            response = {
-                'answer_correct': False, 
-                'points_gained': 0
-            }
-
-        ds_client.put(workout)
+            if flag_attempt in unit['found_flags']:
+                response = {
+                    'answer_correct': True,
+                    'points_gained': 0
+                }
+                return json.dumps(response)
+            else:
+                response = {
+                    'answer_correct': False, 
+                    'points_gained': 0
+                }
         return json.dumps(response)
 
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 

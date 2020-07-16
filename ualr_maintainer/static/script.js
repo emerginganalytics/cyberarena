@@ -1,9 +1,9 @@
-// init Materialize select
-$(document).ready(function(){
+// // init Materialize select
+// $(document).ready(function(){
 
-    $('select').formSelect();   
+//     $('select').formSelect();   
 
-});
+// });
 
 
 
