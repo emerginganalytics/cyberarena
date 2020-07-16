@@ -1,0 +1,76 @@
+/* Arena Landing Styles */
+
+/* ################################################ */
+/* Background Image */
+/* ################################################ */
+html {
+  background: url("/static/img/arena-entry.jpg") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+
+/* ################################################ */
+/* Maint Styles */
+/* ################################################ */
+h1,h2,h3,h4,h5,h6, header, title {
+  font-family: Roboto, "Roboto Thin", "Arial Narrow", Arial;
+  font-kerning: auto;
+  letter-spacing: 3px;
+  font-weight: bold;
+}
+
+#enter-arena {
+  font-family: "Roboto Thin", "Roboto Light", Roboto;
+  font-size: 50px;
+  color: whitesmoke;
+  background-image: linear-gradient(#5b7a9a, #364a5e);
+  border-radius: 10px;
+  border: black 1px;
+  box-shadow: 0 2px 5px #1d1d1d;
+  width: 500px;
+  height: 70px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+button[type=submit] button[id=enter-arena]:hover {
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
+}
+button[type=submit]:active button[id=enter-arena]:active {
+    box-shadow: 0 1px 1px 0 #2d2d2d;
+    transform: translateY(1px);
+}
+/* Container needed to position the button. Adjust the width as needed */
+.arena-container {
+  position: relative;
+  width: 50%;
+}
+
+/* Make the image responsive */
+.arena-container img {
+  width: 100%;
+  height: auto;
+}
+
+/* Style the button and place it in the middle of the container/image */
+.arena-container #enter-arena {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  background-color: #555;
+  color: white;
+  font-size: 16px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.container #enter-arena:hover {
+  background-color: black;
+}
