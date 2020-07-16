@@ -36,7 +36,7 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = complete = submitted_answers = uploaded_files = None
+        running = complete = submitted_answers = uploaded_files = teacher_email = None
         if 'running' in workout_instance:
             running = workout_instance['running']
         if 'complete' in workout_instance:
@@ -45,13 +45,15 @@ def get_unit_workouts(unit_id):
             submitted_answers = workout_instance['submitted_answers']
         if 'uploaded_files' in workout_instance:
             uploaded_files = workout_instance['uploaded_files']
-            
+        if 'teacher_email' in workout_instance:
+            teacher_email = workout_instance['teacher_email']
         workout_info = {
             'name': workout.key.name,
             'running': running,
             'complete': complete,
             'submitted_answers': submitted_answers,
-            'uploaded_files': uploaded_files
+            'uploaded_files': uploaded_files,
+            'teacher_email':teacher_email
         }
         if workout_instance['type'] == "arena":
             if 'points' in workout_instance:
