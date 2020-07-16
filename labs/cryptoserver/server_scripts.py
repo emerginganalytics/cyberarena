@@ -10,7 +10,6 @@ ds_client = datastore.Client()
 project = 'ualr-cybersecurity'
 
 
-# TODO: Update script to work with Cloud Run Environment
 def publish_status(workout_id, workout_key):
     URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 

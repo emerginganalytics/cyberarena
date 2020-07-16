@@ -1,4 +1,5 @@
 from app import app
+from ArenaCiphers import Decoder
 from caesarcipher import CaesarCipher
 from flask import redirect, request, render_template, jsonify, make_response
 from server_scripts import publish_status, gen_pass, ds_client, set_ciphers, check_caesar
@@ -79,7 +80,6 @@ def caesar(workout_id):
 def ajax_calculate_caesar(workout_id):
     # Returns deciphered message
     encrypted_message = request.get_json()
-
     key = int(encrypted_message['key'])
     message = str(encrypted_message['ciphertext'])
     plaintext = CaesarCipher(message, offset=key).decoded
@@ -197,7 +197,6 @@ def hidden(workout_id):
             return redirect('/login/{}'.format(workout_id))
         else:
             page_template = 'pages/hidden.jinja'
-
             return render_template(page_template, workout_id=workout_id)
     else:
         return redirect('/invalid')
@@ -225,7 +224,6 @@ def login(workout_id):
 
                 if username is None or password is None:
                     login_error = 'You must submit a username and password'
-
                     return render_template(
                         page_template,
                         login_error=login_error,
@@ -235,14 +233,11 @@ def login(workout_id):
                     # These are the correct credentials, so the cookie for "logged_in" is set to true
                     resp = make_response(redirect('/hidden/{}'.format(workout_id)))
                     resp.set_cookie('logged_in', 'true')
-
                     workout_token = workout['assessment']['questions'][0]['key']
                     publish_status(workout_id, workout_token)
-
                     return resp
                 else:
                     login_error = 'Please check your username and password and try again'
-
                     return render_template(
                         page_template,
                         login_error=login_error,
@@ -261,6 +256,43 @@ def logout(workout_id):
     resp.set_cookie('logged_in', 'false', expires=0)
 
     return resp
+
+
+# The Following Routes are used by Arena Workouts Only
+@app.route('/arena/landing/<workout_id>')
+def arena(workout_id):
+    page_template = 'pages/johnny-arena-landing.jinja'
+    return render_template(page_template, workout_id=workout_id)
+
+
+@app.route('/arena/cipher-warehouse/<workout_id>')
+def cipher_warehouse(workout_id):
+    page_template = 'pages/arena-cipher-warehouse.jinja'
+    return render_template(page_template, workout_id=workout_id)
+
+
+@app.route('/ajax_calculate_plaintext/<workout_id>')
+def calculate_plaintext(workout_id):
+    # Returns deciphered message
+    encrypted_message = request.get_json()
+    cipher_type = str(encrypted_message['cipher_type'])
+    message = str(encrypted_message['ciphertext'])
+
+    if encrypted_message['encryption'] == 'AtBash':
+        plaintext = Decoder(encryption=cipher_type, message=message, key=None,
+                            keyword=encrypted_message['keyword']).atbash()
+    elif encrypted_message['encryption'] == 'Base32':
+        plaintext = Decoder(encryption=cipher_type, message=message, key=None, keyword=None).dec_base32()
+    elif encrypted_message['encryption'] == 'Base32':
+        plaintext = Decoder(encryption=cipher_type, message=message, key=None, keyword=None).dec_base64()
+    elif encrypted_message['encryption'] == 'Caesar':
+        key = int(encrypted_message['key'])
+        plaintext = Decoder(encryption=cipher_type, message=message, key=key).caesar()
+    elif encrypted_message['encryption'] == 'Col Transposition':
+        plaintext = Decoder(encryption=cipher_type, message=message, key=None,
+                            keyword=encrypted_message['keyword']).transposition()
+
+    return jsonify({'plaintext': plaintext})
 
 
 @app.route('/invalid', methods=['GET'])

@@ -1,0 +1,67 @@
+{#
+    Supported Encryption Types:
+        - base64,
+        - base32,
+        - Caesar,
+        - AtBash,
+        - Col Transposition,
+
+    TODO: The site will change based upon which cipher type is selected.
+            - For each cipher type, create a modal that will display a brief summary
+              about that cipher and possible use cases if used in industry
+
+    Cipher variables:
+        - encryption
+        - ciphertext is the message we want to decode/decrypt
+        - key is only used if Caesar is selected as the desired encryption type
+
+        Background Image taken by Reb0nrKnight:
+        https://www.reddit.com/r/urbanexploration/comments/6fj2fj/abandoned_warehouse/
+#}
+{% extends 'pages/index.jinja' %}
+{% block navblock %}{% endblock navblock %}
+{% block head_block %}{% endblock head_block %}
+{% block content %}{% endblock content %}
+
+{% block js_block %}
+{# AJAX to display Decrypted Cipher #}
+     <script>
+            $('#button_decrypt').on('click', function() {
+               const cipher_type = $('#encryption').val();
+               const encrypted = $('#ciphertext').val();
+               if ($('#key').length)
+                   const key = String($('#key').val());
+               else
+                   const key = null;
+               if ($('#keyword').length)
+                   const keyword = String($('keyword').val());
+               else
+                   const keyword = null;
+               $.ajax({
+                  type : 'POST',
+                  url : '/ajax_calculate_cipher/{{ workout_id }}',
+                  data : JSON.stringify({cipher_type: cipher_type, ciphertext: encrypted, key: key}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+
+                      display_plaintext(data['plaintext']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+
+            function display_plaintext(plaintext) {
+                let results_div = $('#decrypted_results');
+
+                results_div.html('');
+
+                let html_string = 'Decrypted Message: ' + plaintext + '<br />';
+                results_div.html(html_string);
+            }
+     </script>
+{% endblock js_block %}
