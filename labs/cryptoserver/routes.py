@@ -259,39 +259,27 @@ def logout(workout_id):
 
 
 # The Following Routes are used by Arena Workouts Only
-@app.route('/arena/landing/<workout_id>')
+@app.route('/arena/landing/<workout_id>', methods=['GET'])
 def arena(workout_id):
     page_template = 'pages/johnny-arena-landing.jinja'
     return render_template(page_template, workout_id=workout_id)
 
 
-@app.route('/arena/cipher-warehouse/<workout_id>')
+@app.route('/arena/cipher-warehouse/<workout_id>', methods=['GET', 'POST'])
 def cipher_warehouse(workout_id):
     page_template = 'pages/arena-cipher-warehouse.jinja'
     return render_template(page_template, workout_id=workout_id)
 
 
-@app.route('/ajax_calculate_plaintext/<workout_id>')
+@app.route('/ajax_calculate_arena_plaintext/<workout_id>', methods=['POST'])
 def calculate_plaintext(workout_id):
-    # Returns deciphered message
     encrypted_message = request.get_json()
     cipher_type = str(encrypted_message['cipher_type'])
     message = str(encrypted_message['ciphertext'])
+    cipher_key = encrypted_message['key']
+    keyword = encrypted_message['keyword']
 
-    if encrypted_message['encryption'] == 'AtBash':
-        plaintext = Decoder(encryption=cipher_type, message=message, key=None,
-                            keyword=encrypted_message['keyword']).atbash()
-    elif encrypted_message['encryption'] == 'Base32':
-        plaintext = Decoder(encryption=cipher_type, message=message, key=None, keyword=None).dec_base32()
-    elif encrypted_message['encryption'] == 'Base32':
-        plaintext = Decoder(encryption=cipher_type, message=message, key=None, keyword=None).dec_base64()
-    elif encrypted_message['encryption'] == 'Caesar':
-        key = int(encrypted_message['key'])
-        plaintext = Decoder(encryption=cipher_type, message=message, key=key).caesar()
-    elif encrypted_message['encryption'] == 'Col Transposition':
-        plaintext = Decoder(encryption=cipher_type, message=message, key=None,
-                            keyword=encrypted_message['keyword']).transposition()
-
+    plaintext = str(Decoder(encryption=cipher_type, message=message, key=cipher_key, keyword=keyword))
     return jsonify({'plaintext': plaintext})
 
 

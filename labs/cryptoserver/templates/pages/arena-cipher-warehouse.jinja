@@ -10,58 +10,216 @@
             - For each cipher type, create a modal that will display a brief summary
               about that cipher and possible use cases if used in industry
 
-    Cipher variables:
+    Cipher Input variables:
         - encryption
         - ciphertext is the message we want to decode/decrypt
         - key is only used if Caesar is selected as the desired encryption type
+        - keyword is used for Col Transpositions
 
-        Background Image taken by Reb0nrKnight:
-        https://www.reddit.com/r/urbanexploration/comments/6fj2fj/abandoned_warehouse/
 #}
-{% extends 'pages/index.jinja' %}
-{% block navblock %}{% endblock navblock %}
+{% extends 'pages/arena-index.jinja' %}
+{% block nav_block %}{% endblock nav_block %}
 {% block head_block %}{% endblock head_block %}
-{% block content %}{% endblock content %}
+{% block content_block %}
+    <div class="cipher_input_div">
+        <h1 id="form_header">A Sticky Situation</h1>
+        <div id="cipher_form" class="cipher_form">
+            <select id="cipher_type" name="cipher_type">
+                <option value="" selected disabled hidden>-- Cipher Type --</option>
+                <option value="AtBash">AtBash</option>
+                <option value="Caesar">Caesar</option>
+                {#<option value="Col Transpositino">Col Transposition</option>#}
+                <option value="Base32">Base32</option>
+                <option value="Base64">Base64</option>
+            </select>
+
+            <label for="cipher_input_area"></label>
+            <textarea name="ciphertext" id="cipher_input_area" placeholder="Enter Ciphertext ..."></textarea>
+
+            <label id="key_label" for="key" hidden>Key: </label>
+            <input id="key" name="key" type="number" min="0" max="25" hidden>
+
+            <label id="keyword_label" for="keyword" hidden>Keyword: </label>
+            <input id="keyword" name="keyword" type="text" hidden>
+
+            <button id="button_decrypt" type="submit">Decrypt Message</button>
+            <p id="form_error"> </p>
+        </div>
+    </div>
+    <div class="cipher_div">
+        <div class="cipher_list">
+            <p id="cipher_dscr">
+                If you are reading this, you should know that I have infected your machine with ransomeware
+                and it will only be a matter of time before your entire system is corrupted. Luckily,
+                I'm feeling generous and have decided to give you a second chance. Within the following messages
+                are the keys necessary to restore your system. If you act quickly enough, you might be able to
+                stop the inevitable. <br>Good luck!<br>
+            </p>
+            <button type="button" class="cipher-buttons">First Message</button>
+            <div class="ciphers">
+                <p>
+                    gsrhurihgpvbhslfow'evyvvmkivggbvzhb.zggsvvmwlugsvwzb,
+                    rqfhgdzmgglszevufmzmwrxzmtfzizmgvvgszgybnzprmtnbxzkgfivzkkvziuvzhryov.
+                    svivrhgsvurihgpvb,xbyvitbn{gqmbwulxcc4c92sn}.
+                </p>
+            </div>
+            <button type="button" class="cipher-buttons">Second Message</button>
+            <div class="ciphers">
+                <p>
+                    Vm0xNFUxSXhVWGhTV0dST1ZsZG9WRmxVU205VlZscHlWbTFHYUZKc1NsbFVWbU14WVRBeFZrNVdaRmho
+                    TWxKSVdWUktTMVpyTlZsYVJscFhaV3haZWxkV1VrZGhNVXAwVkd0c1ZXSkdTbGhXYlhSM1pVWlplV05G
+                    ZEZSTlZUVklWVEkxUjFZeVNsWlhiR3hXWWtkb1ExUlhlRlpsUmxwMFkwVTVWMDFJUWxoWFYzUlhZakZa
+                    ZVZOdVRsaGlWVnBXVm1wT1EyVnNhM2xsU0U1WFRWZDNNbFZ0TVhOaFJURjFZVVYwVjAxdVVuSlpha3BI
+                    WkVaYWMxZHNVbWxoZWxab1YxZDRVMUZyTVZkVmJHUllZbXh3YzFadE1EVk9WbXhXVm01a1ZrMXJjRnBY
+                    YWs1elYwZEZlR05HUWxaV1JYQlVWVEJhUzJNeVJraFNiRTVzWWxob05WWnNXbE5STVUxNVZXNU9ZVkp0
+                    VW05VmFrSmhZMFpXYzFwRVVsUldiRnA2VjJ0a01GZEhSalpTYWtKYVZsZE5NVll5TVV0V1ZrcHpVV3h3
+                    YUUxV2EzZFhWRUpoVWpKT2RGTnJhRk5pUjJoVVZqQldTMDVzV2xWU2JHUm9UV3N4TlZadE5VdGhWa3BZ
+                    WlVaa1dtSkdTbnBaVlZwaFZsWkdjbVJGT1dsU01VbzJWakowVms1WFJYbFRiRnBxVWtWS1dGWnRNVk5q
+                    Ykd4V1ZsaG9hazFYVWxaVmJYaFhWRzFLV1dGRlZsZFdNMUp5Vm1wR2ExSXhVblZWYlhoVFRUQktkbFpH
+                    WkRSU2JWWkhXa1pvYkZKNmJITlphMk0xVGtac1ZWUnVUbGROYTFreVdXdGtSMVpXV2taU1dHaFdZVEZ3
+                    YUZWdGVHdGtSVGxZWTBVMVUxSnNjRXRXYlhScVpVVTFTRk5yWkZSWFIxSnhWV3hrTkZac1duUmpla1pU
+                    VW14R05GVnNVbk5WVmxaVlRVUnJQUT09
+                </p>
+            </div>
+            <button type="button" class="cipher-buttons">Final Message</button>
+            <div class="ciphers">
+                 <p>
+                     SVFUV1FJREVOQlZXMjZUT05aNUhTSURVTkpZQ0E0VDJOVjVDQTVUWE01NUNBMzNLRUI0RzI1VFlNWVFH
+                     NlkzRU5ZUUdVMkwyRllRRkEyTEJOSldXNjRESk9aWFhVWjNVRlFRR0kzWkFNUlhDQTMzS05JUUdPNVR
+                     QUElYQ0FWREtPQldTQTZUSk41U0cyNlJBTloyRzQzMzJOQVFHSTNSQVBCVkcyM0xRTk5YWFU2Sk9FQk
+                     hXVUlESU9RUUdNMkxLT0pUWFU2TENQSVdDQVJCSE9GNUNBMkRXTkYzR0U2VFpFQlhXVUlEQ1BKWFNBN
+                     VRTT1oyQ0E0VEVONVJXVTREUEVCUkhVMzNQTVJVV0VJRFlPWllHRVkzUEZZUUZTNlRPTk5TRzY2UkFO
+                     NVJXSTNSQUZCM0dTNkpBT1pYQ0EyM05OSlVHSTNUMlBFVVNZSUNFRUJSWE00TDJFQlZXMjJUUk1SNFh
+                     VNkpBTjVSWFVJRFBNTlNHMjZKQU9aVVhTSURCTVJVWE1aWkFNWjVISUlESlBKNEhVM1RPT1pXWElJRF
+                     BOSVFHMjZUT041VkcyNlJBT1JWSEEzSkFOWjVHMjRMMk5VWENBV0RVTzU1RzJRVFVOQjVTQU9DTkdWU
+                     Vc0VkxPSzVaR1FaTExLQTJYRzJaQVBVWENBVFRQT1oyQ0E0TEVNSlNHTzVUSk40UVE9PT09
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock content_block %}
+{% block footer_block %}2{% endblock footer_block %}
 
 {% block js_block %}
-{# AJAX to display Decrypted Cipher #}
-     <script>
-            $('#button_decrypt').on('click', function() {
-               const cipher_type = $('#encryption').val();
-               const encrypted = $('#ciphertext').val();
-               if ($('#key').length)
-                   const key = String($('#key').val());
-               else
-                   const key = null;
-               if ($('#keyword').length)
-                   const keyword = String($('keyword').val());
-               else
-                   const keyword = null;
-               $.ajax({
-                  type : 'POST',
-                  url : '/ajax_calculate_cipher/{{ workout_id }}',
-                  data : JSON.stringify({cipher_type: cipher_type, ciphertext: encrypted, key: key}),
-                  dataType : 'json',
-                  contentType : 'application/json',
-                  success : function(data) {
-                      console.log('AJAX Success!');
+    {# Toggle hidden input fields key and keyword based on cipher_type #}
+    <script type="text/javascript">
+        $('#cipher_type').change(function () {
+            console.log("Entering toggleFields");
+            var selection = $(this).val();
+            let key = $('#key');
+            let keyword = $('#keyword');
 
-                      display_plaintext(data['plaintext']);
-                  },
-                   error : function(e) {
-                      console.log('AJAX Error!');
-                      console.log(e)
-                   }
-               });
-            });
-
-            function display_plaintext(plaintext) {
-                let results_div = $('#decrypted_results');
-
-                results_div.html('');
-
-                let html_string = 'Decrypted Message: ' + plaintext + '<br />';
-                results_div.html(html_string);
+            if (selection === "Caesar")
+            {
+                console.log("Case Caesar");
+                key.show();
+                $("#key_label").show();
+                $("#keyword").hide();
+                $("#keyword_label").hide();
             }
-     </script>
+            else if (selection === "Col Transposition"){
+                console.log("Case Col Transposition");
+                $("#keyword").show();
+                $("#keyword_label").show();
+                $("#key").hide();
+                $("#key_label").hide();
+            }
+            else {
+                console.log("Defaults used ...")
+                $("#key").hide();
+                $("#key_label").hide();
+                $("#keyword").hide();
+                $("#keyword_label").hide();
+            }
+        });
+
+    </script>
+    {# AJAX to display Decrypted Cipher #}
+    <script type="text/javascript">
+       $('#button_decrypt').on('click', function() {
+           const cipherType = $('#cipher_type').val();
+           const cipherText = $('#cipher_input_area').val();
+           var cipherKey = "";
+           var cipherKeyword = "";
+
+           {# Validate if key/keyword values exist before sending POST #}
+
+           if (cipherText === "" || cipherType === "") {
+               displayError('\* Cannot Submit an Empty Form!', 'alert');
+               return console.log('\* Cannot Submit an Empty Form!');
+           } else {
+               if (cipherType === 'Caesar') {
+                   cipherKey = $('#key').val();
+                   if (cipherKey === "") {
+                       displayError("\* Missing Key Value!", 'alert');
+                       return console.log("* Missing Fields!");
+                   }
+               } else if (cipherType === 'Col Transposition') {
+                   cipherKeyword = $('#keyword').val();
+                   if (cipherKeyword === "") {
+                       displayError("\* Missing Keyword Value!", 'alert');
+                       return console.log("* Missing Fields!");
+                   }
+               } else {
+                   cipherKey = String("");
+                   cipherKeyword = "";
+               }
+           }
+
+           $.ajax({
+               type: 'POST',
+               url: '/ajax_calculate_arena_plaintext/{{ workout_id }}',
+               data: JSON.stringify({
+                   cipher_type: cipherType,
+                   ciphertext: cipherText,
+                   key: cipherKey,
+                   keyword: cipherKeyword
+               }),
+               dataType: 'json',
+               contentType: 'application/json',
+               success: function (data) {
+                   console.log('AJAX Success!');
+
+                   displayPlaintext(data['plaintext']);
+               },
+               error: function (e) {
+                   console.log('AJAX Error!');
+                   console.log(e)
+               }
+           })
+       });
+       function displayPlaintext(plaintext) {
+           {# Display Plaintext and clear any printed errors #}
+           let results = $('#cipher_input_area');
+           results.val(plaintext);
+           displayError("", "clear");
+       }
+
+       {# Used to alert or clear any form errors #}
+       function displayError(errorMessage, actionType){
+           let formError = document.getElementById('form_error');
+           if (actionType === 'alert'){
+               formError.innerHTML = errorMessage;
+           } else {
+               formError.innerHTML = "";
+           }
+       }
+    </script>
+    {# Cipher Collapsible Divs #}
+    <script type="text/javascript">
+        var coll = document.getElementsByClassName("cipher-buttons");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+            } else {
+              content.style.display = "block";
+            }
+          });
+        }
+    </script>
 {% endblock js_block %}
