@@ -3,6 +3,7 @@ from common.build_arena import build_arena
 from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts
+from common.compute_management import server_build
 
 
 def cloud_fn_build_workout(event, context):
@@ -113,25 +114,21 @@ def cloud_fn_stop_lapsed_arenas(event, context):
     """
     stop_lapsed_arenas()
 
-# Cloud VM Function Testing
-# data = \
-#     {
-#         'workout_id': 'csmymq'
-#     }
-# event = {'attributes': data}
-# cloud_fn_start_vm(event, None)
-    
 
+def cloud_fn_build_server(event, context):
+    """ Responds to a pub/sub event from other cloud functions to build servers.
+    Args:
+         event (dict):  The dictionary with data specific to this type of
+         event. The `data` field contains the PubsubMessage message. The
+         `attributes` field will contain custom attributes if there are any.
+         context (google.cloud.functions.Context): The Cloud Functions event
+         metadata. The `event_id` field contains the Pub/Sub message ID. The
+         `timestamp` field contains the publish time.
+    Returns:
+        A success status
+    """
+    server_name = event['attributes']['server_name'] if 'server_id' in event['attributes'] else None
+    server_build(server_name)
 
-# For local testing
-# data = \
-#         {
-#             'workout_type': 'cyberattack',
-#             'unit_id': '123456',
-#             'num_team': '1',
-#             'length': '1',
-#             'email': 'pdhuff@ualr.edu',
-#             'unit_name': 'Testing JSON'
-#         }
-# event = {'attributes': data}
-# cloud_fn_build_workout(event, None)
+    if context:
+        print(f'Server {server_name} has been built')

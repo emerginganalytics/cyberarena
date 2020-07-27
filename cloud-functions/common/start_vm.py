@@ -5,7 +5,7 @@
 import googleapiclient.discovery
 from common.globals import ds_client, project, compute, dnszone, dns_suffix, workout_globals
 from common.dns_functions import add_dns_record
-from common.compute_functions import get_server_ext_address
+from common.prepare_compute import get_server_ext_address
 import time
 import calendar
 from googleapiclient.errors import HttpError

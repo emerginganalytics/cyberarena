@@ -7,22 +7,16 @@ from common.dns_functions import add_dns_record, register_workout_server
 from common.stop_compute import stop_workout, stop_arena
 from common.assessment_functions import get_startup_scripts
 from common.networking_functions import create_network, create_route, create_firewall_rules
-from common.compute_functions import create_instance_custom_image, get_server_ext_address
+from common.prepare_compute import create_instance_custom_image, build_guacamole_server
 
 
 student_network_name = 'student-network'
-student_entry_image = 'image-labentry'
 student_network_subnet = '10.1.0.0/24'
 
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
-
-
-def get_random_alphaNumeric_string(stringLength=12):
-    lettersAndDigits = string.ascii_letters + string.digits
-    return ''.join((random.choice(lettersAndDigits) for i in range(stringLength)))
 
 
 def build_student_network(build_id, subnet):
@@ -33,82 +27,6 @@ def build_student_network(build_id, subnet):
         }
     ]
     create_network(networks=student_network, build_id=build_id)
-
-
-def build_guacamole_server(unit_id, network, guacamole_connections):
-    """
-    Builds an image with an Apache Guacamole server and adds startup scripts to insert the
-    correct users and connections into the guacamole database. This server becomes the entrypoint
-    for all students in the arena.
-    :param unit_id: Build ID for the unit. This is used for the server name.
-    :param network: The network name for the server
-    :param guacamole_connections: An array of dictionaries for each student {workoutid, ip address of their server,
-        and password for their server.
-    :return: Null
-    """
-    if len(guacamole_connections) == 0:
-        return None
-
-    startup_script = workout_globals.guac_startup_begin.format(guacdb_password=guac_password)
-    i = 0
-    for connection in guacamole_connections:
-        # Get a PRNG password for the workout and store it with the datastore record for display on the workout controller
-        guac_user = 'cybergym' + str(i+1)
-        guac_connection_password = get_random_alphaNumeric_string()
-        workout_key = ds_client.key('cybergym-workout', connection['workout_id'])
-        workout = ds_client.get(workout_key)
-        workout['workout_user'] = guac_user
-        workout['workout_password'] = guac_connection_password
-        ds_client.put(workout)
-
-        startup_script += workout_globals.guac_startup_user_add.format(user=guac_user,
-                                                                       name=guac_user,
-                                                                       guac_password=guac_connection_password)
-        if connection['entry_type'] == 'vnc':
-            startup_script += workout_globals.guac_startup_vnc.format(ip=connection['ip'],
-                                                                      connection=connection['workout_id'],
-                                                                      vnc_password=connection['password'])
-        else:
-            startup_script += workout_globals.guac_startup_rdp.format(ip=connection['ip'],
-                                                                      connection=connection['workout_id'],
-                                                                      rdp_username=connection['username'],
-                                                                      rdp_password=connection['password'])
-        startup_script += workout_globals.guac_startup_join_connection_user
-        i += 1
-    startup_script += workout_globals.guac_startup_end
-
-    server_name = "%s-%s" % (unit_id, 'student-guacamole')
-    tags = {'items': ['student-entry']}
-    nics = [{
-        "network": network,
-        "internal_IP": '10.1.0.100',
-        "subnet": "%s-%s" % (network, 'default'),
-        "external_NAT": True
-    }]
-    meta_data = {'items': [{"key": "startup-script", "value": startup_script}]}
-    create_instance_custom_image(compute=compute, workout=unit_id, name=server_name,
-                                 custom_image=student_entry_image, machine_type='n1-standard-1',
-                                 networkRouting=False, networks=nics, tags=tags,
-                                 meta_data=meta_data, sshkey=None, guac_path=None)
-    # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
-    ip_address = get_server_ext_address(server_name)
-    add_dns_record(unit_id, ip_address)
-    key = ds_client.key('cybergym-unit', unit_id)
-    build = ds_client.get(key)
-    build["external_ip"] = ip_address
-    ds_client.put(build)
-    # Create the firewall rule allowing access to the guacamole connection
-    allow_entry = [
-        {
-            "name": "%s-%s" % (unit_id, 'allow-student-entry'),
-            "network": network,
-            "targetTags": ['student-entry'],
-            'protocol': None,
-            'ports': ['tcp/80,8080,443'],
-            'sourceRanges': ['0.0.0.0/0']
-        }
-    ]
-    create_firewall_rules(allow_entry)
 
 
 def build_student_servers(unit_id, workouts, student_entry_server, student_entry_type, student_entry_username,
@@ -179,7 +97,7 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
                                          meta_data=None, sshkey=sshkey, guac_path=None)
             j += 1
     # Build the workout entry server and create the firewall rule to make it accessible.
-    build_guacamole_server(unit_id=unit_id, network=guac_network, guacamole_connections=guacamole_connections)
+    build_guacamole_server(type='arena', build_id=unit_id, network=guac_network, guacamole_connections=guacamole_connections)
 
 
 def build_arena(unit_id):
