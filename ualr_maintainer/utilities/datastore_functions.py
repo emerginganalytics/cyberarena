@@ -61,6 +61,9 @@ def add_yaml_defaults(yaml_contents):
     if 'student-servers' not in yaml_contents:
         yaml_contents['student-servers'] = None
 
+    if 'student_entry' not in yaml_contents:
+        yaml_contents['student_entry'] = None
+
     if yaml_contents['workout']['build_type'] == 'compute' or yaml_contents['workout']['build_type'] == 'arena':
         if 'routes' not in yaml_contents:
             yaml_contents['routes'] = None
@@ -133,6 +136,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         servers = y['servers']
         routes = y['routes']
         firewall_rules = y['firewall_rules']
+        student_entry = y['student_entry']
         for i in range(1, num_team+1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
@@ -140,7 +144,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
                                workout_duration=workout_length, workout_type=workout_type,
                                networks=networks, servers=servers, routes=routes,
                                firewall_rules=firewall_rules, assessment=assessment,
-                               student_instructions_url=student_instructions_url)
+                               student_instructions_url=student_instructions_url, student_entry=student_entry)
     elif build_type == 'arena':
         networks = y['additional-networks']
         servers = y['additional-servers']
@@ -188,7 +192,7 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
 
 
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks,
-                       servers, routes, firewall_rules, assessment, student_instructions_url):
+                       servers, routes, firewall_rules, assessment, student_instructions_url, student_entry):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -209,7 +213,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'routes': routes,
         'firewall_rules': firewall_rules,
         'assessment': assessment,
-        'complete': False
+        'complete': False,
+        'student_entry': student_entry
     })
 
     ds_client.put(new_workout)

@@ -1,4 +1,6 @@
 import sys
+import random
+import string
 import googleapiclient.discovery
 from google.cloud import datastore, storage
 
@@ -13,9 +15,11 @@ region = 'us-central1'
 zone = 'us-central1-a'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 guac_password = 'promiseme'
+student_entry_image = 'image-labentry'
 
 # Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/complete'
+
 
 class workout_globals():
     MAX_RUN_HOURS = 10
@@ -82,3 +86,62 @@ class workout_globals():
     def refresh_api():
         compute = googleapiclient.discovery.build('compute', 'v1')
         return compute
+
+
+class SERVER_STATES:
+    READY = 'READY'
+    BUILDING = 'BUILDING'
+    STARTING = 'STARTING'
+    RUNNING = 'RUNNING'
+    STOPPING = 'STOPPING'
+    STOPPED = 'STOPPED'
+    EXPIRED = 'EXPIRED'
+    MISFIT = 'MISFIT'
+    RESETTING = 'RESETTING'
+    RELOADING = 'RELOADING'
+    BROKEN = 'BROKEN'
+
+
+class WORKOUT_STATES:
+    START = 'START'
+    BUILDING_ASSESSMENT = 'BUILDING_ASSESSMENT'
+    BUILDING_NETWORKS = 'BUILDING_NETWORKS'
+    COMPLETED_NETWORKS = 'COMPLETED_NETWORKS'
+    BUILDING_SERVERS = 'BUILDING_SERVERS'
+    COMPLETED_SERVERS = 'COMPLETED_SERVERS'
+    BUILDING_ROUTES = 'BUILDING_ROUTES'
+    COMPLETED_ROUTES = 'COMPLETED_ROUTES'
+    BUILDING_FIREWALL = 'BUILDING_FIREWALL'
+    COMPLETED_FIREWALL = 'COMPLETED_FIREWALL'
+    BUILDING_STUDENT_ENTRY = 'BUILDING_STUDENT_ENTRY'
+    COMPLETED_STUDENT_ENTRY = 'COMPLETED_STUDENT_ENTRY'
+    RUNNING = 'RUNNING'
+    STOPPING = 'STOPPING'
+    READY = 'READY'
+    EXPIRED = 'EXPIRED'
+    MISFIT = 'MISFIT'
+    BROKEN = 'BROKEN'
+
+ordered_workout_states = {
+    WORKOUT_STATES.START: 0,
+    WORKOUT_STATES.BUILDING_ASSESSMENT: 1,
+    WORKOUT_STATES.BUILDING_NETWORKS: 2,
+    WORKOUT_STATES.COMPLETED_NETWORKS: 3,
+    WORKOUT_STATES.BUILDING_SERVERS: 4,
+    WORKOUT_STATES.COMPLETED_SERVERS: 5,
+    WORKOUT_STATES.BUILDING_STUDENT_ENTRY: 6,
+    WORKOUT_STATES.COMPLETED_STUDENT_ENTRY: 7,
+    WORKOUT_STATES.BUILDING_ROUTES: 8,
+    WORKOUT_STATES.COMPLETED_ROUTES: 9,
+    WORKOUT_STATES.BUILDING_FIREWALL: 10,
+    WORKOUT_STATES.COMPLETED_FIREWALL: 11
+}
+
+
+class PUBSUB_TOPICS:
+    BUILD_SERVER = 'build-server'
+
+
+def get_random_alphaNumeric_string(stringLength=12):
+    lettersAndDigits = string.ascii_letters + string.digits
+    return ''.join((random.choice(lettersAndDigits) for i in range(stringLength)))
