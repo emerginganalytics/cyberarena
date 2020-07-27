@@ -55,11 +55,16 @@ def server_build(server_name):
 
     if success:
         state_transition(entity=server, new_state=SERVER_STATES.RUNNING, existing_state=SERVER_STATES.BUILDING)
-        return True
     else:
         state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
         return False
 
+    # Now stop the server before completing
+    print(f'Stopping {server}')
+    compute.instances().stop(project=project, zone=zone, instance=server).execute()
+    state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
+
+# server_build('vsplrymaod-student-guacamole')
 
 # def server_start():
 #
