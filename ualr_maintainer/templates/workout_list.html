@@ -55,7 +55,7 @@
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             <ol class="teams">
                 {% for workout in workout_list %}
-                {% if workout["complete"] == True %}
+                {% if workout["state"] == "READY" %}
                 <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
                 {% else %}
                 <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>

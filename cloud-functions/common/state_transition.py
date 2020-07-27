@@ -17,7 +17,7 @@ def state_transition(entity, new_state, existing_state=None):
 
     if existing_state and entity['state'] != existing_state:
         print(f"Error in state transition: Expected entity to be in {existing_state} state. Instead, it was in the state"
-              f"{entity['state']}")
+              f" {entity['state']}")
         return False
     ts = str(calendar.timegm(time.gmtime()))
     entity['state'] = new_state
