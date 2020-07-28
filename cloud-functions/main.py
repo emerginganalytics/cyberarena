@@ -127,7 +127,7 @@ def cloud_fn_build_server(event, context):
     Returns:
         A success status
     """
-    server_name = event['attributes']['server_name'] if 'server_id' in event['attributes'] else None
+    server_name = event['attributes']['server_name'] if 'server_name' in event['attributes'] else None
     server_build(server_name)
 
     if context:
