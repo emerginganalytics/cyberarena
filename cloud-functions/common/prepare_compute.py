@@ -5,8 +5,8 @@ from google.cloud import pubsub_v1
 from google.cloud import datastore
 from googleapiclient import errors
 
-from common.globals import workout_globals, project, zone, dnszone, ds_client, compute, SERVER_STATES, PUBSUB_TOPICS, \
-    guac_password, get_random_alphaNumeric_string, student_entry_image
+from common.globals import workout_globals, project, zone, dnszone, ds_client, compute, SERVER_STATES, SERVER_ACTIONS, \
+    PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image
 from common.dns_functions import add_dns_record, register_workout_server
 from common.compute_management import get_server_ext_address, server_build
 from common.networking_functions import create_firewall_rules
@@ -115,10 +115,10 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     ds_client.put(new_server)
 
     # Publish to a server build topic
-    pubsub_topic = PUBSUB_TOPICS.BUILD_SERVER
+    pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
     publisher = pubsub_v1.PublisherClient()
     topic_path = publisher.topic_path(project, pubsub_topic)
-    future = publisher.publish(topic_path, data=b'Server Build', server_name=name)
+    future = publisher.publish(topic_path, data=b'Server Build', server_name=name, action=SERVER_ACTIONS.BUILD)
     print(future.result())
     # The command below is used for testing
     # server_build(name)
