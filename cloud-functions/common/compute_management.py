@@ -51,6 +51,7 @@ def server_build(server_name):
     success = False
     while not success and i < 2:
         try:
+            print(f"Begin waiting for operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
             success = True
         except timeout:
