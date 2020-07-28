@@ -68,8 +68,8 @@ def server_build(server_name):
         return False
 
     # Now stop the server before completing
-    print(f'Stopping {server}')
-    compute.instances().stop(project=project, zone=zone, instance=server).execute()
+    print(f'Stopping {server_name}')
+    compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
 
 # server_build('name=mtzmizsvmw-student-guacamole')
