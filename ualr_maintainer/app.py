@@ -15,7 +15,8 @@ from utilities.yaml_functions import parse_workout_yaml
 from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads
 from werkzeug.utils import secure_filename
 from calendar import timegm
-
+import google.oauth2.id_token
+import google.auth.transport.requests
 from flask import Flask, render_template, redirect, request, jsonify
 from forms import CreateWorkoutForm, CreateExpoForm
 import json
@@ -29,9 +30,13 @@ app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 # Default route
 @app.route('/')
 def default_route():
-    assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
-    email, id = validate_assertion(assertion)
-    return render_template('no_workout.html')
+    http_request = google.auth.transport.requests.Request()
+    id_token = request.headers['Authorization']
+    claims = google.oauth2.id_token.verify_firebase_token(id_token, http_request)
+    # assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
+    # email, id = validate_assertion(assertion)
+    # return render_template('no_workout.html')
+    
 
 # Workout build route
 @app.route('/<workout_type>', methods=['GET', 'POST'])
@@ -46,7 +51,8 @@ def index(workout_type):
         if unit_id == False:
             return render_template('no_workout.html')
         elif build_type == 'compute':
-            pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_workout_topic)
+            # pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_workout_topic)
+            print("workout building")
             url = '/workout_list/%s' % (unit_id)
             return redirect(url)
         elif build_type == 'arena':
@@ -280,7 +286,6 @@ def arena_landing(workout_id):
         response = {}
         answer_found = False
         flag_attempt = request.form.get('answer')
-
         question_key = request.form.get('question_content')
         point_value = int(request.form.get('point_value'))
         for i in range(len(assessment)):
@@ -363,6 +368,54 @@ def arena_landing(workout_id):
 
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
+
+@app.route("/login", methods=['GET', 'POST'])
+def login():
+    return render_template('login.html')
+
+@app.route("/login_test", methods=['GET', 'POST'])
+def login_test():
+    http_request = google.auth.transport.requests.Request()
+    id_token = request.headers['Authorization']
+    email = request.headers['user_email']
+    user_name = request.headers['user_name']
+    # print(id_token)
+    # print("User email: " + email)
+    # print("User name: " + user_name)
+    claims = google.oauth2.id_token.verify_firebase_token(id_token, http_request)
+
+    if claims:
+        if 'name' in claims:
+            return claims['name']
+        print("claims" + claims)
+        return render_template('teacher_home.html', user_name=user_name)
+    else:
+        return render_template('teacher_home.html', user_name="idk lol")
+    return render_template('no_workout.html')
+
+@app.route('/teacher_home', methods=['GET', 'POST'])
+def teacher_home():
+    print("Logged in successfully")
+    return render_template('teacher_home.html')
+
+@app.route('/teacher_info', methods=['GET', 'POST'])
+def get_teacher_info():
+    if (request.method == "POST"):
+        teacher_email = request.get_json()
+        unit_list = ds_client.query(kind='cybergym-unit')
+        unit_list.add_filter("instructor_id", "=", str(teacher_email['teacher_email']))
+        # unit_list.add_filter("resources_deleted", "=", False)
+        teacher_units = []
+        for unit in list(unit_list.fetch()):
+            unit_info = {
+                'unit_id': unit.key.name,
+                'type': unit['workout_type'],
+                'unit_name': unit['unit_name'],
+                'timestamp': unit['timestamp']
+            }
+            teacher_units.append(unit_info)
+        teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
+    return json.dumps(teacher_units)
 
 
 

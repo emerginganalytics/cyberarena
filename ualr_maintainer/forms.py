@@ -1,9 +1,10 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, PasswordField
+from wtforms import StringField, IntegerField, PasswordField, HiddenField
 from wtforms.validators import DataRequired, Email
 
 class CreateWorkoutForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
+    # email = StringField('Email', validators=[DataRequired(), Email()])
+    email = HiddenField('Email')
     unit = StringField('Lesson Name (for future reference)', validators=[DataRequired()])
     team = IntegerField('Select number of students (between 1 and 10)', validators=[DataRequired()])
     length = IntegerField('Select length of availability (between 1 and 100 days)', validators=[DataRequired()])
