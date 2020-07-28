@@ -201,13 +201,11 @@ def build_guacamole_server(type, build_id, network, guacamole_connections):
         # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
         ip_address = get_server_ext_address(server_name)
         add_dns_record(build_id, ip_address)
-        if type == 'workout':
-            key = ds_client.key('cybergym-workout', build_id)
-        else:
-            key = ds_client.key('cybergym-unit', build_id)
-        build = ds_client.get(key)
-        build["external_ip"] = ip_address
-        ds_client.put(build)
+        key = ds_client.key('cybergym-server', server_name)
+        server_entity = ds_client.get(key)
+        server_entity['external_ip'] = ip_address
+        server_entity['student_entry'] = True
+        ds_client.put(server_entity)
     except errors.HttpError as err:
         # 409 error means the server already exists.
         if err.resp.status in [409]:

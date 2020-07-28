@@ -2,7 +2,7 @@ import time
 import calendar
 from socket import timeout
 
-from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES
+from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, WORKOUT_STATES
 from google.cloud import datastore
 from common.dns_functions import add_dns_record, register_workout_server
 from common.state_transition import state_transition
@@ -51,12 +51,12 @@ def server_build(server_name):
     success = False
     while not success and i < 2:
         try:
-            print(f"Begin waiting for operation {response['id']}")
+            print(f"Begin waiting for build operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
             success = True
         except timeout:
             i += 1
-            print('Response timeout. Trying again')
+            print('Response timeout for build. Trying again')
             pass
 
     if success:
@@ -72,9 +72,49 @@ def server_build(server_name):
     compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
 
-# server_build('name=mtzmizsvmw-student-guacamole')
 
-# def server_start():
+def server_start(server_name):
+    """
+    Starts a server based on the specification in the Datastore entity with name server_name. A guacamole server
+    is also registered with DNS.
+    :param server_name: The Datastore entity name of the server to start
+    :return: A boolean status on the success of the start
+    """
+    server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    state_transition(entity=server, new_state=SERVER_STATES.STARTING)
+    response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
+    print(f'Sent start request to {server_name}, and waiting for response')
+    i = 0
+    success = False
+    while not success and i < 2:
+        try:
+            print(f"Begin waiting for start response from operation {response['id']}")
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            success = True
+        except timeout:
+            i += 1
+            print('Response timeout for starting server. Trying again')
+            pass
+    if not success:
+        print(f'Timeout in trying to start server {server_name}')
+        state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
+        return False
+    # If this is the guacamole server for student entry, then register the new DNS
+    if 'student_entry' in server and server['student_entry']:
+        print(f'Setting DNS record for {server_name}')
+        ip_address = get_server_ext_address(server_name)
+        add_dns_record(server['workout'], ip_address)
+        server['external_ip'] = ip_address
+        ds_client.put(server)
+        # Now, since this is the guacamole server, update the state of the workout to READY
+        workout = ds_client.get(ds_client.key('cybergym-workout', server['workout']))
+        print(f"Setting the workout {server['workout']} to ready")
+        state_transition(entity=workout, new_state=WORKOUT_STATES.READY)
+
+    state_transition(entity=server, new_state=SERVER_STATES.READY)
+    print(f"Finished starting {server_name}")
+    return True
+
 #
 #
 # def server_delete():
