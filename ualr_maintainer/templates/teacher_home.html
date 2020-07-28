@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Teacher Home Page{% endblock %}
+
+{% block content %}
+<script src='../static/main.js'></script>
+<script>
+
+  var teacher_email = null;
+  initApp = function(){
+    firebase.auth().onAuthStateChanged(function(user){
+      if(user){
+        var displayName = user.displayName;
+        teacher_email = user.email;
+        var data = {teacher_email:teacher_email}
+        $.ajax({
+          type: "POST",
+          url: "/teacher_info",
+          dataType: "json",
+          contentType: "application/json;charset=UTF-8;",
+          data: JSON.stringify(data),
+          success: function(data){
+            for(var i = 0; i < data.length; i++){
+              var nodeName = 'unit_group_' + data[i]['type'];
+              var unitNode = document.getElementById(nodeName);
+              if(unitNode == null){
+                var unit_type = document.createElement("a");
+                unit_type.innerHTML = data[i]['type'];
+                unit_type.className = 'unit_header btn';
+                unit_type.dataToggle = 'collapse';
+                unit_type.href = '#unit_group_' + data[i]['type'];
+                
+                var node = document.createElement("div");
+                node.id = nodeName;
+                node.className = 'collapse';
+                node.style = "margin-bottom:1em;";
+                var unit_div = document.createElement("div");
+                unit_div.append(unit_type);
+                unit_div.append(node);
+                unit_div.style='margin-bottom:1em;border:1px solid black;';
+                var container = document.getElementById('unit_container');
+                container.appendChild(unit_div);
+              }
+
+              var unit_info_div = document.createElement("div");
+              unit_info_div.className = "collapse";
+              unit_info_div.id = "unit_collapse_" + data[i]['type'];
+
+              var unit_id = document.createElement('a');
+              unit_id.innerHTML = data[i]['unit_name'];
+              unit_id.href = '/workout_list/' + data[i]['unit_id']
+              var unit_timestamp = document.createElement('span');
+              unit_timestamp.innerHTML = "\tCreated: " + timeConverter(data[i]['timestamp']);
+
+              var container = document.getElementById(nodeName)
+              container.appendChild(unit_id);
+              container.appendChild(unit_timestamp);
+              container.appendChild(document.createElement("br"));
+            }
+            $(".btn").attr("data-toggle", "collapse");
+          }
+        });
+
+        document.getElementById('user_name_header').innerHTML = "Welcome " + displayName;
+      } else {
+        document.getElementById('sign-out').style.display = "none";
+        document.getElementById('unit_container').style.display = "none";
+        document.getElementById('user_name_header').innerHTML = "Please Log In";
+        var sign_in_button = document.createElement('a');
+        sign_in_button.innerHTML = "Login";
+        sign_in_button.className = "btn";
+        sign_in_button.href = "/login";
+        var container = document.getElementById('teacher_controls');
+        container.appendChild(sign_in_button);
+        container.style.margin = "auto";
+        
+      }
+    })
+    var signOutBtn =$('#sign-out');
+    signOutBtn.click(function(event) {
+      event.preventDefault();
+  
+      firebase.auth().signOut().then(function() {
+        console.log("Sign out successful");
+        window.location.href = "/login";
+      }, function(error) {
+        console.log(error);
+      });
+    });
+    return teacher_email;
+  };
+
+  window.addEventListener('load', function(){
+    var teacher_email = initApp();
+  })
+  
+  function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }
+</script>
+<style>
+
+  .unit_group{
+    border:1px solid black;
+    margin-bottom:1em;
+  }
+  .unit_header{
+    color:white;
+    background-color:#6e2639;
+    margin-top:0;
+  }
+</style>
+
+<p id='test'></p>
+<div class='row'>
+  <div id='teacher_controls' class='col-3'>
+    <div class='image_container' style='text-align: center;'>
+      <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+    </div>
+    <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
+    <button id="sign-out" class='btn'>Sign out</button>
+  </div>
+  <div id='unit_container' class='col'>
+    <h2 style='text-align: center;'>Your Units</h2>
+  </div>
+</div>
+{% endblock %}

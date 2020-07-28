@@ -1,14 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Workout Builder{% endblock %}
 {% block content %}
+<script src='../static/main.js'></script>
+<script>
+
+var teacher_email = null;
+initApp = function(){
+    firebase.auth().onAuthStateChanged(function(user){
+        if(user){
+            document.getElementById('email').value = user.email;
+        }else{
+            window.location.href = "/login";
+        }
+    })
+};
+window.addEventListener('load', function(){
+    initApp();
+})
+</script>
             <h1>Build <span id="workout_type">{{workout_type}}</span> workout :</h1>
 
             <form action="" method="post" novalidate>
                 {{ form.hidden_tag() }}
-                <div class="input-field col s12">
-                    {{ form.email(size=32) }}<br>
-                    {{ form.email.label }}
-                </div>
+                <!-- <input type='hidden' id='user_email_field'> -->
                 <div class="input-field col s12">
                     {{ form.unit(size=32) }}<br>
                     {{ form.unit.label }}
@@ -27,9 +41,9 @@
                     <button type="submit" id="build-workout" class="waves-effect waves-light btn" >BUILD WORKOUT</button>
                 </div>
             </form>
-            </br>
+            <br>
             <div id="loading-msg"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
     <script>
         $(document).ready(function(){
             $("form").submit(function(){
