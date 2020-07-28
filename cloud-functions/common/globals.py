@@ -139,7 +139,13 @@ ordered_workout_states = {
 
 
 class PUBSUB_TOPICS:
-    BUILD_SERVER = 'build-server'
+    MANAGE_SERVER = 'manage-server'
+
+
+class SERVER_ACTIONS:
+    BUILD = 'BUILD'
+    START = 'START'
+    DELETE = 'DELETE'
 
 
 def get_random_alphaNumeric_string(stringLength=12):

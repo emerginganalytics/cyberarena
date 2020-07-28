@@ -26,8 +26,11 @@ def get_server_ext_address(server_name):
 
 def server_build(server_name):
     """
-
+    Builds an individual server based on the specification in the Datastore entity with name server_name.
+    :param server_name: The Datastore entity name of the server to build
+    :return: A boolean status on the success of the build
     """
+    print(f'Building server {server_name}')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     server_ready = state_transition(entity=server, new_state=SERVER_STATES.BUILDING,
                                            existing_state=SERVER_STATES.READY)
@@ -43,28 +46,33 @@ def server_build(server_name):
 
     # Begin the server build and keep trying for an additional 2 30-second cycles
     response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
+    print(f'Sent job to build {server_name}, and waiting for response')
     i = 0
     success = False
     while not success and i < 2:
         try:
+            print(f"Begin waiting for operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
             success = True
         except timeout:
             i += 1
+            print('Response timeout. Trying again')
             pass
 
     if success:
+        print(f'Successfully built server {server_name}')
         state_transition(entity=server, new_state=SERVER_STATES.RUNNING, existing_state=SERVER_STATES.BUILDING)
     else:
+        print(f'Timeout in trying to build server {server_name}')
         state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
         return False
 
     # Now stop the server before completing
-    print(f'Stopping {server}')
-    compute.instances().stop(project=project, zone=zone, instance=server).execute()
+    print(f'Stopping {server_name}')
+    compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
 
-# server_build('vsplrymaod-student-guacamole')
+# server_build('name=mtzmizsvmw-student-guacamole')
 
 # def server_start():
 #
