@@ -4,6 +4,7 @@ from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts
 from common.compute_management import server_build
+from common.globals import SERVER_ACTIONS
 
 
 def cloud_fn_build_workout(event, context):
@@ -115,7 +116,7 @@ def cloud_fn_stop_lapsed_arenas(event, context):
     stop_lapsed_arenas()
 
 
-def cloud_fn_build_server(event, context):
+def cloud_fn_manage_server(event, context):
     """ Responds to a pub/sub event from other cloud functions to build servers.
     Args:
          event (dict):  The dictionary with data specific to this type of
@@ -127,8 +128,17 @@ def cloud_fn_build_server(event, context):
     Returns:
         A success status
     """
-    server_name = event['attributes']['server_name'] if 'server_id' in event['attributes'] else None
-    server_build(server_name)
+    server_name = event['attributes']['server_name'] if 'server_name' in event['attributes'] else None
+    action = event['attributes']['action'] if 'action' in event['attributes'] else None
+
+    if not server_name:
+        print(f'No server name provided in cloud_fn_manage_server for published message')
+
+    if not action:
+        print(f'No action provided in cloud_fn_manage_server for published message.')
+
+    if action == SERVER_ACTIONS.BUILD:
+        server_build(server_name)
 
     if context:
         print(f'Server {server_name} has been built')
