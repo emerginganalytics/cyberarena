@@ -3,7 +3,6 @@
 {% block title %}Unit {{ unit_id }}{% endblock %}
 
 {% block content %}
-<script  src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
 <style>
     .landing_content .btn, table{
@@ -175,7 +174,7 @@
                 dataType: "json",
                 success: function(data){
                     for (i = 0; i < data.length; i++){
-                        if(data[i]['complete'] == true){
+                        if(data[i]['state'] == "READY"){
                             var link = document.getElementById("workout_link_" + data[i]['name']);
                             link.classList.remove('btn-deactivated');
                             link.className = "btn";
