@@ -13,7 +13,7 @@ from common.networking_functions import create_firewall_rules
 
 
 def create_instance_custom_image(compute, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, meta_data, sshkey=None):
+                                 networkRouting, networks, tags, meta_data, sshkey=None, student_entry=False):
     """
     Core function to create a new server according to the input specification. This gets called through
     a cloud function during the automatic build
@@ -27,7 +27,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     :param tags: Tags are key and value pairs which sometimes define the firewall rules
     :param meta_data: This includes startup scripts
     :param sshkey: If the server is running an SSH service, then this adds the public ssh key used for connections
-    :param guac_path: A guacamole path if this is a lab entry server. This will soon deprecate, hopefully
+    :param student_entry: If this is a student_entry image, then add that to the configuration.
     :return: None
     """
     # First check to see if the server configuration already exists. If so, then return without error
@@ -111,6 +111,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         'config': config,
         'state': SERVER_STATES.READY,
         'state-timestamp': str(calendar.timegm(time.gmtime())),
+        'student_entry': student_entry
     })
     ds_client.put(new_server)
 
@@ -183,7 +184,7 @@ def build_guacamole_server(type, build_id, network, guacamole_connections):
         create_instance_custom_image(compute=compute, workout=build_id, name=server_name,
                                      custom_image=student_entry_image, machine_type='n1-standard-1',
                                      networkRouting=False, networks=nics, tags=tags,
-                                     meta_data=meta_data, sshkey=None)
+                                     meta_data=meta_data, sshkey=None, student_entry=True)
 
         # Create the firewall rule allowing external access to the guacamole connection
         allow_entry = [
@@ -197,15 +198,6 @@ def build_guacamole_server(type, build_id, network, guacamole_connections):
             }
         ]
         create_firewall_rules(allow_entry)
-
-        # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
-        ip_address = get_server_ext_address(server_name)
-        add_dns_record(build_id, ip_address)
-        key = ds_client.key('cybergym-server', server_name)
-        server_entity = ds_client.get(key)
-        server_entity['external_ip'] = ip_address
-        server_entity['student_entry'] = True
-        ds_client.put(server_entity)
     except errors.HttpError as err:
         # 409 error means the server already exists.
         if err.resp.status in [409]:

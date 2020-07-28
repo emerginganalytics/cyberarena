@@ -13,6 +13,7 @@ from common.globals import ds_client, project, compute, dnszone, dns_suffix, wor
     PUBSUB_TOPICS, SERVER_ACTIONS
 from common.dns_functions import add_dns_record
 from common.prepare_compute import get_server_ext_address
+from common.compute_management import server_start
 
 # Global variables for this function
 expired_workout = []
@@ -71,7 +72,7 @@ def start_vm(workout_id):
     query_workout_servers = ds_client.query(kind='cybergym-server')
     query_workout_servers.add_filter("workout", "=", workout_id)
     for server in list(query_workout_servers.fetch()):
-        # Publish to a server build topic
+        # Publish to a server management topic
         pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
         publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(project, pubsub_topic)
@@ -116,3 +117,5 @@ def start_arena(unit_id):
     build = ds_client.get(key)
     build["external_ip"] = ip_address
     ds_client.put(build)
+
+# start_vm('slvurxmeqf')

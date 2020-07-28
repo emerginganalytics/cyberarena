@@ -24,6 +24,19 @@ def get_server_ext_address(server_name):
     return ip_address
 
 
+def register_student_entry(build_id, server_name):
+    # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
+    ip_address = get_server_ext_address(server_name)
+    add_dns_record(build_id, ip_address)
+    server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    server['external_ip'] = ip_address
+    ds_client.put(server)
+    # Now, since this is the guacamole server, update the state of the workout to READY
+    print(f"Setting the build {build_id} to ready")
+    workout = ds_client.get(ds_client.key('cybergym-workout', build_id))
+    state_transition(entity=workout, new_state=WORKOUT_STATES.READY)
+
+
 def server_build(server_name):
     """
     Builds an individual server based on the specification in the Datastore entity with name server_name.
@@ -49,7 +62,7 @@ def server_build(server_name):
     print(f'Sent job to build {server_name}, and waiting for response')
     i = 0
     success = False
-    while not success and i < 2:
+    while not success and i < 3:
         try:
             print(f"Begin waiting for build operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
@@ -66,6 +79,11 @@ def server_build(server_name):
         print(f'Timeout in trying to build server {server_name}')
         state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
         return False
+
+    # If this is a student entry server, register the DNS
+    if 'student_entry' in server and server['student_entry']:
+        print(f'Setting DNS record for {server_name}')
+        register_student_entry(server['workout'], server_name)
 
     # Now stop the server before completing
     print(f'Stopping {server_name}')
@@ -86,7 +104,7 @@ def server_start(server_name):
     print(f'Sent start request to {server_name}, and waiting for response')
     i = 0
     success = False
-    while not success and i < 2:
+    while not success and i < 3:
         try:
             print(f"Begin waiting for start response from operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
@@ -102,14 +120,7 @@ def server_start(server_name):
     # If this is the guacamole server for student entry, then register the new DNS
     if 'student_entry' in server and server['student_entry']:
         print(f'Setting DNS record for {server_name}')
-        ip_address = get_server_ext_address(server_name)
-        add_dns_record(server['workout'], ip_address)
-        server['external_ip'] = ip_address
-        ds_client.put(server)
-        # Now, since this is the guacamole server, update the state of the workout to READY
-        workout = ds_client.get(ds_client.key('cybergym-workout', server['workout']))
-        print(f"Setting the workout {server['workout']} to ready")
-        state_transition(entity=workout, new_state=WORKOUT_STATES.READY)
+        register_student_entry(server['workout'], server_name)
 
     state_transition(entity=server, new_state=SERVER_STATES.READY)
     print(f"Finished starting {server_name}")
