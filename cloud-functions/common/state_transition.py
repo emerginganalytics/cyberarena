@@ -1,7 +1,7 @@
 import time
 import calendar
 
-from common.globals import ds_client, ordered_workout_states, WORKOUT_STATES
+from common.globals import ds_client, ordered_workout_states, ordered_arena_states, BUILD_STATES
 
 
 def state_transition(entity, new_state, existing_state=None):
@@ -43,6 +43,28 @@ def check_ordered_workout_state(workout, ordered_state):
         return False
 
     if ordered_workout_states[workout['state']] <= ordered_workout_states[ordered_state]:
+        return True
+    else:
+        return False
+
+
+def check_ordered_arenas_state(unit, ordered_state):
+    """
+    Workouts are built in a designated order. This function checks the state to determine if the unit is in a valid
+    state to begin performing a function
+    :param unit: A datastore cybergym-unit entity
+    :param ordered_state: An ordered state to verify it has not already been performed for a given unit. For example,
+    we would not want to attempt building a network again if it's already built.
+    """
+    if 'state' not in unit:
+        unit['state'] = None
+        ds_client.put(unit)
+        return False
+
+    if unit['state'] not in ordered_arena_states:
+        return False
+
+    if ordered_arena_states[unit['state']] <= ordered_arena_states[ordered_state]:
         return True
     else:
         return False

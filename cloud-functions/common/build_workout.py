@@ -2,11 +2,9 @@ import time
 import random
 import string
 
-from common.globals import ds_client, project, compute, region, zone, dnszone, WORKOUT_STATES
-from common.dns_functions import add_dns_record, register_workout_server
-from common.stop_compute import stop_workout
+from common.globals import ds_client, project, compute, region, zone, BUILD_STATES
 from common.assessment_functions import get_startup_scripts
-from common.networking_functions import create_network, create_route, create_firewall_rules
+from common.networking_functions import create_route, create_firewall_rules
 from common.prepare_compute import create_instance_custom_image, build_guacamole_server
 from common.state_transition import state_transition, check_ordered_workout_state
 
@@ -31,13 +29,13 @@ def build_workout(workout_id):
     startup_scripts = None
     # Parse the assessment specification to obtain any startup scripts for the workout.
     if 'state' not in workout or not workout['state']:
-        state_transition(entity=workout, new_state=WORKOUT_STATES.START)
+        state_transition(entity=workout, new_state=BUILD_STATES.START)
 
     if workout['assessment']:
         startup_scripts = get_startup_scripts(workout_id=workout_id, assessment=workout['assessment'])
     # Create the networks and subnets
-    if check_ordered_workout_state(workout, WORKOUT_STATES.BUILDING_NETWORKS):
-        state_transition(entity=workout, new_state=WORKOUT_STATES.BUILDING_NETWORKS)
+    if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_NETWORKS):
+        state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_NETWORKS)
         print('Creating networks')
         for network in workout['networks']:
             network_body = {"name": "%s-%s" % (workout_id, network['name']),
@@ -55,11 +53,11 @@ def build_workout(workout_id):
                 response = compute.subnetworks().insert(project=project, region=region,
                                                         body=subnetwork_body).execute()
                 compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
-                state_transition(entity=workout, new_state=WORKOUT_STATES.COMPLETED_NETWORKS)
+                state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_NETWORKS)
 
     # Now create the server configurations
-    if check_ordered_workout_state(workout, WORKOUT_STATES.BUILDING_SERVERS):
-        state_transition(entity=workout, new_state=WORKOUT_STATES.BUILDING_SERVERS)
+    if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_SERVERS):
+        state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_SERVERS)
         print('Creating servers')
         for server in workout['servers']:
             server_name = "%s-%s" % (workout_id, server['name'])
@@ -86,10 +84,10 @@ def build_workout(workout_id):
                                          networkRouting=network_routing, networks=nics, tags=tags,
                                          meta_data=meta_data, sshkey=sshkey)
 
-        state_transition(entity=workout, new_state=WORKOUT_STATES.COMPLETED_SERVERS)
+        state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_SERVERS)
     # Create the student entry guacamole server
-    if check_ordered_workout_state(workout, WORKOUT_STATES.BUILDING_STUDENT_ENTRY):
-        state_transition(entity=workout, new_state=WORKOUT_STATES.BUILDING_STUDENT_ENTRY)
+    if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_STUDENT_ENTRY):
+        state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_STUDENT_ENTRY)
         if workout['student_entry']:
             network_name = f"{workout_id}-{workout['student_entry']['network']}"
             guac_connection = [{
@@ -102,12 +100,12 @@ def build_workout(workout_id):
             build_guacamole_server(type='workout', build_id=workout_id, network=network_name,
                                    guacamole_connections=guac_connection)
         else:
-            state_transition(entity=workout, new_state=WORKOUT_STATES.BROKEN)
+            state_transition(entity=workout, new_state=BUILD_STATES.BROKEN)
             return
-        state_transition(entity=workout, new_state=WORKOUT_STATES.COMPLETED_STUDENT_ENTRY)
+        state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_STUDENT_ENTRY)
     # Create all of the network routes and firewall rules
-    if check_ordered_workout_state(workout, WORKOUT_STATES.BUILDING_ROUTES):
-        state_transition(entity=workout, new_state=WORKOUT_STATES.BUILDING_ROUTES)
+    if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_ROUTES):
+        state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_ROUTES)
         print('Creating network routes and firewall rules')
         if 'routes' in workout and workout['routes']:
             for route in workout['routes']:
@@ -119,8 +117,8 @@ def build_workout(workout_id):
                      "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
                 create_route(r)
 
-    if check_ordered_workout_state(workout, WORKOUT_STATES.BUILDING_FIREWALL):
-        state_transition(entity=workout, new_state=WORKOUT_STATES.BUILDING_FIREWALL)
+    if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_FIREWALL):
+        state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_FIREWALL)
         firewall_rules = []
         for rule in workout['firewall_rules']:
             firewall_rules.append({"name": "%s-%s" % (workout_id, rule['name']),
@@ -132,7 +130,7 @@ def build_workout(workout_id):
     
         create_firewall_rules(firewall_rules)
 
-    state_transition(entity=workout, new_state=WORKOUT_STATES.READY)
+    state_transition(entity=workout, new_state=BUILD_STATES.READY)
 
 
 # build_workout('slvurxmeqf')
