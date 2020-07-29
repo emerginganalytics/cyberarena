@@ -148,13 +148,13 @@ def build_guacamole_server(type, build_id, network, guacamole_connections):
         guac_user = 'cybergym' + str(i+1)
         guac_connection_password = get_random_alphaNumeric_string()
         if type == 'arena':
-            workout_key = ds_client.key('cybergym-workout', connection['workout_id'])
+            build_key = ds_client.key('cybergym-workout', connection['workout_id'])
         elif type == 'workout':
-            workout_key = ds_client.key('cybergym-workout', connection['workout_id'])
-        workout = ds_client.get(workout_key)
-        workout['workout_user'] = guac_user
-        workout['workout_password'] = guac_connection_password
-        ds_client.put(workout)
+            build_key = ds_client.key('cybergym-workout', connection['workout_id'])
+        build = ds_client.get(build_key)
+        build['workout_user'] = guac_user
+        build['workout_password'] = guac_connection_password
+        ds_client.put(build)
 
         startup_script += workout_globals.guac_startup_user_add.format(user=guac_user,
                                                                        name=guac_user,

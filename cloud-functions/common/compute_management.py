@@ -2,7 +2,7 @@ import time
 import calendar
 from socket import timeout
 
-from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, WORKOUT_STATES
+from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES
 from google.cloud import datastore
 from common.dns_functions import add_dns_record, register_workout_server
 from common.state_transition import state_transition
@@ -34,7 +34,7 @@ def register_student_entry(build_id, server_name):
     # Now, since this is the guacamole server, update the state of the workout to READY
     print(f"Setting the build {build_id} to ready")
     workout = ds_client.get(ds_client.key('cybergym-workout', build_id))
-    state_transition(entity=workout, new_state=WORKOUT_STATES.READY)
+    state_transition(entity=workout, new_state=BUILD_STATES.READY)
 
 
 def server_build(server_name):
@@ -62,7 +62,7 @@ def server_build(server_name):
     print(f'Sent job to build {server_name}, and waiting for response')
     i = 0
     success = False
-    while not success and i < 3:
+    while not success and i < 5:
         try:
             print(f"Begin waiting for build operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
@@ -122,7 +122,7 @@ def server_start(server_name):
         print(f'Setting DNS record for {server_name}')
         register_student_entry(server['workout'], server_name)
 
-    state_transition(entity=server, new_state=SERVER_STATES.READY)
+    state_transition(entity=server, new_state=SERVER_STATES.RUNNING)
     print(f"Finished starting {server_name}")
     return True
 
