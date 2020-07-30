@@ -36,11 +36,11 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = complete = submitted_answers = uploaded_files = teacher_email = None
+        running = complete = submitted_answers = uploaded_files = teacher_email = state = None
         if 'running' in workout_instance:
             running = workout_instance['running']
-        if 'complete' in workout_instance:
-            complete = workout_instance['complete']
+        if 'state' in workout_instance:
+            state = workout_instance['state']
         if 'submitted_answers' in workout_instance:
             submitted_answers = workout_instance['submitted_answers']
         if 'uploaded_files' in workout_instance:
@@ -50,7 +50,7 @@ def get_unit_workouts(unit_id):
         workout_info = {
             'name': workout.key.name,
             'running': running,
-            'complete': complete,
+            'state': state,
             'submitted_answers': submitted_answers,
             'uploaded_files': uploaded_files,
             'teacher_email':teacher_email

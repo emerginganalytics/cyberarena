@@ -1,5 +1,5 @@
 google.cloud
-google-api-core==1.17.0
+google-api-core
 google-cloud-storage
 google-cloud-datastore
 google-api-python-client
