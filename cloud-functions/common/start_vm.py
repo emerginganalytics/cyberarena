@@ -3,12 +3,17 @@
 # resuming a workout which has previously been stopped.
 #
 import googleapiclient.discovery
-from common.globals import ds_client, project, compute, dnszone, dns_suffix, workout_globals
-from common.dns_functions import add_dns_record
-from common.compute_functions import get_server_ext_address
 import time
 import calendar
 from googleapiclient.errors import HttpError
+from google.cloud import pubsub_v1
+
+from common.state_transition import state_transition
+from common.globals import ds_client, project, compute, dnszone, dns_suffix, workout_globals, BUILD_STATES, \
+    PUBSUB_TOPICS, SERVER_ACTIONS
+from common.dns_functions import add_dns_record
+from common.prepare_compute import get_server_ext_address
+from common.compute_management import server_start
 
 # Global variables for this function
 expired_workout = []
@@ -58,70 +63,51 @@ def register_workout_update(project, dnszone, workout_id, new_ip):
 
 def start_vm(workout_id):
     print("Starting workout %s" % workout_id)
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    state_transition(entity=workout, new_state=BUILD_STATES.STARTING)
     workout['running'] = True
     workout['start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(workout)
 
-    result = compute.instances().list(project=project, zone=zone,
-                                      filter='name = {}*'.format(workout_id)).execute()
-    try:
-        if 'items' in result:
-            for vm_instance in result['items']:
-                response = compute.instances().start(project=project, zone=zone, instance=vm_instance["name"]).execute()
-                workout_globals.extended_wait(project, zone, response["id"])
-
-                started_vm = compute.instances().get(project=project, zone=zone, instance=vm_instance["name"]).execute()
-                if 'accessConfigs' in started_vm['networkInterfaces'][0]:
-                    if 'natIP' in started_vm['networkInterfaces'][0]['accessConfigs'][0]:
-                        tags = started_vm['tags']
-                        if tags:
-                            for item in tags['items']:
-                                if item == 'labentry' or item == 'student-entry':
-                                    ip_address = started_vm['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-                                    register_workout_update(project, dnszone, workout_id, ip_address)
-            time.sleep(30)
-            print("Finished starting %s" % workout_id)
-        return True
-    except():
-        print("Error in starting VM for %s" % workout_id)
-        return False
+    query_workout_servers = ds_client.query(kind='cybergym-server')
+    query_workout_servers.add_filter("workout", "=", workout_id)
+    for server in list(query_workout_servers.fetch()):
+        # Publish to a server management topic
+        pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(project, pubsub_topic)
+        future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
+                                   action=SERVER_ACTIONS.START)
+        print(future.result())
+    state_transition(entity=workout, new_state=BUILD_STATES.RUNNING)
 
 
 def start_arena(unit_id):
     print("Starting arena %s" % unit_id)
-    key = ds_client.key('cybergym-unit', unit_id)
-    unit = ds_client.get(key)
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    state_transition(entity=unit, new_state=BUILD_STATES.STARTING)
     unit['arena']['running'] = True
     unit['arena']['gm_start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(unit)
 
-    result = compute.instances().list(project=project, zone=zone,
-                                      filter='name = {}*'.format(unit_id)).execute()
-    try:
-        if 'items' in result:
-            for vm_instance in result['items']:
-                response = compute.instances().start(project=project, zone=zone, instance=vm_instance["name"]).execute()
-                workout_globals.extended_wait(project, zone, response["id"])
 
-                started_vm = compute.instances().get(project=project, zone=zone, instance=vm_instance["name"]).execute()
-            print("Finished starting %s arena servers" % unit_id)
-    except():
-        print("Error in starting central servers for arena %s" % unit_id)
-        return False
+    # Start the central servers
+    print(f"Starting central servers for the arena with unit ID {unit_id}")
+    query_central_arena_servers = ds_client.query(kind='cybergym-server')
+    query_central_arena_servers.add_filter("workout", "=", unit_id)
+    for server in list(query_central_arena_servers.fetch()):
+        # Publish to a server management topic
+        pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(project, pubsub_topic)
+        future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
+                                   action=SERVER_ACTIONS.START)
+        print(future.result())
+
     # Now start all of the student workouts for this arena
     for workout_id in unit['workouts']:
         start_vm(workout_id)
+    state_transition(entity=unit, new_state=BUILD_STATES.RUNNING)
 
-    # Create a DNS record for the arena with the new IP address
-    # student_entry = unit['arena']['student_entry']
-    student_entry = 'student-guacamole'
-    server_name = f'{unit_id}-{student_entry}'
-    ip_address = get_server_ext_address(server_name)
-    # add_dns_record(unit_id, ip_address)
-    register_workout_update(project, dnszone, unit_id, ip_address)
-    key = ds_client.key('cybergym-unit', unit_id)
-    build = ds_client.get(key)
-    build["external_ip"] = ip_address
-    ds_client.put(build)
+
+# start_arena('wsojiwqdqg')
