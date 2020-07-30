@@ -24,13 +24,20 @@
     <div class="cipher_input_div">
         <h1 id="form_header">A Sticky Situation</h1>
         <div id="cipher_form" class="cipher_form">
-            <select id="cipher_type" name="cipher_type">
-                <option value="" selected disabled hidden>-- Cipher Type --</option>
-                <option value="AtBash">AtBash</option>
-                <option value="Caesar">Caesar</option>
-                {#<option value="Col Transpositino">Col Transposition</option>#}
-                <option value="Base32">Base32</option>
-                <option value="Base64">Base64</option>
+            {# Buttons used to display info on current select cipher type #}
+             <button id="cipherInfoBtn" onclick="window.open('/arena/cipher-warehouse/cipher-info/{{ workout_id }}','_blank')">Cipher Info</button>
+            <select id="cipher_type" name="cipher_type" hidden>
+                <optgroup label="Ciphers">
+                    <option value="" selected disabled hidden>-- Cipher Type --</option>
+                    <option value="AtBash">AtBash</option>
+                    <option value="Caesar">Caesar</option>
+                    <option value="ColTransposition">Col Transposition</option>
+                    <option value="KeywordCipher">Keyword Cipher</option>
+                </optgroup>
+                <optgroup label="Encodings">
+                    <option value="Base32">Base32</option>
+                    <option value="Base64">Base64</option>
+                </optgroup>
             </select>
 
             <label for="cipher_input_area"></label>
@@ -55,7 +62,7 @@
                 are the keys necessary to restore your system. If you act quickly enough, you might be able to
                 stop the inevitable. <br>Good luck!<br>
             </p>
-            <button type="button" class="cipher-buttons">First Message</button>
+            <button type="button" class="cipher-buttons">FIRST MESSAGE</button>
             <div class="ciphers">
                 <p>
                     gsrhurihgpvbhslfow'evyvvmkivggbvzhb.zggsvvmwlugsvwzb,
@@ -63,7 +70,7 @@
                     svivrhgsvurihgpvb,xbyvitbn{gqmbwulxcc4c92sn}.
                 </p>
             </div>
-            <button type="button" class="cipher-buttons">Second Message</button>
+            <button type="button" class="cipher-buttons">SECOND MESSAGE</button>
             <div class="ciphers">
                 <p>
                     Vm0xNFUxSXhVWGhTV0dST1ZsZG9WRmxVU205VlZscHlWbTFHYUZKc1NsbFVWbU14WVRBeFZrNVdaRmho
@@ -81,18 +88,25 @@
                     VW14R05GVnNVbk5WVmxaVlRVUnJQUT09
                 </p>
             </div>
-            <button type="button" class="cipher-buttons">Final Message</button>
+            <button type="button" class="cipher-buttons">FINAL MESSAGE</button>
             <div class="ciphers">
-                 <p>
-                     SVFUV1FJREVOQlZXMjZUT05aNUhTSURVTkpZQ0E0VDJOVjVDQTVUWE01NUNBMzNLRUI0RzI1VFlNWVFH
-                     NlkzRU5ZUUdVMkwyRllRRkEyTEJOSldXNjRESk9aWFhVWjNVRlFRR0kzWkFNUlhDQTMzS05JUUdPNVR
-                     QUElYQ0FWREtPQldTQTZUSk41U0cyNlJBTloyRzQzMzJOQVFHSTNSQVBCVkcyM0xRTk5YWFU2Sk9FQk
-                     hXVUlESU9RUUdNMkxLT0pUWFU2TENQSVdDQVJCSE9GNUNBMkRXTkYzR0U2VFpFQlhXVUlEQ1BKWFNBN
-                     VRTT1oyQ0E0VEVONVJXVTREUEVCUkhVMzNQTVJVV0VJRFlPWllHRVkzUEZZUUZTNlRPTk5TRzY2UkFO
-                     NVJXSTNSQUZCM0dTNkpBT1pYQ0EyM05OSlVHSTNUMlBFVVNZSUNFRUJSWE00TDJFQlZXMjJUUk1SNFh
-                     VNkpBTjVSWFVJRFBNTlNHMjZKQU9aVVhTSURCTVJVWE1aWkFNWjVISUlESlBKNEhVM1RPT1pXWElJRF
-                     BOSVFHMjZUT041VkcyNlJBT1JWSEEzSkFOWjVHMjRMMk5VWENBV0RVTzU1RzJRVFVOQjVTQU9DTkdWU
-                     Vc0VkxPSzVaR1FaTExLQTJYRzJaQVBVWENBVFRQT1oyQ0E0TEVNSlNHTzVUSk40UVE9PT09
+                <p>
+                    I3Uh IH5v ZC8g b3l1 CGR2 ZGFv dXRg YHVo cChk IWkz bnl7 WF4g btZ2 xyai R5cG 9pdG RvbS BkdH Qua3 hkbS
+                    Z2am ZlcG 9ycX hCel lhdl bSRr bmFp bSBg In45 ZS5v dGVj IGAz cSpl dWFu cmBl QWZq fXxt c3Bv I2Z0 d24l
+                    cGJN IWdh I2h0 YEUo I2Bw ZG5s ZnV5 c31z cSkh SHBy IWMV bCB0 cmVv ZGdg YHBp ZyQp cG1g DWUg bSNg ZH4H
+                    N2A0 aGNg YGRl cWBg Wnlz cltn Z2d5 dGVl dWBk YmBp IGNg d3Zi InUN dnll dmNo Lnxp bWRz IHRu ZSVl IXln
+                    cG5y KX90 cGtl dGVl ZDN1 CmQS J5ZH Ngbm B0Zi UtcC 1sSW Rhd2 Budy FpSQ RgYm BhcS NgeW 1gYW cCVl YXB1
+                    LyF1 cGNl I3wt ICdg ZHBp I2wl aGQp e38y IiJS dHNn"
+                </p>
+                <p>NullArray</p>
+            </div>
+            <button type="button" class="cipher-buttons">BONUS ROUND</button>
+            <div class="ciphers">
+                <h4>Bonus Round</h4>
+                <p>
+                    I almost forgot, in my haste to get away I may have damaged some of the company property.
+                    How good are you at fixing fences?<br>
+                    CR{HNYEGMOTEEC}BYNFE
                 </p>
             </div>
         </div>
@@ -101,7 +115,6 @@
 {% block footer_block %}2{% endblock footer_block %}
 
 {% block js_block %}
-    {# Toggle hidden input fields key and keyword based on cipher_type #}
     <script type="text/javascript">
         $('#cipher_type').change(function () {
             console.log("Entering toggleFields");
@@ -114,21 +127,21 @@
                 console.log("Case Caesar");
                 key.show();
                 $("#key_label").show();
-                $("#keyword").hide();
+                keyword.hide();
                 $("#keyword_label").hide();
             }
-            else if (selection === "Col Transposition"){
+            else if (selection === "ColTransposition" || selection === 'KeywordCipher'){
                 console.log("Case Col Transposition");
-                $("#keyword").show();
+                keyword.show();
                 $("#keyword_label").show();
-                $("#key").hide();
+                key.hide();
                 $("#key_label").hide();
             }
             else {
-                console.log("Defaults used ...")
-                $("#key").hide();
+                console.log("AtBash or Encodings Selected ...");
+                key.hide();
                 $("#key_label").hide();
-                $("#keyword").hide();
+                keyword.hide();
                 $("#keyword_label").hide();
             }
         });
@@ -154,7 +167,7 @@
                        displayError("\* Missing Key Value!", 'alert');
                        return console.log("* Missing Fields!");
                    }
-               } else if (cipherType === 'Col Transposition') {
+               } else if (cipherType === 'ColTransposition' || cipherType === 'KeywordCipher') {
                    cipherKeyword = $('#keyword').val();
                    if (cipherKeyword === "") {
                        displayError("\* Missing Keyword Value!", 'alert');
@@ -168,7 +181,7 @@
 
            $.ajax({
                type: 'POST',
-               url: '/ajax_calculate_arena_plaintext/{{ workout_id }}',
+               url: '/ajax_calculate_arena_plaintext',
                data: JSON.stringify({
                    cipher_type: cipherType,
                    ciphertext: cipherText,

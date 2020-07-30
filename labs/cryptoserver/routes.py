@@ -262,17 +262,41 @@ def logout(workout_id):
 @app.route('/arena/landing/<workout_id>', methods=['GET'])
 def arena(workout_id):
     page_template = 'pages/johnny-arena-landing.jinja'
-    return render_template(page_template, workout_id=workout_id)
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout:
+        if workout['name'] == 'Trojan Arena Level 2':
+            return render_template(page_template, workout_id=workout_id)
+    else:
+        return redirect('/invalid')
 
 
 @app.route('/arena/cipher-warehouse/<workout_id>', methods=['GET', 'POST'])
 def cipher_warehouse(workout_id):
     page_template = 'pages/arena-cipher-warehouse.jinja'
-    return render_template(page_template, workout_id=workout_id)
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    if workout:
+        if workout['name'] == 'Trojan Arena Level 2':
+            return render_template(page_template, workout_id=workout_id)
+    else:
+        return redirect('/invalid')
 
+@app.route('/arena/cipher-warehouse/cipher-info/<workout_id>', methods=['GET'])
+def cipher_info(workout_id):
+    page_template = 'pages/arena-cipher-info.jinja'
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
 
-@app.route('/ajax_calculate_arena_plaintext/<workout_id>', methods=['POST'])
-def calculate_plaintext(workout_id):
+    if workout:
+        if workout['name'] == 'Trojan Arena Level 2':
+            return render_template(page_template, workout_id=workout_id)
+    else:
+        return redirect('/invalid')
+
+@app.route('/ajax_calculate_arena_plaintext', methods=['POST'])
+def calculate_plaintext():
     encrypted_message = request.get_json()
     cipher_type = str(encrypted_message['cipher_type'])
     message = str(encrypted_message['ciphertext'])
