@@ -5,6 +5,32 @@
 <script src='../static/main.js'></script>
 <script>
 
+  function generateTableHeaders(table, data){
+    let header = table.createTHead();
+    let row = table.insertRow();
+    for (let key of data) {
+      let th = document.createElement("th");
+      let text = document.createTextNode(key);
+      th.appendChild(text);
+      row.appendChild(th);
+    }
+  }
+
+  function fillTable(table, unit_name, unit_id, unit_timestamp){
+    let row = table.insertRow();
+    let td = document.createElement("td");
+    let unit_link = document.createElement("a");
+    unit_link.innerHTML = unit_name;
+    unit_link.href = "/workout_list/" + unit_id;
+    td.appendChild(unit_link);
+    row.appendChild(td);
+
+    let td2 = document.createElement("td");
+    let timestamp = document.createTextNode(unit_timestamp)
+    td2.appendChild(timestamp);
+    row.appendChild(td2);
+  }
+
   var teacher_email = null;
   initApp = function(){
     firebase.auth().onAuthStateChanged(function(user){
@@ -23,38 +49,49 @@
               var nodeName = 'unit_group_' + data[i]['type'];
               var unitNode = document.getElementById(nodeName);
               if(unitNode == null){
+                //Header/Unit info container
+                var unit_div = document.createElement("div");
+                //Create interactive header button for each unit type
                 var unit_type = document.createElement("a");
                 unit_type.innerHTML = data[i]['type'];
                 unit_type.className = 'unit_header btn';
                 unit_type.dataToggle = 'collapse';
                 unit_type.href = '#unit_group_' + data[i]['type'];
                 
+                //Create div containing the list of units of a specific type
                 var node = document.createElement("div");
                 node.id = nodeName;
                 node.className = 'collapse';
                 node.style = "margin-bottom:1em;";
-                var unit_div = document.createElement("div");
+                
                 unit_div.append(unit_type);
                 unit_div.append(node);
                 unit_div.style='margin-bottom:1em;border:1px solid black;';
+                
+                //Create table for individual unit information
+                var unit_table = document.createElement("table");
+                unit_table.id = 'unit_table_' + data[i]['type'];
+                
+                var table_headers = ["Unit Name", "Creation Date"]
+                //Create table headers
+                //var header_list = Object.keys(data[i])
+                generateTableHeaders(unit_table, table_headers);
+                
+                //unit_table.appendChild()
+
+                
+
                 var container = document.getElementById('unit_container');
                 container.appendChild(unit_div);
+                node.appendChild(unit_table);
               }
 
-              var unit_info_div = document.createElement("div");
-              unit_info_div.className = "collapse";
-              unit_info_div.id = "unit_collapse_" + data[i]['type'];
-
-              var unit_id = document.createElement('a');
-              unit_id.innerHTML = data[i]['unit_name'];
-              unit_id.href = '/workout_list/' + data[i]['unit_id']
-              var unit_timestamp = document.createElement('span');
-              unit_timestamp.innerHTML = "\tCreated: " + timeConverter(data[i]['timestamp']);
-
+              var unit_table = document.getElementById('unit_table_' + data[i]['type']);
+              var unit_name = data[i]['unit_name'];
+              var unit_id = data[i]['unit_id'];
+              var unit_timestamp = data[i]['timestamp'];
+              fillTable(unit_table, unit_name, unit_id, timeConverter(unit_timestamp));
               var container = document.getElementById(nodeName)
-              container.appendChild(unit_id);
-              container.appendChild(unit_timestamp);
-              container.appendChild(document.createElement("br"));
             }
             $(".btn").attr("data-toggle", "collapse");
           }
@@ -105,6 +142,11 @@
     var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
     return time;
   }
+
+  function to_build_page(){
+    var input = document.getElementById('unit_select').value;
+    window.location.href = "/" + input;
+  }
 </script>
 <style>
 
@@ -126,6 +168,27 @@
       <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
     </div>
     <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
+    
+    <div class="input-group mb-3 unit_build_container" style="margin-bottom:1em;">
+      
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary" type="button" onclick='to_build_page()'>Build Unit</button>
+      </div>
+      <select class="custom-select" id="unit_select">
+        <option selected>Select unit type...</option>
+        <option value="mobileforensics">Mobile Forensics</option>
+        <option value="cyberattack">Botnet Cyberattack</option>
+        <option value="ransomware">Ransomware</option>
+        <option value="bufferoverflow">Buffer Overflow</option>
+        <option value="wireshark">Wireshark</option>
+        <option value="nessus">Nessus</option>
+        <option value="publicprivate">Public/Private</option>
+        <option value="password-policy">Password Policy</option>
+        <option value="phishing">Phishing</option>
+        <option value="johnnycipher">Johnny Cipher</option>
+      </select>
+    </div>
+    
     <button id="sign-out" class='btn'>Sign out</button>
   </div>
   <div id='unit_container' class='col'>

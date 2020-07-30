@@ -199,8 +199,7 @@ def workout_list(unit_id):
     if (request.method=="POST"):
         if build_type == 'arena':
             return json.dumps(unit)
-        return json.dumps(workout_list)
-        
+        return json.dumps(workout_list)    
     
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
@@ -373,29 +372,8 @@ def arena_landing(workout_id):
 def login():
     return render_template('login.html')
 
-@app.route("/login_test", methods=['GET', 'POST'])
-def login_test():
-    http_request = google.auth.transport.requests.Request()
-    id_token = request.headers['Authorization']
-    email = request.headers['user_email']
-    user_name = request.headers['user_name']
-    # print(id_token)
-    # print("User email: " + email)
-    # print("User name: " + user_name)
-    claims = google.oauth2.id_token.verify_firebase_token(id_token, http_request)
-
-    if claims:
-        if 'name' in claims:
-            return claims['name']
-        print("claims" + claims)
-        return render_template('teacher_home.html', user_name=user_name)
-    else:
-        return render_template('teacher_home.html', user_name="idk lol")
-    return render_template('no_workout.html')
-
 @app.route('/teacher_home', methods=['GET', 'POST'])
 def teacher_home():
-    print("Logged in successfully")
     return render_template('teacher_home.html')
 
 @app.route('/teacher_info', methods=['GET', 'POST'])
@@ -599,8 +577,14 @@ def expo(workout_type):
         return redirect(url)
     return render_template('expo_page.html', form=form, workout_type=workout_type)
 
+@app.errorhandler(500)
+def handle_500(e):
+    print("500 Error detected: " + str(e))
+    return render_template("500.html", error=e), 500
 
-
+@app.errorhandler(404)
+def handle_404(e):
+    return render_template("404.html")
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)
