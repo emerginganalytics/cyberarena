@@ -21,7 +21,7 @@ h1, h2, h3, h4, h5, h6, header, title, footer, button {
   font-weight: bold;
 }
 
-p, textarea, input, label {
+p, textarea, input, label, ul, li {
   font-family: Lekton, Roboto, "Roboto Thin", "Arial Narrow", Arial;
   font-kerning: auto;
   letter-spacing: 2px;
@@ -142,20 +142,20 @@ h1, h2#form_header {
   cursor: pointer;
 }
 
-input#key {
+input[id='key'] {
   margin-left: auto;
   margin-right: auto;
   margin-top: 15px;
 }
 
-input#keyword{
+input[id='keyword']{
   margin-left: auto;
   margin-right: auto;
   margin-top: 15px;
 }
 
 /* Decryption Tool Button Styles */
-button#button_decrypt {
+button[id='button_decrypt'], button[id='cipherInfoBtn'] {
   display: block;
   margin: 15px 0 15px 0;
   background-color: #3f5858;
@@ -167,11 +167,11 @@ button#button_decrypt {
   font-size: 18px;
   font-family: Lekton, "Roboto Thin", Roboto;
 }
-button#button_decrypt:hover {
+button[id='button_decrypt']:hover, button[id='cipherInfoBtn']:hover {
   background-color: #527272;
   cursor: pointer;
 }
-button#button_decrypt:active {
+button[id='button_decrypt']:active, button[id='cipherInfoBtn']:active {
   background-color: #396d6d;
   box-shadow: 0 1px 0#444444;
   border: 1px solid black;
@@ -182,15 +182,15 @@ p#form_error {
   font-size: 15px;
 }
 
-/* Collapsible Cipher List Styles */
-.cipher_list {
+/* Collapsible Cipher List / Cipher Info Styles */
+.cipher_list, .cipherInfoDiv {
   width: 80%;
   margin-left: auto;
   margin-right: auto;
   padding: 15px;
   /* border: 1px solid black;*/
 }
-.cipher-buttons {
+.cipher-buttons, .cipherInfoBtn {
   background-color: #1f445e;
   color: whitesmoke;
   cursor: pointer;
@@ -202,11 +202,11 @@ p#form_error {
   outline: none;
   font-size: 15px;
 }
-.active, .cipher-buttons:hover {
+.active, .cipher-buttons:hover, .cipherInfoBtn:hover {
   background-color: #34709a;
 }
 
-.cipher-buttons:after {
+.cipher-buttons:after,  .cipherInfoBtn:after {
   content: '\02795'; /* Unicode character for "plus" sign (+) */
   font-size: 15px;
   color: whitesmoke;
@@ -218,9 +218,23 @@ p#form_error {
   content: "\2796"; /* Unicode character for "minus" sign (-) */
 }
 
-.ciphers {
+.ciphers, .cipherInfoContent {
   padding: 0 18px;
   display: none;
   overflow: hidden;
   background-color: whitesmoke;
+}
+
+/* Cipher Info Styles */
+.cipherInfoContent, button[class=cipherInfoBtn] {
+  margin-bottom: 20px;
+}
+
+img[id='colTranspositionImg'] {
+  display: block;
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+  border-radius: 4px;
 }
