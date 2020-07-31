@@ -162,7 +162,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         for i in range(1, num_team+1):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
-            store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers,
+            store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers, user_mail=email,
                                 timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment)
 
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
@@ -280,7 +280,7 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, servers, r
     ds_client.put(unit)
 
 
-def store_arena_workout(workout_id, unit_id, timestamp, student_servers, student_instructions_url,
+def store_arena_workout(workout_id, unit_id, user_email, timestamp, student_servers, student_instructions_url,
                         assessment):
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -295,6 +295,7 @@ def store_arena_workout(workout_id, unit_id, timestamp, student_servers, student
         'misfit': False,
         'assessment': assessment,
         'student_servers': student_servers,
+        'instructor_id': user_email
     })
 
     ds_client.put(new_workout)
