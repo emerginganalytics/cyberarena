@@ -13,6 +13,7 @@ from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 from utilities.yaml_functions import parse_workout_yaml
 from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads
+from utilities.assessment_functions import get_assessment_questions, process_assessment
 from werkzeug.utils import secure_filename
 from calendar import timegm
 import google.oauth2.id_token
@@ -56,6 +57,7 @@ def index(workout_type):
             url = '/workout_list/%s' % (unit_id)
             return redirect(url)
         elif build_type == 'arena':
+
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_arena_topic)
             url = '/arena_list/%s' % (unit_id)
             return redirect(url)
@@ -99,71 +101,11 @@ def landing_page(workout_id):
 
         assessment = assessment_type = None
         if 'assessment' in workout:
-            assessment = {}
-            try:
-                question_list = []
+            assessment, assessment_type = get_assessment_questions(workout)
 
-                if 'type' in workout['assessment']:
-                    assessment_type = workout['assessment']['type']
-                for question in workout['assessment']['questions']:
-                    question_dict = {}
-                    question_dict['question'] = question['question']
-                    if(question['type'] == 'input'):
-                        if 'answer' in question:
-                            question_dict['answer'] = question['answer']
-                    question_dict['type'] = question['type']
-                    question_list.append(question_dict)
-                assessment = question_list
-            except TypeError:
-                print('assessment not defined')
-                print(assessment)
 
         if(request.method == "POST"):
-            valid_answers = []
-            num_correct = 0
-            for i in range(len(assessment)):
-                if(assessment[i].get('type') != 'upload'):
-                    valid_answers.append(assessment[i].get('answer'))
-
-            assessment_answers = request.form.getlist('answer')
-            assessment_questions = request.form.getlist('question')
-
-            assessment_upload_prompt = request.form.getlist('upload_prompt')
-            assessment_uploads = request.files.getlist('file_upload')
-
-
-            store_student_uploads(workout_id, assessment_uploads)
-
-            for i in range(len(assessment_answers)):
-                
-                user_input = {
-                    "question":assessment_questions[i],
-                    "answer":assessment_answers[i]
-                }
-
-                # valid_answers.append(assessment[i].get('answer'))
-                user_answer = str(user_input['answer'])
-                true_answer = str(assessment[i].get('answer'))
-
-                if valid_answers[i]:
-                    if(user_answer.lower() == valid_answers[i].lower()):
-                        num_correct += 1
-
-            uploaded_files = []
-            urls = retrieve_student_uploads(workout_id)
-            for index, item in enumerate(assessment_uploads):#range(len(assessment_uploads)):
-                user_input = {
-                    "question": assessment_upload_prompt[index],
-                    "storage_url": urls[index]
-                }
-                uploaded_files.append(user_input)
-
-
-            percentage_correct = num_correct / len(assessment_questions) * 100
-            workout['uploaded_files'] = uploaded_files
-            workout['submitted_answers'] = assessment_answers
-            workout['assessment_score'] = percentage_correct
-            ds_client.put(workout)
+            uploaded_files, assessment_answers, percentage_correct = process_assessment(workout, workout_id, request, assessment)
 
             return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
@@ -229,11 +171,14 @@ def arena_list(unit_id):
     if'start_time' in unit:
         start_time = unit['start_time']
         # start_time = time.gmtime(start_time)
+    unit_teams = None
+    if 'teams' in unit:
+        unit_teams = unit['teams']
     if (request.method=="POST"):
         return json.dumps(unit)
 
     if unit:
-        return render_template('arena_list.html', unit_teams=unit['teams'], teacher_instructions=teacher_instructions_url, workout_list=workout_list,
+        return render_template('arena_list.html', unit_teams=unit_teams, teacher_instructions=teacher_instructions_url, workout_list=workout_list,
                             student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time)
 
 
@@ -254,117 +199,13 @@ def arena_landing(workout_id):
         guac_pass = workout['workout_password']
     if 'assessment' in workout:
         try:
-            question_list = []
-
-            if 'type' in workout['assessment']:
-                assessment_type = workout['assessment']['type']
-            for question in workout['assessment']['questions']:
-                question_dict = {}
-                if(question['type'] == 'input'):
-                    if 'answer' in question:
-                        question_dict['question'] = question['question']
-                        question_dict['answer'] = question['answer']
-                        question_dict['type'] = question['type']
-                        question_dict['point_value'] = question['points']
-                        question_list.append(question_dict)
-
-                #remove already submitted flag prompts to avoid double submission
-                if 'submitted_answers' in workout:
-                    for question in question_list:
-                        for answer_group in workout['submitted_answers']:
-                            if answer_group['answer'] == question['answer']:
-                                question_list.remove(question)
-            assessment = question_list
-
+            assessment, assessment_type = get_assessment_questions(workout)
         except TypeError:
-            print('assessment not defined')
+            print("type errors")
 
     if(request.method == "POST"):
-        valid_answers = []
-        points = 0
-        response = {}
-        answer_found = False
-        flag_attempt = request.form.get('answer')
-        question_key = request.form.get('question_content')
-        point_value = int(request.form.get('point_value'))
-        for i in range(len(assessment)):
-            if question_key == assessment[i].get('question') and flag_attempt == assessment[i].get('answer'):
-                answer_found = True
-                # if(assessment[i].get('type') != 'upload'):
-                # valid_answers.append(assessment[i].get('answer'))
-        
-        # if flag_attempt in valid_answers:
-        if answer_found:
-            answer_time = time.gmtime(time.time())
-            time_string = str(answer_time[3]) + ":" + str(answer_time[4]) + ":" + str(answer_time[5])
-            team_query = ds_client.query(kind='cybergym-workout')
-            team_query.add_filter('teacher_email', '=', workout['teacher_email'])
-            team_query.add_filter('unit_id', '=', workout['unit_id'])
-            team_members = []
-
-            for team_member in list(team_query.fetch()):
-                team_members.append(team_member)
-            answer_time_dict = {
-                'answer': flag_attempt,
-                'timestamp': time_string
-            }
-
-            #check if the answer is a duplicate
-            if 'submitted_answers' in workout:
-                if flag_attempt not in workout['submitted_answers']:
-                    workout['submitted_answers'].append(answer_time_dict)
-                else:
-                    response = {
-                        'answer_correct': True,
-                        'points_gained':0,
-                    }
-                    return json.dumps(response)
-
-            else:
-                workout['submitted_answers'] = []
-                workout['submitted_answers'].append(answer_time_dict)
-            points += int(point_value)
-            response = {
-            'answer_correct': True,
-            'points_gained': points,   
-            }
-            #check if this is the first time this flag has been found
-            if 'found_flags' in unit:
-                if flag_attempt in unit['found_flags']:
-                    print("flag already found")
-                else:
-                    unit['found_flags'].append(flag_attempt)
-                    point_value += 50
-                    ds_client.put(unit)
-            else:
-                unit['found_flags'] = []
-                unit['found_flags'].append(flag_attempt)
-                point_value += 50
-                ds_client.put(unit)
-
-            for member in team_members:
-                if 'points' in member:
-                    prev_score = member['points']
-                    prev_score += point_value
-                    member['points'] = prev_score
-                else:
-                    member['points'] = point_value
-                member['submitted_answers'] = workout['submitted_answers']
-                ds_client.put(member)
-        else:
-            if flag_attempt in unit['found_flags']:
-                response = {
-                    'answer_correct': True,
-                    'points_gained': 0
-                }
-                return json.dumps(response)
-            else:
-                response = {
-                    'answer_correct': False, 
-                    'points_gained': 0
-                }
-        return json.dumps(response)
-
+        return process_assessment(workout, workout_id, request, assessment)
+       
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
 
