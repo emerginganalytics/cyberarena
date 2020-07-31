@@ -1,0 +1,79 @@
+version: '1'
+
+workout:
+  name: 'Red Team Capstone'
+  workout_description: 'Training Environment for Red Team Capstone'
+  build_type: "compute"
+
+student_entry:
+  type: rdp
+  username: Student
+  password: "F0rgeIn$titute!@12"
+  network: external-network
+  ip: 10.0.0.2
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.0.0.0/24
+
+servers:
+  - name: winjumpbox
+    image: redteam-capstone-winjumpbox
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.0.0.2
+        subnet: default
+        external_NAT: False
+  - name: kali
+    image: kali-full-nessus-image
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.0.0.3
+        subnet: default
+        external_NAT: False
+  - name: tigerking
+    image: redteam-capstone-tigerking
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.0.0.188
+        subnet: default
+        external_NAT: False
+  - name: bernie
+    image: redteam-capstone-bernie
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.0.0.199
+        subnet: default
+        external_NAT: False
+  - name: carol
+    image: redteam-capstone-carol
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.0.0.120
+        subnet: default
+        external_NAT: False
+  - name: nested
+    image: redteam-capstone-nested-win2k8-xp
+    machine_type: "custom-6-10240"
+    nics:
+      - network: external-network
+        minCpuPlatform: "Intel Haswell"
+        internal_IP: 10.0.0.40
+        subnet: default
+        external_NAT: False  
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
