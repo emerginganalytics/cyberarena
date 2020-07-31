@@ -1,10 +1,12 @@
 import time
 import calendar
 from socket import timeout
+import requests
 
 from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES
 from google.cloud import datastore
-from common.dns_functions import add_dns_record, register_workout_server
+from googleapiclient.errors import HttpError
+from common.dns_functions import add_dns_record
 from common.state_transition import state_transition
 
 
@@ -24,17 +26,40 @@ def get_server_ext_address(server_name):
     return ip_address
 
 
+def test_guacamole(ip_address):
+    max_attempts = 40
+    attempts = 0
+    sleeptime = 5  # in seconds, no reason to continuously try if network is down
+
+    # while true: #Possibly Dangerous
+    success = False
+    while not success and attempts < max_attempts:
+        time.sleep(sleeptime)
+        try:
+            requests.get(f"http://{ip_address}:8080/guacamole/#", timeout=5)
+            return True
+        except requests.exceptions.Timeout:
+            attempts += 1
+    return False
+
+
 def register_student_entry(build_id, server_name):
+    build = ds_client.get(ds_client.key('cybergym-workout', build_id))
+    if not build:
+        build = ds_client.get(ds_client.key('cybergym-unit', build_id))
     # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
     ip_address = get_server_ext_address(server_name)
     add_dns_record(build_id, ip_address)
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     server['external_ip'] = ip_address
     ds_client.put(server)
-    # Now, since this is the guacamole server, update the state of the workout to READY
-    print(f"Setting the build {build_id} to ready")
-    workout = ds_client.get(ds_client.key('cybergym-workout', build_id))
-    state_transition(entity=workout, new_state=BUILD_STATES.READY)
+    # Make sure the guacamole server actually comes up successfully before setting the workout state to ready
+    if test_guacamole(ip_address):
+        # Now, since this is the guacamole server, update the state of the workout to READY
+        print(f"Setting the build {build_id} to ready")
+        state_transition(entity=build, new_state=BUILD_STATES.READY)
+    else:
+        state_transition(entity=build, new_state=BUILD_STATES.GUACAMOLE_SERVER_LOAD_TIMEOUT)
 
 
 def server_build(server_name):
@@ -104,7 +129,7 @@ def server_start(server_name):
     print(f'Sent start request to {server_name}, and waiting for response')
     i = 0
     success = False
-    while not success and i < 3:
+    while not success and i < 5:
         try:
             print(f"Begin waiting for start response from operation {response['id']}")
             compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
@@ -132,3 +157,5 @@ def server_start(server_name):
 #
 #
 # def server_reload():
+
+server_start('hadomrzbkz-student-guacamole')
