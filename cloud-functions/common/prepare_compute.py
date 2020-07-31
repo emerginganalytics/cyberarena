@@ -7,7 +7,7 @@ from googleapiclient import errors
 
 from common.globals import workout_globals, project, zone, dnszone, ds_client, compute, SERVER_STATES, SERVER_ACTIONS, \
     PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image
-from common.dns_functions import add_dns_record, register_workout_server
+from common.dns_functions import add_dns_record
 from common.compute_management import get_server_ext_address, server_build
 from common.networking_functions import create_firewall_rules
 
