@@ -3,7 +3,7 @@ import random
 import string
 
 from common.globals import ds_client, project, compute, region, zone, workout_globals, guac_password, BUILD_STATES
-from common.dns_functions import add_dns_record, register_workout_server
+from common.dns_functions import add_dns_record
 from common.stop_compute import stop_workout, stop_arena
 from common.assessment_functions import get_startup_scripts
 from common.networking_functions import create_network, create_route, create_firewall_rules
