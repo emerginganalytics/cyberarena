@@ -155,7 +155,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         student_entry_username = y['student-servers']['student_entry_username']
         student_entry_password = y['student-servers']['student_entry_password']
         network_type = y['student-servers']['network_type']
-        add_arena_to_unit(unit_id=unit_id, workout_duration=workout_length, timestamp=ts, networks=networks,
+        add_arena_to_unit(unit_id=unit_id, workout_duration=workout_length, timestamp=ts, networks=networks, user_mail=email,
                           servers=servers, routes=routes, firewall_rules=firewall_rules,
                           student_entry=student_entry, student_entry_type=student_entry_type, network_type=network_type,
                           student_entry_username=student_entry_username, student_entry_password=student_entry_password)
@@ -241,7 +241,7 @@ def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_
     ds_client.put(new_unit)
 
 
-def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, servers, routes, firewall_rules,
+def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, user_mail, servers, routes, firewall_rules,
                       student_entry, student_entry_type, network_type, student_entry_username,
                       student_entry_password):
     """
@@ -257,7 +257,8 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, servers, r
     :return: None
     """
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-
+    teams = []
+    teams.append(str(user_mail))
     unit['arena'] = {
         'expiration': workout_duration,
         'start_time': timestamp,
@@ -276,14 +277,14 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, servers, r
         'student_entry_password': student_entry_password,
         'student_network_type': network_type
     }
+    unit['teams'] = teams
 
     ds_client.put(unit)
 
 
-def store_arena_workout(workout_id, unit_id, user_email, timestamp, student_servers, student_instructions_url,
+def store_arena_workout(workout_id, unit_id, user_mail, timestamp, student_servers, student_instructions_url,
                         assessment):
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
-
     new_workout.update({
         'unit_id': unit_id,
         'type': 'arena',
@@ -295,7 +296,8 @@ def store_arena_workout(workout_id, unit_id, user_email, timestamp, student_serv
         'misfit': False,
         'assessment': assessment,
         'student_servers': student_servers,
-        'instructor_id': user_email
+        'instructor_id': user_mail,
+        'teacher_email': user_mail
     })
 
     ds_client.put(new_workout)

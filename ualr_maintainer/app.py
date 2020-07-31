@@ -236,12 +236,22 @@ def get_teacher_info():
         # unit_list.add_filter("resources_deleted", "=", False)
         teacher_units = []
         for unit in list(unit_list.fetch()):
-            unit_info = {
-                'unit_id': unit.key.name,
-                'type': unit['workout_type'],
-                'unit_name': unit['unit_name'],
-                'timestamp': unit['timestamp']
-            }
+            if 'unit_id' in unit:
+                unit_info = {
+                    'unit_id': unit.key.name,
+                    'build_type': unit['build_type'],
+                    'type': unit['workout_type'],
+                    'unit_name': unit['unit_id'],
+                    'timestamp': unit['timestamp']
+                }
+            else:
+                unit_info = {
+                    'unit_id': unit.key.name,
+                    'type': unit['workout_type'],
+                    'build_type': unit['build_type'],
+                    'unit_name': unit['unit_name'],
+                    'timestamp': unit['timestamp']
+                }
             teacher_units.append(unit_info)
         teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
     return json.dumps(teacher_units)
