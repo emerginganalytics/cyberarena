@@ -12,6 +12,7 @@ def state_transition(entity, new_state, existing_state=None):
     :param existing_state: A check for the existing state of the server. This defaults to None.
     :return: Boolean on success. If the expected existing state is not the same as the actual, this returns False.
     """
+
     if 'state' not in entity:
         entity['state'] = None
 
