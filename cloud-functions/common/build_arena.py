@@ -104,7 +104,7 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
                                              meta_data=None, sshkey=sshkey)
                 j += 1
         # Build the workout entry server and create the firewall rule to make it accessible.
-        build_guacamole_server(type='arena', build_id=unit_id, network=guac_network,
+        build_guacamole_server(build=unit, network=guac_network,
                                guacamole_connections=guacamole_connections)
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_STUDENT_SERVERS)
 

@@ -158,4 +158,4 @@ def server_start(server_name):
 #
 # def server_reload():
 
-server_start('hadomrzbkz-student-guacamole')
+# server_start('hadomrzbkz-student-guacamole')

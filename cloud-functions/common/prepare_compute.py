@@ -125,19 +125,19 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     # server_build(name)
 
 
-def build_guacamole_server(type, build_id, network, guacamole_connections):
+def build_guacamole_server(build, network, guacamole_connections):
     """
     Builds an image with an Apache Guacamole server and adds startup scripts to insert the
     correct users and connections into the guacamole database. This server becomes the entrypoint
     for all students in the arena.
     :param type: Either workout or arena build.
-    :param build_id: Build ID for the workout or arena. This is used for the server name.
+    :param build: Build Entity for the workout or arena.
     :param network: The network name for the server
     :param guacamole_connections: An array of dictionaries for each student {workoutid, ip address of their server,
         and password for their server.
     :return: Null
     """
-
+    build_id = build.key.name
     if len(guacamole_connections) == 0:
         return None
 
@@ -147,11 +147,7 @@ def build_guacamole_server(type, build_id, network, guacamole_connections):
         # Get a PRNG password for the workout and store it with the datastore record for display on the workout controller
         guac_user = 'cybergym' + str(i+1)
         guac_connection_password = get_random_alphaNumeric_string()
-        if type == 'arena':
-            build_key = ds_client.key('cybergym-unit', connection['workout_id'])
-        else:
-            build_key = ds_client.key('cybergym-workout', connection['workout_id'])
-        build = ds_client.get(build_key)
+
         build['workout_user'] = guac_user
         build['workout_password'] = guac_connection_password
         ds_client.put(build)

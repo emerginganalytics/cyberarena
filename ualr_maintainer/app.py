@@ -96,12 +96,20 @@ def landing_page(workout_id):
             teacher_instructions_url = unit['teacher_instructions_url']
 
         complete = None
-        if 'complete' in workout:
-            complete = workout['complete']
+        if 'state' in workout and workout['state'] == 'READY':
+            complete = True
 
         assessment = assessment_type = None
         if 'assessment' in workout:
             assessment, assessment_type = get_assessment_questions(workout)
+
+        workout_user = None
+        if 'workout_user' in workout:
+            workout_user = workout['workout_user']
+        workout_password = None
+        if 'workout_password' in workout:
+            workout_password = workout['workout_password']
+
 
 
         if(request.method == "POST"):
@@ -112,13 +120,15 @@ def landing_page(workout_id):
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
                                complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
-                               score=percentage_correct)
+                               score=percentage_correct, guac_user=workout_user, guac_pass=workout_password)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
                                teacher_instructions=teacher_instructions_url,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type)
+                               complete=complete, workout_type=workout['type'], assessment=assessment,
+                               assessment_type=assessment_type, guac_user=workout_user,
+                               guac_pass=workout_password)
     else:
         return render_template('no_workout.html')
 
