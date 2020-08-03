@@ -97,7 +97,7 @@ def build_workout(workout_id):
                 'username': workout['student_entry']['username'],
                 'password': workout['student_entry']['password']
             }]
-            build_guacamole_server(type='workout', build_id=workout_id, network=network_name,
+            build_guacamole_server(build=workout, network=network_name,
                                    guacamole_connections=guac_connection)
         else:
             state_transition(entity=workout, new_state=BUILD_STATES.BROKEN)
@@ -133,4 +133,4 @@ def build_workout(workout_id):
     state_transition(entity=workout, new_state=BUILD_STATES.READY)
 
 
-# build_workout('slvurxmeqf')
+# build_workout('iayjorypad')

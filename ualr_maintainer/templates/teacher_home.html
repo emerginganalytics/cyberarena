@@ -16,12 +16,16 @@
     }
   }
 
-  function fillTable(table, unit_name, unit_id, unit_timestamp){
+  function fillTable(table, unit_name, unit_id, unit_build_type, unit_timestamp){
     let row = table.insertRow();
     let td = document.createElement("td");
     let unit_link = document.createElement("a");
     unit_link.innerHTML = unit_name;
-    unit_link.href = "/workout_list/" + unit_id;
+    if(unit_build_type == 'arena'){
+      unit_link.href = "/arena_list/" + unit_id;
+    } else { 
+      unit_link.href = "/workout_list/" + unit_id;
+    }
     td.appendChild(unit_link);
     row.appendChild(td);
 
@@ -90,7 +94,8 @@
               var unit_name = data[i]['unit_name'];
               var unit_id = data[i]['unit_id'];
               var unit_timestamp = data[i]['timestamp'];
-              fillTable(unit_table, unit_name, unit_id, timeConverter(unit_timestamp));
+              var unit_build_type = data[i]['build_type']
+              fillTable(unit_table, unit_name, unit_id, unit_build_type, timeConverter(unit_timestamp));
               var container = document.getElementById(nodeName)
             }
             $(".btn").attr("data-toggle", "collapse");
