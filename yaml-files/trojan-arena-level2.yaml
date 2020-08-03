@@ -67,7 +67,7 @@ assessment:
       answer: "ceNcsBLXl4cexbG1"
       points: 100
     - type: input
-      question: "Flag #4: File Permissions"
+      question: "Flag #4: File Permission"
       answer: "SecuredTheRickRoll"
       points: 100
     - type: input
@@ -82,6 +82,7 @@ assessment:
       question: "Flag #7: Bonus Round"
       answer: "ONTHEFENCE"
       points: 150
+
 #    - type: battle
 #      key: "nA824wazosyssPb1"
 #      script: "trojan-arena.py"
