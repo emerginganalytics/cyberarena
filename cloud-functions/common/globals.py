@@ -2,17 +2,23 @@ import sys
 import random
 import string
 import googleapiclient.discovery
+from google.cloud import runtimeconfig
 from google.cloud import datastore, storage
+
+
+runtimeconfig_client = runtimeconfig.Client()
+myconfig = runtimeconfig_client.config('cybergym')
+project = myconfig.get_variable('project').value.decode("utf-8")
+region = myconfig.get_variable('region').value.decode("utf-8")
+zone = myconfig.get_variable('zone').value.decode("utf-8")
+dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-dns_suffix = ".cybergym-eac-ualr.org"
 project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
-region = 'us-central1'
-zone = 'us-central1-a'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 guac_password = 'promiseme'
 student_entry_image = 'image-labentry'
