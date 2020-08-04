@@ -372,6 +372,49 @@ def reset_all():
                 reset_workout(workout_id['name'])
         return redirect("/workout_list/%s" % (unit_id))
 
+@app.route('/nuke_workout/<workout_id>', methods=['POST'])
+def nuke_workout(workout_id):
+    #Get workout information
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+    #Create new workout of same type
+    workout_type = workout['type']
+    unit_name = unit['unit_name']
+    unit_id = workout['unit_id']
+    if 'expiration' in unit:
+        expiration = unit['expiration']
+    else:
+        expiration = 0
+    instructor_id = workout['user_email']
+    yaml_string = parse_workout_yaml(workout_type)
+    unit_id, build_type, new_id = process_workout_yaml(yaml_string, workout_type, unit_name,
+                                                     1, expiration, instructor_id, unit_id)
+    unit_id = workout['unit_id']
+    #Get new workout information
+    response = {
+        "unit_id":unit_id,
+        "build_type":build_type,
+        "workout_id": new_id
+
+    }
+    if build_type == 'compute':
+        pub_build_single_workout(workout_id=new_id, topic_name=workout_globals.ps_build_workout_topic)
+    
+    if workout_id in unit['workouts']:
+        unit['workouts'].remove(workout_id)
+    unit['workouts'].append(new_id)
+    ds_client.put(unit)
+
+    workout['misfit'] = True
+    ds_client.put(workout)
+    
+
+    return json.dumps(response)
+    #Delete current workout
+    #Delete old workout from datastore
+
+    #return id of new workout
+
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
 @app.route('/complete', methods=['POST'])

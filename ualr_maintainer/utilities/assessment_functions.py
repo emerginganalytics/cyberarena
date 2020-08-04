@@ -22,7 +22,6 @@ def get_assessment_questions(workout):
                     if workout['type'] == 'arena':
                         question_dict['point_value'] = question['points']
                         question_list.append(question_dict)
-                        print(question_list)
                         if 'submitted_answers' in workout:
                             for question in question_list:
                                 for answer_group in workout['submitted_answers']:
@@ -30,7 +29,6 @@ def get_assessment_questions(workout):
                                         question_list.remove(question)
                     else:
                         question_list.append(question_dict)
-                print(question_list)
                 return question_list, assessment_type
             except TypeError as e:
                 print("TypeError detected")
@@ -53,8 +51,6 @@ def process_assessment(workout, workout_id, request, assessment):
         for i in range(len(assessment)):
             if question_key == assessment[i].get('question') and flag_attempt == assessment[i].get('answer'):
                 answer_found = True
-                # if(assessment[i].get('type') != 'upload'):
-                # valid_answers.append(assessment[i].get('answer'))
         
         # if flag_attempt in valid_answers:
         if answer_found:
