@@ -1,7 +1,7 @@
 ﻿<#
 BUILD CYBER GYM
 ---------------
-
+This script uses gcloud and gsutil to build a new Cyber Gym for a Google Cloud Project
 
 Preqrequisites:
     1. Create a mirrored bucket to the Cyber Gym repo at https://cloud.google.com/source-repositories/docs/mirroring-a-bitbucket-repository
@@ -16,7 +16,14 @@ Preqrequisites:
 
 Post-Execution:
     1. Point DNS to the one indicated by the provided suffix
-    2. Increase quotas according the following recommendations...
+    2. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
+        a. Compute Engine API (Subnetworks) - MCB * 2
+        b. Compute Engine API (Networks) - MCB * 1
+        c. Compute Engine API (Firewall Rules) - MCB * 3
+        d. Compute Engine API (Routes) - MCB * 2
+        e. Compute Engine API (In-Use IP Addresses) - MCB * 1
+        f. Compute Engine API (CPUs) - MCB * 3
+        g. Cloud Build API (Concurrent Builds) - 50
 #>
 
  param (
@@ -48,18 +55,15 @@ gcloud pubsub topics create stop-workouts
 
 # Create and copy over bucket files
 gsutil mb gs://"$project"_cloudbuild
-gsutil mb gs://student_workout_instructions_"$uniqueid"
-gsutil mb gs://teacher_workout_instructions_"$uniqueid"
+gsutil mb gs://student_workout_instructions_"$project"
+gsutil mb gs://teacher_workout_instructions_"$project"
 gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
 gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
-gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$uniqueid"
-gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$uniqueid"
-gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$uniqueid"
-gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$uniqueid"
+gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
+gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
+gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
+gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$project"
 gsutil acl ch -r -u cybergym-service@"$project".iam.gserviceaccount.com:R gs://"$project"_cloudbuild
-
-# There is no gcloud command to create a mirrored bucket. Prompt the user to ensure the mirrored repo is created before continuing
-
 
 # Create the cloud functions
 $confirmation = Read-Host "Before creating the cloud functions, you need to have a mirrored repo. Please confirm you have set this up:"
@@ -183,5 +187,7 @@ gcloud compute --project=$project images create image-promise-vnc --source-image
 gcloud compute --project=$project images create image-promise-win-16 --source-image=image-promise-win-16 --source-image-project=ualr-cybersecurity
 
 # Create main application
-gcloud builds submit ./ualr-maintainer --tag gcr.io/$project/cybergym
-gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticatedf
+$sourcepath = Join-Path (Resolve-Path .\).Path "ualr_maintainer"
+gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
+gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
