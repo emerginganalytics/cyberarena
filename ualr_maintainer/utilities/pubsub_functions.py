@@ -1,12 +1,11 @@
 from google.cloud import pubsub_v1
 from google.cloud.pubsub import types
 
-from globals import workout_globals
+from globals import workout_globals, project
 from utilities.datastore_functions import get_unit_workouts
 from time import sleep
 
 
-project = 'ualr-cybersecurity'
 def pub_build_request_msg(unit_id, topic_name):
     """
     Simple pub/sub message to build a workout specified through the workout_id in the Datastore object

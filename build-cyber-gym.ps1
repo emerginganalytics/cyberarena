@@ -39,6 +39,7 @@ gcloud config set project $project
 
 # Create new user for Cloud Run functions
 gcloud iam service-accounts create cybergym-service --display-name "Cyber Gym Service Account"
+gcloud projects add-iam-policy-binding $project --member=serviceAccount:cybergym-service@"$project".iam.gserviceaccount.com --role='roles/owner'
 
 # Create pubsub topics
 gcloud pubsub topics create build_arena
