@@ -203,5 +203,5 @@ def server_delete(server_name):
     else:
         print(f"The state of server {server_name} is already deleted")
 
-server_delete('hvdyvzroor-cybergym-victim')
-server_delete('hvdyvzroor-student-guacamole')
+# server_delete('hvdyvzroor-cybergym-victim')
+# server_delete('hvdyvzroor-student-guacamole')
