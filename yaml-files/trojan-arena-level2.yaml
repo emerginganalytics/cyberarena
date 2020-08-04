@@ -22,6 +22,12 @@ student-servers:
       image: cybergym-arena-level2
       machine_type: n1-standard-1
 
+additional-containers-apps:
+  - name: johnnyhash
+    path: md5
+  - name: johnnyhash
+    path: cipher-warehouse
+
 # If additional networks are needed for servers, these are added here.
 # Do not use 10.1.0.0/16. This is reserved for students
 additional-networks:
