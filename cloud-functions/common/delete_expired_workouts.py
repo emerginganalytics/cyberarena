@@ -9,18 +9,16 @@ import time
 import calendar
 from googleapiclient.errors import HttpError
 import googleapiclient.discovery
+from google.cloud import pubsub_v1
 from google.cloud import datastore
 
-ds_client = datastore.Client()
-compute = googleapiclient.discovery.build('compute', 'v1')
-dns_suffix = ".cybergym-eac-ualr.org"
-project = 'ualr-cybersecurity'
-dnszone = 'cybergym-public'
+from common.globals import compute, dns_suffix, dnszone, project, ds_client, zone, region, BUILD_STATES, PUBSUB_TOPICS, \
+    SERVER_ACTIONS
+from common.start_vm import state_transition
+
 
 # Global variables for this function
 expired_workout = []
-zone = 'us-central1-a'
-region = 'us-central1'
 
 # IN PROGRESS
 # to be update with expiration date query from datastore
@@ -30,24 +28,39 @@ def workout_age(created_date):
     delta = now - instance_creation_date
     return delta.days
 
-def delete_vms(workout_id):
-    result = compute.instances().list(project=project, zone=zone, filter='name = {}*'.format(workout_id)).execute()
-    try:
-        if 'items' in result:
-            for vm_instance in result['items']:
-                response = compute.instances().delete(project=project, zone=zone,
-                                           instance=vm_instance["name"]).execute()
-            time.sleep(60)
-            try:
-                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-            except:
-                pass
-        else:
-            print("No Virtual Machines to delete for workout %s" % workout_id)
-        return True
-    except():
-        print("Error in deleting VM for %s" % workout_id)
+def are_servers_deleted(build):
+    if build['state'] not in [BUILD_STATES.DELETING_SERVERS, BUILD_STATES.COMPLETED_DELETING_SERVERS]:
+        print(f"Workout state is: {build['state']}. Unable to process deletion of servers")
         return False
+
+    i = 0
+    while build['state'] == BUILD_STATES.DELETING_SERVERS and i < 60:
+        i += 1
+        time.sleep(5)
+
+    if build['state'] == BUILD_STATES.COMPLETED_DELETING_SERVERS:
+        return True
+    else:
+        return False
+
+
+def delete_vms(build_id, build_type):
+    """
+    Send pubsub message for asynchronous deletion of all workout machines.
+    """
+    print("Deleting computing resources for workout %s" % build_id)
+    workout = ds_client.get(ds_client.key('cybergym-workout', build_id))
+    state_transition(workout, BUILD_STATES.DELETING_SERVERS)
+    query_workout_servers = ds_client.query(kind='cybergym-server')
+    query_workout_servers.add_filter("workout", "=", build_id)
+    for server in list(query_workout_servers.fetch()):
+        # Publish to a server management topic
+        pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(project, pubsub_topic)
+        future = publisher.publish(topic_path, data=b'Server Delete', server_name=server['name'],
+                                   action=SERVER_ACTIONS.DELETE)
+        print(future.result())
 
 
 def delete_firewall_rules(workout_id):
@@ -164,8 +177,9 @@ def delete_specific_workout(workout_id, workout):
         except KeyError:
             print("workout %s has no external IP address" % workout_id)
             pass
-        if delete_vms(workout_id):
-            time.sleep(5)
+        if workout['state'] != BUILD_STATES.COMPLETED_DELETING_SERVERS:
+            delete_vms(workout_id)
+        if are_servers_deleted(workout):
             if delete_firewall_rules(workout_id):
                 time.sleep(5)
                 if delete_subnetworks(workout_id):
@@ -196,7 +210,6 @@ def delete_specific_arena(unit_id, unit):
     delete_vms(unit_id)
     for workout_id in unit['workouts']:
         delete_vms(workout_id)
-    time.sleep(5)
     # Now delete all of the network elements
     delete_firewall_rules(unit_id)
     for workout_id in unit['workouts']:
@@ -310,5 +323,7 @@ def delete_arenas():
             ds_client.delete(unit.key)
             print("Finished deleting arena %s" % arena_id)
 
+# build = ds_client.get(ds_client.key('cybergym-workout', 'urttpetnmf'))
+# delete_specific_workout('urttpetnmf', build)
 # delete_workouts()
 # delete_arenas()
