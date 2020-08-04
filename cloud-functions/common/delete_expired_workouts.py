@@ -28,15 +28,19 @@ def workout_age(created_date):
     delta = now - instance_creation_date
     return delta.days
 
-def are_servers_deleted(build):
-    if build['state'] not in [BUILD_STATES.DELETING_SERVERS, BUILD_STATES.COMPLETED_DELETING_SERVERS]:
-        print(f"Workout state is: {build['state']}. Unable to process deletion of servers")
-        return False
+def are_servers_deleted(build_id):
+    build = ds_client.get(ds_client.key('cybergym-workout', build_id))
+    if not build:
+        build = ds_client.get(ds_client.key('cybergym-unit', build_id))
 
     i = 0
     while build['state'] == BUILD_STATES.DELETING_SERVERS and i < 60:
         i += 1
         time.sleep(5)
+        build = ds_client.get(ds_client.key('cybergym-workout', build_id))
+        if not build:
+            build = ds_client.get(ds_client.key('cybergym-unit', build_id))
+
 
     if build['state'] == BUILD_STATES.COMPLETED_DELETING_SERVERS:
         return True
@@ -44,13 +48,11 @@ def are_servers_deleted(build):
         return False
 
 
-def delete_vms(build_id, build_type):
+def delete_vms(build_id):
     """
     Send pubsub message for asynchronous deletion of all workout machines.
     """
     print("Deleting computing resources for workout %s" % build_id)
-    workout = ds_client.get(ds_client.key('cybergym-workout', build_id))
-    state_transition(workout, BUILD_STATES.DELETING_SERVERS)
     query_workout_servers = ds_client.query(kind='cybergym-server')
     query_workout_servers.add_filter("workout", "=", build_id)
     for server in list(query_workout_servers.fetch()):
@@ -146,27 +148,6 @@ def delete_network(workout_id):
         print("Error in deleting network for %s" % workout_id)
         return False
 
-def delete_dns(workout_id, ip_address):
-    try:
-        service = googleapiclient.discovery.build('dns', 'v1')
-
-        change_body = {"deletions": [
-            {
-                "kind": "dns#resourceRecordSet",
-                "name": workout_id + dns_suffix + ".",
-                "rrdatas": [ip_address],
-                "type": "A",
-                "ttl": 30
-            }
-        ]}
-
-        request = service.changes().create(project=project, managedZone=dnszone, body=change_body)
-        response = request.execute()
-    except():
-        print("Error in deleting DNS record for workout %s" % workout_id)
-        return False
-    return True
-
 
 def delete_specific_workout(workout_id, workout):
         try:
@@ -177,9 +158,9 @@ def delete_specific_workout(workout_id, workout):
         except KeyError:
             print("workout %s has no external IP address" % workout_id)
             pass
-        if workout['state'] != BUILD_STATES.COMPLETED_DELETING_SERVERS:
-            delete_vms(workout_id)
-        if are_servers_deleted(workout):
+        state_transition(workout, BUILD_STATES.DELETING_SERVERS)
+        delete_vms(workout_id)
+        if are_servers_deleted(workout_id):
             if delete_firewall_rules(workout_id):
                 time.sleep(5)
                 if delete_subnetworks(workout_id):
@@ -323,7 +304,6 @@ def delete_arenas():
             ds_client.delete(unit.key)
             print("Finished deleting arena %s" % arena_id)
 
-# build = ds_client.get(ds_client.key('cybergym-workout', 'urttpetnmf'))
-# delete_specific_workout('urttpetnmf', build)
+
 # delete_workouts()
 # delete_arenas()
