@@ -147,10 +147,10 @@ def build_guacamole_server(build, network, guacamole_connections):
         # Get a PRNG password for the workout and store it with the datastore record for display on the workout controller
         guac_user = 'cybergym' + str(i+1)
         guac_connection_password = get_random_alphaNumeric_string()
-
-        build['workout_user'] = guac_user
-        build['workout_password'] = guac_connection_password
-        ds_client.put(build)
+        workout = ds_client.get(ds_client.key('cybergym-workout', connection['workout_id']))
+        workout['workout_user'] = guac_user
+        workout['workout_password'] = guac_connection_password
+        ds_client.put(workout)
 
         startup_script += workout_globals.guac_startup_user_add.format(user=guac_user,
                                                                        name=guac_user,
