@@ -28,12 +28,8 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-  - name: cybergym-classified
-    image: image-cybergym-classified
   - name: cybergym-hidden
     image: image-cybergym-hiddensite
-  - name: cybergym-nessus
-    image: image-cybergym-nessus-arena
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
@@ -55,32 +51,24 @@ assessment:
   type: "level"
   questions:
     - type: input
-      question: "Flag #1: Classified Website"
-      answer: "CyberGym{iWwH8t4d5GcpZDQi}"
-      points: 100
-    - type: input
-      question: "Flag #2: Nessus Scan"
-      answer: "CyberGym{guest}"
-      points: 100
-    - type: input
-      question: "Flag #3: SQL Injection"
-      answer: "CyberGym{jFt6EjlH6I8EcfBg}"
-      points: 100
-    - type: input
-      question: "Flag #4: Hidden Website"
+      question: "Flag #1: Hidden Target"
       answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
-      question: "Flag #5: Brute Force Password Attack"
-      answer: "CyberGym{Pin_Test}"
+      question: "Flag #2: DOS Attack"
+      answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
-      question: "Flag #6: Steganography"
-      answer: "X1NdIHZ!3#kU$ij2"
+      question: "Flag #3: Johnny Hash"
+      answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
-      question: "Flag #7: Analysis"
-      answer: "p150wX!zjfWi1#rA"
+      question: "Flag #4: Password Parameters"
+      answer: "<TYPE IN FLAG HERE>"
+      points: 100
+    - type: input
+      question: "Flag #5: Project Reversus - Part 2"
+      answer: "<TYPE IN FLAG HERE>"
       points: 100
 #    - type: battle
 #      key: "nA824wazosyssPb1"
