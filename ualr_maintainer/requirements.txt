@@ -8,6 +8,7 @@ google-cloud-storage
 google-cloud-datastore
 google-api-python-client
 google-cloud-pubsub
+google-cloud-runtimeconfig
 pyyaml
 flask-wtf
 cryptography==2.8
