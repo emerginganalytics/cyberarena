@@ -415,6 +415,15 @@ def nuke_workout(workout_id):
 
     #return id of new workout
 
+@app.route('/change_student_name/<workout_id>', methods=["POST"])
+def change_student_name(workout_id):
+    workout = ds_client.get(ds_client.key("cybergym-workout", workout_id))
+    workout['student_name'] = request.values['new_name']
+    ds_client.put(workout)
+    return workout['student_name']
+    # workout['name'] = request.data['new_name']
+
+
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
 @app.route('/complete', methods=['POST'])
@@ -460,6 +469,15 @@ def publish():
         print(res)
     return redirect("/landing/%s" % (workout_id))
 
+@app.errorhandler(500)
+def handle_500(e):
+    print("500 Error detected: " + str(e))
+    return render_template("500.html", error=e), 500
+
+@app.errorhandler(404)
+def handle_404(e):
+    return render_template("404.html")
+
 @app.route('/privacy', methods=['GET'])
 def privacy():
     return render_template('privacy.html')
@@ -481,14 +499,8 @@ def expo(workout_type):
         return redirect(url)
     return render_template('expo_page.html', form=form, workout_type=workout_type)
 
-@app.errorhandler(500)
-def handle_500(e):
-    print("500 Error detected: " + str(e))
-    return render_template("500.html", error=e), 500
 
-@app.errorhandler(404)
-def handle_404(e):
-    return render_template("404.html")
+
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)
