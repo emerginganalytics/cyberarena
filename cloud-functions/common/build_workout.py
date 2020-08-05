@@ -133,4 +133,4 @@ def build_workout(workout_id):
         create_firewall_rules(firewall_rules)
 
 
-build_workout('sxqlrkivik')
+# build_workout('sxqlrkivik')
