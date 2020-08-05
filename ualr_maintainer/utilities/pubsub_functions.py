@@ -24,6 +24,17 @@ def pub_build_request_msg(unit_id, topic_name):
         future = publisher.publish(topic_path, data=b'Cyber Gym Arena', unit_id=unit_id)
         print(future.result())
 
+def pub_build_single_workout(workout_id, topic_name):
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project, topic_name)
+
+    if topic_name == workout_globals.ps_build_workout_topic:
+        future = publisher.publish(topic_path, data=b'Cyber Gym Workout', workout_id=workout_id)
+        print(future.result())
+        
+    elif topic_name == workout_globals.ps_build_arena_topic:
+        future = publisher.publish(topic_path, data=b'Cyber Gym Arena', unit_id=unit_id)
+        print(future.result())
 
 def pub_start_vm(build_id, topic_name='start-vm'):
     publisher = pubsub_v1.PublisherClient()

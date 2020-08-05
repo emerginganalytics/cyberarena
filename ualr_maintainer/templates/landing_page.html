@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+
 {% block title%} Workout {{ workout_id }} {% endblock %}
+{% import 'nuke_macro.html' as nuke %}
     <script>
         $(document).ready(function(){
             $("assessment_reveal").click(function(){
@@ -63,6 +65,9 @@
             
                 </div>
 
+                {{ nuke.nukeButton(workout_id|string) }}
+
+
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
             <div id='workout_info' class='container' style="margin:0;">
@@ -89,8 +94,6 @@
                 {% endif %}
                 <br>
                 
-
-
                 </p>
             </div>
             <div id="workout_id" hidden>{{ workout_id }}</div>
@@ -98,9 +101,11 @@
                 <!-- <h2>Description</h2> -->
                 <h2>{{ workout_type }} Workout</h2>
                 <p>{{ description }}</p><br>
+                {% if guac_user and guac_path %}
                 <h2>Workout Info</h2>
                     <p>Workout Username: {{guac_user}}</p>
                     <p>Workout Password: {{guac_pass}}</p>
+                {% endif %}
                 {% if student_instructions %}
                     <a href="{{ student_instructions }}" target="_blank" class='landing_dropdown'>Workout Instructions</a>
                 {% endif %}
@@ -152,7 +157,6 @@
                     </div> <!--Assessment Dropdown-->
                     {% endif %}
                 {% endif %}
-        
         </div>
     </div> <!--Main Container-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
