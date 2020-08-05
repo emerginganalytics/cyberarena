@@ -106,6 +106,8 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
         # Build the workout entry server and create the firewall rule to make it accessible.
         build_guacamole_server(build=unit, network=guac_network,
                                guacamole_connections=guacamole_connections)
+        # Get the unit datastore entry again because building the guacamole server adds credentials.
+        unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_STUDENT_SERVERS)
 
 

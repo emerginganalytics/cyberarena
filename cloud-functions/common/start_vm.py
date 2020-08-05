@@ -34,7 +34,6 @@ def start_vm(workout_id):
         future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
                                    action=SERVER_ACTIONS.START)
         print(future.result())
-    state_transition(entity=workout, new_state=BUILD_STATES.RUNNING)
 
 
 def start_arena(unit_id):
@@ -62,7 +61,6 @@ def start_arena(unit_id):
     # Now start all of the student workouts for this arena
     for workout_id in unit['workouts']:
         start_vm(workout_id)
-    state_transition(entity=unit, new_state=BUILD_STATES.RUNNING)
 
 
-# start_arena('wsojiwqdqg')
+# start_vm('ukkrsevbye')

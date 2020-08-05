@@ -100,7 +100,7 @@ def landing_page(workout_id):
             complete = True
 
         assessment = assessment_type = None
-        if 'assessment' in workout:
+        if 'assessment' in workout and workout['assessment']:
             assessment, assessment_type = get_assessment_questions(workout)
 
         workout_user = None
