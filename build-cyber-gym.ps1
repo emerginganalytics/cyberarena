@@ -8,7 +8,7 @@ Preqrequisites:
     2. Enable the following APIs at https://console.cloud.google.com/apis/library
         a. Cloud Function APIs
         b. Cloud Build API
-        c. App Engine API
+        c. App Engine Admin API
         d. Runtime Config API
         e. Compute API
         f. Cloud Run API
@@ -38,36 +38,56 @@ $uniqueid = Get-Random
 gcloud config set project $project
 
 # Create new user for Cloud Run functions
-gcloud iam service-accounts create cybergym-service --display-name "Cyber Gym Service Account"
-gcloud projects add-iam-policy-binding $project --member=serviceAccount:cybergym-service@"$project".iam.gserviceaccount.com --role='roles/owner'
+$confirmation = Read-Host "Do you want to create the service account at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud iam service-accounts create cybergym-service --display-name "Cyber Gym Service Account"
+    gcloud projects add-iam-policy-binding $project --member=serviceAccount:cybergym-service@"$project".iam.gserviceaccount.com --role='roles/owner'
+    gcloud projects add-iam-policy-binding $project --member=serviceAccount:cybergym-service@"$project".iam.gserviceaccount.com --role='roles/pubsub.admin'
+}
 
 # Create pubsub topics
-gcloud pubsub topics create build_arena
-gcloud pubsub topics create build-workouts
-gcloud pubsub topics create del-workout
-gcloud pubsub topics create delete_arena
-gcloud pubsub topics create maint-del-tmp-systems
-gcloud pubsub topics create manage-server
-gcloud pubsub topics create start-arena
-gcloud pubsub topics create start-vm
-gcloud pubsub topics create stop-all-servers
-gcloud pubsub topics create stop-lapsed-arenas
-gcloud pubsub topics create stop-workouts
+$confirmation = Read-Host "Do you want to create the pubsub topics for cloud functions at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud pubsub topics create build_arena
+    gcloud pubsub topics create build-workouts
+    gcloud pubsub topics create del-workout
+    gcloud pubsub topics create delete_arena
+    gcloud pubsub topics create maint-del-tmp-systems
+    gcloud pubsub topics create manage-server
+    gcloud pubsub topics create start-arena
+    gcloud pubsub topics create start-vm
+    gcloud pubsub topics create stop-all-servers
+    gcloud pubsub topics create stop-lapsed-arenas
+    gcloud pubsub topics create stop-workouts
+}
 
 # Create and copy over bucket files
-gsutil mb gs://"$project"_cloudbuild
-gsutil mb gs://student_workout_instructions_"$project"
-gsutil mb gs://teacher_workout_instructions_"$project"
-gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
-gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
-gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
-gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
-gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
-gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$project"
-gsutil acl ch -r -u cybergym-service@"$project".iam.gserviceaccount.com:R gs://"$project"_cloudbuild
+$confirmation = Read-Host "Do you want to copy over yaml files and instructions at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gsutil mb gs://"$project"_cloudbuild
+    gsutil mb gs://student_workout_instructions_"$project"
+    gsutil mb gs://teacher_workout_instructions_"$project"
+    gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
+    gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
+    gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
+    gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
+    gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
+    gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$project"
+    gsutil acl ch -r -u cybergym-service@"$project".iam.gserviceaccount.com:R gs://"$project"_cloudbuild
+}
+
+# Create project defaults
+$confirmation = Read-Host "Do you want to set project defaults at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud beta runtime-config configs create "cybergym" --description "Project constants for cloud functions and main app"
+    gcloud beta runtime-config configs variables set "project" $project --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "region" "us-central1" --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "zone" "us-central1-a" --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
+}
 
 # Create the cloud functions
-$confirmation = Read-Host "Before creating the cloud functions, you need to have a mirrored repo. Please confirm you have set this up:"
+$confirmation = Read-Host "Before creating the cloud functions, you need to have a mirrored repo set up. Do you want to continue? (y/N)"
 if ($confirmation -eq 'y') {
     # proceed
     gcloud functions deploy --quiet function-build-arena `
@@ -146,49 +166,55 @@ if ($confirmation -eq 'y') {
 
 
 # Create DNS Zone
-gcloud dns managed-zones create cybergym-public --dns-name "$dns_suffix" --description "A zone for dynamically updating the DNS for Cyber Gym builds"
+$confirmation = Read-Host "Do you want to set up the DNS Zone at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud dns managed-zones create cybergym-public --dns-name "$dns_suffix" --description "A zone for dynamically updating the DNS for Cyber Gym builds"
+}
 
 # Create cloud schedules
-gcloud scheduler jobs create pubsub job-delete-expired-arenas --schedule="0 * * * *" --topic=delete_arena --message-body=Hello!
-gcloud scheduler jobs create pubsub job-stop-all-servers --schedule="0 0 * * *" --topic=stop-all-servers --message-body=Hello!
-gcloud scheduler jobs create pubsub job-stop-lapsed-arenas --schedule="*/15 * * * *" --topic=stop-lapsed-arenas --message-body=Hello!
-gcloud scheduler jobs create pubsub maint-del-job --schedule="0 * * * *" --topic=maint-del-tmp-systems --message-body=Hello!
-gcloud scheduler jobs create pubsub stop-workouts --schedule="*/15 * * * *" --topic=stop-workouts --message-body=Hello!
-
-# Create project defaults
-gcloud beta runtime-config configs create "cybergym" --description "Project constants for cloud functions and main app"
-gcloud beta runtime-config configs variables set "project" $project --config-name "cybergym"
-gcloud beta runtime-config configs variables set "region" "us-central1" --config-name "cybergym"
-gcloud beta runtime-config configs variables set "zone" "us-central1-a" --config-name "cybergym"
-gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
+$confirmation = Read-Host "Do you want to create cloud schedules for cloud functions at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud scheduler jobs create pubsub job-delete-expired-arenas --schedule="0 * * * *" --topic=delete_arena --message-body=Hello!
+    gcloud scheduler jobs create pubsub job-stop-all-servers --schedule="0 0 * * *" --topic=stop-all-servers --message-body=Hello!
+    gcloud scheduler jobs create pubsub job-stop-lapsed-arenas --schedule="*/15 * * * *" --topic=stop-lapsed-arenas --message-body=Hello!
+    gcloud scheduler jobs create pubsub maint-del-job --schedule="0 * * * *" --topic=maint-del-tmp-systems --message-body=Hello!
+    gcloud scheduler jobs create pubsub stop-workouts --schedule="*/15 * * * *" --topic=stop-workouts --message-body=Hello!
+}
 
 # Copy over compute images for building workouts and arenas
-gcloud compute --project=$project images create image-cybergym-account-control-v2 --source-image=image-cybergym-account-control-v2 --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-activedirectory-domaincontroller --source-image= image-cybergym-activedirectory-domaincontroller --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-activedirectory-memberserver --source-image=image-cybergym-activedirectory-memberserver --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-arena-windows --source-image=image-cybergym-arena-windows --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-arena-windows-3 --source-image=image-cybergym-arena-windows-3 --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-bufferoverflow --source-image=image-cybergym-bufferoverflow--source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-classified --source-image=image-cybergym-classified --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-cyberattack --source-image=image-cybergym-cyberattack --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-forensics-workstation --source-image=image-cybergym-forensics-workstation --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-fortinet-fortigate --source-image=image-cybergym-fortinet-fortigate --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-hiddensite --source-image=image-cybergym-hiddensite --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-nessus --source-image=image-cybergym-nessus --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-nessus-arena --source-image=image-cybergym-nessus-arena --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-password-policy-v2 --source-image=image-cybergym-password-policy-v2 --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-ransomware --source-image=image-cybergym-ransomware --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-teenyweb --source-image=image-cybergym-teenyweb --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-tiny-hiddentarget --source-image=image-cybergym-tiny-hiddentarget --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-vnc --source-image=image-cybergym-vnc --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-cybergym-wireshark --source-image=image-cybergym-wireshark --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-promise-attacker --source-image=image-promise-attacker --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-promise-victim-win2012 --source-image=image-promise-victim-win2012 --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-promise-vnc --source-image=image-promise-vnc --source-image-project=ualr-cybersecurity
-gcloud compute --project=$project images create image-promise-win-16 --source-image=image-promise-win-16 --source-image-project=ualr-cybersecurity
+$confirmation = Read-Host "Do you want to copy over compute images at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud compute --project=$project images create image-labentry --source-image=image-labentry --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-account-control-v2 --source-image=image-cybergym-account-control-v2 --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-activedirectory-domaincontroller --source-image= image-cybergym-activedirectory-domaincontroller --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-activedirectory-memberserver --source-image=image-cybergym-activedirectory-memberserver --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-arena-windows --source-image=image-cybergym-arena-windows --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-arena-windows-3 --source-image=image-cybergym-arena-windows-3 --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-bufferoverflow --source-image=image-cybergym-bufferoverflow--source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-classified --source-image=image-cybergym-classified --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-cyberattack --source-image=image-cybergym-cyberattack --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-forensics-workstation --source-image=image-cybergym-forensics-workstation --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-fortinet-fortigate --source-image=image-cybergym-fortinet-fortigate --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-hiddensite --source-image=image-cybergym-hiddensite --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-nessus --source-image=image-cybergym-nessus --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-nessus-arena --source-image=image-cybergym-nessus-arena --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-password-policy-v2 --source-image=image-cybergym-password-policy-v2 --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-ransomware --source-image=image-cybergym-ransomware --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-teenyweb --source-image=image-cybergym-teenyweb --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-tiny-hiddentarget --source-image=image-cybergym-tiny-hiddentarget --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-vnc --source-image=image-cybergym-vnc --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-cybergym-wireshark --source-image=image-cybergym-wireshark --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-promise-attacker --source-image=image-promise-attacker --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-promise-victim-win2012 --source-image=image-promise-victim-win2012 --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-promise-vnc --source-image=image-promise-vnc --source-image-project=ualr-cybersecurity
+    gcloud compute --project=$project images create image-promise-win-16 --source-image=image-promise-win-16 --source-image-project=ualr-cybersecurity
+}
 
 # Create main application
+$confirmation = Read-Host "Do you want to create the main application at this time? Please note, you must also set up a DNS CNAME pointing cybergym to ghs.googlehosted.com. (y/N)"
+if ($confirmation -eq 'y') {
 $sourcepath = Join-Path (Resolve-Path .\).Path "ualr_maintainer"
-gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
-gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
-gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
+    gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
+    gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
+}

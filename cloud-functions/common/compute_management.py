@@ -147,7 +147,9 @@ def server_start(server_name):
     # If this is the guacamole server for student entry, then register the new DNS
     if 'student_entry' in server and server['student_entry']:
         print(f'Setting DNS record for {server_name}')
-        register_student_entry(server['workout'], server_name)
+        ip_address = register_student_entry(server['workout'], server_name)
+        server['external_ip'] = ip_address
+        ds_client.put(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.RUNNING)
     print(f"Finished starting {server_name}")
