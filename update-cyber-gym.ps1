@@ -155,6 +155,8 @@ if ($confirmation -eq 'y') {
 
 $confirmation = Read-Host "Do you want to update the cloud images? (y/N)"
 if ($confirmation -eq 'y') {
+    gcloud compute --project=$project images delete image-labentry
+    gcloud compute --project=$project images create image-labentry --source-image=image-labentry --source-image-project=ualr-cybersecurity
     gcloud compute --project=$project images delete image-cybergym-account-control-v2
     gcloud compute --project=$project images create image-cybergym-account-control-v2 --source-image=image-cybergym-account-control-v2 --source-image-project=ualr-cybersecurity
     gcloud compute --project=$project images delete image-cybergym-activedirectory-domaincontroller
