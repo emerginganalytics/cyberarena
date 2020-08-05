@@ -62,6 +62,20 @@ def register_student_entry(build_id, server_name):
     return ip_address
 
 
+def check_build_state_change(build_id, check_server_state, change_build_state):
+    query_workout_servers = ds_client.query(kind='cybergym-server')
+    query_workout_servers.add_filter("workout", "=", build_id)
+    for check_server in list(query_workout_servers.fetch()):
+        if check_server['state'] != check_server_state:
+            return
+    # If we've made it this far, then all of the servers have changed to the desired state.
+    # now we can change the entire state.
+    build = ds_client.get(ds_client.key('cybergym-workout', build_id))
+    if not build:
+        build = ds_client.get(ds_client.key('cybergym-unit', build_id))
+    state_transition(build, change_build_state)
+
+
 def server_build(server_name):
     """
     Builds an individual server based on the specification in the Datastore entity with name server_name.
@@ -110,11 +124,17 @@ def server_build(server_name):
         ip_address = register_student_entry(server['workout'], server_name)
         server['external_ip'] = ip_address
         ds_client.put(server)
+        server = ds_client.get(ds_client.key('cybergym-server', server_name))
 
     # Now stop the server before completing
     print(f'Stopping {server_name}')
     compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
+
+    # If no other servers are building, then set the workout to the state of READY.
+    build_id = server['workout']
+    check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.STOPPED,
+                             change_build_state=BUILD_STATES.READY)
 
 
 def server_start(server_name):
@@ -149,10 +169,14 @@ def server_start(server_name):
         print(f'Setting DNS record for {server_name}')
         ip_address = register_student_entry(server['workout'], server_name)
         server['external_ip'] = ip_address
-        ds_client.put(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.RUNNING)
     print(f"Finished starting {server_name}")
+
+    # If all servers have started, then change the build state
+    build_id = server['workout']
+    check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.RUNNING,
+                             change_build_state=BUILD_STATES.RUNNING)
     return True
 
 
@@ -190,17 +214,8 @@ def server_delete(server_name):
 
         # If all servers in the workout have been deleted, then set the workout state to True
         build_id = server['workout']
-        query_workout_servers = ds_client.query(kind='cybergym-server')
-        query_workout_servers.add_filter("workout", "=", build_id)
-        for check_server in list(query_workout_servers.fetch()):
-            if check_server['state'] != SERVER_STATES.DELETED:
-                # If a server has not been deleted, then just return with success
-                return True
-        # If we've made it this far, then all of the servers have been deleted. We can change the entire workout state
-        build = ds_client.get(ds_client.key('cybergym-workout', build_id))
-        if not build:
-            build = ds_client.get(ds_client.key('cybergym-unit', build_id))
-        state_transition(build, BUILD_STATES.COMPLETED_DELETING_SERVERS)
+        check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
+                                 change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
         return True
     else:
         print(f"The state of server {server_name} is already deleted")

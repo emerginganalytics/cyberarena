@@ -12,6 +12,7 @@ Preqrequisites:
         d. Runtime Config API
         e. Compute API
         f. Cloud Run API
+        g. Cloud Scheduler API
 
 
 Post-Execution:
@@ -114,6 +115,14 @@ if ($confirmation -eq 'y') {
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
         --timeout=540s `
         --trigger-topic=maint-del-tmp-systems
+    gcloud functions deploy --quiet function-delete-expired-arenas `
+        --region=$region `
+        --memory=256MB `
+        --entry-point=cloud_fn_delete_expired_arenas `
+        --runtime=python37 `
+        --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --timeout=540s `
+        --trigger-topic=delete_arena
     gcloud functions deploy --quiet function-manage-server `
         --region=$region `
         --memory=256MB `

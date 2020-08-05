@@ -99,6 +99,8 @@ def build_workout(workout_id):
             }]
             build_guacamole_server(build=workout, network=network_name,
                                    guacamole_connections=guac_connection)
+            # Get the workout key again or the state transition will overwrite it
+            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
         else:
             state_transition(entity=workout, new_state=BUILD_STATES.BROKEN)
             return
@@ -130,7 +132,5 @@ def build_workout(workout_id):
     
         create_firewall_rules(firewall_rules)
 
-    state_transition(entity=workout, new_state=BUILD_STATES.READY)
 
-
-# build_workout('whsbhdvutc')
+build_workout('sxqlrkivik')
