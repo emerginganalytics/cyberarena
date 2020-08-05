@@ -104,19 +104,23 @@ $("#start-vm").click(function () {
 });
 
 
-function check_workout_status(unit_id){
-
+function change_student_name(workout_id){
+    var name_element = document.getElementById("name_change_field_" + workout_id);
+    var new_name = name_element.value;
+    if(new_name == ""){
+        return false;
+    }
+    var data = {
+        "workout_id": workout_id,
+        "new_name": new_name,
+    }
     $.ajax({
         type: "POST",
-        contentType: "application/json;charset=utf-8",
-        url: "/workout_list/" + unit_id,
-        traditional: "true",
-        data: JSON.stringify({
-            "unit_id": unit_id,
-        }),
-        dataType: "json",
-        success: function(data){
-            console.log("Testing")
+        url: "/change_student_name/" + workout_id,
+        data: data,
+        success: function(update){
+            document.getElementById('workout_link_' + workout_id).innerHTML = update;
+            name_element.value = "";
         }
     });
 }
