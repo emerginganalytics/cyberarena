@@ -81,7 +81,7 @@ def add_yaml_defaults(yaml_contents):
     return yaml_contents
 
 
-def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, workout_length, email):
+def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, workout_length, email, unit_id=None):
     """
     Prepares the build of workouts based on a YAML specification by storing the information in the
     cloud datastore.
@@ -91,11 +91,15 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     :param num_team: The number of students or teams
     :param workout_length: The number of days this workout will remain in the cloud project.
     :param email: The email address of the instructor
+    :param unit_id: The unit id for the workout to be assigned to for addition to a pre-existing unit
     :return: The unit_id AND the build type for the workout
     """
     y = load(yaml_contents, Loader=Loader)
     y = add_yaml_defaults(y)
-    unit_id = randomStringDigits()
+
+    existing_unit = False
+    if unit_id:
+        existing_unit = True
 
     workout_name = y['workout']['name']
     build_type = y['workout']['build_type']
@@ -118,10 +122,16 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
 
     workout_ids = []
     ts = str(calendar.timegm(time.gmtime()))
-    print("Creating unit %s" % (unit_id))
-    store_unit_info(id=unit_id, email=email, unit_name=unit_name, workout_name=workout_name, build_type=build_type,
-                    ts=ts, workout_type=workout_type, workout_url_path=workout_url_path,
-                    teacher_instructions_url=teacher_instructions_url, workout_description=workout_description)
+    if existing_unit:
+        print("Building new workout for unit %s" % (unit_id))
+
+    else:
+        unit_id = randomStringDigits()
+        print("Creating unit %s" % (unit_id))
+        store_unit_info(id=unit_id, email=email, unit_name=unit_name, workout_name=workout_name, build_type=build_type,
+                        ts=ts, workout_type=workout_type, workout_url_path=workout_url_path,
+                        teacher_instructions_url=teacher_instructions_url, workout_description=workout_description)
+
 
     if build_type == 'container':
         container_info = y['container_info']
@@ -164,13 +174,20 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
             workout_ids.append(workout_id)
             store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers, user_mail=email,
                                 timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment)
+    
 
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    unit['workouts'] = workout_ids
-    unit['ready'] = True
-    ds_client.put(unit)
+    if existing_unit:
+        for temp_id in workout_ids:
+            # unit['workouts'].append(temp_id)
+            # ds_client.put(unit)
+            return unit_id, build_type, temp_id
+    else:
+        unit['workouts'] = workout_ids
+        unit['ready'] = True
+        ds_client.put(unit)
 
-    return unit_id, build_type
+        return unit_id, build_type
 
 
 def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment):

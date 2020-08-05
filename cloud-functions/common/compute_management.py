@@ -3,10 +3,10 @@ import calendar
 from socket import timeout
 import requests
 
-from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES
+from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES, workout_globals
 from google.cloud import datastore
 from googleapiclient.errors import HttpError
-from common.dns_functions import add_dns_record
+from common.dns_functions import add_dns_record, delete_dns
 from common.state_transition import state_transition
 
 
@@ -50,9 +50,6 @@ def register_student_entry(build_id, server_name):
     # Add the external_IP address for the workout. This allows easy deletion of the DNS record when deleting the arena
     ip_address = get_server_ext_address(server_name)
     add_dns_record(build_id, ip_address)
-    server = ds_client.get(ds_client.key('cybergym-server', server_name))
-    server['external_ip'] = ip_address
-    ds_client.put(server)
     # Make sure the guacamole server actually comes up successfully before setting the workout state to ready
     if test_guacamole(ip_address):
         # Now, since this is the guacamole server, update the state of the workout to READY
@@ -60,6 +57,9 @@ def register_student_entry(build_id, server_name):
         state_transition(entity=build, new_state=BUILD_STATES.READY)
     else:
         state_transition(entity=build, new_state=BUILD_STATES.GUACAMOLE_SERVER_LOAD_TIMEOUT)
+
+    # Return the IP address used for the server build function to set the server datastore element
+    return ip_address
 
 
 def server_build(server_name):
@@ -70,10 +70,7 @@ def server_build(server_name):
     """
     print(f'Building server {server_name}')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
-    server_ready = state_transition(entity=server, new_state=SERVER_STATES.BUILDING,
-                                           existing_state=SERVER_STATES.READY)
-    if not server_ready:
-        return False
+    state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
 
     # If the server is a router, then add a disk for logging. Admittedly, this is for Fortinet firewalls
     if 'canIPForward' in server and server['config']['canIpForward']:
@@ -82,9 +79,11 @@ def server_build(server_name):
         response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
         compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
-    # Begin the server build and keep trying for an additional 2 30-second cycles
+    # Begin the server build and keep trying for a bounded number of additional 30-second cycles
+    workout_globals.refresh_api()
     response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
     print(f'Sent job to build {server_name}, and waiting for response')
+
     i = 0
     success = False
     while not success and i < 5:
@@ -108,7 +107,9 @@ def server_build(server_name):
     # If this is a student entry server, register the DNS
     if 'student_entry' in server and server['student_entry']:
         print(f'Setting DNS record for {server_name}')
-        register_student_entry(server['workout'], server_name)
+        ip_address = register_student_entry(server['workout'], server_name)
+        server['external_ip'] = ip_address
+        ds_client.put(server)
 
     # Now stop the server before completing
     print(f'Stopping {server_name}')
@@ -125,6 +126,7 @@ def server_start(server_name):
     """
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     state_transition(entity=server, new_state=SERVER_STATES.STARTING)
+    workout_globals.refresh_api()
     response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
     print(f'Sent start request to {server_name}, and waiting for response')
     i = 0
@@ -145,17 +147,63 @@ def server_start(server_name):
     # If this is the guacamole server for student entry, then register the new DNS
     if 'student_entry' in server and server['student_entry']:
         print(f'Setting DNS record for {server_name}')
-        register_student_entry(server['workout'], server_name)
+        ip_address = register_student_entry(server['workout'], server_name)
+        server['external_ip'] = ip_address
+        ds_client.put(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.RUNNING)
     print(f"Finished starting {server_name}")
     return True
 
-#
-#
-# def server_delete():
-#
-#
-# def server_reload():
 
-# server_start('hadomrzbkz-student-guacamole')
+def server_delete(server_name):
+    server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    if server['state'] != SERVER_STATES.DELETED:
+        state_transition(entity=server, new_state=SERVER_STATES.DELETING)
+        workout_globals.refresh_api()
+        response = compute.instances().delete(project=project, zone=zone, instance=server_name).execute()
+        print(f'Sent delete request to {server_name}, and waiting for response')
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                print(f"Begin waiting for delete response from operation {response['id']}")
+                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+                success = True
+            except timeout:
+                i += 1
+                print('Response timeout for deleting server. Trying again')
+                pass
+        if not success:
+            print(f'Timeout in trying to delete server {server_name}')
+            state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
+            return False
+
+        # If this is a student entry server, delete the DNS
+        if 'student_entry' in server and server['student_entry']:
+            print(f'Deleting DNS record for {server_name}')
+            ip_address = server['external_ip']
+            delete_dns(server['workout'], ip_address)
+
+        state_transition(entity=server, new_state=SERVER_STATES.DELETED)
+        print(f"Finished deleting {server_name}")
+
+        # If all servers in the workout have been deleted, then set the workout state to True
+        build_id = server['workout']
+        query_workout_servers = ds_client.query(kind='cybergym-server')
+        query_workout_servers.add_filter("workout", "=", build_id)
+        for check_server in list(query_workout_servers.fetch()):
+            if check_server['state'] != SERVER_STATES.DELETED:
+                # If a server has not been deleted, then just return with success
+                return True
+        # If we've made it this far, then all of the servers have been deleted. We can change the entire workout state
+        build = ds_client.get(ds_client.key('cybergym-workout', build_id))
+        if not build:
+            build = ds_client.get(ds_client.key('cybergym-unit', build_id))
+        state_transition(build, BUILD_STATES.COMPLETED_DELETING_SERVERS)
+        return True
+    else:
+        print(f"The state of server {server_name} is already deleted")
+
+# server_delete('hvdyvzroor-cybergym-victim')
+# server_delete('hvdyvzroor-student-guacamole')

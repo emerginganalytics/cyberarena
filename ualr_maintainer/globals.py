@@ -1,21 +1,22 @@
 import sys
 import logging
 import googleapiclient.discovery
-from google.cloud import datastore, storage
+from google.cloud import datastore, storage, runtimeconfig
+
+
+runtimeconfig_client = runtimeconfig.Client()
+myconfig = runtimeconfig_client.config('cybergym')
+project = myconfig.get_variable('project').value.decode("utf-8")
+region = myconfig.get_variable('region').value.decode("utf-8")
+zone = myconfig.get_variable('zone').value.decode("utf-8")
+dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-region = 'us-central1'
-# dns_suffix = ".acactb.com"
-# project = 'acapte'
-# dnszone = 'aca-bootcamp-public'
-dns_suffix = ".cybergym-eac-ualr.org"
-project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
-#post_endpoint = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
 
 # Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/complete'

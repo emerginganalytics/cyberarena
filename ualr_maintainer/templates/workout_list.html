@@ -54,10 +54,18 @@
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             <ol class="teams">
                 {% for workout in workout_list %}
-                {% if workout["state"] == "READY" %}
-                <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
+                {% if workout.student_name %}                    
+                    {% if workout["state"] == "READY" %}
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout.student_name}} </a>
+                    {% else %}
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">{{workout['student_name']}} </a>
+                    {% endif %}
                 {% else %}
-                <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
+                    {% if workout["state"] == "READY" %}
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
+                    {% else %}
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
+                    {% endif %}
                 {% endif %}
                 <div class="collapse" id="team_collapse_{{workout.name}}">
                     <table>
@@ -71,6 +79,7 @@
                             <th>Student Instructions</th>
                             {% endif %}
                             <th>Assessment Submissions</th>
+                            <th>Change Student Name</th>
                         </tr>
                         <tr>
                             {% if build_type == "container" %}
@@ -89,6 +98,10 @@
                                 {% else %}
                                 N/A
                                 {% endif %}
+                            </td>
+                            <td>
+                                <input id='name_change_field_{{workout.name}}' name="new_name" placeholder="Enter new student name" type="text"/>
+                                <a onclick="change_student_name('{{workout.name}}')" class="btn">Change</a>
                             </td>
                         </tr>
                     </table>
