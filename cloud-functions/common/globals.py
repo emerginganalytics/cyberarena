@@ -16,7 +16,6 @@ dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-project = 'ualr-cybersecurity'
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
