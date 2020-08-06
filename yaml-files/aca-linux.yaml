@@ -7,7 +7,6 @@ workout:
 
 student_entry:
   type: vnc
-  username: forge
   password: "F0rg3up!4theWIN!"
   network: external-network
   ip: 10.0.0.2
