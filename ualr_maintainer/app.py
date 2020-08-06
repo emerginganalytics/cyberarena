@@ -6,7 +6,7 @@ import requests
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
-from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint
+from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint, auth_config
 from utilities.pubsub_functions import *
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
@@ -51,7 +51,7 @@ def index(workout_type):
 
         if unit_id == False:
             return render_template('no_workout.html')
-        elif build_type == 'compute':
+        elif build_type == 'compute' or build_type == 'container':
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_workout_topic)
             print("workout building")
             url = '/workout_list/%s' % (unit_id)
@@ -62,7 +62,7 @@ def index(workout_type):
             url = '/arena_list/%s' % (unit_id)
             return redirect(url)
 
-    return render_template('main_page.html', form=form, workout_type=workout_type)
+    return render_template('main_page.html', form=form, workout_type=workout_type, auth_config=auth_config)
 
 
 # Student landing page route. Displays information and links for an individual workout
@@ -95,13 +95,17 @@ def landing_page(workout_id):
         if 'teacher_instructions_url' in unit:
             teacher_instructions_url = unit['teacher_instructions_url']
 
-        complete = None
-        if 'state' in workout and workout['state'] == 'READY':
-            complete = True
+        # complete = None
+        # if 'state' in workout and workout['state'] == 'READY':
+        #     complete = True
 
         assessment = assessment_type = None
         if 'assessment' in workout and workout['assessment']:
             assessment, assessment_type = get_assessment_questions(workout)
+
+        workout_state = None
+        if 'state' in workout:
+            workout_state = workout['state']
 
         workout_user = None
         if 'workout_user' in workout:
@@ -117,16 +121,16 @@ def landing_page(workout_id):
 
             return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
-                               teacher_instructions=teacher_instructions_url,
+                               teacher_instructions=teacher_instructions_url, state=workout_state,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
+                               workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
                                score=percentage_correct, guac_user=workout_user, guac_pass=workout_password)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
-                               teacher_instructions=teacher_instructions_url,
+                               teacher_instructions=teacher_instructions_url, state=workout_state,
                                shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               complete=complete, workout_type=workout['type'], assessment=assessment,
+                               workout_type=workout['type'], assessment=assessment,
                                assessment_type=assessment_type, guac_user=workout_user,
                                guac_pass=workout_password)
     else:
@@ -221,11 +225,11 @@ def arena_landing(workout_id):
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+    return render_template('login.html', auth_config=auth_config)
 
 @app.route('/teacher_home', methods=['GET', 'POST'])
 def teacher_home():
-    return render_template('teacher_home.html')
+    return render_template('teacher_home.html', auth_config=auth_config)
 
 @app.route('/teacher_info', methods=['GET', 'POST'])
 def get_teacher_info():
@@ -256,7 +260,11 @@ def get_teacher_info():
         teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
     return json.dumps(teacher_units)
 
-
+@app.route('/workout_state/<workout_id>', methods=["POST"])
+def check_workout_state(workout_id):
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    if (request.method == "POST"):
+        return workout['state']
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
@@ -410,10 +418,6 @@ def nuke_workout(workout_id):
     
 
     return json.dumps(response)
-    #Delete current workout
-    #Delete old workout from datastore
-
-    #return id of new workout
 
 @app.route('/change_student_name/<workout_id>', methods=["POST"])
 def change_student_name(workout_id):

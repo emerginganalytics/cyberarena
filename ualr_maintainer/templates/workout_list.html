@@ -58,13 +58,13 @@
                     {% if workout["state"] == "READY" %}
                     <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout.student_name}} </a>
                     {% else %}
-                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">{{workout['student_name']}} </a>
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout['student_name']}} </a>
                     {% endif %}
                 {% else %}
                     {% if workout["state"] == "READY" %}
                     <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
                     {% else %}
-                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
                     {% endif %}
                 {% endif %}
                 <div class="collapse" id="team_collapse_{{workout.name}}">

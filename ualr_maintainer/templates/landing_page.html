@@ -2,15 +2,19 @@
 
 {% block title%} Workout {{ workout_id }} {% endblock %}
 {% import 'nuke_macro.html' as nuke %}
+
+
+    {% block content%}
     <script>
+        
         $(document).ready(function(){
             $("assessment_reveal").click(function(){
                 $("#assessment_form").fadeIn();
             })
+            
         })
+        //var state_checker = setInterval(check_workout_state, 5000);
     </script>
-
-    {% block content%}
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
@@ -20,10 +24,28 @@
                 </div>
             </div>
             <br><h2>Workout Control</h2><br>
-                {% if running %}
-                <p>Workout status: <span style="color:green">RUNNING</span></p><br>
+                {% if state == "RUNNING" %}
+                <p>Workout status: <span id='workout_state_running' style="color:green">RUNNING</span></p><br>
                 {% else %}
-                <p>Workout status: <span style="color:red">STOPPED</span></p><br>
+                <p>Workout status: <span id='workout_state_stopped' style="color:red">STOPPED</span></p><br>
+                <script>
+                    var state_checker = setInterval(check_workout_state, 10000);
+
+                    function check_workout_state(){
+                        $.ajax({
+                            type:"POST",
+                            url: "/workout_state/{{ workout_id }}",
+                            traditional: "true",
+                            success: function(data){
+                                if(data == "RUNNING"){
+                                    clearInterval(state_checker);
+                                    location.reload();
+                                }
+                            }
+
+                        })
+                    }
+                </script>
                 {% endif %}
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
@@ -35,7 +57,7 @@
                                 <label>Run time (1 - 10 hours)</label>
                         </div>
                         <div class="btn-ctn">
-                            {% if running %}
+                            {% if state == "RUNNING" %}
                                 <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
                             {% else %}
                                 <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
@@ -47,7 +69,7 @@
                     <form action="/stop_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
-                            {% if running %}
+                            {% if state == "RUNNING" %}
                                 <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
                             {% else %}
                                 <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
@@ -83,7 +105,7 @@
                     <p>Workout complete: </p><h2 style="color: red;">&#10008;</h2>
                 {% endif %} -->
 
-                {% if running %}
+                {% if state == "RUNNING" %}
                 <br><h2>Workout Servers</h2>
                     {% if guac_path==None %}
                         <a href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
