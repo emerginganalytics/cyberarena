@@ -2,9 +2,8 @@
 {% block title %}Teacher Home Page{% endblock %}
 
 {% block content %}
-<script src='../static/main.js'></script>
+<script src='../static/login.js'></script>
 <script>
-
   function generateTableHeaders(table, data){
     let header = table.createTHead();
     let row = table.insertRow();
@@ -37,6 +36,13 @@
 
   var teacher_email = null;
   initApp = function(){
+    var auth_config = {
+      apiKey: '{{auth_config["api_key"]}}',
+      authDomain: '{{auth_config["auth_domain"]}}',
+      projectId: '{{auth_config["project_id"]}}'
+    };
+    //alert('{{auth_config["api_key"]}}');
+    firebase.initializeApp(auth_config);
     firebase.auth().onAuthStateChanged(function(user){
       if(user){
         var displayName = user.displayName;
@@ -102,6 +108,7 @@
       } else {
         document.getElementById('sign-out').style.display = "none";
         document.getElementById('unit_container').style.display = "none";
+        document.getElementById('build_workout_widget').style.display = "none";
         document.getElementById('user_name_header').innerHTML = "Please Log In";
         var sign_in_button = document.createElement('a');
         sign_in_button.innerHTML = "Login";
@@ -162,7 +169,6 @@
   }
 </style>
 
-<p id='test'></p>
 <div class='row'>
   <div id='teacher_controls' class='col-3'>
     <div class='image_container' style='text-align: center;'>
@@ -170,7 +176,7 @@
     </div>
     <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
     
-    <div class="input-group mb-3 unit_build_container" style="margin-bottom:1em;">
+    <div  id="build_workout_widget" class="input-group mb-3 unit_build_container" style="margin-bottom:1em;">
       
       <div class="input-group-prepend">
         <button class="btn btn-outline-secondary" type="button" onclick='to_build_page()'>Build Unit</button>

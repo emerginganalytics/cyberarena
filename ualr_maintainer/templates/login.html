@@ -2,98 +2,8 @@
 {% block title %}Log In{% endblock %}
 
 {% block content %}
-<script>
-    $(function(){
-        // This is the host for the backend.
-        // TODO: When running Firenotes locally, set to http://localhost:8081. Before
-        // deploying the application to a live production environment, change to
-        // https://backend-dot-<PROJECT_ID>.appspot.com as specified in the
-        // backend's app.yaml file.
-              
-        // [START gae_python_firenotes_config]
-        // Obtain the following from the "Add Firebase to your web app" dialogue
-        // Initialize Firebase
-        var config = {
-          apiKey: "AIzaSyCMIgabOSU5SUcerJjoOK8Q9odaVnQ8ImU",
-          authDomain: "ualr-cybersecurity.firebaseapp.com",
-          projectId: "ualr=cybersecurity"
-        };
-        // [END gae_python_firenotes_config]
-        firebase.initializeApp(config);
-        // This is passed into the backend to authenticate the user.
-        var userIdToken = null;
-        var user_name = null;
-        var user_email = null;
-        // Firebase log-in
-        function configureFirebaseLogin() {
-      
-      
-      
-          // [START gae_python_state_change]
-          firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-              var name = user.displayName;
-              
-              /* If the provider gives a display name, use the name for the
-              personal welcome message. Otherwise, use the user's email. */
-              var welcomeName = user.email;
-      
-              user.getIdToken().then(function(idToken) {
-                userIdToken = idToken;
-                user_name = name;
-                user_email = welcomeName;
-                
-                $('#user').text(welcomeName);
-                $('#logged-in').show();
-      
-              });
-      
-            } else {
-              $('#logged-in').hide();
-              $('#login_container').show();
-      
-            }
-          });
-          // [END gae_python_state_change]
-      
-        }
-      
-        // [START configureFirebaseLoginWidget]
-        // Firebase log-in widget
-        function configureFirebaseLoginWidget() {
-          var uiConfig = {
-            'signInFlow': 'popup',
-            'signInSuccessUrl': '/teacher_home',
-            'signInOptions': [
-              // Leave the lines as is for the providers you want to offer your users.
-              firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            ],
-            // Terms of service url
-            // 'tosUrl': '<your-tos-url>',
-          };
-      
-          var ui = new firebaseui.auth.AuthUI(firebase.auth());
-          ui.start('#firebaseui-auth-container', uiConfig);
-        }
-        // [END gae_python_firebase_login]
-      
-        // Sign out a user
-        var signOutBtn =$('#sign-out');
-        signOutBtn.click(function(event) {
-          event.preventDefault();
-      
-          firebase.auth().signOut().then(function() {
-            console.log("Sign out successful");
-          }, function(error) {
-            console.log(error);
-          });
-        });
-      
-        configureFirebaseLogin();
-        configureFirebaseLoginWidget();
-      
-      });
-</script>
+<script src='../static/login.js'></script>
+
 <div id="login_container" style="margin: auto; text-align: center;">
     <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
 
@@ -101,4 +11,16 @@
     <div id="firebaseui-auth-container"></div>
 </div>
 </div>
+<script>
+  var auth_config = {
+    apiKey: '{{auth_config["api_key"]}}',
+    authDomain: '{{auth_config["auth_domain"]}}',
+    projectId: '{{auth_config["project_id"]}}'
+  };
+  //alert('{{auth_config["api_key"]}}');
+  //firebase.initializeApp(auth_config);
+  firebase.initializeApp(auth_config);
+  configureFirebaseLogin();
+  configureFirebaseLoginWidget();
+</script>
 {% endblock %}
