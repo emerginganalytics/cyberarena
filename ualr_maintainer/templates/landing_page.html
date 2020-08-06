@@ -2,15 +2,19 @@
 
 {% block title%} Workout {{ workout_id }} {% endblock %}
 {% import 'nuke_macro.html' as nuke %}
+
+
+    {% block content%}
     <script>
+        
         $(document).ready(function(){
             $("assessment_reveal").click(function(){
                 $("#assessment_form").fadeIn();
             })
+            
         })
+        //var state_checker = setInterval(check_workout_state, 5000);
     </script>
-
-    {% block content%}
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
@@ -21,9 +25,27 @@
             </div>
             <br><h2>Workout Control</h2><br>
                 {% if state == "RUNNING" %}
-                <p>Workout status: <span style="color:green">RUNNING</span></p><br>
+                <p>Workout status: <span id='workout_state_running' style="color:green">RUNNING</span></p><br>
                 {% else %}
-                <p>Workout status: <span style="color:red">STOPPED</span></p><br>
+                <p>Workout status: <span id='workout_state_stopped' style="color:red">STOPPED</span></p><br>
+                <script>
+                    var state_checker = setInterval(check_workout_state, 10000);
+
+                    function check_workout_state(){
+                        $.ajax({
+                            type:"POST",
+                            url: "/workout_state/{{ workout_id }}",
+                            traditional: "true",
+                            success: function(data){
+                                if(data == "RUNNING"){
+                                    clearInterval(state_checker);
+                                    location.reload();
+                                }
+                            }
+
+                        })
+                    }
+                </script>
                 {% endif %}
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
