@@ -18,6 +18,20 @@ dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 
+auth_config = {}
+if project == 'ualr-cybersecurity':
+    auth_config = {
+        'api_key': 'AIzaSyCMIgabOSU5SUcerJjoOK8Q9odaVnQ8ImU',
+        'auth_domain': 'ualr-cybersecurity.firebaseapp.com',
+        'project_id': project
+
+    }
+elif project == 'virtual-arkansas':
+    auth_config = {
+        'api_key': 'AIzaSyCCeL33iaLbUJm-QwIvTbjRKy22vEpaKvw',
+        'auth_domain': 'virtual-arkansas.firebaseapp.com',
+        'project_id':project
+    }
 # Use this for debugging. Uncomment the above endpoint for final environment.
 post_endpoint = 'http://localhost:8080/complete'
 logger = logging.getLogger()

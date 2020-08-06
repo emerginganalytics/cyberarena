@@ -1,11 +1,18 @@
 {% extends "base.html" %}
 {% block title %}Workout Builder{% endblock %}
 {% block content %}
-<script src='../static/main.js'></script>
+<script src='../static/login.js'></script>
 <script>
 
 var teacher_email = null;
 initApp = function(){
+    var auth_config = {
+        apiKey: '{{auth_config["api_key"]}}',
+        authDomain: '{{auth_config["auth_domain"]}}',
+        projectId: '{{auth_config["project_id"]}}'
+      };
+      //alert('{{auth_config["api_key"]}}');
+    firebase.initializeApp(auth_config);
     firebase.auth().onAuthStateChanged(function(user){
         if(user){
             document.getElementById('email').value = user.email;
