@@ -54,7 +54,7 @@ class workout_globals():
         'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'vnc\');\n' \
         'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'hostname\', \'{ip}\');\n' \
-        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{vnc_password}\";\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{vnc_password}\");\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'5901\');\n'
     guac_startup_rdp = \
         'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'rdp\');\n' \

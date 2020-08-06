@@ -90,11 +90,12 @@ def build_workout(workout_id):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_STUDENT_ENTRY)
         if workout['student_entry']:
             network_name = f"{workout_id}-{workout['student_entry']['network']}"
+            student_entry_username = workout['student_entry']['username'] if 'username' in workout['student_entry'] else None
             guac_connection = [{
                 'workout_id': workout_id,
                 'entry_type': workout['student_entry']['type'],
                 'ip': workout['student_entry']['ip'],
-                'username': workout['student_entry']['username'],
+                'username': student_entry_username,
                 'password': workout['student_entry']['password']
             }]
             build_guacamole_server(build=workout, network=network_name,
@@ -133,4 +134,4 @@ def build_workout(workout_id):
         create_firewall_rules(firewall_rules)
 
 
-# build_workout('sxqlrkivik')
+build_workout('ttxvmuwqzt')
