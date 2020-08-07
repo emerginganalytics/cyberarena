@@ -1,5 +1,5 @@
 from flask import abort, jsonify, redirect, render_template, request, escape
-from google.cloud import datastore
+from google.cloud import datastore, runtimeconfig
 
 import shodan
 import shodan.helpers as helpers
