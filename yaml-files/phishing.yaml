@@ -10,10 +10,10 @@ workout:
 
 student_entry:
   type: vnc
-  username: cybergym
+  username: cybergym1
   password: "Let's workout!"
   network: external-network
-  ip: 10.1.1.18
+  ip: 10.1.1.20
 
 networks: 
   - name: external-network
@@ -26,7 +26,7 @@ servers:
     image: image-cybergym-vnc
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items: ["http-server", "attacker", "vnc-server"]}
+    tags: {items: ["attacker", "vnc-server"]}
     metadata: none
     nics:
       - network: external-network
