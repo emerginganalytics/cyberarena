@@ -34,8 +34,8 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-#  - name: cybergym-classified
-#    image: image-cybergym-classified
+  - name: cybergym-arena2-ftp
+    image: cybergym-arena2-ftp
 #  - name: cybergym-hidden
 #    image: image-cybergym-hiddensite
 #  - name: cybergym-nessus
@@ -56,6 +56,11 @@ firewall_rules:
     protocol: none
     ports: ["tcp/22"]
     source_ranges: ["0.0.0.0/0"]
+  - name: allow-ftp
+    target_tags: ["ftp-capture"]
+    protocol: none
+    ports: ["tcp/20,21"]
+    source_ranges: ["0.0.0.0/0"]
 
 assessment:
   type: "level"
@@ -66,7 +71,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #2: Wireshark"
-      answer: ""
+      answer: "Wasn't_A_Roll"
       points: 100
     - type: input
       question: "Flag #3: Cryptography Part 2"
