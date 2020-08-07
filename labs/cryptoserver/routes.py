@@ -2,7 +2,7 @@ from app import app
 from ArenaCiphers import Decoder
 from caesarcipher import CaesarCipher
 from flask import redirect, request, render_template, jsonify, make_response
-from server_scripts import publish_status, gen_pass, ds_client, set_ciphers, check_caesar
+from server_scripts import publish_status, gen_pass, dns_suffix, ds_client, set_ciphers, check_caesar
 
 import binascii
 import hashlib
@@ -21,6 +21,8 @@ def home(workout_id):
 def loader(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
+
+    app.logger.info('workout_type : %s' % workout['type'])
 
     if workout:
         if workout['type'] == 'johnnycipher':
@@ -60,6 +62,7 @@ def caesar(workout_id):
             elif request.method == 'POST':
                 plaintext = request.get_json()
                 # ['id'] helps determine which cipher is to be evaluated
+                app.logger.info('Checking cipher with id : %d' % int(plaintext['id']))
                 data = check_caesar(workout_id, str(plaintext['cipher']), int(plaintext['id']))
 
                 return jsonify({
@@ -234,6 +237,7 @@ def login(workout_id):
                     resp = make_response(redirect('/hidden/{}'.format(workout_id)))
                     resp.set_cookie('logged_in', 'true')
                     workout_token = workout['assessment']['questions'][0]['key']
+                    app.logger.info(f'Posting Complete to buildthewarrior{dns_suffix}/complete')
                     publish_status(workout_id, workout_token)
                     return resp
                 else:
@@ -262,6 +266,7 @@ def logout(workout_id):
 @app.route('/arena/landing/<workout_id>', methods=['GET'])
 def arena(workout_id):
     page_template = 'pages/johnny-arena-landing.jinja'
+
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
@@ -275,6 +280,7 @@ def arena(workout_id):
 @app.route('/arena/cipher-warehouse/<workout_id>', methods=['GET', 'POST'])
 def cipher_warehouse(workout_id):
     page_template = 'pages/arena-cipher-warehouse.jinja'
+
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     if workout:
@@ -282,6 +288,7 @@ def cipher_warehouse(workout_id):
             return render_template(page_template, workout_id=workout_id)
     else:
         return redirect('/invalid')
+
 
 @app.route('/arena/cipher-warehouse/cipher-info/<workout_id>', methods=['GET'])
 def cipher_info(workout_id):
@@ -294,6 +301,7 @@ def cipher_info(workout_id):
             return render_template(page_template, workout_id=workout_id)
     else:
         return redirect('/invalid')
+
 
 @app.route('/ajax_calculate_arena_plaintext', methods=['POST'])
 def calculate_plaintext():
