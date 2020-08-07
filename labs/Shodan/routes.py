@@ -11,7 +11,9 @@ from app import app
 # SHODAN_API_KEY = 'BWmELJlT4jH83fFG29sKiKqwouKk7kL8'
 SHODAN_API_KEY = 'N81y8YZTBIUfVmrEa1ZL8ywi119Pz1pT'
 ds_client = datastore.Client()
-project = 'ualr-cybersecurity'
+runtimeconfig_client = runtimeconfig.Client()
+myconfig = runtimeconfig_client.config('cybergym')
+project = myconfig.get_variable('project').value.decode("utf-8")
 
 
 @app.route('/<workout_id>', methods=['GET', 'POST'])

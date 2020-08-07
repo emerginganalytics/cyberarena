@@ -3,16 +3,15 @@ import random
 import requests
 
 from caesarcipher import CaesarCipher
-from google.cloud import datastore
+from google.cloud import datastore, runtimeconfig
 from hashlib import md5
-from google.cloud import runtimeconfig
 
+# Project Globals
+ds_client = datastore.Client()
 runtimeconfig_client = runtimeconfig.Client()
 myconfig = runtimeconfig_client.config('cybergym')
 project = myconfig.get_variable('project').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
-
-ds_client = datastore.Client()
 
 
 def publish_status(workout_id, workout_key):
@@ -190,3 +189,4 @@ def check_caesar(workout_id, submission, check):
         publish_status(workout_id, workout_key)
 
     return data
+
