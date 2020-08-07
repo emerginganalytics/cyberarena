@@ -10,13 +10,13 @@ project = myconfig.get_variable('project').value.decode("utf-8")
 region = myconfig.get_variable('region').value.decode("utf-8")
 zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
+script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
-script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 
 auth_config = {}
 if project == 'ualr-cybersecurity':

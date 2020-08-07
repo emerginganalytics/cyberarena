@@ -8,6 +8,7 @@ from google.cloud import datastore
 from googleapiclient.errors import HttpError
 from common.dns_functions import add_dns_record, delete_dns
 from common.state_transition import state_transition
+from requests.exceptions import ConnectionError
 
 
 def get_server_ext_address(server_name):
@@ -31,7 +32,6 @@ def test_guacamole(ip_address):
     attempts = 0
     sleeptime = 5  # in seconds, no reason to continuously try if network is down
 
-    # while true: #Possibly Dangerous
     success = False
     while not success and attempts < max_attempts:
         time.sleep(sleeptime)
@@ -39,6 +39,9 @@ def test_guacamole(ip_address):
             requests.get(f"http://{ip_address}:8080/guacamole/#", timeout=5)
             return True
         except requests.exceptions.Timeout:
+            attempts += 1
+        except ConnectionError:
+            print(f"HTTP Connection Error for Guacamole Server {ip_address}")
             attempts += 1
     return False
 
@@ -51,6 +54,7 @@ def register_student_entry(build_id, server_name):
     ip_address = get_server_ext_address(server_name)
     add_dns_record(build_id, ip_address)
     # Make sure the guacamole server actually comes up successfully before setting the workout state to ready
+    print(f"DNS record set for {server_name}. Now Testing guacamole connection. This may take a few minutes.")
     if test_guacamole(ip_address):
         # Now, since this is the guacamole server, update the state of the workout to READY
         print(f"Setting the build {build_id} to ready")
@@ -220,5 +224,4 @@ def server_delete(server_name):
     else:
         print(f"The state of server {server_name} is already deleted")
 
-# server_delete('hvdyvzroor-cybergym-victim')
-# server_delete('hvdyvzroor-student-guacamole')
+# server_build('bgwyhvwxsx-student-guacamole')

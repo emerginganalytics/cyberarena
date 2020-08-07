@@ -6,12 +6,7 @@ This script uses gcloud and gsutil to build a new Cyber Gym for a Google Cloud P
 Preqrequisites:
     1. Create a mirrored bucket to the Cyber Gym repo at https://cloud.google.com/source-repositories/docs/mirroring-a-bitbucket-repository
     2. Enable the following APIs at https://console.cloud.google.com/apis/library
-        a. Cloud Function APIs
-        b. Cloud Build API
         c. App Engine Admin API
-        d. Runtime Config API
-        e. Compute API
-        f. Cloud Run API
         g. Cloud Scheduler API
 
 
@@ -37,6 +32,20 @@ $uniqueid = Get-Random
 
 # Move to the correct project
 gcloud config set project $project
+
+
+# Enable all of the necessary APIs
+$confirmation = Read-Host "Do you want to enable the necessary APIs at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    gcloud services enable compute.googleapis.com 
+    gcloud services enable cloudfunctions.googleapis.com
+    gcloud services enable cloudbuild.googleapis.com
+    gcloud services enable pubsub.googleapis.com
+    gcloud services enable runtimeconfig.googleapis.com
+    gcloud services enable run.googleapis.com
+    gcloud services enable cloudscheduler.googleapis.com
+    gcloud services enable appengine.googleapis.com 
+}
 
 # Create new user for Cloud Run functions
 $confirmation = Read-Host "Do you want to create the service account at this time? (y/N)"
@@ -85,6 +94,7 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "region" "us-central1" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "zone" "us-central1-a" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "script_repository" gs://"$project"_cloudbuild/startup-scripts/ --config-name "cybergym"
 }
 
 # Create the cloud functions

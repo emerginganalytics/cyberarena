@@ -12,13 +12,13 @@ project = myconfig.get_variable('project').value.decode("utf-8")
 region = myconfig.get_variable('region').value.decode("utf-8")
 zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
+script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
-script_repository = 'gs://ualr-cybersecurity_cloudbuild/startup-scripts/'
 guac_password = 'promiseme'
 student_entry_image = 'image-labentry'
 
@@ -54,7 +54,7 @@ class workout_globals():
         'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'vnc\');\n' \
         'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'hostname\', \'{ip}\');\n' \
-        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{vnc_password}\";\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{vnc_password}\");\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'5901\');\n'
     guac_startup_rdp = \
         'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'rdp\');\n' \

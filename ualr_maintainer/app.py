@@ -260,7 +260,11 @@ def get_teacher_info():
         teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
     return json.dumps(teacher_units)
 
-
+@app.route('/workout_state/<workout_id>', methods=["POST"])
+def check_workout_state(workout_id):
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    if (request.method == "POST"):
+        return workout['state']
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
