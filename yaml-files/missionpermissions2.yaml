@@ -10,7 +10,6 @@ workout:
 
 student_entry:
   type: vnc
-  username: cybergym1
   password: "Let's workout!"
   network: external-network
   ip: 10.1.1.20
