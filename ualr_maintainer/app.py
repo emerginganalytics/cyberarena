@@ -95,10 +95,6 @@ def landing_page(workout_id):
         if 'teacher_instructions_url' in unit:
             teacher_instructions_url = unit['teacher_instructions_url']
 
-        # complete = None
-        # if 'state' in workout and workout['state'] == 'READY':
-        #     complete = True
-
         assessment = assessment_type = None
         if 'assessment' in workout and workout['assessment']:
             assessment, assessment_type = get_assessment_questions(workout)
@@ -152,6 +148,7 @@ def workout_list(unit_id):
     if 'student_instructions_url' in unit:
         student_instructions_url = unit['student_instructions_url']
 
+    #For updating individual workout ready state
     if (request.method=="POST"):
         if build_type == 'arena':
             return json.dumps(unit)

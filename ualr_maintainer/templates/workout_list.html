@@ -91,9 +91,9 @@
                             <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
                             {% endif %}
                             <td>
-                                {% if workout['submitted_answers'] %}
+                                {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
-                                    View Assessment Submission
+                                    View Submissions
                                 </button>
                                 {% else %}
                                 N/A
@@ -106,7 +106,7 @@
                         </tr>
                     </table>
                 </div>
-                {% if workout["submitted_answers"] %}
+                {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
                     <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
                         <div class="modal-dialog" role="document" style="max-width:100%;">
                         <div class="modal-content">
@@ -118,27 +118,49 @@
                             </div>
                             <div class="modal-body">
                                 <ul class="nav nav-pills" style='justify-content: space-around;'>
-                                    <li class="active"><a data-toggle="pill" class='btn' href="#text_input" style='width:100%;'>Text Answers</a></li>
+                                    {% if workout['submitted_answers'] %}
+                                    <li><a data-toggle="pill" class='btn' href="#text_input" style='width:100%;'>Text Answers</a></li>
+                                    {% endif %}
                                     {% if workout["uploaded_files"] %}
                                     <li><a data-toggle="pill" class='btn' href="#file_uploads" style='width:100%;'>File Uploads</a></li>
                                     {% endif %}
+                                    {% if workout["auto_answers"] %}
+                                    <li><a data-toggle="pill" class="btn" href="#auto_assessment" style='width:100%;'>Auto Complete Progress</a></li>
+                                    {% endif %}
                                 </ul>
                                 <div class='tab-content'>
-                                    <div id='text_input' class='tab-pane active fadeIn'>
-                                        <ol>
-                                            {% for question in workout["submitted_answers"] %}
-                                                <li>{{question}}</li>
-                                            {% endfor %}
-                                        </ol>
-                                    </div>
+                                    {% if workout['submitted_answers'] %}
+                                        <div id='text_input' class='tab-pane fadeIn'>
+                                            <ol>
+                                                {% for question in workout["submitted_answers"] %}
+                                                    <li>{{question}}</li>
+                                                {% endfor %}
+                                            </ol>
+                                        </div>
+                                    {% endif %}
                                     {% if workout['uploaded_files'] %}
                                         <div id='file_uploads' style='text-align:center;' class="tab-pane fade">
                                             <div class='upload_view'>
                                            {% for question in workout['uploaded_files'] %}
                                             <li>{{question['question']}}</li>
-                                            <img class="img-fluid" src={{question['storage_url']}}>
+                                            <img class="img-fluid" src="{{question['storage_url']}}">
                                            {% endfor %}
                                             </div>
+                                        </div>
+                                    {% endif %}
+                                    {% if workout['auto_answers'] %}
+                                        <div id='auto_assessment' class='tab-pane fade'>
+                                            <ol>
+                                            {% for question in workout['auto_answers'] %}
+                                                <li>{{question['question']}}: 
+                                                    {% if question['complete'] %}
+                                                    <span style='color:green;'>Complete</span>
+                                                    {% else %}
+                                                    <span style='color:red;'>Not completed</span>
+                                                    {% endif %}
+                                                </li>
+                                            {% endfor %}
+                                            </ol>
                                         </div>
                                     {% endif %}
                                 </div>

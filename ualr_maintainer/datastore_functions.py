@@ -1,6 +1,7 @@
 from google.cloud import datastore
 from globals import ds_client, logger
 from flask import jsonify
+from utilities.assessment_functions import get_auto_assessment
 # Store information for an instructor. To be used when instructor login is complete
 def store_instructor_info(email):
     new_instructor = datastore.Entity(ds_client.key('cybergym-instructor', email))
@@ -36,9 +37,7 @@ def get_unit_workouts(unit_id):
     workout_list = []
     for workout in list(unit_workouts.fetch()):
         workout_instance = workout = ds_client.get(workout.key)
-        running = complete = submitted_answers = uploaded_files = teacher_email = state = student_name = None
-        if 'running' in workout_instance:
-            running = workout_instance['running']
+        submitted_answers = uploaded_files = teacher_email = state = student_name = None
         if 'state' in workout_instance:
             state = workout_instance['state']
         if 'submitted_answers' in workout_instance:
@@ -49,14 +48,15 @@ def get_unit_workouts(unit_id):
             teacher_email = workout_instance['teacher_email']
         if 'student_name' in workout_instance:
             student_name = workout_instance['student_name']
+        auto_answers = get_auto_assessment(workout_instance)
         workout_info = {
             'name': workout.key.name,
-            'running': running,
             'state': state,
             'submitted_answers': submitted_answers,
             'uploaded_files': uploaded_files,
             'teacher_email':teacher_email,
             'student_name': student_name,
+            'auto_answers': auto_answers
         }
         if workout_instance['type'] == "arena":
             if 'points' in workout_instance:
