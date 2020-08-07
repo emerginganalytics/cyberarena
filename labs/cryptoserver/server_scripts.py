@@ -13,7 +13,6 @@ project = myconfig.get_variable('project').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 ds_client = datastore.Client()
-project = 'ualr-cybersecurity'
 
 
 def publish_status(workout_id, workout_key):
