@@ -13,7 +13,7 @@ def arena_snake():
 
 
 @app.route('/snake_flag', methods=['POST'])
-def login_sql():
+def snake_flag():
     if request.method == 'POST':
         score = (request.json['score'])
         flag_data = {'flag': 'CyberGym{Arena_Snake_Champion}'}

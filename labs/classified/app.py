@@ -7,6 +7,7 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
+from google.cloud import datastore
 
 import hashlib
 import sqlite3
@@ -14,8 +15,9 @@ import onetimepass
 import pyqrcode
 import os
 import base64
+import xssdb
 
-
+# TODO: Server Side Template Injection
 # application instance
 app = Flask(__name__)
 app.config.from_object('config')
@@ -27,6 +29,8 @@ bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
 lm = LoginManager(app)
 app.database = "bad.db"
+ds_client = datastore.Client()
+project = 'ualr-cybersecurity'
 
 
 class User(UserMixin, db.Model):
@@ -94,6 +98,26 @@ def hash_pass(passw):
     return m.hexdigest()
 
 
+@app.route('/loader/<workout_id>')
+def loader(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout:
+        if workout['type'] == 'wireshark' or 'dos':
+            return redirect('/' + workout_id)
+        elif workout['type'] == 'xss':
+            return redirect('/workouts/xss/' + workout_id)
+        elif workout['type'] == 'Two-Step':
+            return redirect('/workouts/tfh/' + workout_id)
+        elif workout['type'] == 'inspect':
+            return redirect('/workouts/inspect' + workout_id)
+        elif workout['type'] == 'sql':
+            return redirect('/workouts/sql_injection' + workout_id)
+    else:
+        return redirect('/invalid')
+
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
@@ -129,59 +153,90 @@ def workouts():
     return render_template('workouts.html')
 
 
-@app.route("/workouts/xss", methods=["GET", "POST"])
-def xss():
-    page_template = 'xss.html'
-    comments = []
-    if request.method == 'POST':
-        comment = request.form['comment']
-        comments.append(comment)
-    return render_template(page_template, comments=comments)
+@app.route("/workouts/xss/<workout_id>", methods=["GET", "POST"])
+def xss(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout['type'] == 'xss':
+        page_template = 'xss.html'
+        name = 'Stranger'
+        bad_request = 'bad request'
+        if request.args.get('bad_request'):
+            bad_request = request.args.get('bad_request')
+        if request.method == 'POST':
+            name = request.form['name']
+            # xssdb.add_comment(request.form['comment'])
+
+        search_query = request.args.get('q')
+
+        comments = xssdb.get_comments(search_query)
+        return render_template(page_template, name=name, bad_request=bad_request, comments=comments,
+                               search_query=search_query, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
-@app.route('/workouts/tfh')
-def twofactorhome():
-    page_template = 'welcome.html'
-    flag = 'CyberGym{Classified_Authentication}'
-    return render_template(page_template, flag=flag)
+@app.route('/workouts/tfh/<workout_id>')
+def twofactorhome(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout['type'] == 'Two-Step':
+        page_template = 'welcome.html'
+        flag = 'CyberGym{Classified_Authentication}'
+        return render_template(page_template, flag=flag, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
-@app.route('/workouts/tfh/register', methods=['GET', 'POST'])
-def register():
-    """User registration route."""
-    if current_user.is_authenticated:
-        # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome'))
-    form = RegisterForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is not None:
-            flash('Username already exists.')
-            return redirect(url_for('register'))
-        # add new user to the database
-        user = User(username=form.username.data, password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
+@app.route('/workouts/tfh/register/<workout_id>', methods=['GET', 'POST'])
+def register(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
 
-        # redirect to the two-factor auth page, passing username in session
-        session['username'] = user.username
-        return redirect(url_for('two_factor_setup'))
-    return render_template('register.html', form=form)
+    if workout['type'] == 'Two-Step':
+        """User registration route."""
+        if current_user.is_authenticated:
+            # if user is logged in we get out of here
+            return redirect(url_for('twofactorhome', workout_id=workout_id))
+        form = RegisterForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+            if user is not None:
+                flash('Username already exists.')
+                return redirect(url_for('register'))
+            # add new user to the database
+            user = User(username=form.username.data, password=form.password.data)
+            db.session.add(user)
+            db.session.commit()
+
+            # redirect to the two-factor auth page, passing username in session
+            session['username'] = user.username
+            return redirect(url_for('two_factor_setup', workout_id=workout_id))
+        return render_template('register.html', form=form, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
-@app.route('/workouts/tfh/twofactor')
-def two_factor_setup():
-    if 'username' not in session:
-        return redirect(url_for('twofactorhome'))
-    user = User.query.filter_by(username=session['username']).first()
-    if user is None:
-        return redirect(url_for('twofactorhome'))
-    # since this page contains the sensitive qrcode, make sure the browser
-    # does not cache it
-    return render_template('two-factor-setup.html'), 200, {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'}
+@app.route('/workouts/tfh/twofactor/<workout_id>')
+def two_factor_setup(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    if workout['type'] == 'Two-Step':
+        if 'username' not in session:
+            return redirect(url_for('twofactorhome', workout_id=workout_id))
+        user = User.query.filter_by(username=session['username']).first()
+        if user is None:
+            return redirect(url_for('twofactorhome', workout_id=workout_id))
+        # since this page contains the sensitive qrcode, make sure the browser
+        # does not cache it
+        return render_template('two-factor-setup.html', workout_id=workout_id), 200, {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'}
+    else:
+        return redirect(404)
 
 
 @app.route('/qrcode')
@@ -206,44 +261,67 @@ def qrcode():
         'Expires': '0'}
 
 
-@app.route('/workouts/tfh/login', methods=['GET', 'POST'])
-def login():
-    """User login route."""
-    if current_user.is_authenticated:
-        # if user is logged in we get out of here
-        return redirect(url_for('twofactorhome'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.verify_password(form.password.data) or \
-                not user.verify_totp(form.token.data):
-            flash('Invalid username, password or token.')
-            return redirect(url_for('login'))
+@app.route('/workouts/tfh/login/<workout_id>', methods=['GET', 'POST'])
+def login(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
 
-        # log user in
-        login_user(user)
-        flash('You are now logged in!')
-        return redirect(url_for('twofactorhome'))
-    return render_template('login.html', form=form)
+    if workout['type'] == 'Two-Step':
+        """User login route."""
+        if current_user.is_authenticated:
+            # if user is logged in we get out of here
+            return redirect(url_for('twofactorhome', workout_id=workout_id))
+        form = LoginForm()
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+            if user is None or not user.verify_password(form.password.data) or \
+                    not user.verify_totp(form.token.data):
+                flash('Invalid username, password or token.')
+                return redirect(url_for('login', workout_id=workout_id))
 
-
-@app.route('/workouts/tfh/logout')
-def logout():
-    """User logout route."""
-    logout_user()
-    return redirect(url_for('twofactorhome'))
-
-
-@app.route('/inspect')
-def inspect():
-    page_template = 'inspect.html'
-    return render_template(page_template)
+            # log user in
+            login_user(user)
+            flash('You are now logged in!')
+            return redirect(url_for('twofactorhome', workout_id=workout_id))
+        return render_template('login.html', form=form, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
-@app.route('/sql')
-def sql_injection():
-    page_template = 'sql.html'
-    return render_template(page_template)
+@app.route('/workouts/tfh/logout/<workout_id>')
+def logout(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    if workout['type'] == 'Two-Step':
+        """User logout route."""
+        logout_user()
+        return redirect(url_for('twofactorhome', workout_id=workout_id))
+    else:
+        return redirect(404)
+
+
+@app.route('/inspect/<workout_id>')
+def inspect(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout['type'] == 'inspect':
+        page_template = 'inspect.html'
+        return render_template(page_template, workout_id=workout_id)
+    else:
+        return redirect(404)
+
+
+@app.route('/sql/<workout_id>')
+def sql_injection(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout_id['type'] == 'sql':
+        page_template = 'sql.html'
+        return render_template(page_template, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
 @app.route('/login_SQL', methods=['POST'])
