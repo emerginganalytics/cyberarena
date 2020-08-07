@@ -5,13 +5,19 @@ import requests
 from caesarcipher import CaesarCipher
 from google.cloud import datastore
 from hashlib import md5
+from google.cloud import runtimeconfig
+
+runtimeconfig_client = runtimeconfig.Client()
+myconfig = runtimeconfig_client.config('cybergym')
+project = myconfig.get_variable('project').value.decode("utf-8")
+dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 ds_client = datastore.Client()
 project = 'ualr-cybersecurity'
 
 
 def publish_status(workout_id, workout_key):
-    URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
+    URL = f'https://buildthewarrior{dns_suffix}/complete'
 
     status = {
         "workout_id": workout_id,
