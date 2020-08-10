@@ -15,6 +15,7 @@ from google.cloud import datastore
 from common.globals import compute, dns_suffix, dnszone, project, ds_client, zone, region, BUILD_STATES, PUBSUB_TOPICS, \
     SERVER_ACTIONS
 from common.start_vm import state_transition
+from common.dns_functions import delete_dns
 
 
 # Global variables for this function
