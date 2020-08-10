@@ -28,15 +28,13 @@ def get_server_ext_address(server_name):
 
 
 def test_guacamole(ip_address):
-    max_attempts = 40
+    max_attempts = 10
     attempts = 0
-    sleeptime = 5  # in seconds, no reason to continuously try if network is down
 
     success = False
     while not success and attempts < max_attempts:
-        time.sleep(sleeptime)
         try:
-            requests.get(f"http://{ip_address}:8080/guacamole/#", timeout=5)
+            requests.get(f"http://{ip_address}:8080/guacamole/#", timeout=40)
             return True
         except requests.exceptions.Timeout:
             attempts += 1
@@ -189,7 +187,18 @@ def server_delete(server_name):
     if server['state'] != SERVER_STATES.DELETED:
         state_transition(entity=server, new_state=SERVER_STATES.DELETING)
         workout_globals.refresh_api()
-        response = compute.instances().delete(project=project, zone=zone, instance=server_name).execute()
+        try:
+            response = compute.instances().delete(project=project, zone=zone, instance=server_name).execute()
+        except HttpError:
+            # If the server is already deleted or no longer exists,
+            state_transition(entity=server, new_state=SERVER_STATES.DELETED)
+            print(f"Finished deleting {server_name}")
+
+            # If all servers in the workout have been deleted, then set the workout state to True
+            build_id = server['workout']
+            check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
+                                     change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
+            return True
         print(f'Sent delete request to {server_name}, and waiting for response')
         i = 0
         success = False
@@ -224,4 +233,5 @@ def server_delete(server_name):
     else:
         print(f"The state of server {server_name} is already deleted")
 
-# server_build('bgwyhvwxsx-student-guacamole')
+# server_build('yroxkaezen-student-guacamole')
+# server_delete('ojspjlvuyh-student-guacamole')

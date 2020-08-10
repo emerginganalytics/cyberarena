@@ -9,9 +9,13 @@ gcloud config set project $project
 # Update the main application
 $confirmation = Read-Host "Do you want to update the main applications? (y/N)"
 if ($confirmation -eq 'y') {
+    $app = Read-Host "What is the application name? (cybergym) "
+    if ($app -eq '') {
+        $app = "cybergym"
+    }
     $sourcepath = Join-Path (Resolve-Path .\).Path "ualr_maintainer"
-    gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
-    gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud builds submit $sourcepath --tag gcr.io/$project/$app
+    gcloud run deploy --image gcr.io/$project/$app --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
 
 # Update cybergym-classified
@@ -153,12 +157,11 @@ if ($confirmation -eq 'y') {
     } While ($confirmation –eq ‘y’)
 }
 
-$confirmation = Read-Host "Do you want to update workout and arena instructions? (y/N)"
+$confirmation = Read-Host "Do you want to update build yaml specifications and startup scripts? (y/N)"
 if ($confirmation -eq 'y') {
+    $sourcepath = Join-Path (Resolve-Path .\).Path "\yaml-files\*.yaml"
     gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
-    gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
-    gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
-    gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
+    gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
 }
 
 $confirmation = Read-Host "Do you want to update the cloud images? (y/N)"
