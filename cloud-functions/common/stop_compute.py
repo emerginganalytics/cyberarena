@@ -1,6 +1,7 @@
 import time, calendar
 
-from common.globals import ds_client, project, compute
+from common.globals import ds_client, project, compute, BUILD_STATES
+from common.state_transition import state_transition
 
 # Global variables for this function
 zone = 'us-central1-a'
@@ -11,7 +12,7 @@ def stop_workout(workout_id):
     result = compute.instances().list(project=project, zone=zone,
                                       filter='name = {}*'.format(workout_id)).execute()
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-    workout['running'] = False
+    state_transition(entity=workout, new_state=BUILD_STATES.READY, existing_state=BUILD_STATES.RUNNING)
     ds_client.put(workout)
     if 'items' in result:
         for vm_instance in result['items']:
