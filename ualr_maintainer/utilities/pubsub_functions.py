@@ -49,7 +49,13 @@ def pub_start_vm(build_id, topic_name='start-vm'):
 
     print(future.result())
 
+def pub_stop_vm(workout_id, topic_name='stop-vm'):
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project, topic_name)
+    data = 'Cyber Gym VM Stop Request'
+    future = publisher.publish(topic_path, data=data.encode('utf-8'), workout_id=workout_id)
+
 
 # pub_build_request_msg('cyberattack', '654321', '1', '1', 'pdhuff@ualr.edu', 'Testing')
-pub_start_vm('1234')
+#pub_start_vm('1234')
 

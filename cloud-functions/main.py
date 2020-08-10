@@ -2,7 +2,7 @@ from common.build_workout import build_workout
 from common.build_arena import build_arena
 from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
-from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts
+from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts, stop_workout
 from common.compute_management import server_build, server_start, server_delete
 from common.globals import SERVER_ACTIONS
 
@@ -55,6 +55,15 @@ def cloud_fn_start_vm(event, context):
 
     start_vm(workout_id)
 
+def cloud_fn_stop_vm(event, context):
+    workout_id = event['attributes']['workout_id'] if 'workout_id' in event['attributes'] else None
+
+    if not workout_id:
+        if context:
+            print("Invalid fields for pubsub message triggered by messageId{} published at {}".format(context.event_id, context.timestamp))
+        return False
+    
+    stop_workout(workout_id)
 
 def cloud_fn_start_arena(event, context):
     unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
