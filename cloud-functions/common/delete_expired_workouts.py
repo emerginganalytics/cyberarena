@@ -30,23 +30,16 @@ def workout_age(created_date):
     return delta.days
 
 def are_servers_deleted(build_id):
-    build = ds_client.get(ds_client.key('cybergym-workout', build_id))
-    if not build:
-        build = ds_client.get(ds_client.key('cybergym-unit', build_id))
-
     i = 0
-    while build['state'] == BUILD_STATES.DELETING_SERVERS and i < 60:
-        i += 1
-        time.sleep(5)
-        build = ds_client.get(ds_client.key('cybergym-workout', build_id))
-        if not build:
-            build = ds_client.get(ds_client.key('cybergym-unit', build_id))
-
-
-    if build['state'] == BUILD_STATES.COMPLETED_DELETING_SERVERS:
-        return True
-    else:
-        return False
+    servers_deleted = False
+    while not servers_deleted and i < 6:
+        result = compute.instances().list(project=project, zone=zone, filter=f"name = {build_id}*").execute()
+        if 'items' not in result:
+            servers_deleted = True
+        else:
+            i += 1
+            time.sleep(10)
+    return servers_deleted
 
 
 def delete_vms(build_id):
@@ -159,7 +152,8 @@ def delete_specific_workout(workout_id, workout):
         except KeyError:
             print("workout %s has no external IP address" % workout_id)
             pass
-        state_transition(workout, BUILD_STATES.DELETING_SERVERS)
+        if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
+            state_transition(workout, BUILD_STATES.DELETING_SERVERS)
         delete_vms(workout_id)
         if are_servers_deleted(workout_id):
             if delete_firewall_rules(workout_id):
@@ -238,33 +232,21 @@ def delete_workouts():
             arena_type = True
 
         if not container_type and not arena_type and 'expiration' in workout:
-            if workout_age(workout['timestamp']) >= int(workout['expiration']) and not workout['resources_deleted']:
-                workout_id = None
-                if workout.key.name:
-                    workout_id = workout.key.name
-                elif "workout_ID" in workout:
-                    workout_id = workout["workout_ID"]
-
-                if workout_id:
-                    print('Deleting resources from workout %s' % workout_id)
-                    if delete_specific_workout(workout_id, workout):
-                        workout['resources_deleted'] = True
-                        ds_client.put(workout)
+            if workout_age(workout['timestamp']) >= int(workout['expiration']) and \
+                    workout['state'] != BUILD_STATES.DELETED:
+                workout_id = workout.key.name
+                print('Deleting resources from workout %s' % workout_id)
+                if delete_specific_workout(workout_id, workout):
+                    state_transition(workout, BUILD_STATES.DELETED)
 
     query_misfit_workouts = ds_client.query(kind='cybergym-workout')
     query_misfit_workouts.add_filter("misfit", "=", True)
     for workout in list(query_misfit_workouts.fetch()):
-        workout_id = None
-        if workout.key.name:
-            workout_id = workout.key.name
-        elif "workout_ID" in workout:
-            workout_id = workout["workout_ID"]
-
-        if workout_id:
-            print('Deleting resources from workout %s' % workout_id)
-            if delete_specific_workout(workout_id, workout):
-                ds_client.delete(workout.key)
-                print("Finished deleting workout %s" % workout_id)
+        workout_id = workout.key.name
+        print('Deleting resources from workout %s' % workout_id)
+        if delete_specific_workout(workout_id, workout):
+            ds_client.delete(workout.key)
+            print("Finished deleting workout %s" % workout_id)
 
 
 def delete_arenas():
@@ -284,15 +266,13 @@ def delete_arenas():
             try:
                 arena = unit['arena']
                 if workout_age(arena['timestamp']) >= int(arena['expiration']) \
-                        and not arena['resources_deleted']:
+                        and unit['state'] != BUILD_STATES.DELETED:
                     arena_id = unit.key.name
                     print('Deleting resources from arena %s' % arena_id)
                     if delete_specific_arena(arena_id, unit):
-                        arena['resources_deleted'] = True
-                        ds_client.put(unit)
+                        state_transition(unit, BUILD_STATES.DELETED)
             except KeyError:
-                unit['arena'] = {'resources_deleted': True}
-                ds_client.put(unit)
+                state_transition(unit, BUILD_STATES.DELETED)
 
     # Delete any misfit arenas
     query_misfit_arenas = ds_client.query(kind='cybergym-unit')

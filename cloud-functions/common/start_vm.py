@@ -20,7 +20,6 @@ def start_vm(workout_id):
     print("Starting workout %s" % workout_id)
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     state_transition(entity=workout, new_state=BUILD_STATES.STARTING)
-    workout['running'] = True
     workout['start_time'] = str(calendar.timegm(time.gmtime()))
     ds_client.put(workout)
 

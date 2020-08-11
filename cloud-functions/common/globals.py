@@ -63,7 +63,7 @@ class workout_globals():
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{rdp_password}\");\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'3389\');\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'username\', \'{rdp_username}\');\n' \
-        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'security\', \'nla\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'security\', \'{security_mode}\');\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'ignore-cert\', \'true\');\n'
     guac_startup_join_connection_user = \
         'INSERT INTO guacamole_connection_permission (entity_id, connection_id, permission) VALUES (@entity_id, @connection_id, \'READ\');\n'
@@ -140,6 +140,7 @@ class BUILD_STATES:
     GUACAMOLE_SERVER_LOAD_TIMEOUT = 'GUACAMOLE_SERVER_LOAD_TIMEOUT'
     DELETING_SERVERS = 'DELETING_SERVERS'
     COMPLETED_DELETING_SERVERS = 'COMPLETED_DELETING_SERVERS'
+    DELETED = 'DELETED'
 
 ordered_workout_states = {
     BUILD_STATES.START: 0,

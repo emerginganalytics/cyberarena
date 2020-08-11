@@ -6,12 +6,13 @@ workout:
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/DOSWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/DOSWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
-  dnszone: "cybergym-public"
-  project_api_key_type: cloud
-  flag_location:
   build_type: "compute"
+
+student_entry:
+  type: vnc
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.9
 
 networks:
   - name: external-network
@@ -31,7 +32,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.18
         subnet: default
-        external_NAT: true
+        external_NAT: False
   - name: cybergym-wireshark
     image: image-cybergym-wireshark
     machine_type: "n1-standard-1"
@@ -42,7 +43,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.9
         subnet: default
-        external_NAT: True
+        external_NAT: False
   - name: cybergym-classified
     image: image-cybergym-classified
     machine_type: "n1-standard-1"
@@ -53,7 +54,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.33
         subnet: default
-        external_NAT: True
+        external_NAT: False
 
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.

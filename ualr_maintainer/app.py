@@ -291,7 +291,7 @@ def stop_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
         try:
-            stop_workout(workout_id)
+            pub_stop_vm(workout_id)
         except:
             compute = workout_globals.refresh_api()
             stop_workout(workout_id)
