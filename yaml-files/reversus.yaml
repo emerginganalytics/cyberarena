@@ -3,15 +3,17 @@ version: '1'
 workout:
   name: reversus
   workout_description: 'Learn about reverse engineering'
-  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/Reversus.pdf"
-  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ReversusStudentInstructions.pdf"
-  project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_virtual-arkansas/Reversus.pdf"
+  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_virtual-arkansas/ReversusStudentInstructions.pdf"
   dnszone: "cybergym-public"
-  project_api_key_type: cloud
   build_type: "compute"
-  flag_location:
+
+student_entry:
+  type: rdp
+  username: cybergym
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.11
 
 networks: 
   - name: external-network
@@ -20,18 +22,6 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: reversus-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
-    network_routing: false
-    tags: {items: ["http-server", "labentry"]}
-    metadata: none
-    guac_path: "NgBjAG15c3Fs"
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.18
-        subnet: default
-        external_NAT: true
   - name: reversus-windows-16
     image: image-promise-win-16
     machine_type: "n1-standard-1"
@@ -44,17 +34,8 @@ servers:
         subnet: default
         external_NAT: true
 
-# List network routes. Multiple routes may be listed using YAML block sequence format
-routes:
-
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
-  - name: allow-http
-    network: external-network
-    target_tags: ["http-server"]
-    protocol: none
-    ports: ["tcp/80", "tcp/8080", "tcp/443"]
-    source_ranges: ["0.0.0.0/0"]
   - name: allow-rdp
     network: external-network
     target_tags: ["allow-rdp"]
@@ -67,20 +48,12 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
-  - name: allow-vnc
-    network: external-network
-    target_tags: ["vnc-server"]
-    protocol: tcp
-    ports: ["tcp/5901-5909"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-https
-    network: external-network
-    target_tags: ["https-server"]
-    protocol: none
-    ports: ["tcp/443"]
-    source_ranges: ["0.0.0.0/0"]
 assessment:
   type: "percentage"
   questions:
     - type: upload
-      question: "Upload a screen shot of the validation code from crackthis1"
+      question: "Upload a screen shot of the validation code from crackthis2"
+      script:
+      server: reversus-windows-16
+      operating-system: windows
+      complete: False
