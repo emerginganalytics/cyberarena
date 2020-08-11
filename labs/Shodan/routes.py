@@ -1,5 +1,6 @@
 from flask import abort, jsonify, redirect, render_template, request, escape
-from google.cloud import datastore, runtimeconfig
+from server_scripts import SHODAN_API_KEY, ds_client, runtimeconfig, myconfig, project
+from server_scripts import populate_datastore
 
 import shodan
 import shodan.helpers as helpers
@@ -7,13 +8,6 @@ import sys
 import json
 
 from app import app
-
-# SHODAN_API_KEY = 'BWmELJlT4jH83fFG29sKiKqwouKk7kL8'
-SHODAN_API_KEY = 'N81y8YZTBIUfVmrEa1ZL8ywi119Pz1pT'
-ds_client = datastore.Client()
-runtimeconfig_client = runtimeconfig.Client()
-myconfig = runtimeconfig_client.config('cybergym')
-project = myconfig.get_variable('project').value.decode("utf-8")
 
 
 @app.route('/<workout_id>', methods=['GET', 'POST'])
@@ -120,6 +114,7 @@ def loader(workout_id):
 
     if workout:
         if workout['type'] == 'shodan':
+            populate_datastore(workout_id=workout_id)
             return redirect('/' + workout_id)
         else:
             return redirect('/invalid/' + workout_id)

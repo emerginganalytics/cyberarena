@@ -3,7 +3,7 @@ version: '1'
 workout:
   name: "Shodan"
   build_type: "container"
-  workout_description: 'Fun with Shodan'
+  workout_description: 'Using Shodan API to find vulnerable public access data'
   teacher_instructions_url: ""
   student_instructions_url: ""
   workout_url_path: 'https://cybergym-shodanlite-v7k2apwaqa-uc.a.run.app/loader'
@@ -13,8 +13,19 @@ container_info:
   
 
 assessment:
-  type: "level"
+  type: "percentage"
   questions:
-    - type: auto
-      key: "4z8I9cIx0nKLuE9T"
-      complete: False
+    - type: input
+      question: "What is the ORG for the 3rd result of Minecraft servers in Dallas?"
+      answer: ""
+    - type: input
+      question: "For the first result, what is the ip_str of the company running pfSense?"
+      answer: ""
+    - type: input
+      question: "How many vulnerable Apache servers are there in Phoenix?"
+      answer: ""
+    - type: input
+      question: "How many servers are still vulnerable to Heartbleed?"
+      answer: ""
+    - type: upload
+      question: "Build your own query and upload a screenshot of the most interesting find."
