@@ -3,8 +3,8 @@ version: '1'
 workout:
   name: reversus
   workout_description: 'Learn about reverse engineering'
-  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_virtual-arkansas/Reversus.pdf"
-  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_virtual-arkansas/ReversusStudentInstructions.pdf"
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/Reversus.pdf"
+  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_tgd4419/ReversusStudentInstructions.pdf"
   dnszone: "cybergym-public"
   build_type: "compute"
 
