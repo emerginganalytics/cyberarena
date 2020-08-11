@@ -89,7 +89,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     }
 
     if meta_data:
-        config['metadata'] = meta_data
+        config['metadata'] = {'items': meta_data}
     if sshkey:
         if 'items' in meta_data:
             config['metadata']['items'].append({"key": "ssh-keys", "value": sshkey})
@@ -176,7 +176,7 @@ def build_guacamole_server(build, network, guacamole_connections):
         "subnet": "%s-%s" % (network, 'default'),
         "external_NAT": True
     }]
-    meta_data = {'items': [{"key": "startup-script", "value": startup_script}]}
+    meta_data = {"key": "startup-script", "value": startup_script}
     try:
         create_instance_custom_image(compute=compute, workout=build_id, name=server_name,
                                      custom_image=student_entry_image, machine_type='n1-standard-1',

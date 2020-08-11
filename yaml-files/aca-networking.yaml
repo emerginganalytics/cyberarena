@@ -6,9 +6,10 @@ workout:
   build_type: "compute"
 
 student_entry:
-  type: vnc
+  type: rdp
+  security-mode: any
   username: forge
-  password: "F0rg3up!"
+  password: "F0rg3up!4theWIN!"
   network: external-network
   ip: 10.0.0.2
 
@@ -35,4 +36,4 @@ firewall_rules:
     target_tags: []
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.1.0/24"]
+    source_ranges: ["10.0.0.0/24"]
