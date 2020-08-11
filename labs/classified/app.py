@@ -7,7 +7,7 @@ from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Length, EqualTo
-from google.cloud import datastore
+from google.cloud import datastore, runtimeconfig
 
 import hashlib
 import sqlite3
@@ -30,7 +30,10 @@ db = SQLAlchemy(app)
 lm = LoginManager(app)
 app.database = "bad.db"
 ds_client = datastore.Client()
-project = 'ualr-cybersecurity'
+runtimeconfig_client = runtimeconfig.Client()
+myconfig = runtimeconfig_client.config('cybergym')
+project = myconfig.get_variable('project').value.decode("utf-8")
+dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 
 class User(UserMixin, db.Model):
@@ -175,6 +178,24 @@ def xss(workout_id):
                                search_query=search_query, workout_id=workout_id)
     else:
         return redirect(404)
+
+
+@app.route("/workouts/xss_r/<workout_id>", methods=['GET', 'POST'])
+def xss_r(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    if workout['type'] == 'xss':
+        page_template = 'xss_r'
+        render_template(page_template, workout_id=workout_id)
+
+
+@app.route("/workouts/xss_s/<workout_id>", methods=['GET', 'POST'])
+def xss_r(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    if workout['type'] == 'xss':
+        page_template = 'xss_s'
+        render_template(page_template, workout_id=workout_id)
 
 
 @app.route('/workouts/tfh/<workout_id>')
