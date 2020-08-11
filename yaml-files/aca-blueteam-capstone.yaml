@@ -6,7 +6,8 @@ workout:
   build_type: "compute"
 
 student_entry:
-  type: vnc
+  type: rdp
+  security-mode: any
   username: forge
   password: "F0rg3up!4theWIN!"
   network: external-network

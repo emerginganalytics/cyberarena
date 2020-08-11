@@ -4,15 +4,21 @@ workout:
   name: Nessus
   workout_description: 'This workout teaches the basics of scanning to students.'
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/NessusWorkoutStudentInstructions.pdf"
-  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/NessusTeacherWorkoutInstructions.pdf"
+  instructor_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/NessusTeacherWorkoutInstructions.pdf"
   project_name: ualr-cybersecurity
   region: "us-central1"
   zone: "us-central1-a"
   dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location: /usr/src/flag
-  build_type: "compute"
+  build_type: compute
 
+student_entry:
+ type: rdp
+ username: cybergym
+ password: "Let's workout!"
+ network: external-network
+ ip: 10.1.1.27
 
 networks:
   - name: external-network
@@ -33,19 +39,6 @@ servers:
         internal_IP: 10.1.1.27
         subnet: default
         external_NAT: false
-
-  - name: cybergym-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
-    network_routing: false
-    tags: {items: ["http-server", "https-server", "guac-server", "vnc-server", "labentry"]}
-    metadata: none
-    guac_path: "MQBjAG15c3Fs"
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.10
-        subnet: default
-        external_NAT: true
 
 routes:
 
@@ -85,8 +78,6 @@ firewall_rules:
 assessment:
   type: "percentage"
   questions:
-    # - type: upload
-    #   question: "Upload a screen shot of your scan result"
     - type: input
       question: "What version of Windows is used on the scanned system?"
       answer: "Window Server 2019 Datacenter"
