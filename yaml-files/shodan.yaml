@@ -6,7 +6,7 @@ workout:
   workout_description: 'Fun with Shodan'
   teacher_instructions_url: ""
   student_instructions_url: ""
-  workout_url_path: 'https://cybergym-shodanlite-v7k2apwaqa-uc.a.run.app/loader/'
+  workout_url_path: 'https://cybergym-shodanlite-v7k2apwaqa-uc.a.run.app/loader'
   project_name: ualr-cybersecurity
  
 container_info:
