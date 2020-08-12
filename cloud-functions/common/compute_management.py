@@ -184,44 +184,13 @@ def server_start(server_name):
 
 def server_delete(server_name):
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
-    if server['state'] != SERVER_STATES.DELETED:
-        state_transition(entity=server, new_state=SERVER_STATES.DELETING)
-        workout_globals.refresh_api()
-        try:
-            response = compute.instances().delete(project=project, zone=zone, instance=server_name).execute()
-        except HttpError:
-            # If the server is already deleted or no longer exists,
-            state_transition(entity=server, new_state=SERVER_STATES.DELETED)
-            print(f"Finished deleting {server_name}")
 
-            # If all servers in the workout have been deleted, then set the workout state to True
-            build_id = server['workout']
-            check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
-                                     change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
-            return True
-        print(f'Sent delete request to {server_name}, and waiting for response')
-        i = 0
-        success = False
-        while not success and i < 5:
-            try:
-                print(f"Begin waiting for delete response from operation {response['id']}")
-                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-                success = True
-            except timeout:
-                i += 1
-                print('Response timeout for deleting server. Trying again')
-                pass
-        if not success:
-            print(f'Timeout in trying to delete server {server_name}')
-            state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
-            return False
-
-        # If this is a student entry server, delete the DNS
-        if 'student_entry' in server and server['student_entry']:
-            print(f'Deleting DNS record for {server_name}')
-            ip_address = server['external_ip']
-            delete_dns(server['workout'], ip_address)
-
+    state_transition(entity=server, new_state=SERVER_STATES.DELETING)
+    workout_globals.refresh_api()
+    try:
+        response = compute.instances().delete(project=project, zone=zone, instance=server_name).execute()
+    except HttpError as exception:
+        # If the server is already deleted or no longer exists,
         state_transition(entity=server, new_state=SERVER_STATES.DELETED)
         print(f"Finished deleting {server_name}")
 
@@ -230,8 +199,38 @@ def server_delete(server_name):
         check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
                                  change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
         return True
-    else:
-        print(f"The state of server {server_name} is already deleted")
+    print(f'Sent delete request to {server_name}, and waiting for response')
+    i = 0
+    success = False
+    while not success and i < 5:
+        try:
+            print(f"Begin waiting for delete response from operation {response['id']}")
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            success = True
+        except timeout:
+            i += 1
+            print('Response timeout for deleting server. Trying again')
+            pass
+    if not success:
+        print(f'Timeout in trying to delete server {server_name}')
+        state_transition(entity=server, new_state=SERVER_STATES.BROKEN)
+        return False
 
-# server_build('yroxkaezen-student-guacamole')
-# server_delete('ojspjlvuyh-student-guacamole')
+    # If this is a student entry server, delete the DNS
+    if 'student_entry' in server and server['student_entry']:
+        print(f'Deleting DNS record for {server_name}')
+        ip_address = server['external_ip']
+        delete_dns(server['workout'], ip_address)
+
+    state_transition(entity=server, new_state=SERVER_STATES.DELETED)
+    print(f"Finished deleting {server_name}")
+
+    # If all servers in the workout have been deleted, then set the workout state to True
+    build_id = server['workout']
+    check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
+                             change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
+    return True
+
+
+# server_build('wnhztqskms-winjumpbox')
+# server_delete('oztfvquhhi-cybergym-publicprivate')
