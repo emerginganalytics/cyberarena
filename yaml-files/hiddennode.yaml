@@ -4,11 +4,14 @@ workout:
   name: hiddennode
   workout_description: 'Using Network tools to find hidden nodes on a network'
   project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
-  dnszone: "cybergym-public"
-  project_api_key_type: cloud
-  flag_location:
+  build_type: "compute"
+
+student_entry:
+  type: ssh
+  username: cybergym
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.128.0.58
 
 networks: 
   - name: external-network
@@ -17,18 +20,6 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
-    network_routing: false
-    tags: {items: ["http-server", "https-server", "guac-server", "attacker", "vnc-server", "labentry"]}
-    metadata: none
-    guac_path: "MQBjAG15c3Fs"
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.10
-        subnet: default
-        external_NAT: true
   - name: dvwalab
     image: image-dvwalab
     machine_type: "n1-standard-1"
@@ -73,12 +64,6 @@ firewall_rules:
     target_tags: ["http-server"]
     protocol: none
     ports: ["tcp/80, 8080, 443"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-vnc
-    network: external-network
-    target_tags: ["vnc-server"]
-    protocol: tcp
-    ports: ["tcp/5901-5909"]
     source_ranges: ["0.0.0.0/0"]
   - name: allow-all-local-external
     network: external-network
