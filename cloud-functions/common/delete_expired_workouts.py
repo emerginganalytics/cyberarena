@@ -220,20 +220,21 @@ def delete_workouts():
     query_old_workouts = ds_client.query(kind='cybergym-workout')
     query_old_workouts.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - 10512000))
     for workout in list(query_old_workouts.fetch()):
-        if 'resources_deleted' not in workout:
-            workout['resources_deleted'] = False
+        if 'state' not in workout:
+            workout['state'] = BUILD_STATES.DELETED
+
 
         container_type = False
         if 'build_type' in workout and workout['build_type'] == 'container':
             container_type = True
 
         arena_type = False
-        if 'build_type' in workout and workout['build_type'] == 'arena':
+        if 'build_type' in workout and workout['build_type'] == 'arena' or \
+                'type' in workout and workout['type'] == 'arena':
             arena_type = True
 
-        if not container_type and not arena_type and 'expiration' in workout:
-            if workout_age(workout['timestamp']) >= int(workout['expiration']) and \
-                    workout['state'] != BUILD_STATES.DELETED:
+        if workout['state'] != BUILD_STATES.DELETED and not container_type and not arena_type:
+            if workout_age(workout['timestamp']) >= int(workout['expiration']):
                 workout_id = workout.key.name
                 print('Deleting resources from workout %s' % workout_id)
                 if delete_specific_workout(workout_id, workout):

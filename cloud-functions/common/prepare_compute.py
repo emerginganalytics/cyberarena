@@ -1,6 +1,6 @@
 import time
 import calendar
-from socket import timeout
+import ipaddress
 from google.cloud import pubsub_v1
 from google.cloud import datastore
 from googleapiclient import errors
@@ -13,7 +13,8 @@ from common.networking_functions import create_firewall_rules
 
 
 def create_instance_custom_image(compute, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, meta_data, sshkey=None, student_entry=False):
+                                 networkRouting, networks, tags, meta_data, sshkey=None, student_entry=False,
+                                 minCpuPlatform=None):
     """
     Core function to create a new server according to the input specification. This gets called through
     a cloud function during the automatic build
@@ -99,9 +100,13 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
-        new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
-                     "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
-        config['disks'].append(new_disk)
+        # Commented out because only Fortinet uses this. Need to create a custom build template instead.
+        # new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
+        #              "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
+        # config['disks'].append(new_disk)
+
+    if minCpuPlatform:
+        config['minCpuPlatform'] = minCpuPlatform
 
     new_server = datastore.Entity(ds_client.key('cybergym-server', f'{name}'))
 
@@ -152,18 +157,19 @@ def build_guacamole_server(build, network, guacamole_connections):
         workout['workout_password'] = guac_connection_password
         ds_client.put(workout)
 
+        safe_password = connection['password'].replace('$', '\$')
         startup_script += workout_globals.guac_startup_user_add.format(user=guac_user,
                                                                        name=guac_user,
                                                                        guac_password=guac_connection_password)
         if connection['entry_type'] == 'vnc':
             startup_script += workout_globals.guac_startup_vnc.format(ip=connection['ip'],
                                                                       connection=connection['workout_id'],
-                                                                      vnc_password=connection['password'])
+                                                                      vnc_password=safe_password)
         else:
             startup_script += workout_globals.guac_startup_rdp.format(ip=connection['ip'],
                                                                       connection=connection['workout_id'],
                                                                       rdp_username=connection['username'],
-                                                                      rdp_password=connection['password'],
+                                                                      rdp_password=safe_password,
                                                                       security_mode=connection['security-mode'])
         startup_script += workout_globals.guac_startup_join_connection_user
         i += 1
