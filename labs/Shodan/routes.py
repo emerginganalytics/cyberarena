@@ -1,5 +1,5 @@
 from flask import abort, jsonify, redirect, render_template, request, escape
-from server_scripts import SHODAN_API_KEY, ds_client, runtimeconfig, myconfig, project
+from server_scripts import SHODAN_API_KEY, ds_client, runtimeconfig, myconfig, project, logger
 from server_scripts import populate_datastore
 
 import shodan
@@ -20,6 +20,7 @@ def default(workout_id):
     if workout:
         if workout['type'] == 'shodan':
             if request.method == 'POST':
+                logger.info(f'POST to /{workout_id}')
                 try:
                     query = request.form.get('shodan_query')
                     page_num = request.form.get('page_number')
@@ -36,7 +37,7 @@ def default(workout_id):
                         workoutid=workout_id,
                     )
                 except shodan.APIError as e:
-                    print(e)
+                    logger.info(e)
                     e_template = 'invalid_query.jinja'
                     return render_template(e_template)
             return render_template(page_template)
@@ -79,10 +80,10 @@ def data(workout_id):
     if workout:
         if workout['type'] == 'shodan':
             if request.method == "POST":
-                print("POST")
+                logger.info(f"POSTING to /data/{workout_id}")
                 return render_template(page_template, rawData=request.form.get('data'), workoutid=workout_id,)
             if request.method == "GET":
-                print("GET")
+                logger.info(f'GET /data/{workout_id}')
                 print(type(request.get_data()))
         else:
             return redirect('/invalid/' + workout_id)
@@ -114,7 +115,8 @@ def loader(workout_id):
 
     if workout:
         if workout['type'] == 'shodan':
-            populate_datastore(workout_id=workout_id)
+            data = populate_datastore(workout_id=workout_id)
+            logger.info(data)
             return redirect('/' + workout_id)
         else:
             return redirect('/invalid/' + workout_id)
@@ -125,4 +127,5 @@ def loader(workout_id):
 @app.route('/invalid/<workout_id>')
 def invalid(workout_id):
     page_template = 'invalid_workout.html'
+    logger.error(f'Invalid workout_id : {workout_id}')
     return render_template(page_template)
