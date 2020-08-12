@@ -88,12 +88,12 @@ def server_build(server_name):
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
 
-    # If the server is a router, then add a disk for logging. Admittedly, this is for Fortinet firewalls
-    if 'canIPForward' in server and server['config']['canIpForward']:
-        image_config = {"name": server_name + "-disk", "sizeGb": 30,
-                        "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
-        response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
-        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+    # Commented because this is only for Fortinet right now.
+    # if 'canIPForward' in server and server['config']['canIpForward']:
+    #     image_config = {"name": server_name + "-disk", "sizeGb": 30,
+    #                     "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
+    #     response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
+    #     compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
     workout_globals.refresh_api()
@@ -231,6 +231,5 @@ def server_delete(server_name):
                              change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
     return True
 
-
-# server_build('wnhztqskms-winjumpbox')
+# server_start('hxckdwxwld-nested')
 # server_delete('oztfvquhhi-cybergym-publicprivate')

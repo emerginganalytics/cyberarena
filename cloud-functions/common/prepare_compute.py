@@ -100,9 +100,10 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
-        new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
-                     "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
-        config['disks'].append(new_disk)
+        # Commented out because only Fortinet uses this. Need to create a custom build template instead.
+        # new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
+        #              "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
+        # config['disks'].append(new_disk)
 
     if minCpuPlatform:
         config['minCpuPlatform'] = minCpuPlatform
