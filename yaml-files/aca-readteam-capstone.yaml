@@ -10,7 +10,7 @@ student_entry:
   username: Student
   password: "F0rgeIn$titute!@12"
   network: external-network
-  ip: 10.0.0.2
+  ip: 10.0.0.3
 
 networks: 
   - name: external-network
@@ -24,7 +24,7 @@ servers:
     machine_type: "n1-standard-1"
     nics:
       - network: external-network
-        internal_IP: 10.0.0.2
+        internal_IP: 10.0.0.3
         subnet: default
         external_NAT: False
   - name: kali
@@ -32,7 +32,7 @@ servers:
     machine_type: "n1-standard-1"
     nics:
       - network: external-network
-        internal_IP: 10.0.0.3
+        internal_IP: 10.0.0.4
         subnet: default
         external_NAT: False
   - name: tigerking
@@ -62,9 +62,10 @@ servers:
   - name: nested
     image: redteam-capstone-nested-win2k8-xp
     machine_type: "custom-6-10240"
+    network_routing: True
+    minCpuPlatform: "Intel Haswell"
     nics:
       - network: external-network
-        minCpuPlatform: "Intel Haswell"
         internal_IP: 10.0.0.40
         subnet: default
         external_NAT: False  
