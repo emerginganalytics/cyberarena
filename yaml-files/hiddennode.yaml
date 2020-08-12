@@ -7,7 +7,7 @@ workout:
   build_type: "compute"
 
 student_entry:
-  type: ssh
+  type: vnc
   username: cybergym
   password: "Let's workout!"
   network: external-network
