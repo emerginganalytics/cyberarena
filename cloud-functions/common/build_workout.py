@@ -65,6 +65,7 @@ def build_workout(workout_id):
             tags = server['tags']
             machine_type = server["machine_type"]
             network_routing = server["network_routing"]
+            min_cpu_platform = server["minCpuPlatform"] if "minCpuPlatform" in server else None
             nics = []
             for n in server['nics']:
                 nic = {
@@ -82,7 +83,7 @@ def build_workout(workout_id):
             create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
                                          custom_image=server['image'], machine_type=machine_type,
                                          networkRouting=network_routing, networks=nics, tags=tags,
-                                         meta_data=meta_data, sshkey=sshkey)
+                                         meta_data=meta_data, sshkey=sshkey, minCpuPlatform=min_cpu_platform)
 
         state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_SERVERS)
     # Create the student entry guacamole server
@@ -135,4 +136,4 @@ def build_workout(workout_id):
     
         create_firewall_rules(firewall_rules)
 
-# build_workout('pzletyibzt')
+# build_workout('etnbeibtvk')

@@ -304,6 +304,7 @@ def store_arena_workout(workout_id, unit_id, user_mail, timestamp, student_serve
     new_workout.update({
         'unit_id': unit_id,
         'type': 'arena',
+        'build_type': 'arena',
         'student_instructions_url': student_instructions_url,
         'start_time': timestamp,
         'run_hours': 0,

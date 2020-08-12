@@ -21,7 +21,7 @@ networks:
 
 servers:
   - name: networking
-    image: networking-tmp
+    image: networking-img
     machine_type: "n1-standard-1"
     nics:
       - network: external-network
