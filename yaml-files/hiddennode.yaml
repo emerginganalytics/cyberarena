@@ -65,12 +65,6 @@ firewall_rules:
     protocol: none
     ports: ["tcp/80, 8080, 443"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-vnc
-    network: external-network
-    target_tags: ["vnc-server"]
-    protocol: tcp
-    ports: ["tcp/5901-5909"]
-    source_ranges: ["0.0.0.0/0"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
