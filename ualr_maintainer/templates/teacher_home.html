@@ -56,18 +56,17 @@
           data: JSON.stringify(data),
           success: function(data){
             for(var i = 0; i < data.length; i++){
-              var nodeName = 'unit_group_' + data[i]['type'];
+              var nodeName = 'unit_group_' + data[i]['workout_name'];
               var unitNode = document.getElementById(nodeName);
               if(unitNode == null){
                 //Header/Unit info container
                 var unit_div = document.createElement("div");
                 //Create interactive header button for each unit type
                 var unit_type = document.createElement("a");
-                unit_type.innerHTML = data[i]['type'];
+                unit_type.innerHTML = data[i]['workout_name'];
                 unit_type.className = 'unit_header btn';
                 unit_type.dataToggle = 'collapse';
-                unit_type.href = '#unit_group_' + data[i]['type'];
-                
+                unit_type.href = '#unit_group_' + data[i]['workout_name'];
                 //Create div containing the list of units of a specific type
                 var node = document.createElement("div");
                 node.id = nodeName;
@@ -80,7 +79,7 @@
                 
                 //Create table for individual unit information
                 var unit_table = document.createElement("table");
-                unit_table.id = 'unit_table_' + data[i]['type'];
+                unit_table.id = 'unit_table_' + data[i]['workout_name'];
                 
                 var table_headers = ["Unit Name", "Creation Date"]
                 //Create table headers
@@ -92,7 +91,7 @@
                 node.appendChild(unit_table);
               }
 
-              var unit_table = document.getElementById('unit_table_' + data[i]['type']);
+              var unit_table = document.getElementById('unit_table_' + data[i]['workout_name']);
               var unit_name = data[i]['unit_name'];
               var unit_id = data[i]['unit_id'];
               var unit_timestamp = data[i]['timestamp'];

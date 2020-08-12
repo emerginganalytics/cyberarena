@@ -117,18 +117,14 @@ def landing_page(workout_id):
 
             return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
-                               teacher_instructions=teacher_instructions_url, state=workout_state,
-                               shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               workout_type=workout['type'], assessment=assessment, assessment_type=assessment_type,
+                               state=workout_state, shutoff=shutoff, workout_id=workout_id,
+                               workout_name=unit['workout_name'], assessment=assessment, assessment_type=assessment_type,
                                score=percentage_correct, guac_user=workout_user, guac_pass=workout_password)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
                                guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
-                               teacher_instructions=teacher_instructions_url, state=workout_state,
-                               shutoff=shutoff, workout_id=workout_id, running=workout['running'],
-                               workout_type=workout['type'], assessment=assessment,
-                               assessment_type=assessment_type, guac_user=workout_user,
-                               guac_pass=workout_password)
+                               state=workout_state, shutoff=shutoff, workout_id=workout_id, workout_name=unit['workout_name'], assessment=assessment,
+                               assessment_type=assessment_type, guac_user=workout_user, guac_pass=workout_password)
     else:
         return render_template('no_workout.html')
 
@@ -157,8 +153,7 @@ def workout_list(unit_id):
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
                                workout_list=workout_list, unit_id=unit_id,
-                               description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url,
-                               workout_type=unit['workout_type'])
+                               description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url)
     else:
         return render_template('no_workout.html')
 
@@ -236,24 +231,17 @@ def get_teacher_info():
         unit_list.add_filter("instructor_id", "=", str(teacher_email['teacher_email']))
         # unit_list.add_filter("resources_deleted", "=", False)
         teacher_units = []
+
         for unit in list(unit_list.fetch()):
-            if 'unit_id' in unit:
-                unit_info = {
-                    'unit_id': unit.key.name,
-                    'build_type': unit['build_type'],
-                    'type': unit['workout_type'],
-                    'unit_name': unit['unit_id'],
-                    'timestamp': unit['timestamp']
-                }
-            else:
-                unit_info = {
-                    'unit_id': unit.key.name,
-                    'type': unit['workout_type'],
-                    'build_type': unit['build_type'],
-                    'unit_name': unit['unit_name'],
-                    'timestamp': unit['timestamp']
-                }
+            unit_info = {
+                'unit_id': unit.key.name,
+                'workout_name': unit['workout_name'],
+                'build_type': unit['build_type'],
+                'unit_name': unit['unit_name'],
+                'timestamp': unit['timestamp']
+            }
             teacher_units.append(unit_info)
+
         teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
     return json.dumps(teacher_units)
 

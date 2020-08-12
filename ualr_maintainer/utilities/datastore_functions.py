@@ -129,7 +129,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         unit_id = randomStringDigits()
         print("Creating unit %s" % (unit_id))
         store_unit_info(id=unit_id, email=email, unit_name=unit_name, workout_name=workout_name, build_type=build_type,
-                        ts=ts, workout_type=workout_type, workout_url_path=workout_url_path,
+                        ts=ts, workout_url_path=workout_url_path,
                         teacher_instructions_url=teacher_instructions_url, workout_description=workout_description)
 
 
@@ -238,7 +238,7 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
 
 
 # Store information for an individual unit.
-def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_type, workout_url_path,
+def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_url_path,
                     teacher_instructions_url, workout_description):
     new_unit = datastore.Entity(ds_client.key('cybergym-unit', id))
 
@@ -248,7 +248,6 @@ def store_unit_info(id, email, unit_name, workout_name, build_type, ts, workout_
         "workout_name": workout_name,
         "instructor_id": email,
         "timestamp": ts,
-        "workout_type": workout_type,
         'workout_url_path': workout_url_path,
         "description": workout_description,
         "teacher_instructions_url": teacher_instructions_url,
