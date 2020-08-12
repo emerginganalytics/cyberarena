@@ -53,12 +53,11 @@ def populate_datastore(workout_id):
 
     # Update the Datastore with query results:
     workout['assessment']['questions'][0]['answer'] = query_results[0]
-    workout['assessment']['question2'][1]['answer'] = query_results[1]
-    workout['assessment']['question3'][2]['answer'] = query_results[2]
-    workout['assessment']['question4'][3]['answer'] = query_results[3]
+    workout['assessment']['questions'][1]['answer'] = query_results[1]
+    workout['assessment']['questions'][2]['answer'] = query_results[2]
+    workout['assessment']['questions'][3]['answer'] = query_results[3]
     ds_client.put(workout)
 
     print(query_results)
     
     return print('Datastore Populated for workout %s' % workout_id)
-# populate_datastore(workout_id='mrujptbiaa')
