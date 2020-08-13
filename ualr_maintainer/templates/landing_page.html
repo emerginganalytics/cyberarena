@@ -102,7 +102,9 @@
 
                 {% if state == "RUNNING" %}
                 <br><h2>Workout Servers</h2>
-                    {% if guac_path==None %}
+                    {% if guac_user == 'container' %}
+                        <a style="width:50%" class="btn" href="{{guac_path}}/{{workout_id}}" target="_blank">Enter your workout!</a>
+                    {% elif guac_path==None %}
                         <a style="width:50%" class="btn" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
                     {% else %}
                         <a style="width:50%" class="btn" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!</a>

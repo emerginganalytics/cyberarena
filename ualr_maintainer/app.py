@@ -51,7 +51,7 @@ def index(workout_type):
 
         if unit_id == False:
             return render_template('no_workout.html')
-        elif build_type == 'compute' or build_type == 'container':
+        elif build_type == 'compute':
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_workout_topic)
             print("workout building")
             url = '/workout_list/%s' % (unit_id)
@@ -72,21 +72,28 @@ def landing_page(workout_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
     retrieve_student_uploads(workout_id)
     if (workout):
-        expiration = time.strftime('%d %B %Y', (
-            time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
-
-        run_hours = int(workout['run_hours'])
-        if run_hours == 0:
-            shutoff = "expired"
-        else:
-            shutoff = time.strftime('%d %B %Y at %I:%M %p',
+        expiration = None
+        if 'expiration' in workout:
+            expiration = time.strftime('%d %B %Y', (
+                time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+        shutoff = None
+        if 'run_hours' in workout:
+            run_hours = int(workout['run_hours'])
+            if run_hours == 0:
+                shutoff = "expired"
+            else:
+                shutoff = time.strftime('%d %B %Y at %I:%M %p',
                                     (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
 
         guac_path = None
-        if workout['servers']:
+        if 'servers' in workout:
             for server in workout['servers']:
                 if server['guac_path'] != None:
                     guac_path = server['guac_path']
+        if not guac_path:
+            if unit['build_type'] == 'container':
+                guac_path = unit['workout_url_path']
+
         student_instructions_url = None
         if 'student_instructions_url' in workout:
             student_instructions_url = workout['student_instructions_url']
@@ -106,6 +113,8 @@ def landing_page(workout_id):
         workout_user = None
         if 'workout_user' in workout:
             workout_user = workout['workout_user']
+        else:
+            workout_user = 'container'
         workout_password = None
         if 'workout_password' in workout:
             workout_password = workout['workout_password']
@@ -140,9 +149,6 @@ def workout_list(unit_id):
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
     
-    student_instructions_url = None
-    if 'student_instructions_url' in unit:
-        student_instructions_url = unit['student_instructions_url']
 
     #For updating individual workout ready state
     if (request.method=="POST"):
@@ -153,7 +159,7 @@ def workout_list(unit_id):
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
                                workout_list=workout_list, unit_id=unit_id,
-                               description=unit['description'], teacher_instructions=teacher_instructions_url, student_instructions=student_instructions_url)
+                               description=unit['description'], teacher_instructions=teacher_instructions_url)
     else:
         return render_template('no_workout.html')
 
