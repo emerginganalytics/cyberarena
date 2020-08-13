@@ -70,26 +70,12 @@
                 <div class="collapse" id="team_collapse_{{workout.name}}">
                     <table>
                         <tr>
-                            {% if build_type == "container" %}
-                            <th>Workout URL</th>
-                            {% else %}
                             <th>Workout Landing Page</th>
-                            {% endif %}
-                            {% if workout["student_instruction_url"] %}
-                            <th>Student Instructions</th>
-                            {% endif %}
                             <th>Assessment Submissions</th>
                             <th>Change Student Name</th>
                         </tr>
                         <tr>
-                            {% if build_type == "container" %}
-                            <td>{{ workout_url_path + '/' + workout.name }}</td>
-                            {% else %}
                             <td><a href="/landing/{{workout.name}}" target="_blank">Landing Page</a></td>
-                            {% endif %}
-                            {% if workout["student_instruction_url"] %}
-                            <td><a href="{{workout['student_instruction_url']}}">Student Instructions</a></td>
-                            {% endif %}
                             <td>
                                 {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
