@@ -223,6 +223,47 @@ def login():
 def teacher_home():
     return render_template('teacher_home.html', auth_config=auth_config)
 
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin_page():
+    admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
+
+    if request.method == "POST":
+        response = {
+            'action_completed': 'false'
+        }
+        data = request.get_json(force=True)
+        if data['action'] == 'approve_user':
+            if data['user_email'] in admin_info['pending_users']:
+                admin_info['authorized_users'].append(data['user_email'])
+                admin_info['pending_users'].remove(data['user_email'])
+                ds_client.put(admin_info)
+                response['action_completed'] = 'true'
+        elif data['action'] == 'deny_user':
+            if data['user_email'] in admin_info['pending_users']:
+                admin_info['pending_users'].remove(data['user_email'])
+                ds_client.put(admin_info)
+                response['action_completed'] = 'true'
+        elif data['action'] == 'promote_user':
+            if data['user_email'] in admin_info['authorized_users']:
+                admin_info['admins'].append(data['user_email'])
+                ds_client.put(admin_info)
+                response['action_completed'] = 'true'
+        elif data['action'] == 'remove_user':
+            if data['user_email'] in admin_info['authorized_users']:
+                admin_info['authorized_users'].remove(data['user_email'])
+                ds_client.put(admin_info)
+                response['action_completed'] = 'true'
+        elif data['action'] == 'revoke_access':
+            if data['user_email'] in admin_info['admins']:
+                admin_info['admins'].remove(data['user_email'])
+                ds_client.put(admin_info)
+                response['action_completed'] = 'true'
+        return json.dumps(response)
+        
+    return render_template('admin_page.html', auth_config=auth_config, admin_info=admin_info)
+
+
 @app.route('/teacher_info', methods=['GET', 'POST'])
 def get_teacher_info():
     if (request.method == "POST"):
@@ -374,6 +415,10 @@ def nuke_workout(workout_id):
     workout_type = workout['type']
     unit_name = unit['unit_name']
     unit_id = workout['unit_id']
+
+    submitted_answers = None
+    if 'submitted_answers' in workout:
+        submitted_answers = workout['submitted_answers']
     if 'expiration' in unit:
         expiration = unit['expiration']
     else:
@@ -382,6 +427,11 @@ def nuke_workout(workout_id):
     yaml_string = parse_workout_yaml(workout_type)
     unit_id, build_type, new_id = process_workout_yaml(yaml_string, workout_type, unit_name,
                                                      1, expiration, instructor_id, unit_id)
+
+    if submitted_answers:
+        new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
+        new_workout['submitted_answers'] = submitted_answers
+
     unit_id = workout['unit_id']
     #Get new workout information
     response = {
@@ -390,6 +440,7 @@ def nuke_workout(workout_id):
         "workout_id": new_id
 
     }
+    
     if build_type == 'compute':
         pub_build_single_workout(workout_id=new_id, topic_name=workout_globals.ps_build_workout_topic)
     
@@ -410,8 +461,28 @@ def change_student_name(workout_id):
     workout['student_name'] = request.values['new_name']
     ds_client.put(workout)
     return workout['student_name']
-    # workout['name'] = request.data['new_name']
 
+
+@app.route('/check_user_level', methods=['POST'])
+def check_user_level():
+    if (request.method == 'POST'):
+        user_info = request.get_json(force=True)
+        admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
+        response = {
+            'authorized': False,
+            'admin': False
+        }
+        
+        if user_info['user_email']:
+            if user_info['user_email'] in admin_info['authorized_users']:
+                response['authorized'] = True
+                if user_info['user_email'] in admin_info['admins']:
+                    response['admin'] = True
+            else:
+                if user_info['user_email'] not in admin_info['pending_users']:
+                    admin_info['pending_users'].append(user_info['user_email'])
+                    ds_client.put(admin_info)
+        return json.dumps(response)
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
@@ -457,6 +528,10 @@ def publish():
         res = requests.post(post_endpoint, json=msg)
         print(res)
     return redirect("/landing/%s" % (workout_id))
+
+@app.route('/unauthorized', methods=['GET', 'POST'])
+def unauthorized():
+    return render_template("unauthorized.html")
 
 @app.errorhandler(500)
 def handle_500(e):

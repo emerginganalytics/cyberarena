@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title%} Admin {% endblock %}
+
+{% block content %}
+<script src='../static/login.js'></script>
+<script>
+    initApp = function(){
+        var auth_config = {
+          apiKey: '{{auth_config["api_key"]}}',
+          authDomain: '{{auth_config["auth_domain"]}}',
+          projectId: '{{auth_config["project_id"]}}'
+        };
+        //alert('{{auth_config["api_key"]}}');
+        firebase.initializeApp(auth_config);
+
+        firebase.auth().onAuthStateChanged(function(user){
+            if(user){
+                $.ajax({
+                    type: "POST",
+                    url: "/check_user_level",
+                    data: JSON.stringify({
+                        "user_email": user.email
+                    }),
+                    success: function(data){
+                        var json = $.parseJSON(data);
+                        if(json['admin'] == false){
+                            location.href = "/login";
+                        }else{
+                            document.getElementById('admin_container').style.visibility = "visible";                          
+                        }
+                    }
+                })
+            } else {
+                location.href="/login";
+            }
+        })
+
+    };
+    initApp();
+
+    function admin_action(action, user_email){
+        $.ajax({
+            type: "POST",
+            url: "/admin",
+            data: JSON.stringify({
+                "action": action,
+                "user_email": user_email
+            }),
+            success: function(data){
+                var json = $.parseJSON(data);
+                if(json['action_completed']){
+                    location.reload();
+                }else{
+                    alert("Action denied");
+                }
+            }
+        })
+    }
+</script>
+<style>
+    .user_group{
+        border: 1px solid black;
+        margin-bottom:1em;
+    }
+    #user_container{
+        display:flex;
+        flex-direction: row;
+        justify-content: space-evenly;
+        
+    }
+    .user_info{
+        margin-bottom:2em;
+        border-bottom: 1px solid grey;
+    }
+
+    .user_controls{
+        display:flex;
+        flex-direction:row;
+        justify-content: space-between;
+        padding-top:1em;
+        padding-bottom:1em;
+    }
+
+    .user_controls .btn{
+        font-size:0.9em;
+        padding:0;
+    }
+
+    .user_list li{
+        margin-bottom:1em;
+        background-color:lightgrey;
+    }
+
+    
+</style>
+<h1>Administrator Controls</h1>
+
+<div id="admin_container" style="visibility: hidden;margin-bottom:1em;">
+
+    <div id='user_container'>
+        <div id='admin_users' class='user_group col-3'>
+            <h2>Admin Users</h2>
+            <ul class='user_list'>
+                {% for user in admin_info['admins'] %}
+                    <li>
+                        <a class='btn' data-toggle='collapse' href='#admin_user_{{user}}'>{{user}}</a>
+                        <div id='admin_user_{{user}}' class='collapse user_info'>
+                            <div class='user_controls'>
+                                <button class='btn' onclick="admin_action('revoke_access', '{{user}}')">Revoke Admin Access</button>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id='authorized_users' class='user_group col-3'>
+            <h2>Authorized Users</h2>
+            <ul class='user_list'>
+                {% for user in admin_info['authorized_users'] %}
+                    {% if user not in admin_info['admins'] %}
+                        <li>
+                            <a class='btn' data-toggle='collapse' href='#auth_user_{{user}}'>{{user}}</a>
+                            <div id='auth_user_{{user}}' class='collapse user_info'>
+                                <div class='user_controls'>
+                                    <button class='btn' onclick="admin_action('promote_user', '{{user}}')" style='background-color:green;'>Promote to Admin</button>
+                                    <button class='btn' onclick="admin_action('remove_user', '{{user}}')">Remove</button>
+                                </div>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        <div id='pending_users' class='user_group col-3'>
+            <h2>Pending</h2>
+            <ul class='user_list'>
+                {% for user in admin_info['pending_users'] %}
+                    <li>
+                        <a class='btn' class='user_link' data-toggle='collapse' href='#pending_user_{{user}}'>{{user}}</a>
+                        <div id='pending_user_{{user}}' class='collapse user_info'>
+                            <div class='user_controls'>
+                                <button class='btn' onclick="admin_action('approve_user','{{user}}')" style='background-color:green;'>Approve</button>
+                                <button class='btn' onclick="admin_action('deny_user', '{{user}}')">Deny</button>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}
