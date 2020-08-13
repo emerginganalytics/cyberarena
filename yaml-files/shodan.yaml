@@ -2,16 +2,15 @@ version: '1'
 
 workout:
   name: "Shodan"
-  build_type: "container"
-  workout_description: 'Using Shodan API to find vulnerable public access data'
+  workout_description: 'Using Shodan API to find vulnerable data'
   teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_virtual-arkansas/ShodanTeacherWorkoutInstructions.pdf"
   student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_virtual-arkansas/ShodanStudentWorkoutInstructions.pdf"
   workout_url_path: 'https://cybergym-shodanlite-v7k2apwaqa-uc.a.run.app/loader'
-  project_name: ualr-cybersecurity
+  dnszone: "cybergym-public"
+  build_type: "container"
  
 container_info:
   
-
 assessment:
   type: "percentage"
   questions:

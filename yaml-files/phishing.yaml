@@ -33,7 +33,6 @@ servers:
         subnet: default
         external_NAT: true
 
-
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
   - name: allow-all-local-external
@@ -54,7 +53,7 @@ assessment:
   questions:
     - type: auto
       key: "hxHXan1FFTKaXRkZ"
-      question: "Final Task for Phishing workout"
+      question: "Install Flash Update!"
       script:
       server: cybergym-phishing
       operating-system: linux
