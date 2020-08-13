@@ -203,6 +203,7 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
         'complete': False,
         'container_info': container_info,
         'assessment': assessment,
+        'state': 'RUNNING'
     })
 
     ds_client.put(new_workout)

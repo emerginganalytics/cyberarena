@@ -5,13 +5,15 @@ workout:
   workout_description: 'Learn about a basic buffer overflow exploit.'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/BufferOverflowTeacher.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/BufferOverflow.pdf"
-  project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
   dnszone: "cybergym-public"
-  project_api_key_type: cloud
-  flag_location:
   build_type: "compute"
+
+student_entry:
+  type: vnc
+  username: cybergym
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.44
 
 networks: 
   - name: external-network
@@ -20,18 +22,6 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-bufferoverflow-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
-    network_routing: false
-    tags: {items: ["http-server", "labentry"]}
-    metadata: none
-    guac_path: "NDAAYwBteXNxbA=="
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.10
-        subnet: default
-        external_NAT: true
   - name: cybergym-bufferoverflow
     image: image-cybergym-bufferoverflow
     machine_type: "n1-standard-1"
@@ -49,12 +39,6 @@ routes:
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
-  - name: allow-http
-    network: external-network
-    target_tags: ["http-server"]
-    protocol: none
-    ports: ["tcp/80", "tcp/8080", "tcp/443"]
-    source_ranges: ["0.0.0.0/0"]
   - name: allow-all-local-external
     network: external-network
     target_tags: []
@@ -66,12 +50,6 @@ firewall_rules:
     target_tags: ["vnc-server"]
     protocol: tcp
     ports: ["tcp/5901-5909"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-https
-    network: external-network
-    target_tags: ["https-server"]
-    protocol: none
-    ports: ["tcp/443"]
     source_ranges: ["0.0.0.0/0"]
 assessment:
   type: "percentage"
