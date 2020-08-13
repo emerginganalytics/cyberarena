@@ -24,8 +24,6 @@ student-servers:
 
 additional-containers-apps:
   - name: johnnyhash
-    path: md5
-  - name: johnnyhash
     path: cipher-warehouse
 
 # If additional networks are needed for servers, these are added here.
@@ -36,10 +34,6 @@ additional-networks:
 additional-servers:
   - name: cybergym-arena2-ftp
     image: cybergym-arena2-ftp
-#  - name: cybergym-hidden
-#    image: image-cybergym-hiddensite
-#  - name: cybergym-nessus
-#    image: image-cybergym-nessus-arena
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
