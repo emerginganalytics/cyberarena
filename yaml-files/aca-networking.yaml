@@ -9,7 +9,7 @@ student_entry:
   type: rdp
   security-mode: any
   username: forge
-  password: "F0rg3up!4theWIN!"
+  password: "F0rg3up!"
   network: external-network
   ip: 10.0.0.2
 
