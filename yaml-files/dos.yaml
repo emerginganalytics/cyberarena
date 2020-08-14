@@ -56,36 +56,23 @@ servers:
         subnet: default
         external_NAT: False
 
-
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
-  - name: allow-http
-    network: external-network
-    target_tags: ["http-server"]
-    protocol: none
-    ports: ["tcp/80", "tcp/8080"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-https
-    network: external-network
-    target_tags: ["https-server"]
-    protocol: none
-    ports: ["tcp/443"]
-    source_ranges: ["0.0.0.0/0"]
   - name: allow-vnc
     network: external-network
     target_tags: ["vnc-server"]
     protocol: tcp
     ports: ["tcp/5901-5909"]
     source_ranges: ["0.0.0.0/0"]
-  - name: allow-ftp
-    network: external-network
-    target_tags: ["allow-ftp"]
-    protocol: tcp
-    ports: ["tcp/21"]
-    source_ranges: ["0.0.0.0/0"]
-  - name: allow-all-local-external
-    network: external-network
-    target_tags: []
-    protocol: tcp
-    ports: ["tcp/any", "udp/any", "icmp/any"]
-    source_ranges: ["10.1.0.0/16"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "NcxJp6D9DerKrr2M"
+      question: "Active DoS Check"
+      script: "dos-completion.py"
+      script-language: "python"
+      server: cybergym-wireshark
+      operating-system: linux
+      complete: False
