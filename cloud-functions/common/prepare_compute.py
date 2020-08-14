@@ -158,6 +158,7 @@ def build_guacamole_server(build, network, guacamole_connections):
         ds_client.put(workout)
 
         safe_password = connection['password'].replace('$', '\$')
+        safe_password = safe_password.replace("'", "''")
         startup_script += workout_globals.guac_startup_user_add.format(user=guac_user,
                                                                        name=guac_user,
                                                                        guac_password=guac_connection_password)
