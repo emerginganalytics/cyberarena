@@ -10,8 +10,8 @@ workout:
 
 student_entry:
   type: rdp
-  username: cybergym
-  password: "Let's workout!"
+  username: workout
+  password: "Promiseme!"
   network: external-network
   ip: 10.1.1.11
 
