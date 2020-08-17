@@ -167,15 +167,8 @@ def xss(workout_id):
         bad_request = 'bad request'
         if request.args.get('bad_request'):
             bad_request = request.args.get('bad_request')
-        if request.method == 'POST':
-            name = request.form['name']
-            # xssdb.add_comment(request.form['comment'])
 
-        search_query = request.args.get('q')
-
-        comments = xssdb.get_comments(search_query)
-        return render_template(page_template, name=name, bad_request=bad_request, comments=comments,
-                               search_query=search_query, workout_id=workout_id)
+        return render_template(page_template, name=name, bad_request=bad_request, workout_id=workout_id)
     else:
         return redirect(404)
 
@@ -186,16 +179,31 @@ def xss_r(workout_id):
     workout = ds_client.get(key)
     if workout['type'] == 'xss':
         page_template = 'xss_r'
-        render_template(page_template, workout_id=workout_id)
+        name = 'Stranger'
+        if request.method == 'POST':
+            name = request.form['name']
+        render_template(page_template, name=name, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
 @app.route("/workouts/xss_s/<workout_id>", methods=['GET', 'POST'])
-def xss_r(workout_id):
+def xss_s(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     if workout['type'] == 'xss':
         page_template = 'xss_s'
-        render_template(page_template, workout_id=workout_id)
+        name = 'Stranger'
+        if request.method == 'POST':
+            xssdb.add_comment(request.form['comment'])
+
+        search_query = request.args.get('q')
+
+        comments = xssdb.get_comments(search_query)
+
+        render_template(page_template, name=name, comments=comments, search_query=search_query, workout_id=workout_id)
+    else:
+        return redirect(404)
 
 
 @app.route('/workouts/tfh/<workout_id>')
