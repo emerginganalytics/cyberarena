@@ -3,12 +3,18 @@ version: '1'
 workout:
   name: spoofing
   workout_description: 'Experience a Spoofing Attack'
-  project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
+  teacher_instructions_url:
+  student_instructions_url:
   dnszone: "cybergym-public"
   project_api_key_type: cloud
-  flag_location:
+  build_type: "compute"
+
+student_entry:
+  type: rdp
+  username: workout
+  password: "Promiseme!"
+  network: external-network
+  ip: 10.1.1.4
 
 networks: 
   - name: external-network
@@ -17,18 +23,6 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
-  - name: cybergym-labentry 
-    image: image-labentry
-    machine_type: "n1-standard-1" 
-    network_routing: false
-    tags: {items: ["http-server", "https-server", "labentry"]}
-    metadata: none
-    guac_path: "MQBjAG15c3Fs"
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.10
-        subnet: default
-        external_NAT: true
   - name: cybergym-windows
     image: image-windows
     machine_type: "n1-standard-1"
@@ -48,7 +42,7 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.9
+        internal_IP: 10.1.1.4
         subnet: default
         external_NAT: false
         
