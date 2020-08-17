@@ -8,7 +8,6 @@ workout:
 
 student_entry:
   type: vnc
-  username: cybergym
   password: "Let's workout!"
   network: external-network
   ip: 10.1.1.13
@@ -24,7 +23,7 @@ servers:
     image: image-dvwalab
     machine_type: "n1-standard-1"
     network_routing: false
-    tags: {items["allow-ssh"]}
+    tags: none
     metadata: none
     nics:
       - network: external-network
