@@ -152,11 +152,21 @@ def server_start(server_name):
     :param server_name: The Datastore entity name of the server to start
     :return: A boolean status on the success of the start
     """
+    print(f'Beginning to start {server_name}')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     state_transition(entity=server, new_state=SERVER_STATES.STARTING)
-    workout_globals.refresh_api()
-    response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
-    print(f'Sent start request to {server_name}, and waiting for response')
+    success = False
+    i = 0
+    while not success and i < 5:
+        try:
+            workout_globals.refresh_api()
+            response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
+            success = True
+            print(f'Sent start request to {server_name}, and waiting for response')
+        except BrokenPipeError:
+            print(f'Broken Pipe error for {server_name}. Trying again')
+            i += 1
+
     i = 0
     success = False
     while not success and i < 5:
@@ -237,5 +247,5 @@ def server_delete(server_name):
                              change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
     return True
 
-# server_start('hxckdwxwld-nested')
+# server_start('hxckdwxwld-tigerking')
 # server_delete('oztfvquhhi-cybergym-publicprivate')

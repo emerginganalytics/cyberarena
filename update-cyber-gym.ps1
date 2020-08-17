@@ -135,14 +135,6 @@ if ($confirmation -eq 'y') {
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
         --timeout=540s `
         --trigger-topic=stop-workouts
-    gcloud functions deploy --quiet function-stop-vm `
-        --region=$region `
-        --memory=256MB `
-        --entry-point=cloud_fn_stop_vm `
-        --runtime=python37 `
-        --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
-        --timeout=540s `
-        --trigger-topic=stop-vm
 }
 
 $confirmation = Read-Host "Do you want to update INDIVIDUAL cloud functions? (y/N)"
@@ -172,7 +164,7 @@ if ($confirmation -eq 'y') {
     gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
 }
 
-$confirmation = Read-Host "Do you want to update the cloud images? (y/N)"
+$confirmation = Read-Host "Do you want to update ALL cyber gym cloud images? WARNING: This could take a while! (y/N)"
 if ($confirmation -eq 'y') {
     gcloud compute --project=$project images delete image-labentry
     gcloud compute --project=$project images create image-labentry --source-image=image-labentry --source-image-project=ualr-cybersecurity
@@ -221,4 +213,15 @@ if ($confirmation -eq 'y') {
     gcloud compute --project=$project images delete image-promise-win-16
     gcloud compute --project=$project images create image-promise-win-16 --source-image=image-promise-win-16 --source-image-project=ualr-cybersecurity
     gcloud compute --project=$project images delete image-cybergym-activedirectory-domaincontroller
+}
+
+$confirmation = Read-Host "Do you want to update individual cyber gym cloud images? (y/N)"
+if ($confirmation -eq 'y') {
+    Do
+    {
+        $image = Read-Host "  Which image would you like to update?"
+        gcloud compute --project=$project images delete $image
+        gcloud compute --project=$project images create $image --source-image=$image --source-image-project=ualr-cybersecurity
+        $confirmation = Read-Host "Do you want to update any more images? (y/N)"
+    } While ($confirmation –eq ‘y’)
 }
