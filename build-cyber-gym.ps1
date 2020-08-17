@@ -69,7 +69,6 @@ if ($confirmation -eq 'y') {
     gcloud pubsub topics create stop-all-servers
     gcloud pubsub topics create stop-lapsed-arenas
     gcloud pubsub topics create stop-workouts
-    gcloud pubsub topics create stop-vm
 }
 
 # Create and copy over bucket files
@@ -78,13 +77,17 @@ if ($confirmation -eq 'y') {
     gsutil mb gs://"$project"_cloudbuild
     gsutil mb gs://student_workout_instructions_"$project"
     gsutil mb gs://teacher_workout_instructions_"$project"
+    gsutil mb gs://assessment-uploads_"$project"
     gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
     gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
     gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
     gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
     gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
     gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$project"
+    gsutil acl ch -u AllUsers:R gs://assessment-uploads_"$project"
     gsutil acl ch -r -u cybergym-service@"$project".iam.gserviceaccount.com:R gs://"$project"_cloudbuild
+    gsutil retention set 1m gs://assessment-uploads_"$project"
+
 }
 
 # Create project defaults
@@ -182,14 +185,6 @@ if ($confirmation -eq 'y') {
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
         --timeout=540s `
         --trigger-topic=stop-workouts
-    gcloud functions deploy --quiet function-stop-vm `
-        --region=$region `
-        --memory=256MB `
-        --entry-point=cloud_fn_stop_vm `
-        --runtime=python37 `
-        --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
-        --timeout=540s `
-        --trigger-topic=stop-vm
 }
 
 

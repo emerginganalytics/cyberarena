@@ -96,10 +96,16 @@ def server_build(server_name):
     #     compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
-    workout_globals.refresh_api()
-    response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
-    print(f'Sent job to build {server_name}, and waiting for response')
-
+    i = 0
+    build_success = False
+    while not build_success and i < 5:
+        workout_globals.refresh_api()
+        try:
+            response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
+            build_success = True
+            print(f'Sent job to build {server_name}, and waiting for response')
+        except BrokenPipeError:
+            i += 1
     i = 0
     success = False
     while not success and i < 5:
