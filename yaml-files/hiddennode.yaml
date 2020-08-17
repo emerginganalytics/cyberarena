@@ -10,7 +10,7 @@ student_entry:
   type: vnc
   password: "Let's workout!"
   network: external-network
-  ip: 10.1.1.10
+  ip: 10.1.1.20
 
 networks: 
   - name: external-network
@@ -27,7 +27,7 @@ servers:
     metadata: none
     nics:
       - network: external-network
-        internal_IP: 10.1.1.10
+        internal_IP: 10.1.1.20
         subnet: default
         external_NAT: false
   - name: dvwalab
