@@ -1,12 +1,14 @@
 from app import app
 from flask import redirect, request, render_template, abort, jsonify, make_response
-import time
+import requests
+import subprocess
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     page_template = "index.jinja"
 
-    if request.method == 'GET':
+   if request.method == 'GET':
         return render_template(page_template)
 
     elif request.method == 'POST':
@@ -72,21 +74,36 @@ def fake_login():
             login_error = ' '
             return render_template(page_template, login_error=login_error)
 
-
-@app.route('/fake')
+@app.route('/fake', methods=['GET', 'POST'])
 def fake():
-    import os
-    
     page_template = 'flag.jinja'
-    if request.method == 'POST':
-       os.system("python3 /usr/local/bin/cg-publish.py phishing")
-       return redirect('/totally-not-malware')
-    else:
-        return render_template(page_template)
+
+    # Handling the workout complete request:
+    if request.method == 'POST': 
+        URL = 'https://buildthewarrior.cybergym-eac-ualr.org/complete'
+        URL2 = 'https://buildthewarrior.test-cybergym.org/complete'
+
+        workout_id = subprocess.Popen(['sudo', 'printenv', 'WORKOUTID'])
+        workout_key = subprocess.Popen(['sudo', 'printenv', 'WORKOUTKEY0'])
+
+        status = {
+            "workout_id": workout_id,
+            "token": workout_key,
+        }
+
+        try:
+            publish = requests.post(URL, json=status)
+            print(f'[*] POSTING to {URL} ...')
+        except publish.status != 200:
+            requests.post(URL2, json=status)
+            print(f'[*] POSTING to {URL2} ...') 
+        return redirect('/totally-not-malware')
+
+    return render_template(page_template)
 
 
 @app.route('/totally-not-malware', methods=['GET'])
-def download():
+def end():
     page_template = 'download.jinja'
 
     if request.method == 'GET':
@@ -95,7 +112,7 @@ def download():
         return 405
 
 
-@app.route('/nope')
+@app.route('/nope', methods=['GET'])
 def nope():
     page_template = 'nope.jinja'
     return render_template(page_template)

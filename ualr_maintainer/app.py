@@ -6,7 +6,7 @@ import requests
 from stop_workout import stop_workout
 from start_workout import start_workout
 from reset_workout import reset_workout
-from globals import ds_client, dns_suffix, project, workout_globals, logger, workout_token, post_endpoint, auth_config
+from globals import ds_client, dns_suffix, project, workout_globals, log_client, workout_token, post_endpoint, auth_config, logger
 from utilities.pubsub_functions import *
 from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
@@ -31,12 +31,8 @@ app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 # Default route
 @app.route('/')
 def default_route():
-    http_request = google.auth.transport.requests.Request()
-    id_token = request.headers['Authorization']
-    claims = google.oauth2.id_token.verify_firebase_token(id_token, http_request)
-    # assertion = request.headers.get('X-Goog-IAP-JWT-Assertion')
-    # email, id = validate_assertion(assertion)
-    # return render_template('no_workout.html')
+    return render_template('login.html', auth_config=auth_config)
+
     
 
 # Workout build route
@@ -304,6 +300,8 @@ def check_workout_state(workout_id):
 def start_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
+        g_logger = log_client.logger(str(workout_id))
+        g_logger.log_text(str('Starting workout ' + workout_id))
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
         if 'time' not in request.form:
             workout['run_hours'] = 2
@@ -325,6 +323,8 @@ def start_vm():
 def stop_vm():
     if (request.method == 'POST'):
         workout_id = request.form['workout_id']
+        g_logger = log_client.logger(str(workout_id))
+        g_logger.log_text(str('Stopping workout ' + workout_id))
         try:
             pub_stop_vm(workout_id)
         except:

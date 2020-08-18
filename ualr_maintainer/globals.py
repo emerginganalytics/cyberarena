@@ -2,6 +2,7 @@ import sys
 import logging
 import googleapiclient.discovery
 from google.cloud import datastore, storage, runtimeconfig
+from google.cloud import logging as g_logging
 
 
 runtimeconfig_client = runtimeconfig.Client()
@@ -15,6 +16,7 @@ script_repository = myconfig.get_variable('script_repository').value.decode("utf
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
+log_client = g_logging.Client()
 dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 
