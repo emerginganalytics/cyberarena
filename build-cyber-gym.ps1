@@ -108,6 +108,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_build_arena `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=build_arena
     gcloud functions deploy --quiet function-build-workouts `
@@ -116,6 +117,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_build_workout `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=build-workouts
     gcloud functions deploy --quiet function-delete-expired-workouts `
@@ -124,6 +126,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_delete_expired_workout `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=maint-del-tmp-systems
     gcloud functions deploy --quiet function-delete-expired-arenas `
@@ -132,6 +135,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_delete_expired_arenas `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=delete_arena
     gcloud functions deploy --quiet function-manage-server `
@@ -140,6 +144,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_manage_server `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=manage-server
     gcloud functions deploy --quiet function-start-arena `
@@ -148,6 +153,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_start_arena `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=start-arena
     gcloud functions deploy --quiet function-start-vm `
@@ -156,6 +162,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_start_vm `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=start-vm
     gcloud functions deploy --quiet function-stop-all-servers `
@@ -164,6 +171,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_stop_all_servers `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=stop-all-servers
     gcloud functions deploy --quiet function-stop-lapsed-arenas `
@@ -172,6 +180,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_stop_lapsed_arenas `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=stop-lapsed-arenas
     gcloud functions deploy --quiet function-stop-lapsed-workouts `
@@ -180,6 +189,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_stop_lapsed_workouts `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=stop-workouts
     gcloud functions deploy --quiet function-stop-vm `
@@ -188,6 +198,7 @@ if ($confirmation -eq 'y') {
         --entry-point=cloud_fn_stop_vm `
         --runtime=python37 `
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=stop-vm
 }
