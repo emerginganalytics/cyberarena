@@ -5,7 +5,7 @@ workout:
   workout_description: 'Perform a Denial of Service attack against a computer in your network and observe the impact on the computer'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/DOSWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/DOSWorkoutInstructions.pdf"
-  project_name: ualr-cybersecurity
+  dnszone: "cybergym-public"
   build_type: "compute"
 
 student_entry:
@@ -32,7 +32,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.18
         subnet: default
-        external_NAT: False
+        external_NAT: True
   - name: cybergym-wireshark
     image: image-cybergym-wireshark
     machine_type: "n1-standard-1"
@@ -54,7 +54,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.33
         subnet: default
-        external_NAT: False
+        external_NAT: True
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
