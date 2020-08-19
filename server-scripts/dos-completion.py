@@ -9,9 +9,9 @@ url = "https://buildthewarrior.cybergym-eac-ualr.org/complete"
 def check_cpu_usage():
     current_cpu_percent = psutil.cpu_percent(interval=1)
     if current_cpu_percent >= 30.0:
-        publish()
+        return True
     else:
-        print("Incomplete")
+        return False
 
 
 def publish():
@@ -24,3 +24,9 @@ def publish():
     }
 
     publish = requests.post(url, json=workout)
+
+
+if check_cpu_usage():
+    publish()
+else:
+    print("Incomplete")
