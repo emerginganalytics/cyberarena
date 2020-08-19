@@ -6,13 +6,14 @@ workout:
  network protocols'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/ReconWithWiresharkWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ReconWithWiresharkWorkoutInstructions.pdf"
-  project_name: ualr-cybersecurity
-  region: "us-central1"
-  zone: "us-central1-a"
   dnszone: "cybergym-public"
-  project_api_key_type: cloud
-  flag_location:
   build_type: "compute"
+
+  student_entry:
+    type: vnc
+    password: "Let's workout!"
+    network: external-network
+    ip: 10.1.1.9
 
 networks:
   - name: external-network
