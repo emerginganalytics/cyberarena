@@ -82,13 +82,8 @@ def landing_page(workout_id):
                                     (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
 
         guac_path = None
-        if 'servers' in workout:
-            for server in workout['servers']:
-                if server['guac_path'] != None:
-                    guac_path = server['guac_path']
-        if not guac_path:
-            if unit['build_type'] == 'container':
-                guac_path = unit['workout_url_path']
+        if unit['build_type'] == 'container':
+            guac_path = unit['workout_url_path']
 
         student_instructions_url = None
         if 'student_instructions_url' in workout:
@@ -127,7 +122,7 @@ def landing_page(workout_id):
                                score=percentage_correct, guac_user=workout_user, guac_pass=workout_password)
 
         return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url, 
+                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
                                state=workout_state, shutoff=shutoff, workout_id=workout_id, workout_name=unit['workout_name'], assessment=assessment,
                                assessment_type=assessment_type, guac_user=workout_user, guac_pass=workout_password)
     else:
