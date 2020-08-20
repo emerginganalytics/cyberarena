@@ -11,7 +11,7 @@
                 $("assessment_reveal").click(function(){
                     $("#assessment_form").fadeIn();
                 })
-                
+                check_workout_state();
             })
             var state_checker = setInterval(check_workout_state, 10000);
 
@@ -21,32 +21,51 @@
                     url: "/workout_state/{{ workout_id }}",
                     traditional: "true",
                     success: function(data){
+                        var state_display = document.getElementById("workout_state_display");
+                
                         if(data == "RUNNING"){
-                            location.reload();
+                            state_display.style.color = "green";
+                            state_display.innerHTML = "RUNNING";
+                            $("#stop-vm").removeAttr("disabled");     
+                            $("#reset-vm").removeAttr("disabled");                      
+                        } else if(data == "READY"){
+                            state_display.style.color = "red";
+                            state_display.innerHTML = "STOPPED";
+                            $("#start-vm").removeAttr("disabled");
+                        } else{
+                            state_display.style.color = "orange";
+                            state_display.innerHTML = "WORKING";
+                            $("#start-vm").attr("disabled");
+                            $("#stop-vm").attr("disabled");
+                            $("#reset-vm").attr("disabled");
                         }
                     }
 
                 })
             }
+
         </script>
     {% endif %}
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
-            <div id="workout-form" class='container-fluid'>
-                <div id="logo" class="center">
-                    <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
-                </div>
+            <div id="logo" class="center container-fluid">
+                {% if CUSTOM_LOGO_LOCATION %}
+                <img src="{{ CUSTOM_LOGO_LOCATION }}" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
+                {% else %}
+                <img src="/static/CyberGymLogo.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
+                {% endif %}
             </div>
             <br><h2>Workout Control</h2><br>
-                {% if state == "RUNNING" %}
+            <p>Workout status: <span id='workout_state_display'></span></p><br>
+            <!-- {% if state == "RUNNING" %}
                 <p>Workout status: <span id='workout_state_running' style="color:green">RUNNING</span></p><br>
                 {% else %}
                 <p>Workout status: <span id='workout_state_stopped' style="color:red">STOPPED</span></p><br>
                 <script>
 
                 </script>
-                {% endif %}
+            {% endif %} -->
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
 
@@ -57,10 +76,10 @@
                                 <label>Run time (1 - 10 hours)</label>
                         </div>
                         <div class="btn-ctn">
-                            {% if state == "RUNNING" %}
-                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
-                            {% else %}
+                            {% if state == "READY" %}
                                 <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
+                            {% else %}
+                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
                             {% endif %}
                         </div>
                     </form>
@@ -81,7 +100,7 @@
                     <form action="/reset_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
-                                <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUT</button>
+                                <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
                         </div>
                     </form>
             
@@ -179,7 +198,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-         <script>
+         <!-- <script>
                 $(document).ready(function(){
                     // Initialize Tooltip
                     $('[data-toggle="tooltip"]').tooltip();
@@ -204,7 +223,7 @@
                         }
                     });
                 });
-        </script>
+        </script> -->
     </div>
 {% endblock %}
     <!-- </html> -->

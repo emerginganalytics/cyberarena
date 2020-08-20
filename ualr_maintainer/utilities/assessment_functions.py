@@ -174,17 +174,10 @@ def process_assessment(workout, workout_id, request, assessment):
 def get_auto_assessment(workout):    
     if workout:
         if 'assessment' in workout:
-            if workout['assessment'] and 'questions' in workout:
+            if workout['assessment'] and 'questions' in workout['assessment']:
                 question_list = []
                 for question in workout['assessment']['questions']:
                     if question['type'] == 'auto':
                         question_list.append(question)
-            else:
-                return False
-            
-            if not question_list:
-                return False
-            
-            return question_list
-        else:
-            return False
+                return question_list
+    return False
