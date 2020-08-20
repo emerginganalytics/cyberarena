@@ -1,2 +1,0 @@
-google-api-core
-google-cloud-pubsub

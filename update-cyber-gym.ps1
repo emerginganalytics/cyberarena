@@ -21,7 +21,7 @@ if ($confirmation -eq 'y') {
 # Update cybergym-classified
 $confirmation = Read-Host "Do you want to update cybergym-classified? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path .\).Path "\labs\classified"
+    $sourcepath = Join-Path (Resolve-Path .\).Path "\workouts\classified"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-classified
     gcloud run deploy --image gcr.io/$project/cybergym-classified --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -29,7 +29,7 @@ if ($confirmation -eq 'y') {
 # Update Shodan
 $confirmation = Read-Host "Do you want to update cybergym-shodanlite? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path .\).Path "\labs\Shodan"
+    $sourcepath = Join-Path (Resolve-Path .\).Path "\workouts\Shodan"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-shodanlite
     gcloud run deploy --image gcr.io/$project/cybergym-shodanlite --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -37,7 +37,7 @@ if ($confirmation -eq 'y') {
 # Update Arena Snake
 $confirmation = Read-Host "Do you want to update Arena Snake? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path .\).Path "\labs\Arena Snake"
+    $sourcepath = Join-Path (Resolve-Path .\).Path "\workouts\Arena Snake"
     gcloud builds submit $sourcepath --tag gcr.io/$project/arena-snake-loader
     gcloud run deploy --image gcr.io/$project/arena-snake-loader --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -45,7 +45,7 @@ if ($confirmation -eq 'y') {
 # Update JohnnyHash
 $confirmation = Read-Host "Do you want to update Johnny Hash? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path .\).Path "\labs\cryptoserver"
+    $sourcepath = Join-Path (Resolve-Path .\).Path "\workouts\cryptoserver"
     gcloud builds submit $sourcepath --tag gcr.io/$project/johnnyhash
     gcloud run deploy --image gcr.io/$project/johnnyhash --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
