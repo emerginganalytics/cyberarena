@@ -10,7 +10,7 @@ url = f"https://buildthewarrior{dns_suffix}/complete"
 
 def check_cpu_usage():
     current_cpu_percent = psutil.cpu_percent(interval=1)
-    if current_cpu_percent >= 30.0:
+    if current_cpu_percent >= 15.0:
         return True
     else:
         return False
