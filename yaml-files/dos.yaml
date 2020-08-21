@@ -92,6 +92,6 @@ assessment:
       question: "Active DoS Check"
       script: "dos-completion.py"
       script-language: "python"
-      server: cybergym-wireshark
+      server: cybergym-classified
       operating-system: linux
       complete: False
