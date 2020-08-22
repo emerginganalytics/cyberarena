@@ -19,6 +19,9 @@ def get_assessment_questions(workout):
                     if question['type'] == 'input':
                         question_dict['answer'] = question['answer']
                     question_dict['type'] = question['type']
+                    if question['type'] == 'auto':
+                        question_dict['key'] = question['key']
+                        question_dict['complete'] = question['complete']
                     if workout['type'] == 'arena':
                         question_dict['point_value'] = question['points']
                         question_list.append(question_dict)

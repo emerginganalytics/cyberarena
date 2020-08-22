@@ -44,17 +44,5 @@ function configureFirebaseLoginWidget() {
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
     }
-// [END gae_python_firebase_login]
 
-// Sign out a user
-var signOutBtn =$('#sign-out');
-signOutBtn.click(function(event) {
-    event.preventDefault();
-
-    firebase.auth().signOut().then(function() {
-        console.log("Sign out successful");
-    }, function(error) {
-        console.log(error);
-    });
-});
 
