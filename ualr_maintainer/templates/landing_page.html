@@ -1,8 +1,12 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
 {% extends "base.html" %}
+{% endif %}
 
 {% block title%} Workout {{ workout_id }} {% endblock %}
 {% import 'nuke_macro.html' as nuke %}
-
+{% import 'logo_macro.html' as logo %}
 
     {% block content%}
     {% if state != "RUNNING" %}
@@ -49,13 +53,7 @@
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
-            <div id="logo" class="center container-fluid">
-                {% if CUSTOM_LOGO_LOCATION %}
-                <img src="{{ CUSTOM_LOGO_LOCATION }}" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
-                {% else %}
-                <img src="/static/CyberGymLogo.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
-                {% endif %}
-            </div>
+            {{ logo.logo_div() }}
             <br><h2>Workout Control</h2><br>
             <p>Workout status: <span id='workout_state_display'></span></p><br>
             <!-- {% if state == "RUNNING" %}
@@ -168,31 +166,42 @@
                 </script>
             </div> <!--Workout info container-->
                 {% if assessment %}
-                <br>
-                    {% if assessment_type == 'percentage' %}
-                    <div class='container' id='assessment'>
-                        <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                        <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
-                        {% for question in assessment%}
-                            {% if question['type'] == 'input' %}
-                                <div class='question_group'>
-                                    <input type="hidden" name="question" value="{{ question['question'] }}" />
-                                    {{ question['question'] }}<br>
-                                    <input type='text' name="answer" />
-                                </div>
-                            {% elif question['type'] == 'upload' %}
-                                <div class='question_group'>
-                                <input type="hidden" name="upload_prompt" value="{{ question['question'] }}" />
+                <br>  
+                <div class='container' id='assessment'>
+                    <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
+                    <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
+                    {% for question in assessment%}
+                        {% if question['type'] == 'input' %}
+                            <div class='question_group'>
+                                <input type="hidden" name="question" value="{{ question['question'] }}" />
                                 {{ question['question'] }}<br>
-                                <input type='file' id='assessment_file_upload' name='file_upload'><br><br>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
-                        <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
-                        </form><br>
-                    </div> <!--Assessment Dropdown-->
+                                <input type='text' name="answer" />
+                            </div>
+                        {% elif question['type'] == 'upload' %}
+                            <div class='question_group'>
+                            <input type="hidden" name="upload_prompt" value="{{ question['question'] }}" />
+                            {{ question['question'] }}<br>
+                            <input type='file' id='assessment_file_upload' name='file_upload'><br><br>
+                            </div>
+                        {% elif question['type'] == 'auto' %}
+                            <div class='question_group'>
+                                <input type="hidden" name="question" value="{{ question['question'] }}" />
+                                {{ question['question'] }}
+                                {% if question['complete'] %}
+                                <span style='color:green;'>Complete</span>
+                                {% else %}
+                                <span style='color:red;'>Not completed</span>
+                                {% endif %}
+                                <br>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% if assessment_type == 'percentage' %}
+                    <button type='submit' class="btn" style="margin-top:0;text-align:center;">Submit</button>
                     {% endif %}
-                {% endif %}
+                    </form><br>
+                </div> <!--Assessment Dropdown-->
+                    {% endif %}
         </div>
     </div> <!--Main Container-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
