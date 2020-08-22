@@ -2,9 +2,9 @@
 import os
 import requests
 import psutil
-import subprocess
+from subprocess import check_output
 
-dns_suffix = subprocess.Popen(['sudo', 'printenv', 'DNS_SUFFIX'])
+dns_suffix = check_output(['sudo', 'printenv', 'DNS_SUFFIX'], universal_newlines=True).strip()
 url = f"https://buildthewarrior{dns_suffix}/complete"
 
 
@@ -30,5 +30,6 @@ def publish():
 
 if check_cpu_usage():
     publish()
+    print("Workout Complete")
 else:
     print("Incomplete")
