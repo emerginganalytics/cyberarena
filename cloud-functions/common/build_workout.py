@@ -69,11 +69,18 @@ def build_workout(workout_id):
             nics = []
             for n in server['nics']:
                 nic = {
-                    "network": "%s-%s" % (workout_id, n['network']),
+                    "network": f"{workout_id}-{n['network']}",
                     "internal_IP": n['internal_IP'],
-                    "subnet": "%s-%s-%s" % (workout_id, n['network'], n['subnet']),
+                    "subnet": f"{workout_id}-{n['network']}-{n['subnet']}",
                     "external_NAT": n['external_NAT']
                 }
+                # Nested VMs are sometimes used for vulnerable servers. This adds those specified IP addresses as
+                # aliases to the NIC
+                if 'IP_aliases' in n and n['IP_aliases']:
+                    alias_ip_ranges = []
+                    for ipaddr in n['IP_aliases']:
+                        alias_ip_ranges.append({"ipCidrRange": ipaddr})
+                    nic['aliasIpRanges'] = alias_ip_ranges
                 nics.append(nic)
             # Add the startup script for assessment as metadata if it exists
             meta_data = None
@@ -136,4 +143,4 @@ def build_workout(workout_id):
     
         create_firewall_rules(firewall_rules)
 
-# build_workout('etnbeibtvk')
+# build_workout('isirdhzjqk')
