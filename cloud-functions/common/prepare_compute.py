@@ -59,8 +59,10 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         }
         if 'internal_IP' in network:
             add_network_interface['networkIP'] = network["internal_IP"]
-        networkInterfaces.append(add_network_interface)
 
+        if 'aliasIpRanges' in network:
+            add_network_interface['aliasIpRanges'] = network['aliasIpRanges']
+        networkInterfaces.append(add_network_interface)
     config = {
         'name': name,
         'machineType': machine,
