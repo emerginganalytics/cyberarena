@@ -62,12 +62,12 @@ servers:
   - name: nested
     image: redteam-capstone-nested-win2k8-xp
     machine_type: "n1-standard-4"
-    network_routing: True
     nics:
       - network: external-network
-        internal_IP: 10.0.0.40
+        internal_IP: 10.0.0.5
         subnet: default
-        external_NAT: False  
+        external_NAT: False
+        IP_aliases: [10.0.0.20, 10.0.0.40]
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:

@@ -1,4 +1,8 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
 {% extends "base.html" %}
+{% endif %}
 {% block title %}Workout Builder{% endblock %}
 {% block content %}
 <script src='../static/login.js'></script>

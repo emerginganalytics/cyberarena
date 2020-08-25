@@ -1,5 +1,9 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
 {% extends "base.html" %}
-
+{% endif %}
+{% import "logo_macro.html" as logo %}
 {% block title %}Unit {{ unit_id }}{% endblock %}
 
 {% block content %}
@@ -11,9 +15,7 @@
 </style>
     <div class="row">
         <div class='controls col-lg-2' style="border: 1px solid black">
-            <div id="logo" class="center">
-                <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
-            </div>
+            {{ logo.logo_div() }}
             <div class="control_button">
                 <form action="/start_all" method="post">
                     <div class="input-field" >
