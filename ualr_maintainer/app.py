@@ -506,18 +506,6 @@ def complete_verification():
             return 'OK', 200
         else:
             logger.info("In complete_verification: Completion key %s does NOT exist in assessment dict! Aborting" % token)
-    '''
-        if (workout_request["token"] == workout_token):
-            logger.info("Completion token matches. Setting the workout to complete.")
-            workout_id = workout_request["workout_id"]
-            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-            workout["complete"] = True
-            ds_client.put(workout)
-            logger.info('%s workout is marked complete.' % workout_id)
-            return 'OK', 200
-        else:
-            logger.info("In complete_verification: Completion token does NOT match! Aborting")
-    '''
 
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
