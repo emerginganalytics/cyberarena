@@ -19,6 +19,9 @@ def get_assessment_questions(workout):
                     if question['type'] == 'input':
                         question_dict['answer'] = question['answer']
                     question_dict['type'] = question['type']
+                    if question['type'] == 'auto':
+                        question_dict['key'] = question['key']
+                        question_dict['complete'] = question['complete']
                     if workout['type'] == 'arena':
                         question_dict['point_value'] = question['points']
                         question_list.append(question_dict)
@@ -174,17 +177,10 @@ def process_assessment(workout, workout_id, request, assessment):
 def get_auto_assessment(workout):    
     if workout:
         if 'assessment' in workout:
-            if workout['assessment'] and 'questions' in workout:
+            if workout['assessment'] and 'questions' in workout['assessment']:
                 question_list = []
                 for question in workout['assessment']['questions']:
                     if question['type'] == 'auto':
                         question_list.append(question)
-            else:
-                return False
-            
-            if not question_list:
-                return False
-            
-            return question_list
-        else:
-            return False
+                return question_list
+    return False

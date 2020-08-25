@@ -3,9 +3,9 @@ import calendar
 import random
 import string
 from yaml import load, Loader
-
+from os import path, makedirs
 from google.cloud import datastore
-from globals import ds_client, storage_client, workout_globals
+from globals import ds_client, storage_client, workout_globals, project
 from werkzeug.utils import secure_filename
 
 
@@ -353,3 +353,37 @@ def retrieve_student_uploads(workout_id):
             image_url = blob.public_url
             file_list.append(image_url)
     return file_list
+
+def get_custom_logo():
+    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    folder_path = './static/logo/'
+    blob = bucket.get_blob('logo/logo.png')
+    if blob:
+        if not path.exists(folder_path):
+            makedirs(folder_path)
+        destination_path = './static/{}'.format(blob.name)
+
+        blob.download_to_filename(destination_path)
+        return destination_path
+    else:
+        return False
+
+def get_custom_base():
+    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    folder_path = './templates/{}-base.html'.format(project)
+    blob = bucket.get_blob('base_template/{}-base.html'.format(project))
+    if blob:
+        blob.download_to_filename(folder_path)
+        return '{}-base.html'.format(project)
+    else:
+        return False
+
+def store_custom_logo(logo):
+    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    new_blob = bucket.blob('logo/logo.png')
+    new_blob.upload_from_file(logo)
+
+def store_custom_base(base):
+    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    new_blob = bucket.blob('base_template/{}-base.html'.format(project))
+    new_blob.upload_from_file(base)

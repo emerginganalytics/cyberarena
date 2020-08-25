@@ -1,10 +1,6 @@
-<!-- {% macro test(text_value) -%}
-<h1 id='this_was_a_macro'> {{text_value}} </h1>
-{%- endmacro %} -->
 {% macro nukeButton(workout_id) -%}
 <script type = "text/javascript" src="{{ url_for('static', filename='macro_scripts.js') }}"></script>
 
-<!-- <a class='btn' style='background-color:red; color: white; font-weight: bold;' onclick='testFunction("{{ workout_id }}");'>NUKE {{workout_id}}</a> -->
 <style>
     .nuke_btn{
         background-color:red!important;

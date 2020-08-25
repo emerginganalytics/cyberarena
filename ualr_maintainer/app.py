@@ -2,6 +2,7 @@ import time
 import list_vm
 import start_workout
 import requests
+from os import path
 
 from stop_workout import stop_workout
 from start_workout import start_workout
@@ -12,7 +13,7 @@ from workout_build_functions import build_workout
 from datastore_functions import get_unit_workouts
 from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 from utilities.yaml_functions import parse_workout_yaml
-from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads
+from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads, get_custom_logo, get_custom_base, store_custom_logo, store_custom_base
 from utilities.assessment_functions import get_assessment_questions, process_assessment
 from werkzeug.utils import secure_filename
 from calendar import timegm
@@ -26,6 +27,8 @@ import json
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
+app.jinja_env.globals['CUSTOM_LOGO_LOCATION'] = get_custom_logo()
+app.jinja_env.globals['BASE_TEMPLATE'] = get_custom_base()
 
 # TODO: add something at default route to direct users to correct workout?
 # Default route
@@ -260,6 +263,21 @@ def admin_page():
         
     return render_template('admin_page.html', auth_config=auth_config, admin_info=admin_info)
 
+@app.route('/update_logo', methods=['POST'])
+def update_logo():
+    if request.method == "POST":
+        data = request.files['custom_logo']
+        store_custom_logo(data)
+        app.jinja_env.globals['CUSTOM_LOGO_LOCATION'] = get_custom_logo()
+    return redirect('/teacher_home')
+
+@app.route('/update_base', methods=['POST'])
+def update_base():
+    if request.method == "POST":
+        data = request.files['custom_base']
+        store_custom_base(data)
+        app.jinja_env.globals['BASE_TEMPLATE'] = get_custom_base()
+    return redirect('/teacher_home')
 
 @app.route('/teacher_info', methods=['GET', 'POST'])
 def get_teacher_info():

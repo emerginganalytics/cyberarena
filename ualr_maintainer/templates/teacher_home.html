@@ -1,8 +1,15 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
 {% extends "base.html" %}
+{% endif %}
+{% import 'logo_macro.html' as logo %}
+
 {% block title %}Teacher Home Page{% endblock %}
 
 {% block content %}
 <script src='../static/login.js'></script>
+
 <script>
   function generateTableHeaders(table, data){
     let header = table.createTHead();
@@ -196,9 +203,7 @@
 
 <div class='row'>
   <div id='teacher_controls' class='col-3'>
-    <div class='image_container' style='text-align: center;'>
-      <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
-    </div>
+    {{logo.logo_div() }}
     <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
     
     <div  id="build_workout_widget" class="input-group mb-3 unit_build_container" style="margin-bottom:1em;">
@@ -230,4 +235,5 @@
     <h2 style='text-align: center;'>Your Units</h2>
   </div>
 </div>
+
 {% endblock %}

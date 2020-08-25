@@ -1,4 +1,8 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
 {% extends "base.html" %}
+{% endif %}
 
 {% block title%}Arena {{unit_id}}{% endblock%}
 
