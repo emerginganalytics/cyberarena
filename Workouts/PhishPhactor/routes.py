@@ -1,7 +1,7 @@
 from app import app
 from flask import redirect, request, render_template, abort, jsonify, make_response
+from subprocess import Popen, PIPE
 import requests
-import subprocess
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -74,20 +74,22 @@ def fake_login():
             login_error = ' '
             return render_template(page_template, login_error=login_error)
 
+
 @app.route('/fake', methods=['GET', 'POST'])
 def fake():
     page_template = 'flag.jinja'
 
     # Handling the workout complete request:
     if request.method == 'POST':
-        dns_suffix = subprocess.Popen(['sudo', 'printenv', 'DNS_SUFFIX']) 
-        URL = f'https://buildthewarrior{dns_suffix}/complete'
-        workout_id = subprocess.Popen(['sudo', 'printenv', 'WORKOUTID'])
-        workout_key = subprocess.Popen(['sudo', 'printenv', 'WORKOUTKEY0'])
+        # Get Values from Environment Variables
+        dns_suffix = Popen(['sudo', 'printenv', 'DNS_SUFFIX'], stdout=PIPE).stdout.read().decode() 
+        URL = f'https://buildthewarrior{dns_suffix.rstrip()}/complete'
+        workout_id = Popen(['sudo', 'printenv', 'WORKOUTID'], stdout=PIPE).stdout.read().decode()
+        workout_key = Popen(['sudo', 'printenv', 'WORKOUTKEY0'], stdout=PIPE).stdout.read().decode()
 
         status = {
-            "workout_id": workout_id,
-            "token": workout_key,
+            "workout_id": workout_id.rstrip(),
+            "token": workout_key.rstrip(),
         }
         publish = requests.post(URL, json=status)
         print(f'[*] POSTING to {URL} ...') 
