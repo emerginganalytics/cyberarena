@@ -1,10 +1,9 @@
-import math
-import re
 """
     Thanks to JamesLyons (https://github.com/jameslyons/pycipher/blob/master/pycipher/columnartransposition.py#L45)
     for part of the logic used to encrypt and decrypt the column transposition cipher.
 """
-
+import math
+import re
 
 class ColTransposition(object):
     def __init__(self, message=None, keyword=None, encrypt=False, decrypt=True):
@@ -67,11 +66,6 @@ class ColTransposition(object):
         self.decrypt    = decrypt
         self.ciphertext = ""
         self.plaintext  = ""
-        '''
-            For readability, we will separate ciphertext and plaintext
-            even though logically calling one over the other will not 
-            change the outcome of message encryption or decryption
-        '''
 
     def __repr__(self):
         if self.encrypt:
@@ -178,19 +172,3 @@ class ColTransposition(object):
         :return: formatted message
         """
         return re.sub(filter, '', message)
-
-'''cipher = "SSdtIGltcHJlc3NlZCB5b3Ugd2VyZSBhYmxlIHRvIGNyYWNrIHRoaXMgb25lLiBVbmZvcnR1bmF0ZWx5LCBpdCBpcyB0b28gbGF0ZS4g" \
-         "WW91ciBlbnRpcmUgc3lzdGVtIGlzIGNvcnJ1cHRlZC4NClRvIG15IGtub3dsZWRnZSwgSSd2ZSBtYW5hZ2VkIHRvIGdldCBhd2F5IHdpd" \
-         "GhvdXQgZ2V0dGluZyBjYXVnaHQuIERlc3BpdGUgdGhpcyAoYW5kIGFzIHByb21pc2VkKSwgSSBoYXZlDQpwcm92aWRlZCB0aGUgdGhpcmQ" \
-         "gYW5kIGZpbmFsIGtleSBuZWNlc3NhcnkgdG8gcmVzdG9yZSB5b3VyIHNlcnZlci4gQ3liZXJHeW17IDhSNWZzWnNCd21qcFU1eHAgfS4NCl" \
-         "N0YXkgdmlnaWxhbnQh"
-
-cipher = "SWYgeW91IHdlcmUgYWJsZSB0byBmaWd1cmUgdGhpcyBvbmUgb3V0LCB5b3UgdHJ1bHkgYXJlIGEgd29ydGh5IG9wcG9uZW50LiBFbmpveSB0aGUgcmV3YXJkISBDeWJlckd5bXsgOEMyTUQ0S0paNDIxRTNXSU8gfQ=="
-keyword = "NullArray"
-ciphertext = ColTransposition(message=cipher, keyword=keyword, encrypt=True)
-print(ciphertext)
-
-encrypted = "emB1 c3Ug dG5v cSdy NU1Y yUvL HJyc iB3e XQxf YlZW hgbH E5Zm UkcE pXgc Sdpb 3kgI WpgI kMaS SHJm dmB1 IG9F aXJg ST=W U0cy VgY2 90em B5TD 89gb mB0d X9wL SVDb UIgW dsaG U5bG hubG JlO0 N=IW BgbC JldG B0YW s0RQ"
-plaintext = ColTransposition(message=encrypted, keyword=keyword, decrypt=True)
-print(plaintext)
-'''
