@@ -1,5 +1,5 @@
 import googleapiclient.discovery
-from globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
+from utilities.globals import ds_client, project, compute, dnszone, workout_globals, dns_suffix
 import time
 import calendar
 
