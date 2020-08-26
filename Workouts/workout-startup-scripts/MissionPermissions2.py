@@ -5,13 +5,18 @@ import requests
 import subprocess
 import time
 from time import localtime, strftime
+from subprocess import Popen, PIPE
 
 filename = '/usr/local/etc/protect_me/vulnerable.txt'
 log_file = "/usr/local/src/workout/MissionPermissions2/MissionPermissions2.log"
-dns_suffix = subprocess.Popen(['sudo', 'printenv', 'DNS_SUFFIX'])
-URL = f"https://buildthewarrior{dns_suffix}/complete"
+dns_suffix = Popen(['sudo', 'printenv', 'DNS_SUFFIX'],stdout=PIPE).stdout.read().decode()
+URL = f"https://buildthewarrior{dns_suffix.rstrip()}/complete"
 
-# Used for debugging
+'''
+    This function is used to log all activity for each run. If the workout is complete,
+    it will update the appropriate file with 'Complete'. This will ensure that the script
+    does not flood the Cyber Gym backend with POST requests.
+'''
 def log(event):
         logging.basicConfig(filename=log_file, level=logging.DEBUG)
         
@@ -61,12 +66,12 @@ def verify():
 # Publishes workout completion status
 def publish():
     # Get values from Environment Variables
-    TOKEN = os.environ.get('WORKOUTKEY0')
-    WORKOUT_ID = os.environ.get('WORKOUTID')
+    TOKEN = Popen(['sudo', 'printenv', 'WORKOUTKEY0'], stdout=PIPE).stdout.read().decode()
+    WORKOUT_ID = Popen(['sudo', 'printenv', 'WORKOUTID'], stdout=PIPE).stdout.read().decode()
 
     workout = {
-        "workout_id": WORKOUT_ID,
-        "token": TOKEN,
+        "workout_id": WORKOUT_ID.rstrip(),
+        "token": TOKEN.rstrip(),
     }
 
     publish = requests.post(URL, json=workout)
