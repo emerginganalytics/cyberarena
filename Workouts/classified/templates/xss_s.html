@@ -1,5 +1,4 @@
 {% extends "xss.html" %}
-
 {% block page_content %}
 <body>
 <header>
@@ -7,17 +6,31 @@
         <h1 style ="text-align:center; color:white;"> Stored Cross-Site Scripting </h1>
     </div>
 </header>
-    <div class="container mt-0">
-        <div style="border-radius:25px;background-color:whitesmoke; height:auto; width:80%; box-shadow:2px 5px;
-             border: 1px solid;" class="mx-auto d-block">
-            <div style="padding:1.5em 1.5em 0;height:auto;">
-                <h1>Hello, {{ name }}! </h1>
-                <form name="XSS" action="#" method="POST">
-                    <p> Not a stranger? What's your name? We will store it this time so we know in the future!
-                        <input type="text" name="name" autocomplete="off">
-                        <input type="submit" value="Submit">
-                    </p>
+    <div class="container-fluid">
+        <div class="text-box">
+            <div class="text-area">
+                <h2>Would you trust UA Little Rock: Classified?<br><br>Submit your feedback
+                here!<br></h2>
+                <form style="display:inline-block;" action="/workouts/xss_s" method="POST">
+                    <input type="text" name="feedback" placeholder="Feedback" autocomplete="off" />
+                    <input type="submit" value="Submit Feedback" />
                 </form>
+                <form style="display:inline-block;" method="GET">
+                    <input type="text" name="query" placeholder="Search Query" autocomplete="off" />
+                    <input type="submit" value="Filter Feedback" />
+                </form>
+                {% if not search_query %}
+                    <h3>Showing all feedback:</h3>
+                {% else %}
+                    <h3>Showing all feedback containing "{{ search_query | safe }}":</h3>
+                {% endif %}
+
+                {% for feedback in feedbacks %}
+                    <div>
+                        <p>{{ feedback | safe }}</p>
+                    </div>
+                {% endfor %}
+
             </div>
         </div>
     </div>
