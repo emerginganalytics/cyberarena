@@ -1,4 +1,4 @@
-from globals import storage_client, workout_globals
+from utilities.globals import storage_client, workout_globals
 
 
 def parse_workout_yaml(workout_type):

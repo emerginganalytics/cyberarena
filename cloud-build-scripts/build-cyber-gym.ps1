@@ -252,7 +252,7 @@ if ($confirmation -eq 'y') {
 # Create main application
 $confirmation = Read-Host "Do you want to create the main application at this time? Please note, you must also set up a DNS CNAME pointing cybergym to ghs.googlehosted.com. (y/N)"
 if ($confirmation -eq 'y') {
-$sourcepath = Join-Path (Resolve-Path .\).Path "ualr_maintainer"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "cyber-gym"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
     gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
     gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
