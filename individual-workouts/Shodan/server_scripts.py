@@ -1,15 +1,3 @@
-"""
-    What this function will do:
-    Populate the datastore with information on 3-4 preset query results.
-    Can store service names, cve's, ips, etc.
-
-    Last option will be a wildcard where students create their own query
-    on a object they want to find and submit a screenshot
-    of 1 result from the query results page. We don't need to store any
-    data for this query.
-
-    Data will be validated on the Student / Teacher Landing pages
-"""
 import logging
 import shodan
 import shodan.helpers as helpers
@@ -27,6 +15,18 @@ project = myconfig.get_variable('project').value.decode("utf-8")
 logger = logging.getLogger()
 
 def populate_datastore(workout_id):
+    """
+        What this function will do:
+        Populate the datastore with information on 3-4 preset query results.
+        Can store service names, cve's, ips, etc.
+
+        Last option will be a wildcard where students create their own query
+        on a object they want to find and submit a screenshot
+        of 1 result from the query results page. We don't need to store any
+        data for this query.
+
+        Data will be validated on the Student / Teacher Landing pages
+    """
     api = shodan.Shodan(SHODAN_API_KEY)
     workout_key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(workout_key)
