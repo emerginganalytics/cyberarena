@@ -1,7 +1,7 @@
 version: '1'
 
 workout:
-  name: "sql"
+  name: sql
   build_type: "container"
   workout_description: 'Perform a SQL injection on a vulnerable SQL database'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/SQLInjectionWorkoutTeacherInstructions.pdf"
