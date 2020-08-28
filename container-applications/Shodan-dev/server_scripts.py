@@ -1,31 +1,26 @@
 import logging
-import os
 import shodan
 import shodan.helpers as helpers
 
-from dotenv import load_dotenv
 from google.cloud import datastore, runtimeconfig
 
-logger = logging.getLogger()
-
-"""Shodan Globals"""
-load_dotenv()
-SHODAN_API_KEY = os.getenv('SHODAN_API_KEY')
-
-"""Google Cloud Project Globals"""
+# Globals
+SHODAN_API_KEY = 'N81y8YZTBIUfVmrEa1ZL8ywi119Pz1pT'
 ds_client = datastore.Client()
 runtimeconfig_client = runtimeconfig.Client()
 myconfig = runtimeconfig_client.config('cybergym')
 project = myconfig.get_variable('project').value.decode("utf-8")
 
+logger = logging.getLogger()
 
 def populate_datastore(workout_id):
     """
         What this function will do:
-        Populate the datastore with information on 3-4 preset query results.
-        Can store service names, cve's, ips, etc.
-        Submissions will be validated by the main Cyber Gym application before
-        marking the appropriate questions as complete.
+        Populate the datastore with specific information from the
+        query results based on the preset question list in the workout 
+        YAML. Can store service names, cve's, ips, etc.
+
+        Data will be validated on the Student / Teacher Landing pages
     """
     api = shodan.Shodan(SHODAN_API_KEY)
     workout_key = ds_client.key('cybergym-workout', workout_id)
