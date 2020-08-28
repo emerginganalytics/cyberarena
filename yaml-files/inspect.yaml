@@ -1,7 +1,7 @@
 version: '1'
 
 workout:
-  name: "inspect"
+  name: inspect
   build_type: "container"
   workout_description: 'Find useful information left behind by developers using the inspect element tool'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/InspectWorkoutTeacherInstructions.pdf"

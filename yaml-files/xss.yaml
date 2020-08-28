@@ -1,7 +1,7 @@
 version: '1'
 
 workout:
-  name: "xss"
+  name: xss
   build_type: "container"
   workout_description: 'Understand one of the most common web application vulnerabilities: Cross-Site Scripting (XSS)'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/XSSWorkoutTeacherInstructions.pdf"
