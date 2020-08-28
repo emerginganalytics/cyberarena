@@ -5,14 +5,9 @@ This script uses gcloud and gsutil to build a new Cyber Gym for a Google Cloud P
 
 Preqrequisites:
     1. Create a mirrored bucket to the Cyber Gym repo at https://cloud.google.com/source-repositories/docs/mirroring-a-bitbucket-repository
-    2. Enable the following APIs at https://console.cloud.google.com/apis/library
-        c. App Engine Admin API
-        g. Cloud Scheduler API
-
 
 Post-Execution:
-    1. Point DNS to the one indicated by the provided suffix
-    2. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
+  Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
         a. Compute Engine API (Subnetworks) - MCB * 2
         b. Compute Engine API (Networks) - MCB * 1
         c. Compute Engine API (Firewall Rules) - MCB * 3
@@ -252,7 +247,7 @@ if ($confirmation -eq 'y') {
 # Create main application
 $confirmation = Read-Host "Do you want to create the main application at this time? Please note, you must also set up a DNS CNAME pointing cybergym to ghs.googlehosted.com. (y/N)"
 if ($confirmation -eq 'y') {
-$sourcepath = Join-Path (Resolve-Path .\).Path "ualr_maintainer"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "cyber-gym"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
     gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
     gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region

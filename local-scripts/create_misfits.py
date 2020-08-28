@@ -1,4 +1,4 @@
-from globals import ds_client, project, dnszone, compute
+from utilities.globals import ds_client
 
 
 def create_misfits(field, operator, filter):

@@ -5,7 +5,7 @@ import string
 from yaml import load, Loader
 from os import path, makedirs
 from google.cloud import datastore
-from globals import ds_client, storage_client, workout_globals, project
+from utilities.globals import ds_client, storage_client, workout_globals, project
 from werkzeug.utils import secure_filename
 
 

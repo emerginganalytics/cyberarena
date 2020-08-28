@@ -9,7 +9,7 @@ import calendar
 
 
 # Global variables for this function
-from globals import ds_client, compute, project, dnszone, dns_suffix
+from utilities.globals import compute
 
 
 def student_firewall_add(project, workout_id, ip_address):
