@@ -315,21 +315,10 @@ def start_vm():
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
         # workout['running'] = True
         ds_client.put(workout)
-<<<<<<< HEAD:cyber-gym/app.py
 
         pub_start_vm(workout_id)
         return redirect("/landing/%s" % (workout_id))
-=======
-        
-        try:
-            # print("VM Starting")
-            pub_start_vm(workout_id)
-            # start_workout(workout_id)
-        except:
-            compute = workout_globals.refresh_api()
-            start_workout(workout_id)
-        return 'VM Started'
->>>>>>> 5f276826d70d5dacb88ac463730bc702f7441d1b:ualr_maintainer/app.py
+
 
 # Called by stop workout buttons on landing pages
 @app.route('/stop_vm', methods=['GET', 'POST'])
