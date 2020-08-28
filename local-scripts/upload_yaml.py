@@ -1,6 +1,6 @@
 # Run this script to upload / update YAML files in the cloud bucket
 
-from globals import storage_client, workout_globals
+from utilities.globals import storage_client, workout_globals
 import os
 
 # get bucket with name

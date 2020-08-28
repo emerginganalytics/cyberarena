@@ -1,9 +1,7 @@
 from google.cloud import pubsub_v1
-from google.cloud.pubsub import types
 
-from globals import workout_globals, project
+from utilities.globals import workout_globals, project
 from utilities.datastore_functions import get_unit_workouts
-from time import sleep
 
 
 def pub_build_request_msg(unit_id, topic_name):

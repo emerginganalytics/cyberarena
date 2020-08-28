@@ -1,26 +1,16 @@
 import time
-import list_vm
-import start_workout
 import requests
-from os import path
 
 from stop_workout import stop_workout
-from start_workout import start_workout
 from reset_workout import reset_workout
-from globals import ds_client, dns_suffix, project, workout_globals, log_client, workout_token, post_endpoint, auth_config, logger
+from utilities.globals import ds_client, dns_suffix, log_client, workout_token, post_endpoint, auth_config, logger
 from utilities.pubsub_functions import *
-from workout_build_functions import build_workout
-from datastore_functions import get_unit_workouts
-from identity_aware_proxy import certs, get_metadata, validate_assertion, audience
 from utilities.yaml_functions import parse_workout_yaml
-from utilities.datastore_functions import process_workout_yaml, store_student_uploads, retrieve_student_uploads, get_custom_logo, get_custom_base, store_custom_logo, store_custom_base
+from utilities.datastore_functions import process_workout_yaml, retrieve_student_uploads, get_custom_logo, \
+    get_custom_base, store_custom_logo, store_custom_base, get_unit_workouts
 from utilities.assessment_functions import get_assessment_questions, process_assessment
-from werkzeug.utils import secure_filename
-from calendar import timegm
-import google.oauth2.id_token
-import google.auth.transport.requests
-from flask import Flask, render_template, redirect, request, jsonify
-from forms import CreateWorkoutForm, CreateExpoForm
+from flask import Flask, render_template, redirect, request
+from forms import CreateWorkoutForm
 import json
 # --------------------------- FLASK APP --------------------------
 
@@ -325,6 +315,11 @@ def start_vm():
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
         # workout['running'] = True
         ds_client.put(workout)
+<<<<<<< HEAD:cyber-gym/app.py
+
+        pub_start_vm(workout_id)
+        return redirect("/landing/%s" % (workout_id))
+=======
         
         try:
             # print("VM Starting")
@@ -334,6 +329,7 @@ def start_vm():
             compute = workout_globals.refresh_api()
             start_workout(workout_id)
         return 'VM Started'
+>>>>>>> 5f276826d70d5dacb88ac463730bc702f7441d1b:ualr_maintainer/app.py
 
 # Called by stop workout buttons on landing pages
 @app.route('/stop_vm', methods=['GET', 'POST'])
@@ -384,11 +380,8 @@ def start_all():
             else:
                 workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
             ds_client.put(workout)
-            try:
-                pub_start_vm(workout_id['name'])
-            except:
-                workout_globals.refresh_api()
-                start_workout(workout_id['name'])
+
+            pub_start_vm(workout_id['name'])
 
         return redirect("/workout_list/%s" % (unit_id))
 
@@ -565,25 +558,6 @@ def handle_404(e):
 @app.route('/privacy', methods=['GET'])
 def privacy():
     return render_template('privacy.html')
-
-@app.route('/Xv9RxioJIE0Zdk8FFJh7naJQtVG/<workout_type>', methods=['GET', 'POST'])
-def expo(workout_type):
-    """ Temporary workout page for the online signature experience expo
-    Args:
-         Workout_type - The workout name and yaml file name to build
-    Returns:
-        An expo page for several people to participate in a workout at once.
-    """
-    form = CreateExpoForm()
-    if form.validate_on_submit():
-        unit_id = build_workout(form, workout_type)
-        if unit_id == False:
-            return render_template('no_workout.html')
-        url = '/workout_list/%s' % (unit_id)
-        return redirect(url)
-    return render_template('expo_page.html', form=form, workout_type=workout_type)
-
-
 
 
 if __name__ == '__main__':

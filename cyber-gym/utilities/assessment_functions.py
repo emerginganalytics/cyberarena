@@ -1,8 +1,6 @@
 import json
-from flask import request
 from utilities.datastore_functions import store_student_uploads, retrieve_student_uploads
-from globals import ds_client
-from calendar import timegm
+from utilities.globals import ds_client
 import time
 
 def get_assessment_questions(workout):
