@@ -1,0 +1,38 @@
+{% extends "xss.html" %}
+{% block page_content %}
+<body>
+<header>
+    <div>
+        <h1 style ="text-align:center; color:white;"> Stored Cross-Site Scripting </h1>
+    </div>
+</header>
+    <div class="container-fluid">
+        <div class="text-box">
+            <div class="text-area">
+                <h2>Would you trust UA Little Rock: Classified?<br><br>Submit your feedback
+                here!<br></h2>
+                <form style="display:inline-block;" action="/workouts/xss_s" method="POST">
+                    <input type="text" name="feedback" placeholder="Feedback" autocomplete="off" />
+                    <input type="submit" value="Submit Feedback" />
+                </form>
+                <form style="display:inline-block;" method="GET">
+                    <input type="text" name="query" placeholder="Search Query" autocomplete="off" />
+                    <input type="submit" value="Filter Feedback" />
+                </form>
+                {% if not search_query %}
+                    <h3>Showing all feedback:</h3>
+                {% else %}
+                    <h3>Showing all feedback containing "{{ search_query | safe }}":</h3>
+                {% endif %}
+
+                {% for feedback in feedbacks %}
+                    <div>
+                        <p>{{ feedback | safe }}</p>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}

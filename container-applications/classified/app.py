@@ -15,7 +15,6 @@ import onetimepass
 import pyqrcode
 import os
 import base64
-import xssdb
 
 # TODO: Server Side Template Injection
 # application instance
@@ -101,6 +100,29 @@ def hash_pass(passw):
     return m.hexdigest()
 
 
+def connect_xssdb():
+    xssdb = sqlite3.connect('xss.db')
+    xssdb.cursor().execute('CREATE TABLE IF NOT EXISTS feedbacks ''(id INTEGER PRIMARY KEY, ''feedback TEXT)')
+    xssdb.commit()
+    return xssdb
+
+
+def add_feedback(feedback):
+    xssdb = connect_xssdb()
+    xssdb.cursor().execute('INSERT INTO feedbacks (feedback) ''VALUES (?)', (feedback,))
+    xssdb.commit()
+
+
+def get_feedbacks(search_query=None):
+    xssdb = connect_xssdb()
+    results = []
+    get_all_query = 'SELECT feedback FROM feedbacks'
+    for (feedback,) in xssdb.cursor().execute(get_all_query).fetchall():
+        if search_query is None or search_query in feedback:
+            results.append(feedback)
+    return results
+
+
 @app.route('/loader/<workout_id>')
 def loader(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
@@ -118,7 +140,7 @@ def loader(workout_id):
         elif workout['type'] == 'sql':
             return redirect('/workouts/sql_injection' + workout_id)
     else:
-        return redirect('/invalid')
+        return redirect(404)
 
 
 @app.route('/')
@@ -178,11 +200,11 @@ def xss_r(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     if workout['type'] == 'xss':
-        page_template = 'xss_r'
+        page_template = 'xss_r.html'
         name = 'Stranger'
         if request.method == 'POST':
             name = request.form['name']
-        render_template(page_template, name=name, workout_id=workout_id)
+        return render_template(page_template, name=name, workout_id=workout_id)
     else:
         return redirect(404)
 
@@ -192,16 +214,15 @@ def xss_s(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
     if workout['type'] == 'xss':
-        page_template = 'xss_s'
-        name = 'Stranger'
+        page_template = 'xss_s.html'
         if request.method == 'POST':
-            xssdb.add_comment(request.form['comment'])
+            add_feedback(request.form['feedback'])
 
-        search_query = request.args.get('q')
+        search_query = request.args.get('query')
 
-        comments = xssdb.get_comments(search_query)
+        feedbacks = get_feedbacks(search_query)
 
-        render_template(page_template, name=name, comments=comments, search_query=search_query, workout_id=workout_id)
+        return render_template(page_template, feedbacks=feedbacks, search_query=search_query, workout_id=workout_id)
     else:
         return redirect(404)
 

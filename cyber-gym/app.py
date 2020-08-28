@@ -302,7 +302,10 @@ def check_workout_state(workout_id):
 @app.route('/start_vm', methods=['GET', 'POST'])
 def start_vm():
     if (request.method == 'POST'):
-        workout_id = request.form['workout_id']
+        data = request.get_json(force=True)
+        workout_id = None
+        if 'workout_id' in data:
+            workout_id = data['workout_id']
         g_logger = log_client.logger(str(workout_id))
         g_logger.log_text(str('Starting workout ' + workout_id))
         workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
@@ -310,17 +313,32 @@ def start_vm():
             workout['run_hours'] = 2
         else:
             workout['run_hours'] = min(int(request.form['time']), workout_globals.MAX_RUN_HOURS)
-        workout['running'] = True
+        # workout['running'] = True
         ds_client.put(workout)
+<<<<<<< HEAD:cyber-gym/app.py
 
         pub_start_vm(workout_id)
         return redirect("/landing/%s" % (workout_id))
+=======
+        
+        try:
+            # print("VM Starting")
+            pub_start_vm(workout_id)
+            # start_workout(workout_id)
+        except:
+            compute = workout_globals.refresh_api()
+            start_workout(workout_id)
+        return 'VM Started'
+>>>>>>> 5f276826d70d5dacb88ac463730bc702f7441d1b:ualr_maintainer/app.py
 
 # Called by stop workout buttons on landing pages
 @app.route('/stop_vm', methods=['GET', 'POST'])
 def stop_vm():
     if (request.method == 'POST'):
-        workout_id = request.form['workout_id']
+        data = request.get_json(force=True)
+        workout_id = None
+        if 'workout_id' in data:
+            workout_id = data['workout_id']
         g_logger = log_client.logger(str(workout_id))
         g_logger.log_text(str('Stopping workout ' + workout_id))
         try:
@@ -328,13 +346,19 @@ def stop_vm():
         except:
             compute = workout_globals.refresh_api()
             stop_workout(workout_id)
-        return redirect("/landing/%s" % (workout_id))
+        # return redirect("/landing/%s" % (workout_id))
+        return 'VM Stopped'
 
 # Called by reset workout buttons on landing pages
 @app.route('/reset_vm', methods=['GET', 'POST'])
 def reset_vm():
     if (request.method == 'POST'):
-        workout_id = request.form['workout_id']
+        data = request.get_json(force=True)
+        workout_id = None
+        if 'workout_id' in data:
+            workout_id = data['workout_id']
+        g_logger = log_client.logger(str(workout_id))
+        g_logger.log_text(str('Resetting workout ' + workout_id))
         try:
             reset_workout(workout_id)
         except:
