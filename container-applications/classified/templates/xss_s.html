@@ -11,7 +11,7 @@
             <div class="text-area">
                 <h2>Would you trust UA Little Rock: Classified?<br><br>Submit your feedback
                 here!<br></h2>
-                <form style="display:inline-block;" action="/workouts/xss_s" method="POST">
+                <form style="display:inline-block;" action="/workouts/xss_s/{{ workout_id }}" method="POST">
                     <input type="text" name="feedback" placeholder="Feedback" autocomplete="off" />
                     <input type="submit" value="Submit Feedback" />
                 </form>
