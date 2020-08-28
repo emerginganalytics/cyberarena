@@ -22,7 +22,7 @@ if ($confirmation -eq 'y') {
 # Update cybergym-classified
 $confirmation = Read-Host "Do you want to update cybergym-classified? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path ..\).Path "\individual-workouts\classified"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\classified"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-classified
     gcloud run deploy --image gcr.io/$project/cybergym-classified --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -30,7 +30,7 @@ if ($confirmation -eq 'y') {
 # Update Shodan
 $confirmation = Read-Host "Do you want to update cybergym-shodanlite? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path ..\).Path "\individual-workouts\Shodan"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\Shodan"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-shodanlite
     gcloud run deploy --image gcr.io/$project/cybergym-shodanlite --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -38,7 +38,7 @@ if ($confirmation -eq 'y') {
 # Update Arena Snake
 $confirmation = Read-Host "Do you want to update Arena Snake? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path ..\).Path "\individual-workouts\Arena Snake"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\Arena Snake"
     gcloud builds submit $sourcepath --tag gcr.io/$project/arena-snake-loader
     gcloud run deploy --image gcr.io/$project/arena-snake-loader --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -46,7 +46,7 @@ if ($confirmation -eq 'y') {
 # Update JohnnyHash
 $confirmation = Read-Host "Do you want to update Johnny Hash? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path ..\).Path "\individual-workouts\cryptoserver"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\cryptoserver"
     gcloud builds submit $sourcepath --tag gcr.io/$project/johnnyhash
     gcloud run deploy --image gcr.io/$project/johnnyhash --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
@@ -168,7 +168,7 @@ if ($confirmation -eq 'y') {
 
 $confirmation = Read-Host "Do you want to update build yaml specifications and startup scripts? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path .\).Path "\yaml-files\*.yaml"
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\yaml-files\*.yaml"
     gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
     gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
 }
