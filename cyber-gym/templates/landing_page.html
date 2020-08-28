@@ -9,15 +9,15 @@
 {% import 'logo_macro.html' as logo %}
 
     {% block content%}
-    {% if state != "RUNNING" %}
         <script>
             $(document).ready(function(){
+                var state_checker = setInterval(check_workout_state, 20000);
                 $("assessment_reveal").click(function(){
                     $("#assessment_form").fadeIn();
                 })
                 check_workout_state();
             })
-            var state_checker = setInterval(check_workout_state, 10000);
+            
 
             function check_workout_state(){
                 $.ajax({
@@ -26,36 +26,48 @@
                     traditional: "true",
                     success: function(data){
                         var state_display = document.getElementById("workout_state_display");
-                
+                        var workout_link = document.getElementById("workout_link");
                         if(data == "RUNNING"){
+                            workout_link.style.visibility = "visible";
                             state_display.style.color = "green";
                             state_display.innerHTML = "RUNNING";
+                            $("#start-vm").attr("disabled", "disabled");
                             $("#stop-vm").removeAttr("disabled");     
-                            $("#reset-vm").removeAttr("disabled");                      
+                            $("#reset-vm").removeAttr("disabled");   
+                            $(".loader").remove();                   
                         } else if(data == "READY"){
+                            workout_link.style.visibility = "hidden";
+
                             state_display.style.color = "red";
                             state_display.innerHTML = "STOPPED";
                             $("#start-vm").removeAttr("disabled");
+                            $("#stop-vm").attr("disabled", "disabled");
+                            $("#reset-vm").attr("disabled", "disabled");
+                            $(".loader").remove(); 
                         } else{
+                            workout_link.style.visibility = "hidden";
+
                             state_display.style.color = "orange";
                             state_display.innerHTML = "WORKING";
-                            $("#start-vm").attr("disabled");
-                            $("#stop-vm").attr("disabled");
-                            $("#reset-vm").attr("disabled");
+                            $("#start-vm").attr("disabled", "disabled");
+                            $("#stop-vm").attr("disabled", "disabled");
+                            $("#reset-vm").attr("disabled", "disabled");
+                            $(".loader").remove();  
                         }
+                        return data;
                     }
 
                 })
             }
 
         </script>
-    {% endif %}
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
             {{ logo.logo_div() }}
             <br><h2>Workout Control</h2><br>
-            <p>Workout status: <span id='workout_state_display'></span></p><br>
+            <p>Workout status: <span id='workout_state_display' style="color:red;">STOPPED</span></p><br>
+            <div id="loading-msg"></div>
             <!-- {% if state == "RUNNING" %}
                 <p>Workout status: <span id='workout_state_running' style="color:green">RUNNING</span></p><br>
                 {% else %}
@@ -67,7 +79,7 @@
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
 
-                    <form action="/start_vm" method="post">
+                    <form id='start_vm' action="/start_vm" method="post">
                         <div class="input-field" >
                                 <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                                 <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;">
@@ -83,7 +95,7 @@
                     </form>
                 </div>
                 <div class='control_button'>
-                    <form action="/stop_vm" method="post">
+                    <form id="stop_vm" action="/stop_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
                             {% if state == "RUNNING" %}
@@ -95,7 +107,7 @@
                     </form>
                 </div>
                 <div class='control_button'>
-                    <form action="/reset_vm" method="post">
+                    <form id="reset_vm" action="/reset_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
                                 <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
@@ -116,17 +128,11 @@
                 <p>Assessment Results: {{ score }}</p>
                 <p>*Results may not be final</p>
                 {% endif %}
-
-                {% if state == "RUNNING" %}
                 <br><h2>Workout Servers</h2>
-                    {% if guac_user == 'container' %}
-                        <a style="width:50%" class="btn" href="{{guac_path}}/{{workout_id}}" target="_blank" rel="noopener noreferrer">Enter your workout!</a>
-                    {% elif guac_path==None %}
-                        <a style="width:50%" class="btn" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
-                    {% else %}
-                        <a style="width:50%" class="btn" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/client/{{ guac_path}}" target="_blank">Enter your workout!</a>
-                    {% endif %}
-                        <p>*Machines may take a couple minutes to start</p>
+                {% if guac_user == 'container' %}
+                    <a style="width:50%" class="btn" id="workout_link" href="{{guac_path}}/{{workout_id}}" target="_blank" rel="noopener noreferrer">Enter your workout!</a>
+                {% else %}
+                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
                 {% endif %}
                 <br>
                 
@@ -146,19 +152,47 @@
 
 
 
-                <div id="loading-msg"></div>
+                
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
                 <script>
-                    $(document).ready(function(){
-                        $("form").submit(function(){
+                    /*$(document).ready(function(){
+                        $("form").submit(function(event){
                             $('#start-vm').attr('disabled','disabled');
                             $('#stop-vm').attr('disabled','disabled');
                             $('#reset-vm').attr('disabled','disabled');
                             $("#loading-msg").html('Please wait while the process completes' +
                                 '</br><div class="loader"></div>');
+                            
                         });
                     });
+                    */
+                    $(document).ready(function(){
+                        $("form").submit(function(event){
+                            event.preventDefault();
 
+                            $('#start-vm').attr('disabled','disabled');
+                            $('#stop-vm').attr('disabled','disabled');
+                            $('#reset-vm').attr('disabled','disabled');
+                            $("#loading-msg").html('Please wait while the process completes' +
+                                '</br><div class="loader"></div>');
+                            var currentState = document.getElementById("workout_state_display").innerHTML;
+                            var route = "/" + event.target.id;
+                            var workout_id = document.getElementById("workout_id").value;
+                            $.ajax({
+                                type: "POST",
+                                url: route,
+                                data: JSON.stringify({"workout_id": workout_id}),
+                                contentType: "application/json;charset=utf-8",
+                                success: function(data){
+                                    var newState = document.getElementById("workout_state_display").innerHTML;
+                                    while(newState == currentState){
+                                        var new_checker = setTimeout(check_workout_state, 15000);
+                                    }
+                                   
+                                }
+                            })
+                        })
+                    })
                     function reveal_assessment(){
                         $(".workout_assessment_form").fadeToggle();
                     }

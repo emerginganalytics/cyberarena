@@ -5,14 +5,9 @@ This script uses gcloud and gsutil to build a new Cyber Gym for a Google Cloud P
 
 Preqrequisites:
     1. Create a mirrored bucket to the Cyber Gym repo at https://cloud.google.com/source-repositories/docs/mirroring-a-bitbucket-repository
-    2. Enable the following APIs at https://console.cloud.google.com/apis/library
-        c. App Engine Admin API
-        g. Cloud Scheduler API
-
 
 Post-Execution:
-    1. Point DNS to the one indicated by the provided suffix
-    2. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
+  Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
         a. Compute Engine API (Subnetworks) - MCB * 2
         b. Compute Engine API (Networks) - MCB * 1
         c. Compute Engine API (Firewall Rules) - MCB * 3
