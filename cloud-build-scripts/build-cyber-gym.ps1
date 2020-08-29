@@ -20,7 +20,8 @@ Post-Execution:
  param (
     [string]$project = $( Read-Host "Input GCP project:" ),
     [string]$region = "us-central1",
-    [string]$dns_suffix = $( Read-Host "Input DNS suffix for project (e.g. .example-cybergym.com)" )
+    [string]$dns_suffix = $( Read-Host "Input DNS suffix for project (e.g. .example-cybergym.com)" ),
+    [string]$api_key = $( Read-Host "Input the OAuth2.0 API Key for this project" )
 
  )
 $uniqueid = Get-Random
@@ -91,6 +92,7 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "zone" "us-central1-a" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
     gcloud beta runtime-config configs variables set "script_repository" gs://"$project"_cloudbuild/startup-scripts/ --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
 }
 
 # Create the cloud functions
