@@ -317,7 +317,7 @@ def start_vm():
         ds_client.put(workout)
 
         pub_start_vm(workout_id)
-        return redirect("/landing/%s" % (workout_id))
+        return 'VM Started'
 
 
 # Called by stop workout buttons on landing pages
