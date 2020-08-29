@@ -30,6 +30,8 @@ if ($confirmation -eq 'y') {
 # Update Shodan
 $confirmation = Read-Host "Do you want to update cybergym-shodanlite? (y/N)"
 if ($confirmation -eq 'y') {
+    [string]$shodan_api_key = $( Read-Host "Input the Shodan API Key:" )
+    gcloud beta runtime-config configs variables set "SHODAN_API_KEY" $shodan_api_key --config-name "cybergym"
     $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\Shodan"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-shodanlite
     gcloud run deploy --image gcr.io/$project/cybergym-shodanlite --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
