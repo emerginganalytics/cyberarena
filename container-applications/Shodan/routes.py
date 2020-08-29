@@ -80,7 +80,7 @@ def data(workout_id):
     if workout:
         if workout['type'] == 'shodan':
             if request.method == "POST":
-                logger.info(f"POSTING to /data/{workout_id}")
+                logger.info(f"Sending POST to /data/{workout_id}")
                 return render_template(page_template, rawData=request.form.get('data'), workoutid=workout_id,)
             if request.method == "GET":
                 logger.info(f'GET /data/{workout_id}')

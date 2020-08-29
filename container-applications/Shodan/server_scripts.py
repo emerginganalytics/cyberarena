@@ -1,23 +1,18 @@
 import logging
-import os
 import shodan
 import shodan.helpers as helpers
 
-from dotenv import load_dotenv
 from google.cloud import datastore, runtimeconfig
 
 logger = logging.getLogger()
 
-"""Shodan Globals"""
-load_dotenv()
-SHODAN_API_KEY = os.getenv('SHODAN_API_KEY')
-
 """Google Cloud Project Globals"""
 ds_client = datastore.Client()
 runtimeconfig_client = runtimeconfig.Client()
+
 myconfig = runtimeconfig_client.config('cybergym')
 project = myconfig.get_variable('project').value.decode("utf-8")
-
+SHODAN_API_KEY = myconfig.get_variable('SHODAN_API_KEY').value.decode('utf-8')
 
 def populate_datastore(workout_id):
     """
@@ -60,5 +55,5 @@ def populate_datastore(workout_id):
     ds_client.put(workout)
 
     print(query_results)
-    response = 'Datastore Populated for workout %s' % workout_id
+    response = f'Datastore Populated for workout {workout_id}'
     return response
