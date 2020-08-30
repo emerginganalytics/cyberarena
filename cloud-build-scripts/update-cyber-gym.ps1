@@ -175,7 +175,7 @@ if ($confirmation -eq 'y') {
     gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
 }
 
-$confirmation = Read-Host "Do you want to update the cloud images? (y/N)"
+$confirmation = Read-Host "Do you want to copy over ALL available cloud images? (y/N)"
 if ($confirmation -eq 'y') {
     gcloud compute --project=$project images delete image-labentry
     gcloud compute --project=$project images create image-labentry --source-image=image-labentry --source-image-project=ualr-cybersecurity
@@ -224,4 +224,16 @@ if ($confirmation -eq 'y') {
     gcloud compute --project=$project images delete image-promise-win-16
     gcloud compute --project=$project images create image-promise-win-16 --source-image=image-promise-win-16 --source-image-project=ualr-cybersecurity
     gcloud compute --project=$project images delete image-cybergym-activedirectory-domaincontroller
+}
+
+$confirmation = Read-Host "Do you want to copy over INDIVIDUAL cloud images? (y/N)"
+if ($confirmation -eq 'y') {
+    DO
+    {
+        $image = Read-Host "  Which image would you like to copy?"
+        gcloud compute --project=$project images delete $image
+        gcloud compute --project=$project images create $image --source-image=$image --source-image-project=ualr-cybersecurity
+        $confirmation = Read-Host "Do you want to copy over any more server images? (y/N)"
+
+    } While ($confirmation –eq ‘y’)
 }
