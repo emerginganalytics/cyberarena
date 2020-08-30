@@ -27,7 +27,7 @@ servers:
       - network: external-network
         internal_IP: 10.1.1.20
         subnet: default
-        external_NAT: False
+        external_NAT: True
   - name: kali
     image: kali-full-nessus-image
     machine_type: "n1-standard-1"
@@ -36,15 +36,6 @@ servers:
         internal_IP: 10.1.1.30
         subnet: default
         external_NAT: False
-  - name: cybergym-classified
-    image: image-cybergym-classified
-    machine_type: "n1-standard-1"
-    nics:
-      - network: external-network
-        internal_IP: 10.1.1.33
-        subnet: default
-        external_NAT: False
-
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
