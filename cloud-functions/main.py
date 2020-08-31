@@ -4,6 +4,7 @@ from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts, stop_workout
 from common.compute_management import server_build, server_start, server_delete
+from common.publish_compute_image import create_production_image
 from common.globals import SERVER_ACTIONS
 
 
@@ -125,6 +126,25 @@ def cloud_fn_stop_lapsed_arenas(event, context):
     stop_lapsed_arenas()
 
 
+def cloud_fn_create_server_image(event, context):
+    """
+    Args:
+         event (dict):  The dictionary with data specific to this type of
+         event. The `data` field contains the PubsubMessage message. The
+         `attributes` field will contain custom attributes if there are any.
+         context (google.cloud.functions.Context): The Cloud Functions event
+         metadata. The `event_id` field contains the Pub/Sub message ID. The
+         `timestamp` field contains the publish time.
+    Returns:
+        A success status
+    """
+    server_name = event['attributes']['server_name'] if 'server_name' in event['attributes'] else None
+    if not server_name:
+        print(f'No server name provided in cloud_fn_manage_server for published message')
+        return
+    create_production_image(server_name)
+
+
 def cloud_fn_manage_server(event, context):
     """ Responds to a pub/sub event from other cloud functions to build servers.
     Args:
@@ -142,9 +162,11 @@ def cloud_fn_manage_server(event, context):
 
     if not server_name:
         print(f'No server name provided in cloud_fn_manage_server for published message')
+        return
 
     if not action:
         print(f'No action provided in cloud_fn_manage_server for published message.')
+        return
 
     if action == SERVER_ACTIONS.BUILD:
         server_build(server_name)
