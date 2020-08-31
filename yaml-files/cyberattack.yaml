@@ -5,7 +5,6 @@ workout:
   workout_description: 'Experience a botnet cyber-attack'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/CyberAttackWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/CyberAttackWorkoutStudentInstructions.pdf"
-  dnszone: "cybergym-public"
   build_type: "compute"
 
 student_entry:
