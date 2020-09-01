@@ -4,4 +4,4 @@ Documents
 * [User Guide](user-guide.md)
 * [Instructor Guide](instructor-guide.md)
 * [Student Guide](student-guide.md)
-* [Administrator Guide](administrator-guide.md)
+* [Administrator Guide](admin-guide.md)
