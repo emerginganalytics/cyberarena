@@ -19,26 +19,27 @@ Flask - Used for container applications
 In progress...
 
 ## Authors
-Andrew Bomberger
-Carter Williams
-Chance Melby
-Mark Barnes
-Nick Stewart
-Philip Huff
-Ryan Ronquillio
-Sam Willis
-Verdin-Pol Gaétan
-Zachary Long
+* Andrew Bomberger
+* Carter Williams
+* Chance Melby
+* Mark Barnes
+* Nick Stewart
+* Philip Huff
+* Ryan Ronquillio
+* Sam Willis
+* Verdin-Pol Gaétan
+* Zachary Long
 
 ## License
 This project is licensed under the MIT License - see the LICENSE.md file for details
 
 ## Acknowledgments
 This material is based upon work supported by the National Science Foundation under Grant No. 1623628. 
+
 Additional organizations who have been a huge help in getting cutting edge Cybersecurity labs to students:
-Google Cloud Team, particularly Marcus Forbes, Kyle Azua, and Greg Molnar in their direction
-Fortinet for help in deploying their cloud firewall VM
-Nessus scanning engine
-Shodan for their API search engine
-National FBI Training Academy for help in finding good test images
-Little Rock AFB 223rd Cyberspace Operations Squadron
+* Google Cloud Team, particularly Marcus Forbes, Kyle Azua, and Greg Molnar in their guidance and assistance
+* Fortinet for help in deploying their cloud firewall VM
+* Nessus scanning engine
+* Shodan for their API search engine
+* National FBI Training Academy for help in finding good test images
+* Little Rock Air Force Base 223rd Cyberspace Operations Squadron
