@@ -1,0 +1,31 @@
+{% extends 'pages/index.jinja' %}
+
+{% block navblock %}
+    {% if workout_id %}
+        <a href="/md5_page/{{ workout_id }}" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+            <i class="fa fa-laptop w3-xxlarge"></i>
+            <p>MD5</p>
+        </a>
+    {% endif %}
+{% endblock navblock %}
+
+{% block picture %}
+    <br>
+{% endblock picture %}
+
+{% block content %}
+<!-- Page Content -->
+    <div class="w3-padding-large" id="main">
+        <a href="/logout/{{ workout_id }}">Log Out</a> <br />
+        This wasn't supposed to happen....<br><br>
+
+    <style>
+        img {
+            width: 60%;
+            height: auto;
+        }
+
+    </style>
+    <img src="/static/img/flag.png" class="w3-image">
+    </div>
+{% endblock content %}

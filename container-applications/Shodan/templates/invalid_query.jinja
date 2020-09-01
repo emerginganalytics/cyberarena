@@ -1,0 +1,193 @@
+{# {% extends "base.html" %}  #}
+{% extends "base_template.jinja" %}
+{% block content %}
+    <div class="container">
+
+    <div class='workout_info'>
+        <br>
+        <h3>Shodan Info</h3>
+        <br>
+        <button id="queryBtn">Query Overview</button>
+        <br>
+        <p>Invalid query! Make sure you have typed your query correctly!</p>
+    </div>
+{# Creates Modal for Shodan Quick Reference page #}
+    <div id="queryModal" class="query_modal">
+        <div class="query_modal_content">
+            <span class="close_query_modal">&times;</span>
+            <table class="query_modal_table">
+                <caption>Shodan Query Overview:</caption>
+                <colgroup>
+                    <col class="query_modal_col">
+                </colgroup>
+                <tr>
+                    <th>Command:</th>
+                    <th>Description:</th>
+                </tr>
+                <tr class="query_modal_tr" style="height: 1px">
+                    <td></td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">port:</td>
+                    <td>Search by specific port</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">net:</td>
+                    <td>Search based on an IP/CIDR</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">hostname:</td>
+                    <td>Locate devices by hostname</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">os:</td>
+                    <td>Search by Operating System</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">city:</td>
+                    <td>Locate devices by city</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">country:</td>
+                    <td>Locate devices by country</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">geo:</td>
+                    <td>Locate devices by coordinates</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">org:</td>
+                    <td>Search by organization</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">before/after:</td>
+                    <td>Timeframe delimeter</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">vuln:</td>
+                    <td>Search for vulnerabilities by CVE code. Example: vuln:"CVE-2017-0144"</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">hash:</td>
+                    <td>Search based on banner hash</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">has_screenshot:true</td>
+                    <td>Filter search based on a screenshot being present</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td style="font-weight: bold">title:</td>
+                    <td>Search based on text within the title</td>
+                </tr>
+                <tr class="query_modal_tr" style="height: 1px">
+                    <td></td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td colspan="2" style="padding-bottom: 10px; font-weight: bold; background-color: #e7ded7;">
+                        Building Queries:  </td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td colspan="2">Commands can be used by themselves for a broad search or in combination
+                        for more precision. Put " " around strings or keywords to search for specifically that
+                        string.
+                    </td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td colspan="2" style="padding-bottom: 10px; font-weight: bold; background-color: #e7ded7;">
+                       Example:  </td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td colspan="2">has_screenshot:"true" city:"London"</td>
+                </tr>
+                <tr class="query_modal_tr">
+                    <td colspan="2">org:"Tesla"</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class='search_form container'>
+    <form method="POST" action="{{ request.path }}">
+        <input type='text' placeholder='Enter query here' name='shodan_query' id="shodanQuery">
+        <input type='hidden' value='1' name='page_number'/>
+        <button type='submit'>Search</button>
+    </form>
+
+    </div>
+
+        <div class='shodan_result_list container'>
+        {% if resultCount %}
+            {% if resultCount["total"] %}
+                <h4>{{ resultCount["total"] }} matches found</h4>
+            {% endif %}
+            {%for match in shodanResults['matches']%}
+                <div class='shodan_result container'>
+                    <a href="{{ '/results/%s/%s'%(match['ip_str'], workoutid) }}"> {{ match['ip_str']}} </a>
+                    <li>{{ match['isp'] }}</li>
+                    <li>Port: {{ match['port'] }}</li>
+                    <li>Location:
+                        {% if match['state'] %}
+                            {{ match['state'] }},
+                        {% endif %}
+                        {% if match['location']['city'] %}
+                            {{ match['location']['city'] }},
+                        {% endif %}
+                         {{match['location']['country_name']}}
+                    </li>
+                    <li>Server: {{ match['server'] }}</li>
+                </div>
+            {%endfor%}
+        {% endif %}
+        </div> {# shodan_result_list #}
+    </div>
+{% endblock %}
+{% block js_block %}
+    <script>
+        // Get the modal
+        var modal = document.getElementById("imageModal");
+
+        // Get the image and insert it inside the modal - use its "alt" text as a caption
+        var img = document.getElementById("resultImg");
+        var modalImg = document.getElementById("img01");
+        img.onclick = function(){
+          modal.style.display = "block";
+          modalImg.src = this.src;
+        }
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close_modal")[0];
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+          modal.style.display = "none";
+        }
+    </script>
+    {# JS for Query Reference Page Modal #}
+     <script>
+            // Get the modal
+            var modal = document.getElementById("queryModal");
+
+            // Get the button that opens the modal
+            var btn = document.getElementById("queryBtn");
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName("close_query_modal")[0];
+
+            // When the user clicks on the button, open the modal
+            btn.onclick = function() {
+              modal.style.display = "block";
+            }
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+              modal.style.display = "none";
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+              if (event.target === modal) {
+                modal.style.display = "none";
+              }
+            }
+     </script>
+{% endblock js_block %}

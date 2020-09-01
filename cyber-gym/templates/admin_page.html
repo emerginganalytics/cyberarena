@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title%} Admin {% endblock %}
+
+{% block content %}
+<script src='../static/login.js'></script>
+<script>
+    initApp = function(){
+        var auth_config = {
+          apiKey: '{{auth_config["api_key"]}}',
+          authDomain: '{{auth_config["auth_domain"]}}',
+          projectId: '{{auth_config["project_id"]}}'
+        };
+        //alert('{{auth_config["api_key"]}}');
+        firebase.initializeApp(auth_config);
+
+        firebase.auth().onAuthStateChanged(function(user){
+            if(user){
+                $.ajax({
+                    type: "POST",
+                    url: "/check_user_level",
+                    data: JSON.stringify({
+                        "user_email": user.email
+                    }),
+                    success: function(data){
+                        var json = $.parseJSON(data);
+                        if(json['admin'] == false){
+                            location.href = "/login";
+                        }else{
+                            document.getElementById('admin_container').style.visibility = "visible";                          
+                        }
+                    }
+                })
+            } else {
+                location.href="/login";
+            }
+        })
+
+    };
+    initApp();
+
+    function admin_action(action, user_email){
+        $.ajax({
+            type: "POST",
+            url: "/admin",
+            data: JSON.stringify({
+                "action": action,
+                "user_email": user_email
+            }),
+            success: function(data){
+                var json = $.parseJSON(data);
+                if(json['action_completed']){
+                    location.reload();
+                }else{
+                    alert("Action denied");
+                }
+            }
+        })
+    }
+</script>
+<style>
+    .user_group{
+        border: 1px solid black;
+        margin-bottom:1em;
+    }
+
+    .user_info{
+        margin-bottom:2em;
+        border-bottom: 1px solid grey;
+    }
+
+    .user_controls{
+        display:flex;
+        flex-direction:row;
+        justify-content: space-between;
+        padding-top:1em;
+        padding-bottom:1em;
+    }
+
+    .user_controls .btn{
+        font-size:0.9em;
+        padding:0;
+    }
+
+    .user_list li{
+        margin-bottom:1em;
+        background-color:lightgrey;
+    }
+
+    nav{
+        background-color:white;
+        box-shadow:none;
+        flex-direction:row;
+    }
+
+    nav a{
+        color:black;
+    }
+    .nav-item{
+        display:flex;
+        flex-direction:row;
+    }
+    #user_management_container{
+        width:100%;
+        display:flex;
+        flex-direction:row;
+        justify-content:space-between;
+    }
+
+    #customization form{
+        margin-top:2em;
+        margin-bottom:2em;
+    }
+
+    .btn-small{
+        width:50%!important;
+    }
+
+</style>
+<h1>Administrator Controls</h1>
+
+<div id="admin_container" style="visibility: hidden;margin-bottom:1em;">
+    <ul class="nav nav-tabs" id="control_tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="user_management_tab" data-toggle="tab" href="#user_container" role="tab" aria-controls="user_container" aria-selected="true">User Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class='tab-pane fade show active user_tab' id='user_container' role="tabpanel" aria-labelledby="user_management_tab">
+            <div id="user_management_container">
+                <div id='admin_users' class='user_group col-3'>
+                    <h2>Admin Users</h2>
+                    <ul class='user_list'>
+                        {% for user in admin_info['admins'] %}
+                            <li>
+                                <a class='btn' data-toggle='collapse' href='#admin_user_{{user}}'>{{user}}</a>
+                                <div id='admin_user_{{user}}' class='collapse user_info'>
+                                    <div class='user_controls'>
+                                        <button class='btn' onclick="admin_action('revoke_access', '{{user}}')">Revoke Admin Access</button>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div id='authorized_users' class='user_group col-3'>
+                    <h2>Authorized Users</h2>
+                    <ul class='user_list'>
+                        {% for user in admin_info['authorized_users'] %}
+                            {% if user not in admin_info['admins'] %}
+                                <li>
+                                    <a class='btn' data-toggle='collapse' href='#auth_user_{{user}}'>{{user}}</a>
+                                    <div id='auth_user_{{user}}' class='collapse user_info'>
+                                        <div class='user_controls'>
+                                            <button class='btn' onclick="admin_action('promote_user', '{{user}}')" style='background-color:green;'>Promote to Admin</button>
+                                            <button class='btn' onclick="admin_action('remove_user', '{{user}}')">Remove</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div id='pending_users' class='user_group col-3'>
+                    <h2>Pending</h2>
+                    <ul class='user_list'>
+                        {% for user in admin_info['pending_users'] %}
+                            <li>
+                                <a class='btn' class='user_link' data-toggle='collapse' href='#pending_user_{{user}}'>{{user}}</a>
+                                <div id='pending_user_{{user}}' class='collapse user_info'>
+                                    <div class='user_controls'>
+                                        <button class='btn' onclick="admin_action('approve_user','{{user}}')" style='background-color:green;'>Approve</button>
+                                        <button class='btn' onclick="admin_action('deny_user', '{{user}}')">Deny</button>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class='tab-pane fade' id='customization_container' role="tabpanel" aria-labelledby="customization_tab">
+            <div id="customization">
+                <h2>Upload Custom Logo</h2>
+                <form class='logo_form' action='/update_logo' method="POST" enctype="multipart/form-data">
+                    <input type='file' id='custom_logo_update' name='custom_logo' ><br>
+                    <button type="submit" class="btn btn-small">Submit</button>
+                </form>
+                <h2>Upload Custom Style Template</h2>
+                <form class='base_form' action='/update_base' method="POST" enctype="multipart/form-data">
+                    <input type='file' id='custom_base_update' name='custom_base' ><br>
+                    <button type="submit" class="btn btn-small">Submit</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+{% endblock %}

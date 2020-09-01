@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="UA Little Rock Cyber Gym"/>
+ 	<meta name="author" content="UA Little Rock"/>
+    <title>Cyber Gym - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase.js"></script>
+    <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css">
+    <!-- <script src='../static/main.js'></script> -->
+</head>
+<style>
+  
+  html{
+    height:100%;
+    background: #6e2639; /* #2d2d30 */
+    color: #a7a9ac;
+  }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #6e2639; /* #2d2d30 */
+    color: #a7a9ac; /*#bdbdbd */
+    margin:1em;
+  }
+  h3, h4 {
+    margin: 10px 0 30px 0;
+    letter-spacing: 2px;  /* 10px */
+    font-size: 20px;
+    color: #111; /* #111 */
+	}
+  .bg-1 {
+    background: #6e2639; /* #2d2d30 */
+    color: #a7a9ac; /*#bdbdbd */
+	}
+  .bg-1 h3 {
+    color: #a7a9ac; /* #fff */
+	}
+	.bg-1 p {
+		    font-style: italic;
+	}
+  .btn-ctn {
+      text-align: center;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+  }
+  .btn{
+    background-color:#6e2639;
+    color:white;
+    width:100%;
+  }
+  .btn:hover{
+    color:#6e2639;
+    background-color:white;
+  }
+  .btn:focus{
+    color:#6e2639;
+    background-color:white;
+  }
+
+  .btn-deactivated{
+    color:#6e2639;
+    background-color:grey;
+  }
+  .control_button{
+    margin-top:2%;
+    text-align:center;
+  }
+  .input-field {
+    margin-top: 5vh;
+  }
+
+  .landing_container{
+    margin:auto;
+    background-color:white;
+  }
+
+  footer {
+      background-color: #6e2639; /* #2d2d30 */
+      color: #f5f5f5;
+      padding: 32px;
+  }
+  footer a {
+      color: #f5f5f5;
+  }
+  footer a:hover {
+      color: #777;
+      text-decoration: none;
+  }
+  .loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #6e2639; /* BG color */
+    border-radius: 50%;
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  ol.teams {
+    list-style-type: none;
+    counter-reset: elementcounter;
+    padding-left: 0;
+  }
+
+  li.teams:before {
+    content: "Team " counter(elementcounter) ": ";
+    counter-increment: elementcounter;
+    font-weight: bold;
+  }
+
+  td, th {
+      text-align: center;
+      border: 1px solid black;
+  }
+</style>
+
+<body id="homePage">
+
+  <div id="workout-form" class='landing_container col-lg-12'>
+          <!-- <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/> -->
+          {% block content %}{% endblock %}
+  </div>
+
+<footer class="text-center">
+	<br><br>
+	<p>UA Little Rock Emerging Analytics Center</p>
+    <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
+</footer>
+
+     <script>
+            $(document).ready(function(){
+                // Initialize Tooltip
+                $('[data-toggle="tooltip"]').tooltip();
+
+                // Add smooth scrolling to all links in navbar + footer link
+                $(".navbar a, footer a[href='#homePage']").on('click', function(event) {
+                    // Make sure this.hash has a value before overriding default behavior
+                    if (this.hash !== "") {
+                        // Prevent default anchor click behavior
+                        event.preventDefault();
+                            var hash = this.hash;
+
+                            // Using jQuery's animate() method to add smooth page scroll
+                            // The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
+                            $('html, body').animate({
+                            scrollTop: $(hash).offset().top
+                            }, 900, function(){
+
+                        // Add hash (#) to URL when done scrolling (default click behavior)
+                        window.location.hash = hash;
+                        });
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

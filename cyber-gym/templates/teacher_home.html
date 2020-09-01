@@ -1,0 +1,244 @@
+{% if BASE_TEMPLATE %}
+{% extends BASE_TEMPLATE|string %}
+{% else %}
+{% extends "base.html" %}
+{% endif %}
+{% import 'logo_macro.html' as logo %}
+
+{% block title %}Teacher Home Page{% endblock %}
+
+{% block content %}
+<script src='../static/login.js'></script>
+
+<script>
+  function generateTableHeaders(table, data){
+    let header = table.createTHead();
+    let row = table.insertRow();
+    for (let key of data) {
+      let th = document.createElement("th");
+      let text = document.createTextNode(key);
+      th.appendChild(text);
+      row.appendChild(th);
+    }
+  }
+
+  function fillTable(table, unit_name, unit_id, unit_build_type, unit_timestamp){
+    let row = table.insertRow();
+    let td = document.createElement("td");
+    let unit_link = document.createElement("a");
+    unit_link.innerHTML = unit_name;
+    if(unit_build_type == 'arena'){
+      unit_link.href = "/arena_list/" + unit_id;
+    } else { 
+      unit_link.href = "/workout_list/" + unit_id;
+    }
+    td.appendChild(unit_link);
+    row.appendChild(td);
+
+    let td2 = document.createElement("td");
+    let timestamp = document.createTextNode(unit_timestamp)
+    td2.appendChild(timestamp);
+    row.appendChild(td2);
+  }
+
+  var teacher_email = null;
+  initApp = function(){
+    var auth_config = {
+      apiKey: '{{auth_config["api_key"]}}',
+      authDomain: '{{auth_config["auth_domain"]}}',
+      projectId: '{{auth_config["project_id"]}}'
+    };
+    //alert('{{auth_config["api_key"]}}');
+    firebase.initializeApp(auth_config);
+    firebase.auth().onAuthStateChanged(function(user){
+      if(user){
+        var displayName = user.displayName;
+        teacher_email = user.email;
+        var data = {teacher_email:teacher_email}
+        $.ajax({
+          type: "POST",
+          url: "/teacher_info",
+          dataType: "json",
+          contentType: "application/json;charset=UTF-8;",
+          data: JSON.stringify(data),
+          success: function(data){
+            for(var i = 0; i < data.length; i++){
+              var nodeName = 'unit_group_' + data[i]['workout_name'];
+              var unitNode = document.getElementById(nodeName);
+              if(unitNode == null){
+
+                //Header/Unit info container
+                var unit_div = document.createElement("div");
+                //Create interactive header button for each unit type
+                var unit_type = document.createElement("a");
+                unit_type.innerHTML = data[i]['workout_name'];
+                unit_type.className = 'unit_header btn';
+                unit_type.href = '#unit_group_' + data[i]['workout_name'];
+
+                //Create div containing the list of units of a specific type
+                var node = document.createElement("div");
+                node.id = nodeName;
+                node.className = 'collapse';
+                node.style = "margin-bottom:1em;";
+                
+                unit_div.append(unit_type);
+                unit_div.append(node);
+                unit_div.style='margin-bottom:1em;border:1px solid black;';
+                
+                //Create table for individual unit information
+                var unit_table = document.createElement("table");
+                unit_table.id = 'unit_table_' + data[i]['workout_name'];
+                
+                var table_headers = ["Unit Name", "Creation Date"]
+                //Create table headers
+                //var header_list = Object.keys(data[i])
+                generateTableHeaders(unit_table, table_headers);
+                
+                var container = document.getElementById('unit_container');
+                container.appendChild(unit_div);
+                node.appendChild(unit_table);
+              }
+
+              var unit_table = document.getElementById('unit_table_' + data[i]['workout_name']);
+              var unit_name = data[i]['unit_name'];
+              var unit_id = data[i]['unit_id'];
+              var unit_timestamp = data[i]['timestamp'];
+              var unit_build_type = data[i]['build_type']
+              fillTable(unit_table, unit_name, unit_id, unit_build_type, timeConverter(unit_timestamp));
+              var container = document.getElementById(nodeName)
+            }
+            $(".unit_header").attr("data-toggle", "collapse");
+          }
+        });
+
+        document.getElementById('user_name_header').innerHTML = "Welcome " + displayName;
+
+        $.ajax({
+          type: "POST",
+          url: "/check_user_level",
+          data: JSON.stringify({
+              "user_email": user.email
+          }),
+          success: function(data){
+            var json = $.parseJSON(data)
+            if(json['authorized'] == false){
+              location.href = "/unauthorized";
+            }
+            if(json['admin'] == true){
+              var controls = document.getElementById('teacher_controls');
+              var admin_button = document.createElement("a");
+              admin_button.href = "/admin";
+              admin_button.className = "btn";
+              admin_button.innerHTML = "Admin Page";
+              admin_button.style.marginTop = "1em";
+              controls.append(admin_button);
+            }
+
+          }
+        })
+
+      } else {
+        document.getElementById('sign-out').style.display = "none";
+        document.getElementById('unit_container').style.display = "none";
+        document.getElementById('build_workout_widget').style.display = "none";
+        document.getElementById('user_name_header').innerHTML = "Please Log In";
+        var sign_in_button = document.createElement('a');
+        sign_in_button.innerHTML = "Login";
+        sign_in_button.className = "btn";
+        sign_in_button.href = "/login";
+        var container = document.getElementById('teacher_controls');
+        container.appendChild(sign_in_button);
+        container.style.margin = "auto";
+        
+      }
+    })
+    var signOutBtn =$('#sign-out');
+    signOutBtn.click(function(event) {
+      event.preventDefault();
+  
+      firebase.auth().signOut().then(function() {
+        console.log("Sign out successful");
+        window.location.href = "/login";
+      }, function(error) {
+        console.log(error);
+      });
+    });
+    return teacher_email;
+  };
+
+  window.addEventListener('load', function(){
+    var teacher_email = initApp();
+  })
+  
+  function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }
+
+  function to_build_page(){
+    var input = document.getElementById('unit_select').value;
+    window.location.href = "/" + input;
+  }
+</script>
+<style>
+
+  .unit_group{
+    border:1px solid black;
+    margin-bottom:1em;
+  }
+  .unit_header{
+    color:white;
+    background-color:#6e2639;
+    margin-top:0;
+  }
+</style>
+
+<div class='row'>
+  <div id='teacher_controls' class='col-3'>
+    {{logo.logo_div() }}
+    <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
+    
+    <div  id="build_workout_widget" class="input-group mb-3 unit_build_container" style="margin-bottom:1em;">
+      
+      <div class="input-group-prepend">
+        <button class="btn btn-outline-secondary" type="button" onclick='to_build_page()'>Build Unit</button>
+      </div>
+      <select class="custom-select" id="unit_select">
+        <option selected>Select unit type...</option>
+        <option value="mobileforensics">Mobile Forensics</option>
+        <option value="cyberattack">Botnet Cyberattack</option>
+        <option value="ransomware">Ransomware</option>
+        <option value="bufferoverflow">Buffer Overflow</option>
+        <option value="wireshark">Wireshark</option>
+        <option value="nessus">Nessus</option>
+        <option value="publicprivate">Public/Private</option>
+        <option value="password-policy">Password Policy</option>
+        <option value="phishing">Phishing</option>
+        <option value="johnnycipher">Johnny Cipher</option>
+        <option value="reversus">Reversus</option>
+        <option value="dos">DOS</option>
+        <option value="shodan">Shodan</option>
+          <option value="Two-Step">Two-Step Authentication</option>
+          <option value="xss">Cross-Site Scripting</option>
+          <option value="inspect">Inspect Element</option>
+          <option value="sql">SQL Injection</option>
+          <option value="arena_snake">Arena Snake</option>
+      </select>
+    </div>
+    
+    <button id="sign-out" class='btn'>Sign out</button>
+  </div>
+  <div id='unit_container' class='col'>
+    <h2 style='text-align: center;'>Your Units</h2>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <title>{% block title_block %}Cipher Warehouse{% endblock title_block %}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="/static/img/cipher.ico" type="image/png"/>
+    <link rel="stylesheet" href="/static/styles/arena-styles.css">
+    {% block styles_block %}{% endblock styles_block %}
+</head>
+<body>
+{% block nav_block %}{% endblock nav_block %}
+    <div class="arena-dark-container">
+        <div class="arena-bannner-image">
+            <img class="arena-banner-image" src="/static/img/arena-banner.gif" alt="banner">
+        </div>
+        <div class="arena-main-content-container">
+        {% block content_block %}{% endblock content_block %}
+        </div>
+        <div class="arena-footer">
+            <p class="arena-footer">
+                &copy; UA Little Rock Cyber Gym Arena Level {% block footer_block %}2{% endblock footer_block %}
+            </p>
+        </div>
+    </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% block js_block %}{% endblock js_block %}
+
+</body>
+</html>
