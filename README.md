@@ -30,19 +30,3 @@ Once everything is set up, you will need to increase the default cloud quotas. I
 
 You may need to contact a cloud sales representative to permit these quotas.
 
-## Preparing Authentication
-
-## Customizing your Application
-
-## Default workouts
-
-## Starting the application
-
-## Building your own workouts
-
-## Arenas
-
-## Cloud maintenance functions
-
-## Data model
-
