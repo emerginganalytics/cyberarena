@@ -1,0 +1,186 @@
+{% extends "pages/index.jinja" %}
+
+{% block navblock %}
+  <a href="/caesar/{{ workout_id }}" class="w3-bar-item w3-button w3-padding-large w3-hover-black">
+    <i class="fa fa-key w3-xxlarge"></i>
+    <p>Ciphers</p>
+  </a>
+{% endblock navblock %}
+
+{% block background_img %}
+    <div class="w3-padding-large" id="main">
+      <!-- Header/Home -->
+      <header class="w3-container w3-padding-32 w3-center w3-black" id="home">
+       <img src="/static/img/sinister_alt_banner.jpg" alt="a bigger thing" class="w3-image">
+      </header>
+    </div>
+{% endblock background_img %}
+
+{% block content %}
+
+{# <body style="text-align:center;margin:60px"> #}
+<div class="w3-padding-16" style="text-align: center" id="main">
+    <h2>Caesar Cipher</h2>
+    <div class="w3-section">
+        <label for="ciphertext">Encrypted Message:</label>
+        <input type="text" name="ciphertext" id="ciphertext" size="80">
+
+        <label for="key">Key:</label>
+        <input type="text" name="key" id="key" size="2" value="13">
+    </div>
+    <div>
+        <button id="button_decrypt">Decrypt Message</button>
+    </div>
+    <div id="decrypted_results"></div>
+
+    <br>
+    <br>
+    {# List of Ciphers they need to decipher: Needs to be submitted with Ajax #}
+    <div class="w3-section" id="caesar-cipher-inputs">
+        <div class="w3-section" id="firstcipher">
+            <p>{{ firstcipher }}</p>
+            <label for="cipher1">Cipher 1:</label>
+            <input type="text" size='80' name="cipher1" id="cipher1" class="cipher1" />
+        </div>
+        <div>
+            <button id="button_cipher1">Check Cipher</button>
+        </div>
+        <br><br>
+        <div class="w3-section" id="secondcipher">
+            <p>{{ secondcipher }}</p>
+            <label for="cipher2">Cipher 2:</label>
+            <input type="text" size='80' name="cipher2" id="cipher2" class="cipher2"/>
+        </div>
+        <div>
+            <button id="button_cipher2">Check Cipher</button>
+        </div>
+        <br><br>
+        <div class="w3-section" id="thirdcipher">
+            <p>{{ thirdcipher }}</p>
+            <label for="cipher3">Cipher 3:</label>
+            <input type="text" size='80' name="cipher3" id="cipher3" class="cipher3"/>
+        </div>
+        <div>
+            <button id="button_cipher3">Check Cipher</button>
+        </div>
+    </div>
+​</div>
+{#  </body> #}
+
+{% endblock content %}
+{% block js_block %}
+    {# AJAX to display Decrypted Cipher #}
+     <script>
+            $('#button_decrypt').on('click', function() {
+               const encrypted = $('#ciphertext').val();
+               const key = String($('#key').val());
+               $.ajax({
+                  type : 'POST',
+                  url : '/ajax_calculate_caesar/{{ workout_id }}',
+                  data : JSON.stringify({ciphertext: encrypted, key: key}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+
+                      display_caesar(data['plaintext']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+
+            function display_caesar(plaintext) {
+                let results_div = $('#decrypted_results');
+
+                results_div.html('');
+
+                let html_string = 'Decrypted Message: ' + plaintext + '<br />';
+                results_div.html(html_string);
+            }
+     </script>
+    {# AJAX to check cipher submissions and change CSS based on results #}
+     <script>
+            $('#button_cipher1').on('click', function() {
+               const message = $('#cipher1').val();
+               $.ajax({
+                  type : 'POST',
+                  url : '/caesar/{{ workout_id }}',
+                  data : JSON.stringify({cipher : message, id : 1}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher1_submission(data['status1'], data['message1']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher1_submission(sub_status1, sub_message1) {
+                let results_input = $('#cipher1');
+
+                if (sub_status1 === true)
+                    results_input.html(sub_message1);
+                    results_input.css('background-color', '#4CAF50');
+            }
+     </script>
+     <script>
+            $('#button_cipher2').on('click', function() {
+               const message = $('#cipher2').val();
+               $.ajax({
+                  type : 'POST',
+                  url : '/caesar/{{ workout_id }}',
+                  data : JSON.stringify({cipher : message, id : 2}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher2_submission(data['status2'], data['message2']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher2_submission(sub_status2, sub_message2) {
+                let results_input = $('#cipher2');
+
+                if (sub_status2 === true)
+                    results_input.html(sub_message2);
+                    results_input.css('background-color', '#4CAF50');
+            }
+     </script>
+     <script>
+            $('#button_cipher3').on('click', function() {
+               const message = $('#cipher3').val();
+               $.ajax({
+                  type : 'POST',
+                  url : '/caesar/{{ workout_id }}',
+                  data : JSON.stringify({cipher : message, id : 3}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher3_submission(data['status3'], data['message3']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher3_submission(sub_status3, sub_message3) {
+                let results_input = $('#cipher3');
+
+                if (sub_status3 === true)
+                    results_input.html(sub_message3);
+                    results_input.css('background-color', '#4CAF50');
+            }
+     </script>
+{% endblock js_block %}

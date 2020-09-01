@@ -1,0 +1,70 @@
+body {
+    background-color: aliceblue;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.title-ctn {
+    text-align: center;
+}
+
+
+.form-ctn {
+    width: 40%;
+    margin-top: 10vh;
+    -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62); 
+    box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    padding: 2%;
+    background-color: white;
+} 
+
+
+.btn-ctn {
+    text-align: center;
+    margin-top: 5vh;
+}
+
+.input-field {
+    margin-top: 5vh;
+}
+
+#loading {
+    text-align: center;
+    margin-top: 5vh;
+}
+
+
+.congrats-ctn {
+    width: 60%;
+    margin-top: 10vh;
+    -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62); 
+    box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    padding: 2%;
+    background-color: white;
+    margin: 10vh auto;
+
+}
+
+
+.vm-ctn {
+    margin-bottom: 10vh;
+}
+
+.vm-list-ctn {
+    margin: 0 auto;
+    /* text-align: center; */
+}
+
+.vm-card {
+    margin-bottom: 5vh;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.start-stop-btn {
+    margin-left: 2vw;
+}

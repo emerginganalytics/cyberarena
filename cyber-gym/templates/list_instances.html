@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Cyber Gym Project - List VMs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+
+
+
+    <div class='container title-ctn vm-ctn'>
+        <h1>LIST VMS</h1>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+<div class="container-fluid main-ctn">
+
+
+    <div class="row">
+        <div class="col s12 m12 vm-list-ctn">
+            {% for vm in list_vm %}
+            <div class="card blue-grey vm-card">
+                <div class="card-content white-text">
+                    <span class="card-title"><strong class="align-middle">Name : </strong><span class="align-middle">{{ vm['name'] }}</span></span>
+
+                    <div class="flex-row">
+                        <div>
+                            <div class="vm-caract text-left">
+                                <strong class="align-middle">Creation Date : </strong><span
+                                    class="align-middle">{{ vm['creationTimestamp'][:10] }}</span> <br>
+                            </div>
+                            <div class="vm-caract text-left">
+                                <strong class="align-middle">Status : </strong><span class="align-middle">{{ vm['status'] }}</span> <br>
+                            </div>
+                            <div class="vm-caract text-left">
+                                <strong class="align-middle">Zone : </strong><span class="align-middle">{{ vm['zone'][-13:] }}</span> <br>
+                            </div>
+                        </div>
+    
+                        
+                        <div class="flex-row">
+                            <div class="start-stop-btn" id="stop-vm">
+                                <a class="waves-effect waves-light btn" id={{vm['name']}}>STOP VM</a>
+                            </div>
+        
+                            <div class="start-stop-btn" id="start-vm">
+                                <a class="waves-effect waves-light btn" id={{vm['name']}}>START VM</a>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <!-- LIST OF VM -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light">
+                <h3>List of my VM </h3>
+                <div class="card-body">          
+                    {% for vm in list_vm %}  
+                    <div class="row-vm-ctn">
+                        <div class="vm-caract text-left">
+                            <strong class="align-middle">Name : </strong><span class="align-middle">{{ vm['name'] }}</span> <br>
+                        </div>
+                        <div class="vm-caract text-left">
+                            <strong class="align-middle">Creation Date : </strong><span class="align-middle">{{ vm['creationTimestamp'][:10] }}</span> <br>
+                        </div>
+                        <div class="vm-caract text-left">
+                            <strong class="align-middle">Status : </strong><span class="align-middle">{{ vm['status'] }}</span> <br>
+                        </div>
+                        <div class="vm-caract text-left">
+                            <strong class="align-middle">Zone : </strong><span class="align-middle">{{ vm['zone'][-13:] }}</span> <br>
+                        </div>
+                        <!-- <div class="vm-caract text-right">
+                            <button class="btn btn-danger" id={{vm['name']}} onclick="getConfirmation(this)" >Delete</button><br>
+                        </div> -->
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+        
+</div>
+
+    
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'script.js') }}"></script>
+
+
+</body>
+
+</html>
