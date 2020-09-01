@@ -4,5 +4,4 @@ The UA Little Rock Cyber Gym provides a hands-on cybersecurity lab environment f
 
 ## Read the document here:
 * Click [here](http://ualr-cyber-gym.readthedocs.io/) for the latest formatted release of the document at readthedocs.io.
-* Click [here](docs/README.md) for the local version of the document in Markdown
-˓→format.
+* Click [here](docs/README.md) for the local version of the document in Markdown format.
