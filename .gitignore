@@ -5,8 +5,9 @@
 *.pyc
 
 .DS_Store
-cyber-gym/credentials/ualr-cybersecurity-849ba9354435.json
 cyber-gym/pdh-deleteme.py
 cyber-gym/subscriber.py
 local-scripts
 /yaml-files/private/
+/cyber-gym/static/private/
+/cyber-gym/templates/private/
