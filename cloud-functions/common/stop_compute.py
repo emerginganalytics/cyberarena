@@ -80,7 +80,7 @@ def stop_lapsed_workouts():
 
     # Query all workouts which have not been deleted
     query_workouts = ds_client.query(kind='cybergym-workout')
-    query_workouts.add_filter("running", "=", True)
+    query_workouts.add_filter("state", "=", BUILD_STATES.RUNNING)
     for workout in list(query_workouts.fetch()):
         if "start_time" in workout and "run_hours" in workout and workout.get('type', 'arena') != 'arena':
             workout_id = workout.key.name
@@ -89,6 +89,7 @@ def stop_lapsed_workouts():
 
             # Stop the workout servers if the run time has exceeded the request
             if ts - start_time >= run_hours * 3600:
+                print(f"The workout {workout_id} has exceeded its run time and will be stopped.")
                 stop_workout(workout_id)
 
 
@@ -107,6 +108,7 @@ def stop_lapsed_arenas():
 
             # Stop the workout servers if the run time has exceeded the request
             if ts - start_time >= run_hours * 3600:
+                print(f"The arena {unit_id} has exceeded its run time and will be stopped.")
                 stop_arena(unit_id)
 
-# stop_lapsed_arenas()
+# stop_lapsed_workouts()

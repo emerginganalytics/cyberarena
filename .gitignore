@@ -5,9 +5,8 @@
 *.pyc
 
 .DS_Store
-cyber-gym/pdh-deleteme.py
 cyber-gym/subscriber.py
-local-scripts
+local-scripts/
 /yaml-files/private/
 /cyber-gym/static/private/
 /cyber-gym/templates/private/

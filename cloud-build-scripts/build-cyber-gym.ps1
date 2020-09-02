@@ -210,7 +210,11 @@ if ($confirmation -eq 'y') {
 # Create cloud schedules
 $confirmation = Read-Host "Do you want to create cloud schedules for cloud functions at this time? (y/N)"
 if ($confirmation -eq 'y') {
-    gcloud scheduler jobs create pubsub job-delete-expired-arenas --schedule="0 * * * *" --topic=delete_arena --message-body=Hello!
+    $tz = Read-Host "What is your timezone? (America/Chicago) "
+    if ($tz -eq '') {
+        $tz = "America/Chicago"
+    }
+    gcloud scheduler jobs create pubsub job-delete-expired-arenas --schedule="0 * * * *" --topic=delete_arena --time-zone=$tz --message-body=Hello!
     gcloud scheduler jobs create pubsub job-stop-all-servers --schedule="0 0 * * *" --topic=stop-all-servers --message-body=Hello!
     gcloud scheduler jobs create pubsub job-stop-lapsed-arenas --schedule="*/15 * * * *" --topic=stop-lapsed-arenas --message-body=Hello!
     gcloud scheduler jobs create pubsub maint-del-job --schedule="0 * * * *" --topic=maint-del-tmp-systems --message-body=Hello!
