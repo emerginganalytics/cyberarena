@@ -287,5 +287,5 @@ def delete_arenas():
             print("Finished deleting arena %s" % arena_id)
 
 
-# delete_workouts()
+delete_workouts()
 # delete_arenas()

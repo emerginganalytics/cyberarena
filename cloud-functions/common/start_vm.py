@@ -60,6 +60,3 @@ def start_arena(unit_id):
     # Now start all of the student workouts for this arena
     for workout_id in unit['workouts']:
         start_vm(workout_id)
-
-
-# start_vm('ukkrsevbye')
