@@ -17,9 +17,9 @@ import json
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
-app.jinja_env.globals['CUSTOM_LOGO_LOCATION'] = get_custom_logo()
+# app.jinja_env.globals['CUSTOM_LOGO_LOCATION'] = get_custom_logo()
 app.jinja_env.globals['BASE_TEMPLATE'] = get_custom_base()
-
+app.jinja_env.globals['project'] = project
 # TODO: add something at default route to direct users to correct workout?
 # Default route
 @app.route('/')
@@ -279,14 +279,15 @@ def get_teacher_info():
         teacher_units = []
 
         for unit in list(unit_list.fetch()):
-            unit_info = {
-                'unit_id': unit.key.name,
-                'workout_name': unit['workout_name'],
-                'build_type': unit['build_type'],
-                'unit_name': unit['unit_name'],
-                'timestamp': unit['timestamp']
-            }
-            teacher_units.append(unit_info)
+            if 'workout_name' in unit:
+                unit_info = {
+                    'unit_id': unit.key.name,
+                    'workout_name': unit['workout_name'],
+                    'build_type': unit['build_type'],
+                    'unit_name': unit['unit_name'],
+                    'timestamp': unit['timestamp']
+                }
+                teacher_units.append(unit_info)
 
         teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
     return json.dumps(teacher_units)
