@@ -118,4 +118,4 @@ def create_production_image(server_name, existing_snapshot=None):
             print(f"Error in publishing production image. Timeout waiting for the operation to complete")
             return False
 
-create_production_image('cybergym-mobileforensics')
+# create_production_image('cybergym-mobileforensics')
