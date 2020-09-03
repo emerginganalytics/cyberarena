@@ -10,3 +10,4 @@ local-scripts/
 /yaml-files/private/
 /cyber-gym/static/private/
 /cyber-gym/templates/private/
+/cloud-functions/test_command.py

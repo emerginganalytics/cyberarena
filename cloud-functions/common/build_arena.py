@@ -238,6 +238,3 @@ def build_arena(unit_id):
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_FIREWALL)
 
     state_transition(entity=unit, new_state=BUILD_STATES.READY)
-
-
-# build_arena('wsojiwqdqg')

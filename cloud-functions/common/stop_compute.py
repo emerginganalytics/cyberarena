@@ -110,5 +110,3 @@ def stop_lapsed_arenas():
             if ts - start_time >= run_hours * 3600:
                 print(f"The arena {unit_id} has exceeded its run time and will be stopped.")
                 stop_arena(unit_id)
-
-# stop_lapsed_workouts()
