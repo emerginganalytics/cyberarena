@@ -101,23 +101,24 @@ def hash_pass(passw):
 
 
 def connect_xssdb():
-    xssdb = sqlite3.connect('xss.db')
-    xssdb.cursor().execute('CREATE TABLE IF NOT EXISTS feedbacks ''(id INTEGER PRIMARY KEY, ''feedback TEXT)')
+    xssdb = sqlite3.connect('xss_s.db')
+    xssdb.cursor().execute("""CREATE TABLE IF NOT EXISTS feedbacks (workout_ids TEXT, feedback TEXT)""")
     xssdb.commit()
     return xssdb
 
 
-def add_feedback(feedback):
+def add_feedback(feedback, workout_id):
     xssdb = connect_xssdb()
-    xssdb.cursor().execute('INSERT INTO feedbacks (feedback) ''VALUES (?)', (feedback,))
+    xssdb.cursor().execute("""INSERT INTO feedbacks (workout_ids, feedback) VALUES (?, ?) """, (workout_id, feedback,))
     xssdb.commit()
 
 
-def get_feedbacks(search_query=None):
+def get_feedbacks(workout_id, search_query=None):
     xssdb = connect_xssdb()
     results = []
-    get_all_query = 'SELECT feedback FROM feedbacks'
-    for (feedback,) in xssdb.cursor().execute(get_all_query).fetchall():
+    # get_all_query = """SELECT feedback FROM feedbacks WHERE workout_id=(?)""", (workout_id,)
+    for (feedback,) in \
+            xssdb.cursor().execute("""SELECT feedback FROM feedbacks WHERE workout_ids=?""", (workout_id,)).fetchall():
         if search_query is None or search_query in feedback:
             results.append(feedback)
     return results
@@ -127,6 +128,8 @@ def get_feedbacks(search_query=None):
 def loader(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
+
+    app.logger.info('workout_type : %s' % workout['type'])
 
     if workout:
         if workout['type'] == 'wireshark' or 'dos':
@@ -211,16 +214,16 @@ def xss_r(workout_id):
 
 @app.route("/workouts/xss_s/<workout_id>", methods=['GET', 'POST'])
 def xss_s(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
+    key = ds_client.key('cybergym-workout', workout_id, use_cache=False, use_memcache=False)
     workout = ds_client.get(key)
     if workout['type'] == 'xss':
         page_template = 'xss_s.html'
         if request.method == 'POST':
-            add_feedback(request.form['feedback'])
+            add_feedback(request.form['feedback'], workout_id)
 
         search_query = request.args.get('query')
 
-        feedbacks = get_feedbacks(search_query)
+        feedbacks = get_feedbacks(workout_id, search_query)
 
         return render_template(page_template, feedbacks=feedbacks, search_query=search_query, workout_id=workout_id)
     else:
