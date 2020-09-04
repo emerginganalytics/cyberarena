@@ -1,8 +1,5 @@
-{% if BASE_TEMPLATE %}
-{% extends BASE_TEMPLATE|string %}
-{% else %}
 {% extends "base.html" %}
-{% endif %}
+
 {% import "logo_macro.html" as logo %}
 {% block title %}Unit {{ unit_id }}{% endblock %}
 
@@ -56,9 +53,9 @@
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             <ol class="teams">
                 {% for workout in workout_list %}
-                {% if workout.student_name %}                    
+                {% if workout['student_name'] %}                    
                     {% if workout["state"] == "READY" or workout["state"] == "RUNNING" %}
-                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout.student_name}} </a>
+                    <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout['student_name']}} </a>
                     {% else %}
                     <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="#team_collapse_{{workout.name}}">{{workout['student_name']}} </a>
                     {% endif %}

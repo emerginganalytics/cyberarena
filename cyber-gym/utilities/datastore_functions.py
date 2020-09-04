@@ -3,7 +3,7 @@ import calendar
 import random
 import string
 from yaml import load, Loader
-from os import path, makedirs
+from os import path, makedirs, remove
 from google.cloud import datastore
 from utilities.globals import ds_client, storage_client, workout_globals, project
 from werkzeug.utils import secure_filename
@@ -327,12 +327,16 @@ def get_unit_workouts(unit_id):
     unit_workouts.add_filter("unit_id", "=", unit_id)
     workout_list = []
     for workout in list(unit_workouts.fetch()):
-
+        student_name = None
+        if 'student_name' in workout:
+            student_name = workout['student_name']
         workout_instance = workout = ds_client.get(workout.key)
         workout_info = {
             'name': workout.key.name,
             # 'running': workout_instance['running'],
             'complete': workout_instance['complete'],
+            'student_name':student_name,
+            'state':workout['state'],
         }
         workout_list.append(workout_info)
 
@@ -354,36 +358,21 @@ def retrieve_student_uploads(workout_id):
             file_list.append(image_url)
     return file_list
 
-def get_custom_logo():
-    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
-    folder_path = './static/logo/'
-    blob = bucket.get_blob('logo/logo.png')
-    if blob:
-        if not path.exists(folder_path):
-            makedirs(folder_path)
-        destination_path = './static/{}'.format(blob.name)
-
-        blob.download_to_filename(destination_path)
-        return destination_path
-    else:
-        return False
-
-def get_custom_base():
-    bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
-    folder_path = './templates/{}-base.html'.format(project)
-    blob = bucket.get_blob('base_template/{}-base.html'.format(project))
-    if blob:
-        blob.download_to_filename(folder_path)
-        return '{}-base.html'.format(project)
-    else:
-        return False
 
 def store_custom_logo(logo):
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     new_blob = bucket.blob('logo/logo.png')
     new_blob.upload_from_file(logo)
 
-def store_custom_base(base):
+def store_background_color(color_code):
+    print(str(color_code))
+    css_string = ':root{--main_color: %s}' % (color_code)
+    temp_css = open('temp.css', 'w')
+    temp_css.write(css_string)
+    temp_css.close()
+
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
-    new_blob = bucket.blob('base_template/{}-base.html'.format(project))
-    new_blob.upload_from_file(base)
+    new_blob = bucket.blob('color/{}-base.css'.format(project))
+    new_blob.upload_from_string(css_string, content_type='text/css')
+
+    remove('temp.css')
