@@ -362,10 +362,10 @@ def retrieve_student_uploads(workout_id):
 def store_custom_logo(logo):
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     new_blob = bucket.blob('logo/logo.png')
+    new_blob.cache_control = 'private'
     new_blob.upload_from_file(logo)
 
 def store_background_color(color_code):
-    print(str(color_code))
     css_string = ':root{--main_color: %s}' % (color_code)
     temp_css = open('temp.css', 'w')
     temp_css.write(css_string)
@@ -373,6 +373,8 @@ def store_background_color(color_code):
 
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     new_blob = bucket.blob('color/{}-base.css'.format(project))
+    #Prevent GCP from serving a cached version of this file
+    new_blob.cache_control = 'private'
     new_blob.upload_from_string(css_string, content_type='text/css')
 
     remove('temp.css')

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import 'logo_macro.html' as logo %}
 
 {% block title %}Log In{% endblock %}
 
@@ -6,7 +7,7 @@
 <script src='../static/login.js'></script>
 
 <div id="login_container" style="margin: auto; text-align: center;">
-    <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+    {{logo.logo_div()}}
 
     <h3>Sign in to access your units</h3>
     <div id="firebaseui-auth-container"></div>
