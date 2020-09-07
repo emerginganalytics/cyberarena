@@ -493,9 +493,13 @@ def check_user_level():
                 if user_info['user_email'] in admin_info['admins']:
                     response['admin'] = True
             else:
+                if 'pending_users' not in admin_info:
+                    pending_users = []
+                    pending_users.append(user_info['user_email'])
+                    admin_info['pending_users'] = pending_users
                 if user_info['user_email'] not in admin_info['pending_users']:
                     admin_info['pending_users'].append(user_info['user_email'])
-                    ds_client.put(admin_info)
+                ds_client.put(admin_info)
         return json.dumps(response)
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
