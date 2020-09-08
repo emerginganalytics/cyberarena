@@ -142,5 +142,3 @@ def build_workout(workout_id):
                                    "sourceRanges": rule['source_ranges']})
     
         create_firewall_rules(firewall_rules)
-
-# build_workout('isirdhzjqk')

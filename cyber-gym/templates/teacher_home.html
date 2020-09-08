@@ -1,8 +1,5 @@
-{% if BASE_TEMPLATE %}
-{% extends BASE_TEMPLATE|string %}
-{% else %}
 {% extends "base.html" %}
-{% endif %}
+
 {% import 'logo_macro.html' as logo %}
 
 {% block title %}Teacher Home Page{% endblock %}
@@ -196,7 +193,7 @@
   }
   .unit_header{
     color:white;
-    background-color:#6e2639;
+    background-color:var(--main_color, #6e2639);
     margin-top:0;
   }
 </style>
@@ -226,11 +223,11 @@
         <option value="reversus">Reversus</option>
         <option value="dos">DOS</option>
         <option value="shodan">Shodan</option>
-          <option value="Two-Step">Two-Step Authentication</option>
-          <option value="xss">Cross-Site Scripting</option>
-          <option value="inspect">Inspect Element</option>
-          <option value="sql">SQL Injection</option>
-          <option value="arena_snake">Arena Snake</option>
+        <option value="Two-Step">Two-Step Authentication</option>
+        <option value="xss">Cross-Site Scripting</option>
+        <option value="inspect">Inspect Element</option>
+        <option value="sql">SQL Injection</option>
+        <option value="arena_snake">Arena Snake</option>
       </select>
     </div>
     

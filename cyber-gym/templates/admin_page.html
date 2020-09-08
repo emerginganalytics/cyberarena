@@ -10,7 +10,6 @@
           authDomain: '{{auth_config["auth_domain"]}}',
           projectId: '{{auth_config["project_id"]}}'
         };
-        //alert('{{auth_config["api_key"]}}');
         firebase.initializeApp(auth_config);
 
         firebase.auth().onAuthStateChanged(function(user){
@@ -183,14 +182,15 @@
         </div>
         <div class='tab-pane fade' id='customization_container' role="tabpanel" aria-labelledby="customization_tab">
             <div id="customization">
+                <br>
                 <h2>Upload Custom Logo</h2>
-                <form class='logo_form' action='/update_logo' method="POST" enctype="multipart/form-data">
+                <form class='logo_form col-6' action='/update_logo' method="POST" enctype="multipart/form-data">
                     <input type='file' id='custom_logo_update' name='custom_logo' ><br>
                     <button type="submit" class="btn btn-small">Submit</button>
                 </form>
-                <h2>Upload Custom Style Template</h2>
-                <form class='base_form' action='/update_base' method="POST" enctype="multipart/form-data">
-                    <input type='file' id='custom_base_update' name='custom_base' ><br>
+                <h2>Change Site Theme</h2>
+                <form class='base_form col-6' action='/update_base' method="POST" enctype="multipart/form-data">
+                    <input type='text' id='custom_base_update' name='custom_color' placeholder="#FFFFFF"><br>
                     <button type="submit" class="btn btn-small">Submit</button>
                 </form>
             </div>
