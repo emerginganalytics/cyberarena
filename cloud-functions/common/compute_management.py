@@ -236,6 +236,3 @@ def server_delete(server_name):
     check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
                              change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
     return True
-
-# server_start('hxckdwxwld-nested')
-# server_delete('oztfvquhhi-cybergym-publicprivate')

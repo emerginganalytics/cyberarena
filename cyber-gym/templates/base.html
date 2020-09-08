@@ -18,18 +18,19 @@
     <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase.js"></script>
     <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css">
+    <link type="text/css" rel="stylesheet" href="https://storage.googleapis.com/{{project}}_cloudbuild/color/{{project}}-base.css">
+
     <!-- <script src='../static/main.js'></script> -->
 </head>
 <style>
-  
   html{
     height:100%;
-    background: #6e2639; /* #2d2d30 */
+    background: var(--main_color, #6e2639); /* #2d2d30 */
     color: #a7a9ac;
   }
   body {
     font-family: 'Montserrat', sans-serif;
-    background: #6e2639; /* #2d2d30 */
+    background: var(--main_color, #6e2639); /* #2d2d30 */
     color: #a7a9ac; /*#bdbdbd */
     margin:1em;
   }
@@ -40,7 +41,7 @@
     color: #111; /* #111 */
 	}
   .bg-1 {
-    background: #6e2639; /* #2d2d30 */
+    background: var(--main_color, #6e2639); /* #2d2d30 */
     color: #a7a9ac; /*#bdbdbd */
 	}
   .bg-1 h3 {
@@ -55,21 +56,21 @@
       margin-bottom: 0.5em;
   }
   .btn{
-    background-color:#6e2639;
+    background-color:var(--main_color, #6e2639);
     color:white;
     width:100%;
   }
   .btn:hover{
-    color:#6e2639;
+    color:var(--main_color, #6e2639);
     background-color:white;
   }
   .btn:focus{
-    color:#6e2639;
+    color:var(--main_color, #6e2639);
     background-color:white;
   }
 
   .btn-deactivated{
-    color:#6e2639;
+    color:var(--main_color, #6e2639);
     background-color:grey;
   }
   .control_button{
@@ -86,7 +87,7 @@
   }
 
   footer {
-      background-color: #6e2639; /* #2d2d30 */
+      background-color: var(--main_color, #6e2639); /* #2d2d30 */
       color: #f5f5f5;
       padding: 32px;
   }
@@ -99,7 +100,7 @@
   }
   .loader {
     border: 5px solid #f3f3f3; /* Light grey */
-    border-top: 5px solid #6e2639; /* BG color */
+    border-top: 5px solid var(--main_color, #6e2639); /* BG color */
     border-radius: 50%;
     margin: auto;
     width: 40px;

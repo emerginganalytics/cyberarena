@@ -6,8 +6,8 @@ from reset_workout import reset_workout
 from utilities.globals import ds_client, dns_suffix, log_client, workout_token, post_endpoint, auth_config, logger
 from utilities.pubsub_functions import *
 from utilities.yaml_functions import parse_workout_yaml
-from utilities.datastore_functions import process_workout_yaml, retrieve_student_uploads, get_custom_logo, \
-    get_custom_base, store_custom_logo, store_custom_base, get_unit_workouts
+from utilities.datastore_functions import process_workout_yaml, retrieve_student_uploads, \
+    store_custom_logo, store_background_color, get_unit_workouts
 from utilities.assessment_functions import get_assessment_questions, process_assessment
 from flask import Flask, render_template, redirect, request
 from forms import CreateWorkoutForm
@@ -17,8 +17,6 @@ import json
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
-# app.jinja_env.globals['CUSTOM_LOGO_LOCATION'] = get_custom_logo()
-app.jinja_env.globals['BASE_TEMPLATE'] = get_custom_base()
 app.jinja_env.globals['project'] = project
 # TODO: add something at default route to direct users to correct workout?
 # Default route
@@ -50,7 +48,9 @@ def index(workout_type):
             pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_arena_topic)
             url = '/arena_list/%s' % (unit_id)
             return redirect(url)
-
+        elif build_type == 'container':
+            url = '/workout_list/%s' % (unit_id)
+            return redirect(url)
     return render_template('main_page.html', form=form, workout_type=workout_type, auth_config=auth_config)
 
 
@@ -264,9 +264,8 @@ def update_logo():
 @app.route('/update_base', methods=['POST'])
 def update_base():
     if request.method == "POST":
-        data = request.files['custom_base']
-        store_custom_base(data)
-        app.jinja_env.globals['BASE_TEMPLATE'] = get_custom_base()
+        if 'custom_color' in request.form:
+            store_background_color(request.form['custom_color'])
     return redirect('/teacher_home')
 
 @app.route('/teacher_info', methods=['GET', 'POST'])
@@ -494,9 +493,13 @@ def check_user_level():
                 if user_info['user_email'] in admin_info['admins']:
                     response['admin'] = True
             else:
+                if 'pending_users' not in admin_info:
+                    pending_users = []
+                    pending_users.append(user_info['user_email'])
+                    admin_info['pending_users'] = pending_users
                 if user_info['user_email'] not in admin_info['pending_users']:
                     admin_info['pending_users'].append(user_info['user_email'])
-                    ds_client.put(admin_info)
+                ds_client.put(admin_info)
         return json.dumps(response)
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.

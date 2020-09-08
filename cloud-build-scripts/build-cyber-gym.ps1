@@ -258,3 +258,105 @@ if ($confirmation -eq 'y') {
     gcloud run deploy --image gcr.io/$project/cybergym --memory=512 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
     gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
 }
+
+$admin_email = Read-Host "Enter the email of the first site administrator. This user will have to approve any future users"
+
+#Use gcloud credentials to send requests to REST API
+$cred = gcloud auth application-default print-access-token
+$headers = @{ Authorization = "Bearer $cred" }
+
+
+#Create a new transaction
+[string]$transaction_info = Invoke-WebRequest `
+  -Method Post `
+  -Headers $headers `
+  -ContentType: "application/json; charset=utf-8" `
+  -Uri "https://datastore.googleapis.com/v1/projects/$project`:beginTransaction" | Select-Object -Expand Content
+
+#Get transaction id from response json
+$transaction = $transaction_info | ConvertFrom-Json
+
+#Request body to establish previous entity version (even if it does not exist)
+$base_body = @{
+    readOptions = @{
+        readConsistency = "STRONG"
+        transaction = $transaction.transcation
+    }
+    keys = @(
+        @{
+            partitionId = @{  
+                projectId= $project
+            }
+            path= @(
+                @{
+                    kind= "cybergym-admin-info"
+                    name= "cybergym"
+                }
+            )
+        }
+    )
+}
+
+$base_json = $base_body | ConvertTo-Json -Depth 4
+#Get base entity version
+[string]$base_entity = Invoke-WebRequest `
+  -Method POST `
+  -Headers $headers `
+  -Body $base_json `
+  -ContentType: "application/json; charset=utf-8" `
+  -Uri "https://datastore.googleapis.com/v1/projects/$project`:lookup" | Select-Object -Expand Content
+$base_version = $base_entity | ConvertFrom-Json
+
+#Create commit for new datastore entity
+$body = @{
+    mode = "TRANSACTIONAL"
+    mutations = @( 
+        @{
+            upsert = @{
+                key = @{
+                    partitionId = @{  
+                        projectId= $project
+                    }
+                    path= @(
+                        @{
+                            kind= "cybergym-admin-info"
+                            name= "cybergym"
+                        }
+                    )
+                }
+                properties=@{
+                    admins = @{
+                        arrayValue= @{
+                            values= @(
+                                @{
+                                    stringValue= $admin_email
+                                }
+                            )
+                        }
+                    }
+                    authorized_users = @{
+                        arrayValue=@{
+                            values = @(
+                                @{
+                                    stringValue = $admin_email
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            baseVersion = $base_version.found.version
+        }
+    )
+    transaction = $transaction.transaction
+}
+
+$JSON = $body | ConvertTo-Json -Depth 8
+
+#Send POST request to REST API to create new entity
+$update_response = Invoke-WebRequest `
+  -Method POST `
+  -Headers $headers `
+  -ContentType: "application/json; charset=utf-8" `
+  -Body $JSON `
+  -Uri "https://datastore.googleapis.com/v1/projects/$project`:commit"
