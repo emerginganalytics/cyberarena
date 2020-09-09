@@ -5,7 +5,7 @@ import string
 from yaml import load, Loader
 from os import path, makedirs, remove
 from google.cloud import datastore
-from utilities.globals import ds_client, storage_client, workout_globals, project
+from utilities.globals import ds_client, storage_client, workout_globals, project, BUILD_STATES
 from werkzeug.utils import secure_filename
 
 
@@ -232,7 +232,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'firewall_rules': firewall_rules,
         'assessment': assessment,
         'complete': False,
-        'student_entry': student_entry
+        'student_entry': student_entry,
+        'state': BUILD_STATES.START
     })
 
     ds_client.put(new_workout)
@@ -335,8 +336,8 @@ def get_unit_workouts(unit_id):
             'name': workout.key.name,
             # 'running': workout_instance['running'],
             'complete': workout_instance['complete'],
-            'student_name':student_name,
-            'state':workout['state'],
+            'student_name': student_name,
+            'state': workout_instance['state'],
         }
         workout_list.append(workout_info)
 
