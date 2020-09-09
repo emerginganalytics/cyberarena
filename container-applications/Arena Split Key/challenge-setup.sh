@@ -36,17 +36,17 @@ make install
 sed -i 's/nobody/proftpd/g' /etc/proftpd.conf
 sed -i 's/nogroup/proftpd/g' /etc/proftpd.conf
 ​
-# Create share directories
+## Create share directories
 mkdir /share
 mkdir /share/incatnito
 mkdir /share/IT
 ​
-# Turn off checking of authorized_keys ownership
+## Turn off checking of authorized_keys ownership
 echo "StrictModes no" >> /etc/ssh/sshd_config
 systemctl restart ssh
 ​
 ​
-# Create newuser.sh file
+## Create newuser.sh file
 echo "#!/bin/bash" > /share/IT/newuser.sh
 echo "#Going forward, please use this script for new users." >> /share/IT/newuser.sh
 echo "###We also need to verify existing users permissions.###" >> /share/IT/newuser.sh
@@ -63,13 +63,13 @@ echo "chown \$user:\$user /share/\$user" >> /share/IT/newuser.sh
 chown root:root /share/IT/newuser.sh
 chmod 744 /share/IT/newuser.sh
 ​
-# Read only IT share
+## Read only IT share
 echo "[IT]" >> /etc/samba/smb.conf
 echo "path = /share/IT" >> /etc/samba/smb.conf
 echo "guest ok = yes" >> /etc/samba/smb.conf
 echo "read only = yes" >> /etc/samba/smb.conf
 ​
-# Read/write incatnito share/user
+## Read/write incatnito share/user
 useradd -d /home/incatnito -s /bin/bash -U incatnito
 mkdir /home/incatnito
 mkdir /home/incatnito/.ssh/
@@ -83,10 +83,10 @@ echo "read only = no" >> /etc/samba/smb.conf
 echo "writeable = yes" >> /etc/samba/smb.conf
 chmod 777 /share/incatnito
 ​
-# Start proftpd
+## Start proftpd
 proftpd
 
-# Setup SSH Login Greeting
+## Setup SSH Login Greeting
 mkdir /usr/local/src/nyancat && cd /usr/local/src/nyancat
 git clone https://github.com/klange/nyancat.git
 echo "[*] Cloned Nyancat into dir /usr/local/src/nyancat ..."
@@ -94,7 +94,7 @@ make
 echo "[!!] Display custom flag by modifying the printf statement in line 905 of nyancat.c"
 echo "[-->] run 'make' again in the script root to recompile the modified nyancat.c"
 
-# Update SSH Greeting automation
-echo "if [[ -n $SSH_CONNECTION ]] ; then" >> /home/incatnito/.bashrc
-echo "     /usr/local/src/nyancat/src/nyancat" >> /home/incatnito/.bashrc
-echo "fi" >> /home/incatnito/.bashrc
+## Update SSH Greeting automation
+echo "if [[ -n $SSH_CONNECTION ]] ; then" >> /home/incatnito/.bash_profile
+echo "     /usr/local/src/nyancat/src/nyancat" >> /home/incatnito/.bash_profile
+echo "fi" >> /home/incatnito/.bash_profile
