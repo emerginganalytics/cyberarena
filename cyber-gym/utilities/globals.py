@@ -13,12 +13,17 @@ zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
 api_key = myconfig.get_variable('api_key').value.decode("utf-8")
+custom_dnszone = myconfig.get_variable('dnszone')
+if custom_dnszone != None:
+    dnszone = custom_dnszone.value.decode("utf-8")
+else:
+    dnszone = 'cybergym-public'
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
 log_client = g_logging.Client()
-dnszone = 'cybergym-public'
+
 workout_token = 'RG987S1GVNKYRYHYA'
 
 auth_config = {

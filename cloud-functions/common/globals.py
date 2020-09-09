@@ -13,11 +13,15 @@ region = myconfig.get_variable('region').value.decode("utf-8")
 zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
+custom_dnszone = myconfig.get_variable('dnszone')
+if custom_dnszone != None:
+    dnszone = custom_dnszone.value.decode("utf-8")
+else:
+    dnszone = 'cybergym-public'
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-dnszone = 'cybergym-public'
 workout_token = 'RG987S1GVNKYRYHYA'
 guac_password = 'promiseme'
 student_entry_image = 'image-labentry'
