@@ -3,7 +3,8 @@ import random
 import string
 import googleapiclient.discovery
 from google.cloud import runtimeconfig
-from google.cloud import datastore, storage
+from google.cloud import datastore, storage, logging
+
 
 
 runtimeconfig_client = runtimeconfig.Client()
@@ -22,6 +23,7 @@ else:
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
+log_client = logging.Client()
 workout_token = 'RG987S1GVNKYRYHYA'
 guac_password = 'promiseme'
 student_entry_image = 'image-labentry'

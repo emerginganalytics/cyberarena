@@ -52,61 +52,8 @@
         var displayName = user.displayName;
         teacher_email = user.email;
         var data = {teacher_email:teacher_email}
-        $.ajax({
-          type: "POST",
-          url: "/teacher_info",
-          dataType: "json",
-          contentType: "application/json;charset=UTF-8;",
-          data: JSON.stringify(data),
-          success: function(data){
-            for(var i = 0; i < data.length; i++){
-              var nodeName = 'unit_group_' + data[i]['workout_name'];
-              var unitNode = document.getElementById(nodeName);
-              if(unitNode == null){
-
-                //Header/Unit info container
-                var unit_div = document.createElement("div");
-                //Create interactive header button for each unit type
-                var unit_type = document.createElement("a");
-                unit_type.innerHTML = data[i]['workout_name'];
-                unit_type.className = 'unit_header btn';
-                unit_type.href = '#unit_group_' + data[i]['workout_name'];
-
-                //Create div containing the list of units of a specific type
-                var node = document.createElement("div");
-                node.id = nodeName;
-                node.className = 'collapse';
-                node.style = "margin-bottom:1em;";
-                
-                unit_div.append(unit_type);
-                unit_div.append(node);
-                unit_div.style='margin-bottom:1em;border:1px solid black;';
-                
-                //Create table for individual unit information
-                var unit_table = document.createElement("table");
-                unit_table.id = 'unit_table_' + data[i]['workout_name'];
-                
-                var table_headers = ["Unit Name", "Creation Date"]
-                //Create table headers
-                //var header_list = Object.keys(data[i])
-                generateTableHeaders(unit_table, table_headers);
-                
-                var container = document.getElementById('unit_container');
-                container.appendChild(unit_div);
-                node.appendChild(unit_table);
-              }
-
-              var unit_table = document.getElementById('unit_table_' + data[i]['workout_name']);
-              var unit_name = data[i]['unit_name'];
-              var unit_id = data[i]['unit_id'];
-              var unit_timestamp = data[i]['timestamp'];
-              var unit_build_type = data[i]['build_type']
-              fillTable(unit_table, unit_name, unit_id, unit_build_type, timeConverter(unit_timestamp));
-              var container = document.getElementById(nodeName)
-            }
-            $(".unit_header").attr("data-toggle", "collapse");
-          }
-        });
+        
+        document.getElementById('class_creation_teacher_id').value = teacher_email;
 
         document.getElementById('user_name_header').innerHTML = "Welcome " + displayName;
 
@@ -135,8 +82,9 @@
         })
 
       } else {
+        window.location.href = "/login";
         document.getElementById('sign-out').style.display = "none";
-        document.getElementById('unit_container').style.display = "none";
+        document.getElementById('info_display').style.display = "none";
         document.getElementById('build_workout_widget').style.display = "none";
         document.getElementById('user_name_header').innerHTML = "Please Log In";
         var sign_in_button = document.createElement('a');
@@ -165,6 +113,10 @@
 
   window.addEventListener('load', function(){
     var teacher_email = initApp();
+    var timestamp_list = document.getElementsByClassName('timestamp_field');
+    for(var i = 0; i < timestamp_list.length; i++){
+      timestamp_list[i].innerHTML = timeConverter(timestamp_list[i].innerHTML)
+    }
   })
   
   function timeConverter(UNIX_timestamp){
@@ -230,11 +182,104 @@
         <option value="arena_snake">Arena Snake</option>
       </select>
     </div>
-    
     <button id="sign-out" class='btn'>Sign out</button>
   </div>
-  <div id='unit_container' class='col'>
-    <h2 style='text-align: center;'>Your Units</h2>
+  <div id='info_display' class='col'>
+    <ul class="nav nav-tabs" id="control_tabs" role="tablist">
+      <li class="nav-item">
+          <a class="nav-link active" id="unit_tab" data-toggle="tab" href="#unit_container" role="tab" aria-controls="user_container" aria-selected="true">Units</a>
+      </li>
+      <li class="nav-item">
+          <a class="nav-link" id="class_tab" data-toggle="tab" href="#class_container" role="tab" aria-controls="class_container" aria-selected="false">Classes</a>
+      </li>
+    </ul>
+    <div class='tab-content'>
+      <div class="tab-pane fade active show" id="unit_container" role="tabpanel" aria-labelledby="unit_tab">
+        <h2>Your Units</h2>
+        {% for workout_name, items in teacher_info['units']|groupby('workout_name') %}
+          <div style="margin-bottom:1em;border:1px solid black;">
+            <a class="unit_header btn" data-toggle="collapse" href="#unit_group_{{workout_name}}">{{workout_name}}</a>
+            <div id="unit_group_{{workout_name}}" class="collapse" style="margin-bottom:1em;">
+              <table id="unit_table_{{workout_name}}">
+                <tr>
+                  <th>Unit Name</th>
+                  <th>Creation Date</th>
+                </tr>
+                {% for unit in items %}
+                
+                <tr>
+                  <td>
+                  {% if unit['build_type'] == "arena" %}
+                    <a href="/arena_list/{{unit.unit_id}}">{{unit.unit_name}}</a>
+                  {% else %}
+                    <a href="/workout_list/{{unit.unit_id}}">{{unit.unit_name}}</a>
+                  {% endif %}
+                  </td>
+                  <td class='timestamp_field'>
+                    {{unit.timestamp}}
+                  </td>
+                </tr>
+                {% endfor %}
+              </table>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="tab-pane fade" id="class_container" role="tabpanel" aria-labelledby="class_tab">
+        <h2>Your Classes (WIP)</h2>
+        <div id="class_list">
+          {% for class in teacher_info['classes'] %}
+          <div style="margin-bottom:1em;border:1px solid black;">
+            <a class="class_header btn" data-toggle="collapse" href="#class_group_{{class['class_name']}}">{{class['class_name']}}</a>
+            <div id="class_group_{{class['class_name']}}" class="collapse" style="margin-bottom:1em;">
+              <table id="class_table_{{class['class_name']}}">
+                <tr>
+                  <td>Roster</td>
+                  <td>Units</td>
+                </tr>
+                <tr>
+                  <td>
+                    <ul>
+                    {% for student in class['roster'] %}
+                      <li>{{student}}</li>
+                    {% endfor %}
+                    </ul>
+                  </td>
+                  <td>
+                    {% if class['unit_list'] %}
+                      {% for unit in class['unit_list'] %}
+                      {% endfor %}
+                    {% else %}
+                    <p>This class has no units</p>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          {% endfor %}
+        </div> <!-- Filled in by AJAX -->
+          <a class='btn' data-toggle='collapse' href='#create_class_form'>Create New Class</a>
+        <div id='create_class_form' class='collapse user_info'>
+
+          <form action="/create_new_class" method="POST">
+            <input name="class_name"id="class_name_input" type="text"/>
+            <label for="class_name_input">Class Name (for future reference)</label>
+
+            <input name="num_students" id="num_students_input" type="number"/>
+            <label for="num_students_input">Number of students</label>
+
+            <input name="teacher_email" type="hidden" id='class_creation_teacher_id'/>
+            <br>
+            <button class="btn" type="submit">Submit</button>
+          </form>
+        </div>
+      </div>
+      </div>
+    </div>
+</div>
+    </div>
+    <!-- <h2 style='text-align: center;'>Your Units</h2> -->
   </div>
 </div>
 
