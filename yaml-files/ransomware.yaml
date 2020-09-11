@@ -13,6 +13,13 @@ workout:
   build_type: "compute"
   flag_location:
 
+student_entry:
+  type: rdp
+  username: workout
+  password: "Promiseme!"
+  network: external-network
+  ip: 10.1.1.34
+
 networks:
   - name: external-network
     subnets:
