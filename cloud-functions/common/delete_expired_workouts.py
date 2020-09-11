@@ -285,7 +285,3 @@ def delete_arenas():
         if delete_specific_arena(arena_id, unit):
             ds_client.delete(unit.key)
             print("Finished deleting arena %s" % arena_id)
-
-
-delete_workouts()
-# delete_arenas()
