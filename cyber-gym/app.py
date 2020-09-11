@@ -1,15 +1,13 @@
 import time
 import requests
-
 from stop_workout import stop_workout
 from reset_workout import reset_workout
 from utilities.globals import ds_client, dns_suffix, log_client, workout_token, post_endpoint, auth_config, logger
 from utilities.pubsub_functions import *
 from utilities.yaml_functions import parse_workout_yaml
-from utilities.datastore_functions import process_workout_yaml, retrieve_student_uploads, \
-    store_custom_logo, store_background_color, get_unit_workouts
+from utilities.datastore_functions import *
 from utilities.assessment_functions import get_assessment_questions, process_assessment
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, session
 from forms import CreateWorkoutForm
 import json
 # --------------------------- FLASK APP --------------------------
@@ -206,12 +204,68 @@ def arena_landing(workout_id):
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
 
 @app.route("/login", methods=['GET', 'POST'])
-def login():
+def login():         
+    if request.method == 'POST':
+        json = request.get_json(force=True)
+        if 'user_email' in json:
+            admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
+            if json['user_email'] in admin_info['authorized_users']:
+                session['user_email'] = json['user_email']
     return render_template('login.html', auth_config=auth_config)
 
 @app.route('/teacher_home', methods=['GET', 'POST'])
 def teacher_home():
-    return render_template('teacher_home.html', auth_config=auth_config)
+    if session['user_email']:
+        teacher_email = session['user_email']
+        try:
+            teacher_info = ds_client.get(ds_client.key('cybergym-instructor', str(teacher_email)))
+            if not teacher_info:
+               add_new_teacher(teacher_email)
+        except:
+            add_new_teacher(teacher_email)
+            print("Adding new teacher email{}".format(teacher_email))
+        # if not teacher_info:
+            
+        unit_list = ds_client.query(kind='cybergym-unit')
+        unit_list.add_filter("instructor_id", "=", str(teacher_email))
+
+        class_list = ds_client.query(kind='cybergym-class')
+        class_list.add_filter('teacher_email', '=', str(teacher_email))
+
+        # unit_list.add_filter("resources_deleted", "=", False)
+        teacher_info = {}
+        teacher_units = []
+        teacher_classes = []
+        for unit in list(unit_list.fetch()):
+            if 'workout_name' in unit:
+                unit_info = {
+                    'unit_id': unit.key.name,
+                    'workout_name': unit['workout_name'],
+                    'build_type': unit['build_type'],
+                    'unit_name': unit['unit_name'],
+                    'timestamp': unit['timestamp']
+                }
+                teacher_units.append(unit_info)
+        teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
+
+        for class_instance in list(class_list.fetch()):
+            if 'class_name' in class_instance:
+                if 'units' in class_instance:
+                    class_unit_list = class_instance['units']
+                else:
+                    class_unit_list = None
+                class_info = {
+                    'class_id': class_instance.id,
+                    'class_name': class_instance['class_name'],
+                    'roster': class_instance['roster'],
+                    'class_units': class_unit_list
+                }
+                teacher_classes.append(class_info)
+        teacher_info['units'] = teacher_units
+        teacher_info['classes'] = teacher_classes
+        return render_template('teacher_home.html', auth_config=auth_config, test_variable=session['user_email'], teacher_info=teacher_info)
+    else:
+        return render_template('teacher_home.html', auth_config=auth_config)
 
 
 @app.route('/admin', methods=['GET', 'POST'])
@@ -268,28 +322,17 @@ def update_base():
             store_background_color(request.form['custom_color'])
     return redirect('/teacher_home')
 
-@app.route('/teacher_info', methods=['GET', 'POST'])
-def get_teacher_info():
-    if (request.method == "POST"):
-        teacher_email = request.get_json()
-        unit_list = ds_client.query(kind='cybergym-unit')
-        unit_list.add_filter("instructor_id", "=", str(teacher_email['teacher_email']))
-        # unit_list.add_filter("resources_deleted", "=", False)
-        teacher_units = []
 
-        for unit in list(unit_list.fetch()):
-            if 'workout_name' in unit:
-                unit_info = {
-                    'unit_id': unit.key.name,
-                    'workout_name': unit['workout_name'],
-                    'build_type': unit['build_type'],
-                    'unit_name': unit['unit_name'],
-                    'timestamp': unit['timestamp']
-                }
-                teacher_units.append(unit_info)
+@app.route('/get_classes', methods=['GET', 'POST'])
+def get_classes():
+    if request.method == "POST":
+        json = request.get_json(force=True)
+        if 'user_email' in json:
+            class_list = ds_client.query(kind='cybergym-class')
+            class_list.add_filter('teacher_email', '=', str(json['user_email']))
+            return json.dumps(class_list.fetch())
 
-        teacher_units = sorted(teacher_units, key = lambda i: (i['timestamp']), reverse=True)
-    return json.dumps(teacher_units)
+
 
 @app.route('/workout_state/<workout_id>', methods=["POST"])
 def check_workout_state(workout_id):
@@ -501,6 +544,17 @@ def check_user_level():
                     admin_info['pending_users'].append(user_info['user_email'])
                 ds_client.put(admin_info)
         return json.dumps(response)
+
+@app.route('/create_new_class', methods=['POST'])
+def create_new_class():
+    if(request.method == 'POST'):
+        teacher_email = request.form['teacher_email']
+        num_students = request.form['num_students']
+        class_name = request.form['class_name']
+        
+        store_class_info(teacher_email, num_students, class_name)
+
+        return redirect('/teacher_home')
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}

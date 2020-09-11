@@ -5,7 +5,7 @@ import string
 from yaml import load, Loader
 from os import path, makedirs, remove
 from google.cloud import datastore
-from utilities.globals import ds_client, storage_client, workout_globals, project
+from utilities.globals import ds_client, storage_client, workout_globals, project, BUILD_STATES
 from werkzeug.utils import secure_filename
 
 
@@ -232,7 +232,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'firewall_rules': firewall_rules,
         'assessment': assessment,
         'complete': False,
-        'student_entry': student_entry
+        'student_entry': student_entry,
+        'state': BUILD_STATES.START
     })
 
     ds_client.put(new_workout)
@@ -331,12 +332,15 @@ def get_unit_workouts(unit_id):
         if 'student_name' in workout:
             student_name = workout['student_name']
         workout_instance = workout = ds_client.get(workout.key)
+        state = None
+        if 'state' in workout_instance: 
+            state = workout_instance['state']
         workout_info = {
             'name': workout.key.name,
             # 'running': workout_instance['running'],
             'complete': workout_instance['complete'],
-            'student_name':student_name,
-            'state':workout['state'],
+            'student_name': student_name,
+            'state': state,
         }
         workout_list.append(workout_info)
 
@@ -378,3 +382,20 @@ def store_background_color(color_code):
     new_blob.upload_from_string(css_string, content_type='text/css')
 
     remove('temp.css')
+
+def add_new_teacher(teacher_email):
+    new_teacher = datastore.Entity(ds_client.key('cybergym-instructor', teacher_email))
+    # new_teacher['email'] = teacher_email
+    ds_client.put(new_teacher)
+
+def store_class_info(teacher_email, num_students, class_name):
+    new_class = datastore.Entity(ds_client.key('cybergym-class'))
+
+    new_class['teacher_email'] = teacher_email
+    class_roster = []
+    for i in range(int(num_students)):
+        class_roster.append("Student {}".format(i))
+    new_class['roster'] = class_roster
+    new_class['class_name'] = class_name
+
+    ds_client.put(new_class)

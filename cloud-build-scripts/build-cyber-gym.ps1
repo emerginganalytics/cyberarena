@@ -71,11 +71,12 @@ if ($confirmation -eq 'y') {
 # Create and copy over bucket files
 $confirmation = Read-Host "Do you want to copy over yaml files and instructions at this time? (y/N)"
 if ($confirmation -eq 'y') {
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\yaml-files\*.yaml"
     gsutil mb gs://"$project"_cloudbuild
     gsutil mb gs://student_workout_instructions_"$project"
     gsutil mb gs://teacher_workout_instructions_"$project"
     gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
-    gsutil cp gs://ualr-cybersecurity_cloudbuild/yaml-build-files/* gs://"$project"_cloudbuild/yaml-build-files/
+    gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
     gsutil cp gs://student_workout_instructions_tgd4419/* gs://student_workout_instructions_"$project"
     gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
     gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
