@@ -13,12 +13,17 @@ zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
 api_key = myconfig.get_variable('api_key').value.decode("utf-8")
+custom_dnszone = myconfig.get_variable('dnszone')
+if custom_dnszone != None:
+    dnszone = custom_dnszone.value.decode("utf-8")
+else:
+    dnszone = 'cybergym-public'
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
 log_client = g_logging.Client()
-dnszone = 'cybergym-public'
+
 workout_token = 'RG987S1GVNKYRYHYA'
 
 auth_config = {
@@ -66,3 +71,37 @@ class workout_globals():
     def refresh_api():
         compute = googleapiclient.discovery.build('compute', 'v1')
         return compute
+
+
+class BUILD_STATES:
+    START = 'START'
+    BUILDING_ASSESSMENT = 'BUILDING_ASSESSMENT'
+    BUILDING_NETWORKS = 'BUILDING_NETWORKS'
+    COMPLETED_NETWORKS = 'COMPLETED_NETWORKS'
+    BUILDING_SERVERS = 'BUILDING_SERVERS'
+    COMPLETED_SERVERS = 'COMPLETED_SERVERS'
+    BUILDING_ROUTES = 'BUILDING_ROUTES'
+    COMPLETED_ROUTES = 'COMPLETED_ROUTES'
+    BUILDING_FIREWALL = 'BUILDING_FIREWALL'
+    COMPLETED_FIREWALL = 'COMPLETED_FIREWALL'
+    BUILDING_STUDENT_ENTRY = 'BUILDING_STUDENT_ENTRY'
+    COMPLETED_STUDENT_ENTRY = 'COMPLETED_STUDENT_ENTRY'
+    RUNNING = 'RUNNING'
+    STOPPING = 'STOPPING'
+    STARTING = 'STARTING'
+    READY = 'READY'
+    EXPIRED = 'EXPIRED'
+    MISFIT = 'MISFIT'
+    BROKEN = 'BROKEN'
+    BUILDING_ARENA_STUDENT_NETWORKS = 'BUILDING_ARENA_STUDENT_NETWORKS'
+    COMPLETED_ARENA_STUDENT_NETWORKS = 'COMPLETED_ARENA_STUDENT_NETWORKS'
+    BUILDING_ARENA_STUDENT_SERVERS = 'BUILDING_ARENA_STUDENT_SERVERS'
+    COMPLETED_ARENA_STUDENT_SERVERS = 'COMPLETED_ARENA_STUDENT_SERVERS'
+    BUILDING_ARENA_NETWORKS = 'BUILDING_ARENA_NETWORKS'
+    COMPLETED_ARENA_NETWORKS = 'COMPLETED_ARENA_NETWORKS'
+    BUILDING_ARENA_SERVERS = 'BUILDING_ARENA_SERVERS'
+    COMPLETED_ARENA_SERVERS = 'COMPLETED_ARENA_SERVERS'
+    GUACAMOLE_SERVER_LOAD_TIMEOUT = 'GUACAMOLE_SERVER_LOAD_TIMEOUT'
+    DELETING_SERVERS = 'DELETING_SERVERS'
+    COMPLETED_DELETING_SERVERS = 'COMPLETED_DELETING_SERVERS'
+    DELETED = 'DELETED'

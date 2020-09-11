@@ -175,6 +175,14 @@ if ($confirmation -eq 'y') {
     gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
 }
 
+$confirmation = Read-Host "Do you want to update teacher and student workout instructions (for the primary UA Little Rock project only)? (y/N)"
+if ($confirmation -eq 'y') {
+    $studentpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\student-instructions"
+    $teacherpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\teacher-instructions"
+    gsutil cp $studentpath gs://student_workout_instructions_tgd4419/
+    gsutil cp $teacherpath gs://teacher_workout_instructions_84jf627/
+}
+
 $confirmation = Read-Host "Do you want to copy over ALL available cloud images? (y/N)"
 if ($confirmation -eq 'y') {
     gcloud compute --project=$project images delete image-labentry

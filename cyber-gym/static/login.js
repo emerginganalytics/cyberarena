@@ -13,7 +13,14 @@ function configureFirebaseLogin() {
           userIdToken = idToken;
           user_name = name;
           user_email = welcomeName;
-          
+          var data = {user_email:user_email}
+          $.ajax({
+            type: "POST",
+            url: "/login",
+            dataType: "json",
+            contentType: "application/json;charset=UTF-8;",
+            data: JSON.stringify(data)
+          })
           $('#user').text(welcomeName);
           $('#logged-in').show();
 
