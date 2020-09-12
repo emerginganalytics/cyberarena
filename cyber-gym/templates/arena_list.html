@@ -1,4 +1,4 @@
-ends "base.html" %}
+{% extends "base.html" %}
 
 
 {% block title%}Arena {{unit_id}}{% endblock%}
@@ -89,10 +89,10 @@ ends "base.html" %}
                         {% if workout['points'] %}
                             <script>update_scores('{{team}}', '{{ workout['points'] }}');</script>
                         {% endif %}
-                        {% if workout["complete"] == True %}
+                        {% if workout["state"] == "READY" or workout['state'] == "RUNNING" %}
                         <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
                         {% else %}
-                        <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
+                        <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
                         {% endif %}
                         <div class="collapse" id="team_collapse_{{workout.name}}">
                             <table>

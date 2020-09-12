@@ -349,7 +349,7 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, user_mail,
 
 
 def store_arena_workout(workout_id, unit_id, user_mail, timestamp, student_servers, student_instructions_url,
-                        assessment):
+                        assessment, student_name=None):
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
     new_workout.update({
         'unit_id': unit_id,
@@ -364,7 +364,9 @@ def store_arena_workout(workout_id, unit_id, user_mail, timestamp, student_serve
         'assessment': assessment,
         'student_servers': student_servers,
         'instructor_id': user_mail,
-        'teacher_email': user_mail
+        'teacher_email': user_mail, 
+        'state': BUILD_STATES.START,
+        'student_name':student_name
     })
 
     ds_client.put(new_workout)
@@ -385,14 +387,35 @@ def get_unit_workouts(unit_id):
             state = workout_instance['state']
         workout_info = {
             'name': workout.key.name,
-            # 'running': workout_instance['running'],
-            'complete': workout_instance['complete'],
             'student_name': student_name,
             'state': state,
         }
         workout_list.append(workout_info)
 
     return workout_list
+
+def get_unit_arenas(unit_id):
+    unit_workouts = ds_client.query(kind='cybergym-workout')
+    unit_workouts.add_filter("unit_id", "=", unit_id)
+    workout_list = []
+    for workout in list(unit_workouts.fetch()):
+        student_name = None
+        if 'student_name' in workout:
+            student_name = workout['student_name']
+        workout_instance = workout = ds_client.get(workout.key)
+        state = None
+        if 'state' in workout_instance: 
+            state = workout_instance['state']
+        workout_info = {
+            'name': workout.key.name,
+            'student_name': student_name,
+            'state': state,
+            'teacher_email':workout['teacher_email']
+        }
+        workout_list.append(workout_info)
+    return workout_list
+
+
 
 #store user submitted screenshots in cloud bucket
 def store_student_uploads(workout_id, uploads):
