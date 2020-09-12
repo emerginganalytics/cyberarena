@@ -8,6 +8,47 @@
 <script src='../static/login.js'></script>
 
 <script>
+  function show_student_name_form(student_name, class_id){
+    var new_name = prompt("Enter a new name for student " + student_name);
+    $.ajax({
+      type: "POST",
+      url: "/change_roster_name/" + class_id + "/" + student_name,
+      data: JSON.stringify({
+          "new_name": new_name
+      }),
+    })
+  }
+
+  function remove_student(class_id){
+    var student_name = prompt("Enter the name of the student to remove: ");
+    $.ajax({
+      type: "POST",
+      url: "/change_class_roster/" + class_id,
+      data: JSON.stringify({
+        "action": "remove",
+        "student_name":student_name
+      }),
+      success: function(){
+        window.location.reload();
+      }
+    })
+  }
+
+  function add_new_student(class_id){
+    var new_student_name = prompt("Enter the new student's name");
+    $.ajax({
+      type: "POST",
+      url: "/change_class_roster/" + class_id,
+      data: JSON.stringify({
+          "action": "add",
+          "student_name":new_student_name
+      }),
+      success: function(){
+        window.location.reload();
+      }
+    })
+  }
+
   function generateTableHeaders(table, data){
     let header = table.createTHead();
     let row = table.insertRow();
@@ -175,11 +216,12 @@
         <option value="reversus">Reversus</option>
         <option value="dos">DOS</option>
         <option value="shodan">Shodan</option>
-        <option value="Two-Step">Two-Step Authentication</option>
+        <option value="2fa">Two-Step Authentication</option>
         <option value="xss">Cross-Site Scripting</option>
         <option value="inspect">Inspect Element</option>
         <option value="sql">SQL Injection</option>
         <option value="arena_snake">Arena Snake</option>
+        <option value="hiddennode">Hidden Node</option>
       </select>
     </div>
     <button id="sign-out" class='btn'>Sign out</button>
@@ -206,7 +248,6 @@
                   <th>Creation Date</th>
                 </tr>
                 {% for unit in items %}
-                
                 <tr>
                   <td>
                   {% if unit['build_type'] == "arena" %}
@@ -226,7 +267,7 @@
         {% endfor %}
       </div>
       <div class="tab-pane fade" id="class_container" role="tabpanel" aria-labelledby="class_tab">
-        <h2>Your Classes (WIP)</h2>
+        <h2>Your Classes</h2>
         <div id="class_list">
           {% for class in teacher_info['classes'] %}
           <div style="margin-bottom:1em;border:1px solid black;">
@@ -241,25 +282,57 @@
                   <td>
                     <ul>
                     {% for student in class['roster'] %}
-                      <li>{{student}}</li>
+                      <li>{{student}} <a href="#" onclick="show_student_name_form('{{student}}', '{{class['class_id']}}')">Change Name</a></li>
                     {% endfor %}
                     </ul>
+                    <br>
+                    <a class="add_student_link" href="#" onclick="add_new_student('{{class['class_id']}}')">Add New Student</a><br>
+                    <a class="remove_student_link" href="#" onclick="remove_student('{{class['class_id']}}')">Remove Student</a>
                   </td>
                   <td>
-                    {% if class['unit_list'] %}
-                      {% for unit in class['unit_list'] %}
+                    {% if class['class_units'] %}
+                    <table>
+                    <tr>
+                      <th>Unit Name</th>
+                      <th>Unit Type</th>
+                      <th>Creation Date</th>
+                      <th>Remove</th>
+                    </tr>
+                    
+                      {% for unit in class['class_units'] %}
+                      <tr>
+                        {% if unit['build_type'] != 'arena' %}
+                          <td><a href="/workout_list/{{unit['unit_id']}}">{{unit['unit_name']}}</a></td>
+                          <td>{{unit['workout_name']}}</td>
+                        {% else %}
+                          <td><a href="/arena_list/{{unit['unit_id']}}">{{unit['unit_name']}}</a></td>
+                          <td>{{unit['workout_name']}}</td>
+                        {% endif %}
+                        {% if unit['timestamp']%}
+                        <td class='timestamp_field'>{{unit['timestamp']}}</td>
+                        {% else %}
+                        <td>Unknown</td>
+                        {% endif %}
+                        <td><a href="/remove_unit_from_class/{{class['class_id']}}/{{unit['unit_id']}}">Remove Unit</a></td>
+                      </tr>
                       {% endfor %}
+                      </ul>
                     {% else %}
                     <p>This class has no units</p>
                     {% endif %}
+                    </table>
                   </td>
                 </tr>
+
               </table>
+              <a href="/remove_class/{{class['class_id']}}">Remove Class</a>
+
             </div>
           </div>
           {% endfor %}
+
         </div> <!-- Filled in by AJAX -->
-          <a class='btn' data-toggle='collapse' href='#create_class_form'>Create New Class</a>
+          <a style="width:50%!important;text-align:center;" class='btn' data-toggle='collapse' href='#create_class_form'>Create New Class</a>
         <div id='create_class_form' class='collapse user_info'>
 
           <form action="/create_new_class" method="POST">

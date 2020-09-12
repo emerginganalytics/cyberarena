@@ -81,7 +81,7 @@ def add_yaml_defaults(yaml_contents):
     return yaml_contents
 
 
-def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, workout_length, email, unit_id=None):
+def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class_name, workout_length, email, unit_id=None):
     """
     Prepares the build of workouts based on a YAML specification by storing the information in the
     cloud datastore.
@@ -89,6 +89,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     :param workout_type: The name of the workout
     :param unit_name: A friendly name for the unit of workouts. A unit represents a classroom of students or teams
     :param num_team: The number of students or teams
+    :param class_name: the name of the class 
     :param workout_length: The number of days this workout will remain in the cloud project.
     :param email: The email address of the instructor
     :param unit_id: The unit id for the workout to be assigned to for addition to a pre-existing unit
@@ -100,6 +101,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     existing_unit = False
     if unit_id:
         existing_unit = True
+
 
     workout_name = y['workout']['name']
     build_type = y['workout']['build_type']
@@ -113,9 +115,9 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
     assessment = y['assessment']
     if build_type == 'arena':
         student_servers = y['student-servers']['servers']
-
-    if num_team > workout_globals.max_num_workouts:
-        num_team = workout_globals.max_num_workouts
+    if num_team:
+        if num_team > workout_globals.max_num_workouts:
+            num_team = workout_globals.max_num_workouts
 
     if workout_length > workout_globals.max_workout_len:
         workout_length = workout_globals.max_workout_len
@@ -132,13 +134,45 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
                         ts=ts, workout_url_path=workout_url_path,
                         teacher_instructions_url=teacher_instructions_url, workout_description=workout_description)
 
-
+    num_workouts = 0
+    student_names = []
+    if num_team:
+        num_workouts = num_team
+    else:
+        class_list = ds_client.query(kind='cybergym-class')
+        class_list.add_filter('teacher_email', '=', str(email))
+        class_list.add_filter('class_name', '=', str(class_name))
+        for class_object in list(class_list.fetch()): #Should return only a single class instance
+            num_workouts = len(class_object['roster'])
+            for student_name in class_object['roster']:
+                student_names.append(student_name)
+            unit_object = {
+                "unit_id": str(unit_id),
+                "unit_name": str(unit_name),
+                "workout_name": str(workout_name),
+                "build_type": str(build_type),
+                "timestamp":str(ts)
+            }
+            
+            if 'unit_list' not in class_object:
+                unit_list = []
+                unit_list.append(unit_object)
+                class_object['unit_list'] = unit_list
+            else:
+                class_object['unit_list'].append(unit_object)
+            ds_client.put(class_object)
+    
     if build_type == 'container':
         container_info = y['container_info']
-        for i in range(1, num_team + 1):
+        for i in range(num_workouts):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
-            store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
+            if student_names:
+                store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
+                                    student_instructions_url=student_instructions_url,
+                                    container_info=container_info, assessment=assessment,student_name=student_names[i])
+            else:
+                store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
                                     student_instructions_url=student_instructions_url,
                                     container_info=container_info, assessment=assessment)
     elif build_type == 'compute':
@@ -147,14 +181,22 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         routes = y['routes']
         firewall_rules = y['firewall_rules']
         student_entry = y['student_entry']
-        for i in range(1, num_team+1):
+        for i in range(num_workouts):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
-            store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
-                               workout_duration=workout_length, workout_type=workout_type,
-                               networks=networks, servers=servers, routes=routes,
-                               firewall_rules=firewall_rules, assessment=assessment,
-                               student_instructions_url=student_instructions_url, student_entry=student_entry)
+            if student_names:
+                store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
+                                workout_duration=workout_length, workout_type=workout_type,
+                                networks=networks, servers=servers, routes=routes,
+                                firewall_rules=firewall_rules, assessment=assessment,
+                                student_instructions_url=student_instructions_url, student_entry=student_entry, student_name=student_names[i])
+            else:
+                store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
+                                workout_duration=workout_length, workout_type=workout_type,
+                                networks=networks, servers=servers, routes=routes,
+                                firewall_rules=firewall_rules, assessment=assessment,
+                                student_instructions_url=student_instructions_url, student_entry=student_entry)
+                
     elif build_type == 'arena':
         networks = y['additional-networks']
         servers = y['additional-servers']
@@ -169,11 +211,15 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
                           servers=servers, routes=routes, firewall_rules=firewall_rules,
                           student_entry=student_entry, student_entry_type=student_entry_type, network_type=network_type,
                           student_entry_username=student_entry_username, student_entry_password=student_entry_password)
-        for i in range(1, num_team+1):
+        for i in range(num_workouts):
             workout_id = randomStringDigits()
             workout_ids.append(workout_id)
-            store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers, user_mail=email,
-                                timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment)
+            if student_names:
+                store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers, user_mail=email,
+                                    timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment, student_name=student_name[i])
+            else:
+                store_arena_workout(workout_id=workout_id, unit_id=unit_id, student_servers=student_servers, user_mail=email,
+                                    timestamp=ts, student_instructions_url=student_instructions_url, assessment=assessment)
     
 
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
@@ -190,7 +236,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, worko
         return unit_id, build_type
 
 
-def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment):
+def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment, student_name=None):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -203,14 +249,15 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
         'complete': False,
         'container_info': container_info,
         'assessment': assessment,
-        'state': 'RUNNING'
+        'state': 'RUNNING',
+        'student_name': student_name
     })
 
     ds_client.put(new_workout)
 
 
 def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks,
-                       servers, routes, firewall_rules, assessment, student_instructions_url, student_entry):
+                       servers, routes, firewall_rules, assessment, student_instructions_url, student_entry, student_name=None):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -233,7 +280,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'assessment': assessment,
         'complete': False,
         'student_entry': student_entry,
-        'state': BUILD_STATES.START
+        'state': BUILD_STATES.START,
+        'student_name': student_name
     })
 
     ds_client.put(new_workout)
@@ -394,7 +442,7 @@ def store_class_info(teacher_email, num_students, class_name):
     new_class['teacher_email'] = teacher_email
     class_roster = []
     for i in range(int(num_students)):
-        class_roster.append("Student {}".format(i))
+        class_roster.append("Student {}".format(i+1))
     new_class['roster'] = class_roster
     new_class['class_name'] = class_name
 

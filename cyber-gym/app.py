@@ -29,10 +29,20 @@ def default_route():
 def index(workout_type):
     logger.info('Request for workout type %s' % workout_type)
     form = CreateWorkoutForm()
-    if form.validate_on_submit():
+    if request.method == "POST":
+        unit_name = request.form['unit_name']
+        length = int(request.form['length'])
+        email = request.form['email']
+        team = None
+        class_name = None
+        if request.form['team'] != "":  
+            team = int(request.form['team'])
+        else:
+            class_name = request.form['class_target']
+
         yaml_string = parse_workout_yaml(workout_type)
-        unit_id, build_type = process_workout_yaml(yaml_string, workout_type, form.unit.data,
-                                                     form.team.data, form.length.data, form.email.data)
+        unit_id, build_type = process_workout_yaml(yaml_string, workout_type, unit_name,
+                                                     team, class_name, length, email)
 
         if unit_id == False:
             return render_template('no_workout.html')
@@ -49,7 +59,7 @@ def index(workout_type):
         elif build_type == 'container':
             url = '/workout_list/%s' % (unit_id)
             return redirect(url)
-    return render_template('main_page.html', form=form, workout_type=workout_type, auth_config=auth_config)
+    return render_template('main_page.html', workout_type=workout_type, auth_config=auth_config)
 
 
 # Student landing page route. Displays information and links for an individual workout
@@ -224,7 +234,6 @@ def teacher_home():
         except:
             add_new_teacher(teacher_email)
             print("Adding new teacher email{}".format(teacher_email))
-        # if not teacher_info:
             
         unit_list = ds_client.query(kind='cybergym-unit')
         unit_list.add_filter("instructor_id", "=", str(teacher_email))
@@ -250,8 +259,8 @@ def teacher_home():
 
         for class_instance in list(class_list.fetch()):
             if 'class_name' in class_instance:
-                if 'units' in class_instance:
-                    class_unit_list = class_instance['units']
+                if 'unit_list' in class_instance:
+                    class_unit_list = class_instance['unit_list']
                 else:
                     class_unit_list = None
                 class_info = {
@@ -326,11 +335,16 @@ def update_base():
 @app.route('/get_classes', methods=['GET', 'POST'])
 def get_classes():
     if request.method == "POST":
-        json = request.get_json(force=True)
-        if 'user_email' in json:
-            class_list = ds_client.query(kind='cybergym-class')
-            class_list.add_filter('teacher_email', '=', str(json['user_email']))
-            return json.dumps(class_list.fetch())
+        user_data = request.get_json(force=True)
+        if 'user_email' in user_data:
+            class_query = ds_client.query(kind='cybergym-class')
+            class_query.add_filter('teacher_email', '=', str(user_data['user_email']))
+            
+            class_list = []
+            for class_object in list(class_query.fetch()):
+                class_list.append(class_object)
+            
+            return json.dumps(class_list)
 
 
 
@@ -555,6 +569,54 @@ def create_new_class():
         store_class_info(teacher_email, num_students, class_name)
 
         return redirect('/teacher_home')
+
+@app.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
+def change_roster_name(class_id, student_name):
+    if request.method == 'POST':
+        request_data = request.get_json(force=True)
+        new_name = request_data['new_name']
+        class_info = ds_client.get(ds_client.key('cybergym-class', int(class_id)))
+        if student_name in class_info['roster']:
+            class_info['roster'].remove(student_name)
+            class_info['roster'].append(new_name)
+        ds_client.put(class_info)
+        if 'unit_list' in class_info:
+            for unit in class_info['unit_list']:
+                student_workout_query = ds_client.query(kind='cybergym-workout')
+                student_workout_query.add_filter('unit_id', '=', unit['unit_id'])
+                student_workout_query.add_filter('student_name', '=', student_name)
+                for workout in list(student_workout_query.fetch()):
+                    workout['student_name'] = new_name
+                    ds_client.put(workout)
+    return json.dumps(class_info)
+
+@app.route('/remove_class/<class_id>', methods=['GET',"POST"])
+def remove_class(class_id):
+    ds_client.delete(ds_client.key('cybergym-class', int(class_id)))
+    return redirect('/teacher_home')
+    
+@app.route('/remove_unit_from_class/<class_id>/<unit_id>', methods=['GET','POST'])
+def remove_unit_from_class(class_id, unit_id):
+    class_info = ds_client.get(ds_client.key('cybergym-class', int(class_id)))
+    for unit in class_info['unit_list']:
+        if unit['unit_id'] == unit_id:
+            class_info['unit_list'].remove(unit)
+    ds_client.put(class_info)
+    return redirect('/teacher_home')
+
+@app.route('/change_class_roster/<class_id>', methods=['POST'])
+def change_class_roster(class_id):
+    class_info = ds_client.get(ds_client.key('cybergym-class', int(class_id)))
+    if request.method == 'POST':
+        request_data = request.get_json(force=True)
+        print(str(request_data))
+        if request_data['action'] == 'remove':
+            if request_data['student_name'] in class_info['roster']:
+                class_info['roster'].remove(str(request_data['student_name']))
+        elif request_data['action'] == 'add':
+            class_info['roster'].append(str(request_data['student_name']))
+        ds_client.put(class_info)
+    return redirect('/teacher_home')
 
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
