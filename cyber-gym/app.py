@@ -161,7 +161,7 @@ def arena_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     build_type = unit['build_type']
     workout_url_path = unit['workout_url_path']
-    workout_list = get_unit_workouts(unit_id)
+    workout_list = get_unit_arenas(unit_id)
     
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
