@@ -177,8 +177,8 @@ if ($confirmation -eq 'y') {
 
 $confirmation = Read-Host "Do you want to update teacher and student workout instructions (for the primary UA Little Rock project only)? (y/N)"
 if ($confirmation -eq 'y') {
-    $studentpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\student-instructions"
-    $teacherpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\teacher-instructions"
+    $studentpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\student-instructions\*.pdf"
+    $teacherpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\teacher-instructions\*.pdf"
     gsutil cp $studentpath gs://student_workout_instructions_tgd4419/
     gsutil cp $teacherpath gs://teacher_workout_instructions_84jf627/
 }
