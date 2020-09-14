@@ -76,3 +76,15 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  - type: "input"
+    questions: "How many unique IP addresses were discovered by the scan?"
+    answer: "5"
+  - type: "input"
+    question: "What is the IP address of the hidden target?"
+    answer: "10.1.1.253"
+  - type: "input"
+    question: "What was the port number used to access the hidden target?"
+    answer: "80"
+  
