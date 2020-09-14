@@ -75,7 +75,7 @@ assessment:
       points: 100
     - type: input
       question: "Flag #5: Ghidra"
-      answer: ""
+      answer: "T0w1aZr!nL6S49mS"
       points: 100
     - type: input
       question: "Flag #6: Crypto: Split Key"
