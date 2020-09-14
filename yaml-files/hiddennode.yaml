@@ -3,14 +3,15 @@ version: '1'
 workout:
   name: hiddennode
   workout_description: 'Using Network tools to find hidden nodes on a network'
-  project_name: ualr-cybersecurity
+  teacher_instructions_url: ""
+  student_instructions_url: ""
   build_type: "compute"
 
 student_entry:
   type: vnc
   password: "Let's workout!"
   network: external-network
-  ip: 10.1.1.253
+  ip: 10.1.1.2
 
 networks: 
   - name: external-network
