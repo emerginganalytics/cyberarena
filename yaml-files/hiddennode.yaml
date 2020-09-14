@@ -11,7 +11,7 @@ student_entry:
   type: vnc
   password: "Let's workout!"
   network: external-network
-  ip: 10.1.1.2
+  ip: 10.1.1.10
 
 networks: 
   - name: external-network
@@ -20,6 +20,17 @@ networks:
         ip_subnet: 10.1.1.0/24
 
 servers:
+  - name: cybergym-vnc
+    image: image-cybergym-vnc
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: none
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
   - name: dvwalab
     image: image-dvwalab
     machine_type: "n1-standard-1"
