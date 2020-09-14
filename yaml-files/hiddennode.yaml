@@ -1,10 +1,10 @@
 version: '1'
 
 workout:
-  name: hiddennode
-  workout_description: 'Using Network tools to find hidden nodes on a network'
-  teacher_instructions_url: ""
-  student_instructions_url: ""
+  name: 'Hidden Target'
+  workout_description: 'Using Network tools to find hidden targets on a network'
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/HiddenTargetTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_tgd4419/HiddenTargetWorkoutStudentInstructions.pdf"
   build_type: "compute"
 
 student_entry:
@@ -23,9 +23,6 @@ servers:
   - name: cybergym-vnc
     image: image-cybergym-vnc
     machine_type: "n1-standard-1"
-    network_routing: false
-    tags: none
-    metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.10
@@ -34,9 +31,6 @@ servers:
   - name: dvwalab
     image: image-dvwalab
     machine_type: "n1-standard-1"
-    network_routing: false
-    tags: none
-    metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.253
@@ -45,9 +39,6 @@ servers:
   - name: ce-linux
     image: ce-linux-boot-image-002
     machine_type: "n1-standard-1"
-    network_routing: false
-    tags: none
-    metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.111
@@ -56,9 +47,6 @@ servers:
   - name: cd-windows
     image: ce-windows-boot-image-002
     machine_type: "n1-standard-1"
-    network_routing: false
-    tags: none
-    metadata: none
     nics:
       - network: external-network
         internal_IP: 10.1.1.115
@@ -78,13 +66,17 @@ firewall_rules:
     source_ranges: ["10.1.1.0/24"]
 
 assessment:
-  - type: "input"
-    questions: "How many unique IP addresses were discovered by the scan?"
-    answer: "5"
-  - type: "input"
-    question: "What is the IP address of the hidden target?"
-    answer: "10.1.1.253"
-  - type: "input"
-    question: "What was the port number used to access the hidden target?"
-    answer: "80"
-  
+  type: "percentage"
+  questions:
+    - type: "input"
+      question: "How long does your botnet sleep before communicating with the command and control server?"
+      answer: "10"
+    - type: "input"
+      questions: "How many unique IP addresses were discovered by the scan?"
+      answer: "5"
+    - type: "input"
+      question: "What is the IP address of the hidden target?"
+      answer: "10.1.1.253"
+    - type: "input"
+      question: "What was the port number used to access the hidden target?"
+      answer: "80"
