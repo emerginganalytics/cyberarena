@@ -16,6 +16,19 @@ initApp = function(){
     firebase.initializeApp(auth_config);
     firebase.auth().onAuthStateChanged(function(user){
         if(user){
+            $.ajax({
+                type: "POST",
+                url: "/check_user_level",
+                data: JSON.stringify({
+                    "user_email": user.email
+                }),
+                success: function(data){
+                  var json = $.parseJSON(data)
+                  if(json['authorized'] == false){
+                    location.href = "/unauthorized";
+                  }
+                }
+            })
             document.getElementById('email').value = user.email;
             $.ajax({
                 type: "POST",
