@@ -170,15 +170,16 @@ if ($confirmation -eq 'y') {
 
 $confirmation = Read-Host "Do you want to update build yaml specifications and startup scripts? (y/N)"
 if ($confirmation -eq 'y') {
-    $sourcepath = Join-Path (Resolve-Path ..\).Path "\yaml-files\*.yaml"
-    gsutil cp gs://ualr-cybersecurity_cloudbuild/startup-scripts/* gs://"$project"_cloudbuild/startup-scripts/
-    gsutil cp $sourcepath gs://"$project"_cloudbuild/yaml-build-files/
+    $yamlpath = Join-Path (Resolve-Path ..\).Path "\build-files\*.yaml"
+    $scriptpath = Join-Path (Resolve-Path ..\).Path "\build-files\startup-scripts\*"
+    gsutil cp $scriptpath gs://"$project"_cloudbuild/startup-scripts/
+    gsutil cp $yamlpath gs://"$project"_cloudbuild/yaml-build-files/
 }
 
 $confirmation = Read-Host "Do you want to update teacher and student workout instructions (for the primary UA Little Rock project only)? (y/N)"
 if ($confirmation -eq 'y') {
-    $studentpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\student-instructions\*.pdf"
-    $teacherpath = Join-Path (Resolve-Path ..\).Path "\yaml-files\teacher-instructions\*.pdf"
+    $studentpath = Join-Path (Resolve-Path ..\).Path "\build-files\student-instructions\*.pdf"
+    $teacherpath = Join-Path (Resolve-Path ..\).Path "\build-files\teacher-instructions\*.pdf"
     gsutil cp $studentpath gs://student_workout_instructions_tgd4419/
     gsutil cp $teacherpath gs://teacher_workout_instructions_84jf627/
 }

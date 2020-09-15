@@ -7,7 +7,7 @@
 .DS_Store
 cyber-gym/subscriber.py
 local-scripts/
-/yaml-files/private/
+/build-files/private/
 /cyber-gym/static/private/
 /cyber-gym/templates/private/
 /cloud-functions/test_command.py
