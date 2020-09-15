@@ -72,7 +72,7 @@ assessment:
       question: "How long does your botnet sleep before communicating with the command and control server?"
       answer: "10"
     - type: "input"
-      questions: "How many unique IP addresses were discovered by the scan?"
+      question: "How many unique IP addresses were discovered by the scan?"
       answer: "5"
     - type: "input"
       question: "What is the IP address of the hidden target?"
