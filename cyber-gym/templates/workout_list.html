@@ -5,6 +5,23 @@
 
 {% block content %}
 <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+<script>
+    function copy_student_links(){
+        var temp_div = document.createElement("textarea");
+
+        var links = document.getElementsByClassName('workout-link');
+        
+        for(var i = 0; i < links.length; i++){
+            temp_div.value += links[i].href + "\n";
+        }
+        temp_div.id = "temp_div";
+        document.getElementById('loading-msg').append(temp_div);
+        temp_div.select();
+        document.execCommand("copy");
+        document.getElementById('loading-msg').removeChild(temp_div);
+        document.getElementById('copy_link_text').style.display = "block";
+    }
+</script>
 <style>
     .landing_content .btn, table{
         width:75%;
@@ -74,7 +91,7 @@
                             <th>Change Student Name</th>
                         </tr>
                         <tr>
-                            <td><a href="/landing/{{workout.name}}" target="_blank">Landing Page</a></td>
+                            <td><a href="/landing/{{workout.name}}" class="workout-link" target="_blank">Landing Page</a></td>
                             <td>
                                 {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
@@ -163,7 +180,9 @@
 
                 {% endfor %}
             </ol>
-        </div>
+            <a onclick="copy_student_links()" href="#" class="btn" style="width:50%;">Copy Student Links</a>
+            <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
+        </div>       
     </div>
     <div id="loading-msg"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
