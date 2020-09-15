@@ -35,8 +35,8 @@ def main():
 
     args = parser.parse_args()
 
-    input_directory = Path("../yaml-files/teacher-instructions/need-encryption")
-    output_directory = Path("../yaml-files/teacher-instructions")
+    input_directory = Path("../build-files/teacher-instructions/need-encryption")
+    output_directory = Path("../build-files/teacher-instructions")
     for filename in input_directory.iterdir():
         if filename.suffix == ".pdf":
             set_teacher_instruction_password(filename, args.password, output_directory)
