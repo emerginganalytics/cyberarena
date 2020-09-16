@@ -28,9 +28,9 @@ def get_startup_scripts(workout_id, assessment):
                             'key': 'windows-startup-script-bat',
                             'value': script
                         }
-                if 'script_language' in question and question['script_language'] == 'python':
+                if 'script-language' in question and question['script-language'] == 'python':
                     script_command = 'python {script}'.format(script=question['script'])
-                elif 'script_language' in question and question['script_language'] == 'powershell':
+                elif 'script-language' in question and question['script-language'] == 'powershell':
                     script_command = 'powershell.exe -File ./{script}'.format(script=question['script'])
                     script_command = f'"{script_command}"'
                 else:
@@ -48,7 +48,7 @@ def get_startup_scripts(workout_id, assessment):
                             'key': 'startup-script',
                             'value': script
                         }
-                if 'script_language' in question and question['script_language'] == 'python':
+                if 'script-language' in question and question['script-language'] == 'python':
                     script = 'python3 {script}'.format(script=question['script'])
                 else:
                     script = question['script']
