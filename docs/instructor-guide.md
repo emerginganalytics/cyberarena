@@ -12,7 +12,7 @@ The default view of the teacher home page shows a list of all the units tied to 
  - A **Unit** is simply a collection of workouts of a particular type (for example, a set of 10 Cyberattack workouts). You may have several units of each type depending on course load. 
 
 **Class List**
-[!Class List](/images/instruction-class-management.png)
+![Class List](/images/instruction-class-management.png)
 The second tab on the top of the screen is the class list. In this menu, you can create and edit classes with persistent rosters to make creating and managing groups of students much easier. To create a class, click on the class tab and click the "Create New Class" button. This will a reveal a form that simply asks for the name of the class and the number of students. Upon submission, the class roster will be auto-populated with students. You have the ability to change each individual student name, add a new student, and remove students. Each student must have a unique name, as the add/delete operations are case-sensitive. Changing a student name will also retroactively change the name for all previous workouts registered to that student.
 
 **Build Options**
