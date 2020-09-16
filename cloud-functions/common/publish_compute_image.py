@@ -91,6 +91,8 @@ def create_production_image(server_name, existing_snapshot=None):
                 print(f"Begin waiting for image deletion operation {response['id']}")
                 service.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
                 success = True
+            except HttpError:
+                nothing_to_delete = True
             except timeout:
                 i += 1
                 print('Response timeout for production image deletion. Trying again')
