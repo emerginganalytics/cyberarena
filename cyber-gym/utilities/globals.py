@@ -18,6 +18,7 @@ if custom_dnszone != None:
     dnszone = custom_dnszone.value.decode("utf-8")
 else:
     dnszone = 'cybergym-public'
+main_app_url = myconfig.get_variable('main_app_url')
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')

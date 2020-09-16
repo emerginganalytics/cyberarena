@@ -48,8 +48,17 @@ assessment:
   questions:  
     - type: auto
       key: "1TccG1J"
-      question: "This will automatically be marked complete when you have completed the mission"
-      script: "cyberattack-1"
+      question: "Attack Mission"
+      script: "ransomware-validate.py"
+      script-language: "python"
+      server: cybergym-ransomware
+      operating-system: windows
+      complete: False
+    - type: auto
+      key: "OCIuSTERThea"
+      question: "Protection Mission"
+      script: "ransomware-q2-assessment.ps1"
+      script-language: "powershell"
       server: cybergym-ransomware
       operating-system: windows
       complete: False

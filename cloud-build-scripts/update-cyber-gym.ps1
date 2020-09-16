@@ -178,6 +178,11 @@ if ($confirmation -eq 'y') {
 
 $confirmation = Read-Host "Do you want to update teacher and student workout instructions (for the primary UA Little Rock project only)? (y/N)"
 if ($confirmation -eq 'y') {
+    $confirmation = Read-Host "Do you want to first encrypt the teacher instructions in need of encryption? (y/N)"
+    if ($confirmation -eq 'y') {
+        $pass = Read-Host "What is the password you want to use for encryption? (Don't forget to use a double excalamation point for '!')"
+        python password_protect_teacher_instructions.py -p $pass
+    }
     $studentpath = Join-Path (Resolve-Path ..\).Path "\build-files\student-instructions\*.pdf"
     $teacherpath = Join-Path (Resolve-Path ..\).Path "\build-files\teacher-instructions\*.pdf"
     gsutil cp $studentpath gs://student_workout_instructions_tgd4419/

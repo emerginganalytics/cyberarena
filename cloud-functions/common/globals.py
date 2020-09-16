@@ -19,6 +19,11 @@ if custom_dnszone != None:
     dnszone = custom_dnszone.value.decode("utf-8")
 else:
     dnszone = 'cybergym-public'
+custom_main_app_url = myconfig.get_variable('main_app_url')
+if custom_main_app_url != None:
+    main_app_url = custom_main_app_url.value.decode("utf-8")
+else:
+    main_app_url = 'https://buildthewarrior.cybergym-eac-ualr.org'
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
@@ -37,6 +42,7 @@ class workout_globals():
     yaml_bucket = project + '_cloudbuild'
     yaml_folder = 'yaml-build-files/'
     windows_startup_script_env = 'setx /m WORKOUTID {env_workoutid}\n' \
+                                 'setx /m URL ' + main_app_url + '\n' \
                                  'setx /m DNS_SUFFIX ' + dns_suffix + '\n'
     windows_startup_script_task = 'setx /m WORKOUTKEY{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
@@ -44,6 +50,7 @@ class workout_globals():
     linux_startup_script_env = '#! /bin/bash\n' \
                                'cat >> /etc/environment << EOF\n' \
                                'WORKOUTID={env_workoutid}\n' \
+                               'URL=' + main_app_url + '\n' \
                                'DNS_SUFFIX=' + dns_suffix + '\n'
     linux_startup_script_task = 'WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                 'EOF\n' \
