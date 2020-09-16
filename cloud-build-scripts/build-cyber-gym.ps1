@@ -95,6 +95,7 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
     gcloud beta runtime-config configs variables set "script_repository" gs://"$project"_cloudbuild/startup-scripts/ --config-name "cybergym"
     gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "main_app_url" "https://cybergym$dns_suffix" --config-name "cybergym"
 }
 
 # Create the cloud functions
