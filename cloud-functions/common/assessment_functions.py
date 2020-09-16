@@ -55,6 +55,8 @@ def get_startup_scripts(workout_id, assessment):
                 assess_script = workout_globals.linux_startup_script_task.format(env_workoutkey=question['key'],
                                                                                    q_number=i,
                                                                                    script=script)
+            if i != 0:
+                startup_scripts[question['server']]['value'] += "\n"
             startup_scripts[question['server']]['value'] += assess_script
             i += 1
 
