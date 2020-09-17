@@ -76,7 +76,7 @@
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
 
-                    <form id='start_vm' action="/start_vm" method="post">
+                    <form class="control_form" id='start_vm' action="/start_vm" method="post">
                         <div class="input-field" >
                                 <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                                 <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;">
@@ -92,7 +92,7 @@
                     </form>
                 </div>
                 <div class='control_button'>
-                    <form id="stop_vm" action="/stop_vm" method="post">
+                    <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
                             {% if state == "RUNNING" %}
@@ -104,7 +104,7 @@
                     </form>
                 </div>
                 <div class='control_button'>
-                    <form id="reset_vm" action="/reset_vm" method="post">
+                    <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
                         <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
                         <div class="btn-ctn">
                                 <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
@@ -164,7 +164,7 @@
                     });
                     */
                     $(document).ready(function(){
-                        $("form").submit(function(event){
+                        $(".control_form").submit(function(event){
                             event.preventDefault();
 
                             $('#start-vm').attr('disabled','disabled');

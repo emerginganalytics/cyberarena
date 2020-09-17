@@ -1,5 +1,4 @@
 import json
-from utilities.datastore_functions import store_student_uploads, retrieve_student_uploads
 from utilities.globals import ds_client
 import time
 
@@ -39,6 +38,8 @@ def get_assessment_questions(workout):
         return False
 
 def process_assessment(workout, workout_id, request, assessment):
+    #moved to this function to fix circular import error
+    from utilities.datastore_functions import store_student_uploads, retrieve_student_uploads
     valid_answers = []
     if workout['type'] == 'arena':
         points = 0
@@ -138,8 +139,8 @@ def process_assessment(workout, workout_id, request, assessment):
         assessment_upload_prompt = request.form.getlist('upload_prompt')
         assessment_uploads = request.files.getlist('file_upload')
 
-
-        store_student_uploads(workout_id, assessment_uploads)
+        if assessment_uploads[0].content_type != "application/octet-stream":
+            store_student_uploads(workout_id, assessment_uploads)
 
         for i in range(len(assessment_answers)):
             
@@ -156,12 +157,13 @@ def process_assessment(workout, workout_id, request, assessment):
 
         uploaded_files = []
         urls = retrieve_student_uploads(workout_id)
-        for index, item in enumerate(assessment_uploads):
-            user_input = {
-                "question": assessment_upload_prompt[index],
-                "storage_url": urls[index]
-            }
-            uploaded_files.append(user_input)
+        if urls:
+            for index, item in enumerate(assessment_uploads):
+                user_input = {
+                    "question": assessment_upload_prompt[index],
+                    "storage_url": urls[index]
+                }
+                uploaded_files.append(user_input)
 
 
         percentage_correct = num_correct / len(assessment_questions) * 100
