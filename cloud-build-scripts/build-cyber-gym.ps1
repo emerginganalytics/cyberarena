@@ -73,6 +73,7 @@ $confirmation = Read-Host "Do you want to copy over yaml files and instructions 
 if ($confirmation -eq 'y') {
     $yamlpath = Join-Path (Resolve-Path ..\).Path "\build-files\*.yaml"
     $scriptpath = Join-Path (Resolve-Path ..\).Path "\build-files\startup-scripts\*"
+    gsutil mb gs://"$project"_assessment_upload
     gsutil mb gs://"$project"_cloudbuild
     gsutil mb gs://student_workout_instructions_"$project"
     gsutil mb gs://teacher_workout_instructions_"$project"
@@ -82,6 +83,7 @@ if ($confirmation -eq 'y') {
     gsutil cp gs://teacher_workout_instructions_84jf627/* gs://teacher_workout_instructions_"$project"
     gsutil acl ch -u AllUsers:R gs://student_workout_instructions_"$project"
     gsutil acl ch -u AllUsers:R gs://teacher_workout_instructions_"$project"
+    gsutil acl ch -u AllUsers:R gs://"$project"_assessment_upload
     gsutil acl ch -r -u cybergym-service@"$project".iam.gserviceaccount.com:R gs://"$project"_cloudbuild
 }
 
