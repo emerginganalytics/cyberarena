@@ -154,8 +154,19 @@ def server_start(server_name):
     """
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     state_transition(entity=server, new_state=SERVER_STATES.STARTING)
-    workout_globals.refresh_api()
-    response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
+
+    # Begin the server start and keep trying for a bounded number of cycles
+    i = 0
+    start_success = False
+    while not start_success and i < 5:
+        workout_globals.refresh_api()
+        try:
+            response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
+            start_success = True
+            print(f'Sent job to start {server_name}, and waiting for response')
+        except BrokenPipeError:
+            i += 1
+
     print(f'Sent start request to {server_name}, and waiting for response')
     i = 0
     success = False
