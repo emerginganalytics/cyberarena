@@ -65,17 +65,8 @@
             <br><h2>Workout Control</h2><br>
             <p>Workout status: <span id='workout_state_display' style="color:red;">STOPPED</span></p><br>
             <div id="loading-msg"></div>
-            <!-- {% if state == "RUNNING" %}
-                <p>Workout status: <span id='workout_state_running' style="color:green">RUNNING</span></p><br>
-                {% else %}
-                <p>Workout status: <span id='workout_state_stopped' style="color:red">STOPPED</span></p><br>
-                <script>
-
-                </script>
-            {% endif %} -->
                 <p>Expiration date: {{ expiration }}</p><br>
                 <div class='control_button'>
-
                     <form class="control_form" id='start_vm' action="/start_vm" method="post">
                         <div class="input-field" >
                                 <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
@@ -152,17 +143,6 @@
                 
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
                 <script>
-                    /*$(document).ready(function(){
-                        $("form").submit(function(event){
-                            $('#start-vm').attr('disabled','disabled');
-                            $('#stop-vm').attr('disabled','disabled');
-                            $('#reset-vm').attr('disabled','disabled');
-                            $("#loading-msg").html('Please wait while the process completes' +
-                                '</br><div class="loader"></div>');
-                            
-                        });
-                    });
-                    */
                     $(document).ready(function(){
                         $(".control_form").submit(function(event){
                             event.preventDefault();
@@ -238,32 +218,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-         <!-- <script>
-                $(document).ready(function(){
-                    // Initialize Tooltip
-                    $('[data-toggle="tooltip"]').tooltip();
-    
-                    // Add smooth scrolling to all links in navbar + footer link
-                    $(".navbar a, footer a[href='#homePage']").on('click', function(event) {
-                        // Make sure this.hash has a value before overriding default behavior
-                        if (this.hash !== "") {
-                            // Prevent default anchor click behavior
-                            event.preventDefault();
-                                var hash = this.hash;
-    
-                                // Using jQuery's animate() method to add smooth page scroll
-                                // The optional number (900) specifies the number of milliseconds it takes to scroll to the specified area
-                                $('html, body').animate({
-                                scrollTop: $(hash).offset().top
-                                }, 900, function(){
-    
-                            // Add hash (#) to URL when done scrolling (default click behavior)
-                            window.location.hash = hash;
-                            });
-                        }
-                    });
-                });
-        </script> -->
     </div>
 {% endblock %}
     <!-- </html> -->

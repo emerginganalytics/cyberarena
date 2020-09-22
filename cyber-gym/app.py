@@ -31,7 +31,7 @@ def index(workout_type):
     form = CreateWorkoutForm()
     if request.method == "POST":
         unit_name = request.form['unit_name']
-        length = int(request.form['length'])
+        length = request.form['length']
         email = request.form['email']
         team = None
         class_name = None

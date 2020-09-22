@@ -138,10 +138,10 @@ def process_assessment(workout, workout_id, request, assessment):
 
         assessment_upload_prompt = request.form.getlist('upload_prompt')
         assessment_uploads = request.files.getlist('file_upload')
-
-        if assessment_uploads[0].content_type != "application/octet-stream":
-            store_student_uploads(workout_id, assessment_uploads)
-
+        if assessment_uploads and len(assessment_uploads) > 0:
+            if assessment_uploads[0].content_type != "application/octet-stream":
+                store_student_uploads(workout_id, assessment_uploads)
+        submitted_answers = []
         for i in range(len(assessment_answers)):
             
             user_input = {
@@ -153,8 +153,8 @@ def process_assessment(workout, workout_id, request, assessment):
 
             if valid_answers[i]:
                 if(user_answer.lower() == valid_answers[i].lower()):
-                    num_correct += 1
-
+                    num_correct += 1                   
+            submitted_answers.append(user_input)
         uploaded_files = []
         urls = retrieve_student_uploads(workout_id)
         if urls:
@@ -165,10 +165,10 @@ def process_assessment(workout, workout_id, request, assessment):
                 }
                 uploaded_files.append(user_input)
 
-
+        
         percentage_correct = num_correct / len(assessment_questions) * 100
         workout['uploaded_files'] = uploaded_files
-        workout['submitted_answers'] = assessment_answers
+        workout['submitted_answers'] = submitted_answers
         workout['assessment_score'] = percentage_correct
         ds_client.put(workout)
         return uploaded_files, assessment_answers, percentage_correct
