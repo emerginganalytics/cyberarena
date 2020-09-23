@@ -28,12 +28,6 @@ additional-networks:
 
 # Servers for the arena are added here.
 additional-servers:
-  - name: cybergym-classified
-    image: image-cybergym-classified
-  - name: cybergym-hidden
-    image: image-cybergym-hiddensite
-  - name: cybergym-nessus
-    image: image-cybergym-nessus-arena
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
@@ -55,36 +49,30 @@ assessment:
   type: "level"
   questions:
     - type: input
-      question: "Flag #1: Classified Website"
-      answer: "CyberGym{iWwH8t4d5GcpZDQi}"
+      question: "Flag #1: "
+      answer: ""
       points: 100
     - type: input
-      question: "Flag #2: Nessus Scan"
-      answer: "CyberGym{guest}"
+      question: "Flag #2: OSINT"
+      answer: "United States Bullion Depository"
       points: 100
     - type: input
-      question: "Flag #3: SQL Injection"
-      answer: "CyberGym{jFt6EjlH6I8EcfBg}"
+      question: "Flag #3: "
+      answer: ""
       points: 100
     - type: input
-      question: "Flag #4: Hidden Website"
+      question: "Flag #4: "
       answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
-      question: "Flag #5: Brute Force Password Attack"
-      answer: "CyberGym{Pin_Test}"
+      question: "Flag #5: "
+      answer: ""
       points: 100
     - type: input
-      question: "Flag #6: Steganography"
-      answer: "X1NdIHZ!3#kU$ij2"
+      question: "Flag #6: "
+      answer: ""
       points: 100
     - type: input
-      question: "Flag #7: Analysis"
-      answer: "p150wX!zjfWi1#rA"
+      question: "Flag #7: "
+      answer: ""
       points: 100
-#    - type: battle
-#      key: "nA824wazosyssPb1"
-#      script: "trojan-arena.py"
-#      script-language: "python"
-#      server: student-workstation
-#      operating-system: linux
