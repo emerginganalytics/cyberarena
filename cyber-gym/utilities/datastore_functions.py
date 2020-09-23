@@ -7,6 +7,7 @@ from os import path, makedirs, remove
 from google.cloud import datastore
 from utilities.globals import ds_client, storage_client, workout_globals, project, BUILD_STATES
 from werkzeug.utils import secure_filename
+from utilities.assessment_functions import get_auto_assessment
 
 
 def randomStringDigits(stringLength=10):
@@ -381,14 +382,27 @@ def get_unit_workouts(unit_id):
         student_name = None
         if 'student_name' in workout:
             student_name = workout['student_name']
-        workout_instance = workout = ds_client.get(workout.key)
+        # workout_instance = workout = ds_client.get(workout.key)
         state = None
-        if 'state' in workout_instance: 
-            state = workout_instance['state']
+        if 'state' in workout: 
+            state = workout['state']
+
+        submitted_answers = None
+        if 'submitted_answers' in workout:
+            submitted_answers = workout['submitted_answers']
+
+        uploaded_files = None
+        if 'uploaded_files' in workout:
+            uploaded_files = workout['uploaded_files']
+
+        auto_answers = get_auto_assessment(workout)
         workout_info = {
             'name': workout.key.name,
             'student_name': student_name,
             'state': state,
+            'submitted_answers': submitted_answers,
+            'uploaded_files': uploaded_files,
+            'auto_answers': auto_answers
         }
         workout_list.append(workout_info)
 
@@ -419,13 +433,15 @@ def get_unit_arenas(unit_id):
 
 #store user submitted screenshots in cloud bucket
 def store_student_uploads(workout_id, uploads):
-    bucket = storage_client.get_bucket('assessment-upload')
+    upload_bucket = str(project) + "_assessment_upload"
+    bucket = storage_client.get_bucket(upload_bucket)
     for index, blob in enumerate(uploads):
-        new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(str(index)))
+        new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(str(index)) + '.png')
         new_blob.upload_from_file(blob, content_type=blob.content_type)
 
 def retrieve_student_uploads(workout_id):
-    bucket = storage_client.bucket('assessment-upload')
+    upload_bucket = str(project) + "_assessment_upload"
+    bucket = storage_client.bucket(upload_bucket)
     file_list = []
     for blob in bucket.list_blobs():
         if str(workout_id) in blob.name:
