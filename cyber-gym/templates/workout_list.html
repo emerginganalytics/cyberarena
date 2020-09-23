@@ -121,27 +121,27 @@
                             <div class="modal-body">
                                 <ul class="nav nav-pills" style='justify-content: space-around;'>
                                     {% if workout['submitted_answers'] %}
-                                    <li><a data-toggle="pill" class='btn' href="#text_input" style='width:100%;'>Text Answers</a></li>
+                                    <li><a data-toggle="pill" class='btn' href="#text_input_{{workout.name}}" style='width:100%;'>Text Answers</a></li>
                                     {% endif %}
                                     {% if workout["uploaded_files"] %}
-                                    <li><a data-toggle="pill" class='btn' href="#file_uploads" style='width:100%;'>File Uploads</a></li>
+                                    <li><a data-toggle="pill" class='btn' href="#file_uploads_{{workout.name}} " style='width:100%;'>File Uploads</a></li>
                                     {% endif %}
                                     {% if workout["auto_answers"] %}
-                                    <li><a data-toggle="pill" class="btn" href="#auto_assessment" style='width:100%;'>Auto Complete Progress</a></li>
+                                    <li><a data-toggle="pill" class="btn" href="#auto_assessment_{{workout.name}}" style='width:100%;'>Auto Complete Progress</a></li>
                                     {% endif %}
                                 </ul>
                                 <div class='tab-content'>
                                     {% if workout['submitted_answers'] %}
-                                        <div id='text_input' class='tab-pane fadeIn'>
+                                        <div id='text_input_{{workout.name}}' class='tab-pane fadeIn'>
                                             <ol>
                                                 {% for question in workout["submitted_answers"] %}
-                                                    <li>{{question}}</li>
+                                                    <li>{{question['question']}}<br>Answer: {{question['answer']}}</li>
                                                 {% endfor %}
                                             </ol>
                                         </div>
                                     {% endif %}
                                     {% if workout['uploaded_files'] %}
-                                        <div id='file_uploads' style='text-align:center;' class="tab-pane fade">
+                                        <div id='file_uploads_{{workout.name}}' style='text-align:center;' class="tab-pane fade">
                                             <div class='upload_view'>
                                            {% for question in workout['uploaded_files'] %}
                                             <li>{{question['question']}}</li>
@@ -151,7 +151,7 @@
                                         </div>
                                     {% endif %}
                                     {% if workout['auto_answers'] %}
-                                        <div id='auto_assessment' class='tab-pane fade'>
+                                        <div id='auto_assessment_{{workout.name}}' class='tab-pane fade'>
                                             <ol>
                                             {% for question in workout['auto_answers'] %}
                                                 <li>{{question['question']}}: 
