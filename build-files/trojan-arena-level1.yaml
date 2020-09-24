@@ -49,8 +49,8 @@ assessment:
   type: "level"
   questions:
     - type: input
-      question: "Flag #1: "
-      answer: ""
+      question: "Flag #1: HumptyDumpty"
+      answer: "all the king's horses and all the king's men"
       points: 100
     - type: input
       question: "Flag #2: OSINT"
