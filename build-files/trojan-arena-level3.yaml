@@ -30,6 +30,8 @@ additional-networks:
 additional-servers:
   - name: cybergym-hidden
     image: image-cybergym-hiddensite
+  - name: cybergym-kali
+    image: kali-full-nessus-image
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
 routes:
