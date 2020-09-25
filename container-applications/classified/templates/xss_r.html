@@ -10,7 +10,7 @@
     <div class="container-fluid">
         <div class="text-box">
             <div class="text-area">
-                <h1>Hello, {{ name | safe }}!</h1>
+                <h1 id="stranger">Hello, {{ name | safe }}!</h1>
                 <form name="XSS" action="#" method="POST">
                     <p> Not a stranger? What's your name?
                         <input type="text" name="name" autocomplete="off">
