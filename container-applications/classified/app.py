@@ -116,7 +116,6 @@ def add_feedback(feedback, workout_id):
 def get_feedbacks(workout_id, search_query=None):
     xssdb = connect_xssdb()
     results = []
-    # get_all_query = """SELECT feedback FROM feedbacks WHERE workout_id=(?)""", (workout_id,)
     for (feedback,) in \
             xssdb.cursor().execute("""SELECT feedback FROM feedbacks WHERE workout_ids=?""", (workout_id,)).fetchall():
         if search_query is None or search_query in feedback:
