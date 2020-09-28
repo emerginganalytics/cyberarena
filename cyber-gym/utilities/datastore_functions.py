@@ -120,7 +120,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
         if num_team > workout_globals.max_num_workouts:
             num_team = workout_globals.max_num_workouts
 
-    if workout_length > workout_globals.max_workout_len:
+    if int(workout_length) > workout_globals.max_workout_len:
         workout_length = workout_globals.max_workout_len
 
     workout_ids = []
