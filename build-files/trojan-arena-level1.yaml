@@ -73,6 +73,6 @@ assessment:
       answer: ""
       points: 100
     - type: input
-      question: "Flag #7: "
-      answer: ""
+      question: "Flag #7: Space Gifs"
+      answer: "Gotta_Blast!"
       points: 100

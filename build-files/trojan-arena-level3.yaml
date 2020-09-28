@@ -69,8 +69,8 @@ assessment:
       answer: "<TYPE IN FLAG HERE>"
       points: 100
     - type: input
-      question: "Flag #5: Project Reversus - Part 2"
-      answer: "<TYPE IN FLAG HERE>"
+      question: "Flag #5: Cold Coffee"
+      answer: "I love the java jive and it loves me"
       points: 100
     - type: input
       question: "Flag #6: ROCKed"
