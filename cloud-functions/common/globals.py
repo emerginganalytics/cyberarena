@@ -201,6 +201,7 @@ class SERVER_ACTIONS:
     BUILD = 'BUILD'
     START = 'START'
     DELETE = 'DELETE'
+    STOP = 'STOP'
 
 
 def get_random_alphaNumeric_string(stringLength=12):

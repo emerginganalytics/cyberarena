@@ -247,3 +247,22 @@ def server_delete(server_name):
     check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.DELETED,
                              change_build_state=BUILD_STATES.COMPLETED_DELETING_SERVERS)
     return True
+
+def server_stop(server_name):
+    server = ds_client.get(ds_client.key('cybergym-server', server_name))
+
+    state_transition(entity=server, new_state=SERVER_STATES.STOPPING)
+
+    i = 0
+    stop_success = False
+    while not stop_success and i < 5:
+        workout_globals.refresh_api()
+        try:
+            response = compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
+            stop_success = True
+            print(f'Sent job to start {server_name}, and waiting for response')
+            return True
+        except BrokenPipeError:
+            i += 1
+    
+    return False

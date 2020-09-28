@@ -3,7 +3,7 @@ from common.build_arena import build_arena
 from common.delete_expired_workouts import delete_workouts, delete_arenas
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_workouts, stop_workout
-from common.compute_management import server_build, server_start, server_delete
+from common.compute_management import server_build, server_start, server_delete, server_stop
 from common.publish_compute_image import create_production_image
 from common.globals import SERVER_ACTIONS
 
@@ -174,6 +174,8 @@ def cloud_fn_manage_server(event, context):
         server_start(server_name)
     elif action == SERVER_ACTIONS.DELETE:
         server_delete(server_name)
+    elif action == SERVER_ACTIONS.STOP:
+        server_stop(server_name)
 
     if context:
         print(f'Server {server_name} has been built')
