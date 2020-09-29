@@ -6,6 +6,7 @@ from common.stop_compute import stop_everything,stop_lapsed_arenas, stop_lapsed_
 from common.compute_management import server_build, server_start, server_delete, server_stop
 from common.publish_compute_image import create_production_image
 from common.globals import SERVER_ACTIONS
+from common.database.nvd_update import nvd_update
 
 
 def cloud_fn_build_workout(event, context):
@@ -179,3 +180,19 @@ def cloud_fn_manage_server(event, context):
 
     if context:
         print(f'Server {server_name} has been built')
+
+
+def cloud_fn_update_db_update(event, context):
+    """
+    Updates any database feeds that are used for the Cyber Gym workouts
+    Args:
+         event (dict):  The dictionary with data specific to this type of
+         event. The `data` field contains the PubsubMessage message. The
+         `attributes` field will contain custom attributes if there are any.
+         context (google.cloud.functions.Context): The Cloud Functions event
+         metadata. The `event_id` field contains the Pub/Sub message ID. The
+         `timestamp` field contains the publish time.
+    Returns:
+        A success status
+    """
+    nvd_update()
