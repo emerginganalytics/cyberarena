@@ -14,6 +14,16 @@ def stop_workout(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     state_transition(entity=workout, new_state=BUILD_STATES.READY, existing_state=BUILD_STATES.RUNNING)
     ds_client.put(workout)
+    query_workout_servers = ds_client.query(kind='cybergym-server')
+    query_workout_servers.add_filter("workout", "=", workout_id)
+    for server in list(query_workout_servers.fetch()):
+        # Publish to a server management topic
+        pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(project, pubsub_topic)
+        future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
+                                   action=SERVER_ACTIONS.STOP)
+        print(future.result())
     if 'items' in result:
         for vm_instance in result['items']:
             response = compute.instances().stop(project=project, zone=zone,
