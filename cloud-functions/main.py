@@ -182,7 +182,7 @@ def cloud_fn_manage_server(event, context):
         print(f'Server {server_name} has been built')
 
 
-def cloud_fn_update_db_update(event, context):
+def cloud_fn_db_update(event, context):
     """
     Updates any database feeds that are used for the Cyber Gym workouts
     Args:
