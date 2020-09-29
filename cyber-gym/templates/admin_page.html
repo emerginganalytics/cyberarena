@@ -55,6 +55,41 @@
             }
         })
     }
+    function workout_search(){
+        var search_filter= document.getElementById('filter_select').value;
+        var search_term = document.getElementById('search_term').value;
+        
+        var table = document.getElementById('active_workout_table');
+        var rows = table.getElementsByTagName('tr');
+        for(var i = 0; i < rows.length; i++){
+            var row = rows[i].getElementsByTagName('td');
+            if(row){
+                for(var j = 0; j < row.length; j++){
+                    if(row[j].className === (search_filter + "_field")){
+                        console.log(row[j].innerHTML);
+                        if(row[j].innerHTML.toUpperCase().trim() !== search_term.toUpperCase().trim()){
+                            rows[i].style.display = "none";
+                        }
+                        else{
+                            rows[i].style.display = "";
+                        }
+                    }
+                }
+            }
+
+        }
+        document.getElementById('clear_filter_button').style.display = "";
+    }
+
+    function clear_filter(){
+        var table = document.getElementById('active_workout_table');
+        var rows = table.getElementsByTagName('tr');
+        for(var i = 0; i < rows.length; i++){
+            rows[i].style.display = "";
+        }
+        document.getElementById('clear_filter_button').style.display = "none";
+    }
+
 </script>
 <style>
     .user_group{
@@ -114,6 +149,12 @@
         width:50%!important;
     }
 
+
+    #advanced_search_container{
+        display:flex;
+        flex-direction:row;
+        padding:0;
+    }
 </style>
 <h1>Administrator Controls</h1>
 
@@ -121,6 +162,9 @@
     <ul class="nav nav-tabs" id="control_tabs" role="tablist">
         <li class="nav-item">
             <a class="nav-link active" id="user_management_tab" data-toggle="tab" href="#user_container" role="tab" aria-controls="user_container" aria-selected="true">User Management</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="maintenance_tab" data-toggle="tab" href="#maintenance_container" role="tab" aria-controls="maintenance_container" aria-selected="false">Maintenance</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
@@ -180,6 +224,56 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane fade" id="maintenance_container" rol="tabpanel" aria-labelledby="maintenance_tab">
+            <div id="maintenance">
+                <br><h2>Maintenance</h2><br>
+                <p>This page shows all currently active workouts, as well as some of the basic info you would find in the Datastore. This includes all workouts that have not expired.</p><br>
+                <h3>Advanced Search</h3>
+                <div id="advanced_search_container" style="align-items:center;">
+                    <select id="filter_select" class="col-2" style="display:block;padding:1px;">
+                        <option selected>Select Search Key</option>
+                        <option value="workout_id">Workout ID</option>
+                        <option value="workout_type">Workout Type</option>
+                        <option value="instructor">Instructor</option>
+                        <option value="unit_id">Unit ID</option>
+                        <option value="state">State</option>
+                    </select>
+                    <input name="search_term" type="text" id="search_term" placeholder="Search for workouts here...">
+                    <a href="#" style="text-align:center;" class="btn col-2" onclick="workout_search()">Search</a>
+                    
+                </div>
+                <h3>Active Workouts</h3>
+                <a id="clear_filter_button" href="#" onclick="clear_filter()" class="btn" style="display:none;width:50%;margin-bottom:2em;">Clear Filter</a>
+                <table id="active_workout_table">
+                    <tr>
+                        <th>Workout ID</th>
+                        <th>Workout Type</th>
+                        <th>Instructor</th>
+                        <th>Student Name</th>
+                        <th>Unit ID</th>
+                        <th>State</th>
+                        <th>Time Running</th>
+                        <th>Cost</th>
+                    </tr>
+                    {%for workout in active_workouts%}
+                        <tr id="workout_row_{{workout.key.name}}">
+                            <td class="workout_id_field"><a href="/admin/{{workout.key.name}}">{{workout.key.name}}</a></td>
+                            <td class="workout_type_field">{{workout['type']}}</td>
+                            <td class="instructor_field">{{workout['user_email']}}</td>
+                            {% if workout['student_name'] %}
+                            <td class="student_name_field">{{workout['student_name']}}</td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
+                            <td class="unit_id_field">{{workout['unit_id']}}</td>
+                            <td class="state_field">{{workout['state']}}</td>
+                            <td>Coming soon</td>
+                            <td>Coming soon</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
         <div class='tab-pane fade' id='customization_container' role="tabpanel" aria-labelledby="customization_tab">
             <div id="customization">
                 <br>
@@ -194,10 +288,8 @@
                     <button type="submit" class="btn btn-small">Submit</button>
                 </form>
             </div>
-
         </div>
     </div>
-
 </div>
 
 

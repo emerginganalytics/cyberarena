@@ -49,36 +49,6 @@
     })
   }
 
-  function generateTableHeaders(table, data){
-    let header = table.createTHead();
-    let row = table.insertRow();
-    for (let key of data) {
-      let th = document.createElement("th");
-      let text = document.createTextNode(key);
-      th.appendChild(text);
-      row.appendChild(th);
-    }
-  }
-
-  function fillTable(table, unit_name, unit_id, unit_build_type, unit_timestamp){
-    let row = table.insertRow();
-    let td = document.createElement("td");
-    let unit_link = document.createElement("a");
-    unit_link.innerHTML = unit_name;
-    if(unit_build_type == 'arena'){
-      unit_link.href = "/arena_list/" + unit_id;
-    } else { 
-      unit_link.href = "/workout_list/" + unit_id;
-    }
-    td.appendChild(unit_link);
-    row.appendChild(td);
-
-    let td2 = document.createElement("td");
-    let timestamp = document.createTextNode(unit_timestamp)
-    td2.appendChild(timestamp);
-    row.appendChild(td2);
-  }
-
   var teacher_email = null;
   initApp = function(){
     var auth_config = {

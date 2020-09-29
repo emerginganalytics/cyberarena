@@ -280,7 +280,13 @@ def teacher_home():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_page():
     admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
-
+    active_workout_query = ds_client.query(kind='cybergym-workout')
+    workout_list = active_workout_query.fetch()
+    active_workouts = []
+    for workout in workout_list:
+        if 'state' in workout:
+            if workout['state'] != "DELETED":
+                active_workouts.append(workout)
     if request.method == "POST":
         response = {
             'action_completed': 'false'
@@ -314,7 +320,17 @@ def admin_page():
                 response['action_completed'] = 'true'
         return json.dumps(response)
         
-    return render_template('admin_page.html', auth_config=auth_config, admin_info=admin_info)
+    return render_template('admin_page.html', auth_config=auth_config, admin_info=admin_info, active_workouts=active_workouts)
+
+@app.route('/admin/<workout_id>', methods=['GET', 'POST'])
+def admin_workout(workout_id):
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    workout_server_query = ds_client.query(kind='cybergym-server')
+    workout_server_query.add_filter('workout', '=', workout_id)
+    server_list = []
+    for server in list(workout_server_query.fetch()):
+        server_list.append(server)
+    return render_template('admin_workout.html', workout=workout, servers=server_list)
 
 @app.route('/update_logo', methods=['POST'])
 def update_logo():
@@ -477,6 +493,16 @@ def reset_all():
                 reset_workout(workout_id['name'])
         return redirect("/workout_list/%s" % (unit_id))
 
+@app.route('/admin_server_management/<workout_id>', methods=['POST'])
+def admin_server_management(workout_id):
+    if request.method == 'POST':
+        data = request.json
+        if 'action' in data:
+            if data['action'] == 'REBUILD':
+                return 'True'
+            pub_manage_server(data['server_name'], data['action'])
+    return 'True'
+
 @app.route('/nuke_workout/<workout_id>', methods=['POST'])
 def nuke_workout(workout_id):
     #Get workout information
@@ -517,6 +543,12 @@ def nuke_workout(workout_id):
     
     if workout_id in unit['workouts']:
         unit['workouts'].remove(workout_id)
+    new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
+    if 'submitted_answers' in workout:
+        new_workout['submitted_answers'] = workout['submitted_answers']
+    if 'uploaded_files' in workout:
+        new_workout['uploaded_files'] = workout['uploaded_files']
+    ds_client.put(new_workout)
     unit['workouts'].append(new_id)
     ds_client.put(unit)
 
@@ -618,6 +650,25 @@ def change_class_roster(class_id):
         ds_client.put(class_info)
     return redirect('/teacher_home')
 
+@app.route('/change_workout_state', methods=['POST'])
+def change_workout_state():
+    if request.method == 'POST':
+        request_data = request.get_json(force=True)
+        response = {}
+        response['workout_id'] = request_data['workout_id']
+        response['new_state'] = request_data['new_state']
+
+        workout = ds_client.get(ds_client.key('cybergym-workout', request_data['workout_id']))
+        workout['state'] = request_data['new_state']
+        ds_client.put(workout)
+        return json.dumps(response)
+
+@app.route('/change_workout_expiration', methods=['POST'])
+def change_workout_expiration():
+    if request.method == "POST":
+        request_data = request.get_json(force=True)
+        print(str(request_data))
+        return json.dumps(str("Test"))
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
 @app.route('/complete', methods=['POST'])

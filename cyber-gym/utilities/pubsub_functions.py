@@ -53,6 +53,14 @@ def pub_stop_vm(workout_id, topic_name='stop-vm'):
     data = 'Cyber Gym VM Stop Request'
     future = publisher.publish(topic_path, data=data.encode('utf-8'), workout_id=workout_id)
 
+def pub_manage_server(server_name, action, topic_name="manage-server"):
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project, topic_name)
+    #data = action.encode('utf-8')
+
+    future = publisher.publish(topic_path, data=b'Server Build', action=action.encode('utf-8'), server_name=server_name)
+    
+
 
 # pub_build_request_msg('cyberattack', '654321', '1', '1', 'pdhuff@ualr.edu', 'Testing')
 #pub_start_vm('1234')
