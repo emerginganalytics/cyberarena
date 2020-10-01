@@ -368,7 +368,10 @@ def get_classes():
 def check_workout_state(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     if (request.method == "POST"):
-        return workout['state']
+        if 'state' in workout:
+            return workout['state']
+        else:
+            return "RUNNING"
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
