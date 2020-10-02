@@ -3,8 +3,8 @@ version: '1'
 workout:
   name: dos
   workout_description: 'Perform a Denial of Service attack against a computer in your network and observe the impact on the computer'
-  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_virtual-arkansas//DOSWorkoutTeacherInstructions.pdf"
-  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_virtual-arkansas//DOSWorkoutInstructions.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_virtual-arkansas/DOSWorkoutTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_virtual-arkansas/DOSWorkoutInstructions.pdf"
   build_type: "compute"
 
 student_entry:
