@@ -1,11 +1,10 @@
 #!/usr/bin/python3
-import os
 import requests
 import psutil
-from subprocess import check_output
+from subprocess import Popen, PIPE
 
-dns_suffix = check_output(['sudo', 'printenv', 'DNS_SUFFIX'], universal_newlines=True).strip()
-url = f"https://buildthewarrior{dns_suffix}/complete"
+dns_suffix = Popen(['sudo', 'printenv', 'DNS_SUFFIX'], stdout=PIPE).stdout.read().decode()
+URL = f"https://buildthewarrior{dns_suffix.rstrip()}/complete"
 
 
 def check_cpu_usage():
@@ -17,15 +16,16 @@ def check_cpu_usage():
 
 
 def publish():
-    token = os.environ.get('WORKOUTKEY0')
-    workout_id = os.environ.get('WORKOUTID')
+    # Get values from Environment Variables
+    TOKEN = Popen(['sudo', 'printenv', 'WORKOUTKEY0'], stdout=PIPE).stdout.read().decode()
+    WORKOUT_ID = Popen(['sudo', 'printenv', 'WORKOUTID'], stdout=PIPE).stdout.read().decode()
 
     workout = {
-        "workout_id": workout_id,
-        "token": token,
+        "workout_id": WORKOUT_ID.rstrip(),
+        "token": TOKEN.rstrip(),
     }
 
-    publish = requests.post(url, json=workout)
+    publish = requests.post(URL, json=workout)
 
 
 if check_cpu_usage():
