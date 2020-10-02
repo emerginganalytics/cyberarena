@@ -4,8 +4,8 @@ workout:
   name: "Shodan"
   build_type: "container"
   workout_description: 'Using Shodan API to find vulnerable public access data'
-  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_virtual-arkansas/ShodanTeacherWorkoutInstructions.pdf"
-  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_virtual-arkansas/ShodanStudentWorkoutInstructions.pdf"
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/ShodanTeacherWorkoutInstructions.pdf"
+  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_tgd4419/ShodanStudentWorkoutInstructions.pdf"
   workout_url_path: 'https://cybergym-shodanlite-tly6f5hvda-uc.a.run.app/loader'
  
 container_info:
