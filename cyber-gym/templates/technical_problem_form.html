@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% import "logo_macro.html" as logo %}
+{% block title %}Technical Problems Form{% endblock %}
+{% block content %}
+<script>
+    function submitForm(){
+
+    }
+</script>
+
+<style>
+    .landing_content .btn, table{
+        width:75%;
+    }
+</style>
+    <form>
+        <div class="form-group">
+            <label for="emailInput">Email address</label>
+            <input type="email" class="form-control" id="emailInput" placeholder="name@example.com">
+        </div>
+        <div class="form-group">
+            <label for="locationInput">Issue Location</label>
+            <input type="text" class="form-control" id="locationInput" placeholder="">
+        </div>
+        <div class="form-group">
+            <label for="textInput">Describe Issue</label>
+            <textarea class="form-control" id="textInput" rows="3"></textarea>
+        </div>
+        <button class="btn" type="submit">Submit</button>
+    </form>
+{% endblock %}
