@@ -152,7 +152,7 @@ def process_assessment(workout, workout_id, request, assessment):
             true_answer = str(assessment[i].get('answer'))
 
             if valid_answers[i]:
-                if(user_answer.lower() == valid_answers[i].lower()):
+                if(str(user_answer).lower() == valid_answers[i].lower()):
                     num_correct += 1                   
             submitted_answers.append(user_input)
         uploaded_files = []

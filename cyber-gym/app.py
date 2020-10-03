@@ -368,10 +368,13 @@ def get_classes():
 def check_workout_state(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     if (request.method == "POST"):
-        if 'state' in workout:
-            return workout['state']
+        if workout:
+            if 'state' in workout:
+                return workout['state']
+            else:
+                return "RUNNING"
         else:
-            return "RUNNING"
+            return "NOT FOUND"
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
@@ -525,8 +528,8 @@ def nuke_workout(workout_id):
         expiration = 0
     instructor_id = workout['user_email']
     yaml_string = parse_workout_yaml(workout_type)
-    unit_id, build_type, new_id = process_workout_yaml(yaml_string, workout_type, unit_name,
-                                                     1, expiration, instructor_id, unit_id)
+    unit_id, build_type, new_id = process_workout_yaml(yaml_contents=yaml_string, workout_type=workout_type, unit_name=unit_name,
+                                                     num_team=1, length=expiration, email=instructor_id, unit_id=unit_id)
 
     if submitted_answers:
         new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
