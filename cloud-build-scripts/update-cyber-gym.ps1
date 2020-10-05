@@ -146,6 +146,15 @@ if ($confirmation -eq 'y') {
         --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
         --timeout=540s `
         --trigger-topic=stop-vm
+    gcloud functions deploy --quiet function-db-update `
+        --region=$region `
+        --memory=256MB `
+        --entry-point=cloud_fn_db_update `
+        --runtime=python37 `
+        --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
+        --timeout=540s `
+        --trigger-topic=db-update
 }
 
 $confirmation = Read-Host "Do you want to update INDIVIDUAL cloud functions? (y/N)"

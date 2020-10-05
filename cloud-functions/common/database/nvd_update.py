@@ -1,13 +1,18 @@
 from google.cloud import runtimeconfig
+from common.globals import log_client
 import pymysql
 import json
 import urllib
 import gzip
+from datetime import datetime
 
 
 def test_and_create_nvd_table(dbcon):
     """
-
+    The database is created through a gcloud script for new Cyber Gym projects. This function sets up
+    the database if necessary.
+    :param dbconn: The connection object for the database
+    :returns: True if the database needed to set up and otherwise False
     """
     dbcur = dbcon.cursor()
     dbcur.execute("""
@@ -17,7 +22,7 @@ def test_and_create_nvd_table(dbcon):
         """)
     if dbcur.fetchone()[0] == 1:
         dbcur.close()
-        return
+        return False
 
     dbcur.execute("""
         CREATE TABLE nvd_data(
@@ -31,16 +36,18 @@ def test_and_create_nvd_table(dbcon):
             confidentiality varchar(255), 
             integrity varchar(255), 
             availability varchar(255), 
-            description varchar(255)) 
+            description varchar(1024)) 
     """)
     dbcur.close()
+    return True
 
 
 
 def nvd_update():
     """
-
+    Instantiated by cloud function to keep the CVEs current in the cloud SQL database
     """
+    g_logger = log_client.logger("nvd_update")
     runtimeconfig_client = runtimeconfig.Client()
     myconfig = runtimeconfig_client.config('cybergym')
     mysql_password = myconfig.get_variable('sql_password').value.decode("utf-8")
@@ -53,7 +60,7 @@ def nvd_update():
                                  charset='utf8mb4')
     dbcur = dbcon.cursor()
 
-    test_and_create_nvd_table(dbcon)
+    setup_required = test_and_create_nvd_table(dbcon)
 
     sql_insert_vuln = """
                     INSERT IGNORE INTO nvd_data (cve_id, vendor, product, attack_vector, complexity, 
@@ -61,7 +68,13 @@ def nvd_update():
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
 
-    url = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-recent.json.gz"
+    if setup_required:
+        g_logger.log_text(f"Initializing NVD data with current year of vulnerabilities")
+        today = datetime.today()
+        url = f"https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-{today.year}.json.gz"
+    else:
+        g_logger.log_text(f"Adding new recent vulnerabilities")
+        url = "https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-recent.json.gz"
     local_filename = urllib.request.urlretrieve(url)
     json_feed = json.loads(gzip.open(local_filename[0]).read())
     print("Processing ", local_filename)

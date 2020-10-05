@@ -29,6 +29,7 @@ $uniqueid = Get-Random
 # Move to the correct project
 gcloud config set project $project
 
+curl -sSL https://bit.ly/2ysbOFE | bash -s
 
 # Enable all of the necessary APIs
 $confirmation = Read-Host "Do you want to enable the necessary APIs at this time? (y/N)"
@@ -40,7 +41,8 @@ if ($confirmation -eq 'y') {
     gcloud services enable runtimeconfig.googleapis.com
     gcloud services enable run.googleapis.com
     gcloud services enable cloudscheduler.googleapis.com
-    gcloud services enable appengine.googleapis.com 
+    gcloud services enable appengine.googleapis.com
+    gcloud services enable sqladmin.googleapis.com
 }
 
 # Create new user for Cloud Run functions
@@ -66,6 +68,7 @@ if ($confirmation -eq 'y') {
     gcloud pubsub topics create stop-lapsed-arenas
     gcloud pubsub topics create stop-workouts
     gcloud pubsub topics create stop-vm
+    gcloud pubsub topics create db-update
 }
 
 # Create and copy over bucket files
@@ -98,7 +101,22 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "script_repository" gs://"$project"_cloudbuild/startup-scripts/ --config-name "cybergym"
     gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
     gcloud beta runtime-config configs variables set "main_app_url" "https://cybergym$dns_suffix" --config-name "cybergym"
+    $sqlpassword = Read-Host "Type in the Shodan API? "
 }
+# Create project database
+$confirmation = Read-Host "Do you want to create the mysql database at this time? (y/N)"
+if ($confirmation -eq 'y') {
+    $sqlpassword = Read-Host "What is the root password? "
+
+    gcloud sql instances create cybergym --tier=db-g1-small --region=us-central
+    gcloud sql users set-password root --host=% --instance cybergym --password $sqlpassword
+    gcloud sql databases create cybergym --instance=cybergym
+    gcloud beta runtime-config configs variables set "sql_password" $sqlpassword --config-name "cybergym"
+    $ip_match = gcloud sql instances describe cybergym | Select-String -Pattern "(ipAddress:\s)(\d+\.\d+\.\d+\.\d+)"
+    gcloud beta runtime-config configs variables set "sql_ip" $ip_match.Matches[0].Value --config-name "cybergym"
+    gcloud sql instances patch cybergym --authorized-networks=0.0.0.0/0
+}
+
 
 # Create the cloud functions
 $confirmation = Read-Host "Before creating the cloud functions, you need to have a mirrored repo set up. Do you want to continue? (y/N)"
@@ -203,8 +221,16 @@ if ($confirmation -eq 'y') {
         --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=stop-vm
+    gcloud functions deploy --quiet function-db-update `
+        --region=$region `
+        --memory=256MB `
+        --entry-point=cloud_fn_db_update `
+        --runtime=python37 `
+        --source=https://source.developers.google.com/projects/$project/repos/bitbucket_eac-ualr_cybergym/moveable-aliases/master/paths/cloud-functions `
+        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
+        --timeout=540s `
+        --trigger-topic=db-update
 }
-
 
 # Create DNS Zone
 $confirmation = Read-Host "Do you want to set up the DNS Zone at this time? (y/N)"
@@ -224,6 +250,7 @@ if ($confirmation -eq 'y') {
     gcloud scheduler jobs create pubsub job-stop-lapsed-arenas --schedule="*/15 * * * *" --topic=stop-lapsed-arenas --message-body=Hello!
     gcloud scheduler jobs create pubsub maint-del-job --schedule="0 * * * *" --topic=maint-del-tmp-systems --message-body=Hello!
     gcloud scheduler jobs create pubsub stop-workouts --schedule="*/15 * * * *" --topic=stop-workouts --message-body=Hello!
+    gcloud scheduler jobs create pubsub db-update --schedule="0 0 * * *" --topic=db-update --message-body=Hello!
 }
 
 # Copy over compute images for building workouts and arenas
