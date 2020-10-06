@@ -287,13 +287,14 @@ def unit_signup(unit_id):
 
         return redirect('/landing/%s' % workout_id)
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    # workout_list = get_unit_workouts(unit_id)
     workout_query = ds_client.query(kind='cybergym-workout')
     workout_query.add_filter('unit_id', '=', unit_id)
-    with ds_client.transaction():
-        claimed_workout = None
-        for workout in list(workout_query.fetch()):
-            if 'student_name' in workout:
-                if workout['student_name'] == None:
+    claimed_workout = None
+    for workout in list(workout_query.fetch()):
+        if 'student_name' in workout:
+            if workout['student_name'] == None:
+                with ds_client.transaction():
                     #Reserve workout with temp name
                     claimed_workout = workout
                     claimed_workout['student_name'] = "RESERVED"
