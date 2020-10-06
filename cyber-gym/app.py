@@ -136,7 +136,7 @@ def workout_list(unit_id):
     build_type = unit['build_type']
     workout_url_path = unit['workout_url_path']
     workout_list = get_unit_workouts(unit_id)
-    
+    workout_list = sorted(workout_list, key=lambda i: (i['student_name']))
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
