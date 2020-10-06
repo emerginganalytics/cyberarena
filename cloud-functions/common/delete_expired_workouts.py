@@ -152,8 +152,9 @@ def delete_specific_workout(workout_id, workout):
         except KeyError:
             print("workout %s has no external IP address" % workout_id)
             pass
-        if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
-            state_transition(workout, BUILD_STATES.DELETING_SERVERS)
+        if 'state' in workout:
+            if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
+                state_transition(workout, BUILD_STATES.DELETING_SERVERS)
         delete_vms(workout_id)
         if are_servers_deleted(workout_id):
             if delete_firewall_rules(workout_id):
