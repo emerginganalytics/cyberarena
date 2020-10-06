@@ -266,7 +266,7 @@ def teacher_home():
                 class_info = {
                     'class_id': class_instance.id,
                     'class_name': class_instance['class_name'],
-                    'roster': class_instance['roster'],
+                    'roster': sorted(class_instance['roster']),
                     'class_units': class_unit_list
                 }
                 teacher_classes.append(class_info)
@@ -276,6 +276,30 @@ def teacher_home():
     else:
         return render_template('teacher_home.html', auth_config=auth_config)
 
+@app.route('/<unit_id>/signup', methods=['GET', 'POST'])
+def unit_signup(unit_id):
+    if request.method == 'POST':
+        workout_id = request.form['workout_id']
+        new_name = request.form['student_name']
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        workout['student_name'] = new_name
+        ds_client.put(workout)
+
+        return redirect('/landing/%s' % workout_id)
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    workout_query = ds_client.query(kind='cybergym-workout')
+    workout_query.add_filter('unit_id', '=', unit_id)
+    with ds_client.transaction():
+        claimed_workout = None
+        for workout in list(workout_query.fetch()):
+            if 'student_name' in workout:
+                if workout['student_name'] == None:
+                    #Reserve workout with temp name
+                    claimed_workout = workout
+                    claimed_workout['student_name'] = "RESERVED"
+                    ds_client.put(claimed_workout)
+                    break
+    return render_template('unit_signup.html', unit=unit, claimed_workout=claimed_workout)
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_page():
@@ -368,7 +392,13 @@ def get_classes():
 def check_workout_state(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     if (request.method == "POST"):
-        return workout['state']
+        if workout:
+            if 'state' in workout:
+                return workout['state']
+            else:
+                return "RUNNING"
+        else:
+            return "NOT FOUND"
 
 # TODO: add student_firewall_update call after workout starts
 # Called by start workout buttons on landing pages
@@ -522,8 +552,8 @@ def nuke_workout(workout_id):
         expiration = 0
     instructor_id = workout['user_email']
     yaml_string = parse_workout_yaml(workout_type)
-    unit_id, build_type, new_id = process_workout_yaml(yaml_string, workout_type, unit_name,
-                                                     1, expiration, instructor_id, unit_id)
+    unit_id, build_type, new_id = process_workout_yaml(yaml_contents=yaml_string, workout_type=workout_type, unit_name=unit_name,
+                                                     num_team=1, workout_length=expiration, email=instructor_id, unit_id=unit_id)
 
     if submitted_answers:
         new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
