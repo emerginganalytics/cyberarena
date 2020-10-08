@@ -81,51 +81,25 @@ def landing_page(workout_id):
             else:
                 shutoff = time.strftime('%d %B %Y at %I:%M %p',
                                     (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
-
+        build_type = unit['build_type']
         guac_path = None
-        if unit['build_type'] == 'container':
+        if build_type == 'container':
             guac_path = unit['workout_url_path']
-
-        student_instructions_url = None
-        if 'student_instructions_url' in workout:
-            student_instructions_url = workout['student_instructions_url']
-
-        teacher_instructions_url = None
-        if 'teacher_instructions_url' in unit:
-            teacher_instructions_url = unit['teacher_instructions_url']
 
         assessment = assessment_type = None
         if 'assessment' in workout and workout['assessment']:
             assessment, assessment_type = get_assessment_questions(workout)
 
-        workout_state = None
-        if 'state' in workout:
-            workout_state = workout['state']
-
-        workout_user = None
-        if 'workout_user' in workout:
-            workout_user = workout['workout_user']
-        else:
-            workout_user = 'container'
-        workout_password = None
-        if 'workout_password' in workout:
-            workout_password = workout['workout_password']
-
-
-
         if(request.method == "POST"):
             uploaded_files, assessment_answers, percentage_correct = process_assessment(workout, workout_id, request, assessment)
 
-            return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
-                               state=workout_state, shutoff=shutoff, workout_id=workout_id,
-                               workout_name=unit['workout_name'], assessment=assessment, assessment_type=assessment_type,
-                               score=percentage_correct, guac_user=workout_user, guac_pass=workout_password)
+            return render_template('landing_page.html', build_type=build_type, workout=workout, description=unit['description'], 
+                                dns_suffix=dns_suffix,guac_path=guac_path, expiration=expiration, shutoff=shutoff,
+                                assessment=assessment, assessment_type=assessment_type, score=percentage_correct)
 
-        return render_template('landing_page.html', description=unit['description'], dns_suffix=dns_suffix,
-                               guac_path=guac_path, expiration=expiration, student_instructions=student_instructions_url,
-                               state=workout_state, shutoff=shutoff, workout_id=workout_id, workout_name=unit['workout_name'], assessment=assessment,
-                               assessment_type=assessment_type, guac_user=workout_user, guac_pass=workout_password)
+        return render_template('landing_page.html', build_type=build_type, workout=workout, description=unit['description'], 
+                                dns_suffix=dns_suffix, guac_path=guac_path, expiration=expiration, shutoff=shutoff, assessment=assessment,
+                                assessment_type=assessment_type)
     else:
         return render_template('no_workout.html')
 
@@ -149,9 +123,7 @@ def workout_list(unit_id):
         return json.dumps(workout_list)    
     
     if unit and len(str(workout_list)) > 0:
-        return render_template('workout_list.html', build_type=build_type, workout_url_path=workout_url_path,
-                               workout_list=workout_list, unit_id=unit_id,
-                               description=unit['description'], teacher_instructions=teacher_instructions_url)
+        return render_template('workout_list.html', workout_list=workout_list, unit=unit, teacher_instructions=teacher_instructions_url)
     else:
         return render_template('no_workout.html')
 
@@ -241,7 +213,6 @@ def teacher_home():
         class_list = ds_client.query(kind='cybergym-class')
         class_list.add_filter('teacher_email', '=', str(teacher_email))
 
-        # unit_list.add_filter("resources_deleted", "=", False)
         teacher_info = {}
         teacher_units = []
         teacher_classes = []
@@ -287,7 +258,6 @@ def unit_signup(unit_id):
 
         return redirect('/landing/%s' % workout_id)
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    # workout_list = get_unit_workouts(unit_id)
     workout_query = ds_client.query(kind='cybergym-workout')
     workout_query.add_filter('unit_id', '=', unit_id)
     claimed_workout = None

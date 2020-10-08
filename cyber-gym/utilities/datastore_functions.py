@@ -379,6 +379,7 @@ def get_unit_workouts(unit_id):
     unit_workouts.add_filter("unit_id", "=", unit_id)
     workout_list = []
     for workout in list(unit_workouts.fetch()):
+        student_name = None
         if 'student_name' in workout:
             student_name = workout['student_name']
         if not student_name:

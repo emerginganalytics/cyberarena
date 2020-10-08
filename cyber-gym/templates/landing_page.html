@@ -6,6 +6,7 @@
 {% import 'logo_macro.html' as logo %}
 
     {% block content%}
+        {% if build_type == "compute" %}
         <script>
             $(document).ready(function(){
                 var state_checker = setInterval(check_workout_state, 20000);
@@ -13,13 +14,38 @@
                     $("#assessment_form").fadeIn();
                 })
                 check_workout_state();
+                $(".control_form").submit(function(event){
+                    event.preventDefault();
+
+                    $('#start-vm').attr('disabled','disabled');
+                    $('#stop-vm').attr('disabled','disabled');
+                    $('#reset-vm').attr('disabled','disabled');
+                    $("#loading-msg").html('Please wait while the process completes' +
+                        '</br><div class="loader"></div>');
+                    var currentState = document.getElementById("workout_state_display").innerHTML;
+                    var route = "/" + event.target.id;
+                    var workout_id = document.getElementById("workout_id").value;
+                    $.ajax({
+                        type: "POST",
+                        url: route,
+                        data: JSON.stringify({"workout_id": workout_id}),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(data){
+                            var newState = document.getElementById("workout_state_display").innerHTML;
+                            while(newState == currentState){
+                                var new_checker = setTimeout(check_workout_state, 15000);
+                            }
+                           
+                        }
+                    })
+                })
             })
             
 
             function check_workout_state(){
                 $.ajax({
                     type:"POST",
-                    url: "/workout_state/{{ workout_id }}",
+                    url: "/workout_state/{{ workout.key.name }}",
                     traditional: "true",
                     success: function(data){
                         var state_display = document.getElementById("workout_state_display");
@@ -58,18 +84,25 @@
             }
 
         </script>
+        {% endif %}
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
             {{ logo.logo_div() }}
             <br><h2>Workout Control</h2><br>
-            <p>Workout status: <span id='workout_state_display' style="color:red;">STOPPED</span></p><br>
+            <p>Workout status: 
+                {% if build_type == "container" %}
+                <span id="workout_state_display" style="color:green;">RUNNING</span>
+                {% else %}
+                <span id='workout_state_display' style="color:red;">STOPPED</span>
+                {% endif %}</p><br>
             <div id="loading-msg"></div>
                 <p>Expiration date: {{ expiration }}</p><br>
+                {% if build_type == "compute" %}
                 <div class='control_button'>
                     <form class="control_form" id='start_vm' action="/start_vm" method="post">
                         <div class="input-field" >
-                                <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                                <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                                 <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;">
                                 <label>Run time (1 - 10 hours)</label>
                         </div>
@@ -84,7 +117,7 @@
                 </div>
                 <div class='control_button'>
                     <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
-                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                         <div class="btn-ctn">
                             {% if state == "RUNNING" %}
                                 <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
@@ -96,7 +129,7 @@
                 </div>
                 <div class='control_button'>
                     <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
-                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                         <div class="btn-ctn">
                                 <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
                         </div>
@@ -104,8 +137,8 @@
             
                 </div>
 
-                {{ nuke.nukeButton(workout_id|string) }}
-
+                {{ nuke.nukeButton(workout.key.name|string) }}
+                {% endif %}
 
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
@@ -117,22 +150,22 @@
                 <p>*Results may not be final</p>
                 {% endif %}
                 <br><h2>Workout Servers</h2>
-                {% if guac_user == 'container' %}
-                    <a style="width:50%" class="btn" id="workout_link" href="{{guac_path}}/{{workout_id}}" target="_blank" rel="noopener noreferrer">Enter your workout!</a>
+                {% if build_type == 'container' %}
+                    <a style="width:50%" class="btn" id="container_workout_link" href="{{guac_path}}/{{workout.key.name}}" target="_blank" rel="noopener noreferrer">Enter your workout!</a>
                 {% else %}
-                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout_id }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
+                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
                 {% endif %}
                 <br>
                 
                 </p>
             </div>
-            <div id="workout_id" hidden>{{ workout_id }}</div>
+            <div id="workout_id" hidden>{{ workout.key.name }}</div>
             <div class='container' id='instructions' style="margin:0;">
                 <!-- <h2>Description</h2> -->
-                {% if guac_user and guac_pass %}
+                {% if build_type == "compute" %}
                 <h2>Workout Info</h2>
-                    <p>Workout Username: {{guac_user}}</p>
-                    <p>Workout Password: {{guac_pass}}</p>
+                    <p>Workout Username: {{workout['workout_user']}}</p>
+                    <p>Workout Password: {{workout['workout_password']}}</p>
                 {% endif %}
                 {% if student_instructions %}
                     <a href="{{ student_instructions }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a>
@@ -143,33 +176,7 @@
                 
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
                 <script>
-                    $(document).ready(function(){
-                        $(".control_form").submit(function(event){
-                            event.preventDefault();
-
-                            $('#start-vm').attr('disabled','disabled');
-                            $('#stop-vm').attr('disabled','disabled');
-                            $('#reset-vm').attr('disabled','disabled');
-                            $("#loading-msg").html('Please wait while the process completes' +
-                                '</br><div class="loader"></div>');
-                            var currentState = document.getElementById("workout_state_display").innerHTML;
-                            var route = "/" + event.target.id;
-                            var workout_id = document.getElementById("workout_id").value;
-                            $.ajax({
-                                type: "POST",
-                                url: route,
-                                data: JSON.stringify({"workout_id": workout_id}),
-                                contentType: "application/json;charset=utf-8",
-                                success: function(data){
-                                    var newState = document.getElementById("workout_state_display").innerHTML;
-                                    while(newState == currentState){
-                                        var new_checker = setTimeout(check_workout_state, 15000);
-                                    }
-                                   
-                                }
-                            })
-                        })
-                    })
+                    
                     function reveal_assessment(){
                         $(".workout_assessment_form").fadeToggle();
                     }
@@ -180,7 +187,7 @@
                 <br>  
                 <div class='container' id='assessment'>
                     <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                    <form class='workout_assessment_form' action='/landing/{{ workout_id }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
+                    <form class='workout_assessment_form' action='/landing/{{ workout.key.name }}' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
                     {% for question in assessment%}
                         {% if question['type'] == 'input' %}
                             <div class='question_group'>
