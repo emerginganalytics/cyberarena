@@ -53,6 +53,13 @@ if ($confirmation -eq 'y') {
     gcloud run deploy --image gcr.io/$project/johnnyhash --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
 
+ # Update vulnerability_defender
+$confirmation = Read-Host "Do you want to update Vulnerability Defender? (y/N)"
+if ($confirmation -eq 'y') {
+    $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\vulnerability-defender"
+    gcloud builds submit $sourcepath --tag gcr.io/$project/vulnerability-defender
+    gcloud run deploy --image gcr.io/$project/vulnerability-defender --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+}
 
 # Create the cloud functions
 $confirmation = Read-Host "Do you want to update ALL cloud functions? (y/N)"
