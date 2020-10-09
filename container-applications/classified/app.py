@@ -135,7 +135,7 @@ def loader(workout_id):
             return redirect('/' + workout_id)
         elif workout['type'] == 'xss':
             return redirect('/workouts/xss/' + workout_id)
-        elif workout['type'] == 'Two-Step':
+        elif workout['type'] == '2fa':
             return redirect('/workouts/tfh/' + workout_id)
         elif workout['type'] == 'inspect':
             return redirect('/workouts/inspect' + workout_id)
@@ -234,7 +234,7 @@ def twofactorhome(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    if workout['type'] == 'Two-Step':
+    if workout['type'] == '2fa':
         page_template = 'welcome.html'
         flag = 'CyberGym{Classified_Authentication}'
         return render_template(page_template, flag=flag, workout_id=workout_id)
@@ -247,7 +247,7 @@ def register(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    if workout['type'] == 'Two-Step':
+    if workout['type'] == '2fa':
         """User registration route."""
         if current_user.is_authenticated:
             # if user is logged in we get out of here
@@ -275,7 +275,7 @@ def register(workout_id):
 def two_factor_setup(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
-    if workout['type'] == 'Two-Step':
+    if workout['type'] == '2fa':
         if 'username' not in session:
             return redirect(url_for('twofactorhome', workout_id=workout_id))
         user = User.query.filter_by(username=session['username']).first()
@@ -318,7 +318,7 @@ def login(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    if workout['type'] == 'Two-Step':
+    if workout['type'] == '2fa':
         """User login route."""
         if current_user.is_authenticated:
             # if user is logged in we get out of here
@@ -344,7 +344,7 @@ def login(workout_id):
 def logout(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
-    if workout['type'] == 'Two-Step':
+    if workout['type'] == '2fa':
         """User logout route."""
         logout_user()
         return redirect(url_for('twofactorhome', workout_id=workout_id))
