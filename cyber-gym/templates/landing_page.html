@@ -6,6 +6,8 @@
 {% import 'logo_macro.html' as logo %}
 
     {% block content%}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
         {% if build_type == "compute" %}
         <script>
             $(document).ready(function(){
@@ -145,6 +147,9 @@
             <div id='workout_info' class='container' style="margin:0;">
                 <h2>Welcome to your {{ workout_name }} workout!</h2>
                 <p>{{ description }}</p>
+                {% if workout['student_instructions_url'] %}
+                <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
+                {% endif %}
                 {% if score %}
                 <p>Assessment Results: {{ score }}</p>
                 <p>*Results may not be final</p>
@@ -163,27 +168,19 @@
             <div class='container' id='instructions' style="margin:0;">
                 <!-- <h2>Description</h2> -->
                 {% if build_type == "compute" %}
-                <h2>Workout Info</h2>
+                <h2>Workout Login</h2>
                     <p>Workout Username: {{workout['workout_user']}}</p>
                     <p>Workout Password: {{workout['workout_password']}}</p>
                 {% endif %}
-                {% if student_instructions %}
-                    <a href="{{ student_instructions }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a>
-                {% endif %}
 
-
-
-                
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+         
+            </div> <!--Workout info container-->
+                {% if assessment %}
                 <script>
-                    
                     function reveal_assessment(){
                         $(".workout_assessment_form").fadeToggle();
                     }
-                    
                 </script>
-            </div> <!--Workout info container-->
-                {% if assessment %}
                 <br>  
                 <div class='container' id='assessment'>
                     <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>

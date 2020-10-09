@@ -524,7 +524,7 @@ def nuke_workout(workout_id):
     instructor_id = workout['user_email']
     yaml_string = parse_workout_yaml(workout_type)
     unit_id, build_type, new_id = process_workout_yaml(yaml_contents=yaml_string, workout_type=workout_type, unit_name=unit_name,
-                                                     num_team=1, workout_length=expiration, email=instructor_id, unit_id=unit_id)
+                                                     num_team=1, workout_length=expiration, email=instructor_id, unit_id=unit_id, class_name=None)
 
     if submitted_answers:
         new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
