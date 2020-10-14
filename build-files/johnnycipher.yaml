@@ -6,7 +6,7 @@ workout:
   workout_description: 'Intro to Cryptography'
   teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/JohnnyCipherTeacherWorkoutInstructions.pdf"
   student_instructions_url: ""
-  workout_url_path: 'https://cybergym-johnnyhash-v7k2apwaqa-uc.a.run.app/loader'
+  workout_url_path: 'https://johnnyhash-tly6f5hvda-uc.a.run.app/loader'
   project_name: ualr-cybersecurity
  
 container_info:
