@@ -11,3 +11,4 @@ local-scripts/
 /cyber-gym/static/private/
 /cyber-gym/templates/private/
 /cloud-functions/test_command.py
+/venv/
