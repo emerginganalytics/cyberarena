@@ -55,7 +55,8 @@ assessment:
     - type: auto
       key: "hxHXan1FFTKaXRkZ"
       question: "Final Task for Phishing workout"
-      script:
+      script: "Phishing.py"
+      script-language: "python"
       server: cybergym-phishing
       operating-system: linux
       complete: False
