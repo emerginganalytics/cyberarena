@@ -21,6 +21,9 @@ def publish():
             "token": TOKEN,
     }
     if verify():
-        publish = requests.post(URL, json=workout)
+        result = requests.post(URL, json=workout)
+        print(result)
     else:
         sys.exit()
+
+publish()
