@@ -49,12 +49,14 @@ def get_startup_scripts(workout_id, assessment):
                             'value': script
                         }
                 if 'script-language' in question and question['script-language'] == 'python':
-                    script = 'python3 {script}'.format(script=question['script'])
+                    script_command = f"python3 /usr/bin/{question['script']}"
                 else:
-                    script = question['script']
+                    script_command = f"/usr/bin/{question['script']}"
                 assess_script = workout_globals.linux_startup_script_task.format(env_workoutkey=question['key'],
-                                                                                   q_number=i,
-                                                                                   script=script)
+                                                                                 q_number=i,
+                                                                                 script=question['script'],
+                                                                                 local_storage="/usr/bin",
+                                                                                 script_command=script_command)
             if i != 0:
                 startup_scripts[question['server']]['value'] += "\n"
             startup_scripts[question['server']]['value'] += assess_script
