@@ -54,8 +54,8 @@ class workout_globals():
                                'DNS_SUFFIX=' + dns_suffix + '\n'
     linux_startup_script_task = 'WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                 'EOF\n' \
-                                'gsutil cp ' + script_repository + '{script} /usr/bin\n' \
-                                '(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/{script}") | crontab -'
+                                'gsutil cp ' + script_repository + '{script} {local_storage}\n' \
+                                '(crontab -l 2>/dev/null; echo "* * * * * {script_command}") | crontab -'
 
     # These next few constants build the startup scripts for guacamole. This is VERY helpful!
     # The elusive Apache Guacamole documentation for the SQL commands are here: https://guacamole.apache.org/doc/gug/jdbc-auth.html
