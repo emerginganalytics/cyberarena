@@ -6,9 +6,9 @@ def verify():
     target_file = "/var/www/PhishPhactor/.env"
     with open(target_file) as f:
         if 'Complete' in f.read():
-            return False
-        else:
             return True
+        else:
+            return False
 
 def publish():
     TOKEN = os.environ.get('WORKOUTKEY0')
