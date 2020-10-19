@@ -1,6 +1,6 @@
 import time, calendar
-
-from common.globals import ds_client, project, compute, BUILD_STATES
+from google.cloud import pubsub_v1
+from common.globals import ds_client, project, compute, BUILD_STATES, PUBSUB_TOPICS, SERVER_ACTIONS
 from common.state_transition import state_transition
 
 # Global variables for this function
