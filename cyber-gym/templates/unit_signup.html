@@ -1,21 +1,18 @@
 {% extends "base.html" %}
 {% block title%}Cyber Gym Unit Registration{% endblock%}
 {% block content %}
+    {% if unit_full %}
+    <h2>Unit Full</h2>
+    <p>Please contact your instructor to access your workout</p>
+    {% else %}
     <h2>Workout Registration</h2>
-    {% if claimed_workout %}
         <div id="unit_registration_input">
             <form id="student_info" action="" method="POST">
-                <p>Your workout ID: {{claimed_workout.key.name}} </p>
-                <input name="workout_id" type="hidden" value="{{claimed_workout.key.name}}">
                 <input name="student_name" type="text" placeholder="Your name here">
                 <label for="student_name">Enter your name</label>
                 <input class="btn" type="submit">
             </form>
         </div>
-    {% else %}
-        <div id='unit_full_div'>
-            <h3>Unit Full</h3>
-        </div>
-    {% endif %}
     <br>
+    {% endif %}
 {% endblock %}

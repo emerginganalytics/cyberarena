@@ -10,13 +10,15 @@
 <script>
   function show_student_name_form(student_name, class_id){
     var new_name = prompt("Enter a new name for student " + student_name);
-    $.ajax({
-      type: "POST",
-      url: "/change_roster_name/" + class_id + "/" + student_name,
-      data: JSON.stringify({
-          "new_name": new_name
-      }),
-    })
+    if(new_name){
+      $.ajax({
+        type: "POST",
+        url: "/change_roster_name/" + class_id + "/" + student_name,
+        data: JSON.stringify({
+            "new_name": new_name
+        }),
+      })
+    }
   }
 
   function remove_student(class_id){

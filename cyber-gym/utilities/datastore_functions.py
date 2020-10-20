@@ -171,11 +171,11 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
             if student_names:
                 store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
                                     student_instructions_url=student_instructions_url,
-                                    container_info=container_info, assessment=assessment,student_name=student_names[i])
+                                    container_info=container_info, assessment=assessment, user_email=email, student_name=student_names[i])
             else:
                 store_workout_container(unit_id=unit_id, workout_id=workout_id, workout_type=workout_type,
                                     student_instructions_url=student_instructions_url,
-                                    container_info=container_info, assessment=assessment)
+                                    container_info=container_info, assessment=assessment, user_email=email)
     elif build_type == 'compute':
         networks = y['networks']
         servers = y['servers']
@@ -237,7 +237,7 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
         return unit_id, build_type
 
 
-def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment, student_name=None):
+def store_workout_container(unit_id, workout_id, workout_type, student_instructions_url, container_info, assessment, user_email, student_name=None):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
 
@@ -251,6 +251,7 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
         'container_info': container_info,
         'assessment': assessment,
         'state': 'RUNNING',
+        'user_email': user_email,
         'student_name': student_name
     })
 

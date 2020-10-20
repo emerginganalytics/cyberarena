@@ -249,28 +249,22 @@ def teacher_home():
 
 @app.route('/<unit_id>/signup', methods=['GET', 'POST'])
 def unit_signup(unit_id):
-    if request.method == 'POST':
-        workout_id = request.form['workout_id']
-        new_name = request.form['student_name']
-        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        workout['student_name'] = new_name
-        ds_client.put(workout)
-
-        return redirect('/landing/%s' % workout_id)
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    workout_query = ds_client.query(kind='cybergym-workout')
-    workout_query.add_filter('unit_id', '=', unit_id)
-    claimed_workout = None
-    for workout in list(workout_query.fetch()):
-        if 'student_name' in workout:
-            if workout['student_name'] == None:
-                with ds_client.transaction():
-                    #Reserve workout with temp name
-                    claimed_workout = workout
-                    claimed_workout['student_name'] = "RESERVED"
-                    ds_client.put(claimed_workout)
-                    break
-    return render_template('unit_signup.html', unit=unit, claimed_workout=claimed_workout)
+    if request.method == 'POST':
+        workout_query = ds_client.query(kind='cybergym-workout')
+        workout_query.add_filter('unit_id', '=', unit_id)
+        claimed_workout = None
+        for workout in list(workout_query.fetch()):
+            if 'student_name' in workout:
+                if workout['student_name'] == None:
+                    with ds_client.transaction():
+                        claimed_workout = workout
+                        claimed_workout['student_name'] = request.form['student_name']
+                        ds_client.put(claimed_workout)
+                        return redirect('/landing/%s' % claimed_workout.key.name)
+        return render_template('unit_signup.html', unit_full=True)
+    
+    return render_template('unit_signup.html')
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin_page():
@@ -526,17 +520,12 @@ def nuke_workout(workout_id):
     unit_id, build_type, new_id = process_workout_yaml(yaml_contents=yaml_string, workout_type=workout_type, unit_name=unit_name,
                                                      num_team=1, workout_length=expiration, email=instructor_id, unit_id=unit_id, class_name=None)
 
-    if submitted_answers:
-        new_workout = ds_client.get(ds_client.key('cybergym-workout', new_id))
-        new_workout['submitted_answers'] = submitted_answers
-
     unit_id = workout['unit_id']
     #Get new workout information
     response = {
         "unit_id":unit_id,
         "build_type":build_type,
         "workout_id": new_id
-
     }
     
     if build_type == 'compute':
@@ -562,9 +551,12 @@ def nuke_workout(workout_id):
 @app.route('/change_student_name/<workout_id>', methods=["POST"])
 def change_student_name(workout_id):
     workout = ds_client.get(ds_client.key("cybergym-workout", workout_id))
-    workout['student_name'] = request.values['new_name']
-    ds_client.put(workout)
-    return workout['student_name']
+    if request.values['new_name']:
+        workout['student_name'] = request.values['new_name']
+        ds_client.put(workout)
+        return workout['student_name']
+    else:
+        return False
 
 
 @app.route('/check_user_level', methods=['POST'])
@@ -609,7 +601,7 @@ def change_roster_name(class_id, student_name):
         request_data = request.get_json(force=True)
         new_name = request_data['new_name']
         class_info = ds_client.get(ds_client.key('cybergym-class', int(class_id)))
-        if student_name in class_info['roster']:
+        if student_name in class_info['roster'] and new_name:
             class_info['roster'].remove(student_name)
             class_info['roster'].append(new_name)
         ds_client.put(class_info)

@@ -13,6 +13,17 @@ def stop_workout(workout_id):
                                       filter='name = {}*'.format(workout_id)).execute()
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     state_transition(entity=workout, new_state=BUILD_STATES.READY, existing_state=BUILD_STATES.RUNNING)
+    start_time = None
+    if 'start_time' in workout:
+        start_time = workout['start_time']
+        stop_time = calendar.timegm(time.gmtime())
+        runtime = int(stop_time) - int(start_time)
+        if 'runtime_counter' in workout:
+            accumulator = workout['runtime_counter']
+            new_runtime = int(accumulator) + runtime
+            workout['runtime_counter'] = new_runtime
+        else:
+            workout['runtime_counter'] = runtime
     ds_client.put(workout)
     query_workout_servers = ds_client.query(kind='cybergym-server')
     query_workout_servers.add_filter("workout", "=", workout_id)

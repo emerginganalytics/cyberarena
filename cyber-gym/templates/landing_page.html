@@ -33,9 +33,10 @@
                         data: JSON.stringify({"workout_id": workout_id}),
                         contentType: "application/json;charset=utf-8",
                         success: function(data){
-                            var newState = document.getElementById("workout_state_display").innerHTML;
                             while(newState == currentState){
-                                var new_checker = setTimeout(check_workout_state, 15000);
+                                var newState = document.getElementById("workout_state_display").innerHTML;
+                                var new_checker = setTimeout(check_workout_state, 10000);
+                                sleep(10000);
                             }
                            
                         }

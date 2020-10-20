@@ -4,6 +4,17 @@
 {% block content %}
 <script src='../static/login.js'></script>
 <script>
+    function format_runtime(){
+        var runtime_list = document.getElementsByClassName('runtime_field');
+        for(var i = 0; i < runtime_list.length; i++){
+            var runtime_s = runtime_list[i].innerHTML;
+            var minutes = Math.floor((runtime_s / 60))
+            var seconds = runtime_s % 60
+            var formatted_runtime = minutes.toString() + "min " + seconds.toString() + "sec";
+            runtime_list[i].innerHTML = formatted_runtime;
+        }
+    }
+
     initApp = function(){
         var auth_config = {
           apiKey: '{{auth_config["api_key"]}}',
@@ -36,7 +47,10 @@
 
     };
     initApp();
+    $(document).ready(function(){
+        format_runtime();
 
+    })
     function admin_action(action, user_email){
         $.ajax({
             type: "POST",
@@ -89,6 +103,8 @@
         }
         document.getElementById('clear_filter_button').style.display = "none";
     }
+
+
 
 </script>
 <style>
@@ -267,7 +283,11 @@
                             {% endif %}
                             <td class="unit_id_field">{{workout['unit_id']}}</td>
                             <td class="state_field">{{workout['state']}}</td>
-                            <td>Coming soon</td>
+                            {% if workout['runtime_counter'] %}
+                            <td class="runtime_field">{{workout['runtime_counter']}}</td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
                             <td>Coming soon</td>
                         </tr>
                     {% endfor %}
