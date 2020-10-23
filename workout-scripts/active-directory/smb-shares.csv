@@ -1,0 +1,16 @@
+Name,Path,FullAccess,ChangeAccess,ReadAccess
+Accounting,C:\DeptShares\Accounting,CYBERGYM\AccountingDepartment,,
+BoardDocuments,C:\DeptShares\BoardDocuments,"CYBERGYM\SeniorStaff,CYBERGYM\EngineeringDepartment",,Everyone
+EngineeringAndDesign,C:\DeptShares\EngineeringAndDesign,CYBERGYM\EngineeringDepartment,,
+HumanResources,C:\DeptShares\HumanResources,CYBERGYM\HRDepartment,,
+Marketing,C:\DeptShares\Marketing,CYBERGYM\MarketingDepartment,,
+lwolfe,C:\UserShares\lwolfe,CYBERGYM\lwolfe,,Everyone
+jlewis,C:\UserShares\jlewis,CYBERGYM\jlewis,,
+jbrown,C:\UserShares\jbrown,CYBERGYM\jbrown,,
+jmcdaniel,C:\UserShares\jmcdaniel,CYBERGYM\jmcdaniel,,
+msherman,C:\UserShares\msherman,CYBERGYM\msherman,,
+kcurry,C:\UserShares\kcurry,CYBERGYM\kcurry,,Everyone
+hblair,C:\UserShares\hblair,CYBERGYM\hblair,,
+fcasey,C:\UserShares\fcasey,CYBERGYM\fcasey,,
+jturn,C:\UserShares\jturn,CYBERGYM\jturn,,
+cvargas,C:\UserShares\cvargas,CYBERGYM\cvargas,,

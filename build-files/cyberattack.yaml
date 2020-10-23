@@ -55,8 +55,8 @@ assessment:
       question: "In the command and control server, look for the command prompt in the COMMANDPROMPT section. What movie plays when you type: cmd /K start telnet towel.blinkenlights.nl"
       answer: "star wars"
     - type: "input"
-      question: "What is the password for the ualr-cybergym github account?"
-      answer: "H00h00h00!"
+      question: "What is the password for credentials you recovered?"
+      answer: "$hhhh...It's a secret!"
     - type: "input"
       question: "Come up with your own creative command to run on the botnet victim."
       answer: none
