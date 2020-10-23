@@ -489,3 +489,9 @@ def store_class_info(teacher_email, num_students, class_name):
     new_class['class_name'] = class_name
 
     ds_client.put(new_class)
+
+def store_comment(sender_email, comment):
+    new_comment = datastore.Entity(ds_client.key('cybergym-comments'))
+    new_comment['comment_email'] = sender_email
+    new_comment['comment_text'] = comment
+    ds_client.put(new_comment)
