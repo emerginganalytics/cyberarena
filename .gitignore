@@ -12,3 +12,4 @@ local-scripts/
 /cyber-gym/templates/private/
 /cloud-functions/test_command.py
 /venv/
+cyber-gym/bad.db

@@ -174,6 +174,8 @@ def build_guacamole_server(build, network, guacamole_connections):
                                                                       rdp_username=connection['username'],
                                                                       rdp_password=safe_password,
                                                                       security_mode=connection['security-mode'])
+            if connection['domain']:
+                startup_script += workout_globals.guac_startup_rdp_domain.format(domain=connection['domain'])
         startup_script += workout_globals.guac_startup_join_connection_user
         i += 1
     startup_script += workout_globals.guac_startup_end

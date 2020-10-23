@@ -99,6 +99,7 @@ def build_workout(workout_id):
         if workout['student_entry']:
             network_name = f"{workout_id}-{workout['student_entry']['network']}"
             student_entry_username = workout['student_entry']['username'] if 'username' in workout['student_entry'] else None
+            rdp_domain = workout['student_entry']['domain'] if 'domain' in workout['student_entry'] else None
             security_mode = workout['student_entry']['security-mode'] if 'security-mode' in workout['student_entry'] else 'nla'
             guac_connection = [{
                 'workout_id': workout_id,
@@ -106,6 +107,7 @@ def build_workout(workout_id):
                 'ip': workout['student_entry']['ip'],
                 'username': student_entry_username,
                 'password': workout['student_entry']['password'],
+                'domain': rdp_domain,
                 'security-mode': security_mode
             }]
             build_guacamole_server(build=workout, network=network_name,
