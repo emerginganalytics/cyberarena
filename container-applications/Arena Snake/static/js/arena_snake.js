@@ -24,6 +24,10 @@ let apple = {
   x: 320,
   y: 320
 };
+let fakeApple = {
+  x: 300,
+  y: 300
+};
 // random int
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
@@ -31,8 +35,8 @@ function getRandomInt(min, max) {
 // game loop
 function loop() {
   requestAnimationFrame(loop);
-  // slow game loop to 15 fps instead of 60 (60/15 = 4)
-  if (++count < 4) {
+  // slow game loop to 30 fps instead of 60 (60/30 = 2)
+  if (++count < 2) {
     return;
   }
   count = 0;
@@ -64,6 +68,11 @@ function loop() {
   // draw apple
   context.fillStyle = 'red';
   context.fillRect(apple.x, apple.y, grid-1, grid-1);
+  // draw fakeApple >60
+  if (score > 60) {
+    context.fillStyle = 'red';
+    context.fillRect(fakeApple.x, fakeApple.y, grid-1, grid-1);
+  }
   // draw snake one cell at a time
   context.fillStyle = 'green';
   snake.cells.forEach(function(cell, index) {
@@ -71,8 +80,21 @@ function loop() {
     context.fillRect(cell.x, cell.y, grid-1, grid-1);
     // snake ate apple
     if (cell.x === apple.x && cell.y === apple.y) {
-      snake.maxCells++;
+      if (score < 20) {
+        snake.maxCells++;
+      } else {
+        snake.maxCells = snake.maxCells + 3;
+      }
 	  score+=10;
+	  if (score > 20) {
+	    document.getElementById('bonus').innerHTML="Special Bonus Activated: Apple Growth Boost!";
+      }
+	  if (score > 50) {
+	    document.getElementById('bonus2').innerHTML="Special Bonus Activated: Keybindings Swapped!";
+      }
+	   if (score > 60) {
+	    document.getElementById('bonus3').innerHTML="Special Bonus Activated: Fake Apple Added!";
+      }
 	  if (score >= 100000) {
 	      flag(score);
       }
@@ -82,6 +104,11 @@ function loop() {
       // canvas is 400x400 which is 25x25 grids
       apple.x = getRandomInt(0, 25) * grid;
       apple.y = getRandomInt(0, 25) * grid;
+
+      if(score > 60) {
+        fakeApple.x = getRandomInt(0, 25) * grid;
+        fakeApple.y = getRandomInt(0, 25) * grid;
+      }
     }
     // check collision with all cells after this one
     for (let i = index + 1; i < snake.cells.length; i++)
@@ -104,6 +131,9 @@ function loop() {
 		score=0;
         apple.x = getRandomInt(0, 25) * grid;
         apple.y = getRandomInt(0, 25) * grid;
+        document.getElementById('bonus').innerHTML="";
+        document.getElementById('bonus2').innerHTML="";
+        document.getElementById('bonus3').innerHTML="";
 	    document.getElementById('high').innerHTML=max;
       }
     }
@@ -115,23 +145,47 @@ document.addEventListener('keydown', function(e) {
   // keys for movement & disable backtracking
 
   // left arrow key
-  if (e.keyCode === 37 && snake.dx === 0) {
+  if (score <= 50) {
+    if (e.keyCode === 37 && snake.dx === 0) {
+      snake.dx = -grid;
+      snake.dy = 0;
+    }
+  } else if (e.keyCode === 37 && snake.dx === 0) {
+    // right arrow key >50
+      snake.dx = grid;
+      snake.dy = 0;
+    }
+  // up arrow key
+  if (score <= 50) {
+    if (e.keyCode === 38 && snake.dy === 0) {
+      snake.dy = -grid;
+      snake.dx = 0;
+    }
+  } else if (e.keyCode === 38 && snake.dy === 0) {
+    //down arrow key >50
+     snake.dy = grid;
+     snake.dx = 0;
+  }
+  // right arrow key
+  if (score <= 50) {
+    if (e.keyCode === 39 && snake.dx === 0) {
+      snake.dx = grid;
+      snake.dy = 0;
+    }
+  } else if (e.keyCode === 39 && snake.dx === 0) {
+    //left arrow key >50
     snake.dx = -grid;
     snake.dy = 0;
   }
-  // up arrow key
-  else if (e.keyCode === 38 && snake.dy === 0) {
-    snake.dy = -grid;
-    snake.dx = 0;
-  }
-  // right arrow key
-  else if (e.keyCode === 39 && snake.dx === 0) {
-    snake.dx = grid;
-    snake.dy = 0;
-  }
   // down arrow key
-  else if (e.keyCode === 40 && snake.dy === 0) {
-    snake.dy = grid;
+  if (score <= 50) {
+    if (e.keyCode === 40 && snake.dy === 0) {
+      snake.dy = grid;
+      snake.dx = 0;
+    }
+  } else if (e.keyCode === 40 && snake.dy === 0){
+    //up arrow key >50
+    snake.dy = -grid;
     snake.dx = 0;
   }
 });
