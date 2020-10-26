@@ -138,9 +138,9 @@ def loader(workout_id):
         elif workout['type'] == '2fa':
             return redirect('/workouts/tfh/' + workout_id)
         elif workout['type'] == 'inspect':
-            return redirect('/workouts/inspect' + workout_id)
+            return redirect('/workouts/inspect/' + workout_id)
         elif workout['type'] == 'sql':
-            return redirect('/workouts/sql_injection' + workout_id)
+            return redirect('/workouts/sql_injection/' + workout_id)
     else:
         return redirect(404)
 

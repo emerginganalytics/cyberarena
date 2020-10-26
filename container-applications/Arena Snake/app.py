@@ -13,6 +13,18 @@ project = myconfig.get_variable('project').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 
 
+@app.route('/loader/<workout_id>')
+def loader(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+
+    if workout:
+        if workout['type'] == 'arena_snake':
+            return redirect('/arena_snake/' + workout_id)
+    else:
+        return redirect(404)
+
+
 @app.route('/arena_snake/<workout_id>')
 def arena_snake(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)

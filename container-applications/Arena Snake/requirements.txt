@@ -19,4 +19,5 @@ gunicorn
 google-cloud-datastore
 google-api-python-client
 google-cloud-storage
+google-cloud-runtimeconfig
 requests

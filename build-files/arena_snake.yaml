@@ -6,8 +6,7 @@ workout:
   workout_description: 'Challenge yourself with a more difficult inspect element workout!'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/ArenaSnakeTeacherWorkoutInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/ArenaSnakeStudentWorkoutInstructions.pdf"
-  workout_url_path: 'https://arena-snake-loader-v7k2apwaqa-uc.a.run.app/arena_snake'
-  project_name: ualr-cybersecurity
+  workout_url_path: 'https://arena-snake-loader-v7k2apwaqa-uc.a.run.app/loader/'
 
 assessment:
   type: level
