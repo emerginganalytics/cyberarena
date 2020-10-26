@@ -131,9 +131,11 @@ function loop() {
 		score=0;
         apple.x = getRandomInt(0, 25) * grid;
         apple.y = getRandomInt(0, 25) * grid;
+        document.getElementById('score').innerHTML=score;
         document.getElementById('bonus').innerHTML="";
         document.getElementById('bonus2').innerHTML="";
         document.getElementById('bonus3').innerHTML="";
+        document.getElementById('flag').innerHTML="";
 	    document.getElementById('high').innerHTML=max;
       }
     }
