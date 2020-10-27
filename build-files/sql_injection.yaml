@@ -6,7 +6,7 @@ workout:
   workout_description: 'Perform a SQL injection on a vulnerable SQL database'
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/SQLInjectionWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/SQLInjectionWorkoutInstructions.pdf"
-  workout_url_path: 'https://cybergym-classified-v7k2apwaqa-uc.a.run.app/loader'
+  workout_url_path: 'https://cybergym-classified-v7k2apwaqa-uc.a.run.app/loader/'
   project_name: ualr-cybersecurity
 
 assessment:
