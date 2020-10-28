@@ -150,21 +150,23 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <h5>Please leave your comments or suggestions for our support team to review.</h5>
-          <form>
-          <div class="form-group">
-            <label for="sender-email" class="col-form-label">Your email:</label>
-            <input type="text" class="form-control" id="sender-email">
-          </div>
-          <div class="form-group">
-            <label for="message-text" class="col-form-label">Message:</label>
-            <textarea class="form-control" id="message-text"></textarea>
-          </div>
+          <form action = "/leave_comment" method="POST">
+              <div class="form-group">
+                <label for="comment-email" class="col-form-label">Your email:</label>
+                <input name = "comment-email" type="text" class="form-control" id="sender-email">
+              </div>
+
+              <div class="form-group">
+                <label for="comment-text" class="col-form-label">Message:</label>
+                <textarea class="form-control" id="comment-text"></textarea>
+              </div>
+
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Send</button>
+              </div>
         </form>
 
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary" onclick="">Send</button>
-          </div>
         </div>
       </div>
     </div>
@@ -195,6 +197,8 @@
                     }
                 });
             });
+
+
     </script>
 </body>
 </html>

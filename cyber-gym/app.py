@@ -595,6 +595,14 @@ def create_new_class():
 
         return redirect('/teacher_home')
 
+@app.route('/leave_comment', methods=['POST'])
+def leave_comment():
+    if(request.method == 'POST'):
+        comment = request.form['comment']
+        commenter_email = request.form['email']
+
+        store_comment(comment, commenter_email)
+
 @app.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
 def change_roster_name(class_id, student_name):
     if request.method == 'POST':
