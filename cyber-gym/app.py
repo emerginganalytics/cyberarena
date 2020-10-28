@@ -599,11 +599,10 @@ def create_new_class():
 def leave_comment():
     if(request.method == 'POST'):
         comment = request.form['comment']
-        comment_email = request.form['email']
+        comment_email = request.form['comment_email']
 
         store_comment(comment, comment_email)
 
-        return True
 
 @app.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
 def change_roster_name(class_id, student_name):
