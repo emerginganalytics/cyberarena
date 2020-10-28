@@ -603,6 +603,8 @@ def leave_comment():
 
         store_comment(comment, comment_email)
 
+        return redirect('/teacher_home')
+
 
 @app.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
 def change_roster_name(class_id, student_name):
