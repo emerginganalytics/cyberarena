@@ -7,7 +7,6 @@ workout:
   teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/TwoStepAuthenticationWorkoutTeacherInstructions.pdf"
   student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/TwoStepAuthenticationWorkoutInstructions.pdf"
   workout_url_path: 'https://cybergym-classified-v7k2apwaqa-uc.a.run.app/loader/'
-  project_name: ualr-cybersecurity
 
 assessment:
   type: level
