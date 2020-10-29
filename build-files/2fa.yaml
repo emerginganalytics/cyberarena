@@ -11,7 +11,6 @@ workout:
 assessment:
   type: level
   questions:
-    - type: auto
-      key: "UYR3Xxu5TyMgcaRW"
-      question: "Two-Step Auto-Assessment"
-      complete: False
+    - type: input
+      question: "Two-Step Assessment"
+      answer: "CyberGym{Classified_Authentication}"

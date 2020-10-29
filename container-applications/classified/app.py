@@ -128,10 +128,8 @@ def loader(workout_id):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
-    app.logger.info('workout_type : %s' % workout['type'])
-
     if workout:
-        if workout['type'] == 'wireshark' or 'dos':
+        if workout['type'] == 'wireshark':
             return redirect('/' + workout_id)
         elif workout['type'] == 'xss':
             return redirect('/workouts/xss/' + workout_id)
