@@ -68,6 +68,7 @@ def build_workout(workout_id):
             min_cpu_platform = server["minCpuPlatform"] if "minCpuPlatform" in server else None
             nics = []
             for n in server['nics']:
+                n['external_NAT'] = n['external_NAT'] if 'external_NAT' in n else False
                 nic = {
                     "network": f"{workout_id}-{n['network']}",
                     "internal_IP": n['internal_IP'],

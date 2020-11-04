@@ -94,7 +94,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     if meta_data:
         config['metadata'] = {'items': [meta_data]}
     if sshkey:
-        if 'items' in meta_data:
+        if meta_data and 'items' in meta_data:
             config['metadata']['items'].append({"key": "ssh-keys", "value": sshkey})
         else:
             config['metadata'] = {'items': [{"key": "ssh-keys", "value": sshkey}]}
