@@ -69,10 +69,6 @@ routes:
     network: internal-network
     dest_range: "0.0.0.0/0"
     next_hop_instance: fortinet-fortigate
-  - name: default-internal-fortinet
-    network: internal-network
-    dest_range: "0.0.0.0/0"
-    next_hop_instance: fortinet-fortigate
   - name: default-dmz-fortinet
     network: dmz-network
     dest_range: "0.0.0.0/0"

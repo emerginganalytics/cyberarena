@@ -1,6 +1,6 @@
 import time
 
-from common.globals import project, compute, region, zone, ds_client, log_client
+from common.globals import project, compute, region, zone, ds_client, log_client, test_server_existence
 
 
 def create_firewall_rules(firewall_rules):
@@ -51,14 +51,11 @@ def workout_route_setup(workout_id):
 
     if 'routes' in workout and workout['routes']:
         for route in workout['routes']:
-            router = compute.instances().get(project=project, zone=zone,
-                                             instance=f"{workout_id}-{route['next_hop_instance']}").execute()
             i = 0
-            while (not router and 'name' not in router) and i < 50:
+            while not test_server_existence(workout_id, route['next_hop_instance']) and i < 50:
                 time.sleep(10)
                 i += 1
-                router = compute.instances().get(project=project, zone=zone,
-                                                 instance=f"{workout_id}-{route['next_hop_instance']}").execute()
+
             if i >= 50:
                 g_logger.log_text(f"Timeout waiting to add routes for {route['next_hop_instance']}")
                 return False
