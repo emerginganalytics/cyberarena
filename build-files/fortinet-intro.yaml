@@ -22,7 +22,7 @@ networks:
 
 student_entry:
   type: vnc
-  password: "Let's workout!"
+  password: "Grander Mus@sh!"
   network: external-network
   ip: 10.1.1.2
 
@@ -39,7 +39,7 @@ servers:
     image: image-cybergym-teenyweb
     machine_type: "n1-standard-1"
     tags: {items: ["http-server"]}
-    sshkey: "gymboss:ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAQEAnY0o/cKSB2U8pgFPG2X+A6rw5EDkxJUkDGhvDvEbvnwf/sUUl60CioWBQy3K9qWJ8xK3Df2tyzR6eCKnEV1qjzQ3T584zLmTSeDy/z3NxH0VzB1jNuLP2WqFoxcG67cKGyCTECImYb32hzWU/IPu5KfAoXn45QAG+MmcrEMwNgjyLhbUQel2fPfUXFgFJW9CLFNtQZdjlhdOlFasqPfIhUBypSiRMgJ77Gmv06/MkUCbsUeLxE1E9Zp5wx+uKwZwMRxhn/ZURGwmH3JTLYKHJTLNaOJDbl5MfIgcnjCG+h12qplBUvFKDhwIGKIt152GlhbEOJWA+zRHajOAczGp4w== gymboss"
+    sshkey: "cybergym1:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCxLMRLoeTzFBt5VVL7F8+uADQOh4YMeCtwmW5DsNsprJ8R0aGQjYAjeiJzwV6OlthdPE9iANTbRSq4RKyVKh4tA/NsXQ+bj2yBDDRQmBtppMlR9ZXFPmd7B6dDP8PSeCXuI2HEeF+GfjPOo7igkK32j21p5OqRH0Im+I1brsxC5mBWCOyAb8fF3S24qG83HInbBemArkBKdXNqNNa4yMKuAaULYGQTrkZwLQiqpuF1Wupome9PX61D1E1CBa7P1L2FP5XQ6cjCEEmbKsJZ/pGcOyRr96G9HAGGx6j0k6taDpGHRVUOhMUUapLhg86rZJvHyrfc8CVwDx+eeScGZyQ3 cybergym1"
     nics:
       - network: dmz-network
         internal_IP: 10.1.2.2
@@ -65,6 +65,10 @@ servers:
         external_NAT: false
 
 routes:
+  - name: default-internal-fortinet
+    network: internal-network
+    dest_range: "0.0.0.0/0"
+    next_hop_instance: fortinet-fortigate
   - name: default-internal-fortinet
     network: internal-network
     dest_range: "0.0.0.0/0"
@@ -101,3 +105,23 @@ firewall_rules:
     protocol: tcp
     ports: ["tcp/any", "udp/any", "icmp/any"]
     source_ranges: ["10.1.0.0/16"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "NcxJp6D9DerKrr2M"
+      question: "Phase 1 Firewall Task"
+      script: "fortinet-intro-completion-q1.py"
+      script-language: "python"
+      server: teenyweb
+      operating-system: linux
+      complete: False
+    - type: auto
+      key: "dZInUaMbmgo"
+      question: "Phase 2 Firewall Task"
+      script: "fortinet-intro-completion-q2.py"
+      script-language: "python"
+      server: teenyweb
+      operating-system: linux
+      complete: False

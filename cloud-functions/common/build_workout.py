@@ -4,7 +4,7 @@ import string
 
 from common.globals import ds_client, project, compute, region, zone, BUILD_STATES
 from common.assessment_functions import get_startup_scripts
-from common.networking_functions import create_route, create_firewall_rules
+from common.networking_functions import create_route, create_firewall_rules, workout_route_setup
 from common.prepare_compute import create_instance_custom_image, build_guacamole_server
 from common.state_transition import state_transition, check_ordered_workout_state
 
@@ -124,14 +124,7 @@ def build_workout(workout_id):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_ROUTES)
         print('Creating network routes and firewall rules')
         if 'routes' in workout and workout['routes']:
-            for route in workout['routes']:
-                response = compute.instances().get(project=project, zone=zone,
-                                                   instance=f"{workout_id}-{route['next_hop_instance']}")
-                r = {"name": "%s-%s" % (workout_id, route['name']),
-                     "network": "%s-%s" % (workout_id, route['network']),
-                     "destRange": route['dest_range'],
-                     "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
-                create_route(r)
+            workout_route_setup(workout_id)
 
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_FIREWALL):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_FIREWALL)
