@@ -10,7 +10,7 @@ workout:
 
 student_entry:
   type: vnc
-  password: "Let's workout!"
+  password: "Grander Mus@sh!"
   network: external-network
   ip: 10.1.1.20
 

@@ -5,9 +5,8 @@ workout:
   build_type: "container"
   workout_description: 'Intro to Cryptography'
   teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/JohnnyCipherTeacherWorkoutInstructions.pdf"
-  student_instructions_url: ""
-  workout_url_path: 'https://johnnyhash-tly6f5hvda-uc.a.run.app/loader'
-  project_name: ualr-cybersecurity
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/JohnnyCipher.pdf"
+  workout_url_path: 'https://johnnyhash.trojan-cybergym.org/loader'
  
 container_info:
   cipher_one:

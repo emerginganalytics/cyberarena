@@ -4,7 +4,7 @@ import string
 import googleapiclient.discovery
 from google.cloud import runtimeconfig
 from google.cloud import datastore, storage, logging
-
+from googleapiclient.errors import HttpError
 
 
 runtimeconfig_client = runtimeconfig.Client()
@@ -209,3 +209,11 @@ class SERVER_ACTIONS:
 def get_random_alphaNumeric_string(stringLength=12):
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join((random.choice(lettersAndDigits) for i in range(stringLength)))
+
+
+def test_server_existence(workout_id, server_name):
+    try:
+        server = compute.instances().get(project=project, zone=zone, instance=f"{workout_id}-{server_name}").execute()
+    except HttpError:
+        return False
+    return True

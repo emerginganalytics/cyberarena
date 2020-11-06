@@ -46,11 +46,11 @@ if ($confirmation -eq 'y') {
 }
 
 # Update JohnnyHash
-$confirmation = Read-Host "Do you want to update Johnny Hash? (y/N)"
+$confirmation = Read-Host "Do you want to update Johnny Hash Crypto Server? (y/N)"
 if ($confirmation -eq 'y') {
     $sourcepath = Join-Path (Resolve-Path ..\).Path "\container-applications\cryptoserver"
-    gcloud builds submit $sourcepath --tag gcr.io/$project/johnnyhash
-    gcloud run deploy --image gcr.io/$project/johnnyhash --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud builds submit $sourcepath --tag gcr.io/$project/cryptoserver
+    gcloud run deploy --image gcr.io/$project/cryptoserver --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
 
  # Update vulnerability_defender

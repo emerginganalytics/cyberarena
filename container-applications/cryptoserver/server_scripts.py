@@ -141,6 +141,8 @@ def check_caesar(workout_id, submission, check):
     key = ds_client.key('cybergym-workout', workout_id)
     workout = ds_client.get(key)
 
+
+
     # data is a dict list that is passed back to page as JSON object
     status = workout['assessment']['questions']
     data = {
@@ -174,19 +176,19 @@ def check_caesar(workout_id, submission, check):
     plaintext3 = CaesarCipher(decoded3, offset=workout['container_info']['cipher_three']['key']).decoded
     cipher_list.append(plaintext3)
 
-    # Check if submission exists within cipher_list and update status and call publish_status if correct
+    # Check if submission exists within cipher_list and update status and call publish_status if correct.
     if check == 1 and submission in cipher_list:
         data['cipher1']['status'] = True
-        workout_key = workout['assessment']['questions'][0]['key']
-        publish_status(workout_id, workout_key)
+        workout['assessment']['questions'][0]['complete'] = True
+        ds_client.put(workout)
     elif check == 2 and submission in cipher_list:
         data['cipher2']['status'] = True
-        workout_key = workout['assessment']['questions'][1]['key']
-        publish_status(workout_id, workout_key)
+        workout['assessment']['questions'][1]['complete'] = True
+        ds_client.put(workout)
     elif check == 3 and submission in cipher_list:
         data['cipher3']['status'] = True
-        workout_key = workout['assessment']['questions'][2]['key']
-        publish_status(workout_id, workout_key)
+        workout['assessment']['questions'][2]['complete'] = True
+        ds_client.put(workout)
 
     return data
 

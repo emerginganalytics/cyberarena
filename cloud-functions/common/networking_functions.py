@@ -1,6 +1,6 @@
 import time
 
-from common.globals import project, compute, region, zone
+from common.globals import project, compute, region, zone, ds_client, log_client, test_server_existence
 
 
 def create_firewall_rules(firewall_rules):
@@ -42,6 +42,30 @@ def create_route(route):
         "nextHopInstance": nextHopInstance
     }
     compute.routes().insert(project=project, body=route_body).execute()
+
+
+def workout_route_setup(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    g_logger = log_client.logger(workout_id)
+
+    if 'routes' in workout and workout['routes']:
+        for route in workout['routes']:
+            i = 0
+            while not test_server_existence(workout_id, route['next_hop_instance']) and i < 50:
+                time.sleep(10)
+                i += 1
+
+            if i >= 50:
+                g_logger.log_text(f"Timeout waiting to add routes for {route['next_hop_instance']}")
+                return False
+
+            r = {"name": "%s-%s" % (workout_id, route['name']),
+                 "network": "%s-%s" % (workout_id, route['network']),
+                 "destRange": route['dest_range'],
+                 "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
+
+            create_route(r)
 
 
 def create_network(networks, build_id):
