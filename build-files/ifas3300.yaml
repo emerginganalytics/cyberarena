@@ -1,0 +1,44 @@
+version: '1'
+
+workout:
+  name: 'IFAS-3300 Computer Forensics'
+  workout_description: 'Cyber Gym lab for IFAS 3300'
+  teacher_instructions_url:
+  student_instructions_url:
+  build_type: "compute"
+
+student_entry:
+  type: rdp
+  username: forensics
+  password: "I swear 2..."
+  network: external-network
+  ip: 10.1.1.11
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-forensics-workstation
+    image: image-cybergym-mobileforensics
+    machine_type: "n1-standard-4"
+    network_routing: false
+    tags: {items: ["allow-rdp"]}
+    metadata: None
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.11
+        subnet: default
+        external_NAT: false
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+
