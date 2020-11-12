@@ -47,12 +47,12 @@ foreach ($User in $WebUsers){
 foreach ($User in $BatchUsers){
     $CheckPermissions = (Get-Acl $BatchFolder).Access | Where-Object AccessControlType -eq "Allow" `
     | Where-Object IdentityReference -eq $User
-    if ($CheckPermissions -and $User -ne "CYBERGYM\gymboss") {
-       if($User -eq "CYBERGYM\lwolfe") {
-            break
+    if ($CheckPermissions) {
+       if($User -eq "CYBERGYM\gymboss") {
+            $Count += 1
        }
        else {
-            $Count += 1
+            $Count -= 1
        }
     }
 }
