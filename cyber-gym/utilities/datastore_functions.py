@@ -490,10 +490,14 @@ def store_class_info(teacher_email, num_students, class_name):
 
     ds_client.put(new_class)
 
-def store_comment(comment, comment_email):
-    new_comment = datastore.Entity(ds_client.key('cybergym-comment'))
+def upload_instruction_file(uploaded_file, folder, filename):
+    bucket = storage_client.get_bucket(folder)
+    new_blob = bucket.blob(filename)
+    new_blob.cache_control = 'private'
+    new_blob.upload_from_file(uploaded_file)
 
-    new_comment['comment'] = comment
-    new_comment['comment_email'] = comment_email
-
+def store_comment(sender_email, comment):
+    new_comment = datastore.Entity(ds_client.key('cybergym-comments'))
+    new_comment['comment_email'] = sender_email
+    new_comment['comment_text'] = comment
     ds_client.put(new_comment)

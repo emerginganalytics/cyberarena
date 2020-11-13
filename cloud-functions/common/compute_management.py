@@ -266,3 +266,13 @@ def server_stop(server_name):
             i += 1
     
     return False
+
+def server_rebuild(server_name):
+    server = ds_client.get(ds_client.key('cybergym-server', server_name))
+
+    if 'state' in server:
+        if server['state'] == 'RUNNING':
+            server_stop(server_name)
+    server_delete(server_name)
+
+    server_build(server_name)

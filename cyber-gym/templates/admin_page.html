@@ -3,18 +3,8 @@
 
 {% block content %}
 <script src='../static/login.js'></script>
+<script src="../static/workout_spec_form.js"></script>
 <script>
-    function format_runtime(){
-        var runtime_list = document.getElementsByClassName('runtime_field');
-        for(var i = 0; i < runtime_list.length; i++){
-            var runtime_s = runtime_list[i].innerHTML;
-            var minutes = Math.floor((runtime_s / 60))
-            var seconds = runtime_s % 60
-            var formatted_runtime = minutes.toString() + "min " + seconds.toString() + "sec";
-            runtime_list[i].innerHTML = formatted_runtime;
-        }
-    }
-
     initApp = function(){
         var auth_config = {
           apiKey: '{{auth_config["api_key"]}}',
@@ -48,7 +38,18 @@
     };
     initApp();
     $(document).ready(function(){
-        format_runtime();
+        format_runtime();        
+        var build_type_select = document.getElementById("build_type_select");
+        build_type_select.addEventListener("change", function(){
+            if(this.value == "compute"){
+                document.getElementById("compute_build_form").style.display = "block";
+                document.getElementById("container_build_form").style.display = "none";
+            }
+            else if(this.value == "container"){
+                document.getElementById("compute_build_form").style.display = "none";
+                document.getElementById("container_build_form").style.display = "block";
+            }
+        })
 
     })
     function admin_action(action, user_email){
@@ -171,7 +172,34 @@
         flex-direction:row;
         padding:0;
     }
+
+    legend{
+        width:auto;
+    }
+    fieldset{
+        padding:1em;
+        border: 1px solid black;
+        border-style:groove;
+    }
+    .network_info_container{
+        margin-bottom:1em;
+    }
+    .network_info_container:nth-child(2n){
+        border:1px solid black;
+        background-color:#f0efed;
+    }
+    select{
+        display:block;
+    }
+
+    .form_subgroup > *{
+        border:1px solid black;
+        margin-bottom:1em;
+    }
+
 </style>
+
+
 <h1>Administrator Controls</h1>
 
 <div id="admin_container" style="visibility: hidden;margin-bottom:1em;">
@@ -184,6 +212,9 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="workout_creation_tab" data-toggle="tab" href="#workout_creation_container" role="tab" aria-controls="workout_creation_container" aria-selected="false">Create New Workout Specification</a>
         </li>
     </ul>
     <div class="tab-content">
@@ -309,9 +340,100 @@
                 </form>
             </div>
         </div>
+        <div class='tab-pane fade' id='workout_creation_container' role='tabpanel' aria-labelledby='workout_creation_tab'>
+            <h2>Create A New Workout</h2>
+            <form id="new_workout_form" class="new_workout_form col-8" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>Basic Info</legend>
+                    <input type="text" id="workout_name" name="workout_name" placeholder="Workout Name">
+                    <label for="teacher_instruction_file">Upload Teacher Instructions</label><br>
+                    <input type="file" id="teacher_instruction_file" name="teacher_instruction_file"><br><br>
+
+                    <label for="student_instruction_file">Upload Student Instructions</label><br>
+                    <input type="file" id="student_instruction_file" name="student_instruction_file"><br><br>
+
+                    <textarea id="workout_description" name="workout_description" placeholder="Workout Description"></textarea>
+                    <label for="build_type_select">Select Workout Build Type</label>
+                    <select id="build_type_select" style="display:block" name="build_type">
+                        <option value="compute">Compute VM</option>
+                        <option value="container">Container App</option>
+                    </select>
+                </fieldset>
+                <div id="compute_build_form">
+                    <fieldset>
+                        <legend>Student Entry</legend>
+                        <select style="display:block" name="entry_type">
+                            <option value="rdp">RDP</option>
+                            <option value="vnc">VNC</option>
+                        </select>
+                        <input type="text" id="workout_username" name="workout_username" placeholder="Workout Username">
+                        <label for="workout_username">Enter the student entry username</label>
+                        <input type="text" id="workout_password" name="workout_password" placeholder="Workout Password">
+                        <label for="workout_password">Enter the student entry password</label>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Networks</legend>
+                        <div class="form_subgroup" id="network_container"></div>
+
+                        <a onclick="new_network()" class="btn" id="create_network_button">Add Network</a>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Servers</legend>
+                        <div class="form_subgroup" id="server_container"></div>
+                        <a onclick="new_server()" class="btn" id="create_server_button">Add Server</a>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Firewall Rules</legend>
+                        <div class="form_subgroup" id="firewall_container"></div>
+                        <a onclick="new_firewall()" class="btn" id="create_firewall_button">Add Firewall Rule</a>
+                    </fieldset>
+                </div>
+                <div id="container_build_form" style="display:none;">
+                    <fieldset>
+                        <legend>Container Info</legend>
+                        <input type="text" id="container_url" name="container_url">
+                        <label for="container_url">Enter the container URL (visible in GCP)</label>
+                    </fieldset>
+                </div>
+                <fieldset>
+                    <legend>Assessment</legend>
+                    <div class="form_subgroup" id="assessment_container"></div>
+                    <a onclick="new_assessment_question()" class="btn" id="add_question_button">Add Assessment Question</a>
+                </fieldset>
+                <br>                
+                <a class="btn btn-small" onclick="process_new_spec()">Submit</a>
+                <!-- <input id="new_workout_submit" type="submit" class="btn" value="Submit"> -->
+            </form>
+        </div>
     </div>
 </div>
+<div class="modal fade" id="yaml_modal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div id="yaml_content"></div>
 
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" onclick="confirm_new_spec()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    
+    document.getElementById('new_workout_form').addEventListener('submit', function(event){
+        event.preventDefault();
+        var formData = new FormData(this);
+        var test = new FormData();
+        alert("File Inputs:\n" + file_inputs);
+        console.log(file_inputs);
+        console.log(file_inputs[0].files);
+        //for(var i = 0; i < file_inputs.length; i++){
+          //  console.log(file_inputs[i].files);
+        //}
+        var teacher_file = document.getElementById('teacher_instruction_file').files;
+    });
+</script>
 
 
 {% endblock %}
