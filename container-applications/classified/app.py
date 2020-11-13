@@ -143,16 +143,12 @@ def loader(workout_id):
         return redirect(404)
 
 
-@app.route('/<workout_id>')
-def home(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
+@app.route('/')
+def home():
     if not session.get('logged_in'):
         return render_template('index.html')
     else:
         wireshark_flag = "CyberGym{Classified_Shark_Week}"
-        workout['assessment']['questions'][0]['complete'] = True
-        ds_client.put(workout)
         return render_template('flag.html', wireshark_flag=wireshark_flag)
 
 

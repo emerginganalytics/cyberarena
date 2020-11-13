@@ -2,19 +2,20 @@
 {% block header %}
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
 {% endblock %}
 {% block page_content %}
-    <!-- Body Content -->
+     <!-- Body Content -->
     <div>
-    <h1 style ="text-align:center; color:white;"> Successful Login!</h1>
+    <h1 style ="text-align:center; color:white;"> Successful Login</h1>
     </div>
-    <div class="container mt-0">
+     <div class="container mt-0">
         <div style="border-radius:25px;background-color:whitesmoke; height:auto; width:80%; box-shadow:2px 5px;
          border: 1px solid;" class="mx-auto d-block">
             <div style="padding:1.5em 1.5em 0;height:auto;">
-                <h1 style="text-align:center;">{{ wireshark_flag }}</h1>
+               <h1 style="text-align:center;">{{ wireshark_flag }}</h1>
             </div>
         </div>
-    </div>
+     </div>
 {% endblock %}
