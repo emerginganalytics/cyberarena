@@ -46,10 +46,6 @@ firewall_rules:
 assessment:
   type: level
   questions:
-    - type: auto
-      key: "FlzKa2g3sDDJ4fgc"
-      question: "Successful Login"
-      complete: False
     - required: True
       type: input
       question: "What is the password for the admin user in the Cyber Gym Classified Web Application?"
