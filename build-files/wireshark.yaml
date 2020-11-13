@@ -44,16 +44,20 @@ firewall_rules:
     source_ranges: ["10.1.0.0/16"]
 
 assessment:
-  type: "level"
+  type: level
   questions:
+    - type: auto
+      key: "FlzKa2g3sDDJ4fgc"
+      question: "Successful Login"
+      complete: False
     - required: True
-      type: "input"
+      type: input
       question: "What is the password for the admin user in the Cyber Gym Classified Web Application?"
       answer: "cyberSecret42"
     - required: True
-      type: "upload"
+      type: upload
       question: "Upload a screen shot of the FTP message in Wireshark"
     - required: True
-      type: input-flag
+      type: input
       question: "Wireshark Flag"
-      flag: "CyberGym{Classified_Shark_Week}"
+      answer: "CyberGym{Classified_Shark_Week}"
