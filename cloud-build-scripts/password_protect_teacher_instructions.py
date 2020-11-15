@@ -39,6 +39,7 @@ def main():
     output_directory = Path("../build-files/teacher-instructions")
     for filename in input_directory.iterdir():
         if filename.suffix == ".pdf":
+            print(f"Encrypting {filename.name}")
             set_teacher_instruction_password(filename, args.password, output_directory)
 
 

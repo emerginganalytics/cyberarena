@@ -9,6 +9,7 @@ from googleapiclient.errors import HttpError
 from common.dns_functions import add_dns_record, delete_dns
 from common.state_transition import state_transition
 from requests.exceptions import ConnectionError
+from common.fortinet_build import fortinet_manager_build
 
 
 def get_server_ext_address(server_name):
@@ -88,12 +89,9 @@ def server_build(server_name):
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
 
-    # Commented because this is only for Fortinet right now.
-    # if 'canIPForward' in server and server['config']['canIpForward']:
-    #     image_config = {"name": server_name + "-disk", "sizeGb": 30,
-    #                     "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
-    #     response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
-    #     compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+    # The fortinet firewall requires an additional license server to be built
+    if "fortinet-fortigate" in server_name:
+        fortinet_manager_build(server['workout'])
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
     i = 0
