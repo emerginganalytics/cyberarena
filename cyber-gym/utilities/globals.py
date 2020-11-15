@@ -49,6 +49,8 @@ class workout_globals():
     max_num_workouts = 200
     ps_build_workout_topic = 'build-workouts'
     ps_build_arena_topic = 'build_arena'
+    student_instruction_folder = "student_workout_instructions_" + project
+    teacher_instruction_folder = "teacher_workout_instructions_" + project
 
     @staticmethod
     def extended_wait(project, zone, operation_id):

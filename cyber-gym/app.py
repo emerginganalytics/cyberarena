@@ -4,7 +4,7 @@ from stop_workout import stop_workout
 from reset_workout import reset_workout
 from utilities.globals import ds_client, dns_suffix, log_client, workout_token, post_endpoint, auth_config, logger
 from utilities.pubsub_functions import *
-from utilities.yaml_functions import parse_workout_yaml
+from utilities.yaml_functions import parse_workout_yaml, save_yaml_file, generate_yaml_content
 from utilities.datastore_functions import *
 from utilities.assessment_functions import get_assessment_questions, process_assessment
 from flask import Flask, render_template, redirect, request, session
@@ -197,7 +197,7 @@ def login():
 
 @app.route('/teacher_home', methods=['GET', 'POST'])
 def teacher_home():
-    if session['user_email']:
+    if 'user_email' in session:
         teacher_email = session['user_email']
         try:
             teacher_info = ds_client.get(ds_client.key('cybergym-instructor', str(teacher_email)))
@@ -243,7 +243,7 @@ def teacher_home():
                 teacher_classes.append(class_info)
         teacher_info['units'] = teacher_units
         teacher_info['classes'] = teacher_classes
-        return render_template('teacher_home.html', auth_config=auth_config, test_variable=session['user_email'], teacher_info=teacher_info)
+        return render_template('teacher_home.html', auth_config=auth_config, teacher_info=teacher_info)
     else:
         return render_template('teacher_home.html', auth_config=auth_config)
 
@@ -256,12 +256,18 @@ def unit_signup(unit_id):
         claimed_workout = None
         for workout in list(workout_query.fetch()):
             if 'student_name' in workout:
-                if workout['student_name'] == None:
+                if workout['student_name'] == None or workout['student_name'] == "":
                     with ds_client.transaction():
                         claimed_workout = workout
                         claimed_workout['student_name'] = request.form['student_name']
                         ds_client.put(claimed_workout)
                         return redirect('/landing/%s' % claimed_workout.key.name)
+            else:
+                with ds_client.transaction():
+                    claimed_workout = workout
+                    claimed_workout['student_name'] = request.form['student_name']
+                    ds_client.put(claimed_workout)
+                    return redirect('/landing/%s' % claimed_workout.key.name)
         return render_template('unit_signup.html', unit_full=True)
     
     return render_template('unit_signup.html')
@@ -274,7 +280,7 @@ def admin_page():
     active_workouts = []
     for workout in workout_list:
         if 'state' in workout:
-            if workout['state'] != "DELETED":
+            if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
                 active_workouts.append(workout)
     if request.method == "POST":
         response = {
@@ -493,8 +499,6 @@ def admin_server_management(workout_id):
     if request.method == 'POST':
         data = request.json
         if 'action' in data:
-            if data['action'] == 'REBUILD':
-                return 'True'
             pub_manage_server(data['server_name'], data['action'])
     return 'True'
 
@@ -604,8 +608,7 @@ def leave_comment():
         store_comment(comment, comment_email)
 
         return redirect('/teacher_home')
-
-
+  
 @app.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
 def change_roster_name(class_id, student_name):
     if request.method == 'POST':
@@ -673,6 +676,44 @@ def change_workout_expiration():
         request_data = request.get_json(force=True)
         print(str(request_data))
         return json.dumps(str("Test"))
+
+@app.route('/create_workout_spec', methods=['POST'])
+def create_workout_spec():
+    if request.method == 'POST':
+        request_data = request.get_json(force=True)
+
+        print(str(request_data))
+        yaml_string = generate_yaml_content(request_data)
+        return json.dumps(yaml_string)
+
+@app.route('/save_workout_spec', methods=['POST'])
+def save_workout_spec():
+    if request.method == 'POST':
+        request_data = request.get_json(force=True)
+        # save_yaml_file(request_data)
+        response = {}
+        response['completed'] = True
+        admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
+        workout_entry = str(request_data['workout']['name'])
+        if 'workout_list' not in admin_info:
+            admin_info['workout_list'] = []
+        
+        admin_info['workout_list'].append(workout_entry.replace(" ", "").lower())
+        ds_client.put(admin_info)
+
+        return json.dumps(response)
+
+@app.route('/upload_instructions', methods=['POST'])
+def upload_instructions():
+    if request.method == 'POST':
+        if 'teacher_instruction_file' in request.files:
+            teacher_instruction_file = request.files['teacher_instruction_file']
+            upload_instruction_file(teacher_instruction_file, workout_globals.teacher_instruction_folder, teacher_instruction_file.filename)
+        if 'student_instruction_file' in request.files:
+            student_instruction_file = request.files['student_instruction_file']
+            upload_instruction_file(student_instruction_file, workout_globals.student_instruction_folder, student_instruction_file.filename)
+        return json.dumps({"test":True})
+
 # Workout completion check. Receives post request from workout and updates workout as complete in datastore.
 # Request data in form {'workout_id': workout_id, 'token': token,}
 @app.route('/complete', methods=['POST'])
