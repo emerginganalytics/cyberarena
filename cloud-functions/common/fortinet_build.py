@@ -11,7 +11,7 @@ def fortinet_manager_build(workout_id):
     :return: None
     """
     compute_beta = discovery.build('compute', 'beta')
-    source_machine_image = f"projects/ualr-cybersecurity/global/machineImages/image-fortimanager"
+    source_machine_image = f"projects/{project}/global/machineImages/image-fortimanager"
     config = {
         'name': f"{workout_id}-fortimanager",
         'machineType': f"zones/{zone}/machineTypes/n1-standard-2",

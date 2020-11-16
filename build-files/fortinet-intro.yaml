@@ -3,8 +3,8 @@ version: '1'
 workout:
   name: "Introduction to Fortinet"
   workout_description: 'Perform simple firewall management tasks on the Fortinet Fortigate firewall'
-  student_instructions_url: ""
-  teacher_instructions_url: ""
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/IntrotoFirewallsWorkoutInstructions.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/IntrotoFirewallsWorkoutInstructions.pdf"
 
 networks:
   - name: external-network
