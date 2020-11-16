@@ -87,11 +87,12 @@ def server_build(server_name):
     """
     print(f'Building server {server_name}')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    build_id = server['workout']
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
 
     # The fortinet firewall requires an additional license server to be built
     if "fortinet-fortigate" in server_name:
-        fortinet_manager_build(server['workout'])
+        fortinet_manager_build(build_id)
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
     i = 0
@@ -137,8 +138,9 @@ def server_build(server_name):
     compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
 
+    if "fortinet-fortigate" in server_name:
+        compute.instances().stop(project=project, zone=zone, instance=f"{build_id}-fortimanager").execute()
     # If no other servers are building, then set the workout to the state of READY.
-    build_id = server['workout']
     check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.STOPPED,
                              change_build_state=BUILD_STATES.READY)
 
