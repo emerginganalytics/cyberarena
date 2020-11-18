@@ -65,8 +65,13 @@ def index(workout_type):
 # Student landing page route. Displays information and links for an individual workout
 @app.route('/landing/<workout_id>', methods=['GET', 'POST'])
 def landing_page(workout_id):
-    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-    unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+    unit_list = ds_client.query(kind='cybergym-unit')
+    workouts_list = list(unit_list.add_filter('workouts', '=', str(workout_id)).fetch())
+    if not workouts_list:
+        return render_template('404.html')
+    else:
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
     retrieve_student_uploads(workout_id)
     if (workout):
         expiration = None
