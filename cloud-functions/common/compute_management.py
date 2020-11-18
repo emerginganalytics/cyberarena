@@ -2,15 +2,16 @@ import time
 import calendar
 from socket import timeout
 import requests
+from googleapiclient import discovery
 
-from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES, workout_globals
+from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES, \
+    workout_globals, BUILD_TYPES, log_client
 from google.cloud import datastore
 from googleapiclient.errors import HttpError
 from common.dns_functions import add_dns_record, delete_dns
 from common.state_transition import state_transition
 from requests.exceptions import ConnectionError
 from common.fortinet_build import fortinet_manager_build
-
 
 def get_server_ext_address(server_name):
     """
@@ -86,13 +87,11 @@ def server_build(server_name):
     :return: A boolean status on the success of the build
     """
     print(f'Building server {server_name}')
+    compute_beta = discovery.build('compute', 'beta')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     build_id = server['workout']
+    g_logger = log_client.logger(build_id)
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
-
-    # The fortinet firewall requires an additional license server to be built
-    if "fortinet-fortigate" in server_name:
-        fortinet_manager_build(build_id)
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
     i = 0
@@ -100,11 +99,19 @@ def server_build(server_name):
     while not build_success and i < 5:
         workout_globals.refresh_api()
         try:
-            response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
+            if server['build_type'] == BUILD_TYPES.MACHINE_IMAGE:
+                source_machine_image = f"projects/{project}/global/machineImages/{server['machine_image']}"
+                response = compute_beta.instances().insert(project=project, zone=zone, body=server['config'],
+                                                           sourceMachineImage=source_machine_image).execute()
+            else:
+                response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
             build_success = True
             print(f'Sent job to build {server_name}, and waiting for response')
         except BrokenPipeError:
             i += 1
+        except HttpError as exception:
+            g_logger.log_text(f"Error when trying to build {server_name}")
+            return False
     i = 0
     success = False
     while not success and i < 5:
@@ -138,8 +145,6 @@ def server_build(server_name):
     compute.instances().stop(project=project, zone=zone, instance=server_name).execute()
     state_transition(entity=server, new_state=SERVER_STATES.STOPPED)
 
-    if "fortinet-fortigate" in server_name:
-        compute.instances().stop(project=project, zone=zone, instance=f"{build_id}-fortimanager").execute()
     # If no other servers are building, then set the workout to the state of READY.
     check_build_state_change(build_id=build_id, check_server_state=SERVER_STATES.STOPPED,
                              change_build_state=BUILD_STATES.READY)

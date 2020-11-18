@@ -6,7 +6,7 @@ from google.cloud import datastore
 from googleapiclient import errors
 
 from common.globals import workout_globals, project, zone, dnszone, ds_client, compute, SERVER_STATES, SERVER_ACTIONS, \
-    PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image
+    PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image, BUILD_TYPES
 from common.dns_functions import add_dns_record
 from common.compute_management import get_server_ext_address, server_build
 from common.networking_functions import create_firewall_rules
@@ -14,7 +14,7 @@ from common.networking_functions import create_firewall_rules
 
 def create_instance_custom_image(compute, workout, name, custom_image, machine_type,
                                  networkRouting, networks, tags, meta_data, sshkey=None, student_entry=False,
-                                 minCpuPlatform=None):
+                                 minCpuPlatform=None, build_type=None, machine_image=None, add_disk=None):
     """
     Core function to create a new server according to the input specification. This gets called through
     a cloud function during the automatic build
@@ -38,40 +38,16 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         print(f'Server {name} already exists. Skipping configuration')
         return
 
-    image_response = compute.images().get(project=project, image=custom_image).execute()
-    source_disk_image = image_response['selfLink']
-
-    # Configure the machine
-    machine = "zones/%s/machineTypes/%s" % (zone, machine_type)
-
-    networkInterfaces = []
-    for network in networks:
-        if network["external_NAT"]:
-            accessConfigs = {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
-        else:
-            accessConfigs = None
-        add_network_interface = {
-            'network': 'projects/%s/global/networks/%s' % (project, network["network"]),
-            'subnetwork': 'regions/us-central1/subnetworks/' + network["subnet"],
-            'accessConfigs': [
-                accessConfigs
-            ]
-        }
-        if 'internal_IP' in network:
-            add_network_interface['networkIP'] = network["internal_IP"]
-
-        if 'aliasIpRanges' in network:
-            add_network_interface['aliasIpRanges'] = network['aliasIpRanges']
-        networkInterfaces.append(add_network_interface)
-    config = {
-        'name': name,
-        'machineType': machine,
-
-        # allow http and https server with tags
-        'tags': tags,
-
-        # Specify the boot disk and the image to use as a source.
-        'disks': [
+    config = {}
+    config['name'] = name
+    if machine_type:
+        config['machineType'] = "zones/%s/machineTypes/%s" % (zone, machine_type)
+    if tags:
+        config['tags'] = tags
+    if build_type != BUILD_TYPES.MACHINE_IMAGE:
+        image_response = compute.images().get(project=project, image=custom_image).execute()
+        source_disk_image = image_response['selfLink']
+        config['disks'] = [
             {
                 'boot': True,
                 'autoDelete': True,
@@ -79,17 +55,38 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
                     'sourceImage': source_disk_image,
                 }
             }
-        ],
-        'networkInterfaces': networkInterfaces,
-        # Allow the instance to access cloud storage and logging.
-        'serviceAccounts': [{
+        ]
+
+
+    if networks:
+        networkInterfaces = []
+        for network in networks:
+            if network["external_NAT"]:
+                accessConfigs = {'type': 'ONE_TO_ONE_NAT', 'name': 'External NAT'}
+            else:
+                accessConfigs = None
+            add_network_interface = {
+                'network': 'projects/%s/global/networks/%s' % (project, network["network"]),
+                'subnetwork': 'regions/us-central1/subnetworks/' + network["subnet"],
+                'accessConfigs': [
+                    accessConfigs
+                ]
+            }
+            if 'internal_IP' in network:
+                add_network_interface['networkIP'] = network["internal_IP"]
+
+            if 'aliasIpRanges' in network:
+                add_network_interface['aliasIpRanges'] = network['aliasIpRanges']
+            networkInterfaces.append(add_network_interface)
+        config['networkInterfaces'] = networkInterfaces
+    # Allow the instance to access cloud storage and logging.
+    config['serviceAccounts'] =  [{
             'email': 'default',
             'scopes': [
                 'https://www.googleapis.com/auth/devstorage.read_write',
                 'https://www.googleapis.com/auth/logging.write'
             ]
-        }],
-    }
+        }]
 
     if meta_data:
         config['metadata'] = {'items': [meta_data]}
@@ -99,13 +96,17 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         else:
             config['metadata'] = {'items': [{"key": "ssh-keys", "value": sshkey}]}
 
-    # For a network routing firewall (i.e. Fortinet) add an additional disk for logging.
     if networkRouting:
         config["canIpForward"] = True
-        # Commented out because only Fortinet uses this. Need to create a custom build template instead.
-        # new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
-        #              "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
-        # config['disks'].append(new_disk)
+
+    if add_disk:
+        image_config = {"name": name + "-disk", "sizeGb": add_disk,
+                         "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
+        response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
+        compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+        new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
+                    "source": "projects/" + project + "/zones/" + zone + "/disks/" + name + "-disk"}
+        config['disks'].append(new_disk)
 
     if minCpuPlatform:
         config['minCpuPlatform'] = minCpuPlatform
@@ -115,6 +116,8 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     new_server.update({
         'name': name,
         'workout': workout,
+        'build_type': build_type,
+        'machine_image': machine_image,
         'config': config,
         'state': SERVER_STATES.READY,
         'state-timestamp': str(calendar.timegm(time.gmtime())),

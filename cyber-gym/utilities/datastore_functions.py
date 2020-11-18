@@ -17,6 +17,8 @@ def randomStringDigits(stringLength=10):
 def add_server_defaults(servers):
     server_cnt = len(servers)
     for i in range(server_cnt):
+        if 'build_type' not in servers[i]:
+            servers[i]["build_type"] = None
         if 'sshkey' not in servers[i]:
             servers[i]["sshkey"] = None
         if 'guac_path' not in servers[i]:
@@ -29,6 +31,8 @@ def add_server_defaults(servers):
             servers[i]["network_routing"] = False
         if 'nics' not in servers[i]:
             servers[i]['nics'] = None
+        if 'add_disk' not in servers[i]:
+            servers[i]["add_disk"] = None
     return servers
 
 

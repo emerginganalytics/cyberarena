@@ -207,6 +207,10 @@ class SERVER_ACTIONS:
     REBUILD = 'REBUILD'
 
 
+class BUILD_TYPES:
+    MACHINE_IMAGE = 'machine-image'
+
+
 def get_random_alphaNumeric_string(stringLength=12):
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join((random.choice(lettersAndDigits) for i in range(stringLength)))

@@ -178,9 +178,6 @@ def cloud_fn_manage_server(event, context):
     elif action == SERVER_ACTIONS.STOP:
         server_stop(server_name)
 
-    if context:
-        print(f'Server {server_name} has been built')
-
 
 def cloud_fn_db_update(event, context):
     """
