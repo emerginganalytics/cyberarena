@@ -11,7 +11,6 @@ from googleapiclient.errors import HttpError
 from common.dns_functions import add_dns_record, delete_dns
 from common.state_transition import state_transition
 from requests.exceptions import ConnectionError
-from common.fortinet_build import fortinet_manager_build
 
 def get_server_ext_address(server_name):
     """
@@ -92,6 +91,15 @@ def server_build(server_name):
     build_id = server['workout']
     g_logger = log_client.logger(build_id)
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
+    config = server['config'].copy()
+
+    """
+    Currently, we need a workaround to insert the guacamole startup script because of a 1500 character limit on
+    indexed fields. The exclude_from_index does not work on embedded datastore fields
+    """
+    if 'student_entry' in server and server['student_entry']:
+        config['metadata'] = {'items': [{"key": "startup-script", "value": server['guacamole_startup_script']}]}
+
 
     # Begin the server build and keep trying for a bounded number of additional 30-second cycles
     i = 0
@@ -101,10 +109,10 @@ def server_build(server_name):
         try:
             if server['build_type'] == BUILD_TYPES.MACHINE_IMAGE:
                 source_machine_image = f"projects/{project}/global/machineImages/{server['machine_image']}"
-                response = compute_beta.instances().insert(project=project, zone=zone, body=server['config'],
+                response = compute_beta.instances().insert(project=project, zone=zone, body=config,
                                                            sourceMachineImage=source_machine_image).execute()
             else:
-                response = compute.instances().insert(project=project, zone=zone, body=server['config']).execute()
+                response = compute.instances().insert(project=project, zone=zone, body=config).execute()
             build_success = True
             print(f'Sent job to build {server_name}, and waiting for response')
         except BrokenPipeError:

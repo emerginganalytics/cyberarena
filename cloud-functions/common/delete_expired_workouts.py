@@ -17,9 +17,9 @@ from common.globals import compute, dns_suffix, dnszone, project, ds_client, zon
 from common.start_vm import state_transition
 from common.dns_functions import delete_dns
 
-
 # Global variables for this function
 expired_workout = []
+
 
 # IN PROGRESS
 # to be update with expiration date query from datastore
@@ -28,6 +28,7 @@ def workout_age(created_date):
     instance_creation_date = datetime.fromtimestamp(int(created_date))
     delta = now - instance_creation_date
     return delta.days
+
 
 def are_servers_deleted(build_id):
     i = 0
@@ -76,21 +77,24 @@ def delete_firewall_rules(workout_id):
 
 
 def delete_subnetworks(workout_id):
-    try:
-        result = compute.subnetworks().list(project=project, region=region,
-                                              filter='name = {}*'.format(workout_id)).execute()
-        if 'items' in result:
-            for subnetwork in result['items']:
-                response = compute.subnetworks().delete(project=project, region=region,
-                                                       subnetwork=subnetwork["name"]).execute()
+    i = 0
+    result = compute.subnetworks().list(project=project, region=region,
+                                        filter='name = {}*'.format(workout_id)).execute()
+    if 'items' in result:
+        while i < 6:
             try:
-                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-            except:
+                for subnetwork in result['items']:
+                    response = compute.subnetworks().delete(project=project, region=region,
+                                                            subnetwork=subnetwork["name"]).execute()
+                try:
+                    compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+                except HttpError:
+                    pass
+                return True
+            except HttpError:
+                time.sleep(5)
+                i += 1
                 pass
-        return True
-    except():
-        print("Error in deleting subnetworks for %s" % workout_id)
-        return True
 
 
 def long_delete_network(network, response):
@@ -115,56 +119,59 @@ def long_delete_network(network, response):
 
 
 def delete_network(workout_id):
-    try:
-        # First delete any routes specific to the workout
-        result = compute.routes().list(project=project, filter='name = {}*'.format(workout_id)).execute()
-        if 'items' in result:
-            for route in result['items']:
-                response = compute.routes().delete(project=project, route=route["name"]).execute()
-            try:
-                compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-            except:
-                pass
+    # First delete any routes specific to the workout
+    result = compute.routes().list(project=project, filter='name = {}*'.format(workout_id)).execute()
+    if 'items' in result:
+        for route in result['items']:
+            response = compute.routes().delete(project=project, route=route["name"]).execute()
+        try:
+            compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+        except HttpError:
+            pass
 
-        # Now it is safe to delete the networks.
-        result = compute.networks().list(project=project, filter='name = {}*'.format(workout_id)).execute()
-        if 'items' in result:
-            for network in result['items']:
-                # Networks are not being deleted because the operation occurs too fast.
-                response = compute.networks().delete(project=project, network=network["name"]).execute()
-                compute.globalOperations().wait(project=project, operation=response["id"]).execute()
-                response = compute.globalOperations().get(project=project, operation=response["id"]).execute()
-                if 'error' in response:
-                    if not long_delete_network(network["name"], response):
-                        return False
-        return True
-    except():
-        print("Error in deleting network for %s" % workout_id)
-        return False
+    i = 0
+    # Now it is safe to delete the networks.
+    result = compute.networks().list(project=project, filter='name = {}*'.format(workout_id)).execute()
+    if 'items' in result:
+        while i < 6:
+            try:
+                for network in result['items']:
+                    # Networks are not being deleted because the operation occurs too fast.
+                    response = compute.networks().delete(project=project, network=network["name"]).execute()
+                    compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+                    try:
+                        compute.globalOperations().get(project=project, operation=response["id"]).execute()
+                    except HttpError:
+                        pass
+                return True
+            except HttpError:
+                time.sleep(5)
+                i += 1
+                pass
 
 
 def delete_specific_workout(workout_id, workout):
-        try:
-            delete_dns(workout_id, workout["external_ip"])
-        except HttpError:
-            print("DNS record does not exist")
-            pass
-        except KeyError:
-            print("workout %s has no external IP address" % workout_id)
-            pass
-        if 'state' in workout:
-            if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
-                state_transition(workout, BUILD_STATES.DELETING_SERVERS)
-        delete_vms(workout_id)
-        if are_servers_deleted(workout_id):
-            if delete_firewall_rules(workout_id):
+    try:
+        delete_dns(workout_id, workout["external_ip"])
+    except HttpError:
+        print("DNS record does not exist")
+        pass
+    except KeyError:
+        print("workout %s has no external IP address" % workout_id)
+        pass
+    if 'state' in workout:
+        if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
+            state_transition(workout, BUILD_STATES.DELETING_SERVERS)
+    delete_vms(workout_id)
+    if are_servers_deleted(workout_id):
+        if delete_firewall_rules(workout_id):
+            time.sleep(5)
+            if delete_subnetworks(workout_id):
                 time.sleep(5)
-                if delete_subnetworks(workout_id):
-                    time.sleep(5)
-                    if delete_network(workout_id):
-                        return True
+                if delete_network(workout_id):
+                    return True
 
-        return False
+    return False
 
 
 def delete_specific_arena(unit_id, unit):
@@ -182,7 +189,7 @@ def delete_specific_arena(unit_id, unit):
     except KeyError:
         print("workout %s has no external IP address" % unit_id)
         pass
-    
+
     # First delete all servers associated with this unit
     delete_vms(unit_id)
     for workout_id in unit['workouts']:
@@ -191,11 +198,10 @@ def delete_specific_arena(unit_id, unit):
     delete_firewall_rules(unit_id)
     for workout_id in unit['workouts']:
         delete_firewall_rules(workout_id)
-    time.sleep(5)
     delete_subnetworks(unit_id)
     for workout_id in unit['workouts']:
         delete_subnetworks(workout_id)
-    time.sleep(5)
+    time.sleep(10)
     delete_network(unit_id)
     for workout_id in unit['workouts']:
         delete_network(workout_id)
@@ -223,7 +229,6 @@ def delete_workouts():
     for workout in list(query_old_workouts.fetch()):
         if 'state' not in workout:
             workout['state'] = BUILD_STATES.DELETED
-
 
         container_type = False
         if 'build_type' in workout and workout['build_type'] == 'container':

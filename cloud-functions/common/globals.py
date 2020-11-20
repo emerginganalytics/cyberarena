@@ -222,3 +222,20 @@ def test_server_existence(workout_id, server_name):
     except HttpError:
         return False
     return True
+
+
+def ds_safe_put(entity):
+    """
+    Stores a Datastore entity while excluding any indexing for fields longer than 1500 Bytes
+    :param entity: A data store entity
+    :return: None
+    """
+    exclude_from_indexes = []
+    for item in entity:
+        if type(entity[item]) == str and len(entity[item]) > 1500:
+            exclude_from_indexes.append(item)
+    entity.exclude_from_indexes = exclude_from_indexes
+    try:
+        ds_client.put(entity)
+    except:
+        print("Error storing entity")

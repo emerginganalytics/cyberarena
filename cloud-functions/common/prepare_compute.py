@@ -6,15 +6,16 @@ from google.cloud import datastore
 from googleapiclient import errors
 
 from common.globals import workout_globals, project, zone, dnszone, ds_client, compute, SERVER_STATES, SERVER_ACTIONS, \
-    PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image, BUILD_TYPES
+    PUBSUB_TOPICS, guac_password, get_random_alphaNumeric_string, student_entry_image, BUILD_TYPES, log_client
 from common.dns_functions import add_dns_record
 from common.compute_management import get_server_ext_address, server_build
 from common.networking_functions import create_firewall_rules
 
 
 def create_instance_custom_image(compute, workout, name, custom_image, machine_type,
-                                 networkRouting, networks, tags, meta_data, sshkey=None, student_entry=False,
-                                 minCpuPlatform=None, build_type=None, machine_image=None, add_disk=None):
+                                 networkRouting, networks, tags, meta_data=None, sshkey=None, student_entry=False,
+                                 minCpuPlatform=None, build_type=None, machine_image=None, add_disk=None,
+                                 guacamole_startup_script=None):
     """
     Core function to create a new server according to the input specification. This gets called through
     a cloud function during the automatic build
@@ -29,6 +30,12 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     :param meta_data: This includes startup scripts
     :param sshkey: If the server is running an SSH service, then this adds the public ssh key used for connections
     :param student_entry: If this is a student_entry image, then add that to the configuration.
+    :param minCpuPlatform: For custom images
+    :param build_type: Used for building off machine images
+    :param machine_image: A designated machine image for the build
+    :param add_disk: For adding additional disks to the build
+    :param guacamole_startup_script: A workaround due to not being able to exclude_from_index nested fields in the
+            Google API
     :return: None
     """
     # First check to see if the server configuration already exists. If so, then return without error
@@ -38,6 +45,7 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         print(f'Server {name} already exists. Skipping configuration')
         return
 
+    g_logger = log_client.logger(workout)
     config = {}
     config['name'] = name
     if machine_type:
@@ -111,7 +119,8 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
     if minCpuPlatform:
         config['minCpuPlatform'] = minCpuPlatform
 
-    new_server = datastore.Entity(ds_client.key('cybergym-server', f'{name}'))
+    new_server = datastore.Entity(key=ds_client.key('cybergym-server', f'{name}'),
+                                  exclude_from_indexes=['guacamole_startup_script'])
 
     new_server.update({
         'name': name,
@@ -121,18 +130,24 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         'config': config,
         'state': SERVER_STATES.READY,
         'state-timestamp': str(calendar.timegm(time.gmtime())),
-        'student_entry': student_entry
+        'student_entry': student_entry,
+        'guacamole_startup_script': guacamole_startup_script
     })
-    ds_client.put(new_server)
+
+    try:
+        ds_client.put(new_server)
+    except:
+        g_logger.log_text('Error storing server config')
+        raise
 
     # Publish to a server build topic
-    pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
-    publisher = pubsub_v1.PublisherClient()
-    topic_path = publisher.topic_path(project, pubsub_topic)
-    future = publisher.publish(topic_path, data=b'Server Build', server_name=name, action=SERVER_ACTIONS.BUILD)
-    print(future.result())
+    # pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+    # publisher = pubsub_v1.PublisherClient()
+    # topic_path = publisher.topic_path(project, pubsub_topic)
+    # future = publisher.publish(topic_path, data=b'Server Build', server_name=name, action=SERVER_ACTIONS.BUILD)
+    # print(future.result())
     # The command below is used for testing
-    # server_build(name)
+    server_build(name)
 
 
 def build_guacamole_server(build, network, guacamole_connections):
@@ -190,12 +205,12 @@ def build_guacamole_server(build, network, guacamole_connections):
         "subnet": "%s-%s" % (network, 'default'),
         "external_NAT": True
     }]
-    meta_data = {"key": "startup-script", "value": startup_script}
+
     try:
         create_instance_custom_image(compute=compute, workout=build_id, name=server_name,
                                      custom_image=student_entry_image, machine_type='n1-standard-1',
-                                     networkRouting=False, networks=nics, tags=tags,
-                                     meta_data=meta_data, sshkey=None, student_entry=True)
+                                     networkRouting=False, networks=nics, tags=tags, student_entry=True,
+                                     guacamole_startup_script=startup_script)
 
         # Create the firewall rule allowing external access to the guacamole connection
         allow_entry = [

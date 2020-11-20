@@ -1,7 +1,8 @@
 import time
 import calendar
 
-from common.globals import ds_client, ordered_workout_states, ordered_arena_states, BUILD_STATES, log_client
+from common.globals import ds_client, ordered_workout_states, ordered_arena_states, BUILD_STATES, log_client, \
+    ds_safe_put
 
 
 def state_transition(entity, new_state, existing_state=None):
@@ -25,7 +26,7 @@ def state_transition(entity, new_state, existing_state=None):
     entity['state-timestamp'] = ts
     g_logger = log_client.logger(entity.key.name)
     g_logger.log_text(str('State Transition {}: Transitioning to {} at {}'.format(entity.key.name, new_state, ts)))
-    ds_client.put(entity)
+    ds_safe_put(entity)
     return True
 
 

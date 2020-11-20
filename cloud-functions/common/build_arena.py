@@ -79,12 +79,16 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
             for server in workout['student_servers']:
                 internal_ip_address = f'10.1.{i}.{j}'
                 if server['name'] == student_entry_server:
+                    rdp_domain = server['domain'] if 'domain' in server else None
+                    security_mode = server['security-mode'] if 'security-mode' in server else 'nla'
                     guac_connection = {
                         'workout_id': workout_id,
                         'entry_type': student_entry_type,
                         'ip': internal_ip_address,
                         'username': student_entry_username,
-                        'password': student_entry_password
+                        'password': student_entry_password,
+                        'domain': rdp_domain,
+                        'security-mode': security_mode
                     }
                     guacamole_connections.append(guac_connection)
                 server_name = "%s-%s" % (workout_id, server['name'])
@@ -159,7 +163,6 @@ def build_arena(unit_id):
         for server in arena['servers']:
             server_name = "%s-%s" % (unit_id, server['name'])
             sshkey = server["sshkey"]
-            guac_path = server['guac_path']
             tags = server['tags']
             machine_type = server["machine_type"]
             network_routing = server["network_routing"]

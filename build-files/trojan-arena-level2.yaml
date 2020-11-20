@@ -19,7 +19,7 @@ student-servers:
   network_type: same
   servers:
     - name: student-workstation
-      image: cybergym-arena-level2
+      image: image-cybergym-arena-level2
       machine_type: n1-standard-1
 
 additional-containers-apps:
@@ -35,7 +35,7 @@ additional-networks:
 # Servers for the arena are added here.
 additional-servers:
   - name: cybergym-arena2-ftp
-    image: cybergym-arena2-ftp
+    image: image-cybergym-arena2-ftp
 #  - name: cybergym-hidden
 #    image: image-cybergym-hiddensite
 #  - name: cybergym-nessus
