@@ -17,12 +17,13 @@ foreach ($User in $ContractsUsers){
     if ($CheckPermissions) {
        if($User -eq "CYBERGYM\AwesomeITUser") {
            #Delete Files in Federal Contracts Folder
-           Remove-Item -Path "C:\Company Data\Federal Contracts\Federal Site Contracts.docx" -Confirm:$false
+           Remove-Item -Path "C:\Company Data\Federal Contracts\Federal Site Contract.docx" -Confirm:$false
            #Add Cat Pictures
            Copy-Item -Path "C:\Users\Gymboss\Temp\CatsofValhalla\*" -Destination "C:\Company Data\Federal Contracts" -Recurse
        }
     }
 }
+Start-Sleep -Seconds 5
 #Check for Harold Blair in Trojan Bricks Web Folder
 foreach ($User in $WebUsers) {
     $CheckPermissions = (Get-Acl $WebFolder).Access | Where-Object AccessControlType -eq "Allow" `
@@ -30,18 +31,19 @@ foreach ($User in $WebUsers) {
     if ($CheckPermissions) {
         if ($User -eq "CYBERGYM\hblair") {
             #Replace Trojan Bricks with Defaced Version
-            Remove-Item -Path "C:\inetpub\www\TrojanBricks\templates\index.html"
-            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\index.html" -Destination "C:\inetpub\www\TrojanBricks\templates"
+            Remove-Item -Path "C:\inetpub\wwwroot\TrojanBricks\templates\index.html" -Confirm:$false
+            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\index.html" -Destination "C:\inetpub\wwwroot\TrojanBricks\templates"
 
-            Remove-Item -Path "C:\inetpub\www\TrojanBricks\static\css\base.css"
-            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\base.css" -Destination "C:\inetpub\www\TrojanBricks\static\css"
+            Remove-Item -Path "C:\inetpub\wwwroot\TrojanBricks\static\css\base.css" -Confirm:$false
+            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\base.css" -Destination "C:\inetpub\wwwroot\TrojanBricks\static\css"
 
-            Remove-Item -Path "C:\inetpub\www\TrojanBricks\static\images\Brick_Background.png"
-            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\scam_alert.jpg" -Destination "C:\inetpub\www\TrojanBricks\static\images"
+            Remove-Item -Path "C:\inetpub\wwwroot\TrojanBricks\static\images\Brick_Background.png" -Confirm:$false
+            Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\scam_alert.jpg" -Destination "C:\inetpub\wwwroot\TrojanBricks\static\images"
 
         }
     }
 }
+Start-Sleep -Seconds 5
 #Check for Lola Wolfe in Batch Folder
 foreach ($User in $BatchUsers){
     $CheckPermissions = (Get-Acl $BatchFolder).Access | Where-Object AccessControlType -eq "Allow" `
@@ -49,8 +51,8 @@ foreach ($User in $BatchUsers){
     if ($CheckPermissions) {
         if ($User -eq "CYBERGYM\lwolfe") {
             #Remove and Replace NotifyLatePayments with mischief script
-            Remove-Item -Path "C:\Batch\NotifyLatePayments.ps1"
-            Copy-Item -Path "C:\Users\Gymboss\Temp\NotifyLatePayments.ps1" -Destination "C:\Batch"
+            Remove-Item -Path "C:\Batch\NotifyLatePayment.ps1" -Confirm:$false
+            Copy-Item -Path "C:\Users\Gymboss\Temp\NotifyLatePayment.ps1" -Destination "C:\Batch"
         }
     }
 }

