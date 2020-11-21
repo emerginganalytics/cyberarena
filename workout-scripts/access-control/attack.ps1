@@ -23,6 +23,7 @@ foreach ($User in $ContractsUsers){
        }
     }
 }
+
 Start-Sleep -Seconds 5
 #Check for Harold Blair in Trojan Bricks Web Folder
 foreach ($User in $WebUsers) {
@@ -40,9 +41,34 @@ foreach ($User in $WebUsers) {
             Remove-Item -Path "C:\inetpub\wwwroot\TrojanBricks\static\images\Brick_Background.png" -Confirm:$false
             Copy-Item -Path "C:\Users\Gymboss\Temp\Defaced\scam_alert.jpg" -Destination "C:\inetpub\wwwroot\TrojanBricks\static\images"
 
+            #Delete Google Chrome Cache for updated images and files
+            taskkill /F /IM "chrome.exe"
+            Start-Sleep -Seconds 5
+            $Items = @('Archived History',
+                        'Cache\*',
+                        'Code Cache\*',
+                        'GPUCache\*'
+                        'Cookies',
+                        'History',
+                        'Web History',
+                        'Storage\*',
+                        'Shortcuts',
+                        'blob_storage',
+                        'Login Data',
+                        'Top Sites',
+                        'Visited Links',
+                        'Web Data')
+            $Folder = "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Default"
+            $Items | ForEach-Object {
+            if (Test-Path "$Folder\$_") {
+                Remove-Item "$Folder\$_" -Recurse
+            }
+            }
+            $Folder = "$($env:LOCALAPPDATA)\Google\Chrome\User Data\Default"
         }
     }
 }
+
 Start-Sleep -Seconds 5
 #Check for Lola Wolfe in Batch Folder
 foreach ($User in $BatchUsers){
