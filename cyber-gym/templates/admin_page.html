@@ -216,6 +216,9 @@
         <li class="nav-item">
             <a class="nav-link" id="workout_creation_tab" data-toggle="tab" href="#workout_creation_container" role="tab" aria-controls="workout_creation_container" aria-selected="false">Create New Workout Specification</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" id="comments_tab" data-toggle="tab" href="#comments_container" role="tab" aria-controls="comments_container" aria-selected="false">User Comments</a>
+        </li>
     </ul>
     <div class="tab-content">
         <div class='tab-pane fade show active user_tab' id='user_container' role="tabpanel" aria-labelledby="user_management_tab">
@@ -271,7 +274,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="maintenance_container" rol="tabpanel" aria-labelledby="maintenance_tab">
+        <div class="tab-pane fade" id="maintenance_container" role="tabpanel" aria-labelledby="maintenance_tab">
             <div id="maintenance">
                 <br><h2>Maintenance</h2><br>
                 <p>This page shows all currently active workouts, as well as some of the basic info you would find in the Datastore. This includes all workouts that have not expired.</p><br>
@@ -404,6 +407,41 @@
                 <a class="btn btn-small" onclick="process_new_spec()">Submit</a>
                 <!-- <input id="new_workout_submit" type="submit" class="btn" value="Submit"> -->
             </form>
+        </div>
+        <div class="tab-pane fade" id="comments_container" role="tabpanel" aria-labelledby="comments_tab">
+            <div id="comments">
+                <br><h2>Comments</h2><br>
+                <p>This page shows comments left by users.</p><br>
+                <h3>Comments</h3>
+                <table id="active_workout_table">
+                    <tr>
+                        <th>Email</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Move to Jira</th>
+                    </tr>
+                    {%for comment in comments%}
+                        <tr id="comment_row_{{workout.key.name}}">
+                            <td class="comment_email_field"><a href="/admin/{{workout.key.name}}">{{workout.key.name}}</a></td>
+                            <td class="workout_type_field">{{workout['type']}}</td>
+                            <td class="instructor_field">{{workout['user_email']}}</td>
+                            {% if workout['student_name'] %}
+                            <td class="student_name_field">{{workout['student_name']}}</td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
+                            <td class="unit_id_field">{{workout['unit_id']}}</td>
+                            <td class="state_field">{{workout['state']}}</td>
+                            {% if workout['runtime_counter'] %}
+                            <td class="runtime_field">{{workout['runtime_counter']}}</td>
+                            {% else %}
+                            <td>N/A</td>
+                            {% endif %}
+                            <td>Coming soon</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
     </div>
 </div>
