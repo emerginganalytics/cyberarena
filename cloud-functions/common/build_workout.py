@@ -61,7 +61,7 @@ def build_workout(workout_id):
         print('Creating servers')
         for server in workout['servers']:
             custom_image = server['image'] if 'image' in server else None
-            build_type = server["build_type"]
+            build_type = server["build_type"] if 'build_type' in server else None
             machine_image = server["machine_image"] if "machine_image" in server else None
             server_name = "%s-%s" % (workout_id, server['name'])
             sshkey = server["sshkey"]
