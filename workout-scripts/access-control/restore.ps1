@@ -7,7 +7,7 @@ $BatchFolder = "C:\Batch"
 $WebFolder = "C:\inetpub\wwwroot\TrojanBricks"
 
 #Restore Permissions for AwesomeITUser in Contracts Folder
-$Permission = (Get-Acl $ContractsFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\AwesomeITUser"} `
+$Permission = (Get-Acl $ContractsFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\\AwesomeITUser"} `
 | Select-Object IdentityReference,FileSystemRights
 if ($Permission){
     $Permission | ForEach-Object {Write-Host "User $($_.IdentityReference) has '$($_.FileSystemRights)' rights on folder $ContractsFolder"}
@@ -20,7 +20,7 @@ else {
 }
 
 #Restore Permissions for Harold Blair in Web Folder
-$Permission = (Get-Acl $WebFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\hblair"} `
+$Permission = (Get-Acl $WebFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\\hblair"} `
 | Select-Object IdentityReference,FileSystemRights
 if ($Permission){
     $Permission | ForEach-Object {Write-Host "User $($_.IdentityReference) has '$($_.FileSystemRights)' rights on folder $WebFolder"}
@@ -33,7 +33,7 @@ else {
 }
 
 #Restore Permissions for Lola Wolfe in Batch Folder
-$Permission = (Get-Acl $BatchFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\lwolfe"} `
+$Permission = (Get-Acl $BatchFolder).Access | Where-Object{$_.IdentityReference -match "CYBERGYM\\lwolfe"} `
 | Select-Object IdentityReference,FileSystemRights
 if ($Permission){
     $Permission | ForEach-Object {Write-Host "User $($_.IdentityReference) has '$($_.FileSystemRights)' rights on folder $BatchFolder"}

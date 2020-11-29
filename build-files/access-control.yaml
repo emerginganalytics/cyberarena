@@ -1,0 +1,51 @@
+version: '1'
+
+workout:
+  name: access-control
+  workout_description: 'In this workout, you will review and set up authorized access permissions. WARNING: Read the instructions before starting the server. This is a timed workout, and the attack will start in 15 minutes when you log in. If the attack succeeds, restart the server to complete the workout.'
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/AccessControlStudentWorkoutInstructions.pdf"
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/AccessControlTeacherWorkoutInstructions.pdf"
+
+student_entry:
+  type: rdp
+  domain: CYBERGYM
+  username: gymboss
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.2
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-access-control
+    image: image-cybergym-access-control
+    machine_type: "n1-standard-2"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.2
+        subnet: default
+        external_NAT: true
+
+firewall_rules:
+  - name: default-network-internal-allow
+    network: external-network
+    target_tags: []
+    protocol: none
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "iQAJ4e0t0rdXMS"
+      question: "Active Permission Check"
+      script: "access-control.ps1"
+      script-language: "powershell"
+      server: cybergym-access-control
+      operating-system: windows
+      complete: False

@@ -142,34 +142,35 @@
 
     <br><br>
 
-    <!-- Modal Link -->
-    <a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
+<!-- Modal Link -->
+<a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
 
-    <!-- Modal -->
-    <div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
-      <div class="modal-dialog" role="document">
+<!-- Modal -->
+<div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
-          <h5>Please leave your comments or suggestions for our support team to review.</h5>
-          <form action = "/leave_comment" method="POST">
-              <div class="form-group">
-                <label for="comment_email" class="col-form-label">Your email:</label>
-                <input name = "comment_email" type="text" class="form-control" id="comment_email">
-              </div>
+            <h5>Please leave your comments or suggestions for our support team to review.</h5>
+            <form action = "/leave_comment" method="POST">
 
-              <div class="form-group">
-                <label for="comment" class="col-form-label">Message:</label>
-                <input name = "comment" textarea class="form-control" id="comment"></inputtextarea>
-              </div>
+                <input type="text" id="comment_email" name="comment_email" placeholder="Email: ">
 
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary">Send</button>
-              </div>
-        </form>
+                <select id="comment_subject" style="display:block" name="comment_subject">
+                        <option value="bug">Technical Issue</option>
+                        <option value="request">Feature Request</option>
+                        <option value="other">Other</option>
+                </select>
+
+                <input type="text" id="comment_text" name="comment_text" placeholder="Comment: ">
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
 
         </div>
-      </div>
     </div>
+</div>
 
 </footer>
 

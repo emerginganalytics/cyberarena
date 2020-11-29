@@ -281,8 +281,14 @@ def unit_signup(unit_id):
 def admin_page():
     admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
     active_workout_query = ds_client.query(kind='cybergym-workout')
+    comment_query = ds_client.query(kind='cybergym-comment')
+    comment_list = comment_query.fetch()
+    comments = []
     workout_list = active_workout_query.fetch()
     active_workouts = []
+    for comment in comment_list:
+        comments.append(comment)
+
     for workout in workout_list:
         if 'state' in workout:
             if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
@@ -607,10 +613,10 @@ def create_new_class():
 @app.route('/leave_comment', methods=['POST'])
 def leave_comment():
     if(request.method == 'POST'):
-        comment = request.form['comment']
         comment_email = request.form['comment_email']
-
-        store_comment(comment, comment_email)
+        comment_subject = request.form['comment_subject']
+        comment_text = request.form['comment_text']
+        store_comment(comment_email, comment_subject, comment_text)
 
         return redirect('/teacher_home')
   

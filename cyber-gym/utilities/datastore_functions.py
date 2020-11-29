@@ -505,8 +505,10 @@ def upload_instruction_file(uploaded_file, folder, filename):
     new_blob.cache_control = 'private'
     new_blob.upload_from_file(uploaded_file)
 
-def store_comment(sender_email, comment):
+def store_comment(comment_email, comment_subject, comment_text):
     new_comment = datastore.Entity(ds_client.key('cybergym-comments'))
-    new_comment['comment_email'] = sender_email
-    new_comment['comment_text'] = comment
+    new_comment['comment_email'] = comment_email
+    new_comment['subject'] = comment_subject
+    new_comment['comment_text'] = comment_text
+    new_comment['message_viewed'] = False
     ds_client.put(new_comment)
