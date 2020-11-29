@@ -21,6 +21,7 @@ foreach ($User in $ContractsUsers){
     | Where-Object IdentityReference -eq $User
     if ($CheckPermissions) {
        if($User -eq "CYBERGYM\AwesomeITUser") {
+	    $Count = 0
             break
        }
        else {
@@ -35,6 +36,7 @@ foreach ($User in $WebUsers){
     | Where-Object IdentityReference -eq $User
     if ($CheckPermissions) {
        if($User -eq "CYBERGYM\hblair") {
+            $Count = 0
             break
        }
        elseif(($User -ne "BUILTIN\IIS_IUSRS") -and ($User -ne "NT AUTHORITY\IUSR")) {
@@ -42,21 +44,20 @@ foreach ($User in $WebUsers){
        }
     }
 }
-
 #Check Batch Folder for Lola Wolfe
 foreach ($User in $BatchUsers){
     $CheckPermissions = (Get-Acl $BatchFolder).Access | Where-Object AccessControlType -eq "Allow" `
     | Where-Object IdentityReference -eq $User
     if ($CheckPermissions) {
-       if($User -eq "CYBERGYM\gymboss") {
-            $Count += 1
+       if($User -eq "CYBERGYM\lwolfe") {
+            $Count = 0
+	        break
        }
        else {
-            $Count -= 1
+            $Count += 1
        }
     }
 }
-
 #Workout Environment Variables
 $request_body = @{
     "workout_id"= $Env:WORKOUTID
@@ -64,10 +65,13 @@ $request_body = @{
 } | ConvertTo-Json
 
 #If all three users have been removed, send completion result
-if ($Count -eq 3) {
+if ($Count -eq 10) {
+    Write-Host "Workout Completed!"
     Invoke-WebRequest -UseBasicParsing $Url -ContentType "application/json" -Method POST -Body $request_body
 }
 else
 {
-    Invoke-Item (start powershell ((Split-Path $MyInvocation.InvocationName) + "C:\Users\Gymboss\Temp\attack.ps1"))
+    Write-Host "Found User with Access!"
+    & "C:\Users\Gymboss\Temp\attack.ps1"
 }
+Start-Sleep -Seconds 10
