@@ -5,6 +5,7 @@ workout:
   build_type: arena
   workout_description: 'Head to head capture-the-flag style competition.'
   student_instructions_url: 'TrojanArenaInstructions-Level1.pdf'
+  teacher_instructions_url:
 
 # For student servers, these will be replicated to the number of
 # students specified by the instructor. These student servers can
@@ -15,22 +16,30 @@ student-servers:
   student_entry: student-workstation
   student_entry_type: rdp
   student_entry_username: workout
-  student_entry_password: 'Md32Nlml_fCertZ6QZ-Oa'
+  student_entry_password: 'SHkpf58hnEcoEE51'
   network_type: same
   servers:
     - name: student-workstation
       image: image-cybergym-arena-windows
       machine_type: n1-standard-1
+      operating-system: windows
+      include_env: true
+    - name: kali
+      image: image-cybergym-kali
+      machine_type: "n1-standard-1"
+    - name: forensics
+      image: image-cybergym-mobileforensics
+      machine_type: "n1-standard-2"
 
 # If additional networks are needed for servers, these are added here.
 # Do not use 10.1.0.0/16. This is reserved for students
-additional-networks:
+# additional-networks:
 
 # Servers for the arena are added here.
-additional-servers:
+# additional-servers:
 
 # If a firewall exists in the network, then the routes necessary for the firewall is added here
-routes:
+# routes:
 
 # Any additional firewall rules are added here. Note: student firewall rules are added by default
 firewall_rules:
@@ -49,30 +58,22 @@ assessment:
   type: "level"
   questions:
     - type: input
-      question: "Flag #1:"
-      answer: ""
-      points: 100
-    - type: input
-      question: "Flag #2: OSINT"
+      question: "Flag #1: OSINT"
       answer: "United States Bullion Depository"
       points: 100
     - type: input
-      question: "Flag #3: "
-      answer: ""
-      points: 100
-    - type: input
-      question: "Flag #4: HumptyDumpty "
+      question: "Flag #2: HumptyDumpty "
       answer: "all the king's horses and all the king's men"
       points: 100
     - type: input
-      question: "Flag #5: "
-      answer: ""
+      question: "Flag #3: Forensics"
+      answer: "A bear"
       points: 100
     - type: input
-      question: "Flag #6: "
-      answer: ""
-      points: 100
-    - type: input
-      question: "Flag #7: Space Gifs"
+      question: "Flag #4: Space Gifs"
       answer: "Gotta_Blast!"
+      points: 100
+    - type: input
+      question: "Flag #5: Social Engineering"
+      answer: "Phish are biting"
       points: 100

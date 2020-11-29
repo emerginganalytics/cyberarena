@@ -28,7 +28,7 @@ def get_server_ext_address(server_name):
     return ip_address
 
 
-def test_guacamole(ip_address):
+def test_guacamole(ip_address, build_id=None):
     max_attempts = 10
     attempts = 0
 
@@ -38,6 +38,7 @@ def test_guacamole(ip_address):
             requests.get(f"http://{ip_address}:8080/guacamole/#", timeout=40)
             return True
         except requests.exceptions.Timeout:
+            print(f"Build {build_id}: Timeout {attempts} waiting for guacamole server connection.")
             attempts += 1
         except ConnectionError:
             print(f"HTTP Connection Error for Guacamole Server {ip_address}")
@@ -54,7 +55,7 @@ def register_student_entry(build_id, server_name):
     add_dns_record(build_id, ip_address)
     # Make sure the guacamole server actually comes up successfully before setting the workout state to ready
     print(f"DNS record set for {server_name}. Now Testing guacamole connection. This may take a few minutes.")
-    if test_guacamole(ip_address):
+    if test_guacamole(ip_address, build_id):
         # Now, since this is the guacamole server, update the state of the workout to READY
         print(f"Setting the build {build_id} to ready")
         state_transition(entity=build, new_state=BUILD_STATES.READY)
@@ -86,7 +87,6 @@ def server_build(server_name):
     :return: A boolean status on the success of the build
     """
     print(f'Building server {server_name}')
-    compute_beta = discovery.build('compute', 'beta')
     server = ds_client.get(ds_client.key('cybergym-server', server_name))
     build_id = server['workout']
     g_logger = log_client.logger(build_id)
@@ -109,6 +109,7 @@ def server_build(server_name):
         try:
             if server['build_type'] == BUILD_TYPES.MACHINE_IMAGE:
                 source_machine_image = f"projects/{project}/global/machineImages/{server['machine_image']}"
+                compute_beta = discovery.build('compute', 'beta')
                 response = compute_beta.instances().insert(project=project, zone=zone, body=config,
                                                            sourceMachineImage=source_machine_image).execute()
             else:

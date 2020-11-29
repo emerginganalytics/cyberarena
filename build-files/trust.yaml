@@ -29,7 +29,7 @@ servers:
         subnet: default
         external_NAT: True
   - name: kali
-    image: kali-full-nessus-image
+    image: image-cybergym-kali
     machine_type: "n1-standard-1"
     nics:
       - network: external-network

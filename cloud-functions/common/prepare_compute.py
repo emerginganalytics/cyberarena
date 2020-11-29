@@ -141,13 +141,13 @@ def create_instance_custom_image(compute, workout, name, custom_image, machine_t
         raise
 
     # Publish to a server build topic
-    # pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
-    # publisher = pubsub_v1.PublisherClient()
-    # topic_path = publisher.topic_path(project, pubsub_topic)
-    # future = publisher.publish(topic_path, data=b'Server Build', server_name=name, action=SERVER_ACTIONS.BUILD)
-    # print(future.result())
+    pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+    publisher = pubsub_v1.PublisherClient()
+    topic_path = publisher.topic_path(project, pubsub_topic)
+    future = publisher.publish(topic_path, data=b'Server Build', server_name=name, action=SERVER_ACTIONS.BUILD)
+    print(future.result())
     # The command below is used for testing
-    server_build(name)
+    # server_build(name)
 
 
 def build_guacamole_server(build, network, guacamole_connections):

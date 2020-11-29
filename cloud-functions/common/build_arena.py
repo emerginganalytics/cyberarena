@@ -102,10 +102,19 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
                     "subnet": subnet_name,
                     "external_NAT": False
                 }]
+                # Metadata startup scripts are needed for servers in the arena because, unlike workouts, there
+                # is no assessment function associated with Arenas at this time.
+                meta_data = None
+                if server['include_env']:
+                    if server['operating-system'] == 'windows':
+                        env_startup = workout_globals.windows_startup_script_env.format(env_workoutid=workout_id)
+                    else:
+                        env_startup = workout_globals.linux_startup_script_env.format(env_workoutid=workout_id)
+                    meta_data = {"key": "startup-script", "value": env_startup}
                 create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
                                              custom_image=server['image'], machine_type=machine_type,
                                              networkRouting=network_routing, networks=nics, tags=tags,
-                                             meta_data=None, sshkey=sshkey)
+                                             meta_data=meta_data, sshkey=sshkey)
                 j += 1
         # Build the workout entry server and create the firewall rule to make it accessible.
         build_guacamole_server(build=unit, network=guac_network,
@@ -160,46 +169,47 @@ def build_arena(unit_id):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ARENA_SERVERS)
         print('Creating additional servers')
         i = 101
-        for server in arena['servers']:
-            server_name = "%s-%s" % (unit_id, server['name'])
-            sshkey = server["sshkey"]
-            tags = server['tags']
-            machine_type = server["machine_type"]
-            network_routing = server["network_routing"]
-            # If a nic is not specified, then add the server to the student-network.
-            if server['nics']:
-                nics = []
-                for n in server['nics']:
-                    if 'network' not in n:
-                        n['network'] = student_network_name
-                    if 'internal_IP' not in n:
-                        n['internal_IP'] = f'10.1.0.{i}'
-                    if 'subnet' not in n:
-                        n['subnet'] = 'default'
-                    if 'external_NAT' not in n:
-                        n['external_NAT'] = False
-                    nic = {
-                        "network": "%s-%s" % (unit_id, n['network']),
-                        "internal_IP": n['internal_IP'],
-                        "subnet": "%s-%s-%s" % (unit_id, n['network'], n['subnet']),
-                        "external_NAT": n['external_NAT']
-                    }
-                    nics.append(nic)
-            else:
-                nics = [
-                    {
-                        "network": "%s-%s" % (unit_id, student_network_name),
-                        "internal_IP": f'10.1.0.{i}',
-                        "subnet": "%s-%s-%s" % (unit_id, student_network_name, 'default'),
-                        "external_NAT": False
-                    }
-                ]
+        if 'servers' in arena and arena['servers']:
+            for server in arena['servers']:
+                server_name = "%s-%s" % (unit_id, server['name'])
+                sshkey = server["sshkey"]
+                tags = server['tags']
+                machine_type = server["machine_type"]
+                network_routing = server["network_routing"]
+                # If a nic is not specified, then add the server to the student-network.
+                if server['nics']:
+                    nics = []
+                    for n in server['nics']:
+                        if 'network' not in n:
+                            n['network'] = student_network_name
+                        if 'internal_IP' not in n:
+                            n['internal_IP'] = f'10.1.0.{i}'
+                        if 'subnet' not in n:
+                            n['subnet'] = 'default'
+                        if 'external_NAT' not in n:
+                            n['external_NAT'] = False
+                        nic = {
+                            "network": "%s-%s" % (unit_id, n['network']),
+                            "internal_IP": n['internal_IP'],
+                            "subnet": "%s-%s-%s" % (unit_id, n['network'], n['subnet']),
+                            "external_NAT": n['external_NAT']
+                        }
+                        nics.append(nic)
+                else:
+                    nics = [
+                        {
+                            "network": "%s-%s" % (unit_id, student_network_name),
+                            "internal_IP": f'10.1.0.{i}',
+                            "subnet": "%s-%s-%s" % (unit_id, student_network_name, 'default'),
+                            "external_NAT": False
+                        }
+                    ]
 
-            create_instance_custom_image(compute=compute, workout=unit_id, name=server_name,
-                                         custom_image=server['image'], machine_type=machine_type,
-                                         networkRouting=network_routing, networks=nics, tags=tags,
-                                         meta_data=None, sshkey=sshkey)
-            i += 1
+                create_instance_custom_image(compute=compute, workout=unit_id, name=server_name,
+                                             custom_image=server['image'], machine_type=machine_type,
+                                             networkRouting=network_routing, networks=nics, tags=tags,
+                                             meta_data=None, sshkey=sshkey)
+                i += 1
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_SERVERS)
 
     # STATE: BUILDING_ROUTES

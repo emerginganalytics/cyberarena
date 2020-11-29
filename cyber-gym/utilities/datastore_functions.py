@@ -33,6 +33,10 @@ def add_server_defaults(servers):
             servers[i]['nics'] = None
         if 'add_disk' not in servers[i]:
             servers[i]["add_disk"] = None
+        if 'include_env' not in servers[i]:
+            servers[i]['include_env'] = False
+        if 'operating-system' not in servers[i]:
+            servers[i]['operating-system'] = None
     return servers
 
 
@@ -74,8 +78,9 @@ def add_yaml_defaults(yaml_contents):
             yaml_contents['routes'] = None
 
         if yaml_contents['workout']['build_type'] == 'arena':
-            yaml_contents['additional-servers'] = add_server_defaults(yaml_contents['additional-servers'])
             yaml_contents['student-servers']['servers'] = add_server_defaults(yaml_contents['student-servers']['servers'])
+            if 'additional-servers' in yaml_contents:
+                yaml_contents['additional-servers'] = add_server_defaults(yaml_contents['additional-servers'])
             if 'student_entry_username' not in yaml_contents['student-servers']:
                 yaml_contents['student-servers']['student_entry_username'] = None
             if 'student_entry_password' not in yaml_contents['student-servers']:
@@ -203,9 +208,9 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
                                 student_instructions_url=student_instructions_url, student_entry=student_entry)
                 
     elif build_type == 'arena':
-        networks = y['additional-networks']
-        servers = y['additional-servers']
-        routes = y['routes']
+        networks = y['additional-networks'] if 'additional-networks' in y else None
+        servers = y['additional-servers'] if 'additional-servers' in y else None
+        routes = y['routes'] if 'routes' in y else None
         firewall_rules = y['firewall_rules']
         student_entry = y['student-servers']['student_entry']
         student_entry_type = y['student-servers']['student_entry_type']

@@ -741,6 +741,26 @@ def complete_verification():
         else:
             logger.info("In complete_verification: Completion key %s does NOT exist in assessment dict! Aborting" % token)
 
+
+@app.route('/arena-functions', methods=['POST'])
+def arena_functions():
+    """
+    Used for interacting between workouts in an arena build. The request data includes the following variables:
+    workout_id - The workout on which to perform a given action
+    action - The action to perform on the given workout (e.g., deduct-points)
+    """
+    if request.method == 'POST':
+        arena_data = request.get_json(force=True)
+        workout_id = arena_data['workout_id'] if 'workout_id' in arena_data else None
+        action = arena_data['action'] if 'action' in arena_data else None
+
+        if action == 'deduct-points':
+            if workout_id:
+                workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+                workout['points'] -= 100
+                ds_client.put(workout)
+
+
 # For debugging of pub/sub
 @app.route('/publish', methods=['GET', 'POST'])
 def publish():
