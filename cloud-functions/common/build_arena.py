@@ -108,9 +108,10 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
                 if server['include_env']:
                     if server['operating-system'] == 'windows':
                         env_startup = workout_globals.windows_startup_script_env.format(env_workoutid=workout_id)
+                        meta_data = {"key": "windows-startup-script-cmd", "value": env_startup}
                     else:
                         env_startup = workout_globals.linux_startup_script_env.format(env_workoutid=workout_id)
-                    meta_data = {"key": "startup-script", "value": env_startup}
+                        meta_data = {"key": "startup-script", "value": env_startup}
                 create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
                                              custom_image=server['image'], machine_type=machine_type,
                                              networkRouting=network_routing, networks=nics, tags=tags,

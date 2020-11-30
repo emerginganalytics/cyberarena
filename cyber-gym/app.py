@@ -7,7 +7,7 @@ from utilities.pubsub_functions import *
 from utilities.yaml_functions import parse_workout_yaml, save_yaml_file, generate_yaml_content
 from utilities.datastore_functions import *
 from utilities.assessment_functions import get_assessment_questions, process_assessment
-from flask import Flask, render_template, redirect, request, session
+from flask import Flask, render_template, redirect, request, session, jsonify
 from forms import CreateWorkoutForm
 import json
 # --------------------------- FLASK APP --------------------------
@@ -760,11 +760,23 @@ def arena_functions():
         workout_id = arena_data['workout_id'] if 'workout_id' in arena_data else None
         action = arena_data['action'] if 'action' in arena_data else None
 
-        if action == 'deduct-points':
-            if workout_id:
-                workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-                workout['points'] -= 100
-                ds_client.put(workout)
+        if action == 'deduct-points' and workout_id:
+            workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+            if 'points_deducted' not in workout:
+                if 'points' in workout:
+                    workout['points'] -= 100
+                else:
+                    workout['points'] = -100
+                workout['points_deducted'] = True
+                return_data = {"msg": f"You deducted 100 points from {workout['student_name']}"}
+            else:
+                return_data = {"msg": f"Sorry...someone else beat you to it."}
+            ds_client.put(workout)
+
+        else:
+            return_data = {"msg": f"Invalid action called: {action} for {workout_id}"}
+
+        return jsonify(return_data), 200
 
 
 # For debugging of pub/sub
