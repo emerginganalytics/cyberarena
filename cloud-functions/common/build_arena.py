@@ -70,7 +70,7 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
     if check_ordered_arenas_state(unit, BUILD_STATES.BUILDING_ARENA_STUDENT_SERVERS):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ARENA_STUDENT_SERVERS)
         i = 0
-        j = 2
+        j = 3
         guacamole_connections = []
         for workout_id in workouts:
             workout_key = ds_client.key('cybergym-workout', workout_id)
@@ -78,6 +78,8 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
 
             for server in workout['student_servers']:
                 internal_ip_address = f'10.1.{i}.{j}'
+                # If the server is defined as the student-entry server, then build an array of guacamole configurations
+                # for connecting the various workouts in the arena to the student entry server
                 if server['name'] == student_entry_server:
                     rdp_domain = server['domain'] if 'domain' in server else None
                     security_mode = server['security-mode'] if 'security-mode' in server else 'nla'
