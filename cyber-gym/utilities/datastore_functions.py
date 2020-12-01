@@ -516,3 +516,46 @@ def store_comment(comment_email, comment_subject, comment_text):
     new_comment['comment_text'] = comment_text
     new_comment['message_viewed'] = False
     ds_client.put(new_comment)
+
+def get_arena_ip_addresses_for_workout(workout_id):
+    """
+    Returns the server to local IP address mapping for a given arena and student workout. Not all servers have a
+    direct guacamole connection, and the IP addresses are displayed to the student for jumping to other hosts
+    from their landing server.
+    :param workout_id: The Workout ID associated with the given arena
+    """
+    workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+    unit_id = workout['unit_id']
+    arena_servers = []
+    for server_spec in workout['student_servers']:
+        server = ds_client.get(ds_client.key('cybergym-server', f"{workout_id}-{server_spec['name']}"))
+        if server:
+            server_to_ip = {'name': server['name']}
+            nics = []
+            for interface in server['config']['networkInterfaces']:
+                nic = {
+                    'network': path.basename(interface['subnetwork']),
+                    'ip': interface['networkIP']
+                }
+                nics.append(nic)
+            server_to_ip['nics'] = nics
+            arena_servers.append(server_to_ip)
+
+    # Also include any additional shared servers in the arena
+    unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
+    if 'arena' in unit and 'servers' in unit['arena'] and unit['arena']['servers']:
+        for server_spec in unit['arena']['servers']:
+            server = ds_client.get(ds_client.key('cybergym-server', f"{unit_id}-{server_spec['name']}"))
+            if server:
+                server_to_ip = {'name': server['name']}
+                nics = []
+                for interface in server['config']['networkInterfaces']:
+                    nic = {
+                        'network': path.basename(interface['subnetwork']),
+                        'ip': interface['networkIP']
+                    }
+                    nics.append(nic)
+                server_to_ip['nics'] = nics
+                arena_servers.append(server_to_ip)
+
+    return arena_servers
