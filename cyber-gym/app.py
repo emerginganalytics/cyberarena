@@ -320,6 +320,9 @@ def admin_page():
     for workout in workout_list:
         if 'state' in workout:
             if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
+                if 'hourly_cost' in workout and 'runtime_counter' in workout:
+                    estimated_cost = (float(workout['hourly_cost']) / 3600) * float(workout['runtime_counter'])
+                    workout['estimated_cost'] = format(estimated_cost, '.4f')
                 active_workouts.append(workout)
     if request.method == "POST":
         response = {

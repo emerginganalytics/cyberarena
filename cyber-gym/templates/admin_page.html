@@ -322,7 +322,11 @@
                             {% else %}
                             <td>N/A</td>
                             {% endif %}
+                            {% if workout['estimated_cost'] %}
+                            <td class="cost_estimate_field">${{workout['estimated_cost']}}</td>
+                            {% else %}
                             <td>Coming soon</td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </table>

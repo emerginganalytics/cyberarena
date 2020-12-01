@@ -21,6 +21,9 @@ workout:
   dnszone: "cybergym-public"
   project_api_key_type: cloud
   flag_location: # This is used for the flag generation script. Ignore for now.
+  hourly_cost: #Used to calculate an estimated cost for a workout. ~0.05 + (0.05 * ls) + (0.09 * ws) + (0.09 * lm) + (0.19 * wm)
+               #ls = linux n1-standard-1, lm = linux n1-standard-2
+               #ws = windows n1-standard-1, wm = windows n1-standard-2
 
 # List all networks and all subnets here
 networks:

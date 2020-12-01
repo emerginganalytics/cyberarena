@@ -123,6 +123,9 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
     student_instructions_url = y['workout']['student_instructions_url']
     workout_url_path = y['workout']['workout_url_path']
     assessment = y['assessment']
+    hourly_cost = None
+    if 'hourly_cost' in y:
+        hourly_cost = y['hourly_cost']
     if build_type == 'arena':
         student_servers = y['student-servers']['servers']
     if num_team:
@@ -197,13 +200,13 @@ def process_workout_yaml(yaml_contents, workout_type, unit_name, num_team, class
             if student_names:
                 store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
                                 workout_duration=workout_length, workout_type=workout_type,
-                                networks=networks, servers=servers, routes=routes,
+                                networks=networks, hourly_cost=hourly_cost, servers=servers, routes=routes,
                                 firewall_rules=firewall_rules, assessment=assessment,
                                 student_instructions_url=student_instructions_url, student_entry=student_entry, student_name=student_names[i])
             else:
                 store_workout_info(workout_id=workout_id, unit_id=unit_id, user_mail=email,
                                 workout_duration=workout_length, workout_type=workout_type,
-                                networks=networks, servers=servers, routes=routes,
+                                networks=networks, hourly_cost=hourly_cost, servers=servers, routes=routes,
                                 firewall_rules=firewall_rules, assessment=assessment,
                                 student_instructions_url=student_instructions_url, student_entry=student_entry)
                 
@@ -267,7 +270,7 @@ def store_workout_container(unit_id, workout_id, workout_type, student_instructi
     ds_client.put(new_workout)
 
 
-def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks,
+def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout_type, networks, hourly_cost,
                        servers, routes, firewall_rules, assessment, student_instructions_url, student_entry, student_name=None):
     ts = str(calendar.timegm(time.gmtime()))
     new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
@@ -292,7 +295,8 @@ def store_workout_info(workout_id, unit_id, user_mail, workout_duration, workout
         'complete': False,
         'student_entry': student_entry,
         'state': BUILD_STATES.START,
-        'student_name': student_name
+        'student_name': student_name, 
+        'hourly_cost': hourly_cost
     })
 
     ds_client.put(new_workout)
@@ -334,8 +338,6 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, user_mail,
     :return: None
     """
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
-    teams = []
-    teams.append(str(user_mail))
     unit['arena'] = {
         'expiration': workout_duration,
         'start_time': timestamp,
@@ -354,8 +356,6 @@ def add_arena_to_unit(unit_id, workout_duration, timestamp, networks, user_mail,
         'student_entry_password': student_entry_password,
         'student_network_type': network_type
     }
-    unit['teams'] = teams
-
     ds_client.put(unit)
 
 
@@ -375,7 +375,6 @@ def store_arena_workout(workout_id, unit_id, user_mail, timestamp, student_serve
         'assessment': assessment,
         'student_servers': student_servers,
         'instructor_id': user_mail,
-        'teacher_email': user_mail, 
         'state': BUILD_STATES.START,
         'student_name':student_name
     })
@@ -432,11 +431,16 @@ def get_unit_arenas(unit_id):
         state = None
         if 'state' in workout_instance: 
             state = workout_instance['state']
+
+        team = None
+        if 'team' in workout_instance:
+            team = workout_instance['team']
         workout_info = {
             'name': workout.key.name,
             'student_name': student_name,
             'state': state,
-            'teacher_email':workout['teacher_email']
+            'teacher_email':workout['instructor_id'],
+            'team': team
         }
         workout_list.append(workout_info)
     return workout_list
