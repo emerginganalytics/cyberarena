@@ -19,13 +19,7 @@
                 </div>
             </div>
             <br><h2>Workout Control</h2><br>
-                {% if running %}
-                <p>Workout status: <span style="color:green">RUNNING</span></p><br>
-                {% else %}
-                <p>Workout status: <span style="color:red">STOPPED</span></p><br>
-                {% endif %}
-
-
+                <p>Workout status: <span id='workout_state_display' style="color:red;">STOPPED</span></p><br>
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
             <div id='workout_info' class='container' style="margin:0;">
@@ -38,15 +32,13 @@
                 {% endif %}
 
 
-                {% if running %}
                 <br><h2>Workout Servers</h2>
                     {% if guac_path==None %}
-                        <a href="http://{{ workout_id }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
+                        <a id="workout_link" style="visibility: hidden" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
                     {% else %}
-                        <a href="http://{{ unit_id }}{{ dns_suffix }}:8080/guacamole/#/client/" target="_blank">Enter your workout!</a>
+                        <a id="workout_link" style="visibility: hidden" href="http://{{ workout['unit_id'] }}{{ dns_suffix }}:8080/guacamole/#/client/" target="_blank">Enter your workout!</a>
                     {% endif %}
                         <p>*Machines may take a couple minutes to start</p>
-                {% endif %}
                 <br>
             </div>
             <div id="workout_id" hidden>{{ workout_id }}</div>
@@ -68,10 +60,41 @@
                         $(".workout_assessment_form").fadeToggle();
                     }
                     
-                    // this is the id of the form
+                    function check_workout_state(){
+                        $.ajax({
+                            type:"POST",
+                            url: "/workout_state/{{ workout.key.name }}",
+                            traditional: "true",
+                            success: function(data){
+                                var state_display = document.getElementById("workout_state_display");
+                                var workout_link = document.getElementById("workout_link");
+                                if(data == "RUNNING"){
+                                    workout_link.style.visibility = "visible";
+                                    state_display.style.color = "green";
+                                    state_display.innerHTML = "RUNNING";  
+                                    $(".loader").remove();                   
+                                } else if(data == "READY"){
+                                    workout_link.style.visibility = "hidden";
+                                    state_display.style.color = "red";
+                                    state_display.innerHTML = "STOPPED";
+                                    $(".loader").remove(); 
+                                } else{
+                                    workout_link.style.visibility = "hidden";
+                                    state_display.style.color = "orange";
+                                    state_display.innerHTML = "WORKING";
+                                    $(".loader").remove();  
+                                }
+                                return data;
+                            }
+        
+                        })
+                    }
+
                     $(document).ready(function(){
+                        var state_checker = setInterval(check_workout_state, 20000);
+
                         $(".flag_form").submit(function(e) {
-                            e.preventDefault(); // avoid to execute the actual submit of the form.
+                            e.preventDefault();
     
                             $("#loading-msg").html('Please wait while the process completes' +
                                 '</br><div class="loader"></div>');
@@ -86,7 +109,6 @@
                                 dataType: "json",
                                 success: function(data)
                                 {
-                                    //alert("Points gained" + data['points_gained']); // show response from the php script.
                                     $("#loading-msg").html("");
                                     if(data['answer_correct'] == true){
                                         alert("Correct answer");

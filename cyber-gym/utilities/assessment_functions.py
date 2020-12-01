@@ -59,7 +59,7 @@ def process_assessment(workout, workout_id, request, assessment):
             answer_time = time.gmtime(time.time())
             time_string = str(answer_time[3]) + ":" + str(answer_time[4]) + ":" + str(answer_time[5])
             team_query = ds_client.query(kind='cybergym-workout')
-            team_query.add_filter('teacher_email', '=', workout['teacher_email'])
+            team_query.add_filter('team', '=', workout['team'])
             team_query.add_filter('unit_id', '=', workout['unit_id'])
             team_members = []
 

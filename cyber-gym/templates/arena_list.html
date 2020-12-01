@@ -7,11 +7,54 @@
 <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
 <script>
     update_scores = function(team_name, score){
-        var email = team_name;
+        var team = team_name;
         var score = score;
-        score_field = document.getElementById('team_score_' + email);
+        score_field = document.getElementById('team_score_' + team);
         score_field.innerHTML = score;
+    }
 
+    function get_teams(select){
+        var team_list = document.getElementsByClassName("team_container");
+        var option_list = select.children;
+        
+        for(var i = 0; i < team_list.length; i++){
+            if(!select.querySelector('option[value="' + team_list[i].id + '"]')){
+                var option = document.createElement('option');
+                option.value = team_list[i].id;
+                option.innerHTML = option.value;
+                option.className = option.value;
+                select.options.add(option, i);
+            }           
+        }  
+    }
+
+    function add_team(){
+        var team_name = prompt("Enter the name of the team");
+        if(team_name){
+            $.ajax({
+                type: "POST",
+                url: "/add_team/{{ unit_id }}",
+                data: JSON.stringify({team_name: team_name}),
+                success: function(data){
+                    location.reload();
+                }
+            })
+        }
+    }
+
+    function change_team(workout_id){
+        alert(workout_id);
+        var select_element = document.getElementById('team_select_' + workout_id).value;
+        $.ajax({
+            type:"POST",
+            url: "/change_team/" + workout_id,
+            data: JSON.stringify({
+                new_team: select_element
+            }),
+            success: function(data){
+                location.reload();
+            }
+        })
     }
 </script>
 <style>
@@ -27,6 +70,9 @@
         border-right:0;
         padding:1em;
         margin-bottom:1em;
+    }
+    select{
+        display:block!important;
     }
 </style>
     <div class="row">
@@ -81,20 +127,21 @@
             <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
             {% if unit_teams %}
             {% for team in unit_teams %}
-            <div class='team_container' id='arena_team_{{team}}'>
-            <h3>Instructor email: {{team}}</h3>
+            <div class='team_container' id='{{team}}'>
+            <h2>Team {{team}} </h2>
             <h4>Score: <span id='team_score_{{team}}'></span></h4>
                 {% for workout in workout_list %}
-                    {% if workout['teacher_email'] == team %}
+                    {% if workout['team'] == team %}
                         {% if workout['points'] %}
                             <script>update_scores('{{team}}', '{{ workout['points'] }}');</script>
                         {% endif %}
-                        {% if workout["state"] == "READY" or workout['state'] == "RUNNING" %}
-                        <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
+                        {% if workout['student_name'] %}
+                        <a id='workout_link_{{workout.key.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.key.name}}">{{workout['student_name']}} </a>
                         {% else %}
-                        <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
+                        <a id='workout_link_{{workout.key.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.key.name}}">Student {{loop.index}} </a>
                         {% endif %}
-                        <div class="collapse" id="team_collapse_{{workout.name}}">
+
+                        <div class="collapse" id="team_collapse_{{workout.key.name}}">
                             <table>
                                 <tr>
                                     {% if build_type == "container" %}
@@ -104,12 +151,13 @@
                                     {% endif %}
                                     <th>Total Points</th>
                                     <th>Submission History</th>
+                                    <th>Change Student Name</th>
                                 </tr>
                                 <tr>
                                     {% if build_type == "container" %}
-                                    <td>{{ workout_url_path + '/' + workout.name }}</td>
+                                    <td>{{ workout_url_path + '/' + workout.key.name }}</td>
                                     {% else %}
-                                    <td><a href="/arena_landing/{{workout.name}}" target="_blank">Landing Page</a><p>{{url_for('arena_landing', workout_id=workout.name)}}</p></td>
+                                    <td><a href="/arena_landing/{{workout.key.name}}" target="_blank">Landing Page</a><p>{{url_for('arena_landing', workout_id=workout.key.name)}}</p></td>
                                     {% endif %}
                                     <td>
                                         {% if workout['points'] %}
@@ -120,22 +168,26 @@
                                     </td>
                                     <td>
                                         {% if workout['submitted_answers'] %}
-                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.key.name}}">
                                             View Submission History
                                         </button>
                                         {% else %}
                                         N/A
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        <input id='name_change_field_{{workout.key.name}}' name="new_name" placeholder="Enter new student name" type="text"/>
+                                        <a onclick="change_student_name('{{workout.key.name}}')" class="btn">Change</a>
+                                    </td>
                                 </tr>
                             </table>
                         </div>
                         {% if workout["submitted_answers"] %}
-                            <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                            <div class="modal fade" id="modal_{{workout.key.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.key.name}}" aria-hidden="true">
                                 <div class="modal-dialog" role="document" style="max-width:100%;">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                    <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Submission history for arena {{workout.name}}</h5>
+                                    <h5 class="modal-title" id="ModalLabel_{{workout.key.name}}">Submission history for arena {{workout.key.name}}</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -179,101 +231,111 @@
                     {% endif%}
                 {% endfor %}
 
-                </div>
-            {% endfor %}
-
-            {% else %}
-
-            {% for workout in workout_list %}
-            {% if workout['state'] == 'READY' %}
-            <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.name}}">Student {{loop.index}} </a>
-            {% else %}
-            <a id='workout_link_{{workout.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
-            {% endif %}
-            <div class="collapse" id="team_collapse_{{workout.name}}">
-                <table>
-                    <tr>
-                        {% if build_type == "container" %}
-                        <th>Workout URL</th>
-                        {% else %}
-                        <th>Workout Landing Page</th>
-                        {% endif %}
-                        <th>Total Points</th>
-                        <th>Submission History</th>
-                    </tr>
-                    <tr>
-                        {% if build_type == "container" %}
-                        <td>{{ workout_url_path + '/' + workout.name }}</td>
-                        {% else %}
-                        <td><a href="/arena_landing/{{workout.name}}" target="_blank">Landing Page</a><p>{{url_for('arena_landing', workout_id=workout.name)}}</p></td>
-                        {% endif %}
-                        <td>
-                            {% if workout['points'] %}
-                            <p>{{workout['points']}}</p>
-                            {% else %}
-                            <p>0</p>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if workout['submitted_answers'] %}
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
-                                View Submission History
-                            </button>
-                            {% else %}
-                            N/A
-                            {% endif %}
-                        </td>
-                    </tr>
-                </table>
             </div>
-            {% if workout["submitted_answers"] %}
-                <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
-                    <div class="modal-dialog" role="document" style="max-width:100%;">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                        <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Submission history for arena {{workout.name}}</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class='tab-content'>
-                                <div id='text_input' class='tab-pane active fadeIn'>
-                                    <table>
-                                        <tr>
-                                            <th>Flag</th>
-                                            <th>Submission Time</th>
-                                        </tr>
-                                        {% for question in workout["submitted_answers"] %}
-                                            <tr>
-                                                <td>{{question['answer']}}</td>
-                                                <td>{{question['timestamp']}} UTC</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </table>
-                                </div>
-                                {% if workout['uploaded_files'] %}
-                                    <div id='file_uploads' style='text-align:center;' class="tab-pane fade">
-                                        <div class='upload_view'>
-                                    {% for question in workout['uploaded_files'] %}
-                                        <li>{{question['question']}}</li>
-                                        <img class="img-fluid" src={{question['storage_url']}}>
-                                    {% endfor %}
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-
-                        </div>
-                        <div class="modal-footer" style="justify-content:center;">
-                        <button type="button" class="btn" data-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-            {% endif %}
             {% endfor %}
+            
             {% endif %}
+            <div style="border: 1px solid black; margin-top:1em; margin-bottom:1em; padding:1em" id="unassigned_workouts">
+                <h2>Unassigned Workouts</h2>
+                {% for workout in workout_list %}
+                {% if not workout['team'] %}
+                    {% if workout["state"] == "READY" or workout['state'] == "RUNNING" %}
+                    <a id='workout_link_{{workout.key.name}}' style="margin-top: 1em;" class="btn" data-toggle="collapse" href="#team_collapse_{{workout.key.name}}">Student {{loop.index}} </a>
+                    {% else %}
+                    <a id='workout_link_{{workout.key.name}}' style="margin-top: 1em;" class="btn btn-deactivated" data-toggle="collapse" href="">Student {{loop.index}} </a>
+                    {% endif %}
+                    <div class="collapse" id="team_collapse_{{workout.key.name}}">
+                        <table>
+                            <tr>
+                                {% if build_type == "container" %}
+                                <th>Workout URL</th>
+                                {% else %}
+                                <th>Workout Landing Page</th>
+                                {% endif %}
+                                <th>Total Points</th>
+                                <th>Submission History</th>
+                                <th>Change Team</th>
+                            </tr>
+                            <tr>
+                                {% if build_type == "container" %}
+                                <td>{{ workout_url_path + '/' + workout.key.name }}</td>
+                                {% else %}
+                                <td><a href="/arena_landing/{{workout.key.name}}" target="_blank">Landing Page</a><p>{{url_for('arena_landing', workout_id=workout.key.name)}}</p></td>
+                                {% endif %}
+                                <td>
+                                    {% if workout['points'] %}
+                                    <p>{{workout['points']}}</p>
+                                    {% else %}
+                                    <p>0</p>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if workout['submitted_answers'] %}
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.key.name}}">
+                                        View Submission History
+                                    </button>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <select id="team_select_{{workout.key.name}}" onclick="get_teams(this)" class="team_assign_select">
+                                    </select>
+                                    <a class="btn" onclick="change_team('{{workout.key.name}}')">Change Team</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% if workout["submitted_answers"] %}
+                        <div class="modal fade" id="modal_{{workout.key.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.key.name}}" aria-hidden="true">
+                            <div class="modal-dialog" role="document" style="max-width:100%;">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="ModalLabel_{{workout.key.name}}">Submission history for arena {{workout.key.name}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class='tab-content'>
+                                        <div id='text_input' class='tab-pane active fadeIn'>
+                                            <table>
+                                                <tr>
+                                                    <th>Flag</th>
+                                                    <th>Submission Time</th>
+                                                </tr>
+                                                {% for question in workout["submitted_answers"] %}
+                                                    <tr>
+                                                        <td>{{question['answer']}}</td>
+                                                        <td>{{question['timestamp']}} UTC</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </div>
+                                        {% if workout['uploaded_files'] %}
+                                            <div id='file_uploads' style='text-align:center;' class="tab-pane fade">
+                                                <div class='upload_view'>
+                                            {% for question in workout['uploaded_files'] %}
+                                                <li>{{question['question']}}</li>
+                                                <img class="img-fluid" src={{question['storage_url']}}>
+                                            {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+        
+                                </div>
+                                <div class="modal-footer" style="justify-content:center;">
+                                <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <a class="btn" onclick="add_team()">Add Team</a>
         </div>
     </div>
     <div id="loading-msg"></div>

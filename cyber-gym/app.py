@@ -138,7 +138,10 @@ def arena_list(unit_id):
     unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
     build_type = unit['build_type']
     workout_url_path = unit['workout_url_path']
-    workout_list = get_unit_arenas(unit_id)
+
+    arena_query = ds_client.query(kind='cybergym-workout')
+    arena_query.add_filter("unit_id", "=", unit_id)
+    workout_list = list(arena_query.fetch())
     
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
@@ -162,6 +165,31 @@ def arena_list(unit_id):
         return render_template('arena_list.html', unit_teams=unit_teams, teacher_instructions=teacher_instructions_url, workout_list=workout_list,
                             student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time)
 
+@app.route('/add_team/<arena_id>', methods=['POST'])
+def add_team(arena_id):
+    arena = ds_client.get(ds_client.key('cybergym-unit', str(arena_id)))
+    if request.method == "POST":
+        request_data = request.get_json(force=True)
+        new_team_name = request_data['team_name']
+        if 'teams' in arena:
+            if new_team_name not in arena:
+                arena['teams'].append(new_team_name)
+        else:
+            arena['teams'] = []
+            arena['teams'].append(new_team_name)
+        ds_client.put(arena)
+        return json.dumps(arena)
+
+#Used to change teams for arena workouts
+@app.route('/change_team/<workout_id>', methods=['POST'])
+def change_team(workout_id):
+    if request.method == "POST":
+        request_data = request.get_json(force=True)
+        workout = ds_client.get(ds_client.key('cybergym-workout', str(workout_id)))
+        if 'new_team' in request_data:
+            workout['team'] = request_data['new_team']
+            ds_client.put(workout)
+            return json.dumps(workout)
 
 @app.route('/arena_landing/<workout_id>', methods=['GET', 'POST'])
 def arena_landing(workout_id):
@@ -187,7 +215,7 @@ def arena_landing(workout_id):
     if(request.method == "POST"):
         return process_assessment(workout, workout_id, request, assessment)
        
-    return render_template('arena_landing.html', description=unit['description'], assessment=assessment, running=workout['running'], unit_id=workout['unit_id'], dns_suffix=dns_suffix, 
+    return render_template('arena_landing.html', description=unit['description'], assessment=assessment, workout=workout, dns_suffix=dns_suffix, 
                         guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
 
 @app.route("/login", methods=['GET', 'POST'])
