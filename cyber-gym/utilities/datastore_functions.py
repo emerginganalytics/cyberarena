@@ -530,7 +530,7 @@ def get_arena_ip_addresses_for_workout(workout_id):
     for server_spec in workout['student_servers']:
         server = ds_client.get(ds_client.key('cybergym-server', f"{workout_id}-{server_spec['name']}"))
         if server:
-            server_to_ip = {'name': server['name']}
+            server_to_ip = {'name': server_spec['name']}
             nics = []
             for interface in server['config']['networkInterfaces']:
                 nic = {
