@@ -8,6 +8,6 @@ google-cloud-runtimeconfig
 google-cloud-logging
 pyyaml
 pymysql
-cryptography==2.8
+cryptography==3.2
 python-jose[cryptography]==3.0.1
 oauth2client
