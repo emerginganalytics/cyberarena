@@ -5,6 +5,7 @@ import googleapiclient.discovery
 from google.cloud import runtimeconfig
 from google.cloud import datastore, storage, logging
 from googleapiclient.errors import HttpError
+from socket import timeout
 
 
 runtimeconfig_client = runtimeconfig.Client()
@@ -239,3 +240,37 @@ def ds_safe_put(entity):
         ds_client.put(entity)
     except:
         print("Error storing entity")
+
+
+def gcp_operation_wait(service, response, wait_type="zone", wait_seconds=150):
+    """
+    Wait for a gcp operation to complete
+    :param service: The compute API connection object used for the operation
+    :param response: The response object for the operation being waited on
+    :param wait_type: The type of wait, either zone, region, or global. Defaults to zone
+    :param wait_seconds: The number of seconds to wait before returning.
+    :returns: True if the operation complete, and False if there is a timeout.
+    """
+    i = 0
+    success = False
+    max_wait_iteration = round(wait_seconds / 30)
+    while not success and i < max_wait_iteration:
+        try:
+            print(f"Waiting for operation ID: {response['id']}")
+            if wait_type == 'zone':
+                response = service.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            elif wait_type == 'region':
+                response = service.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+            elif wait_type == 'global':
+                service.globalOperations().wait(project=project, operation=response["id"]).execute()
+            else:
+                raise Exception("Unexpected wait_type in GCP operation wait function.")
+            success = True
+        except timeout:
+            i += 1
+            print(f"Response timeout for operation ID: {response['id']}. Trying again")
+            pass
+    if i >= max_wait_iteration:
+        return False
+    else:
+        return True

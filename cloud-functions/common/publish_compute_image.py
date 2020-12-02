@@ -2,7 +2,7 @@ import googleapiclient.discovery
 from googleapiclient.errors import HttpError
 from socket import timeout
 
-from common.globals import project, zone
+from common.globals import project, zone, gcp_operation_wait
 
 
 def create_snapshot_from_disk(disk):
@@ -13,46 +13,40 @@ def create_snapshot_from_disk(disk):
     """
     service = googleapiclient.discovery.build('compute', 'v1')
 
-    i = 0
     found_available = False
-    while i < 3 and not found_available:
+    latest = 0
+    latest_ts = '2000-01-01T00:00:00.000'
+    i = 0
+    while i < 3:
         try:
             response = service.snapshots().get(project=project, snapshot=disk + str(i)).execute()
+            if response['creationTimestamp'] > latest_ts:
+                latest_ts = response['creationTimestamp']
+                latest = i
             i += 1
         except HttpError:
+            latest = (i - 1) % 3
             found_available = True
+            break
+
+    selected_disk = f"{disk}{(latest + 1) % 3}"
     if not found_available:
-        i = i - 1
+        response = service.snapshots().delete(project=project, snapshot=selected_disk).execute()
 
-    snapshot_to_delete = disk + str((i + 1) % 3)
-    try:
-        response = service.snapshots().delete(project=project, snapshot=snapshot_to_delete).execute
-    except HttpError:
-        pass
+        if not gcp_operation_wait(service=service, response=response, wait_type="global"):
+            raise Exception(f"Timeout waiting for snapshot {selected_disk} to delete.")
 
-    snapshot_to_create = disk + str(i)
     snapshot_body = {
-        'name': snapshot_to_create,
+        'name': selected_disk,
         'description': 'Production snapshot used for imaging'
     }
 
     response = service.disks().createSnapshot(project=project, zone=zone, disk=disk, body=snapshot_body).execute()
-    i = 0
-    success = False
-    while not success and i < 5:
-        try:
-            print(f"Begin waiting for snapshot creation {response['id']}")
-            response = service.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
-            success = True
-        except timeout:
-            i += 1
-            print('Response timeout for production snapshot. Trying again')
-            pass
 
-    if not success:
-        return None
-    else:
-        return snapshot_to_create
+    if not gcp_operation_wait(service=service, response=response):
+        raise Exception(f"Timeout waiting for snapshot {selected_disk} to be created")
+
+    return selected_disk
 
 
 def create_production_image(server_name, existing_snapshot=None):
@@ -73,47 +67,41 @@ def create_production_image(server_name, existing_snapshot=None):
         prod_image = f'image-{server_name}'
         service = googleapiclient.discovery.build('compute', 'v1')
         i = 0
-        build_success = False
+        delete_success = False
         nothing_to_delete = False
-        while not build_success and i < 5 and not nothing_to_delete:
+        while not delete_success and i < 5 and not nothing_to_delete:
             try:
                 response = service.images().delete(project=project, image=prod_image).execute()
-                build_success = True
+                delete_success = True
                 print(f'Sent job to delete the production image before creating a new one, and waiting for response')
             except HttpError:
                 nothing_to_delete = True
             except BrokenPipeError:
                 i += 1
-        i = 0
-        success = False
-        while not success and i < 5 and not nothing_to_delete:
-            try:
-                print(f"Begin waiting for image deletion operation {response['id']}")
-                service.globalOperations().wait(project=project, operation=response["id"]).execute()
-                success = True
-            except timeout:
-                i += 1
-                print('Response timeout for production image deletion. Trying again')
-                pass
+        if not delete_success and not nothing_to_delete:
+            raise Exception(f"Error deleting image {prod_image}")
 
-        if success or nothing_to_delete:
-            # If the image was successfully deleted, then build the new image.
-            image_body = {
-                'name': prod_image,
-                'description': 'Cyber Gym production image',
-                'sourceSnapshot': f'projects/{project}/global/snapshots/{snapshot_name}'
-            }
-            i = 0
-            build_success = False
-            while not build_success and i < 5:
-                try:
-                    response = service.images().insert(project=project, body=image_body).execute()
-                    build_success = True
-                    print(
-                        f'Sent job to create the new production image, and waiting for response')
-                except BrokenPipeError:
-                    i += 1
-            return True
-        else:
-            print(f"Error in publishing production image. Timeout waiting for the operation to complete")
-            return False
+        if not nothing_to_delete:
+            if not gcp_operation_wait(service=service, response=response, wait_type="global"):
+                raise Exception(f"Timeout waiting for image {prod_image} to delete.")
+
+
+        # If the image was successfully deleted, then build the new image.
+        image_body = {
+            'name': prod_image,
+            'description': 'Cyber Gym production image',
+            'sourceSnapshot': f'projects/{project}/global/snapshots/{snapshot_name}'
+        }
+        i = 0
+        build_success = False
+        while not build_success and i < 5:
+            try:
+                response = service.images().insert(project=project, body=image_body).execute()
+                build_success = True
+                print(f'Sent job to create the new production image, and waiting for response')
+            except BrokenPipeError:
+                i += 1
+        return True
+    else:
+        print(f"Error in publishing production image. Timeout waiting for the operation to complete")
+        return False
