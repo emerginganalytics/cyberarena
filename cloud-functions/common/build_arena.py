@@ -98,11 +98,12 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
                 tags = server['tags']
                 machine_type = server["machine_type"]
                 network_routing = server["network_routing"]
+                external_nat = server['external_NAT'] if 'external_NAT' in server else False
                 nics = [{
                     "network": network_name,
                     "internal_IP": internal_ip_address,
                     "subnet": subnet_name,
-                    "external_NAT": False
+                    "external_NAT": external_nat
                 }]
                 # Metadata startup scripts are needed for servers in the arena because, unlike workouts, there
                 # is no assessment function associated with Arenas at this time.

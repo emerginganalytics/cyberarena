@@ -23,6 +23,7 @@ student-servers:
       image: image-cybergym-arena-windows
       machine_type: n1-standard-1
       operating-system: windows
+      external_NAT: True
       include_env: true
     - name: kali
       image: image-cybergym-kali

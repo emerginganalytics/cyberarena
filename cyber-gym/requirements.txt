@@ -11,9 +11,9 @@ google-cloud-pubsub
 google-cloud-runtimeconfig
 pyyaml
 flask-wtf
-cryptography==2.8
+cryptography==3.2
 python-jose[cryptography]==3.0.1
 requests==2.22.0
 email-validator==1.0.5
-google-auth==1.20.1
+google-auth
 google-cloud-logging
