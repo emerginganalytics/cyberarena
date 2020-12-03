@@ -37,7 +37,7 @@ Register-ScheduledJob -RunNow -FilePath C:\Windows\System32\sb\sb_start.ps1 -Nam
 Start-Sleep -Seconds 60
 $shinohid = Get-ItemProperty -Path HKCU:\Software\ShinoBOT5 -Name HID
 $shinopid = Get-ItemProperty -Path HKCU:\Software\ShinoBOT5 -Name PID
-$Payload = @{"username"=$shinohid.HID; "password"=$shinopid.PID; "instructions"="Nice work. The flag is CyberGym{phish are biting} now go to shinobotps1.com to deduct points from your opponents. Run the command: IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/emerginganalytics/ualr-cyber-gym/master/workout-scripts/auto-assess/arena-deduct.ps1'); $return = Invoke-Arena1-Deduct | ConvertFrom-Json; $return;"}
+$Payload = @{"username"=$shinohid.HID; "password"=$shinopid.PID; "instructions"="Nice work. The flag is CyberGym{phish are biting}, but substitute these plus symbols with spaces. Now go to shinobotps1.com to deduct points from your opponents. Run the command found on that handy file on your Desktop."}
 
 while ($true)
 {

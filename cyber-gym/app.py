@@ -199,7 +199,7 @@ def arena_landing(workout_id):
     student_instructions_url = None
     if 'student_instructions_url' in workout:
         student_instructions_url = workout['student_instructions_url']
-    formatted_instruction_url = 'https://storage.googleapis.com/' + workout_globals.student_instruction_folder + "/" + str(student_instructions_url)
+    formatted_instruction_url = student_instructions_url
     assessment = guac_user = guac_pass = flags_found = None
 
     if 'workout_user' in workout:
