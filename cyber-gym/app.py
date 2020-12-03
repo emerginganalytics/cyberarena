@@ -195,11 +195,11 @@ def change_team(workout_id):
 def arena_landing(workout_id):
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
-    
+    arena_server_info = get_arena_ip_addresses_for_workout(workout_id)
     student_instructions_url = None
     if 'student_instructions_url' in workout:
         student_instructions_url = workout['student_instructions_url']
-
+    formatted_instruction_url = 'https://storage.googleapis.com/' + workout_globals.student_instruction_folder + "/" + str(student_instructions_url)
     assessment = guac_user = guac_pass = flags_found = None
 
     if 'workout_user' in workout:
@@ -216,7 +216,7 @@ def arena_landing(workout_id):
         return process_assessment(workout, workout_id, request, assessment)
        
     return render_template('arena_landing.html', description=unit['description'], assessment=assessment, workout=workout, dns_suffix=dns_suffix, 
-                        guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=student_instructions_url)
+                        guac_user=guac_user, guac_pass=guac_pass, arena_id=workout_id, student_instructions=formatted_instruction_url, server_info=arena_server_info)
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():         

@@ -1,15 +1,18 @@
 {% extends "base.html" %}
 
 {% block title%} Workout {{ workout_id }} {% endblock %}
-    <script>
-        $(document).ready(function(){
-            $("assessment_reveal").click(function(){
-                $("#assessment_form").fadeIn();
-            })
-        })
-    </script>
 
     {% block content%}
+
+    <style>
+        .arena_server_container{
+            border: 1px solid black;
+            margin-bottom:1em;
+        }
+        #workout_link{
+            margin-bottom:1em;
+        }
+    </style>
     <div class='landing_container col-lg-12'>
         <div class='row'>
         <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
@@ -34,9 +37,22 @@
 
                 <br><h2>Workout Servers</h2>
                     {% if guac_path==None %}
-                        <a id="workout_link" style="visibility: hidden" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
+                        <a id="workout_link" class="btn" style="visibility: hidden" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
                     {% else %}
-                        <a id="workout_link" style="visibility: hidden" href="http://{{ workout['unit_id'] }}{{ dns_suffix }}:8080/guacamole/#/client/" target="_blank">Enter your workout!</a>
+                        <a id="workout_link" class="btn" style="visibility: hidden" href="http://{{ workout['unit_id'] }}{{ dns_suffix }}:8080/guacamole/#/client/" target="_blank">Enter your workout!</a>
+                    {% endif %}
+                    {% if server_info %}
+                        <div id="extra_server_container">
+                            {% for server in server_info %}
+                                <div class="arena_server_container">
+                                    <p><strong>Server Name:</strong> <span class="arena_server_name">{{server['name']}}</span></p>
+                                    {% for nic in server['nics'] %}
+                                        <p><strong>Network Name:</strong> <span class="arena_server_network">{{nic['network']}}</span></p>
+                                        <p><strong>Network IP: </strong> <span class="arena_server_ip">{{nic['ip']}}</span></p>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% endif %}
                         <p>*Machines may take a couple minutes to start</p>
                 <br>
@@ -47,7 +63,7 @@
                 <p>Workout Username: {{guac_user}}</p>
                 <p>Workout Password: {{guac_pass}}</p>
                 {% if student_instructions %}
-                    <a href="{{ student_instructions }}" target="_blank" class='landing_dropdown'>Workout Instructions</a>
+                    <a href="{{ student_instructions }}" rel="noopener noreferrer" target="_blank" class='landing_dropdown'>Workout Instructions</a>
                 {% endif %}
 
 
