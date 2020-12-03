@@ -321,7 +321,7 @@ def admin_page():
         if 'state' in workout:
             if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
                 if 'hourly_cost' in workout and 'runtime_counter' in workout:
-                    if workout['hourly_cost'] and workout['runtime_container']:
+                    if workout['hourly_cost'] and workout['runtime_counter']:
                         estimated_cost = (float(workout['hourly_cost']) / 3600) * float(workout['runtime_counter'])
                         workout['estimated_cost'] = format(estimated_cost, '.4f')
                 active_workouts.append(workout)
