@@ -20,8 +20,9 @@ Setup
 Before running the application setup scripts you need to perform the following tasks:
 1) Create a new Google Cloud Project: https://console.cloud.google.com/
 2) Install the Google Cloud SDK: https://cloud.google.com/sdk/install
-3) Add this repository to your new Google Cloud Project: https://source.cloud.google.com/
-4) Purchase a DNS zone or add an existing and tie it to your Google Cloud Project: https://cloud.google.com/dns/docs/quickstart
+3) Add this GitHub repository to your new Google Cloud Project: https://source.cloud.google.com/
+4) Purchase a DNS zone or add an existing and tie it to your Google Cloud Project: https://cloud.google.com/dns/docs/quickstart. Here you'll enable the Cloud domains API at https://console.cloud.google.com/net-services/domains. Then click to register the domain. Use the recommended Cloud DNS, but for the Cloud DNS Zone, select to setup a new zone, and change the name to cybergym-public.
+5) Navigate to the Identify Platform at https://console.cloud.google.com/marketplace/product/google-cloud-platform/customer-identity and enable the API. Click to create a new Identity Provider and select Email/Password. The defaults are fine to use. 
 
 Run the build script in the cloud-build-scripts folder. This will walk through all of the steps to set up your applications and cloud functions to run on your project. There is no cost at this point except negligible costs for storage and cloud function run time. Costs will begin accumulating once students run their first workout.
 
