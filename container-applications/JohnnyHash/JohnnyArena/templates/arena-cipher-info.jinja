@@ -1,0 +1,133 @@
+{% extends 'johnnyarena/arena-index.jinja' %}
+{% block content_block %}
+    <h1>Cipher Information</h1>
+
+    <div id="cipherInfo" class="cipherInfoDiv">
+        <button type="button" class="cipherInfoBtn">AtBash Cipher</button>
+        <div id="AtBash" class="cipherInfoContent">
+            <h2>AtBash Cipher</h2>
+            <p>The AtBash is considered to be a special case Affine cipher where 'A' = 'B' = (m - 1). To put in even
+            simpler terms, A => Z, B => Y, C => X, and so on. Due to its simplistic nature and the fact that it
+            doesn't contain a key, the AtBash cipher is not considered a secure method of protecting messages, but
+            it does show up quite often in CTF challenges.</p>
+        </div>
+        <button type="button" class="cipherInfoBtn">Caesar Cipher</button>
+        <div id="Caesar" class="cipherInfoContent">
+            <h2>Caesar Cipher</h2>
+            <p>The Caesar cipher is arguably one of the most popular ciphers when describing basic cryptography.
+            The cipher is a shift cipher where each letter in the plaintext is substituted with another letter
+            <i>x</i> letters to the right where <i>x</i> represents a key of value 0-25. <br>For example:
+            </p>
+            <h3>Example: </h3>
+            <ul>
+                    <li><b>Plaintext: </b>"The Key is under the doormat"</li>
+                    <li><b>Key: </b>7</li>
+                    <li><b>Ciphertext: </b>Aol Rlf pz bukly aol kvvytha</li>
+            </ul>
+            <p>
+                To decrypt the message, simply shift to the left by <i>x</i> places where the <i>x</i> is equal
+                to the key that was used to encrypt the message.<br>Due to the limited shifts (25 total) that can be
+                made with the Caesar cipher, it is very easy to crack without even knowing the key.
+            </p>
+        </div>
+        <button type="button" class="cipherInfoBtn">Column Transposition Cipher</button>
+        <div id="ColTransposition" class="cipherInfoContent">
+            <h2>Column Transposition Cipher</h2>
+            <p>The Column Transposition is a fun cipher to encounter. Although it can initially appear difficult,
+            the basic concept of how it works is pretty simple. <br>How the cipher works is it taken in a keyword
+            and aligns the keyword as the 'header' of a matrix. This means that for every letter in the keyword,
+            there will be a column associated with that letter. The height of the matrix is determined by the length
+            of the ciphertext (message) modded by the length of the keyword.</p>
+            <h3>Example: </h3>
+            <img id="colTranspositionImg" src="/JohnnyArena/static/img/coltransposition.png" alt="Col Transposition Example">
+            <p>Once you have the matrix, write out the values of each column in alphabetical order of the keyword.
+                Generally, the ciphertext is written in blocks of 3 or 4 letters to help obfuscate the message even
+                further.
+            The provided example above returns the following ciphertext:<p>
+            <ul><li>evu acd ese ror den wir</li></ul>
+            <p>Decrypting works pretty much the same way. Place the ciphertext in a matrix and rearrange the columns
+            so that you spell out the keyword in the column headers. The plaintext is read row by row.</p>
+        </div>
+        <button type="button" class="cipherInfoBtn">Keyword Cipher</button>
+        <div id="KeywordCipher" class="cipherInfoContent">
+            <h2>Keyword Cipher</h2>
+            <p>This cipher works very similar to how a Caesar cipher works only instead of shifting be <i>x</i>
+            letters, this cipher takes in a keyword which it uses to create a new alphabet out of. <br>
+            To encode, place the keyword at the beginning of the standard alphabet and if a letter occurs more
+            than once, remove all occurrences following the initial appearance.<br>
+            </p>
+            <h3>Example: </h3>
+            <ul>
+                <li><b>Keyword: </b>CyberGym</li>
+                <li><b>New Alphabet: </b>CYBERGMADFHIJKLNOPQSTUVWXZ</li>
+            </ul>
+            <p>
+            Finally, with each letter in the message you want to encrypt, you translate each value from the
+            standard alphabet to the value set in the custom alphabet. It might sound confusing, but if you
+            write the two alphabets into two separate arrays, you can visualize it a lot better.<br>
+            To decrypt keyword ciphers, you simple do reverse the process taken to encrypt.</p>
+            <h3>Example: </h3>
+            <ul>
+                <li><b>Keyword: </b>CyberGym</li>
+                <li><b>Message: </b>sadq dq c qrbprs jrqqcmr</li>
+                <li><b>Plaintext: </b>THIS IS A SECRET MESSAGE</li>
+            </ul>
+        </div>
+        <button type="button" class="cipherInfoBtn">Encodings</button>
+        <div id="Encodings" class="cipherInfoContent">
+            <h2>Encodings:</h2>
+            <p>
+                Base64 and Base32 are special cases on this series of problems since they are not considered to be cryptographically
+                secure. So what are they?<br>Base64 and Base32 are part of a special group of character representations called encodings.
+                Encodings can be defined as a character set or character map where each character value points to the corresponding code point value.
+                Gross!
+                A good example of how encodings are used is with a web page. Majority of the web pages today use the encoding UTF-8 to display
+                the HTML of a page in a readable form, but it is not uncommon to use another encoding such as Base32 to transfer data
+                from one page to another for processing. Another example of common use is the Base10 encoding that maps to our
+                number set [0-9].
+                <br>
+                When evaluating strings to determine the encoding, it is important to note which encodings support which characters.
+                For example, the string, "This message is encoded" returns the following strings in Base32 and Base64:
+            </p>
+            <ul>
+                <li><b>Base32: </b>KRUGS4ZANVSXG43BM5SSA2LTEBSW4Y3PMRSWI===</li>
+                <li><b>Base64: </b>VGhpcyBtZXNzYWdlIGlzIGVuY29kZWQ=</li>
+            </ul>
+            <p>Without going into details on how the string was encoded, we can generalize the two encodings with the
+            following: </p>
+            <ul>
+                <li><b>Base32: </b>
+                    <ul>
+                        <li>Is not case sensitive (Uses one case for entire string)</li>
+                        <li>Uses all letters from A-Z and only number 0-7</li>
+                    </ul>
+                </li>
+                <li><b>Base64: </b>
+                    <ul>
+                        <li>Is case sensitive</li>
+                        <li>Uses all letters A-Z, a-z, numbers 0-9, and symbols + and /</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>In both cases, the '=' symbol is used strictly for padding.</p>
+        </div>
+    </div>
+{% endblock content_block %}
+{% block js_block %}
+    <script type="text/javascript">
+        var coll = document.getElementsByClassName("cipherInfoBtn");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+          coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+              content.style.display = "none";
+            } else {
+              content.style.display = "block";
+            }
+          });
+        }
+    </script>
+{% endblock js_block %}

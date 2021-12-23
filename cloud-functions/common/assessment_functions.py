@@ -28,9 +28,9 @@ def get_startup_scripts(workout_id, assessment):
                             'key': 'windows-startup-script-bat',
                             'value': script
                         }
-                if 'script_language' in question and question['script_language'] == 'python':
+                if 'script-language' in question and question['script-language'] == 'python':
                     script_command = 'python {script}'.format(script=question['script'])
-                elif 'script_language' in question and question['script_language'] == 'powershell':
+                elif 'script-language' in question and question['script-language'] == 'powershell':
                     script_command = 'powershell.exe -File ./{script}'.format(script=question['script'])
                     script_command = f'"{script_command}"'
                 else:
@@ -48,16 +48,20 @@ def get_startup_scripts(workout_id, assessment):
                             'key': 'startup-script',
                             'value': script
                         }
-                if 'script_language' in question and question['script_language'] == 'python':
-                    script = 'python3 {script}'.format(script=question['script'])
+                if 'script-language' in question and question['script-language'] == 'python':
+                    script_command = f"python3 /usr/bin/{question['script']}"
                 else:
-                    script = question['script']
+                    script_command = f"/usr/bin/{question['script']}"
                 assess_script = workout_globals.linux_startup_script_task.format(env_workoutkey=question['key'],
-                                                                                   q_number=i,
-                                                                                   script=script)
+                                                                                 q_number=i,
+                                                                                 script=question['script'],
+                                                                                 local_storage="/usr/bin",
+                                                                                 script_command=script_command)
+            if i != 0:
+                startup_scripts[question['server']]['value'] += "\n"
             startup_scripts[question['server']]['value'] += assess_script
             i += 1
 
-        if len(startup_scripts) == 0:
-            startup_scripts = None
-        return startup_scripts
+    if len(startup_scripts) == 0:
+        startup_scripts = None
+    return startup_scripts

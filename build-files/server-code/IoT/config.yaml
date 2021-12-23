@@ -1,0 +1,29 @@
+#
+# IOT Configuration file
+# Update this file to match your system setup
+# test
+
+log_file: '/usr/src/cyberarena-dev/telemetry.log'
+
+certs:
+        ssl_private_key: '/usr/src/cyberarena-dev/local/iot_private.pem'
+        algorithm: 'RS256'
+        root_cert: '/usr/src/cyberarena-dev/local/roots.pem'
+
+gcp:
+        #project_id: 'virtual-arkansas'
+        project_id: '<project_id>'
+        zone: '<project zone>'
+        registry_id: '<registry id>'
+        device_id: '<device id>'
+
+# for each animation, create a new folder and add the path below
+images:
+        heart: '/usr/src/cyberarena-dev/images/heart/'
+        heartrate: '/usr/src/cyberarena-dev/images/heartrate/'
+        arrow: '/usr/src/cyberarena-dev/images/arrow/'
+        road: '/usr/src/cyberarena-dev/images/road/'
+        alerts: '/usr/src/cyberarena-dev/images/alerts/'
+        faces: '/usr/src/cyberarena-dev/images/faces/'
+        phase: '/usr/src/cyberarena-dev/images/phase/'
+

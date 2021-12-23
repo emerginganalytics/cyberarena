@@ -1,0 +1,40 @@
+{% extends 'base.jinja' %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/iot-styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/animations.css') }}">
+{% endblock styles_block %}
+{% block js_block %}
+    <script src="{{ url_for('iot_bp.static', filename='js/animations.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('iot_bp.static', filename='js/commands.js') }}" type="text/javascript"></script>
+{% endblock js_block %}
+{% block title_block %}Iot Device Setup{% endblock title_block %}
+{% block nav_block %}<h1>IoT Device Setup</h1>{% endblock nav_block %}
+{% block content_block %}
+    <div class="blue-div-wrapper center-content" id="blue-div-wrapper">
+        <div class="iot-setup-container center-content" id="iot-setup-container">
+            <div class="error-msg" id="error-msg-div">
+                <p id="error-msg-p">
+                {% with messages = get_flashed_messages() %}
+                  {% if messages %}
+                    {% for message in messages %}
+                      {{ message }}
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+                {% if error %}
+                    {{ error }}
+                {% endif %}
+                </p>
+            </div>
+            <div id="animated-text-div"></div>
+            <input type="text" name="iot-device-input" id="iot-device-input" placeholder="Enter your Device ID" required/>
+            <button type="submit" class="iot-commands" id="iot-device-input-btn"
+                onclick="sendDeviceID($('#iot-device-input').val(),
+                '{{ url_for('iot_bp.setup') }}', 'iot-setup-container');">Connect!
+            </button>
+        </div>
+    </div>
+{% endblock content_block %}
+{% block footer_block %}
+    Trouble Connecting Your Device? <a href="{{ url_for('iot_bp.faq') }}">Check out our FAQ.</a>
+{% endblock footer_block %}

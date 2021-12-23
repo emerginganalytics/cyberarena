@@ -8,4 +8,3 @@ google-cloud-storage
 google-cloud-runtimeconfig
 grpcio
 requests
-python-dotenv

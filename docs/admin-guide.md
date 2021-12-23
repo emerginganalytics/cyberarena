@@ -5,7 +5,7 @@ This guide provides an overview of the UA Little Rock Cyber Gym infrastructure f
 
 There are a lot of components working together in the project. This section describes the 6 most relevant components needed for administration. Finding these are a lot easier if you pin them to your personal menu.
 
-![Google Cloud Services](/images/instruction-gcp-overview.png)
+![Google Cloud Services](images/instruction-gcp-overview.png)
 
 1.  **Compute Engine -** This is where you will find the actual servers running. Each workout or arena has a workout ID prefix used for tracking the servers. You can manually troubleshoot these servers, but avoid starting and stopping from the cloud. Some servers have DNS records that need to be managed.
 
@@ -27,7 +27,7 @@ The datastore is the heart of the application. All data necessary for the applic
 
 The data model comprises the following objects. Each of these can be filtered and queried through the Datastore Entities GCP application
 
-![Data Model](/images/instruction-data-model.png)
+![Data Model](images/instruction-data-model.png)
 
 The following list provides guidance on what to look for when administering the system.
 
@@ -45,7 +45,7 @@ The following list provides guidance on what to look for when administering the 
 
 The cloud logs will usually be the first and most specific indicator of a problem. This section describes some of the more useful log filters for quickly finding issues. The figure below shows where to find the log viewer and how to apply the advanced filter. Once you click “Logs Viewer”, click the dropdown for an advanced filter. Then copy in one of the filters below or use basic mode and only look at the cloud function logs.
 
-![Log Review](/images/instruction-logging.png)
+![Log Review](images/instruction-logging.png)
 
 <table data-layout="default"><colgroup><col style="width: 136.0px;"><col style="width: 368.0px;"><col style="width: 253.0px;"></colgroup>
 

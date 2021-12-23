@@ -1,0 +1,30 @@
+{% extends 'index.jinja' %}
+{% block navblock %}
+    {% if workout_id %}
+        <hr>
+        <a href="{{ url_for('johnnyhash.hash_it_out', workout_id=workout_id) }}">
+            <i class="fa fa-laptop sidebar-icon"></i>
+            <p class="sidebar-txt">MD5</p>
+        </a>
+        <hr>
+        <a href="{{ url_for('johnnyhash.login', workout_id=workout_id) }}">
+            <i class="fa fa-user-circle-o sidebar-icon"></i>
+            <p class="sidebar-txt">LOGIN</p>
+        </a>
+        <hr>
+    {% endif %}
+{% endblock navblock %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='styles/johnnyhash-styles.css') }}">
+{% endblock styles_block %}
+{% block header_img %}{% endblock header_img %}
+{% block content %}
+    <div class="inner-content-wrapper" id="logout">
+        <a href="{{ url_for('johnnyhash.logout', workout_id=workout_id) }}">Log Out</a> <br />
+    </div>
+    <div class="inner-content-wrapper" id="hidden">
+        <h1>Welcome, {{ user }}!</h1>
+        <img src="{{ url_for('johnnyhash.static', filename='img/flag.png') }}" class="content-img" id="flagImg">
+        <p>This wasn't supposed to happen....</p><br>
+    </div>
+{% endblock content %}

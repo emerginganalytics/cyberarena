@@ -1,5 +1,5 @@
 # Student Desk Reference
-![Student's Manage Workout Page](/images/instruction-students.png)
+![Student's Manage Workout Page](images/instruction-students.png)
 
 ## Starting a workout
 

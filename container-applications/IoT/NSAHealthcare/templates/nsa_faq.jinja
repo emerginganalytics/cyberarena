@@ -1,0 +1,98 @@
+{% extends 'nsa-base.jinja' %}
+{% block title_block %}{% endblock title_block %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/faq-styles.css') }}">
+{% endblock styles_block %}
+{% block js_block %}
+
+{% endblock js_block %}
+{% block nav_block %}{% endblock nav_block %}
+{% block content_block %}
+    <div class="faqDivWrapper">
+        <h1 id="faq-h1">FAQ</h1>
+        <button type="button" class="faqDivBtn">My device is turned on, but I can't see my display</button>
+        <div id="faq-1" class="faqContentDiv center-content">
+            <p>
+                A common mistake is to plug the HDMI cable into a computer or laptop. This won't work as most computers are
+                only setup to transmit and not receive video signal.
+            </p>
+            <h3>Solution: </h3>
+            <p>
+                Make sure that your micro HDMI to HDMI cable is firmly seated in the Raspberry Pi and that the HDMI end is
+                connected to a monitor or TV with an HDMI port. If at this point, there is still no signal, verify that your
+                monitor or TV is listening on the correct channel.
+            </p>
+        </div>
+        <button type="button" class="faqDivBtn">My device doesn't detect my keyboard</button>
+        <div id="faq-2" class="faqContentDiv">
+            <p>
+                Order matters! When plugging in all the cables to your device, make sure that you plug in your peripherals
+                first before plugging in the power cable.
+            </p>
+            <h3>Solution:</h3>
+            <p>First make sure that you plugged your micro USB to USB adapter in the correct port. The device input port is
+                the leftmost micro USB port. The rightmost micro USB port is reserved for power only.
+                <br>
+                Once you've determined that the cable is inserted into the correct port, simply restart the device.
+            </p>
+        </div>
+        <button type="button" class="faqDivBtn">Can't see keyboard input when typing the login password</button>
+        <div id="faq-3" class="faqContentDiv">
+            <p>This is actually considered a security feature of Unix systems. During a login event, password input
+            is not displayed to the screen to help prevent character length based password attacks.</p>
+            <h3>Solution: </h3>
+            <p>When you are prompted for the password, enter it as normal and hit enter. If you entered the password in
+                correctly, you'll logged in.
+            </p>
+        </div>
+        <button type="button" class="faqDivBtn">Connected my device to the network, but I'm unable to send commands</button>
+        <div id="faq-4" class="faqContentDiv">
+            <p>Usually this means that the device was not able to establish a successful connection to the Cloud.</p>
+            Upon a successful connection, you should see a rotating blue and yellow image on your SenseHat display.
+            <h3>Solution: </h3>
+            <ui>
+                <li>
+                    Open <b>/usr/src/cyberarena-dev/config.yaml</b> with an editor of choice (nano or vim) and
+                    verify that the <i>gcp</i> block matches your environment. Project value should be
+                    <b>{{ project }}</b> and device_id should match what is on the bottom of your device.
+                    <br><br><b>NOTE:</b> If you make any changes to this file, make sure to restart the device in order
+                    for your changes to take effect.<br><br>
+                </li>
+                <li>
+                    If the above suggestion doesn't help, it is possible that your local firewall is blocking traffic.
+                    Make sure that port 8883 is open to traffic to <b>mqtt.googleapis.com</b>
+                </li>
+            </ui>
+        </div>
+        <button type="button" class="faqDivBtn">SenseHat display never turns off</button>
+        <div id="faq-5" class="faqContentDiv">
+            <p>This is usually a result of a bad connection from the SenseHat display to the Raspberry Pi. If this is
+            the case, the Raspberry Pi can't properly detect what is connected to the GPIO pins and as a result isn't
+            able to control any of the LEDs in the display</p>
+            <h3>Solution: </h3>
+            <p>Try reseating the SenseHat display by removing it and carefully pushing it back down on the GPIO pins. It
+            should slide on smoothly but firmly. Be careful not to twist or bend any of the pins or this could effect
+            any future connections</p>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var coll = document.getElementsByClassName("faqDivBtn");
+            var i;
+
+            for (i = 0; i < coll.length; i++) {
+              coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                console.log(content.id);
+                if (content.style.display === "block") {
+                  content.style.display = "none";
+                } else {
+                  content.style.display = "block";
+                }
+              });
+            }
+    </script>
+{% endblock content_block %}
+{% block footer_block %}
+    <a href="{{ url_for('iot_nsa_bp.setup') }}">Back to Setup page &crarr;</a>
+{% endblock footer_block %}

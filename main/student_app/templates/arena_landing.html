@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title%} Workout {{ workout.key.name }} {% endblock %}
+
+    {% block content%}
+
+    <style>
+        .arena_server_container{
+            border: 1px solid black;
+            margin-bottom:1em;
+        }
+        #workout_link{
+            margin-bottom:1em;
+        }
+    </style>
+    <div class='landing_container container col-lg-12'>
+        <div class='row'>
+        <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+            <div id="workout-form" class='container-fluid'>
+                <div id="logo" class="center">
+                    <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
+                </div>
+            </div>
+            <br><h2>Workout Control</h2><br>
+                <p>Workout status: <span id='workout_state_display' style="color:red;">STOPPED</span></p><br>
+        </div>
+        <div class='col-sm-10' style="padding-top:1em; margin-top:2%;">
+            
+            <div class='container' style="margin:0;">
+                <h2>Welcome to the Trojan Arena!</h2>
+                <p>{{ description }}</p><br>
+                <a class="btn" style="width: 50%" href="/arena-scoreboard/{{ unit_id }}" target="_blank">View Scoreboard</a>
+                <br><br>
+                {% if 'points' in workout %}
+                <p><strong style="font-size: 2em">Current Points:  {{ workout['points'] }}</strong></p>
+                <p>*Results may not be final. Refresh the page to view your updated score.</p>
+                {% endif %}
+                
+                <div class="row" >
+                    <div class="col-sm-6">
+                        <h2>Workout Info</h2>
+                    </div>
+                    <div class="row col-12">
+                        <div class='col-sm-6' id='workout_info' style="margin:0;">
+                            <h3>Login Info</h3>
+                            {% if student_instructions %}
+                                <a href="{{ student_instructions }}" rel="noopener noreferrer" target="_blank" class='instruction_link'>Workout Instructions</a>
+                            {% endif %}
+                            <p>Workout Username: {{guac_user}}</p>
+                            <p>Workout Password: {{guac_pass}}</p>
+
+        
+                        </div>
+        
+                        <div id="loading-msg"></div>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+                    
+
+                        <br>
+                        <div class="col-sm-6">
+                            <h3>Workout Servers</h3>
+                                {% if guac_path==None %}
+                                    <a id="workout_link" class="btn" style="visibility: hidden" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080" target="_blank">Enter your workout!</a>
+                                {% else %}
+                                    <a id="workout_link" class="btn" style="visibility: hidden" href="http://{{ workout['unit_id'] }}{{ dns_suffix }}:8080/guacamole/#/client/" target="_blank">Enter your workout!</a>
+                                {% endif %}
+                                {% if server_info %}
+                                    <div id="extra_server_container">
+                                        {% for server in server_info %}
+                                            <div class="arena_server_container">
+                                                <p><strong>Server Name:</strong> <span class="arena_server_name">{{server['name']}}</span></p>
+                                                {% for nic in server['nics'] %}
+                                                    <p><strong>IP Address: </strong> <span class="arena_server_ip">{{nic['ip']}}</span></p>
+                                                {% endfor %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                    <p>*Machines may take a couple minutes to start</p>
+                            <br>
+                            {% if 'containers' in workout and workout['containers']%}
+                                    <h2>External Links</h2>
+                                    {% for container in workout['containers'] %}
+                                        <div class="additional_container_info">
+                                            <a href="{{container['container_url']}}/{{workout.key.name}}" target="_blank" class="btn">{{container['title']}}</a>
+                                        </div>
+                                        <br>
+                                    {% endfor %}
+                            {% endif %}
+                        </div> <!--Workout info container-->
+                    </div>
+                </div>
+            </div>
+            <div id="workout_id" hidden>{{ workout_id }}</div>
+            
+                {% if assessment %}
+                    <br>
+                    <div class='container' id='assessment'>
+                        <a class='landing_dropdown btn' id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
+                        <div class="workout_assessment_form" style="display:none;">
+                        {% for question in assessment%}
+                            {% if question['type'] == 'input' %}
+                                <div class='question_group' style="margin:1em;border:1px solid black;">
+                                    <form class='flag_form' action='/student/arena_landing/{{ arena_id }}' method="POST" enctype="multipart/form-data">
+                                        <div class="form-group">
+                                            <input type="hidden" name="question" value="{{ question['question']}}" />
+                                            <input type='hidden' name='point_value' value="{{question['point_value'] }}" />
+                                            <label for="question_{{loop.index}}">{{ question['question'] }}</label>
+                                            <input class='user_input form-control' id="question_{{loop.index}}" type='text' name="answer" placeholder="Enter Flag Here" />
+                                            <button type='submit' class="btn" style="margin-top:0;text-align:center;" >Submit</button><br>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                        </div><br>
+                        
+                    </div> <!--Assessment Dropdown-->
+                    
+                {% endif %}
+                
+
+
+        
+        </div>
+    </div> <!--Main Container-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+         <script>
+            function reveal_assessment(){
+                $(".workout_assessment_form").fadeToggle();
+            }
+            function check_workout_state(){
+                var state = $.ajax({
+                    type:"POST",
+                    url: "/workout_state/{{ workout.key.name }}",
+                    traditional: "true",
+                });
+                return state;
+            }
+
+            function update_state(){
+                var state_display = document.getElementById("workout_state_display");
+                var workout_link = document.getElementById("workout_link");
+                check_workout_state().then( new_state => {
+                    if(new_state == "RUNNING"){
+                        workout_link.style.visibility = "visible";
+                        state_display.style.color = "green";
+                        state_display.innerHTML = "RUNNING"; 
+                        $(".loader").remove();                   
+                    } else if(new_state == "READY"){
+                        workout_link.style.visibility = "hidden";
+                        state_display.style.color = "red";
+                        state_display.innerHTML = "STOPPED";
+                        $(".loader").remove(); 
+                    } else{
+                        workout_link.style.visibility = "hidden";
+                        state_display.style.color = "orange";
+                        state_display.innerHTML = "WORKING";
+                        $(".loader").remove();  
+                    }
+                });
+                
+            }
+            $(document).ready(function(){
+                update_state();
+                var state_checker = setInterval(update_state, 15000);
+
+                $(".flag_form").submit(function(e) {
+                    e.preventDefault();
+
+                    $("#loading-msg").html('Please wait while the process completes' +
+                        '</br><div class="loader"></div>');
+
+                    var form = $(this);
+                    var url = form.attr('action');    
+
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: form.serialize(), // serializes the form's elements.
+                        dataType: "json",
+                        success: function(data)
+                        {
+                            $("#loading-msg").html("");
+                            if(data['answer_correct']){
+                                alert("Correct answer");
+                                form.parent().fadeOut();
+                            }else{
+                                alert("Incorrect Flag");
+                            }
+                        }
+                        });
+                });
+            });
+                
+        </script>
+    </div>
+{% endblock %}
+    <!-- </html> -->

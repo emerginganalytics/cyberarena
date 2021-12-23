@@ -2,5 +2,5 @@
 gcloud config set project [project-name]
 
 # Deploy to cloud run
-gcloud builds submit --tag gcr.io/ualr-cybersecurity/cybergym-classified
-gcloud beta run deploy --image gcr.io/ualr-cybersecurity/cybergym-classified
+gcloud builds submit --tag gcr.io/[project-name]/cybergym-classified
+gcloud beta run deploy --image gcr.io/[project-name]/cybergym-classified

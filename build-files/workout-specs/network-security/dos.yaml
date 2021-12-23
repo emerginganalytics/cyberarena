@@ -1,0 +1,73 @@
+version: '1'
+
+workout:
+  name: "Denial of Service"
+  workout_description: 'Perform a Denial of Service attack against a computer in your network and observe the impact on the computer'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/DOSWorkoutTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/DOSWorkoutInstructions.pdf"
+  build_type: "compute"
+  hourly_cost: 0.15
+  author: Chance Melby
+  standards:
+    - framework: NICE
+      mapping: PR-CIR-001
+    
+student_entry:
+  type: vnc
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.9
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-wireshark
+    image: image-cybergym-wireshark
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.9
+        subnet: default
+        external_NAT: False
+  - name: cybergym-classified
+    image: image-cybergym-classified
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.33
+        subnet: default
+        external_NAT: True
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.0.0/16"]
+
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "NcxJp6D9DerKrr2M"
+      question: "Phase 1 Active DOS Check"
+      script: "dos-completion-q1.py"
+      script-language: "python"
+      server: cybergym-classified
+      operating-system: linux
+      complete: False
+    - type: auto
+      key: "dZInUaMbmgo23j"
+      question: "Phase 2 Active DOS Check"
+      script: "dos-completion-q2.py"
+      script-language: "python"
+      server: cybergym-classified
+      operating-system: linux
+      complete: False

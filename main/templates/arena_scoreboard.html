@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Arena Scoreboard {% endblock%}
+
+{% block content %}
+    <style>
+        td, th{
+            border: none;
+            color: black;
+        }
+    </style>
+    <script>      
+        setTimeout(function(){
+            window.location.reload();
+        }, 15000);
+    </script> 
+    <h2>{{ arena_type }} Scoreboard</h2>
+    <div id='rules_container'>
+        <p>This page shows the results for an arena exercise. Checkmarks indicate that a team has found a particular flag. You can hover over the checkmark to see the time the flag was submitted. A yellow field indicates that the team was the first to find and submit the flag, and was awarded bonus points.</p>
+    </div>
+    <div id='scoreboard_container'>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Team Name</th>
+                    <th scope="col">Total Points</th>
+                    {% for flag in flag_info['questions'] %}
+                        <th scope="col">Challenge {{ loop.index }} - {{flag['points']}} points</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for team in team_info %}
+                <tr class="team_row">
+                    <td>{{team[0]}}</td>
+                    <td>{{team[1]['points']}}</td>
+                    {% for flag in team[1]['found_flags'] %}
+                        {% if flag != 0 %}
+                            {% if flag['first'] %}
+                                <td style="color: green; background-color: rgb(253, 237, 6);" data-toggle="tooltip" data-placement="top" title="Found at {{flag['timestamp']}}">&#10004</td>
+                            {% else %}
+                                <td style="color: green;" data-toggle="tooltip" data-placement="top" title="Found at {{flag['timestamp']}}">&#10004</td>
+                            {% endif %}
+                        {% else %}
+                            <td style="color: red;">&#935</td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table><br>
+    </div>
+{% endblock %}

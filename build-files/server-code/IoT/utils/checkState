@@ -1,0 +1,22 @@
+#!/bin/bash -x
+
+cd /usr/src/cyberarena-dev/local/
+
+IOTPUB="/usr/src/cyberarena-dev/local/iot.pub"
+IOTPRIV="/usr/src/cyberarena-dev/local/iot_private.pem"
+ROOTS="/usr/src/cyberarena-dev/local/roots.pem"
+
+# Generate SSH keys if they don't exist
+if [[ ! -f $IOTPUB || ! -f $IOTPRIV ]]; then
+	openssl req -x509 -newkey rsa:2048 -keyout iot_private.pem -nodes -out iot.pub -subj "/CN=unused"
+	chmod 777 iot_private.pem && chmod 777 iot.pub
+fi
+if [[ ! -f $ROOTS ]]; then
+	wget https://pki.goog/roots.pem
+fi
+# Service isn't already running, start; Otherwise do nothing
+CHECKSTATE=$(systemctl show -p SubState --value sensehat.service)
+if [ $CHECKSTATE == "dead" ]; then
+	systemctl enable sensehat.service
+	systemctl start sensehat.service
+fi

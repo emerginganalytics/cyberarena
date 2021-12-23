@@ -122,7 +122,7 @@
         {% endif %}
         {%for match in shodanResults['matches']%}
             <div class='shodan_result container'>
-                <a href="{{ '/results/%s/%s'%(match['ip_str'], workoutid) }}"> {{ match['ip_str']}} </a>
+                <a href="{{ url_root }}results/{{ match['ip_str'] }}/{{ workoutid }}">{{ match['ip_str'] }}</a>
                 <li>{{ match['isp'] }}</li>
                 <li>Port: {{ match['port'] }}</li>
                 <li>Location:

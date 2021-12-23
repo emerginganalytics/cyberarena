@@ -1,0 +1,52 @@
+{% extends "johnnyGenCipher/index.jinja" %}
+{% block navblock %}{% endblock navblock %}
+{% block background_img %}{% endblock background_img %}
+{% block styles_block %}
+    <style>
+        #main {
+            text-align: center;
+            padding-left: 50px;
+        }
+        #cipher-div {
+            font-size: 22px;
+            font-style: normal;
+            font-weight: bold;
+            text-align: left;
+            margin-left: 100px;
+            margin-right: 0px;
+        }
+        #subdescription {
+            font-size: 20px;
+            font-weight: normal;
+            width: 80%;
+         }
+        .subciphertext {
+            width: 80%;
+            padding-left: 20px;
+            margin-left: 20px;
+            font-size: 20px;
+            font-weight: normal;
+        }
+    </style>
+{% endblock styles_block %}
+{% block content %}
+{# <body style="text-align:center;margin:60px"> #}
+<div id="main">
+    <h2>A Crypto Challenge</h2>
+    <br>
+    {# List of Ciphers they need to decipher: Needs to be submitted with Ajax #}
+    <div class="w3-section" id="caesar-cipher-inputs">
+        <div class="w3-section" id="cipher-div">
+            <p id="subdescription">While you were taking a walk outside, you heard a commotion and turned to see a hooded stranger sprint
+                pass. As he continued on, a piece of paper with a strange note dropped out of his pocket. You pick it up
+                and this is what you see. Can you decode the message?</p>
+            <p>Ciphertext:</p>
+            <p class="subciphertext">{{ sub_cipher }}</p>
+            <p style="font-size: 14px;">Hint: <br>I wonder if there is a relation to letter frequency in English alphabet?</p>
+        </div>
+    </div>
+</div>
+{#  </body> #}
+{% endblock content %}
+{% block js_block %}
+{% endblock js_block %}

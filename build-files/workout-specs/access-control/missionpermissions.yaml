@@ -1,0 +1,65 @@
+version: '1'
+
+workout:
+  name: missionpermissions
+  workout_description: 'Learn About File Security Using Windows!'
+  teacher_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissionsWorkoutStudentInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/MissionPermissionsWorkoutStudentInstructions.pdf"
+  build_type: "compute"
+  hourly_cost: 0.10
+  author: Andrew Bomberger
+
+student_entry:
+  type: rdp
+  username: cybergym
+  password: "Let's workout!"
+  network: external-network
+  ip: 10.1.1.11
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: missionpermissions-windows16
+    image: image-promise-win-2016
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-rdp"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.11
+        subnet: default
+        external_NAT: True
+
+# List network routes. Multiple routes may be listed using YAML block sequence format
+routes:
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: level
+  questions:
+    - type: auto
+      key: "ZyjHZdInbnp1iES3"
+      question: "Final task for Mission: Permissions"
+      script: "MissionPermissions.ps1"
+      server: missionpermissions2-windows16
+      operating-system: windows
+      complete: False

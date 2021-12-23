@@ -1,0 +1,72 @@
+{% extends "index.jinja" %}
+{% block navblock %}
+     <a href="{{ url_for('johnnycipher.caesar', workout_id=workout_id) }}">
+        <i class="fa fa-key sidebar-icon"></i>
+        <p class="sidebar-txt">Caesar Ciphers</p>
+    </a>
+    <a href="{{ url_for('johnnycipher.substitution', workout_id=workout_id) }}">
+        <i class="fa fa-key sidebar-icon"></i>
+        <p class="sidebar-txt">Substitution Cipher</p>
+    </a>
+{% endblock navblock %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('johnnycipher.static', filename='styles/johnnycipher-styles.css') }}">
+{% endblock styles_block %}
+{% block header_img %}
+    <img class="banner-image"
+         src="{{ url_for('.static', filename='img/sinister_alt_banner.jpg') }}"
+         alt="shadowed figure">
+{% endblock header_img %}
+{% block background_img %}{% endblock background_img %}
+{% block content %}
+{# <body style="text-align:center;margin:60px"> #}
+<div class="inner-content-wrapper" style="text-align: center" id="main">
+    <h1>Substitution Cipher</h1>
+    <br>
+    {# List of Ciphers they need to decipher: Needs to be submitted with Ajax #}
+    <div class="inner-content-wrapper" id="caesar-cipher-inputs">
+        <div class="inner-content-wrapper" id="firstcipher">
+            <p>Cipher: {{ sub_cipher }}</p>
+            <label class="cipher-label" for="cipher1">Cleartext:</label>
+            <input type="text" size='80' name="cipher1" id="cipher1" class="cipher1 cipher-input" />
+        </div>
+        <div>
+            <button class="btn" id="button_cipher1">Check Message</button>
+        </div>
+        <br><br>
+    </div>
+</div>
+{#  </body> #}
+{% endblock content %}
+{% block js_block %}
+     <script type="text/javascript">
+        $(document).ready(function() {
+            $('#button_cipher1').on('click', function () {
+                const message = $('#cipher1').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ url_for('johnnycipher.substitution', workout_id=workout_id) }}",
+                    data: JSON.stringify({cipher: message}),
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        console.log('AJAX Success!');
+                        display_cipher_submission(data['status'], data['message']);
+                    },
+                    error: function (e) {
+                        console.log('AJAX Error!');
+                        console.log(e)
+                    }
+                });
+            });
+
+            function display_cipher_submission(sub_status, sub_message) {
+                let results_input = $('#cipher1');
+                if (sub_status === true) {
+                    results_input.html(sub_message);
+                    results_input.css('background-color', '#4CAF50');
+                }
+            }
+        });
+     </script>
+{% endblock js_block %}

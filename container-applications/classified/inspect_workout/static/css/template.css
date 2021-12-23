@@ -1,0 +1,125 @@
+body {
+    letter-spacing: 0.0625em;
+}
+.btn {
+    box-shadow: 0 0.1875rem 0.1875rem 0 rgba(0, 0, 0, 0.1) !important;
+    padding: 1.25rem 2rem;
+    font-family: "Varela Round", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 80%;
+    text-transform: uppercase;
+    letter-spacing: 0.15rem;
+    border: 0;
+}
+.masthead {
+    position: relative;
+    width: 100%;
+    height: auto;
+    min-height: 35rem;
+    padding: 15rem 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 75%, #000000 100%), url("/static/SecurityBG.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    background-size: cover;
+}
+.masthead h1 {
+    font-family: "Varela Round", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 2.5rem;
+    line-height: 2.5rem;
+    letter-spacing: 0.8rem;
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0));
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+.masthead h2 {
+    max-width: 20rem;
+    font-size: 1rem;
+}
+@media (min-width: 768px) {
+    .masthead h1 {
+        font-size: 4rem;
+        line-height: 4rem;
+    }
+}
+@media (min-width: 992px) {
+    .masthead {
+        height: 100vh;
+        padding: 0;
+    }
+    .masthead h1 {
+        font-size: 6.5rem;
+        line-height: 6.5rem;
+        letter-spacing: 0.8rem;
+    }
+    .masthead h2 {
+        max-width: 30rem;
+        font-size: 1.25rem;
+    }
+}
+.modal-login {
+    color: #636363;
+    width: 350px;
+}
+.modal-login .modal-content {
+    padding: 20px;
+    border-radius: 5px;
+    border: none;
+}
+.modal-login .modal-header {
+    border-bottom: none;
+    position: relative;
+    justify-content: center;
+}
+.modal-login h4 {
+    text-align: center;
+    font-size: 26px;
+}
+.modal-login  .form-group {
+    position: relative;
+}
+.modal-login i {
+    position: absolute;
+    left: 13px;
+    top: 11px;
+    font-size: 18px;
+}
+.modal-login .form-control {
+    padding-left: 40px;
+}
+.modal-login .form-control:focus {
+    border-color: #00ce81;
+}
+.modal-login .form-control, .modal-login .btn {
+    min-height: 40px;
+    border-radius: 3px;
+}
+.modal-login .hint-text {
+    text-align: center;
+    padding-top: 10px;
+}
+.modal-login .close {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+.modal-login .btn, .modal-login .btn:active {
+    border: none;
+    background: #00ce81 !important;
+    line-height: normal;
+}
+.modal-login .btn:hover, .modal-login .btn:focus {
+    background: #00bf78 !important;
+}
+.modal-login .modal-footer {
+    background: #ecf0f1;
+    border-color: #dee4e7;
+    text-align: center;
+    margin: 0 -20px -20px;
+    border-radius: 5px;
+    font-size: 13px;
+    justify-content: center;
+}
+.modal-login .modal-footer a {
+    color: #999;
+}

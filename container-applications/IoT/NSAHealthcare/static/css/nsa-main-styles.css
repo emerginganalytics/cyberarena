@@ -1,0 +1,359 @@
+/* NSA Healthcare IoT Styles */
+/* General Styles */
+html {
+    color: black;
+    background: #efefef;
+    font-family: "Heavy Data Nerd Font Complete", "Heavy Data Nerd", "Cascadia Code Light" ,"sans-serif";
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+}
+body {
+    margin: 0;
+    padding-top: 70px;
+    padding-bottom: 0;
+}
+button {
+    font-size: 15px;
+    font-weight: lighter;
+    margin: 5px;
+    width: auto;
+    display: inline-block;
+}
+input {
+    width: 400px;
+    height: 15px;
+    font-size: 16px;
+    border-radius: 4px;
+    box-shadow: inset 0px 0px 0px 1px black;
+    background: rgba(211, 211, 211, 0.84);
+    padding: 10px;
+    margin: 5px;
+}
+.center-content {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+}
+
+/* Navbar Styles */
+nav.iot-navbar {
+    background: #3178d7;
+    color: white;
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    padding: 0 1%;
+    z-index: 2;
+    border-bottom: #535353 solid 0.1vh;
+    box-shadow: 1px 1px 10px #000000;
+}
+#nav-img {
+    display: inline-block;
+    width: 40px;
+    vertical-align: middle;
+    padding-right: 5px;
+    padding-bottom: 5px;
+    filter: brightness(100%) sepia(100%) saturate(50%);
+}
+link#nav-ico {
+    filter: brightness(100%) sepia(100%) saturate(50%);
+}
+nav > h1 {
+    display: inline-block;
+}
+
+span.disp-bpm {
+    visibility: hidden;
+}
+
+/* Container Styles */
+div.html-container {
+    height: 90%;
+    width: 85%;
+    min-width: 900px;
+    top: 52px;
+    margin: auto auto 50px auto;
+}
+div.body-container {
+    height: 80%;
+    min-height: 520px;
+    width: 100%;
+    min-width: 800px;
+    margin: auto;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+div.blue-div-wrapper {
+    /* background: #4285F4; Same color as navbar */
+    background: #1a73e8;
+    height: 370px;
+    width: 850px;
+    min-width: 820px;
+    border: #535353 solid 0.001vh;
+    border-radius: 2px;
+    box-shadow: 0 15px 10px -10px grey;
+}
+div.iot-setup-container {
+    background: whitesmoke;
+    height: 350px;
+    width: 830px;
+    min-width: 800px;
+    border: 1px solid #535353;
+    border-radius: 2px;
+}
+.error-msg {
+    display: block;
+    color: crimson;
+    font-size: 20px;
+}
+.sensor-data-label p {
+    text-align: right;
+    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: bold;
+
+}
+.grid-hover-msg {
+    position: absolute;
+    visibility: hidden;
+    color: white;
+    font-size: 30px;
+    opacity: 0;
+    z-index: -1;
+}
+.data-square-container {
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+.data-square {
+    display: inline-grid;
+    border: 1px solid #eeb211;
+    border-radius: 4px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: #1a73e8;
+    color: white;
+    font-family: 'Aldrich', sans-serif;
+    font-size: 60px;
+    margin: 10px;
+    padding: 20px;
+}
+.data-square p {
+    margin: 0;
+    padding: 0;
+}
+.data-square sup {
+    font-size: 25px;
+}
+.square-label {
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+}
+
+
+/* Text Input Styles */
+#override-input {
+    width: 300px;
+    height: 15px;
+    font-size: 16px;
+    border-radius: 4px;
+    box-shadow: inset 0px 0px 0px 1px black;
+    background: rgba(211, 211, 211, 0.84);
+    padding: 10px;
+    margin: 5px;
+}
+label {
+    font-size: 18px;
+    font-weight: bold;
+}
+img.override-submit-img {
+    visibility: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    width: 30px;
+    height: auto;
+    border: none;
+    background: none;
+}
+button.override-submit {
+    background: whitesmoke;
+    height: 30px;
+    border: 1px solid #4285F4;
+    border-radius: 2px;
+    box-shadow: 1px 2px 2px 1px #000000;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+button.override-submit:hover + .override-submit-img {
+    visibility: visible;
+}
+button.override-submit:hover {
+    background: rgba(234, 67, 53, 0.62);
+    border: 1px solid black;
+}
+button.override-submit:active {
+    box-shadow: inset 1px 1px 2px 0px #000000;
+}
+
+/* iot-commands button styles */
+button.iot-commands {
+    background: whitesmoke;
+    width: 100px;
+    height: 30px;
+    border: 1px solid #4285F4;
+    border-radius: 2px;
+    box-shadow: 1px 2px 2px 1px #000000;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+button.iot-commands:hover {
+    background: #eeb211;
+    border: 1px solid black;
+    box-shadow: 1px 1px 1px 1px #000000;
+    color: black;
+}
+button.iot-commands:active {
+    box-shadow: inset 1px 1px 2px 0px #000000;
+}
+
+/* Command results styles */
+#command-result-error {}
+.command-result {}
+
+/* Table Styles */
+table {
+    
+}
+
+/* Footer Styles */
+div.iot-footer {
+  height: 10%;
+  width: 70%;
+  margin: 0 auto;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+p.iot-footer {
+  font-size: 15px;
+  text-align: center;
+}
+
+#indicator{
+    transition: 0.1s linear;
+}
+
+.tab{
+    overflow:hidden;
+    border: 1px solid #4285F4;
+    grid-area: tabs;
+    background-color:white;
+}
+
+.tab button{
+    background-color: inherit;
+    float:left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size:2em;
+}
+
+.tab button:hover{
+    background-color: #4285F4;
+    color:white;
+    box-shadow: inset 1px 2px 5px 0 rgba(12, 12, 12, 0.2);
+}
+
+.tab button.active{
+    background-color: #4285F4;
+    color: white;
+    border-bottom: 3px solid #eeb211;
+}
+
+.tabContent{
+    display: none;
+    border-top: none;
+}
+
+/* Popup Begin */
+.modal-popup {
+    position: fixed;
+    width: 40%;
+    min-width: 530px;
+    top: 150px;
+    right: 30%;
+    left: 30%;
+    height: 100px;
+    text-align: center;
+    line-height: 30px;
+    padding-top: 30px;
+    background: #4285F4;
+    border: black solid 1px;
+    border-top: 5px solid #eeb211;
+    box-shadow: 1px 1px 2px 1px grey;
+    color: white;
+    font-size: 2.5em;
+    font-weight: bold;
+    transition: 0.8s;
+    z-index: 10;
+}
+.modal-popup .modal-message {
+    white-space: nowrap;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 767px) {
+    .modal-popup .modal-message {
+        display: none;
+    }
+}
+.modal-popup .mobile {
+    display: none;
+}
+@media (max-width: 767px) {
+    .modal-popup .mobile {
+        display: inline-block;
+    }
+}
+@keyframes slideIn {
+    0% {
+        transform: translateY(-50px);
+    }
+    100% {
+        transform: translateY(250px);
+    }
+}
+.modal-close-cb {
+    border: .01em solid black;
+    color: black;
+    background: whitesmoke;
+    position: absolute;
+    display: inline-block;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    box-shadow: 1px 2px 5px 0 rgba(12, 12, 12, 0.2);
+    line-height: 30px;
+    height: 30px;
+    width: 30px;
+    font-size: 16px;
+    font-weight: bold;
+}
+.modal-close-cb:hover {
+    background: #d50525;
+    box-shadow: inset 1px 2px 5px 0 rgba(12, 12, 12, 0.2);
+}
+.modal-checkbox-cb {
+    display: none;
+}
+.modal-checkbox-cb:checked + .modal-popup {
+    transform: translateY(-500px);
+}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title%} 403 {% endblock %}
+{% block content %}
+    <div class='image_container' style='text-align: center;'>
+        <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+    </div>
+    <div id='error_container' style='margin:auto;text-align:center;'>
+        <h1>Sorry!</h1>
+        <h3>This is embarrassing, but I can't find any workouts for you. Maybe try logging in with another email. If that
+        doesn't work, then check with your instructor.</h3>
+    </div>
+    <script type="text/javascript">
+        window.setTimeout(function () {
+            window.location.replace("{{ url_for('login') }}");
+        }, 6500);
+    </script>
+{% endblock %}

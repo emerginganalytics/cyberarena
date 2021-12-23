@@ -1,0 +1,78 @@
+version: '1'
+
+workout:
+  name: 'GenCyber Arena Acxiom Workout'
+  workout_description: 'Learn how to use Sublist3r to identify subdomains.'
+  student_instructions_url: 'https://storage.googleapis.com/student_workout_instructions_tgd4419/GenCyberAcxiomStudentWorkout.pdf'
+  teacher_instructions_url: 'https://storage.googleapis.com/teacher_workout_instructions_84jf627/GenCyberAcxiomTeacherInstructions.pdf'
+  author: David McCoy
+  hourly_cost: 0.34
+
+student_entry:
+  type: rdp
+  username: workout
+  password: "SHkpf58hnEcoEE51"
+  network: external-network
+  ip: 10.1.1.10
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: student-workstation
+    image: image-cybergym-acxiom-student-windows
+    machine_type: "n1-standard-2"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: linux-host
+    image: image-cybergym-acxiom-linux-host
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.20
+        subnet: default
+        external_NAT: false
+  - name: windows-host
+    image: image-cybergym-acxiom-windows-host
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.30
+        subnet: default
+        external_NAT: false
+
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: "level"
+  questions:
+    - type: input
+      question: "Exercise 1) Are the ports discovered in both scans all in an open state? (Yes or No)"
+      answer: "No"
+    - type: input
+      question: "Exercise 1) Which port number is not in an open state?"
+      answer: "443"
+    - type: input
+      question: "Exercise 2) Which is most likely the operating system?"
+      answer: "linux"
+    - type: input
+      question: "Exercise 2) Which version number of Apache is running on the target system?"
+      answer: "2.4.38"
+    - type: input
+      question: "Exercise 3) What does Apache show when using a browser?"
+      answer: "webpage"
+    - type: input
+      question: "Exercise 4) What's the IP address of ualr.com?"
+      answer: "66.96.149.1"

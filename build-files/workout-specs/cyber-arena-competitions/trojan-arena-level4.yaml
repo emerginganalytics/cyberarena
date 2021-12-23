@@ -1,0 +1,87 @@
+version: '1'
+
+workout:
+  name: 'Trojan Arena Level 4'
+  build_type: arena
+  workout_description: 'Head to head capture-the-flag style competition.'
+  student_instructions_url: 'TrojanArenaLevel4StudentInstructions.pdf'
+  teacher_instructions_url: 'TrojanArenaLevel4TeacherInstructions.pdf'
+
+# For student servers, these will be replicated to the number of
+# students specified by the instructor. These student servers can
+# be in the same network, which is the preferred and default build,
+# but they can also have distinct networks.
+# The student network is named 'student-network' or student-network-#'
+student-servers:
+  student_entry: student-workstation
+  student_entry_type: rdp
+  student_entry_username: workout
+  student_entry_password: 'Md32Nlml_fCertZ6QZ-Oa'
+  network_type: same
+  servers:
+    - name: student-workstation
+      image: image-cybergym-arena-windows-4
+      machine_type: n1-standard-1
+
+# If additional networks are needed for servers, these are added here.
+# Do not use 10.1.0.0/16. This is reserved for students
+additional-networks:
+
+# Servers for the arena are added here.
+additional-servers:
+  - name: cybergym-classified
+    image: image-cybergym-classified
+  - name: cybergym-hidden
+    image: image-cybergym-hiddensite
+  - name: cybergym-nessus
+    image: image-cybergym-nessus-arena
+  - name: cybergym-split-key
+    image: image-cybergym-arena-split-key-debian
+
+# If a firewall exists in the network, then the routes necessary for the firewall is added here
+routes:
+
+# Any additional firewall rules are added here. Note: student firewall rules are added by default
+firewall_rules:
+  - name: allow-http
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-ssh
+    target_tags: ["student-entry"]
+    protocol: none
+    ports: ["tcp/22"]
+    source_ranges: ["0.0.0.0/0"]
+
+assessment:
+  type: "level"
+  questions:
+    - type: input
+      question: "Flag #1: XSS"
+      answer: ""
+      points: 100
+    - type: input
+      question: "Flag #2: Firewall"
+      answer: ""
+      points: 100
+    - type: input
+      question: "Flag #3: Nessus Scan"
+      answer: "CyberGym{guest}"
+      points: 100
+    - type: input
+      question: "Flag #4: Buffer Overflow"
+      answer: ""
+      points: 100
+    - type: input
+      question: "Flag #5: Ghidra"
+      answer: "T0w1aZr!nL6S49mS"
+      points: 100
+    - type: input
+      question: "Flag #6: Crypto: Split Key"
+      answer: "TurboKitty"
+      points: 150
+    - type: input
+      question: 'Flag #7: Bonus Round'
+      answer: "Abc123456"
+      points: 50

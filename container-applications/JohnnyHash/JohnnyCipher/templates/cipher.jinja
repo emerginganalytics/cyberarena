@@ -1,0 +1,179 @@
+{% extends "index.jinja" %}
+{% block navblock %}
+     <a href="{{ url_for('johnnycipher.caesar', workout_id=workout_id) }}">
+        <i class="fa fa-key sidebar-icon"></i>
+        <p class="sidebar-txt">Caesar Ciphers</p>
+    </a>
+    <a href="{{ url_for('johnnycipher.substitution', workout_id=workout_id) }}">
+        <i class="fa fa-key sidebar-icon"></i>
+        <p class="sidebar-txt">Substitution Cipher</p>
+    </a>
+{% endblock navblock %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('johnnycipher.static', filename='styles/johnnycipher-styles.css') }}">
+{% endblock styles_block %}
+{% block header_img %}
+    <img class="banner-image"
+         src="{{ url_for('.static', filename='img/sinister_alt_banner.jpg') }}"
+         alt="shadowed figure">
+{% endblock header_img %}
+{% block background_img %}{% endblock background_img %}
+{% block content %}
+    <div class="inner-content-wrapper" id="cipherMain">
+        <h1>Caesar Cipher</h1>
+        <hr>
+        <div class="inner-content-wrapper">
+            <label class="cipher-label" for="ciphertext">Encrypted Message:</label>
+            <input class="cipher-input" type="text" name="ciphertext" id="ciphertext" size="80">
+
+            <label class="cipher-label" for="key">Key:</label>
+            <input class="cipher-input" type="text" name="key" id="key" size="2" value="13">
+            <button type="submit" class="btn" id="button_decrypt">Decrypt Message</button>
+        </div>
+        <div id="decrypted_results"></div>
+        <br>
+        <br>
+        {# List of Ciphers they need to decipher: Needs to be submitted with Ajax #}
+        <div class="cipher-div-wrapper" id="caesar-cipher-inputs">
+            <div class="inner-content-wrapper" id="firstcipher">
+                <p>{{ firstcipher }}</p>
+                <label class="cipher-label" for="cipher1">Cipher 1:</label>
+                <input type="text" size='80' name="cipher1" id="cipher1" class="cipher1 cipher-input" />
+            </div>
+            <div>
+                <button class="btn" id="button_cipher1">Check Cipher</button>
+            </div>
+            <br><br>
+            <div class="inner-content-wrapper" id="secondcipher">
+                <p>{{ secondcipher }}</p>
+                <label class="cipher-label" for="cipher2">Cipher 2:</label>
+                <input type="text" size='80' name="cipher2" id="cipher2" class="cipher2 cipher-input"/>
+            </div>
+            <div>
+                <button class="btn" id="button_cipher2">Check Cipher</button>
+            </div>
+            <br><br>
+            <div class="inner-content-wrapper" id="thirdcipher">
+                <p>{{ thirdcipher }}</p>
+                <label class="cipher-label" for="cipher3">Cipher 3:</label>
+                <input type="text" size='80' name="cipher3" id="cipher3" class="cipher3 cipher-input"/>
+            </div>
+            <div>
+                <button class="btn" id="button_cipher3">Check Cipher</button>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+{% block js_block %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#button_decrypt').on('click', function() {
+               const encrypted = $('#ciphertext').val();
+               const key = String($('#key').val());
+               $.ajax({
+                  type : 'POST',
+                  url : "{{ url_for('johnnycipher.ajax_calculate_caesar', workout_id=workout_id) }}",
+                  data : JSON.stringify({ciphertext: encrypted, key: key}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+
+                      display_caesar(data['plaintext']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_caesar(plaintext) {
+                let results_div = $('#decrypted_results');
+
+                results_div.html('');
+
+                let html_string = 'Decrypted Message: ' + plaintext + '<br />';
+                results_div.html(html_string);
+            }
+            $('#button_cipher1').on('click', function() {
+               const message = $('#cipher1').val();
+               $.ajax({
+                  type : 'POST',
+                  url : "{{ url_for('johnnycipher.caesar', workout_id=workout_id) }}",
+                  data : JSON.stringify({cipher : message, id : 1}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher1_submission(data['status1'], data['message1']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher1_submission(sub_status1, sub_message1) {
+                let results_input = $('#cipher1');
+                console.log(sub_status1)
+
+                if (sub_status1 === true) {
+                    results_input.html(sub_message1);
+                    results_input.css('background-color', '#4CAF50');
+                }
+            }
+            $('#button_cipher2').on('click', function() {
+               const message = $('#cipher2').val();
+               $.ajax({
+                  type : 'POST',
+                  url : "{{ url_for('johnnycipher.caesar', workout_id=workout_id) }}",
+                  data : JSON.stringify({cipher : message, id : 2}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher2_submission(data['status2'], data['message2']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher2_submission(sub_status2, sub_message2) {
+                let results_input = $('#cipher2');
+
+                if (sub_status2 === true) {
+                    results_input.html(sub_message2);
+                    results_input.css('background-color', '#4CAF50');
+                }
+            }
+            $('#button_cipher3').on('click', function() {
+               const message = $('#cipher3').val();
+               $.ajax({
+                  type : 'POST',
+                  url : "{{ url_for('johnnycipher.caesar', workout_id=workout_id) }}",
+                  data : JSON.stringify({cipher : message, id : 3}),
+                  dataType : 'json',
+                  contentType : 'application/json',
+                  success : function(data) {
+                      console.log('AJAX Success!');
+                      display_cipher3_submission(data['status3'], data['message3']);
+                  },
+                   error : function(e) {
+                      console.log('AJAX Error!');
+                      console.log(e)
+                   }
+               });
+            });
+            function display_cipher3_submission(sub_status3, sub_message3) {
+                let results_input = $('#cipher3');
+
+                if (sub_status3 === true) {
+                    results_input.html(sub_message3);
+                    results_input.css('background-color', '#4CAF50');
+                }
+            }
+        });
+    </script>
+{% endblock js_block %}

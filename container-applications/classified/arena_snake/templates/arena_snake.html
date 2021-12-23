@@ -1,0 +1,82 @@
+{% block title %}<title>Arena Snake</title>{% endblock %}
+{% block header %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper.JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('arena_snake_bp.static', filename='arena_snake.css') }}">
+    <script src="{{ url_for('static', filename='js/modal.js') }}" type="text/javascript"></script>
+{% endblock %}
+{% block page_content %}
+    <p id="message">You only need a score of 100,000 to get the flag. Good luck!</p>
+    <button href="#assessmentModal" class="check_flag_btn btn btn-primary badge-pill" style="display: inline-block;" data-toggle="modal">Check Flag</button>
+    <p id="bonus"></p>
+    <p id="bonus2"></p>
+    <p id="bonus3"></p>
+    <p id="flag"></p>
+    <p id="p1">SCORE: </p>
+    <p id="p2">HIGHSCORE: </p>
+    <p id="score"></p>
+    <p id="high"></p>
+    <canvas width="400" height="400" id="game"></canvas>
+
+    <!-- Classified Flag Modal -->
+    <div id="assessmentModal" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="{{ url_for('arena_snake_bp.check_flag', workout_id=workout_id)}}" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Flag Checker</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Captured the classified flag?</label>
+                            <input type="text" id="classified_flag" name="classified_flag" required><br>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <input type="submit" name="check_button" class="btn btn-success" value="Check">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% if completion == true %}
+    <div id="completion_modal" class="modal" data-easein="tada" tabindex="-1" role="dialog" aria-labelledby="Completion Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">You found the flag!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Thank you so much for finding that flag! Now I can tell the intern to stop making retro games
+                    and start helping around the Trojan Cyber Arena. We couldn't have gotten that flag without you!  </p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+{% block js_block %}
+    <script src="{{ url_for('arena_snake_bp.static', filename='arena_snake.js') }}" type="text/javascript"></script>
+    {% if completion == true %}
+    <script>
+        $(document).ready(function(){
+            $("#completion_modal").modal('show');
+        });
+    </script>
+    {% endif %}
+{% endblock %}

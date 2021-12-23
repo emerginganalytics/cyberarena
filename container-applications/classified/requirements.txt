@@ -13,6 +13,7 @@ PyQRCode
 six
 SQLAlchemy
 visitor
+pymysql
 Werkzeug
 WTForms
 gunicorn
@@ -20,4 +21,7 @@ google-cloud-datastore
 google-api-python-client
 google-cloud-storage
 google-cloud-runtimeconfig
+google-cloud-pubsub
+google-cloud-iot
 requests
+cryptocode

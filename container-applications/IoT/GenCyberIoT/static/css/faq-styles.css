@@ -1,0 +1,63 @@
+/* Collapsible FAQ Info Styles */
+.faqDivWrapper {
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 15px;
+  border: 1px solid black;
+  border-radius: 4px;
+  box-shadow: 5px 15px 10px -5px grey;
+}
+#faq-h1 {
+  border-bottom: 2px solid #d50525;
+}
+.faqDivBtn {
+  background-color: #1a73e8;
+  color: whitesmoke;
+  cursor: pointer;
+  padding: 18px;
+  margin: 0;
+  width: 100%;
+  border: 1px solid black;
+  border-radius: 2px;
+  text-align: left;
+  outline: none;
+  font-size: 20px;
+}
+.active {
+  background-color: #1a73e8;
+  border-bottom: none;
+}
+
+.faqDivBtn:hover {
+  background-color: #eeb211;
+  color: black;
+}
+
+.faqDivBtn:after {
+  content: '\02795'; /* Unicode character for "plus" sign (+) */
+  font-size: 20px;
+  color: black;
+  float: right;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+
+.faqContentDiv {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: whitesmoke;
+  border: 1px solid black;
+  border-top: 5px solid #eeb211;
+  font-family: "Cascadia Code";
+  font-size: 2vh;
+}
+
+/* FAQ Info Styles */
+.faqContentDiv, button[class=faqDivBtn] {
+  margin-bottom: 15px;
+}

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Johnny Hash{% endblock title %}</title>
+    <link rel="icon" href="/static/img/spy.ico" type="image/png"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main-styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/modal-styles.css') }}">
+    {% block styles_block %}{% endblock styles_block %}
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    {% block js_block %}{% endblock js_block %}
+    {% block head_block %}{% endblock head_block %}
+</head>
+<body>
+    <div class="sidebar">
+        <img src="/static/img/sinister%20(2).jpg" style="width:100%" alt="shadowed figure">
+        <a href="/{{ workout_id }}" >
+            <i class="fa fa-home sidebar-icon"></i>
+            <p class="sidebar-txt">HOME</p>
+        </a>
+        {% block navblock %}{% endblock navblock %}
+    </div>
+    <div class="main-content-wrapper">
+        <header class="inner-content-wrapper banner-image" id="home">
+            {% block header_img %}
+                <img class="banner-image"
+                     src="{{ url_for('.static', filename='img/sinister_alt_banner.jpg') }}"
+                     alt="shadowed figure">
+            {% endblock header_img %}
+        </header>
+    </div>
+    <div class="main-content-wrapper">
+         {% block content %}{% endblock content %}
+    </div>
+    <div class="footer-div">
+        <p>&copy; Trojan Cyber Arena 2021</p>
+    </div>
+    </body>
+</html>
+

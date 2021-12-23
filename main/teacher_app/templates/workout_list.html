@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% import "logo_macro.html" as logo %}
+{% block title %}Unit {{ unit.key.name }}{% endblock %}
+
+{% block content %}
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+<script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}"></script>
+<style>
+    .landing_content .btn, table{
+        width:95%;
+    }
+    .status-indicator{
+        height: 1em;
+        width: 1em;
+        border-radius: 50%;
+        display: inline-block;
+        background-color: rgb(196, 154, 16);
+    }
+    .change_student_name{
+        padding-bottom: 1em;
+        border-bottom: 1px solid var(--main_color, #6e2639);
+    }
+    [data-workout-state="RUNNING"]{
+        background-color: blue;
+    }
+    [data-workout-state="READY"]{
+        background-color: green;
+    }
+    [data-workout-state="DELETED"]{
+        background-color: black;
+    }
+</style>
+    <div class="row">
+        <div class='controls col-lg-2' style="border: 1px solid black">
+            {{ logo.logo_div() }}
+            {% if unit['build_type'] == "compute" %}
+            <div class="control_button">
+                <form action="/teacher/start_all" method="post">
+                    <div class="input-field" >
+                        <label>How long should the workout run (1 - 10 hours)?</label>
+                        <input type="hidden" id="unit_id" name="unit_id" value="{{ unit.key.name }}">
+                        <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;text-align:center;">
+
+                    </div>
+                    <div class="btn-ctn">
+                            <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/teacher/stop_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit.key.name }}">
+                    <div class="btn-ctn ">
+                            <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/teacher/reset_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit.key.name }}">
+                    <div class="btn-ctn">
+                            <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            
+            {% endif %}
+            
+            {% if unit['workout_author'] %}
+                <div id="author">
+                Author: {{ unit['workout_author']}}
+                </div>
+            {% endif %}
+              
+             {% if 'nice_standards' in unit and unit['nice_standards'] %}
+             {% for standards in unit['nice_standards'] %}
+                {% for key, values in standards.items() %}
+                    <div id="standards">
+                    {% if key != 'link' %}
+                        {{key}}: {{values}}
+                    {% endif %}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% endif %}
+            <hr>
+            <a href="/teacher/home" class="btn">Home</a>
+        </div>
+        
+
+        <div class='landing_content container col-lg-10' style="margin-top:1em;padding:1em;" onload="check_workout_status('{{ unit.key.name }}')">
+
+            <h2>Description</h2>
+            <p>{{ unit['description'] }}</p>
+            {% if teacher_instructions %}
+                <a href="{{ teacher_instructions }}" target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
+            {% endif %}
+            <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
+
+            <div id="distribution_container" style="margin-top:2em; margin-bottom:1em;">
+                <h2>Distribution</h2>
+                <p>Otherwise, click the button below to copy all the student links to your clipboard (from top to bottom). You can then paste them into a column in a spreadsheet.</p>
+                {% if unit['registration_required'] %}
+                    <p>Students in this unit will have a link to their registered workout from their home page.</p>
+                {% else %}
+                    <p>To allow students to register themselves for this unit, send them the following link: <span id="registration_link" style="color:blue">{{main_app_url}}/student/{{unit.key.name}}/signup</span></p>
+                    <p>This will allow students to claim unnamed workouts, as well as provide their own names.</p>
+                {% endif %}
+                <a onclick="copy_student_links()" href="#" class="btn" style="width:50%;">Copy Student Links</a>
+                <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                    <th>Status</th>
+                    <th>Student Name</th>
+                    <th>Workout ID <br><small>Click to view student landing page</small></th>
+                    <th>Assessment Submissions</th>
+                    <th>Manage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for workout in workout_list %}
+                        <tr>
+                            <td id="state-container-{{workout.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workout.state}}"><span class="status-indicator" id="status-indicator-{{workout.name}}" data-workout-state="{{workout['state']}}"></span></td>
+                            {% if workout['student_name'] %}
+                                {% if unit['registration_required'] %}
+                                    <td id="workout_student_name_{{workout.name}}">{{workout['student_name']['student_name']}}</td>
+                                {% else %}
+                                    <td id="workout_student_name_{{workout.name}}">{{workout['student_name']}}</td>
+                                {% endif %}
+                            {% else %}
+                                <td>Student {{loop.index}}</td>
+                            {% endif %}
+                            <td><a class="workout-link" href="/student/landing/{{workout.name}}">{{workout.name}}</a></td>
+                            <td>
+                                {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
+                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
+                                        View Submissions
+                                    </button>
+                                    <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Assessment results for {{workout.name}}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <ul class="nav nav-pills" style='justify-content: space-around;'>
+                                                        {% if workout['submitted_answers'] %}
+                                                        <li><a data-toggle="pill" class='btn' href="#text_input_{{workout.name}}" style='width:100%;'>Text Answers</a></li>
+                                                        {% endif %}
+                                                        {% if workout["uploaded_files"] %}
+                                                        <li><a data-toggle="pill" class='btn' href="#file_uploads_{{workout.name}}" style='width:100%;'>File Uploads</a></li>
+                                                        {% endif %}
+                                                        {% if workout["auto_answers"] %}
+                                                        <li><a data-toggle="pill" class="btn" href="#auto_assessment_{{workout.name}}" style='width:100%;'>Auto Complete Progress</a></li>
+                                                        {% endif %}
+                                                    </ul>
+                                                    <div class='tab-content'>
+                                                        {% if workout['submitted_answers'] %}
+                                                            <div id='text_input_{{workout.name}}' class='tab-pane fadeIn'>
+                                                                <table class="table">
+                                                                    <tr>
+                                                                        <th>Question</th>
+                                                                        <th>Submitted Answer</th>
+                                                                        <th>Key</th>
+                                                                    </tr>
+                                                                    {% for question in workout["submitted_answers"] %}
+                                                                        <tr>
+                                                                            <td>{{question['question']}}</td>
+
+                                                                            <td>Answer: {{question['answer']}}</td>
+                                                                            {% for full_question in workout['assessment']['questions'] %}
+                                                                                {% if full_question['question'] == question['question'] %}
+                                                                                <td>{{full_question['answer']}}</td>
+                                                                                {% endif%}
+                                                                            {% endfor %}
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </table>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if workout['uploaded_files'] %}
+                                                            <div id='file_uploads_{{workout.name}}' style='text-align:center;' class="tab-pane fade">
+                                                                <div class='upload_view'>
+                                                            {% for question in workout['uploaded_files'] %}
+                                                                <li>{{question['question']}}</li>
+                                                                <img class="img-fluid" src="{{question['storage_url']}}">
+                                                            {% endfor %}
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if workout['auto_answers'] %}
+                                                            <div id='auto_assessment_{{workout.name}}' class='tab-pane fade'>
+                                                                <ol>
+                                                                {% for question in workout['auto_answers'] %}
+                                                                    <li>{{question['question']}}: 
+                                                                        {% if question['complete'] %}
+                                                                        <span style='color:green;'>Complete</span>
+                                                                        {% else %}
+                                                                        <span style='color:red;'>Not completed</span>
+                                                                        {% endif %}
+                                                                    </li>
+                                                                {% endfor %}
+                                                                </ol>
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer" style="justify-content:center;">
+                                                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    No Submissions
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" data-toggle="modal" data-target="#manage_workout_{{workout.name}}">Manage</button>
+                                
+                                <div class="modal fade" id="manage_workout_{{workout.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Manage Workout {{workout.name}}</h4>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                
+                                                <div class="change_student_name">
+                                                    <h5 style="text-align:left">Change Student Name</h5>
+                                                    <input id='name_change_field_{{workout.name}}' name="new_name" placeholder="Enter new student name" type="text" style="margin-bottom: 1em;"/>
+                                                    <a onclick="change_student_name('{{workout.name}}')" class="btn">Change</a>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>        
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>       
+    </div>
+    <div id="loading-msg"></div>
+    <script>
+
+        $(document).ready(function(){
+            $('.status-indicator-container').tooltip();
+            $("form").submit(function(){
+                $('#start-vm').attr('disabled','disabled');
+                $('#stop-vm').attr('disabled','disabled');
+                $('#reset-vm').attr('disabled','disabled');
+                $("#loading-msg").html('Please wait while the process completes' +
+                    '</br><div class="loader"></div>');
+            });
+            check_workout_status("{{unit.key.name}}");
+            setInterval(function(){
+                check_workout_status( "{{ unit.key.name }}");
+            }, 30000);
+        });
+        
+        function check_workout_status(unit_id){
+            
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                url: "/teacher/workout_list/" + unit_id,
+                traditional: "true",
+                data: JSON.stringify({
+                    "unit_id": unit_id,
+                }),
+                dataType: "json",
+                success: function(data){
+                    for (i = 0; i < data.length; i++){
+                        var workout_state_indicator = document.getElementById('status-indicator-' + data[i]['name']);
+                        var state = data[i]['state'].toString();
+                        if (workout_state_indicator.dataset.workoutState != state){
+                            $("#state-container-" + data[i]['name']).tooltip('dispose').attr('title', state).tooltip({title: state});
+                        }
+                        workout_state_indicator.dataset.workoutState = data[i]['state'];
+                    }
+                },
+            });
+    
+        }  
+
+        
+    </script>
+{% endblock %}

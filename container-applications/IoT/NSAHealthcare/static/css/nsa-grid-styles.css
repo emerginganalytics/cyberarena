@@ -1,0 +1,108 @@
+/* Page Grid Styles */
+.body-grid {
+    display: grid;
+    grid-template-columns: 85px 250px 250px 250px 175px;
+    grid-template-areas:
+        'tabs tabs tabs tabs info'
+        'results results results results info'
+        'heart ecg ecg ecg info'
+        'heart ecg ecg ecg info'
+        'sensor sensor sensor sensor info'
+        'cmd cmd cmd cmd info';
+    /*grid-template-columns: 300px;
+    grid-template-rows: 300px;*/
+    grid-gap: 15px;
+    padding: 1px 15px 15px 15px;
+}
+.banner-grid {
+    grid-area: banner;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: white; /*#4285F4;*/
+    filter: grayscale(100%);
+    object-fit: contain;
+    max-height: 450px;
+    max-width: 300px;
+}
+.banner-img{
+    height: 100%;
+}
+.heart-grid {
+    grid-area: heart;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: #f44336; /*#4285F4;*/
+    text-align: center;
+    vertical-align: center;
+}
+.heart-grid h2 {
+    margin-top: 100px;
+    color: black
+}
+.heart-signal-grid {
+    grid-area: ecg;
+    position: relative;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: white; /*#4285F4;*/
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.heart-signal-grid:hover .grid-hover-msg {
+    visibility: visible;
+    opacity: 1;
+    z-index: 10;
+}
+.info-grid {
+    background: white; /*#4285F4;*/
+    grid-area: info; /*1 / 1 / 10 / 2;*/
+    padding: 10px;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    text-align: left;
+}
+.info-grid p {
+    font-size: 16px;
+}
+
+.cmd-btn-grid {
+    grid-area: cmd;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: white; /*#4285F4;*/
+    padding: 10px;
+    text-align: center;
+    justify-content: space-evenly;
+    justify-items: center;
+    align-items: center;
+    align-content: space-evenly;
+}
+.total-data-grid {
+    grid-area: results;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgray;
+    background: white;
+    padding: 10px;
+}
+.sensor-data-grid {
+    grid-area: sensor;
+    display: flex;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgrey;
+    background: white; /*#4285F4;*/
+    padding: 10px;
+    text-align: center;
+    justify-content: space-evenly;
+    justify-items: center;
+    align-items: center;
+    align-content: space-evenly;
+}

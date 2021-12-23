@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+
+{% block title%}Arena {{unit_id}}{% endblock%}
+
+{% block content %}
+<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+<script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}"></script>
+<script>
+    $(document).ready(function(){
+        $("form").submit(function(){
+            $('#start-vm').attr('disabled','disabled');
+            $('#stop-vm').attr('disabled','disabled');
+            $('#reset-vm').attr('disabled','disabled');
+            $("#loading-msg").html('Please wait while the process completes' +
+                '</br><div class="loader"></div>');
+        });
+        check_workout_status("{{unit_id}}");
+    });
+
+    function check_workout_status(unit_id){
+        
+        $.ajax({
+            type: "POST",
+            contentType: "application/json;charset=utf-8",
+            url: "/arena_list/" + unit_id,
+            traditional: "true",
+            data: JSON.stringify({
+                "unit_id": unit_id,
+            }),
+            dataType: "json",
+            success: function(data){
+                if(data['state'] == "READY"){
+                    for (i = 0; i < data['workouts'].length; i++){
+                        var link = document.getElementById("workout_link_" + data['workouts'][i]);
+                        link.classList.remove('btn-deactivated');
+                        link.className = 'btn';
+                        link.href = '#team_collapse_' + data['workouts'][i];
+                    }
+                }
+
+            },
+        });
+
+    }
+    
+    setInterval(function(){
+        check_workout_status( "{{ unit_id }}");
+    }, 30000);
+    
+</script>
+<style>
+    .landing_content .btn, table{
+        width:75%;
+    }
+    td, th{
+        padding:0;
+    }
+
+    .team_container{
+        border: 1px solid black;
+        border-right:0;
+        padding:1em;
+        margin-bottom:1em;
+    }
+    select{
+        display:block!important;
+    }
+</style>
+    <div class="row">
+        <div class='controls col-lg-2' style="border: 1px solid black">
+            <div id="logo" class="center">
+                <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo" class="img-fluid"/>
+            </div>
+            <div class="control_button">
+                <form action="/teacher/start_arena" method="post">
+                    <div class="form-group" >
+                        <label>How long should the workout run (1 - 10 hours)?</label>
+                        <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                        <input type="number" id="time" class="form-control" name="time" value="2" min="1" max="10" style="margin-top:1em;text-align:center;">
+
+                    </div>
+                    <div class="btn-ctn">
+                            <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START ARENA</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/teacher/stop_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                    <div class="btn-ctn ">
+                            <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUTS</button>
+                    </div>
+                </form>
+            </div>
+            <div class="control_button">
+                <form action="/reset_all" method="post">
+                    <input type="hidden" id="unit_id" name="unit_id" value="{{ unit_id }}">
+                    <div class="btn-ctn">
+                            <button id="reset-vm" class="waves-effect waves-light btn" >RESET WORKOUTS</button>
+                    </div>
+                </form>
+            </div><hr>
+            <a href="/teacher/home" class="btn">Home</a>
+        </div>
+        <div class='landing_content col-lg-10' style="margin-top:1em;padding:1em;">
+
+            <h2>Description</h2>
+            <p>{{ description }}</p>
+            {% if start_time %}
+            <h3>Start Time: {{start_time}} UTC</h3>
+            {% endif %}
+
+            {% if teacher_instructions %}
+                <a href="{{ teacher_instructions }}">Teacher Instructions</a>
+            {% endif %}
+            {% if student_instructions %}
+                <a href="{{ student_instructions }}">Student Instructions</a>
+            {% endif %}
+            <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
+            <a class="btn" style="width: 50%" href="/arena-scoreboard/{{ unit_id }}" target="_blank">View Scoreboard</a>
+            <br><br>
+            {% if unit_teams %}
+            {% for team in unit_teams %}
+                <div class='team_container' id='{{team}}'>
+                <h2>Team {{team}} </h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Arena ID <br><small>Click to view student page</small></th>
+                            <th>Manage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for workout in workout_list %}
+                            {% if workout['team'] == team%}
+                            <tr>
+                                {% if workout['student_name'] %}
+                                    <td id="workout_student_name_{{workout.key.name}}">{{workout['student_name']}}</td>
+                                {% else %}
+                                    <td id="workout_student_name_{{workout.key.name}}">Student {{loop.index}}</td>
+                                {% endif %}
+                                <td><a href="/student/arena_landing/{{workout.key.name}}">{{workout.key.name}}</a></td>
+                                <td>
+                                    <button class="btn btn-primary" data-toggle="modal" data-target="#manage_workout_{{workout.key.name}}">Manage</button>
+                                    <div class="modal fade" id="manage_workout_{{workout.key.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.key.name}}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Manage Workout {{workout.name}}</h4>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="change_student_name form-group">
+                                                        <h5 style="text-align:left">Change Student Name</h5>
+                                                        <input id='name_change_field_{{workout.key.name}}' class="form-control" name="new_name" placeholder="Enter new student name" type="text" style="margin-bottom: 1em;"/>
+                                                        <a onclick="change_student_name('{{workout.key.name}}')" class="btn">Change</a><br>
+                                                        <h5 style="text-align:left">Change Team</h5>
+                                                        <div class="change_team container" style="justify-content:center;">
+                                                            <select id="team_select_{{workout.key.name}}" onclick="get_teams(this)" class="team_assign_select form-control" style="margin:auto;">
+                                                            </select>
+                                                            <label for="team_select_{{workout.key.name}}">Select New Team</label>
+                                                            <a class="btn" onclick="change_team('{{workout.key.name}}')">Change Team</a>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            {% endfor %}
+            
+            {% endif %}
+            <div style="border: 1px solid black; margin-top:1em; margin-bottom:1em; padding:1em" id="unassigned_workouts">
+                <h2>Unassigned</h2>
+                <table>
+
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Arena ID <br><small>Click to view student page</small></th>
+                                <th>Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workout in workout_list %}
+                                {% if not workout['team'] %}
+                                    <tr>
+                                        {% if workout['student_name'] %}
+                                            <td>{{workout['student_name']}}</td>
+                                        {% else %}
+                                            <td>Student {{loop.index}}</td>
+                                        {% endif %}
+                                        <td><a href="/student/arena_landing/{{workout.key.name}}">{{workout.key.name}}</a></td>
+                                        <td>
+                                            <button class="btn btn-primary" data-toggle="modal" data-target="#manage_workout_{{workout.key.name}}">Manage</button>
+                                            <div class="modal fade" id="manage_workout_{{workout.key.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.key.name}}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h4 class="modal-title">Manage Workout {{workout.name}}</h4>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="change_student_name">
+                                                                <h5 style="text-align:left">Change Student Name</h5>
+                                                                <input id='name_change_field_{{workout.key.name}}' name="new_name" placeholder="Enter new student name" type="text" style="margin-bottom: 1em;"/>
+                                                                <a onclick="change_student_name('{{workout.key.name}}')" class="btn">Change</a><br>
+                                                                <h5 style="text-align:left">Change Team</h5>
+                                                                <div class="change_team container" style="justify-content:center;">
+                                                                    <select id="team_select_{{workout.key.name}}" onclick="get_teams(this)" class="team_assign_select" style="margin:auto;">
+                                                                    </select>
+                                                                    <label for="team_select_{{workout.key.name}}">Select New Team</label>
+                                                                    <a class="btn" onclick="change_team('{{workout.key.name}}')">Change Team</a>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}        
+                            {% endfor %}
+                        </tbody>
+
+                </table>
+            </div>
+            <a class="btn" href="#" onclick="add_team('{{unit_id}}')">Add Team</a>
+        </div>
+    </div>
+    <div id="loading-msg"></div>
+    
+{% endblock %}

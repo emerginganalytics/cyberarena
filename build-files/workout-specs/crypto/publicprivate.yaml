@@ -1,0 +1,62 @@
+version: '1'
+
+workout:
+  name: publicprivate
+  workout_description: Learn about public and private keys used in encryption.'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/TeacherPublicAndPrivate.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/PublicAndPrivateKeys.pdf"
+  build_type: "compute"
+  author: Ryan Ronquillo
+  standards:
+    - framework: NICE
+      mapping: OV-MGT-002
+
+student_entry:
+  type: rdp
+  username: workout
+  password: "Promiseme!"
+  network: external-network
+  ip: 10.1.1.11
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-publicprivate
+    image: image-promise-win-16
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["allow-rdp"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.11
+        subnet: default
+        external_NAT: true
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-rdp
+    network: external-network
+    target_tags: ["allow-rdp"]
+    protocol: tcp
+    ports: ["tcp/3306"]
+    source_ranges: ["10.1.0.0/24"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+assessment:
+  type: "percentage"
+  questions:
+    - type: upload
+      question: "Upload a screen shot of your PGP encrypted message"
+      script:
+      server: cybergym-publicprivate
+      operating-system: windows
+      complete: False

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+{% block header_block %}
+    <meta charset="utf-8">
+    <title>{% block title_block %}{% endblock title_block %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('.static', filename='imgs/iot-icon_2.ico') }}" id="nav-ico">
+    <!--<link rel="icon" href="/IoT/static/imgs/iot.ico" type="image/png">-->
+    <!--<link rel="stylesheet" href="/static/css/iot-styles.css">-->
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/iot-styles.css') }}">
+    {% block styles_block %}{% endblock styles_block %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="{{ url_for('.static', filename='js/commands.js') }}"></script>
+    {% block js_block %} {% endblock js_block %}
+{% endblock header_block %}
+</head>
+<body>
+    <nav class="iot-navbar">
+        <img src="{{ url_for('.static', filename='imgs/iot-pc.png') }}" id="nav-img" title="open-pc">
+        {% block nav_block %}{% endblock nav_block %}
+    </nav>
+    <div class="html-container">
+        <!-- Body Content -->
+        <div class="body-container center-content">
+            {% block content_block %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{category}}" role="alert"> {{ message }} </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            <div class="command-grid">
+                <div class="device_control">
+                    <button class='iot-commands' onclick="send_command('UNLOCK', '{{ device_id }}', '{{url_for('iot_arena_bp.submit', device_id=device_id)}}')">
+                        Unlock
+                    </button>
+                    <!-- CAUTION: This command will reveal an encrypted code on the device. This code can be used to reveal sensitive information.-->
+                </div>
+                <!-- TODO: Remove this link https://morsedecoder.com/ to prevent unauthorized access -->
+                <div class="form-container" style="display: flex; flex-direction: column">
+                    <form class="unlock_form" action="{{url_for('iot_arena_bp.unlock', device_id=device_id) }}">
+                        <input type="text" name="secret_code" placeholder="1234" />
+                        <input style="height: 100%" type="submit" class="iot_commands" value="Submit"/>
+                    </form>
+                    <p>Submit the correct 4 digit code to reveal the flag</p>
+                </div>
+            </div>
+            {% endblock content_block %}
+        </div>
+        <div class="iot-footer">
+            <p class="iot-footer">
+                &copy; Trojan Cyber Arena {% block footer_block %}{% endblock footer_block %}
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import 'logo_macro.html' as logo %}
+
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+    <script src='../static/login.js'></script>
+
+    <div id="login_container" style="margin: auto; text-align: center;max-width:500px">
+        {{logo.logo_div()}}
+
+        <h3>Sign in to access your units</h3>
+        <div id="firebaseui-auth-container"></div>
+    </div>
+    <script>
+      var auth_config = {
+        apiKey: '{{auth_config["api_key"]}}',
+        authDomain: '{{auth_config["auth_domain"]}}',
+        projectId: '{{auth_config["project_id"]}}'
+      };
+      //alert('{{auth_config["api_key"]}}');
+      //firebase.initializeApp(auth_config);
+      firebase.initializeApp(auth_config);
+      configureFirebaseLogin();
+      configureFirebaseLoginWidget();
+    </script>
+{% endblock %}

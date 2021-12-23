@@ -1,23 +1,37 @@
-import sys
 import random
 import string
+import time
+import calendar
 import googleapiclient.discovery
-from google.cloud import runtimeconfig
-from google.cloud import datastore, storage
+from google.cloud import runtimeconfig, datastore, storage
+from google.cloud import logging as g_logging
+from googleapiclient.errors import HttpError
+from socket import timeout
 
 
 runtimeconfig_client = runtimeconfig.Client()
 myconfig = runtimeconfig_client.config('cybergym')
+mysql_ip = myconfig.get_variable('sql_ip')
+mysql_ip = mysql_ip.value.decode("utf-8") if mysql_ip else None
 project = myconfig.get_variable('project').value.decode("utf-8")
 region = myconfig.get_variable('region').value.decode("utf-8")
 zone = myconfig.get_variable('zone').value.decode("utf-8")
 dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
+custom_dnszone = myconfig.get_variable('dnszone')
+dnszone = custom_dnszone.value.decode("utf-8") if custom_dnszone else 'cybergym-public'
+custom_main_app_url = myconfig.get_variable('main_app_url')
+main_app_url = custom_main_app_url.value.decode("utf-8") if custom_main_app_url \
+    else 'https://buildthewarrior.cybergym-eac-ualr.org'
+parent_project = myconfig.get_variable('parent_project')
+parent_project = parent_project.value.decode("utf-8") if parent_project else project
 
-ds_client = datastore.Client()
+# Set the GCP Objects
+ds_client = datastore.Client(project=parent_project)
 compute = googleapiclient.discovery.build('compute', 'v1')
 storage_client = storage.Client()
-dnszone = 'cybergym-public'
+log_client = g_logging.Client()
+
 workout_token = 'RG987S1GVNKYRYHYA'
 guac_password = 'promiseme'
 student_entry_image = 'image-labentry'
@@ -31,6 +45,7 @@ class workout_globals():
     yaml_bucket = project + '_cloudbuild'
     yaml_folder = 'yaml-build-files/'
     windows_startup_script_env = 'setx /m WORKOUTID {env_workoutid}\n' \
+                                 'setx /m URL ' + main_app_url + '\n' \
                                  'setx /m DNS_SUFFIX ' + dns_suffix + '\n'
     windows_startup_script_task = 'setx /m WORKOUTKEY{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
@@ -38,11 +53,13 @@ class workout_globals():
     linux_startup_script_env = '#! /bin/bash\n' \
                                'cat >> /etc/environment << EOF\n' \
                                'WORKOUTID={env_workoutid}\n' \
+                               'URL=' + main_app_url + '\n' \
                                'DNS_SUFFIX=' + dns_suffix + '\n'
-    linux_startup_script_task = 'WORKOUTKEY{q_number}={env_workoutkey}\n' \
+    linux_startup_script_task = 'cat >> /etc/environment << EOF\n' \
+                                'WORKOUTKEY{q_number}={env_workoutkey}\n' \
                                 'EOF\n' \
-                                'gsutil cp ' + script_repository + '{script} /usr/bin\n' \
-                                '(crontab -l 2>/dev/null; echo "* * * * * /usr/bin/{script}") | crontab -'
+                                'gsutil cp ' + script_repository + '{script} {local_storage}\n' \
+                                '(crontab -l 2>/dev/null; echo "* * * * * {script_command}") | crontab -'
 
     # These next few constants build the startup scripts for guacamole. This is VERY helpful!
     # The elusive Apache Guacamole documentation for the SQL commands are here: https://guacamole.apache.org/doc/gug/jdbc-auth.html
@@ -70,6 +87,8 @@ class workout_globals():
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'username\', \'{rdp_username}\');\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'security\', \'{security_mode}\');\n' \
         'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'ignore-cert\', \'true\');\n'
+    guac_startup_rdp_domain = \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'domain\', \'{domain}\');\n'
     guac_startup_join_connection_user = \
         'INSERT INTO guacamole_connection_permission (entity_id, connection_id, permission) VALUES (@entity_id, @connection_id, \'READ\');\n'
     guac_startup_end = 'MY_QUERY\n'
@@ -143,11 +162,23 @@ class BUILD_STATES:
     BUILDING_ARENA_SERVERS = 'BUILDING_ARENA_SERVERS'
     COMPLETED_ARENA_SERVERS = 'COMPLETED_ARENA_SERVERS'
     GUACAMOLE_SERVER_LOAD_TIMEOUT = 'GUACAMOLE_SERVER_LOAD_TIMEOUT'
+    NUKING = 'NUKING'
+    READY_DELETE = 'READY_DELETE'
     DELETING_SERVERS = 'DELETING_SERVERS'
     COMPLETED_DELETING_SERVERS = 'COMPLETED_DELETING_SERVERS'
+    DELETING_ARENA_FIREWALLS = 'DELETING_ARENA_FIREWALLS'
+    COMPLETED_DELETING_ARENA_FIREWALLS = 'COMPLETED_DELETING_ARENA_FIREWALLS'
+    DELETING_ARENA_ROUTES = 'DELETING_ARENA_ROUTES'
+    COMPLETED_DELETING_ARENA_ROUTES = 'COMPLETED_DELETING_ARENA_ROUTES'
+    DELETING_ARENA_SERVERS = 'DELETING_ARENA_SERVERS'
+    COMPLETED_DELETING_ARENA_SERVERS = 'COMPLETED_DELETING_ARENA_SERVERS'
+    DELETING_ARENA_SUBNETWORKS = 'DELETING_ARENA_SUBNETWORKS'
+    COMPLETED_DELETING_ARENA_SUBNETWORKS = 'COMPLETED_DELETING_ARENA_SUBNETWORKS'
+    DELETING_ARENA_NETWORKS = 'DELETING_ARENA_NETWORKS'
+    COMPLETED_DELETING_ARENA_NETWORKS = 'DELETING_ARENA_NETWORKS'
     DELETED = 'DELETED'
 
-ordered_workout_states = {
+ordered_workout_build_states = {
     BUILD_STATES.START: 0,
     BUILD_STATES.BUILDING_ASSESSMENT: 1,
     BUILD_STATES.BUILDING_NETWORKS: 2,
@@ -158,8 +189,7 @@ ordered_workout_states = {
     BUILD_STATES.COMPLETED_STUDENT_ENTRY: 7,
     BUILD_STATES.BUILDING_ROUTES: 8,
     BUILD_STATES.COMPLETED_ROUTES: 9,
-    BUILD_STATES.BUILDING_FIREWALL: 10,
-    BUILD_STATES.COMPLETED_FIREWALL: 11
+    BUILD_STATES.BUILDING_FIREWALL: 10
 }
 
 
@@ -176,20 +206,194 @@ ordered_arena_states = {
     BUILD_STATES.BUILDING_ROUTES: 9,
     BUILD_STATES.COMPLETED_ROUTES: 10,
     BUILD_STATES.BUILDING_FIREWALL: 11,
-    BUILD_STATES.COMPLETED_FIREWALL: 12
+    BUILD_STATES.COMPLETED_FIREWALL: 12,
+    BUILD_STATES.DELETING_ARENA_FIREWALLS: 100,
+    BUILD_STATES.COMPLETED_DELETING_ARENA_FIREWALLS: 101,
+    BUILD_STATES.DELETING_ARENA_ROUTES: 102,
+    BUILD_STATES.COMPLETED_DELETING_ARENA_ROUTES: 103,
+    BUILD_STATES.DELETING_ARENA_SERVERS: 104,
+    BUILD_STATES.COMPLETED_DELETING_ARENA_SERVERS: 105,
+    BUILD_STATES.DELETING_ARENA_SUBNETWORKS: 106,
+    BUILD_STATES.COMPLETED_DELETING_ARENA_SUBNETWORKS: 107,
+    BUILD_STATES.DELETING_ARENA_NETWORKS: 108,
+    BUILD_STATES.COMPLETED_DELETING_ARENA_NETWORKS: 109
 }
 
 
 class PUBSUB_TOPICS:
     MANAGE_SERVER = 'manage-server'
+    DELETE_EXPIRED = 'maint-del-tmp-systems'
+
 
 
 class SERVER_ACTIONS:
     BUILD = 'BUILD'
     START = 'START'
     DELETE = 'DELETE'
+    STOP = 'STOP'
+    REBUILD = 'REBUILD'
+    SNAPSHOT = 'SNAPSHOT'
+    RESTORE = 'RESTORE'
+
+
+class WORKOUT_ACTIONS:
+    BUILD = 'BUILD'
+    NUKE = 'NUKE'
+
+
+class BUILD_TYPES:
+    MACHINE_IMAGE = 'machine-image'
+
+
+class WORKOUT_TYPES:
+    WORKOUT = "workout"
+    ARENA = "arena"
+    CONTAINER = "container"
+    MISFIT = "misfit"
+
+
+class ArenaWorkoutDeleteType:
+    NETWORK = "network"
+    SERVER = "server"
+    FIREWALL_RULES = "firewall_rules"
+    ROUTES = "routes"
+    SUBNETWORK = "subnetwork"
+
+
+class LOG_LEVELS:
+    """
+    GCP Logging API Severity Levels
+    """
+    DEBUG = 100
+    INFO = 200
+    NOTICE = 300
+    WARNING = 400
+    ERROR = 500
+    CRITICAL = 600
+    ALERT = 700
+    EMERGENCY = 800
+
+
+class LogIDs:
+    ADMIN_SCRIPTS = 'admin-scripts'
+    IOT = 'iot'
+    SERVER_BUILD = "server-build"
+    DELETION_MANAGEMENT = "deletion_management"
+    BUDGET_MANAGEMENT = "budget_management"
+
+
+class MAINTENANCE_ACTIONS:
+    DELETE_EXPIRED = "delete_expired"
+    STOP_LAPSED = "stop_lapsed"
+    MEDIC = "medic"
+    SNAPSHOT = "snapshot"
+
+
+class AdminActions:
+    CREATE_DNS_FORWARDING_FOR_UNIT = "create_dns_forwarding_for_unit"
+    CREATE_NEW_SERVER_IN_UNIT = "create_new_server_in_unit"
+    CREATE_NEW_WORKOUT_IN_UNIT = "create_new_workout_in_unit"
+    CREATE_PRODUCTION_IMAGE = "create_production_image"
+    DELETE_FULL_UNIT = "delete_full_unit"
+    EXTEND_EXPIRATION_DAYS_UNIT = "extend_expiration_days_unit"
+    FIX_SERVER_IN_UNIT = "fix_server_in_unit"
+    FIX_STUDENT_ENTRY_IN_WORKOUT = "fix_student_entry_in_workout"
+    NUKE_REBUILD_SERVER = "nuke_rebuild_server"
+    NUKE_REBUILD_UNIT = "nuke_rebuild_unit"
+    QUERY_WORKOUTS = "query_workouts"
+    ADD_CHILD_PROJECT = "add_child_project"
+
+class AdminInfoEntity:
+    KIND = "cybergym-admin-info"
+    class Entities:
+        ADMINS = "admins"
+        AUTHORIZED_USERS = "authorized_users"
+        PENDING_USERS = "pending_users"
+        CHILD_PROJECTS = "child_projects"
 
 
 def get_random_alphaNumeric_string(stringLength=12):
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join((random.choice(lettersAndDigits) for i in range(stringLength)))
+
+
+def test_server_existence(workout_id, server_name):
+    try:
+        server = compute.instances().get(project=project, zone=zone, instance=f"{workout_id}-{server_name}").execute()
+    except HttpError:
+        return False
+    return True
+
+
+def ds_safe_put(entity):
+    """
+    Stores a Datastore entity while excluding any indexing for fields longer than 1500 Bytes
+    :param entity: A data store entity
+    :return: None
+    """
+    exclude_from_indexes = []
+    for item in entity:
+        if type(entity[item]) == str and len(entity[item]) > 1500:
+            exclude_from_indexes.append(item)
+    entity.exclude_from_indexes = exclude_from_indexes
+    try:
+        ds_client.put(entity)
+    except:
+        print("Error storing entity")
+
+
+def gcp_operation_wait(service, response, wait_type="zone", wait_seconds=150):
+    """
+    Wait for a gcp operation to complete
+    :param service: The compute API connection object used for the operation
+    :param response: The response object for the operation being waited on
+    :param wait_type: The type of wait, either zone, region, or global. Defaults to zone
+    :param wait_seconds: The number of seconds to wait before returning.
+    :returns: True if the operation complete, and False if there is a timeout.
+    """
+    i = 0
+    success = False
+    max_wait_iteration = round(wait_seconds / 30)
+    while not success and i < max_wait_iteration:
+        try:
+            print(f"Waiting for operation ID: {response['id']}")
+            if wait_type == 'zone':
+                response = service.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+            elif wait_type == 'region':
+                response = service.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+            elif wait_type == 'global':
+                service.globalOperations().wait(project=project, operation=response["id"]).execute()
+            else:
+                raise Exception("Unexpected wait_type in GCP operation wait function.")
+            success = True
+        except timeout:
+            i += 1
+            print(f"Response timeout for operation ID: {response['id']}. Trying again")
+            pass
+    if i >= max_wait_iteration:
+        return False
+    else:
+        return True
+
+
+def get_workout_type(workout):
+    """
+    Given a workout specifiction dictionary, this function returns the workout type.
+    :param workout: A dictionary of a workout specification
+    :returns: String, type of workout.
+    """
+    workout_type = None
+    if 'build_type' not in workout:
+        workout_type = WORKOUT_TYPES.WORKOUT
+    else:
+        workout_type = workout['build_type']
+    return workout_type
+
+
+def cloud_log(logging_id, message, severity=LOG_LEVELS.INFO):
+    g_logger = log_client.logger(logging_id)
+    g_logger.log_struct(
+        {
+            "message": message
+        }, severity=severity
+    )

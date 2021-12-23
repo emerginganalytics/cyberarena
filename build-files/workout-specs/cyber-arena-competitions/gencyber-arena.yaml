@@ -1,0 +1,99 @@
+version: '1'
+
+workout:
+  name: 'GenCyber Arena'
+  build_type: arena
+  workout_description: 'Head to head capture-the-flag style competition.'
+  student_instructions_url: 'https://storage.googleapis.com/student_workout_instructions_tgd4419/GenCyberArenaStudentInstructions.pdf'
+  teacher_instructions_url: 'https://storage.googleapis.com/teacher_workout_instructions_84jf627/GenCyberArenaTeacherInstructions.pdf'
+  hourly_cost: 0.43
+
+# For student servers, these will be replicated to the number of
+# students specified by the instructor. These student servers can
+# be in the same network, which is the preferred and default build,
+# but they can also have distinct networks.
+# The student network is named 'student-network' or student-network-#'
+student-servers:
+  student_entry: student-workstation
+  student_entry_type: rdp
+  student_entry_username: workout
+  student_entry_password: 'SHkpf58hnEcoEE51'
+  network_type: same
+  servers:
+    - name: student-workstation
+      image: image-gencyber-arena-1-07162021
+      machine_type: "n1-standard-1"
+      operating-system: windows
+      external_NAT: True
+      include_env: true
+    - name: kali
+      image: image-cybergym-kali
+      machine_type: "n1-standard-1"
+    - name: ransomware
+      image: image-gencyber-arena-ransomware
+      machine_type: "n1-standard-1"
+    - name: gencyber-web
+      image: image-gencyberarena2-web
+      machine_type: "n1-standard-1"
+     
+additional-container-apps:
+  - name: johnnyhash
+    title: 'Crypto Challenge'
+  - name: cybergym-classified
+    title: 'IoT Challenge'
+
+
+# If additional networks are needed for servers, these are added here.
+# Do not use 10.1.0.0/16. This is reserved for students
+# additional-networks:
+
+# Servers for the arena are added here.
+# additional-servers:
+
+# If a firewall exists in the network, then the routes necessary for the firewall is added here
+# routes:
+
+# Any additional firewall rules are added here. Note: student firewall rules are added by default
+firewall_rules:
+  - name: allow-http
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-ssh
+    target_tags: ["student-entry"]
+    protocol: none
+    ports: ["tcp/22"]
+    source_ranges: ["0.0.0.0/0"]
+
+assessment:
+  type: "level"
+  questions:
+    - type: input
+      question: "Flag #1: Crypto"
+      answer: "outofpocket"
+      points: 100
+    - type: input
+      question: "Flag #2: Ransomware"
+      answer: "TmakqntyQ6"
+      points: 200
+    - type: input
+      question: "Flag #3: IoT"
+      answer: "sMaRtToAsTeR"
+      points: 200
+    - type: input
+      question: "Flag #4: Social Engineering"
+      answer: "phish are biting"
+      points: 200
+    - type: input
+      question: "Flag #5: OSINT"
+      answer: "Arlington Resort Hotel & Spa"
+      points: 100
+    - type: input
+      question: "Flag #6: Hack the Shapes"
+      answer: "iamtheflag"
+      points: 100
+    - type: input
+      question: "Flag #7: DOS"
+      answer: "Fl00dedR3veal"
+      points: 100

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title%} Internal Error {% endblock %}
+{% block content %}
+    <div class='image_container' style='text-align: center;'>
+        <img style='text-align:center;' src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/>
+    </div>
+    <div id='error_container' style='margin:auto;text-align:center;'>
+        <p>An error occurred when attempting to build {{ workout_type }}.</p>
+        <p>The following required server images were missing from your project: </p>
+        <ul>
+            {% for image in bad_images %}
+                <li>{{ image }}</li>
+            {% endfor %}
+        </ul>
+        <p>Contact cybergym@ualr.edu for assistance on adding these images to your project.</p>
+    </div>
+{% endblock %}

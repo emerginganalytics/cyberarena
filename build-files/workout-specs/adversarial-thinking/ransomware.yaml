@@ -1,0 +1,69 @@
+version: '1'
+
+workout:
+  name: Ransomware
+  workout_description: 'Simulate ransomware attack on end user.'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/RansomwareTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/RansomwareStudentInstructions.pdf"
+  build_type: "compute"
+  hourly_cost: 0.14
+  author: Nicholas Stewart
+  standards:
+    - framework: NICE
+      mapping: PR-CIR-001
+      
+student_entry:
+  type: rdp
+  username: workout
+  password: "Promiseme!"
+  network: external-network
+  ip: 10.1.1.34
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-ransomware
+    image: image-cybergym-ransomware
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.34
+        subnet: default
+        external_NAT: true
+
+# List network routes. Multiple routes may be listed using YAML block sequence format.
+# If no routes are needed, delete all sub-entries under 'routes:' and leave it empty
+routes:
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: default-network-internal-allow
+    network: external-network
+    target_tags: []
+    protocol: none
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.128.0.0/20","10.1.1.0/24"]
+  
+assessment:
+  type: level
+  questions:  
+    - type: auto
+      key: "1TccG1J"
+      question: "Attack Mission"
+      script: "ransomware-validate.py"
+      script-language: "python"
+      server: cybergym-ransomware
+      operating-system: windows
+      complete: False
+    - type: auto
+      key: "OCIuSTERThea"
+      question: "Protection Mission"
+      script: "ransomware-q2-assessment.ps1"
+      script-language: "powershell"
+      server: cybergym-ransomware
+      operating-system: windows
+      complete: False

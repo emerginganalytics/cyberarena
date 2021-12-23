@@ -1,0 +1,73 @@
+workouts:
+  - unit: "Level 1 - Module 1: Cyber Attack"
+    builds:
+      - adversarial-thinking/cyberattack.yaml
+  - unit: "Level 1 - Module 2: Reconnaissance with Shodan"
+    builds:
+      - network-secuity/shodan.yaml
+  - unit: "Level 1 - Module 3: Phishing Attack"
+    builds:
+      - adversarial-thinking/phishing.yaml
+  - unit: "Level 1 - Module 4: Two Step Authentication"
+    builds:
+      - access-control/2fa
+  - unit: "Level 1 - Module 5: Mobile Phone Forensics"
+    builds:
+      - digital-forensics/mobileforensics.yaml
+  - unit: "Level 2 - Module 6: Cyber Arena"
+    builds:
+      - cyber-arena-competitions/trojan-arena-level1.yaml
+  - unit: "Level 2 - Module 1: Ransomware"
+    builds:
+      - adversarial-thinking/ransomware
+  - unit: "Level 2 - Module 2: Mission Permission"
+    builds:
+      - access-control/missionpermissions.yaml
+  - unit: "Level 2 - Module 3: Recon with Wireshark"
+    builds:
+      - network-security/wireshark.yaml
+  - unit: "Level 2 - Module 4: Johnny Cipher"
+    builds:
+      - crypto/johnnycipher.yaml
+  - unit: "Level 2 - Module 5: Reversus"
+    builds:
+      - digital-forensics/reversus.yaml
+  - unit: "Level 2 - Module 6: Cyber Arena"
+    builds:
+      - cyber-arena-competitions/trojan-arena-level1.yaml
+  - unit: "Level 3 - Module 1: Hidden Target"
+    builds:
+      - network-security/hiddennode.yaml
+  - unit: "Level 3 - Module 2: Denial of Service Attacks"
+    builds:
+      - network-security/dos.yaml
+  - unit: "Level 3 - Module 3: Password Hashing"
+    builds:
+      - crypto/johnnyhash.yaml
+  - unit: "Level 3 - Module 4: Password Parameters"
+    builds:
+      - access-control/password-policy.yaml
+  - unit: "Level 3 - Module 5: Reversus Part 2"
+    builds:
+      - digital-forensics/reversus.yaml
+  - unit: "Level 3 - Module 6: Cyber Arena"
+    builds:
+      - cyber-arena-competitions/trojan-arena-level1.yaml
+  - unit: "Level 4 - Module 1: Cross-Site Scripting"
+    builds:
+      - web-security/xss.yaml
+  - unit: "Level 4 - Module 2: Firewalls with Fortinet"
+    builds:
+      - network-security/firewall-patch.yaml
+  - unit: "Level 4 - Module 3: Vulnerability Scanning with Nessus"
+    builds:
+      - vulnerability-management/nessus.yaml
+  - unit: "Level 4 - Module 4: Buffer Overflows"
+    builds:
+      - vulnerability-management/bufferoverflow.yaml
+  - unit: "Level 4 - Module 5: Asymmetric Cryptography"
+    builds:
+      - crypto/publicprivate.yaml
+  - unit: "Level 4 - Module 6: Cyber Arena"
+    builds:
+      - cyber-arena-competitions/trojan-arena-level4.yaml

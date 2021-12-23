@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Log In{% endblock %}
+
+{% block content %}
+<script src='../static/js/login.js'></script>
+
+<div id="login_container" style="margin: auto; text-align: center;">
+    <p style="font-size: 2em; font-weight: bold; font-variant: small-caps; margin:0; padding:0;">Cyber Safe Small Business Self-Assessment</p>
+    <br>
+    <h5>Sign in with a Google account to begin the assessment</h5>
+    <div id="firebaseui-auth-container"></div>
+</div>
+</div>
+<script>
+  var auth_config = {
+    apiKey: '{{auth_config["api_key"]}}',
+    authDomain: '{{auth_config["auth_domain"]}}',
+    projectId: '{{auth_config["project_id"]}}'
+  };
+  //alert('{{auth_config["api_key"]}}');
+  //firebase.initializeApp(auth_config);
+  firebase.initializeApp(auth_config);
+  configureFirebaseLogin();
+  configureFirebaseLoginWidget();
+</script>
+{% endblock %}

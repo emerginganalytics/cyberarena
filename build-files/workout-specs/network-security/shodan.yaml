@@ -1,0 +1,34 @@
+version: '1'
+
+workout:
+  name: "Shodan"
+  build_type: "container"
+  workout_description: 'Using Shodan API to find vulnerable public access data'
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/ShodanTeacherWorkoutInstructions.pdf"
+  student_instructions_url: "https://storage.googleapis.com/student_workout_instructions_tgd4419/ShodanStudentWorkoutInstructions.pdf"
+  host_name: "cybergym-shodanlite"
+  author: Samuel Willis, Andrew Bomberger
+  standards:
+    - framework: NICE
+      mapping: AN-EXP-001
+
+container_info:
+  
+
+assessment:
+  type: "percentage"
+  questions:
+    - type: input
+      question: "Search for Minecraft servers in Dallas. What is the organization that owns the server of the 2nd result?"
+      answer: ""
+    - type: input
+      question: "Search for devices that are still using default passwords in the United States. From the first result, what is the IP for the server?"
+      answer: ""
+    - type: input
+      question: "How many vulnerable Apache servers are there in Phoenix?"
+      answer: ""
+    - type: input
+      question: "How many servers are still vulnerable to Heartbleed?"
+      answer: ""
+    - type: upload
+      question: "Build your own query and upload a screenshot of the most interesting find."

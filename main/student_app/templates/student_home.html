@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% import 'logo_macro.html' as logo %}
+
+{% block title %}Student Home Page{% endblock %}
+
+{% block content %}
+<script src='../static/login.js'></script>
+<style>
+  .workout-card{
+    transition: background-color 0.4s ease;
+    background-color: var(--main_color, #6e2639);
+    animation-name: card-fade-in;
+    animation-duration: 0.5s;
+    margin:auto;
+  }
+  .card-body{
+    padding:0;
+  }
+  .workout-card:hover{
+    background-color: #FFF;
+    cursor: pointer;
+  }
+  .workout-card:hover .card-title{
+    color: var(--main_color, #6e2639);
+  }
+  .card-title{
+    color: #FFF;
+    text-align:center;
+    font-variant: small-caps;
+    padding:0;
+    margin:0;
+  }
+</style>
+<script>
+  function redirect_to_landing(workout_id){
+    window.location.href = "/student/landing/" + workout_id;
+  }   
+  var auth_config = {
+    apiKey: '{{auth_config["api_key"]}}',
+    authDomain: '{{auth_config["auth_domain"]}}',
+    projectId: '{{auth_config["project_id"]}}'
+  };
+  initApp(auth_config).then(value => {
+    enable_signout();
+    document.getElementById('user_name_header').innerHTML = "Welcome " + value['display_name'];
+  })
+  window.addEventListener('load', function(){
+    var timestamp_list = document.getElementsByClassName('timestamp_field');
+    for(var i = 0; i < timestamp_list.length; i++){
+      timestamp_list[i].innerHTML = timeConverter(timestamp_list[i].innerHTML)
+    }
+  })
+  
+  function timeConverter(UNIX_timestamp){
+    var a = new Date(UNIX_timestamp * 1000);
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var year = a.getFullYear();
+    var month = months[a.getMonth()];
+    var date = a.getDate();
+    var hour = a.getHours();
+    var min = a.getMinutes();
+    var sec = a.getSeconds();
+    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+    return time;
+  }
+</script>
+
+<div class='row'>
+  <div id='student_controls' class='col-3'>
+    {{logo.logo_div() }}
+    <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
+    <button id="sign-out" class='btn'>Sign out</button>
+  </div>
+  <div id='info_display' class='container col'>
+    <div class='container col-12'>
+        <h2>Your Workouts</h2>
+        {% for workout in student_info['workouts'] %}
+          <div class="card workout-card col-lg-6 col-sm-12" onclick="redirect_to_landing('{{workout.workout_id}}')">
+            <div class="card-body">
+              <h5 class="card-title">{{workout.workout_name}}</h5>
+              <p class="card-text">Created <span class="timestamp_field">{{workout.timestamp}}</span></p>
+            </div>
+          </div> 
+        {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

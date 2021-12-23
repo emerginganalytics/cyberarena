@@ -1,6 +1,7 @@
 import time
 
-from common.globals import project, compute, region, zone
+from googleapiclient.errors import HttpError
+from common.globals import project, compute, region, zone, ds_client, log_client, test_server_existence
 
 
 def create_firewall_rules(firewall_rules):
@@ -26,22 +27,55 @@ def create_firewall_rules(firewall_rules):
         # If targetTags is None, then we do not want to include it in the insertion request
         if not rule["targetTags"]:
             del firewall_body["targetTags"]
-
-        compute.firewalls().insert(project=project, body=firewall_body).execute()
+        try:
+            compute.firewalls().insert(project=project, body=firewall_body).execute()
+        except HttpError as err:
+            # If the network already exists, then this may be a rebuild and ignore the error
+            if err.resp.status in [409]:
+                pass
 
 
 def create_route(route):
-    nextHopInstance = "https://www.googleapis.com/compute/v1/projects/" + project + "/zones/" + zone +\
-                      "/instances/" + route["nextHopInstance"]
-    route_body = {
-        "destRange": route["destRange"],
-        "name": route["name"],
-        "network": "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s" % (project, route["network"]),
-        "priority": 0,
-        "tags": [],
-        "nextHopInstance": nextHopInstance
-    }
-    compute.routes().insert(project=project, body=route_body).execute()
+    try:
+        nextHopInstance = "https://www.googleapis.com/compute/v1/projects/" + project + "/zones/" + zone +\
+                          "/instances/" + route["nextHopInstance"]
+        route_body = {
+            "destRange": route["destRange"],
+            "name": route["name"],
+            "network": "https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s" % (project, route["network"]),
+            "priority": 0,
+            "tags": [],
+            "nextHopInstance": nextHopInstance
+        }
+        compute.routes().insert(project=project, body=route_body).execute()
+    except HttpError as err:
+        # If the network already exists, then this may be a rebuild and ignore the error
+        if err.resp.status in [409]:
+            pass
+
+
+def workout_route_setup(workout_id):
+    key = ds_client.key('cybergym-workout', workout_id)
+    workout = ds_client.get(key)
+    g_logger = log_client.logger(workout_id)
+
+    if 'routes' in workout and workout['routes']:
+        for route in workout['routes']:
+            i = 0
+            while not test_server_existence(workout_id, route['next_hop_instance']) and i < 50:
+                time.sleep(10)
+                i += 1
+
+            if i >= 50:
+                g_logger.log_text(f"Timeout waiting to add routes for {route['next_hop_instance']}")
+                return False
+
+            r = {"name": "%s-%s" % (workout_id, route['name']),
+                 "network": "%s-%s" % (workout_id, route['network']),
+                 "destRange": route['dest_range'],
+                 "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
+
+            create_route(r)
 
 
 def create_network(networks, build_id):
@@ -60,7 +94,7 @@ def create_network(networks, build_id):
         time.sleep(10)
         for subnet in network['subnets']:
             subnetwork_body = {
-                "name": "%s-%s" % (network_body['name'], subnet['name']),
+                "name": "%s" % (subnet['name']),
                 "network": "projects/%s/global/networks/%s" % (project, network_body['name']),
                 "ipCidrRange": subnet['ip_subnet']
             }

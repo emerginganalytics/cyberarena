@@ -1,0 +1,130 @@
+/* ===============
+   LEVEL REPORT
+   =============== */
+$borderWidth: 16px;
+$animationTime: 1.5s;
+$border-color-default: #eee;
+$border-color-fill: #1ea704;
+$size: 200px;
+$Steps: 100;
+
+.progress {
+  width: $size;
+  height: $size;
+  line-height: $size;
+  background: none;
+  margin: 0 auto;
+  box-shadow: none;
+  position: relative;
+  &:after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: $borderWidth solid $border-color-default;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  > span {
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+  }
+  .progress-left {
+    left: 0;
+  }
+  .progress-bar {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border-width: $borderWidth;
+    border-style: solid;
+    position: absolute;
+    top: 0;
+    border-color: $border-color-fill;
+  }
+  .progress-left .progress-bar {
+    left: 100%;
+    border-top-right-radius: ($size/2);;
+    border-bottom-right-radius: ($size/2);;
+    border-left: 0;
+    -webkit-transform-origin: center left;
+    transform-origin: center left;
+  }
+  .progress-right {
+    right: 0;
+    .progress-bar {
+      left: -100%;
+      border-top-left-radius: ($size/2);;
+      border-bottom-left-radius: ($size/2);;
+      border-right: 0;
+      -webkit-transform-origin: center right;
+      transform-origin: center right;
+    }
+  }
+  .progress-value {
+    display: flex;
+    border-radius: 50%;
+    font-size: 36px;
+    text-align: center;
+    line-height: 20px;
+    align-items: center;
+    justify-content: center;
+    margin:auto;
+    height: 100%;
+    font-weight: 300;
+    div {
+      margin: auto;
+    }
+    span {
+      font-size: 20px;
+      text-transform: uppercase;
+    }
+  }
+}
+
+/* ===============
+   ANIMATION LOOP
+   =============== */
+@for $i from 1 through $Steps {
+	$stepName: ($i*(100 / $Steps));
+
+	@if $i <= ($Steps/2) {
+		.progress[data-percentage="#{$stepName}"] {
+			.progress-right .progress-bar {
+				 animation: loading-#{$i} $animationTime linear forwards;
+			}
+			.progress-left .progress-bar {animation: 0;}
+		}
+	}
+	@if $i > ($Steps/2)  {
+		.progress[data-percentage="#{$stepName}"] {
+			.progress-right .progress-bar {
+				animation: loading-#{($Steps/2)} $animationTime linear forwards; //set the animation to longest animation
+			}
+			.progress-left .progress-bar {
+      animation: loading-#{$i - ($Steps/2)} $animationTime linear forwards $animationTime;
+    }
+		}
+	}
+}
+
+
+@for $i from 1 through ($Steps/2) {
+	$degrees: (180/($Steps/2));
+	$degrees: ($degrees*$i);
+	@keyframes loading-#{$i}{
+    0%{
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+    100%{
+        -webkit-transform: rotate($degrees);
+			transform: rotate(#{$degrees}deg);
+    }
+	}
+}

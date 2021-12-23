@@ -1,0 +1,61 @@
+version: '1'
+
+workout:
+  name: "Cyber Attack"
+  workout_description: 'Experience a botnet cyber-attack'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/CyberAttackWorkoutTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/CyberAttackWorkoutStudentInstructions.pdf"
+  build_type: "compute"
+  hourly_cost: 0.14
+  author: Philip Huff
+
+student_entry:
+  type: rdp
+  username: workout
+  password: "Promiseme!"
+  network: external-network
+  ip: 10.1.1.11
+
+networks: 
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-victim
+    image: image-cybergym-cyberattack
+    machine_type: "n1-standard-1"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.11
+        subnet: default
+        external_NAT: True
+
+# List all firewall rules. Multiple rules may be listed using YAML block sequence format.
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]
+
+assessment:
+  type: "percentage"
+  questions:
+    - type: "input"
+      question: "How long does your botnet sleep before communicating with the command and control server?"
+      answer: "10"
+    - type: "input"
+      question: "When you open your command and control server, what is the local IP address listed in the host detail? (the short address)"
+      answer: "10.1.1.11"
+    - type: "input"
+      question: "In the command and control server, look for the command prompt in the COMMANDPROMPT section. When using the command 'cmd /K start telnet telehack.com' there are a number of different options that appear when connected. What is the name of the text adventure game option?"
+      answer: "zork"
+    - type: "input"
+      question: "What is the password for credentials you recovered?"
+      answer: "$hhhh...It's a secret!"
+    - type: "input"
+      question: "Come up with your own creative command to run on the botnet victim."
+      answer: none

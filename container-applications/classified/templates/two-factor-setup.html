@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-{% import "bootstrap/wtf.html" as wtf %}
-
-{% block page_content %}
-    <h1>Two Factor Authentication Setup</h1>
-    <p>Please use the installed token generation app on your smartphone and scan the following QR Code with it:</p>
-    <p><img id="qrcode" src="{{ url_for('qrcode') }}"></p>
-    <p>Click here when finished <a href="{{ url_for('login', workout_id=workout_id) }}">Login</a></p>
-{% endblock %}

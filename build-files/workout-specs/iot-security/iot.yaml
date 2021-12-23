@@ -1,0 +1,24 @@
+version: '1'
+
+workout:
+  name: GenCyber IoT
+  build_type: "container"
+  workout_description: 'Familiarize yourself with the operation of devices over the internet by controlling a physical IoT device'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/IoTTeacherWorkoutInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/IoTStudentWorkoutInstructions.pdf"
+  host_name: "cybergym-classified"
+  author: Andrew Bomberger
+
+assessment:
+  type: level
+  questions:
+    - type: input
+      answer: "DrjaGZ1NhkhoOMJr"
+      question: "Flag 1 (Quick Commands Tab)"
+      complete: False
+    - type: input
+      answer: "eVRwYtFNdRVIVlfC"
+      question: "Flag 2 (Self Driving Tab)"
+      complete: False
+
+      

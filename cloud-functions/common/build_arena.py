@@ -1,8 +1,9 @@
 import time
 import random
 import string
+from googleapiclient.errors import HttpError
 
-from common.globals import ds_client, project, compute, region, zone, workout_globals, guac_password, BUILD_STATES
+from common.globals import ds_client, log_client, LOG_LEVELS, project, compute, region, zone, workout_globals, guac_password, BUILD_STATES
 from common.dns_functions import add_dns_record
 from common.stop_compute import stop_workout, stop_arena
 from common.assessment_functions import get_startup_scripts
@@ -12,7 +13,8 @@ from common.state_transition import state_transition, check_ordered_arenas_state
 
 
 student_network_name = 'student-network'
-student_network_subnet = '10.1.0.0/24'
+student_network_subnet = '10.1.0.0/16'
+student_default_guac_ip = "10.1.0.2"
 
 
 # create random strings --> will be used to create random workoutID
@@ -20,14 +22,18 @@ def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
 
 
-def build_student_network(build_id, subnet):
+def build_student_network(build_id, subnet_name):
     student_network = [
         {
             'name': student_network_name,
-            'subnets': [{'name': 'default', 'ip_subnet': subnet}]
+            'subnets': [{'name': subnet_name, 'ip_subnet': student_network_subnet}]
         }
     ]
-    create_network(networks=student_network, build_id=build_id)
+    try:
+        create_network(networks=student_network, build_id=build_id)
+    except HttpError as err:
+        if err.resp.status not in [409]:
+            raise
 
 
 def build_student_servers(unit_id, workouts, student_entry_server, student_entry_type, student_entry_username,
@@ -51,18 +57,17 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
         # If all of the student servers are in the same network, then create a single network first
         guac_network = ''
         if network_type == 'same':
-            build_student_network(build_id=unit_id, subnet=student_network_subnet)
             network_name = "%s-%s" % (unit_id, student_network_name)
-            subnet_name = "%s-%s-%s" % (unit_id, student_network_name, 'default')
+            subnet_name = "%s-default" % network_name
             guac_network = network_name
         elif network_type == 'distinct':
             for workout_id in workouts:
                 i = 0 if i == 0 else i + 1
-                build_student_network(build_id=workout_id, subnet='10.1.' + str(i) + '.0/24')
                 network_name = "%s-%s" % (workout_id, student_network_name)
                 subnet_name = "%s-%s-%s" % (workout_id, student_network_name, 'default')
                 if not guac_network:
                     guac_network = network_name
+        build_student_network(unit_id, subnet_name)
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_STUDENT_NETWORKS)
 
     # STATE: BUILDING_ARENA_SERVERS
@@ -70,7 +75,7 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
     if check_ordered_arenas_state(unit, BUILD_STATES.BUILDING_ARENA_STUDENT_SERVERS):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ARENA_STUDENT_SERVERS)
         i = 0
-        j = 2
+        j = 3
         guacamole_connections = []
         for workout_id in workouts:
             workout_key = ds_client.key('cybergym-workout', workout_id)
@@ -78,34 +83,51 @@ def build_student_servers(unit_id, workouts, student_entry_server, student_entry
 
             for server in workout['student_servers']:
                 internal_ip_address = f'10.1.{i}.{j}'
+                # If the server is defined as the student-entry server, then build an array of guacamole configurations
+                # for connecting the various workouts in the arena to the student entry server
                 if server['name'] == student_entry_server:
+                    rdp_domain = server['domain'] if 'domain' in server else None
+                    security_mode = server['security-mode'] if 'security-mode' in server else 'nla'
                     guac_connection = {
                         'workout_id': workout_id,
                         'entry_type': student_entry_type,
                         'ip': internal_ip_address,
                         'username': student_entry_username,
-                        'password': student_entry_password
+                        'password': student_entry_password,
+                        'domain': rdp_domain,
+                        'security-mode': security_mode
                     }
                     guacamole_connections.append(guac_connection)
                 server_name = "%s-%s" % (workout_id, server['name'])
-                sshkey = server["sshkey"]
-                tags = server['tags']
-                machine_type = server["machine_type"]
-                network_routing = server["network_routing"]
+                sshkey = server.get("sshkey", None)
+                tags = server.get('tags', None)
+                machine_type = server.get("machine_type", None)
+                network_routing = server.get("network_routing", None)
+                external_nat = server.get('external_NAT', False)
                 nics = [{
                     "network": network_name,
                     "internal_IP": internal_ip_address,
                     "subnet": subnet_name,
-                    "external_NAT": False
+                    "external_NAT": external_nat
                 }]
+                # Metadata startup scripts are needed for servers in the arena because, unlike workouts, there
+                # is no assessment function associated with Arenas at this time.
+                meta_data = None
+                if server.get('include_env', None):
+                    if server.get('operating-system', None) == 'windows':
+                        env_startup = workout_globals.windows_startup_script_env.format(env_workoutid=workout_id)
+                        meta_data = {"key": "windows-startup-script-cmd", "value": env_startup}
+                    else:
+                        env_startup = workout_globals.linux_startup_script_env.format(env_workoutid=workout_id)
+                        meta_data = {"key": "startup-script", "value": env_startup}
                 create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
                                              custom_image=server['image'], machine_type=machine_type,
                                              networkRouting=network_routing, networks=nics, tags=tags,
-                                             meta_data=None, sshkey=sshkey)
+                                             meta_data=meta_data, sshkey=sshkey)
                 j += 1
         # Build the workout entry server and create the firewall rule to make it accessible.
-        build_guacamole_server(build=unit, network=guac_network,
-                               guacamole_connections=guacamole_connections)
+        build_guacamole_server(build=unit, network=guac_network, guacamole_connections=guacamole_connections,
+                               guac_ip_address=student_default_guac_ip)
         # Get the unit datastore entry again because building the guacamole server adds credentials.
         unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_STUDENT_SERVERS)
@@ -123,19 +145,20 @@ def build_arena(unit_id):
     # This can sometimes happen when debugging a Unit ID and the Datastore record no longer exists.
     arena = unit['arena']
     if not arena:
-        print('No unit %s exists in the data store' % unit_id)
+        g_logger = log_client.logger('cybergym-app-error')
+        g_logger.log_struct(
+            {
+                "message": f"Build operation failed. No unit {unit_id} exists in the data store"
+            }, severity=LOG_LEVELS.WARNING
+        )
         return
 
     if 'state' not in unit or not unit['state']:
         state_transition(entity=unit, new_state=BUILD_STATES.START)
 
-    # # Parse the assessment specification to obtain any startup scripts for the workout.
-    # startup_scripts = None
-    # if unit['assessment']:
-    #     startup_scripts = get_startup_scripts(workout_id=workout_id, assessment=workout['assessment'])
-    # # Create the networks and subnets
     # First create the student servers
-    print('Creating student servers')
+    g_logger = log_client.logger('arena-actions')
+    g_logger.log_text(f"Creating student servers for arena {unit_id}")
     build_student_servers(unit_id=unit_id, workouts=unit['workouts'],
                           student_entry_type=arena['student_entry_type'],
                           student_entry_server=arena['student_entry'],
@@ -147,62 +170,62 @@ def build_arena(unit_id):
     if check_ordered_arenas_state(unit, BUILD_STATES.BUILDING_ARENA_NETWORKS):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ARENA_NETWORKS)
         if arena['networks']:
-            print('Creating additional arena networks')
+            g_logger.log_text(f"Creating additoinal arena networks for arena {unit_id}")
             create_network(networks=arena['networks'], build_id=unit_id)
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_NETWORKS)
 
     # STATE: BUILDING_ARENA_SERVERS
     if check_ordered_arenas_state(unit, BUILD_STATES.BUILDING_ARENA_SERVERS):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ARENA_SERVERS)
-        print('Creating additional servers')
+        g_logger.log_text(f"Creating additional servers for arena {unit_id}")
         i = 101
-        for server in arena['servers']:
-            server_name = "%s-%s" % (unit_id, server['name'])
-            sshkey = server["sshkey"]
-            guac_path = server['guac_path']
-            tags = server['tags']
-            machine_type = server["machine_type"]
-            network_routing = server["network_routing"]
-            # If a nic is not specified, then add the server to the student-network.
-            if server['nics']:
-                nics = []
-                for n in server['nics']:
-                    if 'network' not in n:
-                        n['network'] = student_network_name
-                    if 'internal_IP' not in n:
-                        n['internal_IP'] = f'10.1.0.{i}'
-                    if 'subnet' not in n:
-                        n['subnet'] = 'default'
-                    if 'external_NAT' not in n:
-                        n['external_NAT'] = False
-                    nic = {
-                        "network": "%s-%s" % (unit_id, n['network']),
-                        "internal_IP": n['internal_IP'],
-                        "subnet": "%s-%s-%s" % (unit_id, n['network'], n['subnet']),
-                        "external_NAT": n['external_NAT']
-                    }
-                    nics.append(nic)
-            else:
-                nics = [
-                    {
-                        "network": "%s-%s" % (unit_id, student_network_name),
-                        "internal_IP": f'10.1.0.{i}',
-                        "subnet": "%s-%s-%s" % (unit_id, student_network_name, 'default'),
-                        "external_NAT": False
-                    }
-                ]
+        if 'servers' in arena and arena['servers']:
+            for server in arena['servers']:
+                server_name = "%s-%s" % (unit_id, server['name'])
+                sshkey = server.get("sshkey", None)
+                tags = server.get('tags', None)
+                machine_type = server.get("machine_type", None)
+                network_routing = server.get("network_routing", None)
+                # If a nic is not specified, then add the server to the student-network.
+                if server.get('nics', None):
+                    nics = []
+                    for n in server['nics']:
+                        if 'network' not in n:
+                            n['network'] = student_network_name
+                        if 'internal_IP' not in n:
+                            n['internal_IP'] = f'10.1.0.{i}'
+                        if 'subnet' not in n:
+                            n['subnet'] = 'default'
+                        if 'external_NAT' not in n:
+                            n['external_NAT'] = False
+                        nic = {
+                            "network": "%s-%s" % (unit_id, n['network']),
+                            "internal_IP": n['internal_IP'],
+                            "subnet": "%s-%s-%s" % (unit_id, n['network'], n['subnet']),
+                            "external_NAT": n['external_NAT']
+                        }
+                        nics.append(nic)
+                else:
+                    nics = [
+                        {
+                            "network": "%s-%s" % (unit_id, student_network_name),
+                            "internal_IP": f'10.1.0.{i}',
+                            "subnet": "%s-%s-%s" % (unit_id, student_network_name, 'default'),
+                            "external_NAT": False
+                        }
+                    ]
 
-            create_instance_custom_image(compute=compute, workout=unit_id, name=server_name,
-                                         custom_image=server['image'], machine_type=machine_type,
-                                         networkRouting=network_routing, networks=nics, tags=tags,
-                                         meta_data=None, sshkey=sshkey)
-            i += 1
+                create_instance_custom_image(compute=compute, workout=unit_id, name=server_name,
+                                             custom_image=server['image'], machine_type=machine_type,
+                                             networkRouting=network_routing, networks=nics, tags=tags,
+                                             meta_data=None, sshkey=sshkey)
+                i += 1
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_ARENA_SERVERS)
 
     # STATE: BUILDING_ROUTES
     if check_ordered_arenas_state(unit, BUILD_STATES.BUILDING_ROUTES):
         state_transition(entity=unit, new_state=BUILD_STATES.BUILDING_ROUTES)
-        print('Creating network routes and firewall rules')
+        g_logger.log_text(f"Creating network routes and firewall rules for arena {unit_id}")
         if 'routes' in arena and arena['routes']:
             for route in arena['routes']:
                 r = {"name": "%s-%s" % (unit_id, route['name']),
@@ -238,6 +261,3 @@ def build_arena(unit_id):
         state_transition(entity=unit, new_state=BUILD_STATES.COMPLETED_FIREWALL)
 
     state_transition(entity=unit, new_state=BUILD_STATES.READY)
-
-
-# build_arena('wsojiwqdqg')

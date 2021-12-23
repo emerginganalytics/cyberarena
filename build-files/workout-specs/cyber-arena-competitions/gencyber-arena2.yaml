@@ -1,0 +1,86 @@
+version: '1'
+
+workout:
+  name: 'GenCyber Arena Level 2'
+  build_type: arena
+  workout_description: 'Head to head capture-the-flag style competition.'
+  student_instructions_url: 'https://storage.googleapis.com/student_workout_instructions_tgd4419/TrojanArenaInstructions-Level2.pdf'
+  teacher_instructions_url:
+  hourly_cost: 0.43
+
+# For student servers, these will be replicated to the number of
+# students specified by the instructor. These student servers can
+# be in the same network, which is the preferred and default build,
+# but they can also have distinct networks.
+# The student network is named 'student-network' or student-network-#'
+student-servers:
+  student_entry: student-workstation
+  student_entry_type: rdp
+  student_entry_username: workout
+  student_entry_password: 'SHkpf58hnEcoEE51'
+  network_type: same
+  servers:
+    - name: student-workstation
+      image: image-gencyberarena2-windows
+      machine_type: n1-standard-1
+      operating-system: windows
+      include_env: true
+    - name: web-traget
+      image: image-gencyberarena2-web
+      machine_type: "n1-standard-1"
+    - name: lamp
+      image: image-gencyber-lamp
+      machine_type: "n1-standard-1"
+
+# If additional networks are needed for servers, these are added here.
+# Do not use 10.1.0.0/16. This is reserved for students
+# additional-networks:
+
+# Servers for the arena are added here.
+# additional-servers:
+
+# If a firewall exists in the network, then the routes necessary for the firewall is added here
+# routes:
+
+# Any additional firewall rules are added here. Note: student firewall rules are added by default
+firewall_rules:
+  - name: allow-http
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-ssh
+    target_tags: ["student-entry"]
+    protocol: none
+    ports: ["tcp/22"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-vnc
+    target_tags: ["vnc-connection"]
+    protocol: none
+    ports: ["tcp/5901"]
+    source_ranges: ["0.0.0.0/0"]
+
+
+assessment:
+  type: "level"
+  questions:
+    - type: input
+      question: "Flag #1: DOS"
+      answer: "Fl00dedR3veal"
+      points: 100
+    - type: input
+      question: "Flag #2: Lamp"
+      answer: "EzPzS3arch"
+      points: 100
+    - type: input
+      question: "Flag #3: Reverse Engineer"
+      answer: "truth5&lie5"
+      points: 100
+    - type: input
+      question: "Flag #4: Hack the Shapes"
+      answer: "iamtheflag"
+      points: 100
+    - type: input
+      question: "Flag #5: OSINT"
+      answer: "Arlington Resort Hotel & Spa"
+      points: 100

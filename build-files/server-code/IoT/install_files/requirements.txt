@@ -1,0 +1,10 @@
+Adafruit-DHT
+sense-hat
+sense-emu
+PyJWT
+flask
+oauthlib
+paho-mqtt
+psutil
+pyyaml
+cryptography>=3.3.1

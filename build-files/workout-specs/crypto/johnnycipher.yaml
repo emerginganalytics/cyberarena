@@ -1,0 +1,50 @@
+version: '1'
+
+workout:
+  name: "Johnny Cipher"
+  build_type: "container"
+  workout_description: 'Intro to Cryptography'
+  teacher_instructions_url: "https://storage.googleapis.com/teacher_workout_instructions_84jf627/JohnnyCipherTeacherWorkoutInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/JohnnyCipher.pdf"
+  host_name: "johnnyhash"
+  hourly_cost: 0.00
+  author: Andrew Bomberger
+  standards:
+    - framework: NICE
+      mapping: OV-MGT-002
+
+container_info:
+  cipher_one:
+    cipher: ''
+    key: ''
+  cipher_two:
+    cipher: ''
+    key: ''  
+  cipher_three:
+    cipher: ''
+    key: ''
+  sub_cipher:
+    cipher: ''
+    cleartext: ''
+    key: ''
+
+assessment:
+  type: "level"
+  key: "a98DukejdBLeiuSZ"
+  questions:
+    - type: auto
+      key: "4z8I9cIx0nKLuE9T"
+      question: "Ciphertext 1"
+      complete: False
+    - type: auto
+      key: "AzSnaExBpmk2b5zz"
+      question: "Ciphertext 2"
+      complete: False
+    - type: auto
+      key: "g2ezV2exgJmpTRtx"
+      question: "Ciphertext 3"
+      complete: False
+    - type: auto
+      key: "8tBhMl7tHRT3vJyy"
+      question: "Ciphertext 4"
+      complete: False

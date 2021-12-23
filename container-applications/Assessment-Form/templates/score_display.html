@@ -1,0 +1,530 @@
+{% block title %}<title>Assessment Score</title>{% endblock %}
+{% block header %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/base.js') }}" type="text/javascript"></script>
+    {% assets "scss_all" %}
+    <link rel="stylesheet" href={{ url_for('static', filename='css/level_report.css') }}>
+    {% endassets %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/completion.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/material-design-iconic-font/css/material-design-iconic-font.min.css') }}">
+{% endblock %}
+{% block page_content %}
+    <div class="wrapper">
+        <div class="inner" id="printable">
+            <img src="static/images/asbtdc-bubbles-logo-horiz.png" alt="ASBTDC Logo"/>
+            <br>
+            <p style="font-size: 1.75em; font-weight: bold; font-variant: small-caps; margin:0; padding:0;">Cyber Safe Small Business Self-Assessment Results</p>
+            <br><br>
+            <div class="container">
+                <div>
+                    <div>
+                    <h3>Access Control</h3>
+                        <div class="progress" data-percentage="{{(score['AC']['overall']/86*100)|round|int}}">
+                            <span class="progress-left">
+                                <span class="progress-bar"></span>
+                            </span>
+                            <span class="progress-right">
+                                <span class="progress-bar"></span>
+                            </span>
+                            <div class="progress-value">
+                                <div>
+                                    {% if score['AC']['overall'] is lt(15) %}
+                                        Level 0<p style="font-size:10pt">Beginning</p>
+                                    {% endif %}
+                                    {% if score['AC']['overall'] is ge(15) and score['AC']['overall'] is lt(30) %}
+                                        Level 1<p style="font-size:10pt">Basic</p>
+                                    {% endif %}
+                                    {% if score['AC']['overall'] is ge(30) and score['AC']['overall'] is lt(55)  %}
+                                        Level 2<p style="font-size:10pt">Intermediate</p>
+                                    {% endif %}
+                                    {% if score['AC']['overall'] is ge(55) and score['AC']['overall'] is lt(86)  %}
+                                        Level 3<p style="font-size:10pt">Good</p>
+                                    {% endif %}
+                                    {% if score['AC']['overall'] is ge(86)  %}
+                                        Level 4<p style="font-size:10pt">Advanced</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <br><br><br>
+                <div>
+                    <div>
+                        <h3>Identification and Authentication</h3>
+                        <div class="progress" data-percentage="{{(score['IA']['overall']/25*100)|round|int}}">
+                            <span class="progress-left">
+                                <span class="progress-bar"></span>
+                            </span>
+                            <span class="progress-right">
+                                <span class="progress-bar"></span>
+                            </span>
+                            <div class="progress-value">
+                                <div>
+                                    {% if score['IA']['overall'] is lt(2) %}
+                                        Level 0<p style="font-size:10pt">Beginning</p>
+                                    {% endif %}
+                                    {% if score['IA']['overall'] is ge(2) and score['IA']['overall'] is lt(7) %}
+                                        Level 1<p style="font-size:10pt">Basic</p>
+                                    {% endif %}
+                                    {% if score['IA']['overall'] is ge(7) and score['IA']['overall'] is lt(10)  %}
+                                        Level 2<p style="font-size:10pt">Intermediate</p>
+                                    {% endif %}
+                                    {% if score['IA']['overall'] is ge(10) and score['IA']['overall'] is lt(25)  %}
+                                        Level 3<p style="font-size:10pt">Good</p>
+                                    {% endif %}
+                                    {% if score['IA']['overall'] is ge(25)  %}
+                                        Level 4<p style="font-size:10pt">Advanced</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Media Protection</h3>
+                    <div class="progress" data-percentage="{{(score['MP']['overall']/30*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['MP']['overall'] is lt(2) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['MP']['overall'] is ge(2) and score['MP']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['MP']['overall'] is ge(10) and score['MP']['overall'] is lt(15)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['MP']['overall'] is ge(15) and score['MP']['overall'] is lt(30)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['MP']['overall'] is ge(30)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Physical Protection</h3>
+                    <div class="progress" data-percentage="{{(score['PE']['overall']/75*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['PE']['overall'] is lt(10) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['PE']['overall'] is ge(10) and score['PE']['overall'] is lt(25) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['PE']['overall'] is ge(25) and score['PE']['overall'] is lt(50)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['PE']['overall'] is ge(50) and score['PE']['overall'] is lt(75)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['PE']['overall'] is ge(75)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>System and Communications Protections</h3>
+                    <div class="progress" data-percentage="{{(score['SC']['overall']/60*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['SC']['overall'] is lt(5) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['SC']['overall'] is ge(5) and score['SC']['overall'] is lt(15) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['SC']['overall'] is ge(15) and score['SC']['overall'] is lt(30)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['SC']['overall'] is ge(30) and score['SC']['overall'] is lt(60)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['SC']['overall'] is ge(60)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>System and Information Integrity</h3>
+                    <div class="progress" data-percentage="{{(score['SI']['overall']/100*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['SI']['overall'] is lt(20) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['SI']['overall'] is ge(20) and score['SI']['overall'] is lt(45) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['SI']['overall'] is ge(45) and score['SI']['overall'] is lt(75)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['SI']['overall'] is ge(75) and score['SI']['overall'] is lt(100)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['SI']['overall'] is ge(100)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Establish System Access Capabilities</h3>
+                    <div class="progress" data-percentage="{{(score['C001']['overall']/21*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C001']['overall'] is lt(1) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C001']['overall'] is ge(1) and score['C001']['overall'] is lt(2) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C001']['overall'] is ge(2) and score['C001']['overall'] is lt(10)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C001']['overall'] is ge(10) and score['C001']['overall'] is lt(21)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C001']['overall'] is ge(21)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Control Internal System Access</h3>
+                    <div class="progress" data-percentage="{{(score['C002']['overall']/45*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C002']['overall'] is lt(2) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C002']['overall'] is ge(2) and score['C002']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C002']['overall'] is ge(10) and score['C002']['overall'] is lt(20)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C002']['overall'] is ge(20) and score['C002']['overall'] is lt(45)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C002']['overall'] is ge(45)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Limit Data Access to Authorized Users and Processes</h3>
+                    <div class="progress" data-percentage="{{(score['C004']['overall']/20*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C004']['overall'] is lt(2) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C004']['overall'] is ge(2) and score['C004']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C004']['overall'] is ge(10) and score['C004']['overall'] is lt(15)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C004']['overall'] is ge(15) and score['C004']['overall'] is lt(20)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C004']['overall'] is ge(20)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Grant Access to Authenticated Entities</h3>
+                    <div class="progress" data-percentage="{{(score['C015']['overall']/25*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C015']['overall'] is lt(2) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C015']['overall'] is ge(2) and score['C015']['overall'] is lt(7) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C015']['overall'] is ge(7) and score['C015']['overall'] is lt(10)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C015']['overall'] is ge(10) and score['C015']['overall'] is lt(25)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C015']['overall'] is ge(25)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Sanitize Media</h3>
+                    <div class="progress" data-percentage="{{(score['C024']['overall']/30*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C024']['overall'] is lt(2) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C024']['overall'] is ge(2) and score['C024']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C024']['overall'] is ge(10) and score['C024']['overall'] is lt(15)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C024']['overall'] is ge(15) and score['C024']['overall'] is lt(30)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C024']['overall'] is ge(30)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Limit Physical Access</h3>
+                    <div class="progress" data-percentage="{{(score['C028']['overall']/75*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C028']['overall'] is lt(10) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C028']['overall'] is ge(10) and score['C028']['overall'] is lt(25) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C028']['overall'] is ge(25) and score['C028']['overall'] is lt(50)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C028']['overall'] is ge(50) and score['C028']['overall'] is lt(75)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C028']['overall'] is ge(75)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Control Communications at System Boundaries</h3>
+                    <div class="progress" data-percentage="{{(score['C039']['overall']/60*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C039']['overall'] is lt(5) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C039']['overall'] is ge(5) and score['C039']['overall'] is lt(15) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C039']['overall'] is ge(15) and score['C039']['overall'] is lt(30)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C039']['overall'] is ge(30) and score['C039']['overall'] is lt(60)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C039']['overall'] is ge(60)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Identify and Manage Information System Flaws</h3>
+                    <div class="progress" data-percentage="{{(score['C040']['overall']/50*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C040']['overall'] is lt(4) %}
+                                    Level 0 <p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C040']['overall'] is ge(4) and score['C040']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C040']['overall'] is ge(10) and score['C040']['overall'] is lt(20)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C040']['overall'] is ge(20) and score['C040']['overall'] is lt(50)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C040']['overall'] is ge(50)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <br><br><br>
+            <div>
+                <div>
+                    <h3>Identify Malicious Content</h3>
+                    <div class="progress" data-percentage="{{(score['C041']['overall']/50*100)|round|int}}">
+                        <span class="progress-left">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <span class="progress-right">
+                            <span class="progress-bar"></span>
+                        </span>
+                        <div class="progress-value">
+                            <div>
+                                {% if score['C041']['overall'] is lt(4) %}
+                                    Level 0<p style="font-size:10pt">Beginning</p>
+                                {% endif %}
+                                {% if score['C041']['overall'] is ge(4) and score['C041']['overall'] is lt(10) %}
+                                    Level 1<p style="font-size:10pt">Basic</p>
+                                {% endif %}
+                                {% if score['C041']['overall'] is ge(10) and score['C041']['overall'] is lt(20)  %}
+                                    Level 2<p style="font-size:10pt">Intermediate</p>
+                                {% endif %}
+                                {% if score['C041']['overall'] is ge(20) and score['C041']['overall'] is lt(50)  %}
+                                    Level 3<p style="font-size:10pt">Good</p>
+                                {% endif %}
+                                {% if score['C041']['overall'] is ge(50)  %}
+                                    Level 4<p style="font-size:10pt">Advanced</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="result_control">
+                <button type="button" onclick="print_results()">Save <i class="zmdi"></i></button>
+                <button type="button" onclick="reset_assessment()">Reset
+                    <i class="zmdi"></i>
+                </button>
+                <p>*Warning: Results shown will not be saved after resetting</p>
+                
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+{% block header_block %}
+    <meta charset="utf-8">
+    <title>{% block title_block %}{% endblock title_block %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{{ url_for('.static', filename='imgs/iot-icon_2.ico') }}" id="nav-ico">
+    <!--<link rel="icon" href="/IoT/static/imgs/iot.ico" type="image/png">-->
+    <!--<link rel="stylesheet" href="/static/css/iot-styles.css">-->
+    <link rel="stylesheet" href="{{ url_for('.static', filename='css/iot-styles.css') }}">
+    {% block styles_block %}{% endblock styles_block %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="{{ url_for('.static', filename='js/commands.js') }}"></script>
+    {% block js_block %} {% endblock js_block %}
+{% endblock header_block %}
+</head>
+<body>
+
+<div class="body-container center-content">
+
+    {% block content %}
+        <h1>Congratulations!</h1>
+        <h1>CyberArena{sMaRtToAsTeR}</h1>
+    {% endblock %}
+
+</div>
+
+</body>

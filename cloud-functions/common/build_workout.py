@@ -1,16 +1,42 @@
-import time
 import random
 import string
-
-from common.globals import ds_client, project, compute, region, zone, BUILD_STATES
+import time
+from common.globals import ds_client, log_client, project, compute, region, zone, BUILD_STATES, LOG_LEVELS
 from common.assessment_functions import get_startup_scripts
-from common.networking_functions import create_route, create_firewall_rules
+from common.networking_functions import create_route, create_firewall_rules, workout_route_setup
 from common.prepare_compute import create_instance_custom_image, build_guacamole_server
 from common.state_transition import state_transition, check_ordered_workout_state
+from googleapiclient.errors import HttpError
+
 
 # create random strings --> will be used to create random workoutID
 def randomStringDigits(stringLength=6):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(stringLength))
+
+
+def create_guac_connection(workout_id, config):
+    """
+    Creates a guacamole connection ready for inserting into the student entry server configuration.
+    @param workout_id: ID of the workout being created
+    @type workout_id: string
+    @param config: Specification string for a student guacamole connection
+    @type config: dict
+    @return: The specification with the workout ID included
+    @rtype: dict
+    """
+    student_entry_username = config['username'] if 'username' in config else None
+    rdp_domain = config['domain'] if 'domain' in config else None
+    security_mode = config['security-mode'] if 'security-mode' in config else 'nla'
+    connection = {
+        'workout_id': workout_id,
+        'entry_type': config['type'],
+        'ip': config['ip'],
+        'username': student_entry_username,
+        'password': config['password'],
+        'domain': rdp_domain,
+        'security-mode': security_mode
+    }
+    return connection
 
 
 def build_workout(workout_id):
@@ -23,9 +49,14 @@ def build_workout(workout_id):
     workout = ds_client.get(key)
     # This can sometimes happen when debugging a workout ID and the Datastore record no longer exists.
     if not workout:
-        print('No workout for %s exists in the data store' % workout_id)
+        g_logger = log_client.logger('cybergym-app-error')
+        g_logger.log_struct(
+            {
+                "message": "Build operation failed. No workout for {} exists in the data store".format(workout_id)
+            }, severity=LOG_LEVELS.WARNING
+        )
         return
-
+    g_logger = log_client.logger(str(workout_id))
     startup_scripts = None
     # Parse the assessment specification to obtain any startup scripts for the workout.
     if 'state' not in workout or not workout['state']:
@@ -36,38 +67,63 @@ def build_workout(workout_id):
     # Create the networks and subnets
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_NETWORKS):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_NETWORKS)
-        print('Creating networks')
+        g_logger.log_struct(
+            {
+                "message": "Building networks",
+            }, severity=LOG_LEVELS.INFO
+        )
         for network in workout['networks']:
             network_body = {"name": "%s-%s" % (workout_id, network['name']),
                             "autoCreateSubnetworks": False,
                             "region": region}
-            response = compute.networks().insert(project=project, body=network_body).execute()
-            compute.globalOperations().wait(project=project, operation=response["id"]).execute()
-            time.sleep(10)
+            try:
+                response = compute.networks().insert(project=project, body=network_body).execute()
+                compute.globalOperations().wait(project=project, operation=response["id"]).execute()
+                time.sleep(10)
+            except HttpError as err:
+                # If the network already exists, then this may be a rebuild and ignore the error
+                if err.resp.status in [409]:
+                    pass
             for subnet in network['subnets']:
                 subnetwork_body = {
                     "name": "%s-%s" % (network_body['name'], subnet['name']),
                     "network": "projects/%s/global/networks/%s" % (project, network_body['name']),
                     "ipCidrRange": subnet['ip_subnet']
                 }
-                response = compute.subnetworks().insert(project=project, region=region,
-                                                        body=subnetwork_body).execute()
-                compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
-                state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_NETWORKS)
+                try:
+                    response = compute.subnetworks().insert(project=project, region=region,
+                                                            body=subnetwork_body).execute()
+                    compute.regionOperations().wait(project=project, region=region, operation=response["id"]).execute()
+                except HttpError as err:
+                    # If the subnetwork already exists, then this may be a rebuild and ignore the error
+                    if err.resp.status in [409]:
+                        pass
+            state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_NETWORKS)
 
     # Now create the server configurations
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_SERVERS):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_SERVERS)
-        print('Creating servers')
+        g_logger.log_struct(
+            {
+                "message": "Building servers"
+            }, severity=LOG_LEVELS.INFO
+        )
         for server in workout['servers']:
+            custom_image = server.get('image', None)
+            build_type = server.get("build_type", None)
+            machine_image = server.get("machine_image", None)
             server_name = "%s-%s" % (workout_id, server['name'])
-            sshkey = server["sshkey"]
-            tags = server['tags']
-            machine_type = server["machine_type"]
-            network_routing = server["network_routing"]
-            min_cpu_platform = server["minCpuPlatform"] if "minCpuPlatform" in server else None
+            sshkey = server.get("sshkey", None)
+            tags = server.get('tags', None)
+            machine_type = server.get("machine_type", None)
+            network_routing = server.get("network_routing", None)
+            min_cpu_platform = server.get("minCpuPlatform", None)
+            add_disk = server.get("add_disk", None)
+            options = server.get("options", None)
+            snapshot = server.get('snapshot', None)
             nics = []
             for n in server['nics']:
+                n['external_NAT'] = n['external_NAT'] if 'external_NAT' in n else False
                 nic = {
                     "network": f"{workout_id}-{n['network']}",
                     "internal_IP": n['internal_IP'],
@@ -86,28 +142,35 @@ def build_workout(workout_id):
             meta_data = None
             if startup_scripts and server['name'] in startup_scripts:
                 meta_data = startup_scripts[server['name']]
-    
+            g_logger.log_struct(
+                {
+                    "message": "Building server {} for workout {}".format(server_name, workout_id)
+                }, severity=LOG_LEVELS.INFO
+            )
             create_instance_custom_image(compute=compute, workout=workout_id, name=server_name,
-                                         custom_image=server['image'], machine_type=machine_type,
+                                         custom_image=custom_image, machine_type=machine_type,
                                          networkRouting=network_routing, networks=nics, tags=tags,
-                                         meta_data=meta_data, sshkey=sshkey, minCpuPlatform=min_cpu_platform)
+                                         meta_data=meta_data, sshkey=sshkey, minCpuPlatform=min_cpu_platform,
+                                         build_type=build_type, machine_image=machine_image, add_disk=add_disk,
+                                         snapshot=snapshot, options=options)
 
         state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_SERVERS)
     # Create the student entry guacamole server
+    # TODO: There's a bug here when attempting to build the guacamole server
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_STUDENT_ENTRY):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_STUDENT_ENTRY)
         if workout['student_entry']:
-            network_name = f"{workout_id}-{workout['student_entry']['network']}"
-            student_entry_username = workout['student_entry']['username'] if 'username' in workout['student_entry'] else None
-            security_mode = workout['student_entry']['security-mode'] if 'security-mode' in workout['student_entry'] else 'nla'
-            guac_connection = [{
-                'workout_id': workout_id,
-                'entry_type': workout['student_entry']['type'],
-                'ip': workout['student_entry']['ip'],
-                'username': student_entry_username,
-                'password': workout['student_entry']['password'],
-                'security-mode': security_mode
-            }]
+            # A configuration may have multiple connections from the student entry to support multiple
+            # concurrent students
+            guac_connection = []
+            if 'connections' in workout['student_entry']:
+                network_name = f"{workout_id}-{workout['student_entry']['network']}"
+                for entry in workout['student_entry']['connections']:
+                    connection = create_guac_connection(workout_id, entry)
+                    guac_connection.append(connection)
+            else:
+                network_name = f"{workout_id}-{workout['student_entry']['network']}"
+                guac_connection.append(create_guac_connection(workout_id, workout['student_entry']))
             build_guacamole_server(build=workout, network=network_name,
                                    guacamole_connections=guac_connection)
             # Get the workout key again or the state transition will overwrite it
@@ -119,16 +182,13 @@ def build_workout(workout_id):
     # Create all of the network routes and firewall rules
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_ROUTES):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_ROUTES)
-        print('Creating network routes and firewall rules')
+        g_logger.log_struct(
+            {
+                "message": "Creating network routes and firewall rules"
+            }, severity=LOG_LEVELS.INFO
+        )
         if 'routes' in workout and workout['routes']:
-            for route in workout['routes']:
-                response = compute.instances().get(project=project, zone=zone,
-                                                   instance=f"{workout_id}-{route['next_hop_instance']}")
-                r = {"name": "%s-%s" % (workout_id, route['name']),
-                     "network": "%s-%s" % (workout_id, route['network']),
-                     "destRange": route['dest_range'],
-                     "nextHopInstance": "%s-%s" % (workout_id, route['next_hop_instance'])}
-                create_route(r)
+            workout_route_setup(workout_id)
 
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_FIREWALL):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_FIREWALL)
@@ -142,5 +202,4 @@ def build_workout(workout_id):
                                    "sourceRanges": rule['source_ranges']})
     
         create_firewall_rules(firewall_rules)
-
-# build_workout('isirdhzjqk')
+        state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_FIREWALL)

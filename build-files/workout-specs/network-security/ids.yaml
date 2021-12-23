@@ -1,0 +1,55 @@
+version: '1'
+
+workout:
+  name: ids
+  workout_description: 'Insert workout description here'
+  project_api_key_type: cloud
+  flag_location: /usr/src/flag
+  author:
+
+networks:
+  - name: external-network
+    subnets:
+      - name: default
+        ip_subnet: 10.1.1.0/24
+
+servers:
+  - name: cybergym-labentry
+    image: image-labentry
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["http-server", "labentry"]}
+    metadata: none
+    guac_path: "MQBjAG15c3Fs"
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.10
+        subnet: default
+        external_NAT: true
+  - name: cybergym-ad-dc
+    image: image-cybergym-activedirectory-domaincontroller
+    machine_type: "n1-standard-1"
+    network_routing: false
+    tags: {items: ["ad-server", "rdp-server"]}
+    metadata: none
+    nics:
+      - network: external-network
+        internal_IP: 10.1.1.11
+        subnet: default
+        external_NAT: false
+
+routes:
+
+firewall_rules:
+  - name: allow-http
+    network: external-network
+    target_tags: ["http-server"]
+    protocol: none
+    ports: ["tcp/80,8080,443"]
+    source_ranges: ["0.0.0.0/0"]
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.1.1.0/24"]

@@ -1,0 +1,19 @@
+version: '1'
+
+workout:
+  name: inspect
+  build_type: "container"
+  workout_description: 'Find useful information left behind by developers using the inspect element tool'
+  teacher_instructions_url: "https://storage.cloud.google.com/teacher_workout_instructions_84jf627/InspectWorkoutTeacherInstructions.pdf"
+  student_instructions_url: "https://storage.cloud.google.com/student_workout_instructions_tgd4419/InspectWorkoutStudentInstructions.pdf"
+  host_name: "cybergym-classified"
+  author: Chance Melby
+
+assessment:
+  type: level
+  key: "D2kj3ghxZbnN458H"
+  questions:
+    - type: auto
+      key: "BMzEc3C5N697KjZH"
+      question: "Classified Flag Found!"
+      complete: False

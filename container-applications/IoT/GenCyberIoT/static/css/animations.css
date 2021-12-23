@@ -1,0 +1,127 @@
+.gradient-wipe {
+    animation: gradient-wipe-kf 380ms ease;
+    background: #85aae3;
+}
+@keyframes gradient-wipe-kf {
+    0%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 1%, whitesmoke 1%, whitesmoke 100%);}
+    5%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 5%, whitesmoke 5%, whitesmoke 100%);}
+    10% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 10%, whitesmoke 10%, whitesmoke 100%);}
+    15%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 15%, whitesmoke 15%, whitesmoke 100%);}
+    20% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 20%, whitesmoke 20%, whitesmoke 100%);}
+    25%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 25%, whitesmoke 25%, whitesmoke 100%);}
+    30% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 30%, whitesmoke 30%, whitesmoke 100%);}
+    35%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 35%, whitesmoke 35%, whitesmoke 100%);}
+    40% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 40%, whitesmoke 40%, whitesmoke 100%);}
+    45%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 45%, whitesmoke 45%, whitesmoke 100%);}
+    50% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 50%, whitesmoke 50%, whitesmoke 100%);}
+    55%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 55%, whitesmoke 55%, whitesmoke 100%);}
+    60% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 60%, whitesmoke 60%, whitesmoke 100%);}
+    65%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 65%, whitesmoke 65%, whitesmoke 100%);}
+    70% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 70%, whitesmoke 70%, whitesmoke 100%);}
+    75%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 75%, whitesmoke 75%, whitesmoke 100%);}
+    80% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 80%, whitesmoke 80%, whitesmoke 100%);}
+    85%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 85%, whitesmoke 85%, whitesmoke 100%);}
+    90% { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 90%, whitesmoke 90%, whitesmoke 100%);}
+    95%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 95%, whitesmoke 95%, whitesmoke 100%);}
+    98%  { background: linear-gradient(145deg, #1a73e8 0%, #1a73e8 98%, whitesmoke 98%, whitesmoke 100%);}
+    100%{ background: #1a73e8; }
+}
+
+.animated-text-div {
+    text-align: center;
+    margin: auto;
+    text-shadow: 3px 6px 3px rgba(0,0,0,.1);
+    font-size: 60px;
+    font-family: "Cascadia Code Light", "Cascadia Code", serif;
+    color: #f1f1f1;
+}
+.animated-text-div i {
+  position: relative;
+  top: 10px;
+  font-style: normal;
+  -webkit-animation: bounce 1s ease infinite alternate;
+  -moz-animation: bounce 1s ease infinite alternate;
+  animation: bounce 1s ease infinite alternate;
+  z-index: 2;
+}
+.animated-text-div i:nth-child(1) {
+  -moz-animation-delay: .2s;
+  -webkit-animation-delay: .2s;
+  animation-delay: .2s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(2) {
+  -moz-animation-delay: .4s;
+  -webkit-animation-delay: .4s;
+  animation-delay: .4s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(3) {
+  -moz-animation-delay: .6s;
+  -webkit-animation-delay: .6s;
+  animation-delay: .6s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(4) {
+  -moz-animation-delay: .8s;
+  -webkit-animation-delay: .8s;
+  animation-delay: .8s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(5) {
+  -moz-animation-delay: 1s;
+  -webkit-animation-delay: 1s;
+  animation-delay: 1s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(6) {
+  -moz-animation-delay: 1.2s;
+  -webkit-animation-delay: 1.2s;
+  animation-delay: 1.2s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(7) {
+  -moz-animation-delay: 1.4s;
+  -webkit-animation-delay: 1.4s;
+  animation-delay: 1.4s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(8) {
+  -moz-animation-delay: 1.6s;
+  -webkit-animation-delay: 1.6s;
+  animation-delay: 1.6s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(9) {
+  -moz-animation-delay: 1.8s;
+  -webkit-animation-delay: 1.8s;
+  animation-delay: 1.8s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(10) {
+  -moz-animation-delay: 2s;
+  -webkit-animation-delay: 2s;
+  animation-delay: 2s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(11) {
+  -moz-animation-delay: 2.2s;
+  -webkit-animation-delay: 2.2s;
+  animation-delay: 2.2s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(12) {
+  -moz-animation-delay: 2.4s;
+  -webkit-animation-delay: 2.4s;
+  animation-delay: 2.4s;
+  color: #fdfcfc;
+}
+.animated-text-div i:nth-child(13) {
+  -moz-animation-delay: 2.6s;
+  -webkit-animation-delay: 2.6s;
+  animation-delay: 2.6s;
+  color: #fdfcfc;
+}
+@keyframes bounce { 100% { top: -10px; } }
+@-webkit-keyframes bounce { 100% { top: -10px; } }
+@-moz-keyframes bounce { 100% { top: -10px; } }

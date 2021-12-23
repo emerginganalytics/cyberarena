@@ -1,0 +1,536 @@
+/* ===============
+   FONTS
+   =============== */
+@font-face {
+  font-family: "Montserrat-Regular";
+  src: url("../fonts/Montserrat/Montserrat-Regular.ttf");
+}
+@font-face {
+  font-family: "Montserrat-Bold";
+  src: url("../fonts/Montserrat/Montserrat-Bold.ttf");
+}
+@font-face {
+  font-family: "Montserrat-SemiBold";
+  src: url("../fonts/Montserrat/Montserrat-SemiBold.ttf");
+}
+
+/* ===============
+   WRAPPER
+   =============== */
+.wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  background: -webkit-gradient(linear, left bottom, left top, from(#73233c), to(#003b49));
+  background: -webkit-linear-gradient(bottom, #73233c 0%, #003b49 100%);
+  background: -moz-linear-gradient(bottom, #73233c 0%, #003b49 100%);
+  background: -o-linear-gradient(bottom, #73233c 0%, #003b49 100%);
+  background: linear-gradient(to top, #73233c 0%, #003b49 100%);
+}
+body {
+  font-family: "Montserrat-Regular";
+  color: #73233c;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ===============
+   INNER
+   =============== */
+.inner {
+  max-width: 758px;
+  margin: auto;
+  background: #ffffff;
+  border: 10px solid #2893cb;
+  padding: 1em 6em 5em;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  -webkit-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  -ms-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+  -o-box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.2);
+}
+.progress {
+  height:1.5em;
+}
+.progress-bar {
+  font-size: 1em;
+  color: black;
+}
+h3 {
+  text-transform: uppercase;
+  font-size: 45px;
+  font-family: "Montserrat-Bold";
+  text-align: center;
+  margin-bottom: 12px;
+}
+p {
+  text-align: center;
+  padding: 1em 1em;
+  line-height: 1.8;
+}
+
+/* ===============
+   BUTTONS
+   =============== */
+.navigation_button {
+  border: none;
+  width: 10em;
+  height: 3em;
+  border: 0.15em solid #fff;
+  margin: auto;
+  margin-top: 4em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background-color: black;
+  color: white;
+  text-transform: uppercase;
+  font-family: "Montserrat-SemiBold";
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  position: relative;
+  -webkit-transition-property: color;
+  transition-property: color;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+}
+  .navigation_button i {
+    margin-left: 10px;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-transition-duration: 0.1s;
+    transition-duration: 0.1s;
+    -webkit-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-timing-function: ease-out;
+    transition-timing-function: ease-out;
+  }
+  .navigation_button:before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #1ea704;
+    -webkit-transform: scaleX(0);
+    transform: scaleX(0);
+    -webkit-transform-origin: 0 50%;
+    transform-origin: 0 50%;
+    -webkit-transition-property: transform;
+    transition-property: transform;
+    -webkit-transition-duration: 0.3s;
+    transition-duration: 0.3s;
+    -webkit-transition-timing-function: ease-out;
+    transition-timing-function: ease-out;
+  }
+  .navigation_button:hover {
+    border-color: transparent;
+  }
+    .navigation_button:hover:before {
+      -webkit-transform: scaleX(1);
+      transform: scaleX(1);
+    }
+    .navigation_button:hover i {
+      -webkit-transform: translateX(4px);
+      transform: translateX(4px);
+    }
+button.right{
+    float:right;
+    margin-right:5em;
+    margin-left:5em;
+}
+button.left {
+    float:left;
+    margin-left:5em;
+}
+/* ===============
+   MOBILE VIEW
+   =============== */
+@media (max-width: 767px) {
+  h3 {
+    font-size: 38px;
+  }
+  p {
+    font-size: 14px;
+    padding: 0;
+  }
+  .inner {
+    padding: 0.05em 1.25em 2.3em;
+    border: none;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    -ms-box-shadow: none;
+    -o-box-shadow: none;
+  }
+  .wrapper {
+    background: #73233c;
+    border: 10px solid #2893cb;
+  }
+}
+/* ===============
+   WORM RADIO SELECT
+   =============== */
+* {
+  border: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;}
+
+/*:root {
+  font-size: calc(32px + (40 - 32)*(100vw - 320px)/ (1024 - 320));
+}*/
+form {
+  display: block;
+  margin-left: 2em;
+  position: relative;
+}
+input {
+  position: fixed;
+  top: -1.5em;
+  left: -1.5em;
+}
+label {
+  cursor: pointer;
+  display: block;
+  font-weight: bold;
+  text-shadow: 0 0.1em 0.1em rgba(0, 0, 0, 0.2);
+  transition: color 0.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+label:not(:last-of-type) {
+  margin-bottom: 1.5em;
+}
+label span {
+  box-shadow: 0 0 0 0.2em currentColor inset, 0 0.2em 0.2em rgba(0, 0, 0, 0.2), 0 0.3em 0.2em rgba(0, 0, 0, 0.2) inset;
+  display: inline-block;
+  margin-right: 0.5em;
+  vertical-align: bottom;
+  width: 1.5em;
+  height: 1.5em;
+  transition: transform 0.2s cubic-bezier(0.5, 0, 0.5, 2), box-shadow 0.2s cubic-bezier(0.45, 0.05, 0.55, 0.95), color 0.2s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+label span,
+.worm__segment:before {
+  border-radius: 50%;
+}
+input:checked + label,
+input:checked + label span,
+.worm__segment:before {
+  color: #2893cb;
+}
+input:checked + label, input:checked + label span {
+  transition-delay: 0.4s;
+}
+input:checked + label span {
+  transform: scale(1.2);
+}
+.worm {
+  top: 0.375em;
+  left: 0.375em;
+}
+.worm, .worm__segment {
+  position: absolute;
+}
+.worm__segment {
+  top: 0;
+  left: 0;
+  width: 0.75em;
+  height: 0.75em;
+  transition: transform 0.4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+}
+.worm__segment:before {
+  animation-duration: 0.4s;
+  animation-timing-function: cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  background: currentColor;
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Delay the transition so it appears to look like a worm */
+.worm__segment:first-child:before, .worm__segment:last-child:before {
+  box-shadow: 0 0 1em 0 currentColor;
+}
+.worm__segment:nth-child(2) {
+  transition-delay: 0.004s;
+}
+.worm__segment:nth-child(2):before {
+  animation-delay: 0.004s;
+}
+.worm__segment:nth-child(3) {
+  transition-delay: 0.008s;
+}
+.worm__segment:nth-child(3):before {
+  animation-delay: 0.008s;
+}
+.worm__segment:nth-child(4) {
+  transition-delay: 0.012s;
+}
+.worm__segment:nth-child(4):before {
+  animation-delay: 0.012s;
+}
+.worm__segment:nth-child(5) {
+  transition-delay: 0.016s;
+}
+.worm__segment:nth-child(5):before {
+  animation-delay: 0.016s;
+}
+.worm__segment:nth-child(6) {
+  transition-delay: 0.02s;
+}
+.worm__segment:nth-child(6):before {
+  animation-delay: 0.02s;
+}
+.worm__segment:nth-child(7) {
+  transition-delay: 0.024s;
+}
+.worm__segment:nth-child(7):before {
+  animation-delay: 0.024s;
+}
+.worm__segment:nth-child(8) {
+  transition-delay: 0.028s;
+}
+.worm__segment:nth-child(8):before {
+  animation-delay: 0.028s;
+}
+.worm__segment:nth-child(9) {
+  transition-delay: 0.032s;
+}
+.worm__segment:nth-child(9):before {
+  animation-delay: 0.032s;
+}
+.worm__segment:nth-child(10) {
+  transition-delay: 0.036s;
+}
+.worm__segment:nth-child(10):before {
+  animation-delay: 0.036s;
+}
+.worm__segment:nth-child(11) {
+  transition-delay: 0.04s;
+}
+.worm__segment:nth-child(11):before {
+  animation-delay: 0.04s;
+}
+.worm__segment:nth-child(12) {
+  transition-delay: 0.044s;
+}
+.worm__segment:nth-child(12):before {
+  animation-delay: 0.044s;
+}
+.worm__segment:nth-child(13) {
+  transition-delay: 0.048s;
+}
+.worm__segment:nth-child(13):before {
+  animation-delay: 0.048s;
+}
+.worm__segment:nth-child(14) {
+  transition-delay: 0.052s;
+}
+.worm__segment:nth-child(14):before {
+  animation-delay: 0.052s;
+}
+.worm__segment:nth-child(15) {
+  transition-delay: 0.056s;
+}
+.worm__segment:nth-child(15):before {
+  animation-delay: 0.056s;
+}
+.worm__segment:nth-child(16) {
+  transition-delay: 0.06s;
+}
+.worm__segment:nth-child(16):before {
+  animation-delay: 0.06s;
+}
+.worm__segment:nth-child(17) {
+  transition-delay: 0.064s;
+}
+.worm__segment:nth-child(17):before {
+  animation-delay: 0.064s;
+}
+.worm__segment:nth-child(18) {
+  transition-delay: 0.068s;
+}
+.worm__segment:nth-child(18):before {
+  animation-delay: 0.068s;
+}
+.worm__segment:nth-child(19) {
+  transition-delay: 0.072s;
+}
+.worm__segment:nth-child(19):before {
+  animation-delay: 0.072s;
+}
+.worm__segment:nth-child(20) {
+  transition-delay: 0.076s;
+}
+.worm__segment:nth-child(20):before {
+  animation-delay: 0.076s;
+}
+.worm__segment:nth-child(21) {
+  transition-delay: 0.08s;
+}
+.worm__segment:nth-child(21):before {
+  animation-delay: 0.08s;
+}
+.worm__segment:nth-child(22) {
+  transition-delay: 0.084s;
+}
+.worm__segment:nth-child(22):before {
+  animation-delay: 0.084s;
+}
+.worm__segment:nth-child(23) {
+  transition-delay: 0.088s;
+}
+.worm__segment:nth-child(23):before {
+  animation-delay: 0.088s;
+}
+.worm__segment:nth-child(24) {
+  transition-delay: 0.092s;
+}
+.worm__segment:nth-child(24):before {
+  animation-delay: 0.092s;
+}
+.worm__segment:nth-child(25) {
+  transition-delay: 0.096s;
+}
+.worm__segment:nth-child(25):before {
+  animation-delay: 0.096s;
+}
+.worm__segment:nth-child(26) {
+  transition-delay: 0.1s;
+}
+.worm__segment:nth-child(26):before {
+  animation-delay: 0.1s;
+}
+.worm__segment:nth-child(27) {
+  transition-delay: 0.104s;
+}
+.worm__segment:nth-child(27):before {
+  animation-delay: 0.104s;
+}
+.worm__segment:nth-child(28) {
+  transition-delay: 0.108s;
+}
+.worm__segment:nth-child(28):before {
+  animation-delay: 0.108s;
+}
+.worm__segment:nth-child(29) {
+  transition-delay: 0.112s;
+}
+.worm__segment:nth-child(29):before {
+  animation-delay: 0.112s;
+}
+.worm__segment:nth-child(30) {
+  transition-delay: 0.116s;
+}
+.worm__segment:nth-child(30):before {
+  animation-delay: 0.116s;
+}
+/* Worm Hops for Radio Select Options */
+input:nth-of-type(1):checked ~ .worm .worm__segment:before {
+  animation-name: hop1;
+}
+@keyframes hop1 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+input:nth-of-type(2):checked ~ .worm .worm__segment {
+  transform: translateY(3em);
+}
+input:nth-of-type(2):checked ~ .worm .worm__segment:before {
+  animation-name: hop2;
+}
+@keyframes hop2 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+input:nth-of-type(3):checked ~ .worm .worm__segment {
+  transform: translateY(6em);
+}
+input:nth-of-type(3):checked ~ .worm .worm__segment:before {
+  animation-name: hop3;
+}
+@keyframes hop3 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+input:nth-of-type(4):checked ~ .worm .worm__segment {
+  transform: translateY(9em);
+}
+input:nth-of-type(4):checked ~ .worm .worm__segment:before {
+  animation-name: hop4;
+}
+@keyframes hop4 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+input:nth-of-type(5):checked ~ .worm .worm__segment {
+  transform: translateY(12em);
+}
+input:nth-of-type(5):checked ~ .worm .worm__segment:before {
+  animation-name: hop5;
+}
+@keyframes hop5 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+input:nth-of-type(6):checked ~ .worm .worm__segment {
+  transform: translateY(15em);
+}
+input:nth-of-type(6):checked ~ .worm .worm__segment:before {
+  animation-name: hop6;
+}
+@keyframes hop6 {
+  from, to {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-1.5em);
+  }
+}
+/* ===============
+   MODAL
+   =============== */
+.modal-header {
+  color:black;
+}
+.modal-body {
+  color:black;
+}
+.modal-footer {
+  color:black;
+}
+/* ===============
+   LINKS
+   =============== */
+.resources a {
+  text-decoration:underline;
+  margin:auto;
+}
+

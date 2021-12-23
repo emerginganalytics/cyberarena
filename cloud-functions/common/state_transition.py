@@ -1,7 +1,8 @@
 import time
 import calendar
 
-from common.globals import ds_client, ordered_workout_states, ordered_arena_states, BUILD_STATES
+from common.globals import ds_client, ordered_workout_build_states, ordered_arena_states, BUILD_STATES, LOG_LEVELS, log_client, \
+    ds_safe_put
 
 
 def state_transition(entity, new_state, existing_state=None):
@@ -17,13 +18,25 @@ def state_transition(entity, new_state, existing_state=None):
         entity['state'] = None
 
     if existing_state and entity['state'] != existing_state:
-        print(f"Error in state transition: Expected entity to be in {existing_state} state. Instead, it was in the state"
-              f" {entity['state']}")
+        g_logger = log_client.logger(entity.key.name)
+        g_logger.log_struct(
+            {
+                "message": "Error in state transition: Expected entity to be in {} state. Instead, it was in state {}".format(existing_state, entity['state'])
+            }, severity=LOG_LEVELS.WARNING
+        )
+        # print(f"Error in state transition: Expected entity to be in {existing_state} state. Instead, it was in the state"
+        #       f" {entity['state']}")
         return False
     ts = str(calendar.timegm(time.gmtime()))
     entity['state'] = new_state
     entity['state-timestamp'] = ts
-    ds_client.put(entity)
+    if new_state == BUILD_STATES.DELETED:
+        entity['active'] = False
+    elif new_state == BUILD_STATES.READY:
+        entity['active'] = True
+    g_logger = log_client.logger(entity.key.name)
+    g_logger.log_text(str('State Transition {}: Transitioning to {} at {}'.format(entity.key.name, new_state, ts)))
+    ds_safe_put(entity)
     return True
 
 
@@ -40,10 +53,10 @@ def check_ordered_workout_state(workout, ordered_state):
         ds_client.put(workout)
         return False
 
-    if workout['state'] not in ordered_workout_states:
+    if workout['state'] not in ordered_workout_build_states:
         return False
 
-    if ordered_workout_states[workout['state']] <= ordered_workout_states[ordered_state]:
+    if ordered_workout_build_states[workout['state']] <= ordered_workout_build_states[ordered_state]:
         return True
     else:
         return False

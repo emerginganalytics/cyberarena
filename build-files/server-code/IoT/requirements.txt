@@ -1,0 +1,10 @@
+sense-hat
+sense-emu
+PyJWT
+flask
+oauthlib
+paho-mqtt
+psutil
+pyyaml
+python-dotenv
+requests
