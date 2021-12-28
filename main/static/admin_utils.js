@@ -74,6 +74,67 @@ function workout_search(){
     document.getElementById('clear_filter_button').style.display = "";
 }
 
+function fill_active_workout_table(data){
+    let table = document.getElementById('active_workout_display');
+
+    for(let i = 0; i < data.length; i++){
+        //let new_workout = document.createElement('tr')
+        var row = add_element("tr", {id: "workout_row_" + data[i]['id']});
+
+        var workout_link = add_element('a', {href: '/admin/workout/' + data[i]['id'], innerHTML: data[i]['id']})
+        row.appendChild(add_element('td', {innerHTML: workout_link.outerHTML}));
+        row.appendChild(add_element('td', {innerHTML: data[i]['type']}));
+        if(data[i]['user_email']){
+            row.appendChild(add_element('td', {innerHTML: data[i]['user_email']}));
+        } else {
+            row.appendChild(add_element('td', {innerHTML: " "}));
+        }
+        if(data[i]['student_name']){
+            row.appendChild(add_element('td', {innerHTML: data[i]['student_name']}));
+        } else {
+            row.appendChild(add_element('td', {innerHTML: " "}));
+        }
+
+        row.appendChild(add_element('td', {innerHTML: data[i]['unit_id']}));
+        row.appendChild(add_element('td', {innerHTML: data[i]['state']}));
+
+        if(data[i]['runtime_counter']){
+            row.appendChild(add_element('td', {innerHTML: data[i]['runtime_counter'], className: 'runtime_field'}));
+        } else {
+            row.appendChild(add_element('td', {innerHTML: "0"}));
+        }
+        
+        if(data[i]['estimated_cost']){
+            var cost = data[i]['estimated_cost']
+        } else{
+            var cost = "No cost info in spec";
+        }
+        var cost_el = add_element('td', {innerHTML: cost})
+        row.appendChild(cost_el);
+        table.appendChild(row);
+    }   
+}
+
+function get_active_workouts(){
+    let table = document.getElementById('active_workout_display');
+    //console.log(table.firstElementChild);
+    if(table.firstElementChild == null){
+        var loader = document.getElementById('loading-msg');
+        loader.style.display = "block";
+        $("#loading-msg").html('Fetching active workouts' + '</br><div class="loader"></div>');
+        $.ajax({
+            type: "GET",
+            url: "/admin/api/active_workouts",
+            dataType: "json",
+            success: function(data){
+                loader.style.display = "none";
+                fill_active_workout_table(data);
+                format_runtime();
+            }
+        })
+    }
+}
+
 function clear_filter(){
     //Removes active filters from the Maintenance table
     var table = document.getElementById('active_workout_table');

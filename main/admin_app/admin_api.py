@@ -8,6 +8,24 @@ import json
 admin_api = Blueprint('admin_api', __name__, url_prefix='/api')
 
 
+@admin_api.route('/active_workouts', methods=['GET'])
+def get_active_workouts():
+    active_workout_query = ds_client.query(kind='cybergym-workout')
+    
+    workout_list = active_workout_query.fetch()
+    active_workouts = []
+
+    for workout in workout_list:
+        if 'state' in workout:
+            if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
+                if 'hourly_cost' in workout and 'runtime_counter' in workout:
+                    if workout['hourly_cost'] and workout['runtime_counter']:
+                        estimated_cost = (float(workout['hourly_cost']) / 3600) * float(workout['runtime_counter'])
+                        workout['estimated_cost'] = format(estimated_cost, '.2f')
+                workout['id'] = workout.key.name
+                active_workouts.append(workout)
+    return json.dumps(active_workouts)
+
 @admin_api.route("/admin_scripts", methods=['POST'])
 def admin_scripts():
     if request.method == 'POST':

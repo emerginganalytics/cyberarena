@@ -11,27 +11,18 @@ from admin_app.admin_api import admin_api
 admin_app = Blueprint('admin', __name__, url_prefix="/admin", static_folder="../static", template_folder="templates")
 admin_app.register_blueprint(admin_api)
 
+
 @admin_app.route('/home', methods=['GET', 'POST'])
 def admin_page():
     admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
-    active_workout_query = ds_client.query(kind='cybergym-workout')
     comment_query = ds_client.query(kind='cybergym-comments')
     comment_query.order = ['date']
     comment_list = comment_query.fetch()
     comments = []
-    workout_list = active_workout_query.fetch()
     active_workouts = []
     for comment in comment_list:
         comments.append(comment)
-    for workout in workout_list:
-        if 'state' in workout:
-            if workout['state'] != "DELETED" and workout['state'] != "COMPLETED_DELETING_SERVERS":
-                if 'hourly_cost' in workout and 'runtime_counter' in workout:
-                    if workout['hourly_cost'] and workout['runtime_counter']:
-                        estimated_cost = (float(workout['hourly_cost']) / 3600) * float(workout['runtime_counter'])
-                        workout['estimated_cost'] = format(estimated_cost, '.4f')
-                active_workouts.append(workout)
-
+        
     instance_list = []
     machine_instances = compute.instances().list(project=project, zone=zone, filter=("name:cybergym-*")).execute()
     if 'items' in machine_instances:
@@ -146,6 +137,7 @@ def handle_500(e):
         }
     )
     return render_template("500.html", error=e), 500
+
 
 @admin_app.errorhandler(404)
 def handle_404(e):
