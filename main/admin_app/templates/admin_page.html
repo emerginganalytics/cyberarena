@@ -3,7 +3,7 @@
 
 {% block content %}
 <script src='../static/login.js'></script>
-<script src="../static/workout_spec_form.js"></script>
+<script type="text/javascript" src="../static/workout_spec_form.js"></script>
 <script type="text/javascript" src="{{url_for('static', filename='admin_utils.js')}}"></script>
 <script>
     var auth_config = {
@@ -20,7 +20,7 @@
     })
     $(document).ready(function(){
         //Convert timestamps to readable format
-        format_runtime();        
+               
 
         //Adds event listeners to display forms for container or compute workouts
         prepare_workout_form();
@@ -47,6 +47,10 @@
                 contentType: false,
                 processData: false
             })
+        })
+        $('#maintenance_tab').on('shown.bs.tab', function(e){
+            let target = $(e.target).attr('href');
+            get_active_workouts();
         })
         
     })
@@ -261,6 +265,7 @@
                     </form>
                 </div>
                 <h3>Active Workouts</h3>
+                <div id="loading-msg" style="display:none;text-align:center"></div>
                 <a id="clear_filter_button" href="#" onclick="clear_filter()" class="btn" style="display:none;width:50%;margin-bottom:2em;">Clear Filter</a>
                 <table id="active_workout_table" class="table table-hover">
                     <thead>
@@ -277,36 +282,7 @@
                             <th>Cost</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    {%for workout in active_workouts%}
-                        <tr id="workout_row_{{workout.key.name}}">
-                            <td class="workout_id_field"><a href="/admin/{{workout.key.name}}">{{workout.key.name}}</a></td>
-                            <td class="workout_type_field">{{workout['type']}}</td>
-                            <td class="instructor_field">{{workout['user_email']}}</td>
-                            {% if workout['student_name'] %}
-                            <td class="student_name_field">{{workout['student_name']}}</td>
-                            {% else %}
-                            <td>N/A</td>
-                            {% endif %}
-                            <td class="unit_id_field">{{workout['unit_id']}}</td>
-                            <td class="state_field">{{workout['state']}}</td>
-                            {% if workout['runtime_counter'] %}
-                            <td class="runtime_field">{{workout['runtime_counter']}}</td>
-                            {% else %}
-                            <td>N/A</td>
-                            {% endif %}
-                            {% if 'hourly_cost' in workout and workout['hourly_cost'] %}
-                                {% if 'runtime_counter' in workout and workout['runtime_counter'] %}
-                                    <td class="cost_estimate_field">${{'%0.2f'|
-                                    format(workout['hourly_cost'] * workout['runtime_counter']/3600|float)}}</td>
-                                {% else %}
-                                    <td class="cost_estimate_field">$0</td>
-                                {% endif %}
-                            {% else %}
-                                <td>No cost info in workout spec</td>
-                            {% endif %}
-                        </tr>
-                    {% endfor %}
+                    <tbody id="active_workout_display">
                     </tbody>
                 </table>
             </div>
