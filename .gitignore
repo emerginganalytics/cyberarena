@@ -17,3 +17,4 @@ local-scripts/
 container-applications/classified/IoT/overview.md
 container-applications/classified/local_files/
 cloud-build-scripts/node_modules/
+design-files/private/
