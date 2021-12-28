@@ -1,3 +1,11 @@
+function add_element(element, properties){
+    var new_element = document.createElement(element);
+    for(var prop in properties){
+        new_element[prop] = properties[prop]
+    }
+    return new_element;
+}
+
 function format_runtime(){
     //Formats runtime counter into hours/minutes instead of seconds
     var runtime_list = document.getElementsByClassName('runtime_field');
@@ -72,6 +80,11 @@ function workout_search(){
 
     }
     document.getElementById('clear_filter_button').style.display = "";
+}
+
+function calculate_workout_cost(hourly_cost, runtime){
+    console.log("Calculating cost: \nHourly: " + hourly_cost + "     Runtime: " + runtime);
+    return hourly_cost * runtime / 3600;
 }
 
 function fill_active_workout_table(data){
