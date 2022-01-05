@@ -59,11 +59,13 @@ def landing_page(workout_id):
     server_list = []
     survey = process_survey_yaml(parse_survey_yaml())
     for server in list(workout_server_query.fetch()):
+        server_name = server['name'][11:]
+        server['name'] = server_name
         try:
             snapshots = compute.snapshots().list(project=project, filter=f"name = {server.key.name}*").execute()
             server['snapshots'] = []
             for snapshot in snapshots['items']:
-                server['snapshots'].append({'snapshot_name': snapshot['name'], 'creation_date':snapshot['creationTimestamp']})
+                server['snapshots'].append({'snapshot_name': snapshot['name'], 'creation_date': snapshot['creationTimestamp']})
         except Exception as e:
             pass
         server_list.append(server)
@@ -99,7 +101,6 @@ def landing_page(workout_id):
         if(request.method == "POST"):
             attempt = assessment_manager.submit()
             return json.dumps(attempt)
-
         return render_template('landing_page.html', build_type=build_type, workout=workout,
                                description=unit['description'], container_url=container_url, dns_suffix=dns_suffix,
                                expiration=expiration, shutoff=shutoff, assessment=assessment,
@@ -154,6 +155,7 @@ def student_server_management(workout_id):
             pub_manage_server(data['server_name'], data['action'])
     return 'True'
 
+
 @student_app.route('/feedback/<workout_id>', methods=['POST'])
 def student_feedback(workout_id):
     if request.method == 'POST':
@@ -161,6 +163,7 @@ def student_feedback(workout_id):
         
         store_student_feedback(data, workout_id)
         return json.dumps(data)
+
 
 @student_app.route('/<unit_id>/signup', methods=['GET', 'POST'])
 def unit_signup(unit_id):

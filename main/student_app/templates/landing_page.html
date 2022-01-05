@@ -1,6 +1,4 @@
 {% extends "base.html" %}
-
-
 {% block title%} Workout {{ workout_name }} {% endblock %}
 {% import 'nuke_macro.html' as nuke %}
 {% import 'logo_macro.html' as logo %}
@@ -23,7 +21,7 @@
         //Set up display modal for student feedback survey
         var modal = document.getElementById("surveyModal");
         var btn = document.getElementById("surveyBtn");
-        var span = document.getElementsByClassName("close")[0];
+        var span = document.getElementsByClassName("close-modal")[0];
 
         btn.onclick = function() {
             modal.style.display = "block";
@@ -283,10 +281,22 @@
     .assessment_question{
         margin-bottom:0;
     }
-
     .question_group{
         border: 1px solid lightgray;
         margin-bottom:0;
+    }
+    .survey_btn {
+        background-color: var(--main_color, #6e2639)!important;
+        color: white !important;
+        width: 10em;
+        border-radius: 4px;
+        border: None;
+        margin-bottom: 20px;
+        padding: 5px;
+    }
+    .survey_btn:hover {
+        background-color:white!important;
+        color:var(--main_color, #6e2639)!important;
     }
 </style>
 
@@ -294,41 +304,39 @@
 body {font-family: Arial, Helvetica, sans-serif;}
 
 .modal {
-display: none; 
-position: fixed; 
-z-index: 1; 
-padding-top: 100px; 
-left: 0;
-top: 0;
-width: 100%; 
-height: 100%; 
-overflow: auto; 
-background-color: rgb(0,0,0); 
-background-color: rgba(0,0,0,0.4); 
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 100px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
 }
 
 .modal-content {
-background-color: #fefefe;
-margin: auto;
-padding: 20px;
-border: 1px solid #888;
-width: 80%;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
 }
-
-.close {
-color: #aaaaaa;
-float: right;
-font-size: 28px;
-font-weight: bold;
+.close-modal {
+    color: #aaaaaa;
+    font-size: 2.2em;
+    font-weight: bold;
+    padding-right: 20px;
 }
-
+.close-modal:hover {cursor: pointer}
 .text-input {
-display:block;
-width:75%;
-height:100%;
-margin-right:45%;
+    display:block;
+    width:75%;
+    height:100%;
+    margin-right:45%;
 }
-
 </style>
 
 <div class='landing_container col-lg-12'>
@@ -411,6 +419,7 @@ margin-right:45%;
             {% endif %}
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+
             <div id='workout_info' class='container' style="margin:0;">
                 <h2>Welcome to your {{ workout['workout_name'] }} workout!</h2>
                 <p>{{ description }}</p>
@@ -421,7 +430,7 @@ margin-right:45%;
                 {% if workout['student_instructions_url'] %}
                     <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
                 {% endif %}
-                <div  id='login-info' style="margin:0;">
+                <div  id='login-info' style="margin: 20px 0 0;">
                     {% if build_type == "compute" %}
                         <h2>Workout Login</h2>
                         {% if "workout_credentials" in workout %}
@@ -444,10 +453,10 @@ margin-right:45%;
                     target="_blank" rel="noopener noreferrer">Enter your workout!</a>
                 {% else %}
                     <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
-
-                <table id='workout_server_table'>
+                <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                     <tr>
                         <th>Server Name</th>
+                        <th>IP</th>
                         <th>Server State</th>
                         <th>Operations</th>
                         <th>Snapshots</th>
@@ -455,8 +464,10 @@ margin-right:45%;
                 {% for server in servers %}
                     <tr>
                         <td>{{server['name']}}</td>
+                        <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
                         <td>{{server['state']}}</td>
                         <td>
+                            <div class="server_control_container" id='{{server["name"]}}_operations'>
                             <div class="server_control_container" id='{{server["name"]}}_operations'>
                                 <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
                                 <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
@@ -578,23 +589,24 @@ margin-right:45%;
                         {% endif %}
                         </div>
                         
-                    <button id="surveyBtn">Complete Survey</button>
+                    <button id="surveyBtn" class="survey_btn">Complete Survey</button>
 
                     <div id="surveyModal" class="modal">
-
                         <div class="modal-content">
-                            <span class="close">&times;</span>
-                            <h1 class="survey-title">SURVEY FORM</h1>
-                            <form id="survey_form" method="post" enctype="multipart/form-data">
-
-                                {% for key in survey.keys() %}
-                                <label for={{survey[key]}}>{{survey[key]}}</label>
-                                <input type='textarea' class="text-input" id={{survey[key]}} size="60" name={{survey[key]}}/>
-                                <br>
-                                {% endfor %}
-
-                                <input type="submit" value="Submit Survey" name="Submit"/> 
-                            </form>
+                            <div class="modal-header">
+                                <h1 class="survey-title">SURVEY FORM</h1>
+                                <span class="close-modal">&times;</span>
+                            </div>
+                            <div class="modal-body">
+                                <form id="survey_form" method="post" enctype="multipart/form-data">
+                                    {% for key in survey.keys() %}
+                                        <label for={{survey[key]}}>{{survey[key]}}</label>
+                                        <input type='textarea' class="text-input" id={{survey[key]}} size="60" name={{survey[key]}}/>
+                                        <br>
+                                    {% endfor %}
+                                    <input type="submit" value="Submit Survey" name="Submit" class="survey_btn"/>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div> <!--Assessment Dropdown-->

@@ -28,7 +28,6 @@ def add_additional_containers(containers):
 
 def process_survey_yaml(yaml_contents):
     y = load(yaml_contents, Loader=Loader)
-    print(y)
     return y
     
 

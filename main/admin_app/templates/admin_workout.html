@@ -181,16 +181,19 @@
                     </div>
                 </div>
                 <div class="loader"></div>
+                <br>
                 {% if servers %}
-                <table id='workout_server_table'>
+                <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                     <tr>
                         <th>Server Name</th>
+                        <th>IP</th>
                         <th>Server State</th>
                         <th>Operations</th>
                     </tr>
                 {% for server in servers%}
                     <tr>
                         <td>{{server['name']}}</td>
+                        <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
                         <td>{{server['state']}}</td>
                         <td>
                             <div class="server_control_container" id='{{server["name"]}}_operations'>
@@ -200,7 +203,6 @@
                             </div>
                         </td>
                     </tr>
-                    
                 {% endfor %}
 
                 </table>
