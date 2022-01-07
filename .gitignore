@@ -9,7 +9,6 @@ main/subscriber.py
 local-scripts/
 /build-files/private/
 /build-files/build-update-scripts/private/
-/build-files/workout-instructions/teacher-instructions/need-encryption/
 /main/static/private/
 /main/templates/private/
 /cloud-functions/test_command.py
@@ -18,6 +17,8 @@ container-applications/classified/IoT/overview.md
 container-applications/classified/local_files/
 cloud-build-scripts/node_modules/
 design-files/private/
-/build-files/workout-specs/needs-encrypted/
+/build-files/workout-specs/needs-encrypted/**/*.yaml
+/build-files/workout-specs/needs-encrypted/**/*.yml
+/build-files/workout-instructions/teacher-instructions/need-encrypted/*.pdf
 /local_files/
 /test.py

@@ -1,3 +1,4 @@
+import argparse
 import io
 import pyAesCrypt
 from pathlib import Path
@@ -118,3 +119,31 @@ class FileEncrypt(object):
                 file_ext = "".join(filename.suffixes)
                 if file_ext == f'.{self.ext}.aes':
                     self.decrypt_file(input_file=filename)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--password', required=True, help='Password')
+    parser.add_argument('-m', '--mode', required=True, choices=['encrypt', 'decrypt'])
+    parser.add_argument('-e', '--extension', required=True, choices=['pdf', 'yaml', 'yml'])
+    args = parser.parse_args()
+
+    if args.extension in ['yaml', 'yml']:
+        if args.mode == 'decrypt':
+            input_directory = Path("../workout-specs")
+            output_directory = Path("../workout-specs/needs-encrypted")
+        else:
+            input_directory = Path("../workout-specs/needs-encrypted")
+            output_directory = Path("../workout-specs")
+    else:
+        if args.mode == 'decrypt':
+            input_directory = Path("../workout-instructions/teacher-instructions")
+            output_directory = Path("../workout-instructions/teacher-instructions/need-encrypted")
+        else:
+            input_directory = Path("../workout-instructions/teacher-instructions/need-encrypted")
+            output_directory = Path("../workout-instructions/teacher-instructions")
+
+    FileEncrypt(input_dir=input_directory, output_dir=output_directory,
+                pwd=args.password, mode=args.mode, ext=args.extension)
+
+if __name__ == "__main__":
+    main()
