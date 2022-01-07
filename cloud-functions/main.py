@@ -4,7 +4,7 @@ import sys
 from json.decoder import JSONDecodeError
 from admin_scripts.add_child_project import add_child_project
 from admin_scripts.create_dns_forwarding_for_unit import create_dns_forwarding
-from common.build_arena import build_arena
+from common.build_competition_arena import CompetitionArena
 from common.build_workout import build_workout
 from common.compute_management import server_build, server_start, server_delete, server_stop, Snapshot
 from common.database.iot_database import IOTDatabase
@@ -86,7 +86,7 @@ def cloud_fn_build_arena(event, context):
         return
 
     unit_id = event['attributes']['unit_id'] if 'unit_id' in event['attributes'] else None
-    build_arena(unit_id)
+    CompetitionArena(unit_id).build()
 
     if context:
         print("Workout %s has completed." % unit_id)

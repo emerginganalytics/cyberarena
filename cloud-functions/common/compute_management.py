@@ -109,6 +109,16 @@ def server_build(server_name):
     while not build_success and i < 5:
         workout_globals.refresh_api()
         try:
+            if server['add_disk']:
+                try:
+                    image_config = {"name": server_name + "-disk", "sizeGb": server['add_disk'],
+                                    "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}
+                    response = compute.disks().insert(project=project, zone=zone, body=image_config).execute()
+                    compute.zoneOperations().wait(project=project, zone=zone, operation=response["id"]).execute()
+                except HttpError as err:
+                    # If the disk already exists (i.e. a nuke), then ignore
+                    if err.resp.status in [409]:
+                        pass
             if server['build_type'] == BUILD_TYPES.MACHINE_IMAGE:
                 source_machine_image = f"projects/{project}/global/machineImages/{server['machine_image']}"
                 compute_beta = discovery.build('compute', 'beta')

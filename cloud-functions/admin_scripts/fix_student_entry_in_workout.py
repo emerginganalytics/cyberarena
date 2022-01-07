@@ -1,6 +1,4 @@
 from common.globals import ds_client, BUILD_STATES
-from common.prepare_compute import build_guacamole_server
-from common.build_workout import create_guac_connection
 from common.compute_management import server_delete
 from common.state_transition import state_transition
 

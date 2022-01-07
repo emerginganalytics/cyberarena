@@ -2,7 +2,6 @@ import os
 import sys
 import yaml
 from common.globals import ds_client, BUILD_STATES, compute, project
-from common.prepare_compute import create_instance_custom_image
 from common.nuke_workout import nuke_workout
 from common.state_transition import state_transition
 

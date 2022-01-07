@@ -19,6 +19,8 @@ if custom_dnszone != None:
 else:
     dnszone = 'cybergym-public'
 main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
+guac_db_password = myconfig.get_variable('guac_password')
+guac_db_password = guac_db_password.value.decode("utf-8")
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')
@@ -42,10 +44,22 @@ class workout_globals():
     MAX_RUN_HOURS = 10
     yaml_bucket = project + '_cloudbuild'
     yaml_folder = 'yaml-build-files/'
-    windows_startup_script_env = 'setx WORKOUTID {env_workoutid}\n'
-    windows_startup_script_task = 'setx WORKOUTKEY_{q_number} {env_workoutkey}\n' \
+    windows_startup_script_env = 'setx /m WORKOUTID {env_workoutid}\n' \
+                                 'setx /m URL ' + main_app_url + '\n' \
+                                                                 'setx /m DNS_SUFFIX ' + dns_suffix + '\n'
+    windows_startup_script_task = 'setx /m WORKOUTKEY{q_number} {env_workoutkey}\n' \
                                   'call gsutil cp ' + script_repository + '{script} .\n' \
-                                  'schtasks /Create /SC MINUTE /TN {script_name} /TR .\\{script}'
+                                                                          'schtasks /Create /SC MINUTE /TN {script_name} /RU System /TR {script_command}'
+    linux_startup_script_env = '#! /bin/bash\n' \
+                               'cat >> /etc/environment << EOF\n' \
+                               'WORKOUTID={env_workoutid}\n' \
+                               'URL=' + main_app_url + '\n' \
+                                                       'DNS_SUFFIX=' + dns_suffix + '\n'
+    linux_startup_script_task = 'cat >> /etc/environment << EOF\n' \
+                                'WORKOUTKEY{q_number}={env_workoutkey}\n' \
+                                'EOF\n' \
+                                'gsutil cp ' + script_repository + '{script} {local_storage}\n' \
+                                                                   '(crontab -l 2>/dev/null; echo "* * * * * {script_command}") | crontab -'
     max_workout_len = 100
     max_num_workouts = 200
     ps_build_workout_topic = 'build-workouts'
@@ -203,3 +217,7 @@ class BuildTypes:
     ARENA = "arena"
     CONTAINER = "container"
     Types = [COMPUTE, ARENA, CONTAINER]
+
+
+class ComputeBuildTypes:
+    MACHINE_IMAGE = 'machine-image'

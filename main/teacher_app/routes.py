@@ -4,7 +4,7 @@ from forms.forms import CreateWorkoutForm
 from utilities.reset_workout import reset_workout
 from utilities.stop_workout import stop_workout
 from utilities.child_project_manager import ChildProjectManager
-from utilities.workout_spec_to_cloud import WorkoutSpecToCloud, InvalidBuildSpecification
+from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, InvalidBuildSpecification
 from utilities.datastore_functions import *
 from utilities.globals import auth_config, dns_suffix, ds_client, log_client, logger, LOG_LEVELS, main_app_url, \
     post_endpoint, workout_token, workout_globals, BuildTypes
@@ -136,7 +136,7 @@ def index(workout_type):
                 registration_required = False
 
         try:
-            cloud_spec = WorkoutSpecToCloud(cyber_arena_yaml=workout_type, unit_name=unit_name,
+            cloud_spec = BuildSpecToCloud(cyber_arena_yaml=workout_type, unit_name=unit_name,
                                             build_count=build_count, class_name=class_name, workout_length=length,
                                             email=email, build_now=build_now,
                                             registration_required=registration_required, time_expiry=None)
@@ -150,11 +150,14 @@ def index(workout_type):
         if build_type == BuildTypes.COMPUTE:
             if build_now:
                 pm = ChildProjectManager(unit_id)
-                workouts_built = pm.build_workouts()
+                pm.build_workouts()
             url = f'/teacher/workout_list/{unit_id}'
             return redirect(url)
         elif build_type == BuildTypes.ARENA:
-            pub_build_request_msg(unit_id=unit_id, topic_name=workout_globals.ps_build_arena_topic)
+            # There is not currently logic to build an arena across multiple projects
+            publisher = pubsub_v1.PublisherClient()
+            topic_path = publisher.topic_path(project, workout_globals.ps_build_arena_topic)
+            publisher.publish(topic_path, data=b'Competition Cyber Arena', unit_id=unit_id)
             url = '/teacher/arena_list/%s' % (unit_id)
             return redirect(url)
         elif build_type == BuildTypes.CONTAINER:
