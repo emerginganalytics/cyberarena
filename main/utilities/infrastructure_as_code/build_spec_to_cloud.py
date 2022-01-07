@@ -17,13 +17,17 @@ from utilities.globals import ds_client, workout_globals, dns_suffix, LOG_LEVELS
     BuildTypes
 from utilities.workout_validator import WorkoutValidator
 from utilities.yaml_functions import parse_workout_yaml
+from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCloud
+from utilities.infrastructure_as_code.student_entry_spec_to_cloud import StudentEntrySpecToCloud
+from utilities.infrastructure_as_code.competition_server_spec_to_cloud import CompetitionServerSpecToCloud
+from utilities.assessment_functions import CyberArenaAssessment
 
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2021, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff", "Samuel Willis"]
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Production"
@@ -68,7 +72,7 @@ class ArenaSchema(Schema):
         strict = True
 
 
-class WorkoutSpecToCloud:
+class BuildSpecToCloud:
     def __init__(self, cyber_arena_yaml, unit_name, build_count, class_name, workout_length, email,
                  unit_id=None, build_now=True, registration_required=False, time_expiry=None):
         """
@@ -142,7 +146,7 @@ class WorkoutSpecToCloud:
     def commit_to_cloud(self):
         """
         Commits the parsed workout specification for multiple student builds to the cloud datastore.
-        This first stores the unit to the datastore and then all of the individual builds
+        This first stores the unit to the datastore and then all the individual builds
         @return: None
         """
         cloud_log(LogIDs.MAIN_APP, f"Creating unit {self.unit_id}", LOG_LEVELS.INFO)
@@ -156,9 +160,15 @@ class WorkoutSpecToCloud:
             new_workout = datastore.Entity(ds_client.key('cybergym-workout', workout_id))
             new_workout.update(cloud_ready_spec)
             ds_client.put(new_workout)
-
+            # Store the server specifications for compute workouts
+            if self.build_type == BuildTypes.COMPUTE:
+                self._commit_workout_servers(workout_id, new_workout)
         new_unit['workouts'] = workout_ids
         ds_client.put(new_unit)
+        # If this is an arena, then store all server configurations at this time.
+        if self.build_type == BuildTypes.ARENA:
+            CompetitionServerSpecToCloud(unit=new_unit, workout_ids=workout_ids,
+                                         workout_specs=self.cloud_ready_specs).commit_to_cloud()
 
         return {
             'unit_id': self.unit_id,
@@ -380,6 +390,23 @@ class WorkoutSpecToCloud:
         else:
             self.class_record['unit_list'].append(class_unit)
         ds_client.put(self.class_record)
+
+    def _commit_workout_servers(self, workout_id, new_workout):
+        """
+        Store the server specifications of the servers in this workout as well as the student entry guacamole server
+        @param workout_id: ID of the new workout
+        @type workout_id: str
+        @param new_workout: Datastore dict of the new workout
+        @type new_workout: dict
+        @return: None
+        """
+        startup_scripts = None
+        if new_workout['assessment']:
+            startup_scripts = CyberArenaAssessment.get_startup_scripts(workout_id=workout_id,
+                                                                       assessment=new_workout['assessment'])
+        for server in new_workout['servers']:
+            ServerSpecToCloud(server, workout_id, startup_scripts).commit_to_cloud()
+        StudentEntrySpecToCloud(type=BuildTypes.COMPUTE, build=new_workout, build_id=workout_id).commit_to_cloud()
 
 
 class Error(Exception):

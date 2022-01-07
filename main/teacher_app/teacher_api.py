@@ -1,12 +1,7 @@
 from flask import Blueprint, request, redirect
-from utilities.reset_workout import reset_workout
-from utilities.stop_workout import stop_workout
-from utilities.child_project_manager import ChildProjectManager
-from utilities.workout_spec_to_cloud import WorkoutSpecToCloud, InvalidBuildSpecification
 from utilities.datastore_functions import *
 from utilities.pubsub_functions import *
-from utilities.globals import auth_config, dns_suffix, ds_client, log_client, logger, LOG_LEVELS, main_app_url, \
-    post_endpoint, workout_token, workout_globals, BuildTypes
+from utilities.globals import ds_client, log_client, LOG_LEVELS
 import json
 
 teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')

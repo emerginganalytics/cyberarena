@@ -19,6 +19,7 @@ class ChildProjectManager:
     def __init__(self, unit_id):
         self.allocation = {}
         self.unit_id = unit_id
+        self.unit = ds_client.get(ds_client.key('cybergym-unit', unit_id))
         unit_workouts = ds_client.query(kind='cybergym-workout')
         unit_workouts.add_filter("unit_id", "=", unit_id)
         self.workouts = list(unit_workouts.fetch())
@@ -36,6 +37,9 @@ class ChildProjectManager:
             # If there are not enough resource, delete the unit from the datastore before returning.
             for workout in self.workouts:
                 ds_client.delete(workout.key)
+                servers = ds_client.query(kind='cybergym-server').add_filter('workout', '=', workout.key.name).fetch()
+                for server in servers:
+                    ds_client.delete(server)
             return False
         _projects = list(self.allocation.keys())
         i = 0
@@ -59,6 +63,46 @@ class ChildProjectManager:
                 i = 0
         return True
 
+    def build_arena(self):
+        """
+
+        @return: Status
+        @rtype: bool
+        """
+        self._get_build_allocation()
+        if not self.allocation:
+            # If there are not enough resource, delete the unit and workouts from the datastore before returning.
+            ds_client.delete(self.unit_id)
+            for workout in self.workouts:
+                ds_client.delete(workout.key)
+                servers = ds_client.query(kind='cybergym-server').add_filter('workout', '=', workout.key.name).fetch()
+                for server in servers:
+                    ds_client.delete(server)
+            servers = ds_client.query(kind='cybergym-server').add_filter('workout', '=', workout.key.name).fetch()
+            for server in servers:
+                ds_client.delete(server)
+            return False
+        _projects = list(self.allocation.keys())
+        i = 0
+        j = 0
+        publisher = topic_path = current_project = None
+        for workout in self.workouts:
+            if i == 0:
+                current_project = _projects[j]
+                j += 1
+
+                publisher = pubsub_v1.PublisherClient()
+                topic_path = publisher.topic_path(current_project, workout_globals.ps_build_workout_topic)
+            workout['build_project_location'] = current_project
+            ds_client.put(workout)
+            publisher.publish(topic_path, data=b'Cyber Gym Workout', workout_id=workout.key.name)
+
+            i += 1
+            # If the index is greater than the current project's build allocation, reset the index, which triggers
+            # a project change on the next iteration.
+            if i >= self.allocation[current_project]:
+                i = 0
+        return True
 
     def _get_build_allocation(self):
         """
