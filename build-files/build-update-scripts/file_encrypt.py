@@ -52,10 +52,9 @@ class FileEncrypt(object):
 
     def decrypt_file(self, input_file):
         """
-            Function decrypts AES encrypted files and stores them is same directory
-            as encrypted file.
+            Function decrypts AES encrypted files and stores them in given output directory.
         """
-        output_file = input_file.with_suffix("")
+        output_file = self.output_dir / input_file.name.strip(".aes")
         print(f"[+] Decrypting {input_file.name}")
 
         with open(input_file, 'rb') as f:
@@ -64,7 +63,7 @@ class FileEncrypt(object):
         pyAesCrypt.decryptStream(buffer_stream, output_buffer, self.pwd, self.buffer_size,
                                  len(buffer_stream.getvalue()))
 
-        with open(f'{output_file}', 'wb') as f:
+        with open(output_file, 'wb') as f:
             f.write(output_buffer.getbuffer())
 
     def encrypt_yamls(self):
@@ -102,9 +101,9 @@ class FileEncrypt(object):
         the desired file extension, self.ext. Due to how they are stored,
         YAML file encryption / decryption process requires calling this
         function multiple times.
+
         Args:
             **kwargs: input_dir, output_dir
-
         Returns:
 
         """
