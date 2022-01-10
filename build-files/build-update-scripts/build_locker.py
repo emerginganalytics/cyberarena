@@ -5,7 +5,7 @@ import pyAesCrypt
 from pathlib import Path
 
 
-class FileEncrypt(object):
+class BuildLocker(object):
     """
     Used for encryption and decryption of PDF and YAML files.
     Requires pathlib.Path objects for both input and output directories
@@ -81,13 +81,9 @@ class FileEncrypt(object):
         directories.
 
         Encrypted files are sent to a new directory,
-            <output_dir>/encrypted/<yaml_dir>
+            <output_dir>/<yaml_dir>
         """
-        # Created directory if it doesn't already exist
-        base_output_dir = self.output_dir / 'encrypted'
-        if not base_output_dir.is_dir():
-            Path.mkdir(base_output_dir)
-
+        base_output_dir = self.output_dir
         for cur_path in self.input_dir.iterdir():
             if cur_path.is_dir():
                 # Create subdirectory if it doesn't already exist
@@ -161,7 +157,7 @@ def main():
     if not plaintext_dir.is_dir():
         os.mkdir(plaintext_dir)
 
-    FileEncrypt(input_dir=input_directory, output_dir=output_directory,
+    BuildLocker(input_dir=input_directory, output_dir=output_directory,
                 pwd=args.password, mode=args.mode, doc_type=args.type)
 
 
