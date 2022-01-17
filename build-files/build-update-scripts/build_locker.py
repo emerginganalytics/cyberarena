@@ -1,10 +1,11 @@
 import argparse
 import io
+import os
 import pyAesCrypt
 from pathlib import Path
 
 
-class FileEncrypt(object):
+class BuildLocker(object):
     """
     Used for encryption and decryption of PDF and YAML files.
     Requires pathlib.Path objects for both input and output directories
@@ -14,17 +15,18 @@ class FileEncrypt(object):
         input_dir: Where to insert the path iterator
         output_dir: Where to store the modified file
         pwd: Used to encrypt/decrypt the files
-        ext: What file extension we are filtering over (pdf, (yaml, yml))
+        doc_type: Either instructions or specs
     """
-    def __init__(self, mode, input_dir, output_dir, pwd, ext):
+    def __init__(self, mode, input_dir, output_dir, pwd, doc_type):
         self.mode = mode
         self.buffer_size = 65536
         self.input_dir = input_dir
         self.output_dir = output_dir
         self.pwd = pwd
-        self.ext = ext
+        self.doc_type = doc_type
+        self.ext = 'yaml' if doc_type == 'specs' else 'pdf'
 
-        if self.ext in ['yaml', 'yml']:
+        if self.doc_type in ['specs']:
             if self.mode == 'encrypt':
                 self.encrypt_yamls()
             elif self.mode == 'decrypt':
@@ -51,19 +53,24 @@ class FileEncrypt(object):
         with open(f'{output_file}.aes', 'wb') as f:
             f.write(output_buffer.getbuffer())
 
-    def decrypt_file(self, input_file):
+    def decrypt_file(self, input_file, current_dir=None):
         """
             Function decrypts AES encrypted files and stores them in given output directory.
         """
         output_file = self.output_dir / input_file.name.strip(".aes")
-        print(f"[+] Decrypting {input_file.name}")
+        # If it's a yaml file, we need to replicate the encrypted folder structure
+        if current_dir:
+            destination = self.output_dir / current_dir.name
+            if not destination.is_dir():
+                Path.mkdir(destination)
+            output_file = destination / input_file.name[:-4]
 
+        print(f"[+] Decrypting {input_file.name}")
         with open(input_file, 'rb') as f:
             buffer_stream = io.BytesIO(f.read())
         output_buffer = io.BytesIO()
         pyAesCrypt.decryptStream(buffer_stream, output_buffer, self.pwd, self.buffer_size,
                                  len(buffer_stream.getvalue()))
-
         with open(output_file, 'wb') as f:
             f.write(output_buffer.getbuffer())
 
@@ -74,13 +81,9 @@ class FileEncrypt(object):
         directories.
 
         Encrypted files are sent to a new directory,
-            <output_dir>/encrypted/<yaml_dir>
+            <output_dir>/<yaml_dir>
         """
-        # Created directory if it doesn't already exist
-        base_output_dir = self.output_dir / 'encrypted'
-        if not base_output_dir.is_dir():
-            Path.mkdir(base_output_dir)
-
+        base_output_dir = self.output_dir
         for cur_path in self.input_dir.iterdir():
             if cur_path.is_dir():
                 # Create subdirectory if it doesn't already exist
@@ -94,7 +97,8 @@ class FileEncrypt(object):
     def decrypt_yamls(self):
         for cur_path in self.input_dir.iterdir():
             if cur_path.is_dir():
-                self.walk_path(input_dir=cur_path)
+                if cur_path.name != 'needs-encrypted':
+                    self.walk_path(input_dir=cur_path)
 
     def walk_path(self, **kwargs):
         """
@@ -118,32 +122,44 @@ class FileEncrypt(object):
             elif self.mode == 'decrypt':
                 file_ext = "".join(filename.suffixes)
                 if file_ext == f'.{self.ext}.aes':
+                    if file_ext in ['.yaml.aes', '.yml.aes']:
+                        self.decrypt_file(input_file=filename, current_dir=input_dir)
+                        continue
                     self.decrypt_file(input_file=filename)
+
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--password', required=True, help='Password')
     parser.add_argument('-m', '--mode', required=True, choices=['encrypt', 'decrypt'])
-    parser.add_argument('-e', '--extension', required=True, choices=['pdf', 'yaml', 'yml'])
+    parser.add_argument('-t', '--type', required=True, choices=['instructions', 'specs'])
     args = parser.parse_args()
 
-    if args.extension in ['yaml', 'yml']:
+    if args.type in ['specs']:
+        encrypted_dir = Path("../workout-specs")
         if args.mode == 'decrypt':
-            input_directory = Path("../workout-specs")
+            input_directory = encrypted_dir
             output_directory = Path("../workout-specs/needs-encrypted")
         else:
             input_directory = Path("../workout-specs/needs-encrypted")
-            output_directory = Path("../workout-specs")
+            output_directory = encrypted_dir
     else:
+        encrypted_dir = Path("../workout-instructions/teacher-instructions")
         if args.mode == 'decrypt':
-            input_directory = Path("../workout-instructions/teacher-instructions")
-            output_directory = Path("../workout-instructions/teacher-instructions/need-encrypted")
+            input_directory = encrypted_dir
+            output_directory = Path("../workout-instructions/teacher-instructions/needs-encrypted")
         else:
-            input_directory = Path("../workout-instructions/teacher-instructions/need-encrypted")
-            output_directory = Path("../workout-instructions/teacher-instructions")
+            input_directory = Path("../workout-instructions/teacher-instructions/needs-encrypted")
+            output_directory = encrypted_dir
 
-    FileEncrypt(input_dir=input_directory, output_dir=output_directory,
-                pwd=args.password, mode=args.mode, ext=args.extension)
+    # Create plaintext folder if it doesn't already exist
+    plaintext_dir = encrypted_dir / "needs-encrypted"
+    if not plaintext_dir.is_dir():
+        os.mkdir(plaintext_dir)
+
+    BuildLocker(input_dir=input_directory, output_dir=output_directory,
+                pwd=args.password, mode=args.mode, doc_type=args.type)
+
 
 if __name__ == "__main__":
     main()
