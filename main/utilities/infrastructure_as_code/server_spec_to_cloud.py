@@ -19,7 +19,7 @@ __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff"]
 __license__ = "MIT"
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Production"
@@ -56,7 +56,7 @@ class ServerSpecToCloud:
         self.machine_image = server_spec.get("machine_image", None)
         self.sshkey = server_spec.get("sshkey", None)
         self.tags = server_spec.get('tags', None)
-        self.machine_type = server_spec.get("machine_type", None)
+        self.machine_type = server_spec.get("machine_type", "n1-standard-1")
         self.network_routing = server_spec.get("network_routing", None)
         self.min_cpu_platform = server_spec.get("minCpuPlatform", None)
         self.add_disk = server_spec.get("add_disk", None)

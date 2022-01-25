@@ -5,7 +5,8 @@ import requests
 from googleapiclient import discovery
 
 from common.globals import project, zone, dnszone, ds_client, compute, SERVER_STATES, BUILD_STATES, \
-    workout_globals, BUILD_TYPES, log_client, gcp_operation_wait, PUBSUB_TOPICS, SERVER_ACTIONS
+    workout_globals, BUILD_TYPES, log_client, gcp_operation_wait, PUBSUB_TOPICS, SERVER_ACTIONS, cloud_log,\
+    LOG_LEVELS, LogIDs
 from google.cloud import pubsub_v1
 from googleapiclient.errors import HttpError
 from common.dns_functions import add_dns_record, delete_dns
@@ -133,7 +134,7 @@ def server_build(server_name):
         except BrokenPipeError:
             i += 1
         except HttpError as exception:
-            g_logger.log_text(f"Error when trying to build {server_name}")
+            cloud_log(build_id, f"Error when trying to build {server_name}: {exception.reason}", LOG_LEVELS.ERROR)
             return False
     i = 0
     success = False

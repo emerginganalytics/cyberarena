@@ -40,8 +40,10 @@ def parse_survey_yaml():
     if not blob:
         return False
     # convert to string
-    yaml_string = blob.download_as_string()
-    return yaml_string
+    survey_string = blob.download_as_string()
+    if survey_string:
+        survey = yaml.load(survey_string, Loader=yaml.Loader)
+    return survey
 
 
 def generate_yaml_content(json_data):

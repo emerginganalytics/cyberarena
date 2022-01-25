@@ -21,13 +21,14 @@ from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCl
 from utilities.infrastructure_as_code.student_entry_spec_to_cloud import StudentEntrySpecToCloud
 from utilities.infrastructure_as_code.competition_server_spec_to_cloud import CompetitionServerSpecToCloud
 from utilities.assessment_functions import CyberArenaAssessment
+from utilities.infrastructure_as_code.additionaL_build_directives.student_network_combiner import StudentNetworkCombiner
 
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2021, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff", "Samuel Willis"]
 __license__ = "MIT"
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Production"
@@ -36,6 +37,7 @@ __status__ = "Production"
 class WorkoutComputeSchema(Schema):
     version = fields.Str(required=False)
     workout = fields.Dict()
+    additional_build_directives = fields.Dict()
     student_entry = fields.Dict()
     networks = fields.List(fields.Dict())
     servers = fields.List(fields.Dict())
@@ -108,10 +110,7 @@ class BuildSpecToCloud:
         max_time_expiry = calendar.timegm(time.gmtime()) + (86400 * workout_globals.max_workout_len)
         self.time_expiry = time_expiry if time_expiry and int(time_expiry) < max_time_expiry else max_time_expiry
         self.build_spec = parse_workout_yaml(cyber_arena_yaml)
-        try:
-            self.build_type = self.build_spec['workout']['build_type']
-        except AttributeError:
-            raise InvalidBuildSpecification
+        self.build_type = self.build_spec['workout'].get('build_type', 'compute')
         # Validate the build_spec before extracting the data
         self._validate_build_spec()
         # The workout key is common to all build types
@@ -119,6 +118,7 @@ class BuildSpecToCloud:
 
         # Initialize build data
         self.workout_name = workout_spec.get('name', None)
+        self.additional_build_directives = workout_spec.get('additional_build_directives', None)
         self.workout_description = workout_spec.get('workout_description')
         self.teacher_instructions_url = workout_spec.get('teacher_instructions_url', None)
         self.student_instructions_url = workout_spec.get('student_instructions_url', None)
@@ -227,7 +227,10 @@ class BuildSpecToCloud:
         assessment = self.build_spec.get('assessment', None)
 
         # Verify server images exist in project compute before storing any data
-        server_image_list = [server['image'] for server in servers]
+        server_image_list = []
+        for server in servers:
+            if 'image' in server:
+                server_image_list.append(server['image'])
         WorkoutValidator(image_list=server_image_list).validate_machine_images()
         for i in range(self.build_count):
             student_name = self.student_names[i] if self.student_names else None
@@ -263,6 +266,7 @@ class BuildSpecToCloud:
                 'student_email': student_email
             }
             self.cloud_ready_specs.append(cloud_ready_spec)
+        self._process_additional_build_directives()
 
     def _parse_container(self):
         container_info = self.build_spec['container_info']
@@ -408,6 +412,11 @@ class BuildSpecToCloud:
             ServerSpecToCloud(server, workout_id, startup_scripts).commit_to_cloud()
         StudentEntrySpecToCloud(type=BuildTypes.COMPUTE, build=new_workout, build_id=workout_id).commit_to_cloud()
 
+    def _process_additional_build_directives(self):
+        if self.additional_build_directives:
+            combine_student_networks = self.additional_build_directives.get('combine_student_networks', None)
+            if combine_student_networks:
+                StudentNetworkCombiner(self.cloud_ready_specs, combine_student_networks).combine_network
 
 class Error(Exception):
     """Base class for exceptions in this module."""
