@@ -26,11 +26,6 @@ def add_additional_containers(containers):
     return containers
 
 
-def process_survey_yaml(yaml_contents):
-    y = load(yaml_contents, Loader=Loader)
-    return y
-    
-
 def store_student_feedback(feedback, workout_id):
     student_feedback = datastore.Entity(ds_client.key('cybergym-student-feedback', workout_id))
     

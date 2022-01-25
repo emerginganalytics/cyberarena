@@ -20,6 +20,20 @@ workout:
                #ls = linux n1-standard-1, lm = linux n1-standard-2
                #ws = windows n1-standard-1, wm = windows n1-standard-2
 
+additional_build_directives:  # BETA: Optional to include broad directives in the unit's build
+  combine_student_networks: # whether to route all student workouts in the unit according to specifications
+    network:  # Which network needs to combine? Commonly the external network
+    subnet:   # The dynamic subnet to use when combining. Defaults to 10.1.0.0/16
+
+student_entry: # Specifications for building the Apache Guacamole server
+  type: # Either RDP or VNC
+  security-mode: # Optional: default "Any"
+  domain: # Optionally used for connecting to Active Directory servers
+  username: # The username for accessing RDP connections
+  password: # The password used for connecting both RDP and VNC connections
+  network: # The network in which to place the Gucamole server
+  ip: # IP address the guacamole server should connect to
+
 # List all networks and all subnets here
 networks:
   - name: # The network name is arbitrary, but be consistent as this will be referenced by subnets, VMs, routes, and firewall rules
@@ -73,3 +87,29 @@ assessment:
       server: # server that runs script. Takes server name from list of servers provided above
       operating-system: # target server os
       complete: False
+
+redteam: # Optional: If this exists, build a redteam network according to the specification
+  student-network-peer: # The name of the student network to peer with when creating the red team
+  student-entry: # For each Red Team network, this is the specification for the Guacamole server to allow access.
+    type: # Either RDP or VNC
+    security-mode: # Optional: default "Any"
+    domain: # Optionally used for connecting to Active Directory servers
+    username: # The username for accessing RDP connections
+    password: # The password used for connecting both RDP and VNC connections
+    network: # The network in which to place the Gucamole server
+    ip: # IP address the guacamole server should connect to
+  servers: # The list of red team servers to add. Networks are dynamically assigned at this time.
+    - name: # Name of the server
+      image: # Use the exact name of the server image from Google Cloud
+      machine_type: # Google Cloud VM type (i.e., "n1-standard-1")
+      metadata: # VM metadata
+
+weaknesses:
+  - type: patch-removal
+    specifications:
+      patch: KB29387987
+      delay: 10m
+      target: all or cyber-arena-windows
+  - type: plaintext-password
+    specifications:
+

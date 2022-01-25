@@ -116,7 +116,7 @@ class StudentEntrySpecToCloud:
             for entry in raw_connections:
                 connection = self._create_guac_connection(self.build_id, entry, i)
                 self.student_credentials.append({
-                    "workout_id": entry['workout_id'],
+                    "workout_id": entry.get('workout_id', None),
                     "workout_user": connection['student_user'],
                     "workout_password": connection['student_password']
                 })
