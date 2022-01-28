@@ -6,15 +6,16 @@ WorkoutContainerSchema, ArenaSchema, and perhaps more. New fields in the yaml sh
 validation.
 """
 
-import time
+import calendar
 import random
 import string
+import time
+import validators
 from datetime import datetime
-import calendar
 from google.cloud import datastore
 from marshmallow import Schema, fields, ValidationError
-from utilities.globals import ds_client, workout_globals, dns_suffix, LOG_LEVELS, BUILD_STATES, cloud_log, LogIDs, \
-    BuildTypes
+from utilities.globals import ds_client, default_student_bucket, default_teacher_bucket, workout_globals, \
+    dns_suffix, LOG_LEVELS, BUILD_STATES, cloud_log, LogIDs, BuildTypes
 from utilities.workout_validator import WorkoutValidator
 from utilities.yaml_functions import parse_workout_yaml
 from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCloud
@@ -22,7 +23,6 @@ from utilities.infrastructure_as_code.student_entry_spec_to_cloud import Student
 from utilities.infrastructure_as_code.competition_server_spec_to_cloud import CompetitionServerSpecToCloud
 from utilities.assessment_functions import CyberArenaAssessment
 from utilities.infrastructure_as_code.additionaL_build_directives.student_network_combiner import StudentNetworkCombiner
-
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2021, UA Little Rock, Emerging Analytics Center"
@@ -122,6 +122,7 @@ class BuildSpecToCloud:
         self.workout_description = workout_spec.get('workout_description')
         self.teacher_instructions_url = workout_spec.get('teacher_instructions_url', None)
         self.student_instructions_url = workout_spec.get('student_instructions_url', None)
+        self._set_instructions_url()
         self.mapped_standards = workout_spec.get('standards', None)
         self.hourly_cost = workout_spec.get('hourly_cost', None)
         self.workout_author = workout_spec.get('author', None)
@@ -196,6 +197,24 @@ class BuildSpecToCloud:
             cloud_log(LogIDs.MAIN_APP, error_message, LOG_LEVELS.ERROR)
             raise InvalidBuildSpecification(error_message)
         return
+
+    def _set_instructions_url(self):
+        student_instructions = self.student_instructions_url
+        teacher_instructions = self.teacher_instructions_url
+        if student_instructions and not self._validate_instructions_url(student_instructions):
+            self.student_instructions_url = "%s%s" % (default_student_bucket, student_instructions)
+        if teacher_instructions and not self._validate_instructions_url(teacher_instructions):
+            self.teacher_instructions_url = "%s%s" % (default_teacher_bucket, teacher_instructions)
+
+    def _validate_instructions_url(self, instruction_url: str) -> bool:
+        """
+        Validates instruction URL provided in spec file
+        :return:
+        """
+        result = validators.url(instruction_url)
+        if isinstance(result, validators.ValidationFailure):
+            return False
+        return result
 
     def _create_unit(self):
         self.new_unit = {

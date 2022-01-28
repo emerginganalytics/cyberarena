@@ -108,6 +108,8 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "zone" "us-central1-a" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "dns_suffix" $dns_suffix --config-name "cybergym"
     gcloud beta runtime-config configs variables set "script_repository" gs://"$project"_cloudbuild/startup-scripts/ --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "default_teacher_bucket" https://storage.cloud.google.com/teacher_workout_instructions_"$project"/ --config-name "cybergym"
+    gcloud beta runtime-config configs variables set "default_student_bucket" https://storage.cloud.google.com/student_workout_instructions_"$project"/ --config-name "cybergym"
     gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
     gcloud beta runtime-config configs variables set "main_app_url" "https://cybergym$dns_suffix" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "admin_email" $admin_email --config-name "cybergym"
