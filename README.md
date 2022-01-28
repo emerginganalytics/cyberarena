@@ -1,5 +1,3 @@
-# Welcome to the Cyber Arena
-
 Introduction
 ============
 
