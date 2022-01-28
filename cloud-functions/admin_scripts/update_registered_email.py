@@ -23,7 +23,7 @@ def update_registered_email(class_name, curr_email, new_email):
     for classes in cybergym_class_list:
         for student in classes['roster']:
             if student['student_email'] == curr_email:
-                print(f'[+] update class roster with {new_email}')
+                print(f'[+] Update class roster with {new_email}')
                 student['student_email'] = new_email
                 ds_client.put(classes)
                 break
@@ -33,7 +33,7 @@ def update_registered_email(class_name, curr_email, new_email):
     query_workouts.add_filter('student_email', '=', curr_email)
     for workout in list(query_workouts.fetch()):
         workout['student_email'] = new_email
-        print(f'[+] updating workout\'s student_email with {new_email}')
+        print(f'[*] Updating workout\'s student_email with {new_email}')
         ds_client.put(workout)
 
     # Finally, replace current email with new email in authed students list

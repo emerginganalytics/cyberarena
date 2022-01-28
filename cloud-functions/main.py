@@ -2,6 +2,7 @@ import base64
 import json
 import sys
 from json.decoder import JSONDecodeError
+
 from admin_scripts.add_child_project import add_child_project
 from admin_scripts.create_dns_forwarding_for_unit import create_dns_forwarding
 from common.build_competition_arena import CompetitionArena
@@ -11,7 +12,7 @@ from common.database.iot_database import IOTDatabase
 from common.database.nvd_update import nvd_update
 from common.delete_expired_workouts import DeletionManager
 from common.globals import AdminActions, ArenaWorkoutDeleteType, cloud_log, LogIDs, log_client,  LOG_LEVELS, \
-    MAINTENANCE_ACTIONS, project, SERVER_ACTIONS, WORKOUT_ACTIONS, WORKOUT_TYPES
+    MAINTENANCE_ACTIONS, mysql_ip, project, SERVER_ACTIONS, WORKOUT_ACTIONS, WORKOUT_TYPES
 from common.medic import medic
 from common.database.iot_database import IOTDatabase
 from common.budget_management import BudgetManager
@@ -285,7 +286,8 @@ def cloud_fn_daily_maintenance(event, context):
 
     stop_everything()
     Snapshot.snapshot_all()
-    nvd_update()
+    if mysql_ip:
+        nvd_update()
 
 
 def cloud_fn_admin_scripts(event, context):
