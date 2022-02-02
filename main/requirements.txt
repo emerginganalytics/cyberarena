@@ -20,4 +20,4 @@ google-cloud-logging
 pyAesCrypt
 marshmallow~=3.14.1
 netaddr==0.8.0
-validator
+validators
