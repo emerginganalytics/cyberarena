@@ -1,0 +1,2 @@
+class AttackScripts:
+    NMAP = "nmap"

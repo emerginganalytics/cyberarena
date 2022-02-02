@@ -25,6 +25,12 @@ main_app_url = custom_main_app_url.value.decode("utf-8") if custom_main_app_url 
     else 'https://buildthewarrior.cybergym-eac-ualr.org'
 parent_project = myconfig.get_variable('parent_project')
 parent_project = parent_project.value.decode("utf-8") if parent_project else project
+student_instructions_url = myconfig.get_variable('student_instructions_url')
+student_instructions_url = student_instructions_url.value.decode("utf-8") if student_instructions_url else \
+    'https://storage.googleapis.com/student_workout_instructions_ualr-cybersecurity/'
+teacher_instructions_url = myconfig.get_variable('teacher_instructions_url')
+teacher_instructions_url = teacher_instructions_url.value.decode("utf-8") if teacher_instructions_url else \
+    'https://storage.googleapis.com/teacher_workout_instructions_ualr-cybersecurity/'
 
 # Set the GCP Objects
 ds_client = datastore.Client(project=parent_project)
@@ -229,6 +235,8 @@ class LogIDs:
     SERVER_BUILD = "server-build"
     DELETION_MANAGEMENT = "deletion_management"
     BUDGET_MANAGEMENT = "budget_management"
+    ATTACK_SCRIPTS = "attack-scripts"
+    VULNERABILITY_SCRIPTS = "vulnerability-scripts"
 
 
 class MAINTENANCE_ACTIONS:

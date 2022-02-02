@@ -28,6 +28,8 @@ from admin_scripts.nuke_rebuild_unit import nuke_rebuild_unit
 from admin_scripts.fix_student_entry_in_workout import fix_student_entry_in_workout
 from admin_scripts.create_new_workout_in_unit import create_new_workout_in_unit
 from admin_scripts.create_new_server_in_unit import create_new_server_in_unit
+from attack.nmap import Nmap
+from attack.attack_globals import AttackScripts
 
 
 bm = BudgetManager()
@@ -409,6 +411,19 @@ def cloud_fn_budget_manager(event, context):
 
     if cost_amount >= budget_amount:
         bm.set_budget_exceeded()
+
+
+def cloud_fn_attack_scripts(event, context):
+    """
+    TODO: fillin descriptions
+    Run something similar to the following:
+    script_info = json.loads(event['attributes'].get('script_dict'))
+    action = Utilities.check_variable(script_info, 'function_name', 'test', LogIDs.ADMIN_SCRIPTS)
+    params = Utilities.check_variable(script_info, 'params', 'test', LogIDs.ADMIN_SCRIPTS)
+    attack_setup = AttackScripts(action, params)
+    attack_setup.attack()
+    """
+    pass
 
 
 class Utilities:
