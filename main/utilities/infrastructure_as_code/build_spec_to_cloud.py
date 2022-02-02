@@ -14,7 +14,7 @@ import validators
 from datetime import datetime
 from google.cloud import datastore
 from marshmallow import Schema, fields, ValidationError
-from utilities.globals import ds_client, default_student_bucket, default_teacher_bucket, workout_globals, \
+from utilities.globals import ds_client, student_instructions_url, teacher_instructions_url, workout_globals, \
     dns_suffix, LOG_LEVELS, BUILD_STATES, cloud_log, LogIDs, BuildTypes
 from utilities.workout_validator import WorkoutValidator
 from utilities.yaml_functions import parse_workout_yaml
@@ -135,7 +135,7 @@ class BuildSpecToCloud:
         self.student_emails = []
         self.unit_id = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
         self._create_unit()
-        if not self.build_count:
+        if self.registration_required:
             self._process_class_roster()
         if self.build_type == BuildTypes.COMPUTE:
             self._parse_workout()
@@ -202,9 +202,9 @@ class BuildSpecToCloud:
         student_instructions = self.student_instructions_url
         teacher_instructions = self.teacher_instructions_url
         if student_instructions and not self._validate_instructions_url(student_instructions):
-            self.student_instructions_url = "%s%s" % (default_student_bucket, student_instructions)
+            self.student_instructions_url = "%s%s" % (student_instructions_url, student_instructions)
         if teacher_instructions and not self._validate_instructions_url(teacher_instructions):
-            self.teacher_instructions_url = "%s%s" % (default_teacher_bucket, teacher_instructions)
+            self.teacher_instructions_url = "%s%s" % (teacher_instructions_url, teacher_instructions)
 
     def _validate_instructions_url(self, instruction_url: str) -> bool:
         """
@@ -391,8 +391,7 @@ class BuildSpecToCloud:
         class_list = ds_client.query(kind='cybergym-class')
         class_list.add_filter('teacher_email', '=', self.email)
         class_list.add_filter('class_name', '=', self.class_name)
-        self.class_record = class_list.fetch()[0]
-        self.build_count = len(self.class_record)
+        self.class_record = list(class_list.fetch())[0]
         for student_name in self.class_record['roster']:
             if self.class_record['student_auth'] == 'email':
                 self.student_emails.append(student_name['student_email'])

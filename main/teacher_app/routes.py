@@ -116,7 +116,7 @@ def index(workout_type):
         email = request.form['email']
         build_now = request.form.get("build_now")
         build_now = True if build_now else False
-        build_count = None
+        build_count = 0
         class_name = None
         # If team is indicated, then the teacher intends to build this for anonymous authentication.
         # Otherwise, a class registration is required.
@@ -125,10 +125,12 @@ def index(workout_type):
             registration_required = False
         else:
             class_name = request.form['class_target']
-            class_list = ds_client.query(kind='cybergym-class')
-            class_list.add_filter('teacher_email', '=', str(email))
-            class_list.add_filter('class_name', '=', str(class_name))
-            for class_object in list(class_list.fetch()):
+            class_query = ds_client.query(kind='cybergym-class')
+            class_query.add_filter('teacher_email', '=', str(email))
+            class_query.add_filter('class_name', '=', str(class_name))
+            class_list = list(class_query.fetch())
+            build_count = len(class_list)
+            for class_object in class_list:
                 class_entity = class_object
             if class_entity['student_auth'] == 'email':
                 registration_required = True

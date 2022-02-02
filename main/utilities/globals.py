@@ -13,8 +13,12 @@ dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
 script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
 api_key = myconfig.get_variable('api_key').value.decode("utf-8")
 custom_dnszone = myconfig.get_variable('dnszone')
-default_teacher_bucket = myconfig.get_variable('default_teacher_bucket').value.decode('utf-8')
-default_student_bucket = myconfig.get_variable('default_student_bucket').value.decode('utf-8')
+student_instructions_url = myconfig.get_variable('student_instructions_url')
+student_instructions_url = student_instructions_url.value.decode("utf-8") if student_instructions_url else \
+    'https://storage.googleapis.com/student_workout_instructions_ualr-cybersecurity/'
+teacher_instructions_url = myconfig.get_variable('teacher_instructions_url')
+teacher_instructions_url = teacher_instructions_url.value.decode("utf-8") if teacher_instructions_url else \
+    'https://storage.googleapis.com/teacher_workout_instructions_ualr-cybersecurity/'
 if custom_dnszone != None:
     dnszone = custom_dnszone.value.decode("utf-8")
 else:
