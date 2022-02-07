@@ -13,7 +13,7 @@ if ($confirmation -eq 'y') {
     if ($app -eq 'y') {
         $app = "cybergym"
     }
-    $sourcepath = Join-Path (Resolve-Path ..\..\).Path "main"
+    $sourcepath = Join-Path (Resolve-Path ..\..\).Path "\main"
     gcloud builds submit $sourcepath --tag gcr.io/$project/$app
     gcloud run deploy "$app" --image gcr.io/"$project"/"$app" --memory=1024Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
