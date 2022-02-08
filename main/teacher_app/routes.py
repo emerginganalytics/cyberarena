@@ -129,7 +129,10 @@ def index(workout_type):
             class_query.add_filter('teacher_email', '=', str(email))
             class_query.add_filter('class_name', '=', str(class_name))
             class_list = list(class_query.fetch())
-            build_count = len(class_list)
+            if len(class_list) > 0 and class_list[0].get('roster', None):
+                build_count = len(class_list[0]['roster'])
+            else:
+                return render_template('invalid_build_specification.html')
             for class_object in class_list:
                 class_entity = class_object
             if class_entity['student_auth'] == 'email':
