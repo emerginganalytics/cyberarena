@@ -363,6 +363,12 @@ body {font-family: Arial, Helvetica, sans-serif;}
                     </form>
                 </div>
             {% endif %}
+            {% if build_type == 'container' %}
+                    <a style="width:100%" class="btn" id="container_workout_link"
+                    href="{{container_url}}/{{workout.key.name}}"
+                    target="_blank" rel="noopener noreferrer">Enter your workout!</a>
+                {% else %}
+                    <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -447,12 +453,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 <br>
                 
                 <h2>Workout Servers</h2>
-                {% if build_type == 'container' %}
-                    <a style="width:50%" class="btn" id="container_workout_link"
-                    href="{{container_url}}/{{workout.key.name}}"
-                    target="_blank" rel="noopener noreferrer">Enter your workout!</a>
-                {% else %}
-                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
+
                 <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                     <tr>
                         <th>Server Name</th>
@@ -523,6 +524,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                         </td>
                     </tr>
                 {% endfor %}
+
 
                 </table>
                 {% endif %}
