@@ -429,7 +429,10 @@ body {font-family: Arial, Helvetica, sans-serif;}
             <div id='workout_info' class='container' style="margin:0;">
                 <h2>Welcome to your {{ workout['workout_name'] }} workout!</h2>
                 <p>{{ description }}</p>
-                <p>Need help with your workout? Check the <a href="/faq">FAQ page</a> or the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+                <p>Need help with your workout? Check the <a href="/faq">FAQ page</a></p>
+                {% if workout['type'] %}
+                <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+                {% endif %}
                 {% if is_expired %}
                     <p><b>*This workout has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
                 {% endif %}
@@ -462,7 +465,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                         <th>Operations</th>
                         <th>Snapshots</th>
                     </tr>
-                {% for server in servers %}
+                {% for server in servers if not 'guacamole' in server['name']%}
                     <tr>
                         <td>{{server['name']}}</td>
                         <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
