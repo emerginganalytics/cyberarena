@@ -363,6 +363,12 @@ body {font-family: Arial, Helvetica, sans-serif;}
                     </form>
                 </div>
             {% endif %}
+            {% if build_type == 'container' %}
+                    <a style="width:100%" class="btn" id="container_workout_link"
+                    href="{{container_url}}/{{workout.key.name}}"
+                    target="_blank" rel="noopener noreferrer">Enter your workout!</a>
+                {% else %}
+                    <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -423,7 +429,10 @@ body {font-family: Arial, Helvetica, sans-serif;}
             <div id='workout_info' class='container' style="margin:0;">
                 <h2>Welcome to your {{ workout['workout_name'] }} workout!</h2>
                 <p>{{ description }}</p>
-                <p>Need help with your workout? Check the <a href="/faq">FAQ page</a> or the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+                <p>Need help with your workout? Check the <a href="/faq">FAQ page</a></p>
+                {% if workout['type'] %}
+                <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+                {% endif %}
                 {% if is_expired %}
                     <p><b>*This workout has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
                 {% endif %}
@@ -447,12 +456,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 <br>
                 
                 <h2>Workout Servers</h2>
-                {% if build_type == 'container' %}
-                    <a style="width:50%" class="btn" id="container_workout_link"
-                    href="{{container_url}}/{{workout.key.name}}"
-                    target="_blank" rel="noopener noreferrer">Enter your workout!</a>
-                {% else %}
-                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
+
                 <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                     <tr>
                         <th>Server Name</th>
@@ -461,7 +465,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                         <th>Operations</th>
                         <th>Snapshots</th>
                     </tr>
-                {% for server in servers %}
+                {% for server in servers if not 'guacamole' in server['name']%}
                     <tr>
                         <td>{{server['name']}}</td>
                         <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
@@ -523,6 +527,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                         </td>
                     </tr>
                 {% endfor %}
+
 
                 </table>
                 {% endif %}
