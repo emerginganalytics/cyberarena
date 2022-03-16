@@ -52,7 +52,10 @@
             let target = $(e.target).attr('href');
             get_active_workouts();
         })
-        
+        $('#iot_management_tab').on('shown.bs.tab', function(e){
+            let target = $(e.target).attr('href');
+            get_iot_devices();
+        })
     })
     
     function create_server_group(instance_list){
@@ -174,6 +177,7 @@
 <div id="admin_container" class="row" style="visibility: hidden;margin-bottom:1em;">
     <div class="nav flex-column col-2 nav-pills">
         <a class="nav-link active" id="user_management_tab" data-toggle="tab" href="#user_container" role="tab" aria-controls="user_container" aria-selected="true">User Management</a>
+        <a class="nav-link" id="iot_management_tab" data-percentage="tab" href="#iot_container" role="tab" aria-controls="iot_container" aria-selected="false">IoT Management</a>
         <a class="nav-link" id="maintenance_tab" data-toggle="tab" href="#maintenance_container" role="tab" aria-controls="maintenance_container" aria-selected="false">Maintenance</a>
         <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
         <a class="nav-link" id="workout_creation_tab" data-toggle="tab" href="#workout_creation_container" role="tab" aria-controls="workout_creation_container" aria-selected="false">Workout Management</a>
@@ -232,6 +236,28 @@
                         {% endfor %}
                     </ul>
                 </div>
+            </div>
+        </div>
+        <div class='tab-pane fade' id='iot_container' role="tabpanel" aria-labelledby="iot_management_tab">
+            <div id="iot_management_container">
+                <table id="iot_devices_table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Device ID<br>
+                                <small>Click to view admin controls</small>
+                            </th>
+                            <th>Last Online</th>
+                            <th>Student Name</th>
+                            <th>Student Address</th>
+                            <th>Date Sent</th>
+                            <th>Date Received</th>
+                            <th>Checked</th>
+                            <th>Available</th>
+                        </tr>
+                    </thead>
+                    <tbody id="iot_devices_display">
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class="tab-pane fade" id="maintenance_container" role="tabpanel" aria-labelledby="maintenance_tab">

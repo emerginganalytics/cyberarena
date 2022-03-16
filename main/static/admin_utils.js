@@ -157,3 +157,31 @@ function clear_filter(){
     }
     document.getElementById('clear_filter_button').style.display = "none";
 }
+
+function fill_iot_device_table(data){
+    let table = document.getElementById('iot_devices_display');
+    if (data['status_code'] === 404){
+        table.innerHTML = '<h2>No Registered IoT devices found for current project</h2>';
+    }
+    else {
+        // TODO: Parse Data into different fields
+    }
+}
+
+function get_iot_devices(){
+    let table = document.getElementById('iot_devices_display');
+    if (table.firstElementChild == null){
+        var loader = document.getElementById('loading-msg');
+        loader.style.display = "block";
+        $("#loading-msg").html('Fetching Registered Devices' + '</br><div class="loader"></div>');
+        $.ajax({
+            type: "GET",
+            url: "/admin/api/iot_devices",
+            dataType: "json",
+            success: function(data){
+                loader.style.display = "none";
+                fill_iot_device_table(data);
+            }
+        })
+    }
+}

@@ -1,3 +1,4 @@
+from google.cloud import iot_v1
 from flask import Blueprint, request, redirect
 from utilities.pubsub_functions import pub_admin_scripts, pub_manage_server
 from utilities.globals import ds_client, project, log_client, compute, zone, LOG_LEVELS, AdminActions, workout_globals
@@ -25,6 +26,17 @@ def get_active_workouts():
                 workout['id'] = workout.key.name
                 active_workouts.append(workout)
     return json.dumps(active_workouts)
+
+
+@admin_api.route('/registered_iot_devices', methods=['GET'])
+def get_iot_devices():
+    iot_client = iot_v1.DeviceManagerClient()
+    cloud_region = 'us-central1'
+    registry_id = 'cybergym-registry'
+    devices_gen = iot_client.list_devices(
+        parent=f'projects/{project}/locations/{cloud_region}/registries/{registry_id}')
+    iot_device_list = [i.id for i in devices_gen]
+
 
 @admin_api.route("/admin_scripts", methods=['POST'])
 def admin_scripts():
@@ -55,6 +67,7 @@ def update_logo():
         )
     return redirect('/admin/home')
 
+
 @admin_api.route('/update_workout_list', methods=["POST"])
 def update_workout_list():
     if request.method == 'POST':
@@ -74,6 +87,7 @@ def update_workout_list():
         else:
             return 'Failed'
 
+
 @admin_api.route('/server_management/<workout_id>', methods=['POST'])
 def admin_server_management(workout_id):
     if request.method == 'POST':
@@ -87,6 +101,7 @@ def admin_server_management(workout_id):
             )
             pub_manage_server(data['server_name'], data['action'])
     return 'True'
+
 
 @admin_api.route('/change_workout_state', methods=['POST'])
 def change_workout_state():
@@ -112,6 +127,7 @@ def change_workout_state():
         ds_client.put(workout)
         return json.dumps(response)
 
+
 @admin_api.route('/change_workout_expiration', methods=['POST'])
 def change_workout_expiration():
     if request.method == "POST":
@@ -122,6 +138,7 @@ def change_workout_expiration():
             ds_client.put(workout)
         return json.dumps(str("Test"))
 
+
 @admin_api.route('/create_workout_spec', methods=['POST'])
 def create_workout_spec():
     if request.method == 'POST':
@@ -129,6 +146,7 @@ def create_workout_spec():
 
         yaml_string = generate_yaml_content(request_data)
         return json.dumps(yaml_string)
+
 
 @admin_api.route('/save_workout_spec', methods=['POST'])
 def save_workout_spec():
@@ -153,6 +171,7 @@ def save_workout_spec():
 
         return json.dumps(response)
 
+
 @admin_api.route('/instance_info', methods=["POST"])
 def instance_info():
     if request.method == "POST":
@@ -171,6 +190,7 @@ def instance_info():
             instance_info['nics'] = nics
 
         return json.dumps(instance_info)
+
 
 @admin_api.route('/upload_instructions', methods=['POST'])
 def upload_instructions():
