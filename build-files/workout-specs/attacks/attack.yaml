@@ -1,19 +1,37 @@
 attack:
-	- id: nmap_scanning
-  name: NMAP Scanning
-	  Mitre-attack: T1595
-	  attack_type: scanning
-	  description: Probe network for vulnerabilities.
-	  Args:
-	     - id: target_network
-      name: "Target Network"
-	       type: string
-	       hint: The network name to scan
-	     - id: scan_type 
-      name: "Scan Type"
-	      default: Aggressive
-	      type: choice
-	      Choices:
-		  - Aggressive
-	 	  - Ping Sweep
-		  - Quick Scan
+  - id: nmap_scanning
+    name: NMAP Scanning
+    mitre_attack: T1595
+    attack_type: scanning
+    description: Probe network for vulnerabilities
+    args:
+      - id: target_network
+        name: Target Network
+        type: string
+        hint: The network name to scan
+      - id: scan_type
+        name: Scan Type
+        default: Aggressive
+        type: choice
+        Choices:
+          - Aggressive: '-T5'
+          - Ping Sweep: '-Pn'
+          - Quick Scan: '-sn'
+  - id: placeholder
+    name: placeholder attack
+    mitre_attack: T9999
+    attack_type: some_type
+    description: A descriptor for the placeholder attack
+    args:
+      - id: target_network
+        name: Target Network
+        type: string
+        hint: The network name to scan
+      - id: placeholder_type
+        name: placeholder Type
+        default: pog
+        type: choice
+        choices:
+          - pog: 'PogU'
+          - sadge: 'Sadge'
+          - nopers: 'Nopers'
