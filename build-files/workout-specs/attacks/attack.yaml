@@ -17,21 +17,13 @@ attack:
           - Aggressive: '-T5'
           - Ping Sweep: '-Pn'
           - Quick Scan: '-sn'
-  - id: placeholder
-    name: placeholder attack
+  - id: sqlmap
+    name: SQL Vulnerability Scan
     mitre_attack: T9999
-    attack_type: some_type
-    description: A descriptor for the placeholder attack
+    attack_type: scanning
+    description: Use sqlmap to detect and exploit database vulnerabilities.
     args:
-      - id: target_network
-        name: Target Network
+      - id: url
+        name: URL
         type: string
-        hint: The network name to scan
-      - id: placeholder_type
-        name: placeholder Type
-        default: pog
-        type: choice
-        choices:
-          - pog: 'PogU'
-          - sadge: 'Sadge'
-          - nopers: 'Nopers'
+        hint: The url or host to scan.
