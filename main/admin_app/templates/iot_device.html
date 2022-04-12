@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+{% import 'iot_delete_macro.html' as delete_iot %}
+{% import 'logo_macro.html' as logo %}
+{% block title %}Admin Controls - {{ device['device_id'] }}{% endblock %}
+{% block content %}
+    <style>
+        .server_control_container{
+            display:flex;
+            flex-direction:row;
+        }
+        .btn:hover{
+            background-color:white!important;
+            color:var(--main_color, #6e2639)!important;
+        }
+        .device_form {
+            display: block;
+            left: 50px;
+            float: left;
+            width: auto;
+            padding: 10px;
+        }
+        .device-ctrl-padding {
+            padding-bottom: 10px;
+        }
+        .iot_textarea {
+            overflow-y: scroll;
+            resize: none;
+        }
+    </style>
+    <script>
+    function timeConverter(UNIX_timestamp){
+        return new Date(UNIX_timestamp * 1000);
+    }
+    function disableField(targetField){
+            targetField.prop("disabled", true);
+            targetField.prop('hidden', true);
+    }
+    function enableField(targetField){
+        targetField.prop('disabled', false);
+        targetField.prop('hidden', false);
+    }
+    $(document).ready(function (){
+        $("#device_status").on('change', function (){
+            var device_status = $('#device_status').val();
+            var ssh_field = $('#ssh_field');
+            var sent_date_field = $('#sent_date_field');
+            var recv_date_field = $('#recv_date_field');
+            var student_name_field = $('#student_name_field');
+            var student_address_field = $('#student_address_field');
+            var tracking_field = $('#tracking_num_field');
+
+            if (device_status === 'SENT'){
+                enableField(sent_date_field);
+                enableField(student_name_field);
+                enableField(student_address_field);
+                enableField(tracking_field);
+                disableField(recv_date_field);
+                disableField(ssh_field);
+            }
+            else if (device_status === 'CHECK'){
+                enableField(recv_date_field);
+                disableField(sent_date_field);
+                disableField(student_address_field);
+                disableField(student_name_field);
+                disableField(tracking_field);
+                disableField(ssh_field);
+            }
+            else if (device_status === 'UPDATE'){
+                enableField(ssh_field);
+                disableField(student_address_field);
+                disableField(student_name_field);
+                disableField(tracking_field);
+                disableField(recv_date_field);
+                disableField(sent_date_field);
+            }
+            else {
+                disableField(recv_date_field);
+                disableField(sent_date_field);
+                disableField(student_address_field);
+                disableField(student_name_field);
+                disableField(tracking_field);
+                disableField(ssh_field);
+            }
+        });
+
+        $('#update_device').on('submit', function(event){
+            event.preventDefault();
+            var formData = new FormData(this);
+            console.log(formData);
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('admin.admin_api.update_iot_device', device_id=device['device_id']) }}",
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (data){
+                    console.log(data);
+                    if (data.status === 200){
+                        window.location.reload();
+                    }
+                    else {
+                        $('#device-form-err').append(data.error);
+                    }
+                }
+            });
+        });
+        {% if device['status'] == 'SENT' %}
+            {% if device['date_sent'] != 'N/A' %}
+                var formatted_date = timeConverter({{ device['date_sent'] }});
+                document.getElementById('device_sent_date').innerHTML = formatted_date.getMonth() + 1 + "-" + formatted_date.getUTCDate() + "-" + formatted_date.getFullYear();
+            {% endif %}
+        {% endif %}
+        {% if device['status'] == 'CHECK' or device['status'] == 'UPDATE' %}
+            {% if device['date_received'] != 'N/A' %}
+                var formatted_date = timeConverter({{ device['date_received'] }});
+                document.getElementById('return_date').innerHTML = formatted_date.getMonth() + 1 + "-" + formatted_date.getUTCDate() + "-" + formatted_date.getFullYear();
+            {% endif %}
+        {% endif %}
+
+        $('#send_command').click(function(e){
+            e.preventDefault();
+            var data_obj = {'device_id': '{{ device['device_id'] }}'};
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('admin.admin_api.send_command',device_id=device['device_id']) }}",
+                data: JSON.stringify(data_obj),
+                dataType: 'json',
+                success: function (data){
+                    console.log(data);
+                    if (data.status !== 200){
+                        $('#command-form-err').append(data.error);
+                    }
+                }
+            });
+        });
+    });
+    </script>
+    <div class="landing_container col-lg-12">
+        <div class="row">
+            <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+                {{ logo.logo_div() }}
+                <br><h2>Device Management</h2><br>
+                <div id="state_management_container" style="display:flex; flex-direction:column;">
+                    <p style="padding-top: 10px;">Device ID: <a href="{{ device['device_url'] }}" target="_blank">{{ device['device_id'] }}</a></p>
+                    <p>Status: {{ device['status'] }}</p>
+                    {% if device['status'] == 'SENT' %}
+                        <p>Date Sent: <span id="device_sent_date">{{ device['date_sent'] }}</span></p>
+                        <p>Tracking Number: {{ device['current_student']['tracking_number'] }}</p>
+                    {% elif device['status'] == 'CHECK' or device['status'] == 'UPDATE' %}
+                        <p>Date Received: <span id="return_date"></span></p>
+                    {% endif %}
+                    {% if device['comments'] %}
+                        <p>Comments: {{ device['comments'] }}</p>
+                    {% else %}
+                        <p>Comments: None </p>
+                    {% endif %}
+                    <h4 id="command-result-error"></h4>
+                    <div style="padding-bottom: 10px;">
+                        <script>
+                            document.write('<a class="btn btn-primary" href="' + document.referrer + '">Go Back</a>');
+                        </script>
+                    </div>
+                    <button id='send_command' class="btn btn-primary">Test Connection</button>
+                   {{ delete_iot.deleteDevice(device['device_id']|string) }}
+                </div>
+            </div>
+            <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+                <div id="update_device_container">
+                    <form id="update_device" class="device_form form-horizontal">
+                        <h4 style="color: red;" id="device-form-err"></h4>
+                        <input id="device_id" value="{{ device['device_id'] }}" hidden>
+                        <div class="form-row align-items-center device-ctrl-padding">
+                            <div class="form-control my-1">
+                                <label class="mr-sm-2" for="device_status">Status: </label>
+                                <select name='device_status' id="device_status" class="custom-select mr-sm-2" required>
+                                    <option value="" selected disabled hidden>Select Device State</option>
+                                    <option value="READY">READY</option>
+                                    <option value="SENT">SENT</option>
+                                    <option value="CHECK">CHECK</option>
+                                    <option value="UPDATE">UPDATE</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id='ssh_field' class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control">
+                                <label class="control-label" for="device_ssh" style="text-align: center;" >SSH Public Key: </label>
+                                <div>
+                                    <textarea id="device_ssh" name='device_ssh' class="iot_textarea" type="text" rows="3" cols="50" placeholder="RSA X509 public key"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div id='student_name_field' class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control">
+                                <label class="control-label" for="student_name">Student Name: </label>
+                                <div>
+                                    <input id="student_name" name="student_name" type="text" style="width: 500px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div id='student_address_field' class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control">
+                                <label class="control-label" for="student_address">Student Address: </label>
+                                <div>
+                                    <input id="student_address" name="student_address" type="text" style="width: 500px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tracking_num_field" class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control">
+                                <label class="control-label" for="tracking_num">Tracking Number: </label>
+                                <div>
+                                    <input id="tracking_num" name="tracking_num" type="text" style="width: 500px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div id='sent_date_field' class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control my-3">
+                                <label for="date_sent">Date Sent: </label>
+                                <input id="date_sent" name="date_sent" type="date">
+                            </div>
+                        </div>
+                        <div id='recv_date_field' class="form-row align-items-center device-ctrl-padding" hidden disabled>
+                            <div class="form-control my-3">
+                                <label for="date_recv" style="padding-left: 10px;">Date Received: </label>
+                                <input id="date_recv" name="date_recv" type="date">
+                            </div>
+                        </div>
+                        <div id='comments_field' class="form-row align-items-center device-ctrl-padding">
+                            <div class="form-control">
+                                <label class="control-label mr-sm-2" for="comments">Comments: </label>
+                                <div>
+                                    <textarea id="comments" name="comments" rows="3" cols="50" class="iot_textarea"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row align-items-center device-ctrl-padding">
+                            <button class='btn btn-primary' type="submit">Update Device</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

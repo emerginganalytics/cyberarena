@@ -103,8 +103,8 @@ def get_unit_arenas(unit_id):
     return workout_list
 
 
-#store user submitted screenshots in cloud bucket
 def store_student_upload(workout_id, upload, index):
+    # stores user submitted screenshots in cloud bucket
     upload_bucket = str(project) + "_assessment_upload"
     bucket = storage_client.get_bucket(upload_bucket)
     new_blob = bucket.blob(str(workout_id) + '/' + secure_filename(str(index)) + '.png')
@@ -138,7 +138,8 @@ def store_background_color(color_code):
 
     bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
     new_blob = bucket.blob('color/{}-base.css'.format(project))
-    #Prevent GCP from serving a cached version of this file
+
+    # Prevent GCP from serving a cached version of this file
     new_blob.cache_control = 'private'
     new_blob.upload_from_string(css_string, content_type='text/css')
 
@@ -147,6 +148,7 @@ def store_background_color(color_code):
 
 def add_new_teacher(teacher_email):
     new_teacher = datastore.Entity(ds_client.key('cybergym-instructor', teacher_email))
+
     # new_teacher['email'] = teacher_email
     ds_client.put(new_teacher)
 

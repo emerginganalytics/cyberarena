@@ -22,3 +22,24 @@ function nuke_workout(workout_id){
     $("#reset-vm").attr("disabled", "disabled");
     $('.nuke_btn').attr("disabled", "disabled");
 }
+
+function delete_device(device_id){
+    $.ajax({
+        type: "POST",
+        contentType: "application/json;charset=utf-8",
+        url: '/admin/api/iot_device/' + device_id + '/delete',
+        traditional: 'true',
+        data: JSON.stringify({
+            'device_id': device_id,
+        }),
+        dataType: 'json',
+        success: function(data){
+            if (data.status === 200){
+                window.location.href="/admin/home";
+            }
+            else {
+                $('#iot-delete-err').append(data.error);
+            }
+        }
+    });
+}
