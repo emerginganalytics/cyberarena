@@ -3,6 +3,7 @@ from flask import abort, Blueprint, jsonify, render_template, redirect, request,
 from utilities.datastore_functions import *
 from utilities.globals import AdminActions, auth_config, compute, dns_suffix, ds_client, log_client, logger, LOG_LEVELS, \
     workout_token, post_endpoint, main_app_url, project, region, zone
+from utilities.iot_manager import IotManager
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
 
@@ -29,7 +30,6 @@ def admin_page():
         for instance in machine_instances['items']:
             if 'name' in instance:
                 instance_list.append(str(instance['name']))
-
 
     if request.method == "POST":
         response = {
@@ -108,6 +108,15 @@ def admin_workout(workout_id):
         for server in list(workout_server_query.fetch()):
             server_list.append(server)
         return render_template('admin_workout.html', workout=workout, servers=server_list)
+    else:
+        abort(404)
+
+
+@admin_app.route('/iot_device/<device_id>', methods=['GET', 'POST'])
+def iot_device(device_id):
+    device = ds_client.get(ds_client.key(IotManager().kind, device_id))
+    if device:
+        return render_template('iot_device.html', device=device)
     else:
         abort(404)
 

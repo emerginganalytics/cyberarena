@@ -160,11 +160,23 @@ function clear_filter(){
 
 function fill_iot_device_table(data){
     let table = document.getElementById('iot_devices_display');
-    if (data['status_code'] === 404){
+    if (data['status'] === 404){
         table.innerHTML = '<h2>No Registered IoT devices found for current project</h2>';
     }
     else {
-        // TODO: Parse Data into different fields
+        for (let i=0; i < data['devices'].length; i++){
+            var row = add_element("tr", {id: "device_row_" + data['devices'][i]['device_id']});
+            var device_link = add_element('a', {href: '/admin/iot_device/' + data['devices'][i]['device_id'], innerHTML: data['devices'][i]['device_id']});
+            row.appendChild(add_element('td', {innerHTML: device_link.outerHTML}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['current_student']['name']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['current_student']['address']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['tracking_number']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['date_sent']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['date_received']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['status']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['comments']}));
+            table.appendChild(row);
+        }
     }
 }
 
@@ -176,9 +188,10 @@ function get_iot_devices(){
         $("#loading-msg").html('Fetching Registered Devices' + '</br><div class="loader"></div>');
         $.ajax({
             type: "GET",
-            url: "/admin/api/iot_devices",
+            url: "/admin/api/iot_devices/list",
             dataType: "json",
             success: function(data){
+                console.log(data['status'])
                 loader.style.display = "none";
                 fill_iot_device_table(data);
             }

@@ -1,0 +1,31 @@
+{% macro deleteDevice(device_id) -%}
+<script type = "text/javascript" src="{{ url_for('static', filename='macro_scripts.js') }}"></script>
+
+<style>
+    .nuke_btn{
+        background-color:red!important;
+    }
+</style>
+<button type="button" class="btn nuke_btn" style="margin-top:2em;margin-bottom:1em;" data-toggle="modal" data-target="#modal_{{workout_id}}">
+    Delete Device
+</button>
+<div class="modal fade" id="modal_{{workout_id}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout_id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="max-width:50%;">
+    <div class="modal-content">
+        <div class="modal-header" style='justify-content:center;'>
+        <h2 style='text-align:center;' class="modal-title" id="ModalLabel_{{workout_id}}">CAUTION</h2>
+        </div>
+        <div class="modal-body">
+            <h4>You are about to delete the current device. All data from this device will be lost!</h4>
+        </div>
+        <div class="modal-body" id="iot-error-div">
+            <h4 id="iot-delete-err" style="color: red"></h4>
+        </div>
+        <div class="modal-footer" style="justify-content:space-around;">
+        <button type="button" style="margin-right:1em;" class="btn popup_close" data-dismiss="modal">Cancel</button>
+        <a onclick="delete_device('{{device_id}}')" class="btn" style="background-color:red;">Continue</a>
+        </div>
+    </div>
+    </div>
+</div>
+{%- endmacro %}

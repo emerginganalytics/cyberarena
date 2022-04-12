@@ -1,10 +1,12 @@
+import datetime
+import json
 from google.cloud import iot_v1
 from flask import Blueprint, request, redirect
 from utilities.pubsub_functions import pub_admin_scripts, pub_manage_server
 from utilities.globals import ds_client, project, log_client, compute, zone, LOG_LEVELS, AdminActions, workout_globals
 from utilities.yaml_functions import generate_yaml_content, parse_workout_yaml, save_yaml_file
 from utilities.datastore_functions import store_custom_logo, store_background_color, upload_instruction_file
-import json
+from utilities.iot_manager import IotManager
 
 admin_api = Blueprint('admin_api', __name__, url_prefix='/api')
 
@@ -28,14 +30,95 @@ def get_active_workouts():
     return json.dumps(active_workouts)
 
 
-@admin_api.route('/registered_iot_devices', methods=['GET'])
+@admin_api.route('/iot_devices/list', methods=['GET'])
 def get_iot_devices():
-    iot_client = iot_v1.DeviceManagerClient()
-    cloud_region = 'us-central1'
-    registry_id = 'cybergym-registry'
-    devices_gen = iot_client.list_devices(
-        parent=f'projects/{project}/locations/{cloud_region}/registries/{registry_id}')
-    iot_device_list = [i.id for i in devices_gen]
+    if request.method == 'GET':
+        device_list = []
+        devices_query = ds_client.query(kind=IotManager().kind).fetch()
+
+        if devices_query:
+            for device in devices_query:
+                device_list.append(json.loads(json.dumps(device), parse_int=str))
+            print(device_list)
+            return json.dumps({'devices': device_list, 'status': 200})
+        else:
+            return {'status': 404}
+
+
+@admin_api.route('/iot_device/register', methods=['POST'])
+def register_iot_device():
+    """
+    Used to register, update, and delete IoT devices on current project
+
+    """
+    manager = IotManager()
+    if request.method == 'POST':
+        request_data = request.form.to_dict()
+        ssh_key = request_data['register_device_ssh']
+        device_id = request_data['register_device_id']
+        action = manager.register_new_iot_device(device_id=device_id, certificate=ssh_key)
+        return json.dumps(action)
+
+
+@admin_api.route('/iot_device/<device_id>/update', methods=['POST'])
+def update_iot_device(device_id):
+    """
+        Requests to this route either updates existing device registry
+        or device datastore object
+    """
+    manager = IotManager()
+    device_obj = {}
+
+    if request.method == 'POST':
+        request_form = request.form.to_dict()
+        print(request_form)
+        device_status = request_form['device_status']
+
+        # Prepare device object and forward on to manager class
+        device_obj['status'] = device_status
+        device_obj['comments'] = request_form['comments']
+        if device_status == manager.DeviceStates.READY:
+            # Device is checked and ready to be used again
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.SENT:
+            # Device was sent out to a student
+            device_obj['current_student'] = {
+                'name': request_form['student_name'],
+                'address': request_form['student_address'],
+                'tracking_number': request_form['tracking_num']
+            }
+            date_sent = request_form['date_sent']
+            device_obj['date_sent'] = datetime.datetime.strptime(date_sent, "%Y-%m-%d").timestamp()
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.CHECK:
+            # Device needs to be checked before being sent out again
+            date_recv = request_form['date_recv']
+            device_obj['date_received'] = datetime.datetime.strptime(date_recv, "%Y-%m-%d").timestamp()
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.UPDATE:
+            # Update to device SSH keys
+            device_ssh = request_form['device_ssh']
+            device_obj['certificate'] = device_ssh
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+
+        return json.dumps(action)
+
+
+@admin_api.route('/iot_device/<device_id>/delete', methods=['POST'])
+def delete_iot_device(device_id):
+    manager = IotManager()
+    if request.method == 'POST':
+        request_json = request.get_json()
+        action = manager.delete_iot_device(request_json['device_id'])
+        return json.dumps(action)
+
+
+@admin_api.route('iot_device/<device_id>/send_command', methods=['POST'])
+def send_command(device_id):
+    manager = IotManager()
+    if request.method == 'POST':
+        action = manager.send_command(device_id=device_id)
+        return json.dumps(action)
 
 
 @admin_api.route("/admin_scripts", methods=['POST'])
