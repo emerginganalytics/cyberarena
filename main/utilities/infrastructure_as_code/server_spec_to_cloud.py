@@ -45,11 +45,10 @@ class ServerSpecToCloud:
         # First check to see if the server configuration already exists. If so, then return without error
         exists_check = ds_client.query(kind='cybergym-server')
         exists_check.add_filter("name", "=", self.server_name)
-        if exists_check.fetch().num_results > 0:
+        if len(list(exists_check.fetch())) > 0:
             cloud_log(LogIDs.MAIN_APP, f"The server {self.server_name} already exists. Skipping configuration.",
                       LOG_LEVELS.ERROR)
-            raise ReferenceError
-
+            raise ValueError
         self.build_id = build_id
         self.custom_image = server_spec.get('image', None)
         self.build_type = server_spec.get("build_type", None)

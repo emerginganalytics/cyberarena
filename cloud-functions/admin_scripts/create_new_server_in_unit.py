@@ -1,61 +1,84 @@
 import os
 import sys
+import time
 import yaml
-from common.globals import ds_client, BUILD_STATES, compute, project
-from common.nuke_workout import nuke_workout
-from common.state_transition import state_transition
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+from google.cloud import pubsub_v1
+from common.globals import ds_client, PUBSUB_TOPICS, project, SERVER_ACTIONS, compute, zone
+from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCloud
+
+__author__ = "Philip Huff"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Philip Huff"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Philip Huff"
+__email__ = "pdhuff@ualr.edu"
+__status__ = "Production"
 
 
-def create_new_server_in_unit(unit_id, build_server_spec):
+# Parse command line arguments
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("-u", "--unit", default=None, help="Unit ID to build the server in")
+parser.add_argument("-s", "--server-spec", default=None, type=str, help="Name of server specification in the "
+                                                                         "build-files/server-specs folder")
+
+args = vars(parser.parse_args())
+
+# Set up parameters
+unit_id = args['unit']
+server_spec = args['server_spec']
+
+
+def create_new_server_in_unit(unit_id, server_spec_file):
     """
     Use this script when a new server is needed for an existing Unit. This is often helpful for semester long labs
     in which you would like to modify the build environment.
     @param unit_id: The unit_id to add the server to
     @type unit_id: String
-    @param build_server_spec: The yaml specification file which holds the new server
-    @type build_server_spec: String
-    @param spec_folder: Folder where the specs are located
-    @type spec_folder: String
+    @param server_spec_file: The yaml specification file which holds the new server
+    @type server_spec_file: str
     @return: None
     @rtype: None
     """
-    spec_folder = "..\\build-files\\server-specs"
+    spec_folder = "temp"
 
     # Open and read YAML file
-    server_spec = os.path.join(spec_folder, build_server_spec)
-    with open(server_spec, "r") as f:
-        yaml_spec = yaml.load(f, Loader=yaml.SafeLoader)
-    name = yaml_spec['name']
-    custom_image = yaml_spec['image']
-    tags = yaml_spec['tags'] if 'tags' in yaml_spec else None
-    machine_type = yaml_spec['machine_type'] if 'machine_type' in yaml_spec else 'n1-standard-1'
-    network_routing = yaml_spec['network_routing'] if 'network_routing' in yaml_spec else False
+    file_object = os.path.join(spec_folder, server_spec_file)
+    try:
+        with open(file_object, "r") as f:
+            server_spec = yaml.load(f, Loader=yaml.SafeLoader)
+    except FileNotFoundError:
+        print(f"Error, server spec file {server_spec_file} not found.")
+        return
 
+    pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
     query_workouts = ds_client.query(kind='cybergym-workout')
     query_workouts.add_filter('unit_id', '=', unit_id)
+    servers = []
+    print(f"Info: Beginning to send messages to build server {server_spec['name']} in unit {unit_id}.")
     for workout in list(query_workouts.fetch()):
+        workout_id = workout.key.name
         workout_project = workout.get('build_project_location', project)
-        if workout_project == project:
-            workout_id = workout.key.name
-            nics = []
-            for n in yaml_spec['nics']:
-                n['external_NAT'] = n['external_NAT'] if 'external_NAT' in n else False
-                nic = {
-                    "network": f"{workout_id}-{n['network']}",
-                    "internal_IP": n['internal_IP'],
-                    "subnet": f"{workout_id}-{n['network']}-{n['subnet']}",
-                    "external_NAT": n['external_NAT']
-                }
-                if 'IP_aliases' in n and n['IP_aliases']:
-                    alias_ip_ranges = []
-                    for ipaddr in n['IP_aliases']:
-                        alias_ip_ranges.append({"ipCidrRange": ipaddr})
-                    nic['aliasIpRanges'] = alias_ip_ranges
-                nics.append(nic)
-            create_instance_custom_image(compute=compute, workout=workout_id, name=f"{workout_id}-{name}",
-                                         custom_image=custom_image, machine_type=machine_type,
-                                         networkRouting=network_routing, networks=nics, tags=tags)
+        try:
+            cloud_ready_server = ServerSpecToCloud(server_spec=server_spec, build_id=workout_id)
+            cloud_ready_server.commit_to_cloud()
+        except ValueError:
+            print(f"Warning: the server for build {workout_id} already exists")
+
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(workout_project, pubsub_topic)
+        server_name = f"{workout_id}-{server_spec['name']}"
+        publisher.publish(topic_path, data=b'Server Build', server_name=server_name, action=SERVER_ACTIONS.BUILD)
+        servers.append(server_name)
+
+    print(f"Info: Messages to build server {server_spec['name']} have been sent successfully")
 
 
 if __name__ == "__main__":
-    create_new_server_in_unit()
+    if not unit_id:
+        print("Error: Must supply a unit ID")
+    elif not server_spec:
+        print("Error: Must supply a server_spec file")
+    else:
+        create_new_server_in_unit(unit_id, server_spec)
