@@ -52,10 +52,10 @@ def create_new_server_in_unit(unit_id, server_spec_file):
         print(f"Error, server spec file {server_spec_file} not found.")
         return
 
+    publisher = pubsub_v1.PublisherClient()
     pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
     query_workouts = ds_client.query(kind='cybergym-workout')
     query_workouts.add_filter('unit_id', '=', unit_id)
-    servers = []
     print(f"Info: Beginning to send messages to build server {server_spec['name']} in unit {unit_id}.")
     for workout in list(query_workouts.fetch()):
         workout_id = workout.key.name
@@ -66,12 +66,9 @@ def create_new_server_in_unit(unit_id, server_spec_file):
         except ValueError:
             print(f"Warning: the server for build {workout_id} already exists")
 
-        publisher = pubsub_v1.PublisherClient()
         topic_path = publisher.topic_path(workout_project, pubsub_topic)
         server_name = f"{workout_id}-{server_spec['name']}"
         publisher.publish(topic_path, data=b'Server Build', server_name=server_name, action=SERVER_ACTIONS.BUILD)
-        servers.append(server_name)
-
     print(f"Info: Messages to build server {server_spec['name']} have been sent successfully")
 
 
