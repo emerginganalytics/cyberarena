@@ -118,7 +118,7 @@ def medic():
                     nuke_workout(workout.key.name)
 
     #
-    #Fixing machines that did not get built
+    # Fixing machines that did not get built
     #
     query_rebuild = ds_client.query(kind='cybergym-workout')
     query_rebuild.add_filter('state', '=', BUILD_STATES.READY)

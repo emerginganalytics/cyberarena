@@ -9,6 +9,7 @@ google-cloud-datastore
 google-api-python-client
 google-cloud-pubsub
 google-cloud-runtimeconfig
+google-cloud-iot
 pyyaml
 flask-wtf
 cryptography==3.3.2
@@ -20,4 +21,4 @@ google-cloud-logging
 pyAesCrypt
 marshmallow~=3.14.1
 netaddr==0.8.0
-validator
+validators

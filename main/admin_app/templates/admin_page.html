@@ -234,6 +234,55 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane fade" role="tabpanel" id='iot_container' aria-labelledby="iot_management_tab">
+            <div id="iot_management_container">
+                <div style="padding: 20px; max-width: 50%;">
+                    <button class="btn btn-primary" data-toggle="collapse" data-target="#register_device_div">Register New Device</button>
+                </div>
+                <div id="register_device_div" class="collapse" style="max-width: 50%;">
+                    <h4 style='color: red; padding-bottom: 5px;' id="register-device-err"></h4>
+                    <form id="register_device" class="form-horizontal" style="padding-bottom: 10px">
+                        <div class="form-row align-items-center device-ctrl-padding">
+                            <div class="form-control my-3">
+                                <label for="register_device_id">Device ID: </label>
+                                <div>
+                                    <input type='text' id="register_device_id" name="register_device_id"
+                                           pattern="^cyber-arena-[0-9]{4}$" title="cyber-arena-0000" placeholder="cyber-arena-0000" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row align-items-center device-ctrl-padding">
+                            <div class="form-control my-3">
+                                <label class='control-label mr-sm-2' for="register_device_ssh">Device Public Key</label>
+                                <div>
+                                    <textarea id="register_device_ssh" name='register_device_ssh' class="iot-textarea"
+                                              type="text" rows="3" cols="50" placeholder="RSA X509 Public Key" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="max-width: 50%;" onsubmit="return device_id_regex()">Submit</button>
+                    </form>
+                </div>
+                <table id="iot_devices_table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Device ID<br>
+                                <small>Click to view admin controls</small>
+                            </th>
+                            <th>Student Name</th>
+                            <th>Student Address</th>
+                            <th>Tracking Number</th>
+                            <th>Date Sent</th>
+                            <th>Date Received</th>
+                            <th>Status</th>
+                            <th>Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody id="iot_devices_display">
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="tab-pane fade" id="maintenance_container" role="tabpanel" aria-labelledby="maintenance_tab">
             <div id="maintenance">
                 <br><h2>Maintenance</h2><br>

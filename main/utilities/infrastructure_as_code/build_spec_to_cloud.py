@@ -17,7 +17,7 @@ from marshmallow import Schema, fields, ValidationError
 from utilities.globals import ds_client, default_student_bucket, default_teacher_bucket, workout_globals, \
     dns_suffix, LOG_LEVELS, BUILD_STATES, cloud_log, LogIDs, BuildTypes
 from utilities.workout_validator import WorkoutValidator
-from utilities.yaml_functions import parse_workout_yaml
+from utilities.yaml_functions import parse_workout_yaml, YamlFunctions
 from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCloud
 from utilities.infrastructure_as_code.student_entry_spec_to_cloud import StudentEntrySpecToCloud
 from utilities.infrastructure_as_code.competition_server_spec_to_cloud import CompetitionServerSpecToCloud
@@ -109,7 +109,7 @@ class BuildSpecToCloud:
             else workout_globals.max_workout_len
         max_time_expiry = calendar.timegm(time.gmtime()) + (86400 * workout_globals.max_workout_len)
         self.time_expiry = time_expiry if time_expiry and int(time_expiry) < max_time_expiry else max_time_expiry
-        self.build_spec = parse_workout_yaml(cyber_arena_yaml)
+        self.build_spec = YamlFunctions().parse_yaml(yaml_filename=cyber_arena_yaml)
         self.build_type = self.build_spec['workout'].get('build_type', 'compute')
         # Validate the build_spec before extracting the data
         self._validate_build_spec()

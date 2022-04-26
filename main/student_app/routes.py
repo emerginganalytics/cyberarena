@@ -6,7 +6,7 @@ from utilities.globals import auth_config, compute, zone, cloud_log, dns_suffix,
     main_app_url, post_endpoint, workout_token
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
-from utilities.yaml_functions import generate_yaml_content, parse_workout_yaml, save_yaml_file, parse_survey_yaml
+from utilities.yaml_functions import YamlFunctions
 import json
 student_app = Blueprint('student_app', __name__, url_prefix="/student", static_folder="../static",
                         template_folder="templates")
@@ -57,7 +57,7 @@ def landing_page(workout_id):
     workout_server_query = ds_client.query(kind='cybergym-server')
     workout_server_query.add_filter('workout', '=', workout_id)
     server_list = []
-    survey_yaml = parse_survey_yaml()
+    survey_yaml = YamlFunctions().parse_yaml(yaml_filename='survey')
     survey = survey_yaml.get('survey', None) if survey_yaml else None
     for server in list(workout_server_query.fetch()):
         server_name = server['name'][11:]

@@ -4,33 +4,195 @@
 {% block title %}Unit {{ unit.key.name }}{% endblock %}
 
 {% block content %}
-<script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
-<script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}"></script>
-<style>
-    .landing_content .btn, table{
-        width:95%;
-    }
-    .status-indicator{
-        height: 1em;
-        width: 1em;
-        border-radius: 50%;
-        display: inline-block;
-        background-color: rgb(196, 154, 16);
-    }
-    .change_student_name{
-        padding-bottom: 1em;
-        border-bottom: 1px solid var(--main_color, #6e2639);
-    }
-    [data-workout-state="RUNNING"]{
-        background-color: blue;
-    }
-    [data-workout-state="READY"]{
-        background-color: green;
-    }
-    [data-workout-state="DELETED"]{
-        background-color: black;
-    }
-</style>
+    <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
+    <script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}" ></script>
+    <!--<script type="text/javascript" src="{{ url_for('static', filename='inject_attack.js') }}" ></script>-->
+    <style>
+        .landing_content .btn, table{
+            width:95%;
+        }
+        .status-indicator{
+            height: 1em;
+            width: 1em;
+            border-radius: 50%;
+            display: inline-block;
+            background-color: rgb(196, 154, 16);
+        }
+        .change_student_name{
+            padding-bottom: 1em;
+            border-bottom: 1px solid var(--main_color, #6e2639);
+        }
+        [data-workout-state="RUNNING"]{
+            background-color: blue;
+        }
+        [data-workout-state="READY"]{
+            background-color: green;
+        }
+        [data-workout-state="DELETED"]{
+            background-color: black;
+        }
+        .nav-link {
+            width: auto;
+            margin-right: 5px;
+        }
+        .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+            background-color: var(--main_color, #6e2639);
+            color: white;
+        }
+        .img-btn {
+            border-radius: 15%;
+            border: 1px solid black;
+            width: 200px;
+            height: 200px;
+            margin: 10px;"
+            box-shadow: 0 10px 8px 0 black
+        }
+        .img-btn:hover {
+            box-shadow: 0 2px 8px 0 black
+        }
+
+    </style>
+    <script>
+        function remove_fields(ele_id, clear=false){
+            var rem_elem = $('#' + ele_id);
+            rem_elem.prop("disabled", true);
+            rem_elem.prop("hidden", true);
+
+            // Cases where we want to remove old form artifacts,
+            // i.e Template filter buttons
+            if (clear === true){
+                rem_elem.innerHTML = "";
+            }
+        }
+        function build_form(templates){
+            // TODO: all keys for submitted form values should be generic enough
+            //       to fit all templates
+
+            // Target Form
+            var vuln_form = $('#vuln-builder-form');
+            vuln_form.prop('disabled', false);
+            $('#vuln-container').prop('hidden', false);
+
+            var workout_list = JSON.parse('{{ workout_list | tojson }}');
+            console.log(workout_list);
+            var registration_required = "{{ unit['registration_required'] }}".toLowerCase();
+
+            // Build form
+            for (var i = 0; i < templates['attack'].length; i++){
+                // TODO: Create a unique form for each template and nest it in a collapsible div
+                /* TODO: Each div needs to display attack info such as MITRE ID, name, hint, and description
+                * */
+                var template = templates['attack'][i];
+
+                // create select elements from arguments
+                for (var j = 0; j < template.args.length; j++){
+                    if (template.args[j].type === 'choice'){
+                        // Current argument is a choice. Create Select element
+                        console.log('Argument: ' + template.args[j].name);
+
+                        // create select label
+                        var label_i = document.createElement('label');
+                        label_i.htmlFor = template.args[j].id;
+                        label_i.textContent = template.args[j].name;
+
+                        // create select element;
+                        var select_i = document.createElement('select');
+                        select_i.name = template.args[j].id;
+                        select_i.id = template.args[j].id;
+
+                        // generate options for select element
+                        for (var k = 0; k < template.args[j].Choices.length; k++){
+                            // get key value
+                            var arg_key = Object.keys(template['args'][j]['Choices'][k])[0]
+                            var option = document.createElement('option');
+                            option.name = arg_key;
+                            option.value = arg_key;
+                            option.textContent = arg_key;
+
+                            // set default select option
+                            if (template.args[j].default === arg_key){
+                                option.defaultSelected = true;
+                            }
+                            select_i.appendChild(option);
+                        }
+                        // add element to form
+                        vuln_form.append(label_i)
+                        vuln_form.append(select_i);
+                    }
+                    else if (template.args[j]['type'] === 'string'){
+                        var input_i = document.createElement('input');
+                        input_i.type = 'text';
+                        input_i.name = template.args.id;
+                        input_i.id = template.args.id;
+
+                        // add element to form
+                        vuln_form.append(input_i);
+                    }
+                }
+                // build target network inputs
+
+                // build unit checkbox
+                var network_u_label = document.createElement('label');
+                network_u_label.htmlFor = 'target-unit-' + i;
+                network_u_label.textContent = 'Send to Unit: ';
+                var network_u = document.createElement('input');
+                network_u.type = 'checkbox';
+                network_u.id = 'target-unit-' + i;
+                // append to form
+                vuln_form.append(network_u_label);
+                vuln_form.append(network_u);
+
+                // build workout select list
+                var network_i = document.createElement('select');
+                network_i.id = 'target-workout-list-' + i;
+                network_i.name = 'target-workout';
+
+                var network_default = document.createElement('option');
+                network_default.disabled = true;
+                network_default.defaultSelected = true;
+                network_default.value = '';
+                network_default.textContent = '-- Select Target Workout --';
+                network_i.appendChild(network_default);
+
+                // build network options
+                if (registration_required){
+                    for (var w = 0; w < workout_list.length; w++){
+                        var network_opt = document.createElement('option');
+                        network_opt.value = workout_list[w].name;
+                        network_opt.textContent = workout_list[w].name + ' | ' + workout_list[w]['student_name'];
+                        network_i.appendChild(network_opt);
+                        console.log(workout_list[w].student_name);
+                    }
+                }
+                else {
+                    for (var w = 0; w < workout_list.length; w++){
+                        var network_opt = document.createElement('option');
+                        network_opt.value = workout_list[w].name;
+                        network_opt.textContent = workout_list[w].name + ' | ' + workout_list[w]['student_name'];
+                        network_i.appendChild(network_opt);
+                    }
+                }
+                vuln_form.append(network_i);
+            }
+        }
+        function filterTemplates(filter_str){
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=utf-8",
+                url: "/teacher/api/vuln/templates/filter",
+                traditional: "true",
+                data: JSON.stringify({
+                    "filter_str": filter_str,
+                }),
+                dataType: "json",
+                success: function(data){
+                    console.log(data);
+                    remove_fields('template-btn-container', true);
+                    build_form(data);
+                },
+            });
+        }
+    </script>
     <div class="row">
         <div class='controls col-lg-2' style="border: 1px solid black">
             {{ logo.logo_div() }}
@@ -87,174 +249,232 @@
             <hr>
             <a href="/teacher/home" class="btn">Home</a>
         </div>
-        
-
         <div class='landing_content container col-lg-10' style="margin-top:1em;padding:1em;" onload="check_workout_status('{{ unit.key.name }}')">
+            <ul class="nav nav-tabs mb-3" id="unit-nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="nav-info-tab" data-toggle="tab"
+                            data-target="#info-container" type="button" role="tab" aria-controls="nav-info"
+                            aria-selected="true">Workout Info</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="nav-attack-tab" data-toggle="tab"
+                            data-target="#vuln-builder-container" type="button" role="tab" aria-controls="nav-attacks"
+                            aria-selected="false">Attack Builder</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="nav-tabContent">
+                <div id="vuln-builder-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
+                    <div id="template-btn-container" class="text-center">
+                        <input type="image" src="/static/network-scan.png" name="scan-template-btn" id="scan-template-btn"
+                               class="img-btn" onclick="filterTemplates('scanning');"/>
+                        <input type="image" src="/static/credentials.png" name="cred-template-btn" id="cred-template-btn"
+                               class="img-btn" onclick="filterTemplates('credentials');"/>
+                        <input type="image" src="/static/exploitation.png" name="exploit-template-btn" id="exploit-template-btn"
+                               class="img-btn" onclick="filterTemplates('exploitation');"/>
+                    </div>
+                    <div id="vuln-container" hidden>
+                        <form id="vuln-builder-form" disabled="true">
+                            <select name="attack_names" id="attack_id" required>
+                                <option  value="" selected disabled hidden>Select Vulnerability Template</option>
+                                {% for attack in attack_spec['attack'] %}
+                                    <option value="{{ attack.id }}">[MITRE {{ attack.mitre_attack }}] {{ attack.name }} - {{ attack.description }}</option>
+                                {% endfor %}
+                            </select>
+                            <h4>Attack Arguments: </h4>
+                            <select name="network-names"></select>
+                            <div id="attack-arg-lists">
+                                <!--Remaining args will be filled here dynamically-->
+                            </div>
+                            <button type="submit">Inject Vulnerability</button>
+                        </form>
+                        <!-- object dump -->
+                        <br>
+                        <p>{{ attack_spec['attack'][0] }}</p>
+                        <div id="attack-results-container">
+                            <!-- TODO: Build a TABLE that shows list of all attacks for current unit
+                                        Table can be filtered based on status, attack_type, timestamp(?)-->
+                            <table id="attack-results-table" class="table">
+                                <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Mode (Inject or Attack)</th>
+                                    <th>AttackID</th>
+                                    <th>Type</th>
+                                    <th>Network</th>
+                                    <th>Time (Start)</th>
+                                    <th>Args</th>
+                                </tr>
+                                </thead>
 
-            <h2>Description</h2>
-            <p>{{ unit['description'] }}</p>
-            {% if teacher_instructions %}
-                <a href="{{ teacher_instructions }}" target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
-            {% endif %}
-            <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="info-container" class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-info-tab">
+                    <h2>Description</h2>
+                    <p>{{ unit['description'] }}</p>
+                    {% if teacher_instructions %}
+                        <a href="{{ teacher_instructions }}" target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
+                    {% endif %}
+                    <p>To begin, click on an available team below. It may take several minutes before workouts are available </p>
+                    <div id="distribution_container" style="margin-top:2em; margin-bottom:1em;">
+                        <h2>Distribution</h2>
+                        <p>Otherwise, click the button below to copy all the student links to your clipboard (from top to bottom). You can then paste them into a column in a spreadsheet.</p>
+                        {% if unit['registration_required'] %}
+                            <p>Students in this unit will have a link to their registered workout from their home page.</p>
+                        {% else %}
+                            <p>To allow students to register themselves for this unit, send them the following link: <span id="registration_link" style="color:blue">{{main_app_url}}/student/{{unit.key.name}}/signup</span></p>
+                            <p>This will allow students to claim unnamed workouts, as well as provide their own names.</p>
+                        {% endif %}
+                        <a onclick="copy_student_links()" href="#" class="btn" style="width:50%;">Copy Student Links</a>
+                        <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                            <th>Status</th>
+                            <th>Student Name</th>
+                            <th>Workout ID <br><small>Click to view student landing page</small></th>
+                            <th>Assessment Submissions</th>
+                            <th>Manage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for workout in workout_list %}
+                                <tr>
+                                    <td id="state-container-{{workout.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workout.state}}"><span class="status-indicator" id="status-indicator-{{workout.name}}" data-workout-state="{{workout['state']}}"></span></td>
+                                    {% if workout['student_name'] %}
+                                        {% if unit['registration_required'] %}
+                                            <td id="workout_student_name_{{workout.name}}">{{workout['student_name']['student_name']}}</td>
+                                        {% else %}
+                                            <td id="workout_student_name_{{workout.name}}">{{workout['student_name']}}</td>
+                                        {% endif %}
+                                    {% else %}
+                                        <td>Student {{loop.index}}</td>
+                                    {% endif %}
+                                    <td><a class="workout-link" href="/student/landing/{{workout.name}}">{{workout.name}}</a></td>
+                                    <td>
+                                        {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
+                                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
+                                                View Submissions
+                                            </button>
+                                            <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                        <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Assessment results for {{workout.name}}</h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <ul class="nav nav-pills" style='justify-content: space-around;'>
+                                                                {% if workout['submitted_answers'] %}
+                                                                <li><a data-toggle="pill" class='btn' href="#text_input_{{workout.name}}" style='width:100%;'>Text Answers</a></li>
+                                                                {% endif %}
+                                                                {% if workout["uploaded_files"] %}
+                                                                <li><a data-toggle="pill" class='btn' href="#file_uploads_{{workout.name}}" style='width:100%;'>File Uploads</a></li>
+                                                                {% endif %}
+                                                                {% if workout["auto_answers"] %}
+                                                                <li><a data-toggle="pill" class="btn" href="#auto_assessment_{{workout.name}}" style='width:100%;'>Auto Complete Progress</a></li>
+                                                                {% endif %}
+                                                            </ul>
+                                                            <div class='tab-content'>
+                                                                {% if workout['submitted_answers'] %}
+                                                                    <div id='text_input_{{workout.name}}' class='tab-pane fadeIn'>
+                                                                        <table class="table">
+                                                                            <tr>
+                                                                                <th>Question</th>
+                                                                                <th>Submitted Answer</th>
+                                                                                <th>Key</th>
+                                                                            </tr>
+                                                                            {% for question in workout["submitted_answers"] %}
+                                                                                <tr>
+                                                                                    <td>{{question['question']}}</td>
 
-            <div id="distribution_container" style="margin-top:2em; margin-bottom:1em;">
-                <h2>Distribution</h2>
-                <p>Otherwise, click the button below to copy all the student links to your clipboard (from top to bottom). You can then paste them into a column in a spreadsheet.</p>
-                {% if unit['registration_required'] %}
-                    <p>Students in this unit will have a link to their registered workout from their home page.</p>
-                {% else %}
-                    <p>To allow students to register themselves for this unit, send them the following link: <span id="registration_link" style="color:blue">{{main_app_url}}/student/{{unit.key.name}}/signup</span></p>
-                    <p>This will allow students to claim unnamed workouts, as well as provide their own names.</p>
-                {% endif %}
-                <a onclick="copy_student_links()" href="#" class="btn" style="width:50%;">Copy Student Links</a>
-                <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
-            </div>
-            <table class="table">
-                <thead>
-                    <tr>
-                    <th>Status</th>
-                    <th>Student Name</th>
-                    <th>Workout ID <br><small>Click to view student landing page</small></th>
-                    <th>Assessment Submissions</th>
-                    <th>Manage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for workout in workout_list %}
-                        <tr>
-                            <td id="state-container-{{workout.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workout.state}}"><span class="status-indicator" id="status-indicator-{{workout.name}}" data-workout-state="{{workout['state']}}"></span></td>
-                            {% if workout['student_name'] %}
-                                {% if unit['registration_required'] %}
-                                    <td id="workout_student_name_{{workout.name}}">{{workout['student_name']['student_name']}}</td>
-                                {% else %}
-                                    <td id="workout_student_name_{{workout.name}}">{{workout['student_name']}}</td>
-                                {% endif %}
-                            {% else %}
-                                <td>Student {{loop.index}}</td>
-                            {% endif %}
-                            <td><a class="workout-link" href="/student/landing/{{workout.name}}">{{workout.name}}</a></td>
-                            <td>
-                                {% if workout["submitted_answers"] or workout['auto_answers'] or workout['uploaded_files'] %}
-                                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal_{{workout.name}}">
-                                        View Submissions
-                                    </button>
-                                    <div class="modal fade" id="modal_{{workout.name}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
-                                        <div class="modal-dialog" role="document">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Assessment results for {{workout.name}}</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <ul class="nav nav-pills" style='justify-content: space-around;'>
-                                                        {% if workout['submitted_answers'] %}
-                                                        <li><a data-toggle="pill" class='btn' href="#text_input_{{workout.name}}" style='width:100%;'>Text Answers</a></li>
-                                                        {% endif %}
-                                                        {% if workout["uploaded_files"] %}
-                                                        <li><a data-toggle="pill" class='btn' href="#file_uploads_{{workout.name}}" style='width:100%;'>File Uploads</a></li>
-                                                        {% endif %}
-                                                        {% if workout["auto_answers"] %}
-                                                        <li><a data-toggle="pill" class="btn" href="#auto_assessment_{{workout.name}}" style='width:100%;'>Auto Complete Progress</a></li>
-                                                        {% endif %}
-                                                    </ul>
-                                                    <div class='tab-content'>
-                                                        {% if workout['submitted_answers'] %}
-                                                            <div id='text_input_{{workout.name}}' class='tab-pane fadeIn'>
-                                                                <table class="table">
-                                                                    <tr>
-                                                                        <th>Question</th>
-                                                                        <th>Submitted Answer</th>
-                                                                        <th>Key</th>
-                                                                    </tr>
-                                                                    {% for question in workout["submitted_answers"] %}
-                                                                        <tr>
-                                                                            <td>{{question['question']}}</td>
-
-                                                                            <td>Answer: {{question['answer']}}</td>
-                                                                            {% for full_question in workout['assessment']['questions'] %}
-                                                                                {% if full_question['question'] == question['question'] %}
-                                                                                <td>{{full_question['answer']}}</td>
-                                                                                {% endif%}
+                                                                                    <td>Answer: {{question['answer']}}</td>
+                                                                                    {% for full_question in workout['assessment']['questions'] %}
+                                                                                        {% if full_question['question'] == question['question'] %}
+                                                                                        <td>{{full_question['answer']}}</td>
+                                                                                        {% endif%}
+                                                                                    {% endfor %}
+                                                                                </tr>
                                                                             {% endfor %}
-                                                                        </tr>
+                                                                        </table>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% if workout['uploaded_files'] %}
+                                                                    <div id='file_uploads_{{workout.name}}' style='text-align:center;' class="tab-pane fade">
+                                                                        <div class='upload_view'>
+                                                                    {% for question in workout['uploaded_files'] %}
+                                                                        <li>{{question['question']}}</li>
+                                                                        <img class="img-fluid" src="{{question['storage_url']}}">
                                                                     {% endfor %}
-                                                                </table>
+                                                                        </div>
+                                                                    </div>
+                                                                {% endif %}
+                                                                {% if workout['auto_answers'] %}
+                                                                    <div id='auto_assessment_{{workout.name}}' class='tab-pane fade'>
+                                                                        <ol>
+                                                                        {% for question in workout['auto_answers'] %}
+                                                                            <li>{{question['question']}}:
+                                                                                {% if question['complete'] %}
+                                                                                <span style='color:green;'>Complete</span>
+                                                                                {% else %}
+                                                                                <span style='color:red;'>Not completed</span>
+                                                                                {% endif %}
+                                                                            </li>
+                                                                        {% endfor %}
+                                                                        </ol>
+                                                                    </div>
+                                                                {% endif %}
                                                             </div>
-                                                        {% endif %}
-                                                        {% if workout['uploaded_files'] %}
-                                                            <div id='file_uploads_{{workout.name}}' style='text-align:center;' class="tab-pane fade">
-                                                                <div class='upload_view'>
-                                                            {% for question in workout['uploaded_files'] %}
-                                                                <li>{{question['question']}}</li>
-                                                                <img class="img-fluid" src="{{question['storage_url']}}">
-                                                            {% endfor %}
-                                                                </div>
-                                                            </div>
-                                                        {% endif %}
-                                                        {% if workout['auto_answers'] %}
-                                                            <div id='auto_assessment_{{workout.name}}' class='tab-pane fade'>
-                                                                <ol>
-                                                                {% for question in workout['auto_answers'] %}
-                                                                    <li>{{question['question']}}: 
-                                                                        {% if question['complete'] %}
-                                                                        <span style='color:green;'>Complete</span>
-                                                                        {% else %}
-                                                                        <span style='color:red;'>Not completed</span>
-                                                                        {% endif %}
-                                                                    </li>
-                                                                {% endfor %}
-                                                                </ol>
-                                                            </div>
-                                                        {% endif %}
+                                                        </div>
+                                                        <div class="modal-footer" style="justify-content:center;">
+                                                            <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer" style="justify-content:center;">
-                                                    <button type="button" class="btn" data-dismiss="modal">Close</button>
-                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    No Submissions
-                                {% endif %}
-                            </td>
-                            <td>
-                                <button class="btn btn-primary" data-toggle="modal" data-target="#manage_workout_{{workout.name}}">Manage</button>
-                                
-                                <div class="modal fade" id="manage_workout_{{workout.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h4 class="modal-title">Manage Workout {{workout.name}}</h4>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                
-                                                <div class="change_student_name">
-                                                    <h5 style="text-align:left">Change Student Name</h5>
-                                                    <input id='name_change_field_{{workout.name}}' name="new_name" placeholder="Enter new student name" type="text" style="margin-bottom: 1em;"/>
-                                                    <a onclick="change_student_name('{{workout.name}}')" class="btn">Change</a>
-                                                </div>
+                                        {% else %}
+                                            No Submissions
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" data-toggle="modal" data-target="#manage_workout_{{workout.name}}">Manage</button>
 
+                                        <div class="modal fade" id="manage_workout_{{workout.name}}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">Manage Workout {{workout.name}}</h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+
+                                                        <div class="change_student_name">
+                                                            <h5 style="text-align:left">Change Student Name</h5>
+                                                            <input id='name_change_field_{{workout.name}}' name="new_name" placeholder="Enter new student name" type="text" style="margin-bottom: 1em;"/>
+                                                            <a onclick="change_student_name('{{workout.name}}')" class="btn">Change</a>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>        
-                    {% endfor %}
-                </tbody>
-            </table>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>       
     </div>
     <div id="loading-msg"></div>
     <script>
-
         $(document).ready(function(){
             $('.status-indicator-container').tooltip();
             $("form").submit(function(){
@@ -269,9 +489,20 @@
                 check_workout_status( "{{ unit.key.name }}");
             }, 30000);
         });
-        
+
+        $(document).ready(function (){
+            // Disables individual workout select if target Unit is selected.
+            // TODO: Not sure if this function is needed at the moment
+            $('#target-unit').on('change', function(){
+                $('#target-workout-list').prop("disabled", this.checked);
+                $('#target-workout-div').prop("hidden", this.checked);
+            });
+            $('#attack_id').on("change", function (){
+                // build_form(this.val());
+            })
+        });
+
         function check_workout_status(unit_id){
-            
             $.ajax({
                 type: "POST",
                 contentType: "application/json;charset=utf-8",
@@ -292,9 +523,7 @@
                     }
                 },
             });
-    
-        }  
 
-        
+        }
     </script>
 {% endblock %}

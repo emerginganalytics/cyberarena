@@ -5,7 +5,7 @@ from utilities.globals import AdminActions, auth_config, compute, dns_suffix, ds
     workout_token, post_endpoint, main_app_url, project, region, zone
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
-
+from utilities.iot_manager import IotManager
 from admin_app.admin_api import admin_api
 
 admin_app = Blueprint('admin', __name__, url_prefix="/admin", static_folder="../static", template_folder="templates")
@@ -108,6 +108,15 @@ def admin_workout(workout_id):
         for server in list(workout_server_query.fetch()):
             server_list.append(server)
         return render_template('admin_workout.html', workout=workout, servers=server_list)
+    else:
+        abort(404)
+
+
+@admin_app.route('/iot_device/<device_id>', methods=['GET'])
+def iot_device(device_id):
+    device = ds_client.get(ds_client.key(IotManager().kind, device_id))
+    if device:
+        return render_template('iot_device.html', device=device)
     else:
         abort(404)
 

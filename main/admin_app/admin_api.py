@@ -1,9 +1,11 @@
 from flask import Blueprint, request, redirect
 from utilities.pubsub_functions import pub_admin_scripts, pub_manage_server
 from utilities.globals import ds_client, project, log_client, compute, zone, LOG_LEVELS, AdminActions, workout_globals
-from utilities.yaml_functions import generate_yaml_content, parse_workout_yaml, save_yaml_file
+from utilities.yaml_functions import YamlFunctions
 from utilities.datastore_functions import store_custom_logo, store_background_color, upload_instruction_file
+from utilities.iot_manager import IotManager
 import json
+import datetime
 
 admin_api = Blueprint('admin_api', __name__, url_prefix='/api')
 
@@ -25,6 +27,98 @@ def get_active_workouts():
                 workout['id'] = workout.key.name
                 active_workouts.append(workout)
     return json.dumps(active_workouts)
+
+
+@admin_api.route('/iot_devices/list', methods=['GET'])
+def get_iot_devices():
+    if request.method == 'GET':
+        device_list = []
+        devices_query = ds_client.query(kind=IotManager().kind).fetch()
+
+        if devices_query:
+            for device in devices_query:
+                device_list.append(json.loads(json.dumps(device), parse_int=str))
+            print(device_list)
+            return json.dumps({'devices': device_list, 'status': 200})
+        else:
+            return {'status': 404}
+
+
+@admin_api.route('/iot_device/register', methods=['POST'])
+def register_iot_device():
+    """
+    Used to register, update, and delete IoT devices on current project
+
+    """
+    manager = IotManager()
+    if request.method == 'POST':
+        request_data = request.form.to_dict()
+        ssh_key = request_data['register_device_ssh']
+        device_id = request_data['register_device_id']
+        action = manager.register_new_iot_device(device_id=device_id, certificate=ssh_key)
+        return json.dumps(action)
+
+
+@admin_api.route('/iot_device/<device_id>/update', methods=['POST'])
+def update_iot_device(device_id):
+    """
+        Requests to this route either updates existing device registry
+        or device datastore object
+    """
+    manager = IotManager()
+    device_obj = {}
+
+    if request.method == 'POST':
+        request_form = request.form.to_dict()
+        print(request_form)
+        device_status = request_form['device_status']
+
+        # Prepare device object and forward on to manager class
+        device_obj['status'] = device_status
+        device_obj['comments'] = request_form['comments']
+        if device_status == manager.DeviceStates.READY:
+            # Device is checked and ready to be used again
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.SENT:
+            # Device was sent out to a student
+            device_obj['current_student'] = {
+                'name': request_form['student_name'],
+                'address': request_form['student_address'],
+                'tracking_number': request_form['tracking_num']
+            }
+            date_sent = request_form['date_sent']
+            device_obj['date_sent'] = datetime.datetime.strptime(date_sent, "%Y-%m-%d").timestamp()
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.CHECK:
+            # Device needs to be checked before being sent out again
+            date_recv = request_form['date_recv']
+            device_obj['date_received'] = datetime.datetime.strptime(date_recv, "%Y-%m-%d").timestamp()
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+        elif device_status == manager.DeviceStates.UPDATE:
+            # Update to device SSH keys
+            device_ssh = request_form['device_ssh']
+            device_obj['certificate'] = device_ssh
+            action = manager.update_device_entity(device_id=device_id, data=device_obj)
+
+        return json.dumps(action)
+
+
+@admin_api.route('/iot_device/<device_id>/delete', methods=['POST'])
+def delete_iot_device(device_id):
+    manager = IotManager()
+    if request.method == 'POST':
+        request_json = request.get_json()
+        action = manager.delete_iot_device(request_json['device_id'])
+        return json.dumps(action)
+
+
+@admin_api.route('iot_device/<device_id>/send_command', methods=['POST'])
+def send_command(device_id):
+    manager = IotManager()
+    if request.method == 'POST':
+        action = manager.send_command(device_id=device_id)
+        return json.dumps(action)
+
 
 @admin_api.route("/admin_scripts", methods=['POST'])
 def admin_scripts():
@@ -55,6 +149,7 @@ def update_logo():
         )
     return redirect('/admin/home')
 
+
 @admin_api.route('/update_workout_list', methods=["POST"])
 def update_workout_list():
     if request.method == 'POST':
@@ -74,6 +169,7 @@ def update_workout_list():
         else:
             return 'Failed'
 
+
 @admin_api.route('/server_management/<workout_id>', methods=['POST'])
 def admin_server_management(workout_id):
     if request.method == 'POST':
@@ -87,6 +183,7 @@ def admin_server_management(workout_id):
             )
             pub_manage_server(data['server_name'], data['action'])
     return 'True'
+
 
 @admin_api.route('/change_workout_state', methods=['POST'])
 def change_workout_state():
@@ -112,6 +209,7 @@ def change_workout_state():
         ds_client.put(workout)
         return json.dumps(response)
 
+
 @admin_api.route('/change_workout_expiration', methods=['POST'])
 def change_workout_expiration():
     if request.method == "POST":
@@ -122,19 +220,21 @@ def change_workout_expiration():
             ds_client.put(workout)
         return json.dumps(str("Test"))
 
+
 @admin_api.route('/create_workout_spec', methods=['POST'])
 def create_workout_spec():
     if request.method == 'POST':
         request_data = request.get_json(force=True)
 
-        yaml_string = generate_yaml_content(request_data)
+        yaml_string = YamlFunctions().generate_yaml_content(request_data)
         return json.dumps(yaml_string)
+
 
 @admin_api.route('/save_workout_spec', methods=['POST'])
 def save_workout_spec():
     if request.method == 'POST':
         request_data = request.get_json(force=True)
-        save_yaml_file(request_data)
+        YamlFunctions().save_yaml_file(request_data)
         response = {}
         response['completed'] = True
         admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
@@ -152,6 +252,7 @@ def save_workout_spec():
         ds_client.put(admin_info)
 
         return json.dumps(response)
+
 
 @admin_api.route('/instance_info', methods=["POST"])
 def instance_info():
@@ -171,6 +272,7 @@ def instance_info():
             instance_info['nics'] = nics
 
         return json.dumps(instance_info)
+
 
 @admin_api.route('/upload_instructions', methods=['POST'])
 def upload_instructions():
