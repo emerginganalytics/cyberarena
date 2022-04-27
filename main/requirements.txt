@@ -9,6 +9,7 @@ google-cloud-datastore
 google-api-python-client
 google-cloud-pubsub
 google-cloud-runtimeconfig
+google-cloud-iot
 pyyaml
 flask-wtf
 cryptography==3.3.2
