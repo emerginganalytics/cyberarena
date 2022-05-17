@@ -288,7 +288,7 @@ class BuildSpecToCloud:
         self._process_additional_build_directives()
 
     def _parse_container(self):
-        container_info = self.build_spec['container_info']
+        container_info = self.build_spec.get('container_info', None)
         assessment = self.build_spec.get('assessment', None)
         host_name = self.build_spec['workout'].get('host_name', None)
         if not host_name:

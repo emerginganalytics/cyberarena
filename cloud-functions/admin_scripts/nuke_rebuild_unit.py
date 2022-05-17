@@ -19,5 +19,9 @@ def nuke_rebuild_unit(unit_id):
             print(f"Completed nuking and rebuilding workout {workout.key.name}")
 
 
+"""
 if __name__ == "__main__":
-    nuke_rebuild_unit()
+    units = ['occahzxtnr', 'qinajihcjv']
+    for unit in units:
+        nuke_rebuild_unit(unit)
+"""

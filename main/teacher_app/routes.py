@@ -1,5 +1,4 @@
 import json
-import yaml  # USED FOR LOCAL TEST ONLY
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 from forms.forms import CreateWorkoutForm
 from utilities.reset_workout import reset_workout

@@ -12,7 +12,10 @@ teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')
 def vuln_builder_form_data(unit_id):
     """POST to this endpoint to build form based on filtered items"""
     unit = ds_client.get(ds_client.key("cybergym-unit", unit_id))
-    pass
+    if request.method == 'POST':
+        form_data = json.dumps(request.json)
+        VulnManager().process_form(unit_id=unit_id, form_data=form_data)
+        return '200'
 
 
 @teacher_api.route('/<unit_id>/vuln/status', methods=['POST'])
@@ -30,18 +33,16 @@ def vuln_results_filter(unit_id):
 @teacher_api.route('/vuln/templates/filter', methods=['POST'])
 def vuln_template_filter():
     yaml_str = VulnManager().load_yaml_str
-    attack_types = ['scanning', 'credential', 'exploitation']
     if request.method == 'POST':
-        template_filter = request.json['filter_str']
+        template_filter = request.json['attack_id']
         print(template_filter)
-        if template_filter in attack_types:
-            templates = []
-            for template in yaml_str['attack']:
-                if template['attack_type'] == template_filter:
-                    templates.append(template)
-            return json.dumps({'attack': templates})
-        else:
-            return f'Invalid filter item {template_filter}'
+
+        attack = ''
+        for template in yaml_str['attack']:
+            if template['id'] == template_filter:
+                attack = template
+                break
+        return json.dumps(attack)
     else:
         return '400'
 

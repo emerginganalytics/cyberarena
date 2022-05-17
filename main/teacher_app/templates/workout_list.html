@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
 {% import "logo_macro.html" as logo %}
+{% import "vuln_macros.html" as vuln_macros %}
 {% block title %}Unit {{ unit.key.name }}{% endblock %}
 
 {% block content %}
     <script type = "text/javascript" src = "{{ url_for('static', filename = 'script.js') }}" ></script>
     <script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}" ></script>
-    <!--<script type="text/javascript" src="{{ url_for('static', filename='inject_attack.js') }}" ></script>-->
     <style>
         .landing_content .btn, table{
             width:95%;
@@ -50,149 +50,59 @@
         .img-btn:hover {
             box-shadow: 0 2px 8px 0 black
         }
-
+        #vuln-templates-table {
+            border-collapse: collapse;
+        }
+        .table_title {
+            float: left;
+        }
+        .selected td {
+            border-bottom: 4px solid var(--main_color, #6e2639);
+        }
+        .checkmark {
+            display:inline-block;
+            width: 22px;
+            height:22px;
+            -ms-transform: rotate(45deg); /* IE 9 */
+            -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+            transform: rotate(45deg);
+            margin-right: 5px;
+        }
+        .checkmark:before {
+            content: "";
+            position: absolute;
+            width: 3px;
+            height: 9px;
+            background-color: var(--main_color, #6e2639);
+            left: 11px;
+            top: 6px;
+        }
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: var(--main_color, #6e2639);
+            left: 8px;
+            top: 12px;
+        }
+        #vuln-template-btn {
+            width: 200px;
+            float: right;
+            margin: 10px 20px 40px 10px;
+        }
+        #vuln-template-btn-div {
+            margin-bottom: 30px;
+        }
+        .readOnly {
+            border: 0;
+            outline: 0;
+            margin: 5px;
+        }
+        .readOnly:focus {
+            outline: none !important;
+        }
     </style>
-    <script>
-        function remove_fields(ele_id, clear=false){
-            var rem_elem = $('#' + ele_id);
-            rem_elem.prop("disabled", true);
-            rem_elem.prop("hidden", true);
-
-            // Cases where we want to remove old form artifacts,
-            // i.e Template filter buttons
-            if (clear === true){
-                rem_elem.innerHTML = "";
-            }
-        }
-        function build_form(templates){
-            // TODO: all keys for submitted form values should be generic enough
-            //       to fit all templates
-
-            // Target Form
-            var vuln_form = $('#vuln-builder-form');
-            vuln_form.prop('disabled', false);
-            $('#vuln-container').prop('hidden', false);
-
-            var workout_list = JSON.parse('{{ workout_list | tojson }}');
-            console.log(workout_list);
-            var registration_required = "{{ unit['registration_required'] }}".toLowerCase();
-
-            // Build form
-            for (var i = 0; i < templates['attack'].length; i++){
-                // TODO: Create a unique form for each template and nest it in a collapsible div
-                /* TODO: Each div needs to display attack info such as MITRE ID, name, hint, and description
-                * */
-                var template = templates['attack'][i];
-
-                // create select elements from arguments
-                for (var j = 0; j < template.args.length; j++){
-                    if (template.args[j].type === 'choice'){
-                        // Current argument is a choice. Create Select element
-                        console.log('Argument: ' + template.args[j].name);
-
-                        // create select label
-                        var label_i = document.createElement('label');
-                        label_i.htmlFor = template.args[j].id;
-                        label_i.textContent = template.args[j].name;
-
-                        // create select element;
-                        var select_i = document.createElement('select');
-                        select_i.name = template.args[j].id;
-                        select_i.id = template.args[j].id;
-
-                        // generate options for select element
-                        for (var k = 0; k < template.args[j].Choices.length; k++){
-                            // get key value
-                            var arg_key = Object.keys(template['args'][j]['Choices'][k])[0]
-                            var option = document.createElement('option');
-                            option.name = arg_key;
-                            option.value = arg_key;
-                            option.textContent = arg_key;
-
-                            // set default select option
-                            if (template.args[j].default === arg_key){
-                                option.defaultSelected = true;
-                            }
-                            select_i.appendChild(option);
-                        }
-                        // add element to form
-                        vuln_form.append(label_i)
-                        vuln_form.append(select_i);
-                    }
-                    else if (template.args[j]['type'] === 'string'){
-                        var input_i = document.createElement('input');
-                        input_i.type = 'text';
-                        input_i.name = template.args.id;
-                        input_i.id = template.args.id;
-
-                        // add element to form
-                        vuln_form.append(input_i);
-                    }
-                }
-                // build target network inputs
-
-                // build unit checkbox
-                var network_u_label = document.createElement('label');
-                network_u_label.htmlFor = 'target-unit-' + i;
-                network_u_label.textContent = 'Send to Unit: ';
-                var network_u = document.createElement('input');
-                network_u.type = 'checkbox';
-                network_u.id = 'target-unit-' + i;
-                // append to form
-                vuln_form.append(network_u_label);
-                vuln_form.append(network_u);
-
-                // build workout select list
-                var network_i = document.createElement('select');
-                network_i.id = 'target-workout-list-' + i;
-                network_i.name = 'target-workout';
-
-                var network_default = document.createElement('option');
-                network_default.disabled = true;
-                network_default.defaultSelected = true;
-                network_default.value = '';
-                network_default.textContent = '-- Select Target Workout --';
-                network_i.appendChild(network_default);
-
-                // build network options
-                if (registration_required){
-                    for (var w = 0; w < workout_list.length; w++){
-                        var network_opt = document.createElement('option');
-                        network_opt.value = workout_list[w].name;
-                        network_opt.textContent = workout_list[w].name + ' | ' + workout_list[w]['student_name'];
-                        network_i.appendChild(network_opt);
-                        console.log(workout_list[w].student_name);
-                    }
-                }
-                else {
-                    for (var w = 0; w < workout_list.length; w++){
-                        var network_opt = document.createElement('option');
-                        network_opt.value = workout_list[w].name;
-                        network_opt.textContent = workout_list[w].name + ' | ' + workout_list[w]['student_name'];
-                        network_i.appendChild(network_opt);
-                    }
-                }
-                vuln_form.append(network_i);
-            }
-        }
-        function filterTemplates(filter_str){
-            $.ajax({
-                type: "POST",
-                contentType: "application/json;charset=utf-8",
-                url: "/teacher/api/vuln/templates/filter",
-                traditional: "true",
-                data: JSON.stringify({
-                    "filter_str": filter_str,
-                }),
-                dataType: "json",
-                success: function(data){
-                    console.log(data);
-                    remove_fields('template-btn-container', true);
-                    build_form(data);
-                },
-            });
-        }
-    </script>
     <div class="row">
         <div class='controls col-lg-2' style="border: 1px solid black">
             {{ logo.logo_div() }}
@@ -258,56 +168,59 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="nav-attack-tab" data-toggle="tab"
-                            data-target="#vuln-builder-container" type="button" role="tab" aria-controls="nav-attacks"
+                            data-target="#vuln-container" type="button" role="tab" aria-controls="nav-attacks"
                             aria-selected="false">Attack Builder</button>
                 </li>
             </ul>
             <div class="tab-content" id="nav-tabContent">
-                <div id="vuln-builder-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
-                    <div id="template-btn-container" class="text-center">
-                        <input type="image" src="/static/network-scan.png" name="scan-template-btn" id="scan-template-btn"
-                               class="img-btn" onclick="filterTemplates('scanning');"/>
-                        <input type="image" src="/static/credentials.png" name="cred-template-btn" id="cred-template-btn"
-                               class="img-btn" onclick="filterTemplates('credentials');"/>
-                        <input type="image" src="/static/exploitation.png" name="exploit-template-btn" id="exploit-template-btn"
-                               class="img-btn" onclick="filterTemplates('exploitation');"/>
-                    </div>
-                    <div id="vuln-container" hidden>
-                        <form id="vuln-builder-form" disabled="true">
-                            <select name="attack_names" id="attack_id" required>
-                                <option  value="" selected disabled hidden>Select Vulnerability Template</option>
-                                {% for attack in attack_spec['attack'] %}
-                                    <option value="{{ attack.id }}">[MITRE {{ attack.mitre_attack }}] {{ attack.name }} - {{ attack.description }}</option>
-                                {% endfor %}
-                            </select>
-                            <h4>Attack Arguments: </h4>
-                            <select name="network-names"></select>
-                            <div id="attack-arg-lists">
-                                <!--Remaining args will be filled here dynamically-->
-                            </div>
-                            <button type="submit">Inject Vulnerability</button>
-                        </form>
-                        <!-- object dump -->
-                        <br>
-                        <p>{{ attack_spec['attack'][0] }}</p>
-                        <div id="attack-results-container">
-                            <!-- TODO: Build a TABLE that shows list of all attacks for current unit
-                                        Table can be filtered based on status, attack_type, timestamp(?)-->
-                            <table id="attack-results-table" class="table">
-                                <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Mode (Inject or Attack)</th>
-                                    <th>AttackID</th>
-                                    <th>Type</th>
-                                    <th>Network</th>
-                                    <th>Time (Start)</th>
-                                    <th>Args</th>
-                                </tr>
-                                </thead>
-
-                            </table>
+                <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
+                    <!--Holds both form builder and attack results table-->
+                    <div id="vuln-templates-container">
+                         <table class="table table-hover" id="vuln-templates-table">
+                             {{ vuln_macros.display_vulns(attack_spec.attack) }}
+                         </table>
+                        <div id="vuln-template-btn-div">
+                            <button id='vuln-template-btn' class="btn btn-sm" type="button" disabled hidden>Select Template</button>
                         </div>
+                    </div>
+                    <div id='vuln-form-modal' class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Attack Template Form</h5>
+                                    <button type="button" class="close cancel-form" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="vuln-template-form" name="vuln-template-form" method="post" action="/teacher/api/{{ unit.key.id }}/vuln/build">
+                                        <div id="vuln-template-args"></div>
+                                        {{ vuln_macros.target_network('vuln-template-form', workout_list, unit.registration_required) }}
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary" form="vuln-template-form">Submit</button>
+                                    <button type="button" class="btn btn-secondary cancel-form" data-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="attack-results-container">
+                        <!-- TODO: Build a TABLE that shows list of all attacks for current unit
+                                    Table can be filtered based on status, attack_type, timestamp(?)-->
+                        <table id="attack-results-table" class="table">
+                            <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Mode (Inject or Attack)</th>
+                                <th>AttackID</th>
+                                <th>Type</th>
+                                <th>Network</th>
+                                <th>Time (Start)</th>
+                                <th>Args</th>
+                            </tr>
+                            </thead>
+                        </table>
                     </div>
                 </div>
                 <div id="info-container" class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-info-tab">
@@ -471,37 +384,201 @@
                     </table>
                 </div>
             </div>
-        </div>       
+        </div>
     </div>
     <div id="loading-msg"></div>
     <script>
+        // Vulnerability Builder Functions
+        $(document).ready(function(){
+            // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
+            //       new page
+            $('#vuln-templates-table').DataTable({
+                "paging": false,
+                "bInfo": false,
+                "columns": [
+                    {searchable: true, orderable: true},
+                    {searchable: true, orderable: false},
+                    {searchable: true, orderable: true},
+                    {searchable: false, orderable: false},
+                ],
+                "dom": '<"table_title">frtip',
+            });
+            $("div.table_title").html('<h3>Select an Attack Template: </h3>');
+
+            var selectedID = '';
+            // Handle attack template table clicks
+            $('#vuln-templates-table tr').click(function(){
+                var row = $(this);
+                var checkmark = $(this).find('span');
+                var vulnBtn = $('#vuln-template-btn');
+                if (row.attr("id") !== 'vuln-table-header'){
+                    // Current template is deselected
+                    if (row.hasClass('selected')){
+                        row.removeClass('selected');
+                        checkmark.removeClass('checkmark');
+                        vulnBtn.prop('disabled', true);
+                        vulnBtn.prop('hidden', true);
+                    }
+                    // A different row is selected
+                    else {
+                        row.addClass('selected').siblings().removeClass('selected');
+                        row.siblings().find('span').removeClass('checkmark');
+                        checkmark.addClass('checkmark');
+                        selectedID = row.attr('id');
+                        vulnBtn.prop('disabled', false);
+                        vulnBtn.prop('hidden', false);
+                    }
+                }
+            });
+            // Send request to server for attack template and build form
+            $('#vuln-template-btn').on('click', function(e){
+                $.ajax({
+                    type: 'POST',
+                    contentType: 'application/json;charset=utf-8',
+                    traditional: true,
+                    url: '/teacher/api/vuln/templates/filter',
+                    data: JSON.stringify({'attack_id': selectedID}),
+                    dataType: 'json',
+                    success: function (data){
+                        // reset selectedID value to NULL
+                        build_form(data, selectedID);
+                    }
+                })
+            });
+
+            // Resets form if modal close or cancel buttons are clicked
+            $('button.cancel-form').click(function(){
+                var table = $('#vuln-templates-table');
+                table.find('.selected').removeClass('selected');
+                table.find('.checkmark').removeClass('checkmark');
+                remove_fields('vuln-template-btn');
+            });
+
+            // Vuln form listener
+            $('#vuln-template-form').submit(function(e){
+                e.preventDefault();
+                let post_url = $(this).attr('action');
+                let request_method = $(this).attr("method");
+                let serialized = $(this).serialize().split("&");
+
+                // build json object from serialized form
+                var form_data = {}
+                for (var key in serialized){
+                    form_data[serialized[key].split("=")[0]] = serialized[key].split("=")[1];
+                }
+                console.log(form_data);
+                $('#vuln-form-modal').modal('hide');
+                $.ajax({
+                    type: request_method,
+                    contentType: 'application/json;charset=utf-8',
+                    traditional: true,
+                    url: post_url,
+                    data: JSON.stringify(form_data),
+                    processData: false,
+                    dataType: "json",
+                    success: function (data){
+                        console.log(data);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                    }
+               });
+            });
+        });
+        // Builds form with data received from vuln-template-table POST request
+       function build_form(data){
+            var vulnForm = $('#vuln-template-args');
+            // First clean up any old form values
+           document.getElementById('vuln-template-args').innerHTML = '';
+
+           // Create field for attack_id
+           var aid_div = document.createElement('div');
+           aid_div.className = 'form-group';
+           // Attack ID Input
+           var aid_input = document.createElement('input');
+           aid_input.type = 'text';
+           aid_input.name = 'attack_id';
+           aid_input.value = data.id;
+           aid_input.readOnly = true;
+           aid_input.className = 'readOnly';
+           // Attack ID label
+           var aid_label = document.createElement('label');
+           aid_label.htmlFor = 'attack_id';
+           aid_label.innerText = 'Attack ID: ';
+           // Add fields to form
+           aid_div.appendChild(aid_label);
+           aid_div.appendChild(aid_input);
+           vulnForm.append(aid_div);
+
+            // Create arg label and select field
+           for (var arg = 0; arg < data.args.length; arg++){
+               if (data.args[arg].id !== 'target_network'){
+                   // Create wrapper div
+                   var arg_div = document.createElement('div');
+                   arg_div.className = 'form-group';
+                   // Create arg select field
+                   var arg_select = document.createElement("select");
+                   arg_select.name = data.args[arg].id;
+                   arg_select.id = data.args[arg].id;
+                   // Create arg label
+                   var arg_label = document.createElement('label');
+                   arg_label.htmlFor = data.args[arg].id;
+                   arg_label.textContent = data.args[arg].name + ':';
+                   if ('Choices' in data.args[arg]){
+                       for (var i = 0; i < data.args[arg].Choices.length; i++){
+                            var option_i = document.createElement('option');
+                            var option_key = Object.keys(data.args[arg]['Choices'][i])[0];
+                            option_i.name = option_key;
+                            option_i.value = option_key.toString();
+                            option_i.textContent = option_key;
+
+                            // check for default value
+                            var current_choice = data['args'][arg]['Choices'][i];
+                            if (current_choice === data.args[arg].default){
+                                option_i.defaultSelected = true;
+                            }
+                            arg_select.appendChild(option_i);
+                       } // end Choices for loop
+                       // Append generated fields to form
+                       arg_div.appendChild(arg_label);
+                       arg_div.appendChild(arg_select);
+                       vulnForm.append(arg_div);
+                   }
+               }  // end !target_network
+           } // end args for loop
+           // Form is built; Toggle form modal
+            $('#vuln-form-modal').modal();
+       }
+       function remove_fields(ele_id, clear=false){
+           var rem_elem = $('#' + ele_id);
+           rem_elem.prop("disabled", true);
+           rem_elem.prop("hidden", true);
+
+           // Cases where we want to remove old form artifacts,
+           // i.e Template filter buttons
+           if (clear === true){
+               rem_elem.innerHTML = "";
+           }
+       }
+
+       // Workout functions
         $(document).ready(function(){
             $('.status-indicator-container').tooltip();
             $("form").submit(function(){
-                $('#start-vm').attr('disabled','disabled');
-                $('#stop-vm').attr('disabled','disabled');
-                $('#reset-vm').attr('disabled','disabled');
-                $("#loading-msg").html('Please wait while the process completes' +
-                    '</br><div class="loader"></div>');
+                if (this.name !== 'vuln-template-form'){
+                    $('#start-vm').attr('disabled','disabled');
+                    $('#stop-vm').attr('disabled','disabled');
+                    $('#reset-vm').attr('disabled','disabled');
+                    $("#loading-msg").html('Please wait while the process completes' +
+                        '</br><div class="loader"></div>');
+                }
             });
             check_workout_status("{{unit.key.name}}");
             setInterval(function(){
                 check_workout_status( "{{ unit.key.name }}");
             }, 30000);
         });
-
-        $(document).ready(function (){
-            // Disables individual workout select if target Unit is selected.
-            // TODO: Not sure if this function is needed at the moment
-            $('#target-unit').on('change', function(){
-                $('#target-workout-list').prop("disabled", this.checked);
-                $('#target-workout-div').prop("hidden", this.checked);
-            });
-            $('#attack_id').on("change", function (){
-                // build_form(this.val());
-            })
-        });
-
         function check_workout_status(unit_id){
             $.ajax({
                 type: "POST",

@@ -12,3 +12,4 @@ def rebuild_workout(workout_id):
     state_transition(entity=workout, new_state=BUILD_STATES.START)
     build_workout(workout_id)
     return
+
