@@ -129,7 +129,7 @@
                 success: function (data){
                     console.log(data);
                     if (data.status !== 200){
-                        $('#command-form-err').append(data.error);
+                        $('#command-result-error').append(data.message);
                     }
                 }
             });
@@ -155,7 +155,7 @@
                     {% else %}
                         <p>Comments: None </p>
                     {% endif %}
-                    <h4 id="command-result-error"></h4>
+                    <h4 id="command-result-error" style="color: red;"></h4>
                     <div style="padding-bottom: 10px;">
                         <script>
                             document.write('<a class="btn btn-primary" href="' + document.referrer + '">Go Back</a>');
@@ -172,9 +172,9 @@
                         <input id="device_id" value="{{ device['device_id'] }}" hidden>
                         <div class="form-row align-items-center device-ctrl-padding">
                             <div class="form-control my-1">
-                                <label class="mr-sm-2" for="device_status">Status: </label>
+                                <label class="mr-sm-2" for="device_status">Action: </label>
                                 <select name='device_status' id="device_status" class="custom-select mr-sm-2" required>
-                                    <option value="" selected disabled hidden>Select Device State</option>
+                                    <option value="" selected disabled hidden>Select Device Action</option>
                                     <option value="READY">READY</option>
                                     <option value="SENT">SENT</option>
                                     <option value="CHECK">CHECK</option>

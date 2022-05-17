@@ -10,12 +10,12 @@ from utilities.globals import auth_config, dns_suffix, ds_client, log_client, lo
     post_endpoint, workout_token, workout_globals, BuildTypes
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
-from utilities.yaml_functions import generate_yaml_content, parse_workout_yaml, save_yaml_file
-
+from utilities.yaml_functions import YamlFunctions
 from teacher_app.teacher_api import teacher_api
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher", static_folder="../static", template_folder="templates")
 teacher_app.register_blueprint(teacher_api)
+
 
 @teacher_app.route('/home', methods=['GET', 'POST'])
 def teacher_home():
@@ -62,8 +62,8 @@ def teacher_home():
                             'timestamp': unit['timestamp']
                         }
                     expired_units.append(unit_info)
-        current_units = sorted(current_units, key = lambda i: (i['timestamp']), reverse=True)
-        expired_units = sorted(expired_units, key = lambda i: (i['timestamp']), reverse=True)
+        current_units = sorted(current_units, key=lambda i: (i['timestamp']), reverse=True)
+        expired_units = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
         for class_instance in list(class_list.fetch()):
             if 'class_name' in class_instance:
                 if 'student_auth' in class_instance:
@@ -187,15 +187,17 @@ def workout_list(unit_id):
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
 
-    #For updating individual workout ready state
-    if (request.method=="POST"):
+    attack_yaml = YamlFunctions().parse_yaml('attack')
+
+    # For updating individual workout ready state
+    if request.method=="POST":
         if build_type == 'arena':
             return json.dumps(unit)
-        return json.dumps(workout_list)    
-    
+        return json.dumps(workout_list)
+
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', workout_list=workout_list, unit=unit,
-                               teacher_instructions=teacher_instructions_url, main_app_url=main_app_url)
+                               teacher_instructions=teacher_instructions_url, main_app_url=main_app_url, attack_spec=attack_yaml)
     else:
         return render_template('no_workout.html')
 
@@ -363,7 +365,7 @@ def quick_build(workout_type):
         build_now = request.form.get("build_now")
         build_now = True if build_now else False
 
-        yaml_string = parse_workout_yaml(workout_type)
+        yaml_string = YamlFunctions().parse_yaml(yaml_filename=workout_type)
         unit_id, build_type = process_workout_yaml(yaml_string, workout_type, unit_name,
                                                    team, class_name, length, email, build_now=build_now)
 

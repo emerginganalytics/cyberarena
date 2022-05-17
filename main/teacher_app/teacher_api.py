@@ -2,9 +2,50 @@ from flask import Blueprint, request, redirect
 from utilities.datastore_functions import *
 from utilities.pubsub_functions import *
 from utilities.globals import ds_client, log_client, LOG_LEVELS
+from utilities.vuln_manager import VulnManager
 import json
 
 teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')
+
+
+@teacher_api.route('/<unit_id>/vuln/build', methods=['POST'])
+def vuln_builder_form_data(unit_id):
+    """POST to this endpoint to build form based on filtered items"""
+    unit = ds_client.get(ds_client.key("cybergym-unit", unit_id))
+    if request.method == 'POST':
+        form_data = json.dumps(request.json)
+        VulnManager().process_form(unit_id=unit_id, form_data=form_data)
+        return '200'
+
+
+@teacher_api.route('/<unit_id>/vuln/status', methods=['POST'])
+def vuln_status(unit_id):
+    """Handles polling on injected vulnerabilities or attacks"""
+    pass
+
+
+@teacher_api.route('/<unit_id>/vuln/results/filter', methods=['POST'])
+def vuln_results_filter(unit_id):
+    """Handles filtering of attack result table -- Possibly unneeded"""
+    pass
+
+
+@teacher_api.route('/vuln/templates/filter', methods=['POST'])
+def vuln_template_filter():
+    yaml_str = VulnManager().load_yaml_str
+    if request.method == 'POST':
+        template_filter = request.json['attack_id']
+        print(template_filter)
+
+        attack = ''
+        for template in yaml_str['attack']:
+            if template['id'] == template_filter:
+                attack = template
+                break
+        return json.dumps(attack)
+    else:
+        return '400'
+
 
 @teacher_api.route('/change_student_name/<workout_id>', methods=["POST"])
 def change_student_name(workout_id):
@@ -40,6 +81,7 @@ def create_new_class():
 
         return redirect('/teacher/home')
 
+
 @teacher_api.route('/change_roster_name/<class_id>/<student_name>', methods=['POST'])
 def change_roster_name(class_id, student_name):
     if request.method == 'POST':
@@ -59,6 +101,7 @@ def change_roster_name(class_id, student_name):
                     workout['student_name'] = new_name
                     ds_client.put(workout)
     return json.dumps(class_info)
+
 
 @teacher_api.route('/change_class_roster/<class_id>', methods=['POST'])
 def change_class_roster(class_id):
@@ -104,6 +147,7 @@ def change_class_roster(class_id):
         ds_client.put(class_info)
     return redirect('/teacher/home')
 
+
 @teacher_api.route('add_multiple_students', methods=['POST'])
 def add_multiple_students():
     if request.method == "POST":
@@ -139,6 +183,7 @@ def add_multiple_students():
         ds_client.put(class_entity)
         return json.dumps({'result': "success"})
 
+
 @teacher_api.route('/unclaim_workout/<workout_id>', methods=["POST"])
 def unclaim_workout(workout_id):
     workout = ds_client.get(ds_client.key("cybergym-workout", workout_id))
@@ -164,6 +209,7 @@ def unclaim_workout(workout_id):
 
         return workout['student_name']
 
+
 @teacher_api.route('/add_team/<arena_id>', methods=['POST'])
 def add_team(arena_id):
     arena = ds_client.get(ds_client.key('cybergym-unit', str(arena_id)))
@@ -179,6 +225,7 @@ def add_team(arena_id):
     ds_client.put(arena)
     return json.dumps(arena)
 
+
 #Used to change teams for arena workouts
 @teacher_api.route('/change_team/<workout_id>', methods=['POST'])
 def change_team(workout_id):
@@ -189,6 +236,7 @@ def change_team(workout_id):
             workout['team'] = request_data['new_team']
             ds_client.put(workout)
             return json.dumps(workout)
+
 
 @teacher_api.route('/remove_unit_from_class/<class_id>/<unit_id>', methods=['GET','POST'])
 def remove_unit_from_class(class_id, unit_id):

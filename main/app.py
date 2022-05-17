@@ -332,12 +332,18 @@ def arena_scoreboard(arena_id):
 @app.route('/faq', methods=['GET'])
 def faq():
     return render_template('faq.html')
+
+
 @app.route('/cyberattack_faq', methods=['GET'])
 def cyberattack_faq():
     return render_template('cyberattack_faq.html')
+
+
 @app.route('/ransomware_faq', methods=['GET'])
 def ransomware_faq():
     return render_template('ransomware_faq.html')
+
+
 @app.route('/dos_faq', methods=['GET'])
 def dos_faq():
     return render_template('dos_faq.html')
@@ -361,58 +367,91 @@ def mobileforensics_faq():
 @app.route('/trust_faq', methods=['GET'])
 def trust_faq():
     return render_template('trust_faq.html')
+
+
 @app.route('/nessus_faq', methods=['GET'])
 def nessus_faq():
     return render_template('nessus_faq.html')
+
+
 @app.route('/bufferoverflow_faq', methods=['GET'])
 def bufferoverflow_faq():
     return render_template('bufferoverflow_faq.html')
+
+
 @app.route('/publicprivate_faq', methods=['GET'])
 def publicprivate_faq():
     return render_template('publicprivate_faq.html')
+
+
 @app.route('/wireshark_faq', methods=['GET'])
 def wireshark_faq():
     return render_template('wireshark_faq.html')
+
+
 @app.route('/2fa_faq', methods=['GET'])
 def twofa_faq():
     return render_template('2fa_faq.html')
+
+
 @app.route('/access-control_faq', methods=['GET'])
 def accesscontrol_faq():
     return render_template('access-control_faq.html')
+
+
 @app.route('/arena_snake_faq', methods=['GET'])
 def arena_snake_faq():
     return render_template('arena_snake_faq.html')
+
+
 @app.route('/hiddennode_faq', methods=['GET'])
 def hiddennode_faq():
     return render_template('hiddennode_faq.html')
+
+
 @app.route('/inspect_faq', methods=['GET'])
 def inspect_faq():
     return render_template('inspect_faq.html')
+
+
 @app.route('/kersplunk_faq', methods=['GET'])
 def kersplunk_faq():
     return render_template('kersplunk_faq.html')
+
+
 @app.route('/missionpermissions2_faq', methods=['GET'])
 def missionpermissions2_faq():
     return render_template('missionpermissions2_faq.html')
+
+
 @app.route('/password-policy_faq', methods=['GET'])
 def passwordpolicy_faq():
     return render_template('password-policy_faq.html')
+
+
 @app.route('/phishing_faq', methods=['GET'])
 def phishing_faq():
     return render_template('phishing_faq.html')
+
+
 @app.route('/reversus_faq', methods=['GET'])
 def reversus_faq():
     return render_template('reversus_faq.html')
+
+
 @app.route('/shodan_faq', methods=['GET'])
 def shodan_faq():
     return render_template('shodan_faq.html')
+
+
 @app.route('/sql_injection_faq', methods=['GET'])
 def sql_injection_faq():
     return render_template('sql_injection_faq.html')
+
+
 @app.route('/xss_faq', methods=['GET'])
 def xss_faq():
     return render_template('xss_faq.html')
-
 
 
 # For debugging of pub/sub

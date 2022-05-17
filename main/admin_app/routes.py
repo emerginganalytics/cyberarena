@@ -6,7 +6,7 @@ from utilities.globals import AdminActions, auth_config, compute, dns_suffix, ds
 from utilities.iot_manager import IotManager
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
-
+from utilities.iot_manager import IotManager
 from admin_app.admin_api import admin_api
 
 admin_app = Blueprint('admin', __name__, url_prefix="/admin", static_folder="../static", template_folder="templates")
@@ -112,7 +112,7 @@ def admin_workout(workout_id):
         abort(404)
 
 
-@admin_app.route('/iot_device/<device_id>', methods=['GET', 'POST'])
+@admin_app.route('/iot_device/<device_id>', methods=['GET'])
 def iot_device(device_id):
     device = ds_client.get(ds_client.key(IotManager().kind, device_id))
     if device:

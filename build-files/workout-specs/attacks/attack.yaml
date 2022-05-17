@@ -4,6 +4,7 @@ attack:
     mitre_attack: T1595
     attack_type: scanning
     description: Probe network for vulnerabilities
+    mode: 'attack'
     args:
       - id: target_network
         name: Target Network
@@ -22,8 +23,9 @@ attack:
     mitre_attack: T9999
     attack_type: scanning
     description: Use sqlmap to detect and exploit database vulnerabilities.
+    mode: 'attack'
     args:
-      - id: url
-        name: URL
+      - id: target_network
+        name: Target Network
         type: string
-        hint: The url or host to scan.
+        hint: The network or host to scan.

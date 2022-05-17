@@ -158,6 +158,10 @@ function clear_filter(){
     document.getElementById('clear_filter_button').style.display = "none";
 }
 
+function timeConverter(UNIX_timestamp){
+        return new Date(UNIX_timestamp * 1000);
+}
+
 function fill_iot_device_table(data){
     let table = document.getElementById('iot_devices_display');
     if (data['status'] === 404){
@@ -165,14 +169,25 @@ function fill_iot_device_table(data){
     }
     else {
         for (let i=0; i < data['devices'].length; i++){
+            var hasNumber = /\d/;
+            var sent_date_val = data['devices'][i]['date_sent'];
+            var recv_date_val = data['devices'][i]['date_received'];
+            if (hasNumber.test(sent_date_val)){
+                var sent_date = timeConverter(sent_date_val);
+                sent_date_val = sent_date.getMonth() + 1 + "-" + sent_date.getUTCDate()  + "-" + sent_date.getFullYear();
+            }
+            if (hasNumber.test(recv_date_val)){
+                var recv_date = timeConverter(recv_date_val);
+                recv_date_val = recv_date.getMonth() + 1 + "-" + recv_date.getUTCDate()  + "-" + recv_date.getFullYear();
+            }
             var row = add_element("tr", {id: "device_row_" + data['devices'][i]['device_id']});
             var device_link = add_element('a', {href: '/admin/iot_device/' + data['devices'][i]['device_id'], innerHTML: data['devices'][i]['device_id']});
             row.appendChild(add_element('td', {innerHTML: device_link.outerHTML}));
             row.appendChild(add_element('td', {innerHTML: data['devices'][i]['current_student']['name']}));
             row.appendChild(add_element('td', {innerHTML: data['devices'][i]['current_student']['address']}));
-            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['tracking_number']}));
-            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['date_sent']}));
-            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['date_received']}));
+            row.appendChild(add_element('td', {innerHTML: data['devices'][i]['current_student']['tracking_number']}));
+            row.appendChild(add_element('td', {innerHTML: sent_date_val}));
+            row.appendChild(add_element('td', {innerHTML: recv_date_val}));
             row.appendChild(add_element('td', {innerHTML: data['devices'][i]['status']}));
             row.appendChild(add_element('td', {innerHTML: data['devices'][i]['comments']}));
             table.appendChild(row);

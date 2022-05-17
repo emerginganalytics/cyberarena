@@ -4,9 +4,11 @@ from google.cloud import iot_v1
 from flask import Blueprint, request, redirect
 from utilities.pubsub_functions import pub_admin_scripts, pub_manage_server
 from utilities.globals import ds_client, project, log_client, compute, zone, LOG_LEVELS, AdminActions, workout_globals
-from utilities.yaml_functions import generate_yaml_content, parse_workout_yaml, save_yaml_file
+from utilities.yaml_functions import YamlFunctions
 from utilities.datastore_functions import store_custom_logo, store_background_color, upload_instruction_file
 from utilities.iot_manager import IotManager
+import json
+import datetime
 
 admin_api = Blueprint('admin_api', __name__, url_prefix='/api')
 
@@ -227,7 +229,7 @@ def create_workout_spec():
     if request.method == 'POST':
         request_data = request.get_json(force=True)
 
-        yaml_string = generate_yaml_content(request_data)
+        yaml_string = YamlFunctions().generate_yaml_content(request_data)
         return json.dumps(yaml_string)
 
 
@@ -235,7 +237,7 @@ def create_workout_spec():
 def save_workout_spec():
     if request.method == 'POST':
         request_data = request.get_json(force=True)
-        save_yaml_file(request_data)
+        YamlFunctions().save_yaml_file(request_data)
         response = {}
         response['completed'] = True
         admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))

@@ -1,9 +1,16 @@
-import io
 import google.api_core.exceptions
-import json
 from google.cloud import iot_v1, datastore
 from google.protobuf import field_mask_pb2 as gp_field_mask
 from utilities.globals import ds_client, project, log_client, LOG_LEVELS
+
+__author__ = "Andrew Bomberger"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Andrew Bomberger"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Philip Huff"
+__email__ = "pdhuff@ualr.edu"
+__status__ = "Production"
 
 
 class IotManager(object):
@@ -27,7 +34,7 @@ class IotManager(object):
         TEST = 'TEST'
 
     def get_iot_device(self, device_id):
-        """Sends request to IoT core to retrieve information on a single device"""
+        """Sends request to IoT core to retrieve information on a single device."""
         device_path = self.iot_client.device_path(project, self.cloud_region, self.registry_id, device_id)
         device = self.iot_client.get_device(request={"name": device_path})
         return device.id
@@ -257,7 +264,7 @@ class IotManager(object):
 
         def __dict__(self):
             if self.status in self.messages:
-                return {'status': self.status, 'message': self.messages[self.status], 'error': self.err}
-            return {'status': self.status, 'message': self.err, 'error': self.err}
+                return {'status': self.status, 'message': self.messages[self.status], 'error': str(self.err)}
+            return {'status': self.status, 'message': str(self.err), 'error': str(self.err)}
 
 # [ eof ]
