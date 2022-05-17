@@ -19,6 +19,13 @@
         }
     })
     $(document).ready(function(){
+        $('a[data-toggle="tab"]').on('show.bs.tab', function(e){
+            localStorage.setItem('activeTab', $(e.target).attr('href'));
+        });
+        var activeTab = localStorage.getItem('activeTab');
+        if (activeTab){
+            $('#admin-tabs a[href="' + activeTab + '"]').tab('show');
+        }
         //Convert timestamps to readable format
                
 
@@ -52,7 +59,31 @@
             let target = $(e.target).attr('href');
             get_active_workouts();
         })
-        
+        $('#iot_management_tab').on('shown.bs.tab', function(e){
+            let target = $(e.target).attr('href');
+            get_iot_devices();
+        })
+        $('#register_device').on('submit', function(event){
+            event.preventDefault();
+            var formData = new FormData(this);
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('admin.admin_api.register_iot_device') }}",
+                data: formData,
+                dataType: 'json',
+                contentType: false,
+                processData: false,
+                success: function (data){
+                    console.log(data);
+                    if (data.status === 200){
+                        window.location.reload();
+                    }
+                    else {
+                        $('#register-device-err').append(data.error);
+                    }
+                }
+            });
+        });
     })
     
     function create_server_group(instance_list){
@@ -60,7 +91,12 @@
         add_image_options(server_div, {{ instance_list|safe }});
     }
 
-    //add_image_options({{ image_list|safe }})
+    function device_id_regex() {
+        // validates register device_id form input
+        var device_id = document.getElementById("register_device_id").value
+        let dID_regex = /^cyber-arena-\d\d\d\d$/i;
+        return dID_regex.test(device_id);
+    }
 </script>
 <style>
     .user_group{
@@ -165,15 +201,19 @@
         width:auto;
         margin-left: 1em;
     }
-
+   .iot_textarea {
+        overflow-y: scroll;
+        resize: none;
+    }
 </style>
 
 
 <h1>Administrator Controls</h1>
 
 <div id="admin_container" class="row" style="visibility: hidden;margin-bottom:1em;">
-    <div class="nav flex-column col-2 nav-pills">
+    <div id='admin-tabs' class="nav flex-column col-2 nav-pills">
         <a class="nav-link active" id="user_management_tab" data-toggle="tab" href="#user_container" role="tab" aria-controls="user_container" aria-selected="true">User Management</a>
+        <a class="nav-link" id="iot_management_tab" data-toggle="tab" href="#iot_container" role="tab" aria-controls="iot_container" aria-selected="false">IoT Management</a>
         <a class="nav-link" id="maintenance_tab" data-toggle="tab" href="#maintenance_container" role="tab" aria-controls="maintenance_container" aria-selected="false">Maintenance</a>
         <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
         <a class="nav-link" id="workout_creation_tab" data-toggle="tab" href="#workout_creation_container" role="tab" aria-controls="workout_creation_container" aria-selected="false">Workout Management</a>

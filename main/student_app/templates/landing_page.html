@@ -363,6 +363,12 @@ body {font-family: Arial, Helvetica, sans-serif;}
                     </form>
                 </div>
             {% endif %}
+            {% if build_type == 'container' %}
+                <a style="width:100%" class="btn" id="container_workout_link"
+                href="{{container_url}}/{{workout.key.name}}"
+                target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
+            {% else %}
+                <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">ENTER WORKOUT!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -409,29 +415,27 @@ body {font-family: Arial, Helvetica, sans-serif;}
                             </div>
                         </form>
                     </div>
-
                     {% if is_expired == False %}
                         {{ nuke.nukeButton(workout.key.name|string) }}
                     {% endif %}
                 {% endif %}
+            {% endif %}
             {% if workout['registration_required'] %}
                 <hr><a href="/student/home" class="btn">Home</a>
             {% endif %}
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
-
             <div id='workout_info' class='container' style="margin:0;">
                 <h2>Welcome to your {{ workout['workout_name'] }} workout!</h2>
                 <p>{{ description }}</p>
-                <p>Need help with your workout? Check the <a href="/faq">FAQ page</a> or the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
                 {% if is_expired %}
                     <p><b>*This workout has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
                 {% endif %}
                 {% if workout['student_instructions_url'] %}
                     <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
                 {% endif %}
-                <div  id='login-info' style="margin: 20px 0 0;">
-                    {% if build_type == "compute" %}
+                {% if build_type == "compute" %}
+                    <div  id='login-info' style="margin: 20px 0 0;">
                         <h2>Workout Login</h2>
                         {% if "workout_credentials" in workout %}
                             {% for credential in workout["workout_credentials"]%}
@@ -441,93 +445,84 @@ body {font-family: Arial, Helvetica, sans-serif;}
                             <p>Workout Username: {{workout['workout_user']}}</p>
                             <p>Workout Password: {{workout['workout_password']}}</p>
                         {% endif %}
-                    {% endif %}
+                    </div> <!--Workout info container-->
+                    <br>
 
-                </div> <!--Workout info container-->
-                <br>
-                
-                <h2>Workout Servers</h2>
-                {% if build_type == 'container' %}
-                    <a style="width:50%" class="btn" id="container_workout_link"
-                    href="{{container_url}}/{{workout.key.name}}"
-                    target="_blank" rel="noopener noreferrer">Enter your workout!</a>
-                {% else %}
-                    <a style="width:50%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">Enter your workout!</a>
-                <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
-                    <tr>
-                        <th>Server Name</th>
-                        <th>IP</th>
-                        <th>Server State</th>
-                        <th>Operations</th>
-                        <th>Snapshots</th>
-                    </tr>
-                {% for server in servers %}
-                    <tr>
-                        <td>{{server['name']}}</td>
-                        <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
-                        <td>{{server['state']}}</td>
-                        <td>
-                            <div class="server_control_container" id='{{server["name"]}}_operations'>
-                            <div class="server_control_container" id='{{server["name"]}}_operations'>
-                                <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
-                                <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
-                                <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
-                            </div>
-                        </td>
-                        <td>
+                    <h2>Workout Servers</h2>
+
+                    <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
+                        <tr>
+                            <th>Server Name</th>
+                            <th>IP</th>
+                            <th>Server State</th>
+                            <th>Operations</th>
+                            <th>Snapshots</th>
+                        </tr>
+                    {% for server in servers if not 'guacamole' in server['name']%}
+                        <tr>
+                            <td>{{server['name']}}</td>
+                            <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
+                            <td>{{server['state']}}</td>
+                            <td>
+                                <div class="server_control_container" id='{{server["name"]}}_operations'>
+                                <div class="server_control_container" id='{{server["name"]}}_operations'>
+                                    <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
+                                    <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
+                                    <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
+                                </div>
+                            </td>
+                            <td>
                             {% if 'guacamole' not in server['name'] %}
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{server['name']}}_snapshot_modal">
-                                Manage Snapshots
-                            </button>
-                            <div class="modal fade" id="{{server['name']}}_snapshot_modal" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Snapshot Management: {{server.key.name}}</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            {% if 'snapshots' in server and server['snapshots']%}
-                                                <!-- {{server['snapshots']}} -->
-                                                <div id="{{server.key.name}}_snapshot_restore">
-                                                    <table class="table">
-                                                        <tr>
-                                                            <th>Snapshot Name</th>
-                                                            <th>Creation Date</th>
-                                                        </tr>
-                                                        {% for snapshot in server['snapshots'] | sort(attribute='creation_date') %}
-                                                            <tr>
-                                                                <td>{{snapshot['snapshot_name']}}</td>
-                                                                <td class="snapshot_time">{{snapshot['creation_date']}}</td>
-                                                            </tr>
-                                                        {% endfor %}
-                                                        
-                                                    </table>
-                                                    <a class="btn" href="#" onclick="server_action('RESTORE', '{{server.key.name}}')">Restore</a>
-                                                </div>
-                                            {% endif %}
-                                            <div id="{{server.key.name}}_new_snapshot" style="margin-top: 1em;">
-                                                <a href="#" class="btn" onclick="server_action('SNAPSHOT', '{{server.key.name}}')">Create New Snapshot</a>
-                                                <p><small>Snapshots are automatically created at midnight. Creating a new snapshot will overwrite the previous one.</small></p>
+                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{server['name']}}_snapshot_modal">
+                                    Manage Snapshots
+                                </button>
+                                <div class="modal fade" id="{{server['name']}}_snapshot_modal" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Snapshot Management: {{server.key.name}}</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
                                             </div>
-                                        </div>
-                                        <div class="modal-footer" style="justify-content:center;">
-                                            <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                            <div class="modal-body">
+                                                {% if 'snapshots' in server and server['snapshots']%}
+                                                    <!-- {{server['snapshots']}} -->
+                                                    <div id="{{server.key.name}}_snapshot_restore">
+                                                        <table class="table">
+                                                            <tr>
+                                                                <th>Snapshot Name</th>
+                                                                <th>Creation Date</th>
+                                                            </tr>
+                                                            {% for snapshot in server['snapshots'] | sort(attribute='creation_date') %}
+                                                                <tr>
+                                                                    <td>{{snapshot['snapshot_name']}}</td>
+                                                                    <td class="snapshot_time">{{snapshot['creation_date']}}</td>
+                                                                </tr>
+                                                            {% endfor %}
+
+                                                        </table>
+                                                        <a class="btn" href="#" onclick="server_action('RESTORE', '{{server.key.name}}')">Restore</a>
+                                                    </div>
+                                                {% endif %}
+                                                <div id="{{server.key.name}}_new_snapshot" style="margin-top: 1em;">
+                                                    <a href="#" class="btn" onclick="server_action('SNAPSHOT', '{{server.key.name}}')">Create New Snapshot</a>
+                                                    <p><small>Snapshots are automatically created at midnight. Creating a new snapshot will overwrite the previous one.</small></p>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer" style="justify-content:center;">
+                                                <button type="button" class="btn" data-dismiss="modal">Close</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                             {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-
+                            </td>
+                        </tr>
+                    {% endfor %}
                 </table>
                 {% endif %}
                 <br>
-                
                 {% if score %}
                     <p>Assessment Results: {{ score }}</p>
                     <p>*Results may not be final</p>
@@ -588,7 +583,10 @@ body {font-family: Arial, Helvetica, sans-serif;}
                             {% endfor %}
                         {% endif %}
                         </div>
-                        
+                    <p>Need help with your workout? Check the <a href="/faq">FAQ page</a></p>
+        {% if workout['type'] %}
+        <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+        {% endif %}
                     <button id="surveyBtn" class="survey_btn">Complete Survey</button>
 
                     <div id="surveyModal" class="modal">
@@ -614,4 +612,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
         </div>
     </div> <!--Main Container-->
 </div>
+
 {% endblock %}
+

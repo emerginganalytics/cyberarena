@@ -3,6 +3,7 @@ from flask import abort, Blueprint, jsonify, render_template, redirect, request,
 from utilities.datastore_functions import *
 from utilities.globals import AdminActions, auth_config, compute, dns_suffix, ds_client, log_client, logger, LOG_LEVELS, \
     workout_token, post_endpoint, main_app_url, project, region, zone
+from utilities.iot_manager import IotManager
 from utilities.pubsub_functions import *
 from utilities.workout_validator import WorkoutValidator
 from utilities.iot_manager import IotManager
@@ -29,7 +30,6 @@ def admin_page():
         for instance in machine_instances['items']:
             if 'name' in instance:
                 instance_list.append(str(instance['name']))
-
 
     if request.method == "POST":
         response = {

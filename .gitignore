@@ -22,3 +22,4 @@ design-files/private/
 /build-files/workout-instructions/teacher-instructions/needs-encrypted/*.pdf
 /local_files/
 /test.py
+/cloud-functions/admin_scripts/temp/

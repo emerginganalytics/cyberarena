@@ -110,7 +110,7 @@ def server_build(server_name):
     while not build_success and i < 5:
         workout_globals.refresh_api()
         try:
-            if server['add_disk']:
+            if server.get('add_disk', None):
                 try:
                     image_config = {"name": server_name + "-disk", "sizeGb": server['add_disk'],
                                     "type": "projects/" + project + "/zones/" + zone + "/diskTypes/pd-ssd"}

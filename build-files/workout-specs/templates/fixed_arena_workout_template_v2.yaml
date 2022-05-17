@@ -1,0 +1,30 @@
+# This template provides an overview of the YAML specification for Cyber Arena
+# simulation configurations. Simulations do not have an expiration date and are intended to function more as a range.
+version: '2'
+
+build_type: fixed_arena_workout
+
+fixed_arena: # Name of the fixed arena specification the workout associates with
+
+summary:
+  name: # Name displayed on the web application
+  description: # Description displayed on the web application
+  teacher_instructions_link: # A link to instructions for teachers
+  student_instructions_link: # A link to instructions for students
+  hourly_cost: # Additional hourly cost
+  author: # Author of the fixed arena workout
+
+student_entry:
+  network: # name of the network to place student servers
+  servers:
+    - name: # name of the server to use for students
+      image: # image to use for student machines
+      machine_type: # machine type (e.g., e1-standard1)
+      interactive_protocol: # rdp or vnc
+      username: # username to use when logging in
+      password: # password to use when logging in
+
+servers: # Servers to turn on for the workout.
+  - # list of server names
+
+assessment: # Assessment questions for the fixed arena workout

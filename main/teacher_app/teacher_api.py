@@ -63,6 +63,7 @@ def change_student_name(workout_id):
     else:
         return False
 
+
 @teacher_api.route('/create_new_class', methods=['POST'])
 def create_new_class():
     if(request.method == 'POST'):

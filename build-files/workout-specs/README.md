@@ -1,6 +1,9 @@
+Specifications are encrypted in the repository. To view or modify them follow the instructions here:
+[Encrypting/Decrypting](docs/build-locker.md). Decrypting the files will place them in a local folder called 
+_needs-encrypted_ in this directory. You can then encrypt the files when you have finished modifying them.
+
 Workout Specification
 ---------------------
-
 Yaml files are used in the UA Little Rock Cyber Gym to specify automatic cloud builds of _workouts_ for students. 
 By using yaml files, one only needs to create the server images you want to replicate and then describe the build 
 according to this specification. Then you can build the same _workout_ for students millions of times.

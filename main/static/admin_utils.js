@@ -94,7 +94,7 @@ function fill_active_workout_table(data){
         //let new_workout = document.createElement('tr')
         var row = add_element("tr", {id: "workout_row_" + data[i]['id']});
 
-        var workout_link = add_element('a', {href: '/admin/workout/' + data[i]['id'], innerHTML: data[i]['id']})
+        var workout_link = add_element('a', {href: '/admin/' + data[i]['id'], innerHTML: data[i]['id']})
         row.appendChild(add_element('td', {innerHTML: workout_link.outerHTML}));
         row.appendChild(add_element('td', {innerHTML: data[i]['type']}));
         if(data[i]['user_email']){
