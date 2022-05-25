@@ -364,19 +364,11 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 </div>
             {% endif %}
             {% if build_type == 'container' %}
-<<<<<<< Updated upstream
                 <a style="width:100%" class="btn" id="container_workout_link"
                 href="{{container_url}}/{{workout.key.name}}"
                 target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
             {% else %}
                 <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">ENTER WORKOUT!</a>
-=======
-                    <a style="width:100%" class="btn" id="container_workout_link"
-                    href="{{container_url}}/{{workout.key.name}}"
-                    target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
-                {% else %}
-                    <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
->>>>>>> Stashed changes
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -442,7 +434,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 {% if workout['student_instructions_url'] %}
                     <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
                 {% endif %}
-<<<<<<< Updated upstream
                 {% if build_type == "compute" %}
                     <div  id='login-info' style="margin: 20px 0 0;">
                         <h2>Workout Login</h2>
@@ -481,34 +472,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
                                 </div>
                             </td>
                             <td>
-=======
-                <br>
-                
-                <h2>Workout Servers</h2>
-
-                <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
-                    <tr>
-                        <th>Server Name</th>
-                        <th>IP</th>
-                        <th>Server State</th>
-                        <th>Operations</th>
-                        <th>Snapshots</th>
-                    </tr>
-                {% for server in servers if not 'guacamole' in server['name']%}
-                    <tr>
-                        <td>{{server['name']}}</td>
-                        <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
-                        <td>{{server['state']}}</td>
-                        <td>
-                            <div class="server_control_container" id='{{server["name"]}}_operations'>
-                            <div class="server_control_container" id='{{server["name"]}}_operations'>
-                                <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
-                                <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
-                                <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
-                            </div>
-                        </td>
-                        <td>
->>>>>>> Stashed changes
                             {% if 'guacamole' not in server['name'] %}
                                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{server['name']}}_snapshot_modal">
                                     Manage Snapshots
