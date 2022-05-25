@@ -1,3 +1,6 @@
+# About   
+This folder contains a series of useful Python and Bash scripts to help make the initial setup and maintainence the Iot device a little easier.   
+
 ## image_to_pixmap.py   
 
 This script is designed to take the image directories specified in either the config.yaml or by argument, generate a pixel map from those images for the SenseHat.
@@ -37,8 +40,8 @@ Example:
 
 ## checkState   
 
-A simple bash script used to check and maintain SSH keys and Google's root.pem   
+A simple bash script used to check and maintain SSH keys and Google's root.pem    
 
-## wpaconf.sh 
+## iotctl.sh   
 
-Allows you to quickly setup wireless networks and pull SSH keys. Created to help speed up the mass imagagin process   
+Allows you to quickly setup wireless networks, update and pull ssh keys, and check service and telemetry logs   
