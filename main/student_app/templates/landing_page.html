@@ -368,7 +368,7 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 href="{{container_url}}/{{workout.key.name}}"
                 target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
             {% else %}
-                <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/" target="_blank">ENTER WORKOUT!</a>
+                <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -435,17 +435,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
                     <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
                 {% endif %}
                 {% if build_type == "compute" %}
-                    <div  id='login-info' style="margin: 20px 0 0;">
-                        <h2>Workout Login</h2>
-                        {% if "workout_credentials" in workout %}
-                            {% for credential in workout["workout_credentials"]%}
-                                <p>Credentials for user <b>{{ credential["workout_user"] }}</b>: {{ credential["workout_password"] }}</p>
-                            {% endfor %}
-                        {% else %}
-                            <p>Workout Username: {{workout['workout_user']}}</p>
-                            <p>Workout Password: {{workout['workout_password']}}</p>
-                        {% endif %}
-                    </div> <!--Workout info container-->
                     <br>
 
                     <h2>Workout Servers</h2>
