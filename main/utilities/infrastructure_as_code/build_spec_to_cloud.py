@@ -170,7 +170,8 @@ class BuildSpecToCloud:
         if self.build_type == BuildTypes.ARENA:
             CompetitionServerSpecToCloud(unit=new_unit, workout_ids=workout_ids,
                                          workout_specs=self.cloud_ready_specs).commit_to_cloud()
-
+        # Update class unit list with new unit
+        self._cloud_update_class()
         return {
             'unit_id': self.unit_id,
             'build_type': self.build_type
