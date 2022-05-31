@@ -7,7 +7,7 @@ When you first open your workout landing page, the workout status will probably 
 
 ## Logging in
 
-After starting, first, copy the workout password and remember the username, and then click the button to enter your workout. A new tab will open to a login screen from Apache Guacamole. Here, you’ll enter your username and copy your password. After a few seconds, your desktop will show up. Now you can start your workout!
+After starting, first, copy the workout password and remember the username, and then click the button to enter your workout. After a few seconds, your desktop will show up. Now you can start your workout!
 
 ## Performing Your Workout
 
