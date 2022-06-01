@@ -61,6 +61,8 @@ class ServerSpecToCloud:
         self.add_disk = server_spec.get("add_disk", None)
         self.options = server_spec.get("options", None)
         self.snapshot = server_spec.get('snapshot', None)
+        self.nested_vm = server_spec.get('nested_virtualization', False)
+
         # Add the network configuration
         self.networks = []
         for n in server_spec['nics']:
@@ -144,17 +146,16 @@ class ServerSpecToCloud:
                 config['metadata']['items'].append({"key": "ssh-keys", "value": self.sshkey})
             else:
                 config['metadata'] = {'items': [{"key": "ssh-keys", "value": self.sshkey}]}
-
         if self.network_routing:
             config["canIpForward"] = True
-
         if self.add_disk:
             new_disk = {"mode": "READ_WRITE", "boot": False, "autoDelete": True,
                         "source": "projects/" + project + "/zones/" + zone + "/disks/" + self.server_name + "-disk"}
             config['disks'].append(new_disk)
-
         if self.min_cpu_platform:
             config['minCpuPlatform'] = self.min_cpu_platform
+        if self.nested_vm:
+            config['advancedMachineFeatures'] = {'enableNestedVirtualization': self.nested_vm}
 
         new_server = datastore.Entity(key=ds_client.key('cybergym-server', self.server_name),
                                       exclude_from_indexes=['guacamole_startup_script'])
