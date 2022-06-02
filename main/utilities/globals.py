@@ -1,3 +1,4 @@
+from enum import Enum
 import googleapiclient.discovery
 import logging
 from google.cloud import datastore, runtimeconfig, storage
@@ -226,3 +227,23 @@ class BuildTypes:
 
 class ComputeBuildTypes:
     MACHINE_IMAGE = 'machine-image'
+
+
+class BuildConstants:
+    class BuildType(str, Enum):
+        ARENA = "arena"
+        FIXED_ARENA = "fixed_arena"
+        WORKOUT = "workout"
+
+    class Protocols(str, Enum):
+        RDP = "rdp"
+        VNC = "vnc"
+
+    class Firewalls(str, Enum):
+        FORTINET = "fortinet"
+        VYOS = "vyos"
+
+    class TransportProtocols(str, Enum):
+        TCP = "tcp"
+        UDP = "udp"
+        ICMP = "icmp"

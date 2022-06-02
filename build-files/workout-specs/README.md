@@ -8,7 +8,7 @@ Yaml files are used in the UA Little Rock Cyber Gym to specify automatic cloud b
 By using yaml files, one only needs to create the server images you want to replicate and then describe the build 
 according to this specification. Then you can build the same _workout_ for students millions of times.
 
-The files are uploaded to a Google Cloud bucket, in which the web application looks. This way, workout builders do not 
+The files are uploaded to the Google Cloud bucket <project-name>_cloudbuild/yaml-build-files/, in which the web application looks. This way, workout builders do not 
 need to change the application. They only need to specify the YAML. We are currently beta testing an interface to build
  the YAML specifications. The following sections describe the YAML specification.
 
