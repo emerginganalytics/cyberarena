@@ -1,26 +1,16 @@
 # This template provides an overview of the YAML specification for Cyber Arena
 # simulation configurations. Simulations do not have an expiration date and are intended to function more as a range.
+id: # ID of the build to use. This will be the entity ID for the build and the prefix for all named resources
 version: '2'
-
 build_type: fixed_arena
 
 summary:
   name: # Name displayed on the web application
   description: # Description displayed on the web application
-  teacher_instructions_link: # A link to instructions for teachers
-  student_instructions_link: # A link to instructions for students
+  teacher_instructions_url: # A link to instructions for teachers
+  student_instructions_url: # A link to instructions for students
   hourly_cost: # Estimated cost per hour to run this simulation
   author: # Author of the simulation
-
-student_entry:
-  network: # name of the network to place student servers (must be included below)
-  servers:
-    - name: # name of the server to use for students
-      image: # image to use for student machines
-      machine_type: # machine type (e.g., e1-standard1)
-      interactive_protocol: # rdp or vnc
-      username: # username to use when logging in
-      password: # password to use when logging in
 
 networks:
   - name: # Network name (e.g. external-network, dmz-network, etc.) Make sure it is unique in the environment
@@ -32,20 +22,27 @@ servers: # All of the servers associated with this simulation
   - name: # Name of the server
     image: # image to use for building
     machine_type: # machine type (e.g., e1-standard1)
+    human_interaction: # credentials needed for interaction
+      - display: # boolean whether to include this as a display
+        protocol: # rdp or vnc
+        username: # username to use when logging in
+        password: # password to use when logging in
+        domain: # domain
+        security_mode: # Used for guacamole configuration with RDP
     nics:
       - network: # Network name included from network spec above
-        internal_IP: # Designated internal IP address
-        subnet: default
-        external_NAT: # True or False, should this server get out to the Internet
+        internal_ip: # Designated internal IP address
+        subnet_name: default
+        external_nat: # True or False, should this server get out to the Internet
 
 firewalls: # The firewalls connecting the various networks
   - name: # name of the firewall
     type: # [fortinet, vyos]
     gateway: # The gateway network used for routing through the firewall
     networks:
-      - network: # e.g., external-network
-      - network: # internal-network
-      - network: # dmz-network
+      - # e.g., external-network
+      - # e.g., internal-network
+      - # e.g., dmz-network
 
 # List all firewall rules. Multiple rules may be listed using YAML block sequence format.
 firewall_rules:
