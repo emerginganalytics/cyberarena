@@ -25,8 +25,12 @@ class DataStoreManager:
         else:
             self.key = None
 
-    def get(self):
-        return self.ds_client.get(self.key)
+    def get(self, key_type=None, key_id=None):
+        if key_type:
+            temp_key = self.ds_client.key(key_type, key_id)
+            return self.ds_client.get(temp_key)
+        else:
+            return self.ds_client.get(self.key)
 
     def put(self, obj, key_type=None, key_id=None):
         if key_type:
@@ -46,5 +50,5 @@ class DataStoreManager:
 
     def get_servers(self):
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
-        query_servers.add_filter('workout', '=', self.key_id)
+        query_servers.add_filter('build_id', '=', self.key_id)
         return list(query_servers.fetch())

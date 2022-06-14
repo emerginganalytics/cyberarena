@@ -10,7 +10,7 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
-from cloud_fn_utilities.state_manager import StateManager
+from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 
@@ -25,21 +25,21 @@ __status__ = "Testing"
 
 
 class FixedArenaBuild:
-    def __init__(self, fixed_arena_id, debug=False):
+    def __init__(self, build_id, debug=False):
+        self.fixed_arena_id = build_id
         self.debug = debug
         self.env = CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
-        self.s = StateManager.States
-        self.pubsub_manager = PubSubManager(PubSub.Topics.MANAGE_SERVER)
-        self.state_manager = StateManager(build_type=DatastoreKeyTypes.FIXED_ARENA, initial_build_id=fixed_arena_id)
-        self.vpc_manager = VpcManager(build_id=fixed_arena_id)
+        self.s = FixedArenaStateManager.States
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.state_manager = FixedArenaStateManager(initial_build_id=self.fixed_arena_id)
+        self.vpc_manager = VpcManager(build_id=self.fixed_arena_id)
         self.firewall_manager = FirewallManager()
-        self.fixed_arena_id = fixed_arena_id
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.fixed_arena_id)
         self.fixed_arena = self.ds.get()
         if not self.fixed_arena:
-            logging.error(f"The datastore record for {fixed_arena_id} no longer exists!")
+            logging.error(f"The datastore record for {self.fixed_arena_id} no longer exists!")
             raise LookupError
 
     def build_fixed_arena(self):
@@ -50,7 +50,7 @@ class FixedArenaBuild:
             self.state_manager.state_transition(self.s.BUILDING_NETWORKS)
             for network in self.fixed_arena['networks']:
                 self.vpc_manager.build(network_spec=network)
-            self.vpc_manager.build(network_spec=BuildConstants.GATEWAY_NETWORK)
+            self.vpc_manager.build(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
             self.state_manager.state_transition(self.s.COMPLETED_NETWORKS)
 
         # Servers are built asynchronously and kicked off through pubsub messages.
@@ -63,13 +63,13 @@ class FixedArenaBuild:
                 if self.debug:
                     ComputeManager(server_name=server_name).build()
                 else:
-                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.Actions.BUILD_SERVER,
+                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.SERVER,
                                             server_name=server_name)
             # Don't forget to build the Display Proxy Server!
             if self.debug:
                 DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena).build()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.Actions.BUILD_DISPLAY_PROXY,
+                self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.DISPLAY_PROXY,
                                         key_type=DatastoreKeyTypes.FIXED_ARENA, build_id=self.fixed_arena_id)
 
         if self.state_manager.get_state() < self.s.BUILDING_FIREWALL_RULES.value:

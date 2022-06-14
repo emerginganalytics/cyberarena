@@ -4,7 +4,9 @@ from enum import Enum
 class DatastoreKeyTypes(str, Enum):
     CYBERGYM_WORKOUT = 'cybergym-workout'
     FIXED_ARENA = 'fixed-arena'
+    FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
     SERVER = 'cybergym-server'
+    ADMIN_INFO = 'cybergym-admin-info'
 
 
 class BuildConstants:
@@ -37,39 +39,65 @@ class BuildConstants:
 
     class MachineImages:
         GUACAMOLE = "image-labentry"
+        FORTIMANAGER = "image-fortimanager"
 
-    class ReservedIPAddresses:
-        DISPLAY_SERVER = '10.1.0.3'
+    class AssessmentTypes(str, Enum):
+        PERCENTAGE = "percentage"
+        LEVEL = "level"
 
-    GATEWAY_NETWORK = {
-        'name': 'gateway',
-        'subnets':
-            {
-                'name': 'default',
-                'ip_subnet': '10.1.0.0/24'
-            }
-    }
+    class QuestionTypes(str, Enum):
+        AUTO = "auto"
+        INPUT = "input"
+        UPLOAD = "upload"
 
     class ServerBuildType:
         MACHINE_IMAGE = "machine-image"
 
+    class Networks:
+        class Reservations:
+            DISPLAY_SERVER = '10.1.0.3'
+            FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
+        GATEWAY_NETWORK_NAME = 'gateway'
+        GATEWAY_NETWORK_CONFIG = {
+            'name': GATEWAY_NETWORK_NAME,
+            'subnets': [
+                {
+                    'name': 'default',
+                    'ip_subnet': '10.1.0.0/24'
+                }
+            ]
+        }
+
 
 class PubSub:
     class Topics(str, Enum):
-        MANAGE_SERVER = 'manage-server'
-        DELETE_EXPIRED = 'maint-del-tmp-systems'
-        BUILD_WORKOUT = 'build-workouts'
-        BUILD_ARENA = 'build-arena'
-        BUILD_FIXED_ARENA = "build-fixed-arena"
+        CYBER_ARENA = "cyber-arena"
 
-    class ServerActions(str, Enum):
-        BUILD = 'BUILD'
-        START = 'START'
-        DELETE = 'DELETE'
-        STOP = 'STOP'
-        REBUILD = 'REBUILD'
-        SNAPSHOT = 'SNAPSHOT'
-        RESTORE = 'RESTORE'
+    class Handlers(str, Enum):
+        BUDGET = "BUDGET"
+        BUILD = "BUILD"
+        MAINTENANCE = "MAINTENANCE"
+        ADMIN = "ADMIN"
+        IOT = "IOT"
+        BOTNET = "BOTNET"
+
+    class BuildActions(Enum):
+        WORKOUT = 0
+        ARENA = 1
+        FIXED_ARENA = 2
+        FIXED_ARENA_WORKOUT = 3
+        SERVER = 4
+        DISPLAY_PROXY = 5
+        FIREWALL_SERVER = 6
+        FIXED_ARENA_WORKSPACE_PROXY = 7
+
+    class MaintenanceActions(Enum):
+        START_SERVER = 5
+        DELETE_SERVER = 6
+        STOP_SERVER = 7
+        REBUILD_SERVER = 8
+        SNAPSHOT_SERVER = 9
+        RESTORE_SERVER = 10
 
 class Buckets:
     class Folders(str, Enum):

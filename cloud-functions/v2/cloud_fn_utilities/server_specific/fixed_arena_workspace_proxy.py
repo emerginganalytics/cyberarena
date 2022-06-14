@@ -23,51 +23,50 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class DisplayProxy:
-    def __init__(self, build_id, build_spec):
+class FixedArenaWorkspaceProxy:
+    def __init__(self, build_id, workspace_ids):
         """
         Creates a guacamole server with the configured connections for proxying servers used for displays
         @param build_id: The build ID used mainly for naming objects in the cloud
         @type build_id: str
-        @param build_spec: The full build spec
-        @type build_spec: DatastoreEntity
+        @param workspace_ids: The auto-generated workspace IDs for the build. Used for storing the proxy connection info
+        @type build_spec: List
         """
         self.env = CloudEnv()
-        self.server_name = f"{build_id}-display-guacamole-server"
+        self.server_name = f"{build_id}-display-workspace-server"
         self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None
         self.build_id = build_id
-        self.build_spec = build_spec
-        self.server_specs = build_spec['servers']
+        self.workspace_ids = workspace_ids
         self.guac_connections = []
         self.ds = DataStoreManager()
         self.guac = GuacamoleConfiguration(self.build_id)
 
     def build(self):
-        build_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
-        build_record = build_ds.get()
         proxy_configs = []
-        proxy_connections = []
-        for server in self.server_specs:
-            human_interaction = server.get('human_interaction', None)
-            if human_interaction:
-                for connection in human_interaction:
-                    if connection.get('display', False):
-                        server_ip = server['nics'][0]['internal_ip']
-                        proxy_config = self.guac.prepare_guac_connection(connection=connection, server_ip=server_ip)
-                        proxy_configs.append(proxy_config)
-                        connection = {
-                            'server': server['name'],
-                            'internal_ip_address': server_ip,
-                            'username': proxy_config['workspace_username'],
-                            'password': proxy_config['workspace_password']
-                        }
-                        proxy_connections.append(connection)
-
-        build_record['proxy_connections'] = proxy_connections
-        build_ds.put(build_record)
+        for ws_id in self.workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_record = ws_ds.get()
+            proxy_connections = []
+            for server in ws_record['student_servers']:
+                human_interaction = server.get('human_interaction', None)
+                if human_interaction:
+                    for connection in human_interaction:
+                        if connection.get('display', False):
+                            server_ip = server['nics'][0]['internal_ip']
+                            proxy_config = self.guac.prepare_guac_connection(connection=connection, server_ip=server_ip)
+                            proxy_configs.append(proxy_config)
+                            connection = {
+                                'server': server['name'],
+                                'internal_ip_address': server_ip,
+                                'username': proxy_config['workspace_username'],
+                                'password': proxy_config['workspace_password']
+                            }
+                            proxy_connections.append(connection)
+            ws_record['proxy_connections'] = proxy_connections
+            ws_ds.put(ws_record)
 
         guac_startup_script = self.guac.get_guac_startup_script(proxy_configs)
         server_spec = {
