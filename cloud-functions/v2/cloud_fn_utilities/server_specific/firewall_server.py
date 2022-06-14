@@ -40,8 +40,8 @@ class FirewallServer:
         self.full_build_spec = full_build_spec
         self.firewall_spec = full_build_spec['firewalls']
         # Add the gateway network here for the firewall configurations
-        self.full_build_spec['networks'].append(BuildConstants.GATEWAY_NETWORK)
-        self.firewall_spec[0]['networks'].append(BuildConstants.GATEWAY_NETWORK['name'])
+        self.full_build_spec['networks'].append(BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
+        self.firewall_spec[0]['networks'].append(BuildConstants.Networks.GATEWAY_NETWORK_NAME)
         self.firewall_server_spec = {}
         self.dst_ranges = {}
         for network in self.full_build_spec['networks']:
@@ -130,7 +130,7 @@ class FirewallServer:
     def _add_routes(self, firewall_spec):
         routes = []
         for network in firewall_spec['networks']:
-            if network != BuildConstants.GATEWAY_NETWORK['name']:
+            if network != BuildConstants.Networks.GATEWAY_NETWORK_NAME:
                 new_route = {
                     'name': f"default-{network}-through-firewall",
                     'network': network,

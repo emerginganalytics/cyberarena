@@ -1,11 +1,11 @@
 import time
 from datetime import datetime
-import calendar
 from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes
+from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -50,6 +50,7 @@ class FixedArenaStateManager:
 
     def __init__(self, initial_build_id=None):
         self.s = FixedArenaStateManager.States
+        self.server_states = ServerStateManager.States
         if initial_build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=initial_build_id)
             self.build = self.ds.get()
@@ -104,7 +105,7 @@ class FixedArenaStateManager:
             servers_finished = True
             servers = self.ds.get_servers()
             for server in servers:
-                if server.get('state', None) != self.ServerStates.STOPPED:
+                if server.get('state', None) != self.server_states.STOPPED:
                     servers_finished = False
             if not servers_finished:
                 time.sleep(sleep_time)

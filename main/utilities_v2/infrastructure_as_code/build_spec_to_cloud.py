@@ -9,8 +9,8 @@ from datetime import datetime
 from marshmallow import ValidationError
 from google.cloud import logging_v2
 
-from v2.cloud_fn_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub
-from utilities_v2.infrastructure_as_code.schema import FixedArenaSchema
+from utilities_v2.globals import BuildConstants, DatastoreKeyTypes, PubSub
+from utilities_v2.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaWorkoutSchema
 from utilities_v2.gcp.cloud_env import CloudEnv
 from utilities_v2.gcp.datastore_manager import DataStoreManager
 from utilities_v2.gcp.pubsub_manager import PubSubManager
@@ -40,16 +40,23 @@ class BuildSpecToCloud:
             raise ValidationError
 
         cyber_arena_spec['creation_timestamp'] = datetime.utcnow().isoformat()
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
+        self.build_id = cyber_arena_spec['id']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
-            self.build_id = self.cyber_arena_spec['id']
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
-            self.pubsub_manager = PubSubManager(topic=PubSub.Topics.BUILD_FIXED_ARENA)
+            self.action = PubSub.BuildActions.FIXED_ARENA.value
+        elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_WORKOUT.value:
+            self.cyber_arena_spec = FixedArenaWorkoutSchema().load(cyber_arena_spec)
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT,
+                                                      key_id=self.build_id)
+            self.action = PubSub.BuildActions.FIXED_ARENA_WORKOUT.value
         self.debug = debug
 
 
     def commit(self):
         self.datastore_manager.put(self.cyber_arena_spec)
         if not self.debug:
-            self.pubsub_manager.msg(build_id=self.build_id)
+            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=self.action,
+                                    fixed_arena_workout_id=self.build_id)

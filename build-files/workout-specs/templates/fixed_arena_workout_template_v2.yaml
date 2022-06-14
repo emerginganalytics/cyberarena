@@ -4,7 +4,7 @@ version: '2'
 
 build_type: fixed_arena_workout
 
-fixed_arena: # Name of the fixed arena specification the workout associates with
+fixed_arena_id: # Name of the fixed arena specification the workout associates with
 
 summary:
   name: # Name displayed on the web application
@@ -14,17 +14,20 @@ summary:
   hourly_cost: # Additional hourly cost
   author: # Author of the fixed arena workout
 
-student_entry:
-  network: # name of the network to place student servers
-  servers:
-    - name: # name of the server to use for students
-      image: # image to use for student machines
-      machine_type: # machine type (e.g., e1-standard1)
-      interactive_protocol: # rdp or vnc
-      username: # username to use when logging in
-      password: # password to use when logging in
+# Note that for student_servers, the networking fields are automatically determined.
+student_servers:
+  - name: # Name of the server
+    image: # image to use for building
+    machine_type: # machine type (e.g., e1-standard1)
+    human_interaction: # credentials needed for interaction
+      - display: # boolean whether to include this as a display
+        protocol: # rdp or vnc
+        username: # username to use when logging in
+        password: # password to use when logging in
+        domain: # domain
+        security_mode: # Used for guacamole configuration with RDP
 
-servers: # Servers to turn on for the workout.
+fixed_arena_servers: # Servers to turn on for the workout.
   - # list of server names
 
 assessment: # Assessment questions for the fixed arena workout

@@ -33,3 +33,5 @@ class CloudEnv:
             self.dnszone = 'cybergym-public'
         self.main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
         self.guac_db_password = myconfig.get_variable('guac_password').value.decode("utf-8")
+        max_workspaces = myconfig.get_variable('max_workspaces')
+        self.max_workspaces = int(max_workspaces.value.decode("utf-8")) if max_workspaces else 100

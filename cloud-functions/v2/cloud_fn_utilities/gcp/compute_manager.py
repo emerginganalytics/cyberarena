@@ -10,7 +10,7 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.dns_manager import DnsManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.state_manager import StateManager
+from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -38,7 +38,7 @@ class ComputeManager:
         self.env = CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.dns_manager = DnsManager()
-        self.s = StateManager.ServerStates
+        self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_name = server_name
@@ -52,7 +52,7 @@ class ComputeManager:
         :param build_id: ID of the build used for the predicate
         :return: A boolean status on the success of the build
         """
-        state_manager = StateManager(build_type=DatastoreKeyTypes.SERVER, initial_build_id=self.server_name)
+        state_manager = ServerStateManager(initial_build_id=self.server_name)
         state_manager.state_transition(self.s.BUILDING)
         self._add_disks()
         self._add_metadata()
@@ -123,6 +123,50 @@ class ComputeManager:
         logging.info(f'Stopping {self.server_name}')
         self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
         state_manager.state_transition(self.s.STOPPED)
+
+    def start(self):
+        """
+        Starts a server based on the specification in the Datastore entity with name server_name. A guacamole server
+        is also registered with DNS.
+        """
+        state_manager = ServerStateManager(initial_build_id=self.server_name)
+        state_manager.state_transition(self.s.STARTING)
+        i = 0
+        start_success = False
+        while not start_success and i < 5:
+            try:
+                if "delayed_start" in self.server_spec and self.server_spec["delayed_start"]:
+                    time.sleep(30)
+                response = self.compute.instances().start(project=self.env.project, zone=self.env.zone,
+                                                          instance=self.server_name).execute()
+                start_success = True
+                logging.info(f'Sent job to start {self.server_name}, and waiting for response')
+            except BrokenPipeError:
+                i += 1
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                                   operation=response["id"]).execute()
+                success = True
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for starting server {self.server_name}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in trying to start server {self.server_name}')
+            state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
+
+        # If the server is an external proxy, then register its DNS name
+        dns_hostname = self.server_spec.get('dns_hostname', None)
+        if dns_hostname:
+            dns_record = dns_hostname + self.env.dns_suffix + "."
+            self.dns_manager.add_dns_record(dns_record, self.server_name)
+
+        state_manager.state_transition(self.s.RUNNING)
+        logging.info(f"Finished starting {self.server_name}")
 
     def _add_disks(self):
         disks = None
