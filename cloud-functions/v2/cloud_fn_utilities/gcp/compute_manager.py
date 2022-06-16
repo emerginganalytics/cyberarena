@@ -124,7 +124,7 @@ class ComputeManager:
         self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
         state_manager.state_transition(self.s.STOPPED)
 
-    def start(self):
+    def start(self): # should be correct because I did not do it
         """
         Starts a server based on the specification in the Datastore entity with name server_name. A guacamole server
         is also registered with DNS.
@@ -167,6 +167,77 @@ class ComputeManager:
 
         state_manager.state_transition(self.s.RUNNING)
         logging.info(f"Finished starting {self.server_name}")
+
+    def stop(self): # Prbably mostly correct because is a copy of start just running the stop function however unsure about a couple of parts
+        """
+        Stops a server based on the specification in the Datastore entity with name server_name.
+        """
+        state_manager = ServerStateManager(initial_build_id=self.server_name)
+        state_manager.state_transition(self.s.STOPPING)
+        i = 0
+        stop_success = False
+        while not stop_success and i < 0:
+            try:        # need to check for if the server is on.
+                response = self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
+                                                          instance=self.server_name).execute()
+                stop_success = True
+                logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
+            except BrokenPipeError:
+                i += 1
+
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.compute.zoneOperations.wait(project=self.env.project, zone=self.env.zone,
+                                                   operation=response["id"]).execute()
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in trying to stop server {self.server_name}')
+            state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
+
+        state_manager.state_transition(self.s.STOPPED)
+        logging.info(f"Finished stopping {self.server_name}")
+
+    def nuke(self): # Dont beleive is correct because is a copy of start and stop. Does it need to delete multiple servers or just 1?
+        state_manager = ServerStateManager(build_type=DatastoreKeyTypes.SERVER, initial_build_id=self.server_name)
+        state_manager.state_transition(self.s.DELETING_SERVERS)
+        i = 0
+        delete_success = False
+        while not delete_success and i < 0:
+            try:  # need to check for if the server is on.
+                response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
+                                                         instance=self.server_name).execute()
+                delete_success = True
+                logging.info(f'Sent job to delete {self.server_name}, and waiting for response')
+            except BrokenPipeError:
+                i += 1
+
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.compute.zoneOperations.wait(project=self.env.project, zone=self.env.zone,
+                                                 operation=response["id"]).execute()
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for deleteing server {self.server_name}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in trying to delete server {self.server_name}')
+            state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
+
+        state_manager.state_transition(self.s.DELETED)
+        logging.info(f"Finished deleting {self.server_name}")
+
+        # state_manager.state_transition(self.s.STOPPED)
+        # logging.info(f"Finished stopping {self.server_name}")
+        self.build(self)
 
     def _add_disks(self):
         disks = None
