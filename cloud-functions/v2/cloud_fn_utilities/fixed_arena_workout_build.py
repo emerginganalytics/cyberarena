@@ -13,7 +13,7 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
-from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
+from cloud_fn_utilities.state_managers.fixed_arena_workout_states import FixedArenaWorkoutStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
 
@@ -34,14 +34,14 @@ class FixedArenaWorkoutBuild:
         self.env = CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
-        self.s = FixedArenaStateManager.States
+        self.s = FixedArenaWorkoutStateManager.States
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
-        self.state_manager = FixedArenaStateManager(initial_build_id=self.fixed_arena_workout_id)
+        self.state_manager = FixedArenaWorkoutStateManager(initial_build_id=self.fixed_arena_workout_id)
         self.firewall_manager = FirewallManager()
 
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=self.fixed_arena_workout_id)
         self.fixed_arena_workout = self.ds.get()
-        if not self.fixed_arena:
+        if not self.fixed_arena_workout:
             logging.error(f"The datastore record for {self.fixed_arena_workout_id} no longer exists!")
             raise LookupError
         self.fixed_arena_workstations_ids = []
@@ -49,29 +49,24 @@ class FixedArenaWorkoutBuild:
         self.ip_reservations = list(iter_iprange(ip_range[0], ip_range[1]))
         self.next_reservation = 0
 
-    def build_fixed_arena_workout(self):
+    def build(self):
         if not self.state_manager.get_state():
             self.state_manager.state_transition(self.s.START)
 
         # Create datastore records for each workspace under the key type fixed-arena-workout
         self.fixed_arena_workspace_ids = self._create_workspace_records()
 
-        # Start the Fixed Arena servers specified for this build
-        for server in self.fixed_arena_workout['fixed_arena_servers']:
-            server_name = f"{self.fixed_arena_workout['fixed-arena-id']}-{server}"
-            if self.debug:
-                ComputeManager(server_name).start()
-            else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
-                                        action=PubSub.MaintenanceActions.START_SERVER, server_name=server_name)
-
         # Build workspace servers
-        if self.state_manager.get_state() < self.s.BUILDING_SERVERS.value:
-            self.state_manager.state_transition(self.s.BUILDING_SERVERS)
+        if self.state_manager.get_state() <= self.s.BUILDING_WORKSPACE_SERVERS.value:
+            self.state_manager.state_transition(self.s.BUILDING_WORKSPACE_SERVERS)
             for ws_id in self.fixed_arena_workspace_ids:
+                ws_servers = []
                 for server in self.fixed_arena_workout['workspace_servers']:
                     server_name = f"{ws_id}-{server['name']}"
-                    server['build_id'] = ws_id
+                    server['parent_id'] = ws_id
+                    server['parent_build_type'] = self.fixed_arena_workout['build_type']
+                    server['grandparent_id'] = self.fixed_arena_workout_id
+                    server['great_grandparent_id'] = self.fixed_arena_workout['parent_id']
                     if 'nics' not in server:
                         server['nics'] = self._get_workspace_network_config()
                     self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
@@ -80,17 +75,24 @@ class FixedArenaWorkoutBuild:
                     else:
                         self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.SERVER,
                                                 server_name=server_name)
+                    ws_servers.append(server)
+                # Store the server information with IP addresses back with each fixed arena workout before looping
+                ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+                ws_record['servers'] = ws_servers
+                self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
 
             # Now build the Workspace Proxy Server
-            if self.debug:
-                FixedArenaWorkspaceProxy(build_id=self.fixed_arena_workout_id,
-                                         workspace_ids=self.fixed_arena_workspace_ids).build()
-            else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.DISPLAY_PROXY,
-                                        build_id=self.fixed_arena_workout_id,
-                                        workspace_ids=self.fixed_arena_workspace_ids)
+            if self.state_manager.get_state() <= self.s.BUILDING_WORKSPACE_PROXY.value:
+                self.state_manager.state_transition(self.s.BUILDING_WORKSPACE_PROXY)
+                if self.debug:
+                    FixedArenaWorkspaceProxy(build_id=self.fixed_arena_workout_id,
+                                             workspace_ids=self.fixed_arena_workspace_ids).build()
+                else:
+                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.DISPLAY_PROXY,
+                                            build_id=self.fixed_arena_workout_id,
+                                            workspace_ids=self.fixed_arena_workspace_ids)
 
-        if not self.state_manager.are_server_builds_finished():
+        if not self.state_manager.are_server_builds_finished(self.fixed_arena_workspace_ids):
             self.state_manager.state_transition(self.s.BROKEN)
             logging.error(f"Fixed Arena {self.fixed_arena_workout_id}: Timed out waiting for server builds to "
                           f"complete!")
@@ -98,9 +100,38 @@ class FixedArenaWorkoutBuild:
             self.state_manager.state_transition(self.s.READY)
             logging.info(f"Finished building Fixed Arena {self.fixed_arena_workout_id}!")
 
+    def start(self):
+        self.state_manager.state_transition(self.s.START)
+        display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
+        servers_to_start = [display_proxy]
+        for server in self.fixed_arena_workout['fixed_arena_servers']:
+            server_name = f"{self.fixed_arena_workout['fixed-arena-id']}-{server}"
+            servers_to_start.append(server_name)
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_servers = ws_ds.get_servers()
+            for ws_server in ws_servers:
+                servers_to_start.append(ws_server)
+
+        for server in servers_to_start:
+            if self.debug:
+                ComputeManager(server).start()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
+                                        action=PubSub.MaintenanceActions.START_SERVER, server_name=server)
+
+        if not self.state_manager.are_servers_started():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_workout_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.RUNNING)
+            logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
+
+
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()
-        registration_required = self.fixed_arena_workout['workspace_settings'].get('count', False)
+        registration_required = self.fixed_arena_workout['workspace_settings'].get('registration_required', False)
         if registration_required:
             student_list = self.fixed_arena_workout['workspace_settings']['student_list']
             count = min(self.env.max_workspaces, len(student_list))
@@ -111,8 +142,9 @@ class FixedArenaWorkoutBuild:
         for i in range(count):
             id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             workspace_record = {
-                'parent_id': self.fixed_arena_workout['fixed_arena_id'],
-                'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKOUT,
+                'parent_id': self.fixed_arena_workout_id,
+                'parent_build_type': self.fixed_arena_workout['build_type'],
+                'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
                 'creation_timestamp': datetime.utcnow().isoformat(),
                 'registration_required': registration_required,
             }

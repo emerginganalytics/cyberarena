@@ -37,12 +37,12 @@ class DataStoreManager:
             self.key = self.ds_client.key(key_type, key_id)
         try:
             obj.key = self.key
-            self.ds_client.put(obj)
+            self.ds_client.put(self._create_safe_entity(obj))
         except AttributeError:
             # An attribute error occurs when passing in a dictionary. In this case, create a new entity from the dict
             ds_entity = datastore.Entity(self.key)
             ds_entity.update(obj)
-            self.ds_client.put(ds_entity)
+            self.ds_client.put(self._create_safe_entity(ds_entity))
 
     def set(self, key_type, key_id):
         self.key_id = key_id
@@ -50,5 +50,19 @@ class DataStoreManager:
 
     def get_servers(self):
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
-        query_servers.add_filter('build_id', '=', self.key_id)
+        query_servers.add_filter('parent_id', '=', self.key_id)
         return list(query_servers.fetch())
+
+    def get_workspaces(self, key_type, build_id):
+        query_workspaces = self.ds_client.query(kind=key_type)
+        query_workspaces.add_filter('parent_id', '=', build_id)
+        return list(query_workspaces.fetch())
+
+    @staticmethod
+    def _create_safe_entity(entity):
+        exclude_from_indexes = []
+        for item in entity:
+            if type(entity[item]) == str and len(entity[item]) > 1500:
+                exclude_from_indexes.append(item)
+        entity.exclude_from_indexes = exclude_from_indexes
+        return entity

@@ -71,7 +71,7 @@ class DisplayProxy:
 
         guac_startup_script = self.guac.get_guac_startup_script(proxy_configs)
         server_spec = {
-            'build_id': self.build_id,
+            'parent_id': self.build_id,
             'name': self.server_name,
             'image': BuildConstants.MachineImages.GUACAMOLE,
             'tags': {'items': ['student-entry']},
