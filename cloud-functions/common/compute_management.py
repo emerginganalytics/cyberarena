@@ -95,6 +95,10 @@ def server_build(server_name):
     g_logger = log_client.logger(str(server_name))
     state_transition(entity=server, new_state=SERVER_STATES.BUILDING)
     config = server['config'].copy()
+    nested_vm = server.get("nested_virtualization", False)
+    if nested_vm:
+        config['advancedMachineFeatures'] = {"enableNestedVirtualization": nested_vm}
+
 
     """
     Currently, we need a workaround to insert the guacamole startup script because of a 1500 character limit on

@@ -33,7 +33,7 @@ class FixedArenaWorkspaceProxy:
         @type build_spec: List
         """
         self.env = CloudEnv()
-        self.server_name = f"{build_id}-display-workspace-server"
+        self.server_name = f"{build_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
@@ -42,15 +42,15 @@ class FixedArenaWorkspaceProxy:
         self.workspace_ids = workspace_ids
         self.guac_connections = []
         self.ds = DataStoreManager()
+        self.build_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=self.build_id)
         self.guac = GuacamoleConfiguration(self.build_id)
 
     def build(self):
         proxy_configs = []
         for ws_id in self.workspace_ids:
-            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
-            ws_record = ws_ds.get()
+            ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
             proxy_connections = []
-            for server in ws_record['student_servers']:
+            for server in ws_record['servers']:
                 human_interaction = server.get('human_interaction', None)
                 if human_interaction:
                     for connection in human_interaction:
@@ -66,11 +66,13 @@ class FixedArenaWorkspaceProxy:
                             }
                             proxy_connections.append(connection)
             ws_record['proxy_connections'] = proxy_connections
-            ws_ds.put(ws_record)
+            self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
 
         guac_startup_script = self.guac.get_guac_startup_script(proxy_configs)
         server_spec = {
-            'build_id': self.build_id,
+            'parent_build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
+            'parent_id': self.build_id,
+            'grandparent_id': self.build_record['parent_id'],
             'name': self.server_name,
             'image': BuildConstants.MachineImages.GUACAMOLE,
             'tags': {'items': ['student-entry']},
@@ -80,10 +82,10 @@ class FixedArenaWorkspaceProxy:
                     "network": BuildConstants.Networks.GATEWAY_NETWORK_NAME,
                     "subnet_name": "default",
                     "external_nat": True,
-                    "internal_ip": BuildConstants.Networks.Reservations.DISPLAY_SERVER
+                    "internal_ip": BuildConstants.Networks.Reservations.WORKSPACE_PROXY_SERVER
                 }
             ],
-            'build_type': BuildConstants.BuildType.FIXED_ARENA,
+            'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKOUT,
             'dns_hostname': f"{self.build_id}-display",
             'guacamole_startup_script': guac_startup_script
         }

@@ -8,6 +8,8 @@ validation.
 from datetime import datetime
 from marshmallow import ValidationError
 from google.cloud import logging_v2
+import random
+import string
 
 from utilities_v2.globals import BuildConstants, DatastoreKeyTypes, PubSub
 from utilities_v2.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaWorkoutSchema
@@ -42,12 +44,14 @@ class BuildSpecToCloud:
         cyber_arena_spec['creation_timestamp'] = datetime.utcnow().isoformat()
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
-        self.build_id = cyber_arena_spec['id']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
+            self.build_id = cyber_arena_spec['id']
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA.value
         elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_WORKOUT.value:
+            self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            cyber_arena_spec['id'] = self.build_id
             self.cyber_arena_spec = FixedArenaWorkoutSchema().load(cyber_arena_spec)
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT,
                                                       key_id=self.build_id)

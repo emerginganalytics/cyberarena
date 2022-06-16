@@ -30,20 +30,22 @@ class FixedArenaSchema(Schema):
 class FixedArenaWorkoutSchema(Schema):
     id = fields.Str(required=True)
     creation_timestamp = fields.DateTime()
+    version = fields.Str(required=True)
     workspace_settings = fields.Nested('WorkspaceSettingsSchema')
     build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
-    fixed_arena_id = fields.Str(required=True)
+    parent_id = fields.Str(description='The Fixed Arena ID in which this is built', required=True)
     summary = fields.Nested('CyberArenaSummarySchema', required=True)
     workspace_servers = fields.Nested('ServerSchema', many=True, required=True)
-    fixed_arena_servers = fields.Str(many=True)
+    fixed_arena_servers = fields.List(fields.Str, description='A list of servers to turn on in the fixed arena.',
+                                      required=True)
     assessment = fields.Nested('AssessmentSchema', required=False)
 
 
 class WorkspaceSettingsSchema(Schema):
     count = fields.Int(description='The number of distinct workstation builds to deploy', required=True)
     registration_required = fields.Bool(description='Whether students must login to access this build', default=False)
-    student_list = fields.List(description='Email addresses of students when registration is required', many=True,
-                              required=False)
+    student_list = fields.List(fields.Dict, description='Email addresses of students when registration is required',
+                               many=True, required=False)
     expires = fields.DateTime(required=True)
 
 

@@ -14,6 +14,7 @@ class BuildConstants:
         ARENA = "arena"
         FIXED_ARENA = "fixed_arena"
         FIXED_ARENA_WORKOUT = "fixed_arena_workout"
+        FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
         WORKOUT = "workout"
 
     class Protocols(str, Enum):
@@ -56,6 +57,7 @@ class BuildConstants:
     class Networks:
         class Reservations:
             DISPLAY_SERVER = '10.1.0.3'
+            WORKSPACE_PROXY_SERVER = '10.1.0.4'
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
         GATEWAY_NETWORK_NAME = 'gateway'
         GATEWAY_NETWORK_CONFIG = {
@@ -67,6 +69,9 @@ class BuildConstants:
                 }
             ]
         }
+
+    class Servers:
+        FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
 
 
 class PubSub:

@@ -6,7 +6,7 @@ import logging
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
-from cloud_fn_utilities.state_manager import StateManager
+from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.route_manager import RouteManager
@@ -31,7 +31,7 @@ class FirewallServer:
         @type full_build_spec: dict
         """
         self.env = CloudEnv()
-        self.s = StateManager.ServerStates
+        self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None
@@ -52,7 +52,8 @@ class FirewallServer:
             firewall_type = fw['type']
             firewall_name = f"{self.build_id}-{fw['name']}"
             self.firewall_server_spec = {
-                'build_id': self.build_id,
+                'parent_id': self.build_id,
+                'parent_type': self.build,
                 'name': fw['name'],
                 'machine_type': BuildConstants.MachineTypes.LARGE.value,
                 'can_ip_forward': True,
