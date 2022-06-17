@@ -27,16 +27,17 @@
     <!-- <script src='../static/main.js'></script> -->
 </head>
 <style>
-  html{
+  html {
     height:100%;
     background: var(--main_color, #6e2639); /* #2d2d30 */
     color: #a7a9ac;
   }
   body {
-    font-family: 'Montserrat', sans-serif;
-    background: var(--main_color, #6e2639); /* #2d2d30 */
-    color: #a7a9ac; /*#bdbdbd */
-    margin:1em;
+      font-family: 'Montserrat', sans-serif;
+      background: var(--main_color, #6e2639); /* #2d2d30 */
+      color: #a7a9ac; /*#bdbdbd */
+      margin: auto;
+      width: 96%;
   }
   h3, h4, h5 {
     margin: 10px 0 30px 0;
@@ -59,38 +60,43 @@
       margin-top: 0.5em;
       margin-bottom: 0.5em;
   }
-  .btn{
+  .btn {
     background-color:var(--main_color, #6e2639);
     color:white;
     width:100%;
   }
-  .btn:hover{
+  .btn:hover {
     color:var(--main_color, #6e2639);
     background-color:white;
   }
-  .btn:focus{
+  .btn:focus {
     color:var(--main_color, #6e2639);
     background-color:white;
   }
 
-  .btn-deactivated{
+  .btn-deactivated {
     color:var(--main_color, #6e2639);
     background-color:grey;
   }
-  .control_button{
+  .control_button {
     margin-top:2%;
     text-align:center;
   }
 
-  .landing_container{
-    margin:auto;
-    background-color:white;
+  .landing_container {
+      margin:auto;
+      background-color: white;
+      min-height: 100%;
+      position: relative;
   }
-
   footer {
+      position: static;
       background-color: var(--main_color, #6e2639); /* #2d2d30 */
       color: #f5f5f5;
       padding: 32px;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
   }
   footer a {
       color: #f5f5f5;
@@ -129,8 +135,7 @@
   td, th {
       text-align: center;
   }
-  .nav{
-    border-right: 1px solid #a7a9ac;
+  .nav {
     padding:0;
   }
   .nav-pills .nav-link, .dropright .nav-link{
@@ -138,7 +143,7 @@
     background-color: white;
     color: var(--main_color, #6e2639);
     border: none;
-    border-radius: 0px;
+    border-radius: 0;
     border-bottom: 1px solid var(--main_color, #6e2639);
   }
   .nav-pills .nav-link:hover{
@@ -155,44 +160,44 @@
           <!-- <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/> -->
           {% block content %}{% endblock %}
   </div>
+  {%  block footer_block %}
+    <footer class="text-center">
+        <br><br>
+        <p>UA Little Rock Emerging Analytics Center</p>
+        <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
 
-<footer class="text-center">
-	<br><br>
-	<p>UA Little Rock Emerging Analytics Center</p>
-    <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
+        <br><br>
 
-    <br><br>
+    <!-- Modal Link -->
+    <a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
 
-<!-- Modal Link -->
-<a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
+    <!-- Modal -->
+    <div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <h5>Please leave your comments or suggestions for our support team to review.</h5>
+                <form action = "/leave_comment" method="POST">
 
-<!-- Modal -->
-<div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <h5>Please leave your comments or suggestions for our support team to review.</h5>
-            <form action = "/leave_comment" method="POST">
+                    <input type="text" id="comment_email" name="comment_email" placeholder="Email: ">
 
-                <input type="text" id="comment_email" name="comment_email" placeholder="Email: ">
+                    <select id="comment_subject" style="display:block" name="comment_subject">
+                            <option value="bug">Technical Issue</option>
+                            <option value="request">Feature Request</option>
+                            <option value="other">Other</option>
+                    </select>
 
-                <select id="comment_subject" style="display:block" name="comment_subject">
-                        <option value="bug">Technical Issue</option>
-                        <option value="request">Feature Request</option>
-                        <option value="other">Other</option>
-                </select>
+                    <input type="text" id="comment_text" name="comment_text" placeholder="Comment: ">
 
-                <input type="text" id="comment_text" name="comment_text" placeholder="Comment: ">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Send</button>
+                    </div>
+                </form>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Send</button>
-                </div>
-            </form>
-
+            </div>
         </div>
     </div>
-</div>
-
-</footer>
+    </footer>
+    {% endblock footer_block %}
 </body>
 </html>

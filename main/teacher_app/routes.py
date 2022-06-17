@@ -233,6 +233,58 @@ def arena_list(unit_id):
                             student_instructions=student_instructions_url, description=unit['description'], unit_id=unit_id, start_time=start_time)
 
 
+@teacher_app.route('/fixed-arena/', methods=['GET', 'POST'])
+def fixed_arena():
+    """
+    Kind id parent_id build_type
+    fixed-arena-workout, ohzuxkhxee, cln-stoc, fixed_arena_workout
+
+    Kind build_type id
+    fixed-arena, fixed_arena, cln-stoc
+
+    Workspaces are denoted by fixed-arena-workout.workspace_servers
+
+    :return:
+    """
+    # TODO: Get attack specs from stored Datastore object
+    attack_yaml = YamlFunctions().parse_yaml('attack')
+
+    # TODO: Get Network build specs from stored Datastore object
+    # TODO: Get current network build from stored Datastore object
+    # This is all the possible variation of quick builds templates that are available
+    network_builds = [{'name': 'Access Control', 'id': 'access_control'},
+                      {'name': 'Logging', 'id': 'logging'},
+                      {'name': 'Firewall', 'id': 'firewall'},
+                      {'name': 'Full Build', 'id': 'full'}]
+
+    # Get List of Servers available to for Fixed Network
+    fixed_arena = ds_client.get(ds_client.key('fixed-arena', 'cln-stoc'))
+    server_list = list(fixed_arena['servers'])
+
+    # Get list of workout stations available for fixed network
+    fixed_id = 'ozlhpovszf'
+    #fixed_workout_query = ds_client.query(kind='fixed-arena-workout')
+    #fixed_workout_query.add_filter('id', '=', fixed_id)
+    #fixed_workout_list = list(fixed_workout_query.fetch())
+    #server_list = fixed_workout_list[0]['workspace_servers']
+
+
+    # Get list of workouts from cloud bucket
+    # Used for creating new dynamic workouts
+    build_workout_options = []
+    yaml_bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
+    for blob in yaml_bucket.list_blobs(prefix=workout_globals.yaml_folder):
+        blob_name = blob.name
+        formatted_blobname = blob_name.replace(workout_globals.yaml_folder, "").split('.')[0]
+        if formatted_blobname != "":
+            build_workout_options.append(formatted_blobname)
+
+    # Render template
+    return render_template('fixed_arena_home.html', workout_titles=build_workout_options,
+                           auth_config=auth_config, attack_spec=attack_yaml, network_builds=network_builds,
+                           server_list=server_list, fixed_workout_list=server_list)
+
+
 # Called by start workouts button on instructor landing. Starts all workouts in a unit.
 @teacher_app.route('/start_all', methods=['GET', 'POST'])
 def start_all():

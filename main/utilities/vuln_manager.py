@@ -64,16 +64,17 @@ class VulnManager(object):
 
     def get_all_datastore_entries(self, unit_id):
         """Returns all attack entries for specific unit"""
-        attack_query = ds_client.query(self.kind)
-        attack_query.filter('unit_id', '==', unit_id)
+        attack_query = ds_client.query(kind=self.kind)
+        attack_query.add_filter('unit_id', '=', unit_id)
         attack_list = list(attack_query.fetch())
         return attack_list
 
-    def process_form(self, unit_id, form_data):
+    def process_form(self, form_data):
         """Handles forms for attack template build requests"""
         attack_id = form_data.get('attack_id')
         attack_spec = self.get_spec_by_id(attack_id)
         mode = attack_spec.get('mode', None)
+        unit_id = form_data.get('unit_id', None)
         if 'target_unit' in form_data:
             network = form_data['target_unit']
             scope = 'unit'

@@ -1,0 +1,491 @@
+{% extends "base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% import "vuln_macros.html" as vuln_macros %}
+{% import "fixed_arena_macros.html" as fixed_arena_macros %}
+{% block title %}Teacher Home Page{% endblock %}
+{% block content %}
+    <script src='../static/login.js'></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='fixed_arena_utils.js') }}"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='fixed_arena_styles.css') }}">
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+            apiKey: '{{auth_config["api_key"]}}',
+            authDomain: '{{auth_config["auth_domain"]}}',
+            projectId: '{{auth_config["project_id"]}}'
+          };
+          initApp(auth_config).then(value => {
+            enable_signout();
+            var controls = document.getElementById('teacher_controls');
+            var build_widget = document.getElementById('build_workout_widget');
+            document.getElementById('user_name_header').innerHTML = "Welcome " + value['display_name'];
+            if(value['admin'] == true){
+              var admin_button = document.createElement("a");
+              admin_button.href = "/admin/home";
+              admin_button.className = "nav-link";
+              admin_button.innerHTML = "Admin Page";
+              controls.insertBefore(admin_button, build_widget);
+            }
+            if(value['student'] == true){
+              var student_home_link = document.createElement('a');
+              student_home_link = '/student/home';
+              student_home_link.className = "nav-link";
+              student_home_link.innerHTML = "Your Student Page";
+              controls.insertBefore(student_home_link, build_widget);
+            }
+          });
+    </script>
+<div class='row flex-fill'>
+  <div id="teacher_controls" class="nav flex-column nav-pills col-2" role="tablist" aria-orientation="vertical">
+    {{logo.logo_div() }}
+    <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
+    <a class="nav-link" id="class_tab" href="/teacher/home">Classes</a>
+    <a class="nav-link" id="unit_tab" href="/teacher/home#current_unit_container">Current Units</a>
+    <a class="nav-link" id="expired_unit_tab" href="/teacher/home#expired_unit_container">Expired Units</a>
+    <a class="nav-link active" id="fixed_arena_tab" data-toggle="pill" href="#fixed_arena_container" type="button" role="tab" aria-controls="fixed_arena_container" aria-selected="true">Secure Training and Operations Center</a>
+
+    <div  id="build_workout_widget" class="input-group unit_build_container">
+      <div class="input-group-prepend container nav-item dropright" style="padding:0;">
+        <a class="nav-link" onclick="to_build_page()" href="#">Build Unit</a>
+        <a class="nav-link dropdown-toggle dropdown-toggle-split" id="unit_build_dropdown" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+
+        <div class="dropdown-menu" id="unit_select" style="overflow-y: auto;max-height:360px;" aria-labelledby="unit_build_dropdown" href="#">
+          <option selected>Select unit type...</option>
+          {% for workout in workout_titles %}
+            {% if workout != 'attack' %}
+              <option class="dropdown-item build_unit_type" value="{{workout}}">{{workout}}</option>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="selected_build_unit" style="align-items:center;justify-content:center; flex-grow:1;">
+          <p class="nav-link" id="build_unit_display" style="display:none;margin:0;height:100%;width:100%;"></p>
+        </div>
+      </div>
+    </div>
+    <a id="sign-out" href="#" class='nav-link'>Sign out</a>
+  </div>
+    <div id='info_display' class='tab-content col fixed-arena-container'>
+        <!-- Fixed Arena Tab -->
+        <div class="tab-pane fade active show" id="fixed_arena_container" role="tabpanel" aria-labelledby="fixed_arena_tab">
+            <h1>Secure Training and Operations Center</h1>
+            <ul class="nav nav-tabs" id="unit-nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active nav-link-tabs" id="nav-boot-btn" data-toggle="tab"
+                            data-target="#boot-container" type="button" role="tab"
+                            aria-controls="nav-boot"
+                            aria-selected="true">Boot Up</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link nav-link-tabs" id="nav-create-lab-btn" data-toggle="tab"
+                            data-target="#create-lab-container" type="button" role="tab"
+                            aria-controls="nav-create-lab"
+                            aria-selected="false">Create a Lab</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link nav-link-tabs" id="nav-attack-tab" data-toggle="tab"
+                            data-target="#vuln-container" type="button" role="tab"
+                            aria-controls="nav-attacks"
+                            aria-selected="false">Command and Control</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link nav-link-tabs" id="nav-settings-btn" data-toggle="tab"
+                            data-target="#settings-container" type="button" role="tab"
+                            aria-controls="nav-settings"
+                            aria-selected="false">Manage</button>
+                </li>
+            </ul>
+            <div class="tab-content" id="nav-tabContent">
+                <div id="boot-container" class="tab-pane fade active show" aria-labelledby="nav-boot-btn">
+                    <div class="network-control-group form-group col-md-3">
+                        <div class="power-toggle-div">
+                            <div id="power-toggle-label">
+                                <h5>Power</h5>
+                            </div>
+                            <div id="power-toggle-form" class="btn-group btn-toggle">
+                                <label class="power-toggle" for="power">
+                                    <input type="checkbox" id="power">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="network-template-div">
+                            <table id="network-build-table" class="table table-hover">
+                                <!-- TODO: Highlight based on which preset is currently active -->
+                                {{ fixed_arena_macros.build_network_form_table(network_builds) }}
+                            </table>
+                            <div id="network-template-btn-div">
+                                <button id="network-build-btn" class="btn btn-primary" type="button" disabled hidden>Update</button>
+                            </div>
+                        </div>
+                        <div id="auto-shutoff-div">
+                            <button type="button" class="btn btn-primary auto-shutoff-btn" data-toggle="modal" data-target="#auto-shutoff-modal">Auto Shutoff</button>
+                        </div>
+                        <div class="modal-center modal" id="auto-shutoff-modal" tabindex="-1" role="dialog" aria-labelledby="auto-shutoff-label" aria-hidden="true">
+                            <div id="auto-shutoff-dialog" class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="auto-shutoff-label">Set Auto Shutoff Time (Hours)</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="auto-shutoff-counter mt-5">
+                                            <span class="minus bg-dark prevent-select">-</span>
+                                            <input type="number" class="form-control count" id="auto-shutoff-time"
+                                                   name="auto_shutoff" value="2" min="1" max="10" />
+                                            <span class="plus bg-dark prevent-select">+</span>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary">Update</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="col">
+                            <h4>Servers</h4>
+                        </div>
+                        <!--<div class="col">
+                            <ul class="server-toolbar">
+                                    <li class="server-control">
+                                        <button type="button" class='server-control-btn' value="start-selected"><span><img class="button-icon" src="/static/start-icon.png"></span>Start</button>
+                                    </li>
+                                    <li class="server-control">
+                                        <button type="button" class='server-control-btn' value="stop-selected"><span><img class="button-icon" src="/static/stop-icon.png"></span>Stop</button>
+                                    </li>
+                                    <li class="server-control">
+                                        <button type="button" class='server-control-btn' value="rebuild-selected"><span><img class="button-icon" src="/static/rebuild-icon.png"></span>Rebuild</button>
+                                    </li>
+                                    <li class="server-control">
+                                        <button type="button" class='server-control-btn' value="del-selected"><span><img class="button-icon" src="/static/delete-icon.png"></span>Delete</button>
+                                    </li>
+                            </ul>
+                        </div>-->
+                        <div class="server-table-div col">
+                            <table id="server-table" class="server-table table table-hover table-small">
+                                <tr class="prevent-select">
+                                    <th>#</th>
+                                    <th>Server Name</th>
+                                    <th>State</th>
+                                    <th>Display</th>
+                                </tr>
+                                <!--TODO: Build table based on incoming jinja dict objects-->
+                                <tr>
+                                    <td>1</td>
+                                    <td>adfsadf-kali</td>
+                                    <td>STOPPED</td>
+                                    <td>Navigate to adfsadf-ubuntu and login</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td>adfsadf-ubuntu</td>
+                                    <td>RUNNING</td>
+                                    <td><a href="#">Open</a></td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td>adfsadf-win2019</td>
+                                    <td>RUNNING</td>
+                                    <td><a href="#">Open</a></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="create-lab-container" class="tab-pane fade" aria-labelledby="nav-create-lab-btn">
+                    <h2>Create a Lab</h2>
+                </div>
+                <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
+                    <!--Holds both form builder and attack results table-->
+                    <div id="vuln-templates-container">
+                         <table class="table table-hover" id="vuln-templates-table">
+                             {{ vuln_macros.display_vulns(attack_spec.attack) }}
+                         </table>
+                        <div id="vuln-template-btn-div">
+                            <button id='vuln-template-btn' class="btn btn-sm" type="button" disabled hidden>Select Template</button>
+                        </div>
+                    </div>
+                    <div id='vuln-form-modal' class="modal" tabindex="-1" role="dialog">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Attack Template Form</h5>
+                                    <button type="button" class="close cancel-form" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="vuln-template-form" name="vuln-template-form" method="post" action="/teacher/api/vuln/build">
+                                        <div id="vuln-template-args"></div>
+                                        {{ vuln_macros.target_network('vuln-template-form', workout_list, false) }}
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary" form="vuln-template-form">Submit</button>
+                                    <button type="button" class="btn btn-secondary cancel-form" data-dismiss="modal">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="attack-results-container">
+                        <!-- TODO: Build a TABLE that shows list of all attacks for current unit
+                                    Table can be filtered based on status, attack_type, timestamp(?)-->
+                        <table id="attack-results-table" class="table">
+                            <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Mode (Inject or Attack)</th>
+                                <th>AttackID</th>
+                                <th>Type</th>
+                                <th>Network</th>
+                                <th>Time (Start)</th>
+                                <th>Args</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+                <div id="settings-container" class="tab-pane fade" aria-labelledby="nav-settings-btn">
+                    <div class="server-manage-wrapper" id="server-manage-wrapper">
+                        <!--TODO: functionality:
+                            - List all servers available for network (built and not built)
+                            - Allow:
+                                |: Build new server on network
+                                |: Restart server on network
+                                |: Delete server from network
+                                |: Rebuild server on network
+                         -->
+                        <div class="server-toolbar-div">
+                            <!--TODO:
+                                Toolbar used to Build, delete, or rebuild machines selected in
+                                div/form below-->
+
+                            <ul id="manage-server-nav" class="server-toolbar">
+                                <li class="server-control">
+                                    <button type="button" class='server-control-btn' value="start-selected" disabled><span><img class="button-icon" src="/static/start-icon.png"></span>Build</button>
+                                </li>
+                               <!-- <li class="server-control">
+                                    <button type="button" class='server-control-btn' value="stop-selected"><span><img class="button-icon" src="/static/stop-icon.png"></span>Stop</button>
+                                </li>-->
+                                <li class="server-control">
+                                    <button type="button" class='server-control-btn' value="rebuild-selected" disabled><span><img class="button-icon" src="/static/rebuild-icon.png"></span>Rebuild</button>
+                                </li>
+                                <li class="server-control">
+                                    <button type="button" class='server-control-btn' value="del-selected" disabled><span><img class="button-icon" src="/static/delete-icon.png"></span>Delete</button>
+                                </li>
+                            </ul>
+                        </div>
+                        <!-- TODO:
+                            Each machine cell will display:
+                                |: Select CheckBox
+                                |: Machine name
+                                |: Network
+                                |:
+                        -->
+                        <table id="manage-server-table" class="table">
+                            <thead id="manage-server-header">
+                                <tr>
+                                    <th><input id='select-all-servers' type="checkbox" /></th>
+                                    <th class="prevent-select">Status</th>
+                                    <th class="prevent-select">Name</th>
+                                    <th class="prevent-select">Network</th>
+                                    <th class="prevent-select">Internal IP</th>
+                                    <th class="prevent-select">External NAT</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manage-server-body">
+                                <tr class="machine-cell">
+                                    <td><input type="checkbox" value=""/></td>
+                                    <td>NOT BUILT</td>
+                                    <td>cyberarena-nessus</td>
+                                    <td>enterprise</td>
+                                    <td>10.1.1.5</td>
+                                    <td>False</td>
+                                </tr>
+                                {% for server in server_list %}
+                                    <tr class="machine-cell">
+                                        <td><input type="checkbox" value="" id="{{ server.name }}"/></td>
+                                        <td>READY</td>
+                                        <td>{{ server.name }}</td>
+                                        {% for nic in server.nics %}
+                                            <td>{{ nic.network }}</td>
+                                            <td>{{ nic.internal_ip }}</td>
+                                            <td>{{ nic.external_nat }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+      </div>
+</div>
+<script type="text/javascript">
+    // Vulnerability Builder Functions
+    var selectedTemplateID = '';
+    // Handle attack template table clicks
+    $('#vuln-templates-table tr').click(function () {
+        var row = $(this);
+        var checkmark = $(this).find('span');
+        var vulnBtn = $('#vuln-template-btn');
+        if (row.attr("id") !== 'vuln-table-header') {
+            // Current template is deselected
+            if (row.hasClass('selected')) {
+                row.removeClass('selected');
+                checkmark.removeClass('checkmark');
+                vulnBtn.prop('disabled', true);
+                vulnBtn.prop('hidden', true);
+            }
+            // A different row is selected
+            else {
+                row.addClass('selected').siblings().removeClass('selected');
+                row.siblings().find('span').removeClass('checkmark');
+                checkmark.addClass('checkmark');
+                selectedTemplateID = row.attr('id');
+                vulnBtn.prop('disabled', false);
+                vulnBtn.prop('hidden', false);
+            }
+        }
+    });
+    $(document).ready(function() {
+        // Send request to server for attack template and build form
+        $('#vuln-template-btn').on('click', function (e) {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                traditional: true,
+                url: '/teacher/api/vuln/templates/filter',
+                data: JSON.stringify({'attack_id': selectedTemplateID}),
+                dataType: 'json',
+                success: function (data) {
+                    // reset selectedID value to NULL
+                    build_form(data, selectedTemplateID);
+                }
+            })
+        });
+    });
+
+    // Network Build Functions
+    var selectedBuildID = '';
+    // Handle attack template table clicks
+    $('#network-build-table tr').click(function () {
+        var row = $(this);
+        var checkmark = $(this).find('span');
+        var networkBtn = $('#network-build-btn');
+        if (row.attr("id") !== 'network-build-header') {
+            // Current template is deselected
+            if (row.hasClass('selected')) {
+                row.removeClass('selected');
+                checkmark.removeClass('checkmark');
+                networkBtn.prop('disabled', true);
+                networkBtn.prop('hidden', true);
+            }
+            // A different row is selected
+            else {
+                if (row.hasClass('active-build')) {
+                    return
+                }
+                row.addClass('selected').siblings().removeClass('selected');
+                row.siblings().find('span').removeClass('checkmark');
+                checkmark.addClass('checkmark');
+                selectedBuildID = row.attr('id');
+                networkBtn.prop('disabled', false);
+                networkBtn.prop('hidden', false);
+            }
+        }
+    });
+    $(document).ready(function() {
+        // Send request to server for attack template and build form
+        $('#network-build-btn').on('click', function (e) {
+            $.ajax({
+                type: 'POST',
+                contentType: 'application/json;charset=utf-8',
+                traditional: true,
+                url: '/teacher/api/fixed-arena/update',
+                data: JSON.stringify({'attack_id': selectedBuildID, 'network_id': 'network-adsfasdf'}),
+                dataType: 'json',
+                success: function (data) {
+                    // reset selectedBuildID value to NULL
+                    console.log(data);
+                }
+            })
+        });
+    });
+    $(document).ready(function(){
+        $('.count').prop('disabled', true);
+        $(document).on('click','.plus',function(){
+            var countObj = $('#auto-shutoff-time')
+            var count = countObj.val(parseInt(countObj.val()));
+            console.log(count.val());
+            if (count.val() < 10) {
+                countObj.val(parseInt(countObj.val()) + 1);
+                //$('.count').val(parseInt($('.count').val()) + 1);
+            }
+            else if (count.val() >= 10) {
+                $('.count').val('10');
+            }
+        });
+        $(document).on('click','.minus',function(){
+            var countObj = $('#auto-shutoff-time');
+            countObj.val(parseInt(countObj.val()) - 1);
+           //  $('.count').val(parseInt($('.count').val()) - 1 );
+            if (countObj.val() == 0) {
+                countObj.val(1);
+            }
+        });
+    });
+    $('#select-all-servers').click(function(event){
+        var selectState = this.checked;
+        $(":checkbox").each(function(){ this.checked = selectState; });
+        $('#manage-server-nav:button').each(function(){ this.disabled(selectState); });
+    });
+
+</script>
+</div>
+{% endblock content %}
+{% block footer_block %}
+    <div id="fixed-arena-footer-div" class="fixed-arena-footer-ctn">
+        <footer class="text-center" id="fixed-arena-footer">
+            <br><br>
+            <p>UA Little Rock Emerging Analytics Center</p>
+            <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
+
+            <br><br>
+
+            <!-- Modal Link -->
+            <a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
+
+            <!-- Modal -->
+            <div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <h5>Please leave your comments or suggestions for our support team to review.</h5>
+                        <form action = "/leave_comment" method="POST">
+
+                            <input type="text" id="comment_email" name="comment_email" placeholder="Email: ">
+
+                            <select id="comment_subject" style="display:block" name="comment_subject">
+                                    <option value="bug">Technical Issue</option>
+                                    <option value="request">Feature Request</option>
+                                    <option value="other">Other</option>
+                            </select>
+
+                            <input type="text" id="comment_text" name="comment_text" placeholder="Comment: ">
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+{% endblock footer_block %}
