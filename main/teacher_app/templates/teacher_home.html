@@ -9,8 +9,6 @@
 <script type="text/javascript" src="{{url_for('static', filename='teacher_utils.js')}}"></script>
 
 <script>
-  
-
   var teacher_email = null;
   var auth_config = {
     apiKey: '{{auth_config["api_key"]}}',
@@ -57,20 +55,6 @@
     })
     
   })
-  
-  function timeConverter(UNIX_timestamp){
-    var a = new Date(UNIX_timestamp * 1000);
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    var year = a.getFullYear();
-    var month = months[a.getMonth()];
-    var date = a.getDate();
-    var hour = a.getHours();
-    var min = a.getMinutes();
-    var sec = a.getSeconds();
-    var time = date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    return time;
-  }
-
   function to_build_page(){
     var input = document.getElementById('build_unit_display').className;
     window.location.href = "/teacher/" + input;
@@ -84,6 +68,13 @@
   function open_class_modal(class_id){
     $('#class_modal_' + class_id).modal();
   }
+  $(document).ready(function(){
+      var hashcode = window.location.hash;
+      if ((hashcode !== "") && $('' + hashcode))
+          $('#teacher_controls a[href="' + hashcode + '"]').tab('show');
+      else
+          $('#teacher_controls a:first').tab('show');
+  })
 </script>
 <style>
   textarea{
@@ -147,14 +138,11 @@
     <a class="nav-link active" id="class_tab" data-toggle="pill" href="#class_container" type="button" role="tab" aria-controls="class_container" aria-selected="true">Classes</a>
     <a class="nav-link" id="unit_tab" data-toggle="pill" href="#current_unit_container" type="button" role="tab" aria-controls="unit_container" aria-selected="false">Current Units</a>
     <a class="nav-link" id="expired_unit_tab" data-toggle="pill" href="#expired_unit_container" type="button" role="tab" aria-controls="expired_unit_container" aria-selected="false">Expired Units</a>
-    
+    <a class="nav-link" id="fixed_arena_tab" href="/teacher/fixed-arena">Secure Training Operation Center</a>
     <div  id="build_workout_widget" class="input-group unit_build_container">
-      
-      
       <div class="input-group-prepend container nav-item dropright" style="padding:0;">
         <a class="nav-link" onclick="to_build_page()" href="#">Build Unit</a>
         <a class="nav-link dropdown-toggle dropdown-toggle-split" id="unit_build_dropdown" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
-      
         <div class="dropdown-menu" id="unit_select" style="overflow-y: auto;max-height:360px;" aria-labelledby="unit_build_dropdown" href="#">
           <option selected>Select unit type...</option>
           {% for workout in workout_titles %}

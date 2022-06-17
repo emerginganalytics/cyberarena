@@ -8,24 +8,56 @@ import json
 teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')
 
 
-@teacher_api.route('/<unit_id>/vuln/build', methods=['POST'])
-def vuln_builder_form_data(unit_id):
+@teacher_api.route('/fixed-network/update', methods=['POST'])
+def fixed_network_update():
+    """
+    POST to this endpoint to update the existing network build.
+
+    e.g Update from a partial to a full build based on selected
+    network build spec ID
+    """
+    if request.method == 'POST':
+        data = request.form.to_dict()
+        print(data)
+    return '200'
+
+
+@teacher_api.route('/fixed-arena/start', methods=['POST'])
+def fixed_arena_start():
+    if request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        # TODO: Insert start network logic here
+        return '{"status": "200", "action": "start"}'
+
+
+@teacher_api.route('/fixed-arena/stop', methods=['POST'])
+def fixed_arena_stop():
+    if request.method == 'POST':
+        data = request.get_json()
+        print(data)
+        # TODO: Insert stop network logic here
+        return '{"status": "200", "action": "stop"}'
+
+
+@teacher_api.route('/vuln/build', methods=['POST'])
+def vuln_builder_form_data():
     """POST to this endpoint to build form based on filtered items"""
-    unit = ds_client.get(ds_client.key("cybergym-unit", unit_id))
     if request.method == 'POST':
         form_data = json.dumps(request.json)
-        VulnManager().process_form(unit_id=unit_id, form_data=form_data)
+        VulnManager().process_form(form_data=form_data)
         return '200'
 
 
-@teacher_api.route('/<unit_id>/vuln/status', methods=['POST'])
-def vuln_status(unit_id):
+@teacher_api.route('/vuln/status', methods=['POST'])
+def vuln_status():
     """Handles polling on injected vulnerabilities or attacks"""
+    # TODO: Consider moving this endpoint to standard routes instead of api routes
     pass
 
 
-@teacher_api.route('/<unit_id>/vuln/results/filter', methods=['POST'])
-def vuln_results_filter(unit_id):
+@teacher_api.route('/vuln/results/filter', methods=['POST'])
+def vuln_results_filter():
     """Handles filtering of attack result table -- Possibly unneeded"""
     pass
 
