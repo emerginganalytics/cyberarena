@@ -8,38 +8,6 @@ import json
 teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')
 
 
-@teacher_api.route('/fixed-network/update', methods=['POST'])
-def fixed_network_update():
-    """
-    POST to this endpoint to update the existing network build.
-
-    e.g Update from a partial to a full build based on selected
-    network build spec ID
-    """
-    if request.method == 'POST':
-        data = request.form.to_dict()
-        print(data)
-    return '200'
-
-
-@teacher_api.route('/fixed-arena/start', methods=['POST'])
-def fixed_arena_start():
-    if request.method == 'POST':
-        data = request.get_json()
-        print(data)
-        # TODO: Insert start network logic here
-        return '{"status": "200", "action": "start"}'
-
-
-@teacher_api.route('/fixed-arena/stop', methods=['POST'])
-def fixed_arena_stop():
-    if request.method == 'POST':
-        data = request.get_json()
-        print(data)
-        # TODO: Insert stop network logic here
-        return '{"status": "200", "action": "stop"}'
-
-
 @teacher_api.route('/vuln/build', methods=['POST'])
 def vuln_builder_form_data():
     """POST to this endpoint to build form based on filtered items"""

@@ -34,6 +34,8 @@ def assign_instructor_to_unit(unit_id, prev_instructor, instructor_email):
     query_class.add_filter('teacher_email', '=', prev_instructor)
     class_list = list(query_class.fetch())
 
+    # TODO: Look into ways of checking if class with exact roster already exists for an instructor and simply adding the
+    #       unit to that class instead of creating a whole new class each time.
     remove_unit = ''
     for class_obj in class_list:
         current_list = class_obj.get('unit_list', None)
