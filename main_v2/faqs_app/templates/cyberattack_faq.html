@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ{% endblock%}
+
+{% block content %}
+    <style>
+        .faq-container{
+            margin-bottom: 1em;
+            
+        }
+    </style>
+    <div class="faq-container container">
+        <h2>General</h2>
+        <div id="faq-accordion-general">
+            <div class="card">
+                <div class="card-header" id="gen-faq-header0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq0" aria-expanded="false" aria-controls="collapse_gen_faq0">
+                        I can't run any commands in ShinoBOT, what do I do.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq0" class="collapse" aria-labelledby="gen-faq-header0" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            First, make sure you are using chrome to access this website. If the site is blocked by your school, then you may have to access the website in the virtual machine. If you are trying to do this, make sure you are using chrome to access this website.
+                        </p>
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                <div class="card-header" id="gen-faq-header1">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq1" aria-expanded="false" aria-controls="collapse_gen_faq1">
+                        I can't find my Host ID and Password. Help!!!
+                    </button>
+                </div>
+                <div id="collapse_gen_faq1" class="collapse" aria-labelledby="gen-faq-header1" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Your host ID and password can be found in three places.
+                            <br><br>
+                            <ol>
+                        <li>It can be found at the start of the command prompt that Shinobot is running on.</li>
+                        <li>It can be found by hovering over the application in the toolbar.</li>
+                        <li>It can be found where it says shinobotps on the application at the top.</li>
+                            </ol>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            </div><div class="card">
+                <div class="card-header" id="gen-faq-header2">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq2" aria-expanded="false" aria-controls="collapse_gen_faq2">
+                        My question isn't here.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq2" class="collapse" aria-labelledby="gen-faq-header2" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Contact cybergym@ualr.edu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
