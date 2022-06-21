@@ -175,36 +175,41 @@ class ComputeManager:
         Stops a server based on the specification in the Datastore entity with name server_name.
         """
         state_manager = ServerStateManager(initial_build_id=self.server_name)
-        state_manager.state_transition(self.s.STOPPING)
-        i = 0
-        stop_success = False
-        while not stop_success and i < 5:
-            try:
-                response = self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
-                                                          instance=self.server_name).execute()
-                stop_success = True
-                logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
-            except BrokenPipeError:
-                i += 1
 
-        i = 0
-        success = False
-        while not success and i < 5:
-            #This try statment seems to be running infinitely for some unknown reason.
-            try:
-                self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
-                                                   operation=response["id"]).execute()
-            except timeout:
-                i += 1
-                logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
-                pass
-        if not success:
-            logging.error(f'Timeout in trying to stop server {self.server_name}')
-            state_manager.state_transition(self.s.BROKEN)
-            raise ConnectionError
+        if state_manager.get_state() != state_manager.States.STOPPED.value:
+            state_manager.state_transition(self.s.STOPPING)
+            i = 0
+            stop_success = False
+            while not stop_success and i < 5:
+                try:
+                    response = self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
+                                                             instance=self.server_name).execute()
+                    stop_success = True
+                    logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
+                except BrokenPipeError:
+                    i += 1
 
-        state_manager.state_transition(self.s.STOPPED)
-        logging.info(f"Finished stopping {self.server_name}")
+            i = 0
+            success = False
+            while not success and i < 5:
+                try:
+                    self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                                       operation=response["id"]).execute()
+                    success = True
+                    print('i got here')
+                except timeout:
+                    i += 1
+                    logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                    pass
+            if not success:
+                logging.error(f'Timeout in trying to stop server {self.server_name}')
+                state_manager.state_transition(self.s.BROKEN)
+                raise ConnectionError
+
+            state_manager.state_transition(self.s.STOPPED)
+            logging.info(f"Finished stopping {self.server_name}")
+        else:
+            logging.info(f"Server {self.server_name} is not running")
 
     def nuke(self):
         self.delete()
