@@ -192,7 +192,6 @@ class ComputeManager:
             i = 0
             success = False
             while not success and i < 5:
-                # This try statment seems to be running infinitely for some unknown reason.
                 try:
                     self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
                                                        operation=response["id"]).execute()
