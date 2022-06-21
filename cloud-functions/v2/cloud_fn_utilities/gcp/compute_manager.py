@@ -126,7 +126,7 @@ class ComputeManager:
         self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
         state_manager.state_transition(self.s.STOPPED)
 
-    def start(self): # should be correct because I did not do it
+    def start(self):
         """
         Starts a server based on the specification in the Datastore entity with name server_name. A guacamole server
         is also registered with DNS.
@@ -207,17 +207,19 @@ class ComputeManager:
         logging.info(f"Finished stopping {self.server_name}")
 
     def nuke(self):
+        self.delete()
+        self.build()
+
+    def delete(self):
         state_manager = ServerStateManager(initial_build_id=self.server_name)
         state_manager.state_transition(self.s.DELETING)
 
         logging.info(f'Deleting {self.server_name}')
         response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
-                                                 instance=self.server_name).execute()
+                                                   instance=self.server_name).execute()
         self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
                                            operation=response["id"]).execute()
         state_manager.state_transition(self.s.DELETED)
-
-        self.build()
 
     def _add_disks(self):
         disks = None
