@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Cyber Gym Project</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <div class='container title-ctn'>
+            <h1>TEST BUILD WORKOUT</h1>
+            <h4>Only DOS and cyberattack workout available</h4>
+        </div>
+        <div id="workout-form" class='container form-ctn'>
+            <div class="input-field col s12">
+                <input placeholder="Enter your email" id="email" type="email" class="validate">
+                <label for="email">Email</label>
+            </div>
+            <div class="input-field col s12">
+                    <input type="number" id="team" name="team" min="1" max="10">
+                    <label>Select number of teams (between 1 and 10)</label>
+            </div>
+            <div class="input-field col s12">
+                    <input type="number" id="availability" name="availability" min="1" max="7">
+                    <label>Select length of availability (between 1 and 7 days)</label>
+            </div>
+            <div class="btn-ctn" id="build-workout" onclick="$('#loading').show();">
+                <a class="waves-effect waves-light btn">BUILD WORKOUT</a>
+            </div>
+            <div id="loading" style="display:none;">
+                <div class="progress">
+                    <div class="indeterminate"></div>
+                </div>
+                <i>It can take some times, please be patient !</i>
+            </div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script type = "text/javascript" src = "{{ url_for('static', filename = 'js/script.js') }}" ></script>
+    </body>
+</html>

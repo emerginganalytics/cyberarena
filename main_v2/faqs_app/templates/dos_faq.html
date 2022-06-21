@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ{% endblock%}
+
+{% block content %}
+    <style>
+        .faq-container{
+            margin-bottom: 1em;
+            
+        }
+    </style>
+    <div class="faq-container container">
+        <h2>General</h2>
+        <div id="faq-accordion-general">
+            <div class="card">
+                <div class="card-header" id="gen-faq-header0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq0" aria-expanded="false" aria-controls="collapse_gen_faq0">
+                        I don't see the place where I start the attack.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq0" class="collapse" aria-labelledby="gen-faq-header0" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Make sure of the following:
+                            <br><br>
+                            <ol>
+                        <li>You've cd'd into LOIC and run the <strong>./loic-net4.5.sh run</strong> script.</li>
+                        <li>You've targeted 10.1.1.33 by typing it in the IP field of Select Your Target and clicked Lock On.</li>
+                        <li>You've changed the Method to HTTP and hit Ready.</li>
+                            </ol>
+                        </p>
+                    </div>
+                </div>
+            </div>
+             <div class="card">
+                <div class="card-header" id="gen-faq-header1">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq1" aria-expanded="false" aria-controls="collapse_gen_faq1">
+                        My assignment isn't auto-completing.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq1" class="collapse" aria-labelledby="gen-faq-header1" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Wait 3-5 minutes. If this hasn't fixed itself in this time period stop the dos attack and restart it. If this still hasn't worked contact cybergym@ualr.edu .
+                        </p>
+                    </div>
+                </div>
+            </div>
+            </div><div class="card">
+                <div class="card-header" id="gen-faq-header2">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq2" aria-expanded="false" aria-controls="collapse_gen_faq2">
+                        My question isn't here.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq2" class="collapse" aria-labelledby="gen-faq-header2" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Contact cybergym@ualr.edu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

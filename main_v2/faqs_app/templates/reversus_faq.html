@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ{% endblock%}
+
+{% block content %}
+    <style>
+        .faq-container{
+            margin-bottom: 1em;
+            
+        }
+    </style>
+    <div class="faq-container container">
+        <h2>General</h2>
+        <div id="faq-accordion-general">
+            </div>
+        <div class="card">
+                <div class="card-header" id="gen-faq-header1">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq1" aria-expanded="false" aria-controls="collapse_gen_faq1">
+                        My question isn't here.
+                    </button>
+                </div>
+                <div id="collapse_gen_faq1" class="collapse" aria-labelledby="gen-faq-header1" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Contact cybergym@ualr.edu.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
