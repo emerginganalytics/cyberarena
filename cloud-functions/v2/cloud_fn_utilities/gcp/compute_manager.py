@@ -176,7 +176,7 @@ class ComputeManager:
         """
         state_manager = ServerStateManager(initial_build_id=self.server_name)
 
-        if state_manager.get_state() != state_manager.States.STOPPED.value:
+        if state_manager.get_state() != self.s.STOPPED.value:
             state_manager.state_transition(self.s.STOPPING)
             i = 0
             stop_success = False
@@ -192,11 +192,11 @@ class ComputeManager:
             i = 0
             success = False
             while not success and i < 5:
+                # This try statment seems to be running infinitely for some unknown reason.
                 try:
                     self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
                                                        operation=response["id"]).execute()
                     success = True
-                    print('i got here')
                 except timeout:
                     i += 1
                     logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
@@ -212,10 +212,17 @@ class ComputeManager:
             logging.info(f"Server {self.server_name} is not running")
 
     def nuke(self):
+        """
+        Deletes a server based on the specification in the Datastore entity with the name server_name. Then rebuilds
+        the server.
+        """
         self.delete()
         self.build()
 
     def delete(self):
+        """
+        Deletes a server based on the specification in the Datastore entity with the name server_name.
+        """
         state_manager = ServerStateManager(initial_build_id=self.server_name)
         state_manager.state_transition(self.s.DELETING)
 
