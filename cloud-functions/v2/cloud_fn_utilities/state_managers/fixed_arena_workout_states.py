@@ -154,6 +154,77 @@ class FixedArenaWorkoutStateManager:
         else:
             return False
 
+    def are_servers_stopped(self):
+        # Good place to look for bugs, may need to change the STOPPED value to STOPPING
+        max_wait_time = 300
+        sleep_time = 10
+        wait_time = 0
+        servers_finished = False
+        workspaces = self.ds.get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, build_id=self.build_id)
+        while not servers_finished and wait_time < max_wait_time:
+            servers_finished = True
+            servers = self.ds.get_servers()
+            for server in servers:
+                if server.get('state', None) != self.server_states.STOPPED.value:
+                    servers_finished = False
+                    continue
+            for workspace in workspaces:
+                ws_id = workspace['id']
+                ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+                ws_servers = ws_ds.get_servers()
+                for ws_server in ws_servers:
+                    if ws_server.get('state', None) != self.server_states.STOPPED.value:
+                        servers_finished = False
+                        continue
+            for server in self.build['fixed_arena_servers']:
+                server_name = f"{self.build['parent_id']}-{server}"
+                server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
+                if server_ds.get('state', None) != self.server_states.STOPPED.value:
+                    servers_finished = False
+                    continue
+            if not servers_finished:
+                time.sleep(sleep_time)
+                wait_time += sleep_time
+        if servers_finished:
+            return True
+        else:
+            return False
+
+    def are_servers_deleted(self):
+        # Good place to look for bugs, do not know if will work properly
+        max_wait_time = 300
+        sleep_time = 10
+        wait_time = 0
+        servers_finished = False
+        workspaces = self.ds.get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, build_id=self.build_id)
+        while not servers_finished and wait_time < max_wait_time:
+            servers_finished = True
+            servers = self.ds.get_servers()
+            for server in servers:
+                if server.get('state', None) != self.server_states.DELETED.value:
+                    servers_finished = False
+                    continue
+            for workspace in workspaces:
+                ws_id = workspace['id']
+                ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+                ws_servers = ws_ds.get_servers()
+                for ws_server in ws_servers:
+                    if ws_server.get('state', None) != self.server_states.DELETED.value:
+                        servers_finished = False
+                        continue
+            for server in self.build['fixed_arena_servers']:
+                server_name = f"{self.build['parent_id']}-{server}"
+                server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
+                if server_ds.get('state', None) != self.server_states.DELETED.value:
+                    servers_finished = False
+                    continue
+            if not servers_finished:
+                time.sleep(sleep_time)
+                wait_time += sleep_time
+        if servers_finished:
+            return True
+        else:
+            return False
 
     def _is_fixed_arena_valid_transition(self, existing_state, new_state):
         if new_state == self.s.START and not existing_state:

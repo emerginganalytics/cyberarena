@@ -128,6 +128,65 @@ class FixedArenaWorkoutBuild:
             self.state_manager.state_transition(self.s.RUNNING)
             logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
 
+    def stop(self):
+        self.state_manager.state_transition(self.s.STOPPING)
+        display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
+        servers_to_stop = [display_proxy]
+        for server in self.fixed_arena_workout['fixed_arena_servers']:
+            server_name = f"{self.fixed_arena_workout['fixed-arena-id']}-{server}"
+            servers_to_stop.append(server_name)
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_servers = ws_ds.get_servers()
+            for ws_server in ws_servers:
+                servers_to_stop.append(ws_server)
+
+        for server in servers_to_stop:
+            if self.debug:
+                ComputeManager(server).stop()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
+                                        action=PubSub.MaintenanceActions.STOP_SERVER, server_name=server)
+
+        if not self.state_manager.are_servers_stopped():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_workout_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.RUNNING)
+            logging.info(f"Finished stopping the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
+
+    def delete(self):
+        self.state_manager.state_transition(self.s.DELETED)
+        display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
+        servers_to_delete = [display_proxy]
+        for server in self.fixed_arena_workout['fixed_arena_servers']:
+            server_name = f"{self.fixed_arena_workout['fixed-arena-id']}-{server}"
+            servers_to_delete.append(server_name)
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_servers = ws_ds.get_servers()
+            for ws_server in ws_servers:
+                servers_to_delete.append(ws_server)
+
+        for server in servers_to_delete:
+            if self.debug:
+                ComputeManager(server).delete()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
+                                        action=PubSub.MaintenanceActions.DELETE_SERVER, server_name=server)
+
+        if not self.state_manager.are_servers_deleted():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_workout_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.RUNNING)
+            logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
+
+    def nuke(self):
+        self.delete()
+        self.build()
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()
