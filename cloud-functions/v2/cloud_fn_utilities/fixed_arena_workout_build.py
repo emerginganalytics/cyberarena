@@ -106,7 +106,7 @@ class FixedArenaWorkoutBuild:
         servers_to_start = [display_proxy]
         for server in self.fixed_arena_workout['fixed_arena_servers']:
             self.fixed_arena_workout.get('fixed_arena_id')
-            server_name = f"{self.fixed_arena_workout['id']}-{server}"
+            server_name = f"{self.fixed_arena_workout['parent_id']}-{server}"
             servers_to_start.append(server_name)
         for ws_id in self.fixed_arena_workout_id:
             ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)

@@ -48,11 +48,16 @@ class TestFixedArenaWorkout:
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fawb = FixedArenaWorkoutBuild(build_id='7805587311078128395', debug=True)
+        fawb = FixedArenaWorkoutBuild(build_id='vipntzveqt', debug=True)
         # fawb.build()
+        fawb.start()
+
+    def start(self):
+        fawb = FixedArenaWorkoutBuild(build_id='vipntzveqt', debug=True)
         fawb.start()
 
 
 if __name__ == "__main__":
     fixed_arena_workout = 'stoc-workout' if not fixed_arena_workout else fixed_arena_workout
-    TestFixedArenaWorkout().build()
+    #TestFixedArenaWorkout().build()
+    TestFixedArenaWorkout().start()

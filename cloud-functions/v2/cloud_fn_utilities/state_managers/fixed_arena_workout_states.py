@@ -133,7 +133,7 @@ class FixedArenaWorkoutStateManager:
                     servers_finished = False
                     continue
             for workspace in workspaces:
-                ws_id = workspace['id']
+                ws_id = workspace.key.name
                 ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
                 ws_servers = ws_ds.get_servers()
                 for ws_server in ws_servers:
