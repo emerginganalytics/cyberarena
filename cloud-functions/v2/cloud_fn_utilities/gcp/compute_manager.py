@@ -42,7 +42,14 @@ class ComputeManager:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_name = server_name
-        self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
+        # self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
+        server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
+        if server_spec:
+            self.server_spec = server_spec.get()
+            self.parent_id = self.server_spec.get('parent_id', None)
+        else:
+            self.server_spec = None
+            self.parent_id = None
         self.parent_id = self.server_spec['parent_id']
 
     def build(self):
