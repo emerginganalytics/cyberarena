@@ -1,6 +1,7 @@
 import json
 import requests
-from flask import abort, Flask, jsonify, redirect, render_template, request, session
+from flask import abort, Flask, jsonify, redirect, render_template, request, session, views
+from flask.views import View
 from utilities.reset_workout import reset_workout
 from utilities.stop_workout import stop_workout
 from utilities.arena_authorizer import ArenaAuthorizer
@@ -15,6 +16,12 @@ from student_app.routes import student_app
 from teacher_app.routes import teacher_app
 from faqs_app.routes import faqs_app
 
+# API Views
+from api.classroom import ClassroomAPI
+from api.workout import WorkoutAPI
+from api.iot_device import IoTDeviceAPI
+from api.fixed_arena import FixedArenaAPI
+from api.injector import InjectorAPI
 # --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
 app.register_blueprint(admin_app)
@@ -424,6 +431,22 @@ def handle_500(e):
 def privacy():
     return render_template('privacy.html')
 
+
+def register_api(view, endpoint, url, pk='id', pk_type='string'):
+    view_func = view.as_view(endpoint)
+    app.add_url_rule(url,
+                     view_func=view_func, methods=['GET'])
+    app.add_url_rule(url, view_func=view_func, methods=['POST'])
+    app.add_url_rule(f'{url}<{pk_type}:{pk}>', view_func=view_func,
+                     methods=['GET', 'PUT', 'DELETE'])
+
+
+# Register all API Routes
+register_api(view=ClassroomAPI, endpoint='classroom', url='/api/classroom/', pk='class_name')
+register_api(view=WorkoutAPI, endpoint='workout', url='/api/workout/', pk='build_id')
+register_api(view=IoTDeviceAPI, endpoint='iot', url='/api/iot/', pk='device_id')
+register_api(view=FixedArenaAPI, endpoint='fixed-arena', url='/api/fixed-arena/', pk='fixed_arena_id')
+register_api(view=InjectorAPI, endpoint='inject', url='/api/inject/', pk='inject_id')
 
 if __name__ == '__main__':
      app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)

@@ -4,17 +4,17 @@
 {% import 'logo_macro.html' as logo %}
 {% block content%}
     <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student-styles.css') }}">
-    <script type="text/javascript" src="{{ url_for('student_app.static', filename='student-utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('student_app.static', filename='js/student-utils.js') }}"></script>
 {% if workout['registration_required'] %}
-    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
-    <script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
+    <script type="text/javascript">
         var auth_config = {
-            apiKey: '{{auth_config["api_key"]}}',
-            authDomain: '{{auth_config["auth_domain"]}}',
-            projectId: '{{auth_config["project_id"]}}'
+            apiKey: '{{ auth_config["api_key"] }}',
+            authDomain: '{{ auth_config["auth_domain"] }}',
+            projectId: '{{ auth_config["project_id"] }}'
         };
         initApp(auth_config).then(value => {
-            if(value['admin'] == false && value['student'] == false){
+            if ( value['admin'] == false && value['student'] == false ){
                 location.href = "/login";
             }
         })
@@ -33,19 +33,31 @@
     </script>
 {% endif %}
 {% if build_type == "compute" %}
-    <script>
+    <script type="text/javascript">
         //Used if the workout involves VMs
         //Regularly check the state, and update the current state indicator
         //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
-        function check_workout_state(){
-            var state = $.ajax({
-                type:"POST",
-                url: "/workout_state/{{ workout.key.name }}",
-                traditional: "true",
-            });
-            return state;
-        }
-
+        {% if workout['registration_required'] %}
+            function check_workout_state(){
+                var workout = $.ajax({
+                    type:"GET",
+                    url: "/api/workout/{{ workout.key.name }}",
+                    traditional: "true",
+                });
+                var state = workout.get('state', 'RUNNING');
+                workout = null;
+                return state;
+            }
+        {% else %}
+             function check_workout_state(){
+                var state = $.ajax({
+                    type:"GET",
+                    url: "/api/workout/{{ workout.key.name }}",
+                    traditional: "true",
+                });
+                return state;
+             }
+        {% endif %}
         function update_state(){
             var state_display = document.getElementById("workout_state_display");
             var workout_link = document.getElementById("workout_link");
@@ -103,11 +115,10 @@
                     $(".loader").remove();  
                 }
             });
-            
         }
         $(document).ready(function(){
             update_state();
-            var state_checker = setInterval(update_state, 10000);
+            var state_checker = setInterval(update_state, 30000);
 
             $(".control_form").submit(function(event){
                 event.preventDefault();
@@ -140,7 +151,7 @@
                                     if(test_state !== currentState){
                                         clearInterval(state_update);
                                         update_state();
-                                        state_checker = setInterval(update_state, 10000);
+                                        state_checker = setInterval(update_state, 30000);
                                     }
                                 });
                             }, 5000);
@@ -148,6 +159,14 @@
                     })
                 })
             }); 
+        });
+        $(document).ready(function (){
+            document.querySelector('#start-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target).entries());
+                console.log(data);
+                send_action(data, workout_id='{{ workout.key.name }}');
+            });
         });
     </script>
 {% endif %}
@@ -184,9 +203,10 @@
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
-                        <form class="control_form" id='start_vm' action="/start_vm" method="post">
+                        <form class="control_form" id='start-vm-form'>
                             <div class="input-field form-group" >
                                 <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
+                                <input type="hidden" id="start_vm" name="action" value="START">
                                 <input type="number" id="time" class="form-control" name="time" value="2" min="1" max="10" style="margin-top:1em;">
                                 <label>Run time (1 - 10 hours)</label>
                             </div>
@@ -205,6 +225,7 @@
                     </div>
                     <div class='control_button'>
                         <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
+                            <input type="hidden" id="stop-vm" name="action" value="STOP">
                             <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                             <div class="btn-ctn">
                                 {% if is_expired %}
