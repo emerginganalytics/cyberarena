@@ -9,6 +9,16 @@ function server_action(action, server_name){
         })
     })
 }
+function send_action(data, workout_id) {
+    var send_data = JSON.stringify(data);
+    fetch('/api/workout/' + workout_id, {
+        method: "PUT",
+        headers: {'Content-Type': 'application/json'},
+        body: send_data
+    }).then(response=>{
+        return response
+    }).then(data=>console.log(data));
+}
 function prepare_survey(){
     //Set up display modal for student feedback survey
     var modal = document.getElementById("surveyModal");

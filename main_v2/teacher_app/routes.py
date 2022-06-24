@@ -270,7 +270,6 @@ def fixed_arena():
     #fixed_workout_list = list(fixed_workout_query.fetch())
     #server_list = fixed_workout_list[0]['workspace_servers']
 
-
     # Get list of workouts from cloud bucket
     # Used for creating new dynamic workouts
     build_workout_options = []
@@ -284,7 +283,7 @@ def fixed_arena():
     # Render template
     return render_template('fixed_arena_home.html', workout_titles=build_workout_options,
                            auth_config=auth_config, attack_spec=attack_yaml, network_builds=network_builds,
-                           server_list=server_list, fixed_workout_list=server_list)
+                           server_list=server_list, fixed_workout_list=server_list, workstations=None)
 
 
 # Called by start workouts button on instructor landing. Starts all workouts in a unit.

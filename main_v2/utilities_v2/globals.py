@@ -2,11 +2,13 @@ from enum import Enum
 
 
 class DatastoreKeyTypes(str, Enum):
+    ADMIN_INFO = 'cybergym-admin-info'
+    CLASSROOM = 'cybergym-class'
     CYBERGYM_WORKOUT = 'cybergym-workout'
+    CYBERGYM_UNIT = 'cybergym-unit'
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
     SERVER = 'cybergym-server'
-    ADMIN_INFO = 'cybergym-admin-info'
 
 
 class BuildConstants:
@@ -71,9 +73,17 @@ class BuildConstants:
     class Servers:
         FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
 
+
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
+        MANAGE_SERVER = 'manage-server'
+        BUILD_WORKOUTS = 'build-workouts'
+        ADMIN_SCRIPTS = 'admin-scripts'
+        START_VM = 'start-vm'
+        STOP_VM = 'stop-vm'
+        START_ARENA = 'start-arena'
+        STOP_ARENA = 'stop-arena'
 
     class Handlers(str, Enum):
         BUDGET = "BUDGET"
@@ -100,6 +110,11 @@ class PubSub:
         REBUILD_SERVER = 8
         SNAPSHOT_SERVER = 9
         RESTORE_SERVER = 10
+
+    class WorkoutActions(str, Enum):
+        BUILD: 'BUILD'
+        NUKE: 'NUKE'
+
 
 class Buckets:
     class Folders(str, Enum):
