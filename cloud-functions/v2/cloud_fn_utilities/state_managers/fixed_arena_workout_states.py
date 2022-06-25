@@ -155,7 +155,6 @@ class FixedArenaWorkoutStateManager:
             return False
 
     def are_servers_stopped(self):
-        # Good place to look for bugs, may need to change the STOPPED value to STOPPING
         max_wait_time = 300
         sleep_time = 10
         wait_time = 0
@@ -169,7 +168,7 @@ class FixedArenaWorkoutStateManager:
                     servers_finished = False
                     continue
             for workspace in workspaces:
-                ws_id = workspace['id']
+                ws_id = workspace.key.name
                 ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
                 ws_servers = ws_ds.get_servers()
                 for ws_server in ws_servers:
@@ -191,7 +190,6 @@ class FixedArenaWorkoutStateManager:
             return False
 
     def are_servers_deleted(self):
-        # Good place to look for bugs, do not know if will work properly
         max_wait_time = 300
         sleep_time = 10
         wait_time = 0
@@ -205,11 +203,11 @@ class FixedArenaWorkoutStateManager:
                     servers_finished = False
                     continue
             for workspace in workspaces:
-                ws_id = workspace['id']
+                ws_id = workspace.key.name
                 ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
                 ws_servers = ws_ds.get_servers()
                 for ws_server in ws_servers:
-                    if ws_server.get('state', None) != self.server_states.DELETED.value:
+                    if ws_server.get('state', None) != self.server_states.STOPPED.value:
                         servers_finished = False
                         continue
             for server in self.build['fixed_arena_servers']:
