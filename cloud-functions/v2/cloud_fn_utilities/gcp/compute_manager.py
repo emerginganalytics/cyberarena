@@ -170,6 +170,68 @@ class ComputeManager:
         state_manager.state_transition(self.s.RUNNING)
         logging.info(f"Finished starting {self.server_name}")
 
+    def stop(self):
+        """
+        Stops a server based on the specification in the Datastore entity with name server_name.
+        """
+        state_manager = ServerStateManager(initial_build_id=self.server_name)
+
+        if state_manager.get_state() != self.s.STOPPED.value:
+            state_manager.state_transition(self.s.STOPPING)
+            i = 0
+            stop_success = False
+            while not stop_success and i < 5:
+                try:
+                    response = self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
+                                                             instance=self.server_name).execute()
+                    stop_success = True
+                    logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
+                except BrokenPipeError:
+                    i += 1
+
+            i = 0
+            success = False
+            while not success and i < 5:
+                try:
+                    self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                                       operation=response["id"]).execute()
+                    success = True
+                except timeout:
+                    i += 1
+                    logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                    pass
+            if not success:
+                logging.error(f'Timeout in trying to stop server {self.server_name}')
+                state_manager.state_transition(self.s.BROKEN)
+                raise ConnectionError
+
+            state_manager.state_transition(self.s.STOPPED)
+            logging.info(f"Finished stopping {self.server_name}")
+        else:
+            logging.info(f"Server {self.server_name} is not running")
+
+    def nuke(self):
+        """
+        Deletes a server based on the specification in the Datastore entity with the name server_name. Then rebuilds
+        the server.
+        """
+        self.delete()
+        self.build()
+
+    def delete(self):
+        """
+        Deletes a server based on the specification in the Datastore entity with the name server_name.
+        """
+        state_manager = ServerStateManager(initial_build_id=self.server_name)
+        state_manager.state_transition(self.s.DELETING)
+
+        logging.info(f'Deleting {self.server_name}')
+        response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
+                                                   instance=self.server_name).execute()
+        self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                           operation=response["id"]).execute()
+        state_manager.state_transition(self.s.DELETED)
+
     def _add_disks(self):
         disks = None
         if self.server_spec.get('build_type', None) != BuildConstants.ServerBuildType.MACHINE_IMAGE:
