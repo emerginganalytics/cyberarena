@@ -8,24 +8,24 @@ import json
 teacher_api = Blueprint('teacher_api', __name__, url_prefix='/api')
 
 
-@teacher_api.route('/<unit_id>/vuln/build', methods=['POST'])
-def vuln_builder_form_data(unit_id):
+@teacher_api.route('/vuln/build', methods=['POST'])
+def vuln_builder_form_data():
     """POST to this endpoint to build form based on filtered items"""
-    unit = ds_client.get(ds_client.key("cybergym-unit", unit_id))
     if request.method == 'POST':
         form_data = json.dumps(request.json)
-        VulnManager().process_form(unit_id=unit_id, form_data=form_data)
+        VulnManager().process_form(form_data=form_data)
         return '200'
 
 
-@teacher_api.route('/<unit_id>/vuln/status', methods=['POST'])
-def vuln_status(unit_id):
+@teacher_api.route('/vuln/status', methods=['POST'])
+def vuln_status():
     """Handles polling on injected vulnerabilities or attacks"""
+    # TODO: Consider moving this endpoint to standard routes instead of api routes
     pass
 
 
-@teacher_api.route('/<unit_id>/vuln/results/filter', methods=['POST'])
-def vuln_results_filter(unit_id):
+@teacher_api.route('/vuln/results/filter', methods=['POST'])
+def vuln_results_filter():
     """Handles filtering of attack result table -- Possibly unneeded"""
     pass
 

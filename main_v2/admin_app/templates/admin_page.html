@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% block title%} Admin {% endblock %}
+{% block content %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='css/admin-styles.css') }}">
+    <script src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src="{{ url_for('admin.static', filename='js/workout_spec_form.js') }}"></script>
+    <script type="text/javascript" src="{{url_for('admin.static', filename='js/admin_utils.js') }}"></script>
+    <script>
+        var auth_config = {
+            apiKey: '{{auth_config["api_key"]}}',
+            authDomain: '{{auth_config["auth_domain"]}}',
+            projectId: '{{auth_config["project_id"]}}'
+        };
+        initApp(auth_config).then(value =>{
+            if(value['admin'] == false){
+                location.href = "/login";
+            }else{
+                document.getElementById('admin_container').style.visibility = "visible";
+            }
+        })
+        $(document).ready(function(){
+            $('a[data-toggle="tab"]').on('show.bs.tab', function(e){
+                localStorage.setItem('activeTab', $(e.target).attr('href'));
+            });
+            var activeTab = localStorage.getItem('activeTab');
+            if (activeTab){
+                $('#admin-tabs a[href="' + activeTab + '"]').tab('show');
+            }
+            //Convert timestamps to readable format
+            //Adds event listeners to display forms for container or compute workouts
+            prepare_workout_form();
+            //Jquery listeners for basic admin functions
+            $(".workout_search").on("submit", function(e){
+                e.preventDefault();
+                workout_search();
+            })
+            $("#admin_function_controls").on("click", function(){
+                var function_name = document.getElementById('function_select').value;
+                var function_modal = document.getElementById(function_name + "_modal");
+                $(function_modal).modal();
+            })
+
+            $('.admin_action_form').on('submit', function(event){
+                event.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                    type: "POST",
+                    url: "/admin/api/admin_scripts",
+                    data: formData,
+                    dataType: 'json',
+                    contentType: false,
+                    processData: false
+                })
+            })
+            $('#maintenance_tab').on('shown.bs.tab', function(e){
+                let target = $(e.target).attr('href');
+                get_active_workouts();
+            })
+            $('#iot_management_tab').on('shown.bs.tab', function(e){
+                let target = $(e.target).attr('href');
+                get_iot_devices();
+            })
+            $('#register_device').on('submit', function(event){
+                event.preventDefault();
+                var formData = new FormData(this);
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('admin.admin_api.register_iot_device') }}",
+                    data: formData,
+                    dataType: 'json',
+                    contentType: false,
+                    processData: false,
+                    success: function (data){
+                        console.log(data);
+                        if (data.status === 200){
+                            window.location.reload();
+                        }
+                        else {
+                            $('#register-device-err').append(data.error);
+                        }
+                    }
+                });
+            });
+        })
+        function create_server_group(instance_list){
+            var server_div = new_server();
+            add_image_options(server_div, {{ instance_list|safe }});
+        }
+    </script>
+    <h1>Administrator Controls</h1>
+    <div id="admin_container" class="row" style="visibility: hidden;margin-bottom:1em;">
+        <div id='admin-tabs' class="nav flex-column col-2 nav-pills">
+            <a class="nav-link active" id="user_management_tab" data-toggle="tab" href="#user_container" role="tab" aria-controls="user_container" aria-selected="true">User Management</a>
+            <a class="nav-link" id="iot_management_tab" data-toggle="tab" href="#iot_container" role="tab" aria-controls="iot_container" aria-selected="false">IoT Management</a>
+            <a class="nav-link" id="maintenance_tab" data-toggle="tab" href="#maintenance_container" role="tab" aria-controls="maintenance_container" aria-selected="false">Maintenance</a>
+            <a class="nav-link" id="customization_tab" data-toggle="tab" href="#customization_container" role="tab" aria-controls="customization_container" aria-selected="false">Customization</a>
+            <a class="nav-link" id="workout_creation_tab" data-toggle="tab" href="#workout_creation_container" role="tab" aria-controls="workout_creation_container" aria-selected="false">Workout Management</a>
+            <a class="nav-link" id="comments_tab" data-toggle="tab" href="#comments_container" role="tab" aria-controls="comments_container" aria-selected="false">User Comments</a>
+            <a class="nav-link" id="teacher_home_link" href="/teacher/home">Instructor Page</a>
+        </div>
+        <div class="tab-content col-10">
+            <div class='tab-pane fade show active user_tab' id='user_container' role="tabpanel" aria-labelledby="user_management_tab">
+                <div id="user_management_container">
+                    <div id='admin_users' class='user_group col-3'>
+                        <h2>Admin Users</h2>
+                        <ul class='user_list' style="list-style-type: none">
+                            {% for user in admin_info['admins'] %}
+                                <li>
+                                    <a class='btn' data-toggle='collapse' href='#admin_user_{{user}}'>{{user}}</a>
+                                    <div id='admin_user_{{user}}' class='collapse user_info'>
+                                        <div class='user_controls'>
+                                            <button class='btn' onclick="admin_action('revoke_access', '{{user}}')">Revoke Admin Access</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div id='authorized_users' class='user_group col-3'>
+                        <h2>Authorized Users</h2>
+                        <ul class='user_list' style="list-style-type: none">
+                            {% for user in admin_info['authorized_users'] %}
+                                {% if user not in admin_info['admins'] %}
+                                    <li>
+                                        <a class='btn' data-toggle='collapse' href='#auth_user_{{user}}'>{{user}}</a>
+                                        <div id='auth_user_{{user}}' class='collapse user_info'>
+                                            <div class='user_controls'>
+                                                <button class='btn' onclick="admin_action('promote_user', '{{user}}')" style='background-color:green;'>Promote to Admin</button>
+                                                <button class='btn' onclick="admin_action('remove_user', '{{user}}')">Remove</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div id='pending_users' class='user_group col-3'>
+                        <h2>Pending</h2>
+                        <ul class='user_list' style="list-style-type: none">
+                            {% for user in admin_info['pending'] %}
+                                <li>
+                                    <a class='btn' class='user_link' data-toggle='collapse' href='#pending_user_{{user}}'>{{user}}</a>
+                                    <div id='pending_user_{{user}}' class='collapse user_info'>
+                                        <div class='user_controls'>
+                                            <button class='btn' onclick="admin_action('approve_user','{{user}}')" style='background-color:green;'>Approve</button>
+                                            <button class='btn' onclick="admin_action('deny_user', '{{user}}')">Deny</button>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" role="tabpanel" id='iot_container' aria-labelledby="iot_management_tab">
+                <div id="iot_management_container">
+                    <div style="padding: 20px; max-width: 50%;">
+                        <button class="btn btn-primary" data-toggle="collapse" data-target="#register_device_div">Register New Device</button>
+                    </div>
+                    <div id="register_device_div" class="collapse" style="max-width: 50%;">
+                        <h4 style='color: red; padding-bottom: 5px;' id="register-device-err"></h4>
+                        <form id="register_device" class="form-horizontal" style="padding-bottom: 10px">
+                            <div class="form-row align-items-center device-ctrl-padding">
+                                <div class="form-control my-3">
+                                    <label for="register_device_id">Device ID: </label>
+                                    <div>
+                                        <input type='text' id="register_device_id" name="register_device_id"
+                                               pattern="^cyber-arena-[0-9]{4}$" title="cyber-arena-0000" placeholder="cyber-arena-0000" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row align-items-center device-ctrl-padding">
+                                <div class="form-control my-3">
+                                    <label class='control-label mr-sm-2' for="register_device_ssh">Device Public Key</label>
+                                    <div>
+                                        <textarea id="register_device_ssh" name='register_device_ssh' class="iot-textarea"
+                                                  type="text" rows="3" cols="50" placeholder="RSA X509 Public Key" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="max-width: 50%;" onsubmit="return device_id_regex()">Submit</button>
+                        </form>
+                    </div>
+                    <table id="iot_devices_table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Device ID<br>
+                                    <small>Click to view admin controls</small>
+                                </th>
+                                <th>Student Name</th>
+                                <th>Student Address</th>
+                                <th>Tracking Number</th>
+                                <th>Date Sent</th>
+                                <th>Date Received</th>
+                                <th>Status</th>
+                                <th>Comments</th>
+                            </tr>
+                        </thead>
+                        <tbody id="iot_devices_display">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="maintenance_container" role="tabpanel" aria-labelledby="maintenance_tab">
+                <div id="maintenance">
+                    <br><h2>Maintenance</h2><br>
+                    <p>This page shows all currently active workouts, as well as some basic info you would find in the Datastore. This includes all workouts that have not expired.</p><br>
+                    <h3>Admin Functions</h3>
+                    <div id="admin_functions_container" class="container" style="margin:0">
+                        <select id="function_select" class="col-8 input-group form-control">
+                            {% for action in admin_actions %}
+                                <option class="active_admin_function" value="{{action}}" data-function-name="{{action}}">{{action}}</option>
+                            {% endfor %}
+                        </select>
+                        <a href="#" class="btn col-3" id="admin_function_controls">Activate</a>
+                    </div>
+                    <h3>Advanced Search</h3>
+                    <div id="advanced_search_container" style="align-items:center;">
+                        <form class="col-12 workout_search">
+                            <div class="input-group">
+                                <select id="filter_select" class="col-2 input-group-prepend form-control" style="display:block;padding:1px;margin:0;">
+                                    <option selected>Select Search Key</option>
+                                    <option value="workout_id">Workout ID</option>
+                                    <option value="workout_type">Workout Type</option>
+                                    <option value="instructor">Instructor</option>
+                                    <option value="unit_id">Unit ID</option>
+                                    <option value="state">State</option>
+                                </select>
+                                <input name="search_term" type="text" class="form-control col-8" id="search_term" placeholder="Search for workouts here..." />
+                                <input type="submit" style="text-align:center;" class="btn col-2" value="Search">
+                            </div>
+                        </form>
+                    </div>
+                    <h3>Active Workouts</h3>
+                    <div id="loading-msg" style="display:none;text-align:center"></div>
+                    <a id="clear_filter_button" href="#" onclick="clear_filter()" class="btn" style="display:none;width:50%;margin-bottom:2em;">Clear Filter</a>
+                    <table id="active_workout_table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Workout ID<br>
+                                    <small>Click to view admin controls</small>
+                                </th>
+                                <th>Workout Type</th>
+                                <th>Instructor</th>
+                                <th>Student Name</th>
+                                <th>Unit ID</th>
+                                <th>State</th>
+                                <th>Time Running</th>
+                                <th>Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active_workout_display">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class='tab-pane fade' id='customization_container' role="tabpanel" aria-labelledby="customization_tab">
+                <div id="customization">
+                    <br>
+                    <h2>Upload Custom Logo</h2>
+                    <form class='logo_form col-6' action='/admin/api/update_logo' method="POST" enctype="multipart/form-data">
+                        <input type='file' class="form-control-file" id='custom_logo_update' name='custom_logo' ><br>
+                        <button type="submit" class="btn btn-small">Submit</button>
+                    </form>
+                    <h2>Change Site Theme</h2>
+                    <form class='base_form col-6' action='/admin/api/update_base' method="POST" enctype="multipart/form-data">
+                        <input type='text' class="form-control" id='custom_base_update' name='custom_color' placeholder="#FFFFFF"><br>
+                        <button type="submit" class="btn btn-small">Submit</button>
+                    </form>
+
+                </div>
+            </div>
+            <div class='tab-pane fade' id='workout_creation_container' role='tabpanel' aria-labelledby='workout_creation_tab'>
+                <h2>Create A New Workout</h2>
+                <a class="btn btn-small" href="javascript:void(0)" onclick="toggle_new_spec_form()">Toggle New Spec Form</a>
+                <div id="new_workout_spec_form" style="display: none; margin-bottom: 1em;">
+                    <form id="new_workout_form" class="new_workout_form col-8" enctype="multipart/form-data">
+                        <fieldset>
+                            <legend>Basic Info</legend>
+                            <input type="text" class="form-control" id="workout_name" name="workout_name" placeholder="Workout Name">
+                            <label for="teacher_instruction_file">Upload Teacher Instructions</label><br>
+                            <input type="file" class="form-control-file" id="teacher_instruction_file" name="teacher_instruction_file"><br><br>
+
+                            <label for="student_instruction_file">Upload Student Instructions</label><br>
+                            <input type="file" class="form-control-file"id="student_instruction_file" name="student_instruction_file"><br><br>
+
+                            <textarea id="workout_description" class="form-control" name="workout_description" placeholder="Workout Description"></textarea>
+                            <label for="build_type_select">Select Workout Build Type</label>
+                            <select id="build_type_select" class="form-control" style="display:block" name="build_type">
+                                <option value="compute">Compute VM</option>
+                                <option value="container">Container App</option>
+                            </select>
+                        </fieldset>
+                        <div id="compute_build_form" class="form-group">
+                            <fieldset>
+                                <legend>Student Entry</legend>
+                                <div id="student_entry_container">
+                                    <select class="form-control" style="display:block" id="student_entry_type" name="entry_type">
+                                        <option value="rdp">RDP</option>
+                                        <option value="vnc">VNC</option>
+                                    </select>
+                                    <select style="display:block" class="form-control" name="student_entry_network" id="student_entry_select"></select>
+                                    <label for="student_entry_select">Select the network to which the student entry will connect</label>
+                                    <select class="form-control" style="display:block" name="host_ip" id="host_ip_select"></select>
+                                    <label for="host_ip_select">Select the IP of the host machine</label>
+                                    <input class="form-control" type="text" id="workout_username" name="workout_username" placeholder="Workout Username">
+                                    <label for="workout_username">Enter the student entry username</label>
+                                    <input class="form-control" type="text" id="workout_password" name="workout_password" placeholder="Workout Password">
+                                    <label for="workout_password">Enter the student entry password</label>
+                                </div>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Networks</legend>
+                                <div class="form_subgroup form-group" id="network_container"></div>
+
+                                <a onclick="new_network()" href="javascript:void(0)" class="btn" id="create_network_button">Add Network</a>
+                            </fieldset>
+                            <fieldset>
+                                <legend>Servers</legend>
+                                <div class="form_subgroup form-group" id="server_container"></div>
+                                <a onclick="create_server_group()" href="javascript:void(0)" class="btn" id="create_server_button">Add Server</a>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Firewall Rules</legend>
+                                <div class="form_subgroup form-group" id="firewall_container"></div>
+                                <a onclick="new_firewall()" href="javascript:void(0)" class="btn" id="create_firewall_button">Add Firewall Rule</a>
+                            </fieldset>
+                        </div>
+                        <div id="container_build_form" style="display:none;">
+                            <fieldset>
+                                <legend>Container Info</legend>
+                                <input type="text" class="form-control" id="container_url" name="container_url">
+                                <label for="host_name">Enter the container host name (configured in GCP DNS)</label>
+                            </fieldset>
+                        </div>
+                        <fieldset>
+                            <legend>Assessment</legend>
+                            <div class="form_subgroup form-group" id="assessment_container"></div>
+                            <a onclick="new_assessment_question()" href="javascript:void(0)" class="btn" id="add_question_button">Add Assessment Question</a>
+                        </fieldset>
+                        <br>
+                        <a class="btn btn-small" onclick="process_new_spec()">Submit</a>
+                        <!-- <input id="new_workout_submit" type="submit" class="btn" value="Submit"> -->
+                    </form>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="comments_container" role="tabpanel" aria-labelledby="comments_tab">
+                <div id="comments">
+                    <br><h2>Comments</h2><br>
+                    <p>This page shows comments left by users.</p><br>
+                    <h3>Comments</h3>
+                    <table id="comment_table" class="table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Email</th>
+                            <th>Subject</th>
+                            <th>Comment</th>
+                            <th>Message Read?</th>
+                        </tr>
+                        {%for comment in comments%}
+                            <tr id="comment_row_{{comment.key.name}}">
+                                <td class="comment_date_field">{{ comment['date'] }}</td>
+                                <td class="comment_email_field">{{ comment['comment_email'] }}</td>
+                                <td class="comment_subject_field">{{ comment['subject'] }}</td>
+                                <td class="comment_text_field">{{ comment['comment_text'] }}</td>
+                                <td class="comment_status">{{ comment['message_viewed'] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% for action in admin_actions %}
+        <div class="modal fade" id="{{action}}_modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5>Admin Function: {{action}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form enctype="multipart/form-data" class="form admin_action_form" id="{{action}}_submit_form">
+                            <input type="hidden" name="function_name" value="{{action}}"/>
+                            {% for param in admin_actions[action]['params'] %}
+                                <div class="form-group">
+                                    <label for="{{action}}_{{param}}">{{param}}</label>
+                                    <input type="text" class="form-control" name="{{param}}" id="{{action}}_{{param}}">
+                                </div>
+                            {% endfor %}
+                            <div class="container">
+                                <div class="row" style="justify-content: space-around;">
+                                    <button class="btn col-5" data-dismiss="modal">Cancel</button>
+                                    <button class="btn col-5" type="submit">Submit</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="modal fade" id="yaml_modal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div id="yaml_content"></div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="confirm_new_spec()">Send</button>
+            </div>
+          </div>
+        </div>
+    </div>
+{% endblock %}

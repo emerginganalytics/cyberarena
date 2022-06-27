@@ -68,6 +68,8 @@ class BuildConstants:
             ]
         }
 
+    class Servers:
+        FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
 
 class PubSub:
     class Topics(str, Enum):
@@ -102,3 +104,4 @@ class PubSub:
 class Buckets:
     class Folders(str, Enum):
         FIXED_ARENA = "yaml-build-files/v2/fixed_arena/"
+        FIXED_ARENA_WORKOUT = "yaml-build-files/v2/fixed_arena_workout/"

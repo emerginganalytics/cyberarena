@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}FAQ{% endblock%}
+
+{% block content %}
+    <style>
+        .faq-container{
+            margin-bottom: 1em;
+            
+        }
+    </style>
+    <div class="faq-container container">
+        <h2>General</h2>
+        <div id="faq-accordion-general">
+            <div class="card">
+                <div class="card-header" id="gen-faq-header0">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq0" aria-expanded="false" aria-controls="collapse_gen_faq0">
+                        Who should I contact for technical assistance?
+                    </button>
+                </div>
+                <div id="collapse_gen_faq0" class="collapse" aria-labelledby="gen-faq-header0" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            There is a help desk worker that you can contact, usually through Slack or email. If you do not know who this is, ask your instructor and they will be able to either provide contact information or contact the help desk directly.
+                            <br><br>
+                            <strong>Note: </strong> the help desk workers may not be able to assist with issues inside the workout / lesson, as they may not be involved in the development of the curriculum. They are mainly there for issues involving the Cyber Arena site or cloud resources (virtual machines, datastore, etc).
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="gen-faq-header1">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq1" aria-expanded="false" aria-controls="collapse_gen_faq1">
+                        Workout stuck in "Working" state
+                    </button>
+                </div>
+                <div id="collapse_gen_faq1" class="collapse" aria-labelledby="gen-faq-header1" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            This can occur after the workout is started, and usually resolves itself within 15 minutes (for synchronous lessons, we recommend instructors start all workouts ~20 minutes before the lesson begins).
+                            <br>
+                            This can also indicate that a workout has been deleted, either manually or because it has expired. If you believe this is the case, ask your instructor or the help desk for assistance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="gen-faq-header2">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq2" aria-expanded="false" aria-controls="collapse_gen_faq2">
+                        When should I nuke my workout?
+                    </button>
+                </div>
+                <div id="collapse_gen_faq2" class="collapse" aria-labelledby="gen-faq-header2" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            "Nuking" a workout is generally the last resort to fix errors with the machines. It deletes the machines, and builds new ones with the initial configuration. If your workout does not require progress over several sessions (ie, a semester long course), nuking is a relatively quick way to get back into the lesson.
+                            <br>
+                            <strong>However,</strong> if your lesson is designed to be progressed over time, nuking will delete <strong>ALL</strong> of your progress. In this case, it is recommended that you seek assistance from the help desk or your instructor, as they may be able to find the cause of the issue without removing your progress.
+                            <br><br>
+                            Notes:
+
+                            <ul>
+                                <li>It takes several minutes for the Nuke process to complete. During this time <strong>DO NOT </strong> initiate the Nuke process again. This can lead to issues with the rebuild process, causing the workout to become stuck and inaccessible until it is manually fixed.</li>
+                                <li>Rebuilding the workout will generate a new password for your guacamole server. To see the new password, simply refresh the landing page.</li>
+                            </ul>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="gen-faq-header3">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq3" aria-expanded="false" aria-controls="collapse_gen_faq3">
+                        How are assessments scored?
+                    </button>
+                </div>
+                <div id="collapse_gen_faq3" class="collapse" aria-labelledby="gen-faq-header3" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            Workout assessments are scored using a general text-matching scheme with an answer key. It is not 100% precise, so the score shown on your landing page may not be entirely accurate. However, the answers you submit are available to the instructor, so they will be able to tell if your answers are close enough to be marked correct.
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="gen-faq-header4">
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_gen_faq4" aria-expanded="false" aria-controls="collapse_gen_faq4">
+                        Part of my workout is not working / accessible
+                    </button>
+                </div>
+                <div id="collapse_gen_faq4" class="collapse" aria-labelledby="gen-faq-header4" data-parent="#faq-accordion-general">
+                    <div class="card-body">
+                        <p>
+                            This may be caused by individual virtual machines not starting, or not being built correctly. Contact the help desk worker, and they will be able to start the machine or rebuild it.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="faq-container container">
+            <h2>Guacamole Issues</h2>
+            <div id="faq-accordion-guac">
+                <div class="card">
+                    <div class="card-header" id="faq-header1">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_faq1" aria-expanded="false" aria-controls="collapse_faq1">
+                            Connection Error After Clicking Enter Workout
+                        </button>
+                    </div>
+                    <div id="collapse_faq1" class="collapse" aria-labelledby="faqheader1" data-parent="#faq-accordion-guac">
+                        <div class="card-body">
+                            <p>
+                                This can happen when the workout is accessed immediately after it switches to the "running" state, usually because the virtual machines are running, but the guacamole server has not finished the startup process.
+                                Wait a couple of minutes for the server to finish the start process, then refresh the page, and the regular log in page should appear. If the issue is still not resolved, stop the workout, wait another couple minutes, then start it again.
+                                If the issue reappears, ask your instructor for assistance, or contact the help desk (usually through Slack/email).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="faq-header2">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_faq2" aria-expanded="false" aria-controls="collapse_faq2">
+                            Simultaneous Login Limit Reached
+                        </button>
+                    </div>
+                    <div id="collapse_faq2" class="collapse" aria-labelledby="faqheader2" data-parent="#faq-accordion-guac">
+                        <div class="card-body">
+                            <p>
+                                This can occur when the same workout is assigned to multiple people, usually when the signup link is used (we are currently investigating this issue). If you see this error, simply go back to the signup page and claim another workout, or ask your instructor to send you a new workout link.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header" id="faq-header3">
+                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse_faq3" aria-expanded="false" aria-controls="collapse_faq3">
+                            Remote Desktop Server Is Currently Unreachable (Guacamole Error After Logging In)
+                        </button>
+                    </div>
+                    <div id="collapse_faq3" class="collapse" aria-labelledby="faqheader3" data-parent="#faq-accordion-guac">
+                        <div class="card-body">
+                            <p>
+                                This indicates that the desktop that is served by Guacamole is not connecting correctly. This could be because the machine did not start correctly, or the internal network encountered an error. 
+                                Stop the workout, wait a minute, then start it again. If the error persists, you may have to "Nuke" your workout. This will delete the machines and rebuild them. This process will take several minutes.
+                                <br><br><strong>CAUTION: </strong> Nuking will remove any data or progress you have made in the workout, and should only be used as a last resort. We recommend contacting the help desk for assistance first, as they can troubleshoot the machines without removing your progress.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+{% endblock %}

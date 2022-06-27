@@ -1,0 +1,141 @@
+{# Jinja2 macros used to build forms based on filterTemplates results #}
+<!-- Builds select field for template choices -->
+{% macro choices_arg(form_id, name, choices, default) -%}
+    {# builds select fields for each, non-network argument #}
+    <select name="{{ name }}" id="{{ form_id }}_{{ name }}">
+        {% for choice in choices %}
+            {% for key, val in choice.items() %}
+                {% if key == default %}
+                    <option value="{{ key }}" selected>{{ key }}</option>
+                {% else %}
+                    <option value="{{ key }}">{{ key }}</option>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+   </select>
+{%- endmacro %}
+
+<!-- Builds target_network input and select fields -->
+{% macro target_network(form_id, workout_list, registration_required) %}
+    <script>
+        function disableTargetWorkout(elem, target_field){
+            var disable_field = $("#" + target_field);
+            disable_field.prop("disabled", elem.checked);
+            disable_field.prop('required', elem.checked);
+            if (elem.checked === true){
+                elem.setAttribute('required', "");
+            }
+            else {
+                elem.removeAttribute('required');
+            }
+        }
+    </script>
+    {# builds network form fields #}
+    <div class="form-group">
+        <label for="target_unit">Send to Unit: </label>
+        <input name="target_unit" type="checkbox" value="check" id="target_unit"
+               onchange="disableTargetWorkout(this, 'target_workout')"/>
+        <select name="target_workout" id="target_workout" required>
+            <option value="" selected disabled hidden style="text-align: center">--Send to Workout--</option>
+            {% for workout in workout_list %}
+                {% if workout.studnet_name %}
+                    {% if registration_required %}
+                        <option value="{{ workout.name }}">{{ workout.name }} | {{ workout.student_name.student_name }}</option>
+                    {% else %}
+                        <option value="{{ workout.name }}">{{ workout.name }} | {{ workout.student_name }}
+                    {% endif %}
+                {% else %}
+                    <option value="{{ workout.name }}">{{ workout.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+{% endmacro %}
+
+<!-- [REPLACED] For each template in the template list, builds a form and adds that form to a table -->
+{% macro build_form_table(templates, uid, workout_list, registration_required) -%}
+    <style>
+        .hiddenRow {
+            padding: 0 4px !important;
+            background-color: #eeeeee;
+            font-size: 14px;
+        }
+        .accordian-body {
+            color: #a2a2a2 !important;
+            column-span: all;
+        }
+        .accordian-td {
+            padding: 0;
+            background-color: #eeeeee;
+        }
+        .collapse.show {
+            display: table-cell;
+        }
+    </style>
+    <!--For each template in filtered template list-->
+    <thead>
+        <tr>
+            <th>MITRE ATT&CK ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody id="accordian-table">
+    {% for template in templates %}
+        {% set outer_loop = loop.index0 %}
+        <tr data-toggle="collapse" data-target="#attack_tr_{{ outer_loop }}" aria-expanded="false" aria-controls="attack_tr_{{ outer_loop }}">
+            <td>{{ template.mitre_attack }}</td>
+            <td>{{ template.name }}</td>
+            <td>{{ template.attack_type }}</td>
+            <td>{{ template.description }}</td>
+        </tr>
+        <tr>
+            <td id='attack_tr_{{ outer_loop }}' colspan="4" class='accordian-td collapse' aria-labelledby="attack_tr_{{ outer_loop }}" data-parent="#accordian-table"  >
+                <div id="attack_div_{{ outer_loop }}" class="hiddenRow accordian-body" >
+                    <form id="attack_form_{{ outer_loop }}" name="vuln-form" action="/teacher/api/{{ uid }}/vuln/build" method="post">
+                        {% set form_id = "attack_" + outer_loop|string + "" %}
+                        <!--Rendering arg values-->
+                        {% for arg in template.args %}
+                            {% if arg.id == 'target_network' %}
+                                {{ target_network(form_id, workout_list, registration_required) }}
+                            {% elif arg.type == 'choice' %}
+                                {{ choices_arg(form_id, template.id, arg.Choices, arg.default) }}
+                            {% endif %}
+                        {% endfor %}
+                        <button type="submit">Submit Template</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        <!--{{ add_form_listener('attack_form_' + outer_loop|string) }}-->
+    {% endfor %}
+    </tbody>
+{%- endmacro %}
+
+<!-- Macro used to build the vulnerability template table. This table can be searched or filtered to send a request
+     to the server to build the form for that template. -->
+{% macro display_vulns(templates) -%}
+    <thead>
+        <tr id="vuln-table-header">
+            <th>MITRE ATT&CK ID</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody id="vuln-table-body">
+    {% for template in templates %}
+        {% set outer_loop = loop.index0 %}
+        <tr id="{{ template.id}}">
+            <td><span id="checkmark-span"></span>{{ template.mitre_attack }}</td>
+            <td>{{ template.name }}</td>
+            <td>{{ template.attack_type }}</td>
+            <td>{{ template.description }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+{% endmacro %}
+
+
+<!-- [ eof ] -->

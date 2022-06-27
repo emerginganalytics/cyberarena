@@ -1,0 +1,94 @@
+.landing_content .btn, table{
+    width:95%;
+}
+.status-indicator{
+    height: 1em;
+    width: 1em;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: rgb(196, 154, 16);
+}
+.change_student_name{
+    padding-bottom: 1em;
+    border-bottom: 1px solid var(--main_color, #6e2639);
+}
+[data-workout-state="RUNNING"]{
+    background-color: blue;
+}
+[data-workout-state="READY"]{
+    background-color: green;
+}
+[data-workout-state="DELETED"]{
+    background-color: black;
+}
+.nav-link {
+    width: auto;
+    margin-right: 5px;
+}
+.nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    background-color: var(--main_color, #6e2639);
+    color: white;
+}
+.img-btn {
+    border-radius: 15%;
+    border: 1px solid black;
+    width: 200px;
+    height: 200px;
+    margin: 10px;"
+    box-shadow: 0 10px 8px 0 black
+}
+.img-btn:hover {
+    box-shadow: 0 2px 8px 0 black
+}
+#vuln-templates-table {
+    border-collapse: collapse;
+}
+.table_title {
+    float: left;
+}
+.selected td {
+    border-bottom: 4px solid var(--main_color, #6e2639);
+}
+.checkmark {
+    display:inline-block;
+    width: 22px;
+    height:22px;
+    -ms-transform: rotate(45deg); /* IE 9 */
+    -webkit-transform: rotate(45deg); /* Chrome, Safari, Opera */
+    transform: rotate(45deg);
+    margin-right: 5px;
+}
+.checkmark:before {
+    content: "";
+    position: absolute;
+    width: 3px;
+    height: 9px;
+    background-color: var(--main_color, #6e2639);
+    left: 11px;
+    top: 6px;
+}
+.checkmark:after {
+    content: "";
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background-color: var(--main_color, #6e2639);
+    left: 8px;
+    top: 12px;
+}
+#vuln-template-btn {
+    width: 200px;
+    float: right;
+    margin: 10px 20px 40px 10px;
+}
+#vuln-template-btn-div {
+    margin-bottom: 30px;
+}
+.readOnly {
+    border: 0;
+    outline: 0;
+    margin: 5px;
+}
+.readOnly:focus {
+    outline: none !important;
+}

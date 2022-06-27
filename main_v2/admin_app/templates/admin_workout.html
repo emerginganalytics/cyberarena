@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% import 'logo_macro.html' as logo %}
+{% import 'nuke_macro.html' as nuke%}
+{% block title %}Admin Controls - {{ workout.key.name }}{% endblock %}
+{% block content %}
+    <script>
+        function check_workout_state(){
+            $.ajax({
+                type:"POST",
+                url: "/workout_state/{{ workout.key.name }}",
+                traditional: "true",
+                success: function(data){
+                    if(data == "RUNNING"){
+                        $("#start-vm").attr("disabled", "disabled");
+                        $("#stop-vm").removeAttr("disabled");     
+                        $("#reset-vm").removeAttr("disabled");   
+                        $(".loader").remove();                   
+                    } else if(data == "READY"){
+                        $("#start-vm").removeAttr("disabled");
+                        $("#stop-vm").attr("disabled", "disabled");
+                        $("#reset-vm").attr("disabled", "disabled");
+                        $(".loader").remove(); 
+                    } else{
+                        $("#start-vm").attr("disabled", "disabled");
+                        $("#stop-vm").attr("disabled", "disabled");
+                        $("#reset-vm").attr("disabled", "disabled");
+                        $(".loader").remove();  
+                    }
+                    return data;
+                }
+            })
+        }
+        function server_action(action, server_name){
+
+            $.ajax({
+                type: "POST",
+                url: "/admin/api/server_management/{{ workout.key.name }}",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "action": action,
+                    "server_name": server_name
+                })
+            })
+        }
+        var workout_id = '{{workout.key.name}}';
+        function timeConverter(UNIX_timestamp){
+            var a = new Date(UNIX_timestamp * 1000);
+            return a;
+        }
+
+        function change_state(){
+            var new_state = document.getElementById('state_change_select').value;
+            $.ajax({
+                type: "POST",
+                url: "/admin/api/change_workout_state",
+                data: JSON.stringify({
+                    "workout_id": workout_id,
+                    "new_state": new_state
+                }),
+                success: function(){
+                    window.location.reload();
+                }
+            })
+            check_workout_state();
+        }
+
+        function change_expiration(){
+            var new_expiration_date = document.getElementById('expiration_select').valueAsDate;
+            var formatted_date = new Date();
+            var formatted_date = timeConverter('{{workout['timestamp']}}');
+            var difference = Math.ceil((new_expiration_date.getTime() - formatted_date.getTime()) /( 1000 * 3600 * 24));
+            $.ajax({
+                type: "POST",
+                url: "/admin/api/change_workout_expiration",
+                data: JSON.stringify({
+                    "workout_id": workout_id,
+                    "new_expiration": difference
+                })
+            })
+        }
+    </script>
+    <style>
+        .server_control_container{
+            display:flex;
+            flex-direction:row;
+        }
+        .btn:hover{
+            background-color:white!important;
+            color:var(--main_color, #6e2639)!important;
+        }
+    </style>
+    <div class="landing_container col-lg-12">
+        <div class="row">
+            <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+                {{ logo.logo_div() }}
+                <br><h2>Workout Control</h2><br>
+                
+                <div id="loading-msg"></div>
+                <div class='control_button'>
+                    <form class="control_form" id='start_vm' action="/start_vm" method="post">
+                        <div class="input-field" >
+                                <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                                <input type="number" id="time" name="time" value="2" min="1" max="10" style="margin-top:1em;">
+                                <label>Run time (1 - 10 hours)</label>
+                        </div>
+                        <div class="btn-ctn">
+                            {% if workout['state'] == "READY" %}
+                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
+                            {% else %}
+                                <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class='control_button'>
+                    <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <div class="btn-ctn">
+                            {% if workout['state'] == "RUNNING" %}
+                                <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
+                            {% else %}
+                                <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+                <div class='control_button'>
+                    <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
+                        <input type="hidden" id="workout_id" name="workout_id" value="{{ workout_id }}">
+                        <div class="btn-ctn">
+                                <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
+                        </div>
+                    </form>
+                </div>
+                {{ nuke.nukeButton(workout_id|string) }}    
+            </div>
+            <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+                <div id="state_expiration_container" style="display:flex;flex-direction:row;justify-content:space-around;">
+                    <div id="state_management_container" style="display:flex; flex-direction:column;">
+                        <h2>Workout Info</h2>
+                        <p>Instructor: {{workout['user_email']}}</p>
+                        <p>Workout Id: {{workout.key.name}}</p>
+                        <p>Workout Type: {{workout['type']}}</p>
+                        <p>Unit ID: {{workout['unit_id']}}</p>
+                        <p>Current workout state: <span id='workout_state_display'>{{workout['state']}}</span></p>
+                        <select style="display:block;margin-top:0;" class="state_change form-control" id="state_change_select">
+                            <option selected>Select new workout state</option>
+                            <option value="START">START</option>
+                            <option value="RUNNING">RUNNING</option>
+                            <option value="STOPPING">STOPPING</option>
+                            <option value="STARTING">STARTING</option>
+                            <option value="READY">READY</option>
+                            <option value="EXPIRED">EXPIRED</option>
+                            <option value="MISFIT">MISFIT</option>
+                            <option value="BROKEN">BROKEN</option>
+                            <option value="DELETED">DELETED</option>
+                            <option value="BUILDING_ASSESSMENT">BUILDING_ASSESSMENT</option>
+                            <option value="BUILDING_NETWORKS">BUILDING_NETWORKS</option>
+                            <option value="COMPLETED_NETWORKS">COMPLETED_NETWORKS</option>
+                            <option value="BUILDING_SERVERS">BUILDING_SERVERS</option>
+                            <option value="COMPLETED_SERVERS">COMPLETED_SERVERS</option>
+                            <option value="BUILDING_ROUTES">BUILDING_ROUTES</option>
+                            <option value="COMPLETED_ROUTES">COMPLETED_ROUTES</option>
+                            <option value="BUILDING_FIREWALL">BUILDING_FIREWALL</option>
+                            <option value="COMPLETED_FIREWALL">COMPLETED_FIREWALL</option>
+                            <option value="BUILDING_STUDENT_ENTRY">BUILDING_STUDENT_ENTRY</option>
+                            <option value="COMPLETED_STUDENT_ENTRY">COMPLETED_STUDENT_ENTRY</option>
+                        </select>
+                        <a href="#" onclick="change_state()" class="btn">Override State</a><br>
+                    </div>
+                    <div id="expiration_container">
+                        <h2>Workout Timeline</h2>
+                        <h4>Workout created <span id="workout_start_date"></span></h4>
+                        <h4>Expiration: <span id="expiration_date"></span></h4>
+                        <form id="expiration_form" onsubmit="change_expiration()" method="POST">
+                            <input id="expiration_select" class="form-control" type="date">
+                            <input type="submit" class="btn" value="Change Expiration">
+                        </form>
+                    </div>
+                </div>
+                <div class="loader"></div>
+                <br>
+                {% if servers %}
+                <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
+                    <tr>
+                        <th>Server Name</th>
+                        <th>IP</th>
+                        <th>Server State</th>
+                        <th>Operations</th>
+                    </tr>
+                {% for server in servers%}
+                    <tr>
+                        <td>{{server['name']}}</td>
+                        <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
+                        <td>{{server['state']}}</td>
+                        <td>
+                            <div class="server_control_container" id='{{server["name"]}}_operations'>
+                                <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
+                                <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
+                                <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <script>
+        var start_date = '{{workout['timestamp']}}';
+        var formatted_date = timeConverter(start_date);
+        document.getElementById('workout_start_date').innerHTML = formatted_date.getMonth() + 1 + "-" + formatted_date.getUTCDate() + "-" + formatted_date.getFullYear();
+        check_workout_state();
+        {% if workout['expiration'] %}
+        formatted_date.setDate(formatted_date.getUTCDate() + {{workout['expiration']}});
+        {% endif %}
+
+        document.getElementById('expiration_date').innerHTML = formatted_date.getMonth() + 1 + "-" + formatted_date.getUTCDate() + "-" + formatted_date.getFullYear();
+        document.querySelector('input[type="date"]').valueAsDate=formatted_date;   
+    </script>
+{% endblock %}

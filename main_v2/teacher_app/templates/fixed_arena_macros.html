@@ -1,0 +1,20 @@
+{# Jinja2 Macros used to build tables and forms #}
+{% macro build_network_form_table(specs) -%}
+    <thead>
+        <tr id="network-build-header" class="prevent-select">
+            <!--<th>&#x2610;</th>-->
+            <th>Quick Network Builds</th>
+        </tr>
+    </thead>
+    <tbody id="network-build-table-body">
+        <tr id="forensics-build-id" class="prevent-select active-build">
+            <td><span></span><input name="network_build" type="text" hidden readonly value="forensics"/>Forensics</td>
+        </tr>
+        {% for spec in specs %}
+            <tr id="{{ spec.id }}" class="prevent-select">
+                <!--<td><span></span><input name="network_build" type="text" hidden readonly value="{{ spec.id }}"/></td>-->
+                <td><span></span><input name="network_build" type="text" hidden readonly value="{{ spec.id }}"/>{{ spec.name }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+{%- endmacro %}

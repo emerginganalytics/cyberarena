@@ -13,7 +13,9 @@ from utilities.workout_validator import WorkoutValidator
 from utilities.yaml_functions import YamlFunctions
 from teacher_app.teacher_api import teacher_api
 
-teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher", static_folder="../static", template_folder="templates")
+
+teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
+                        static_folder="/static", template_folder="templates")
 teacher_app.register_blueprint(teacher_api)
 
 

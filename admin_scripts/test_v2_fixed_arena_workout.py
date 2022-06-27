@@ -1,6 +1,6 @@
 import os
 import sys
-import time
+from datetime import datetime, timedelta
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from google.cloud import pubsub_v1
@@ -37,18 +37,19 @@ class TestFixedArenaWorkout:
         self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.FIXED_ARENA}{fixed_arena_workout}.yaml")
+        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
+                                       file=f"{Buckets.Folders.FIXED_ARENA_WORKOUT}{fixed_arena_workout}.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
         build_spec['workspace_settings'] = {
             'count': 2,
             'registration_required': False,
             'student_list': [],
-            'expires': '2022-06-16'
+            'expires': (datetime.now() + timedelta(hours=3)).isoformat()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
         fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)
-        fawb.build_fixed_arena_workout()
+        fawb.build()
 
 
 if __name__ == "__main__":
