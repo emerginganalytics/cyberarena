@@ -1,5 +1,4 @@
 from google.cloud import datastore
-
 from utilities_v2.globals import DatastoreKeyTypes
 
 __author__ = "Philip Huff"

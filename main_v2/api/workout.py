@@ -17,7 +17,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class WorkoutAPI(MethodView):
+class Workout(MethodView):
     def get(self, build_id=None):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
         can return the full build object"""
@@ -28,8 +28,12 @@ class WorkoutAPI(MethodView):
                 key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT,
                 key_id=build_id).get()
             if workout:
-                if user_email == workout['student_email'] or ArenaAuthorizer.UserGroups.AUTHORIZED in user_group:
-                    return json.dumps(workout)
+                if user_email and workout['registration_required']:
+                    if user_email == workout['student_email'] or ArenaAuthorizer.UserGroups.AUTHORIZED in user_group:
+                        return json.dumps(workout)
+                    # Bad Request; Unauthorized User
+                    else:
+                        abort(403)
                 else:
                     # Anonymous user, return only workout state
                     workout_state = workout.get('state', None)
@@ -37,6 +41,7 @@ class WorkoutAPI(MethodView):
                         return workout_state
                     else:
                         return "RUNNING"
+            # Bad Request; Workout not found
             abort(404)
         # Bad Request; No build_id given
         abort(400)
@@ -52,7 +57,7 @@ class WorkoutAPI(MethodView):
         Change build state based on action (START, STOP, NUKE, etc)
         """
         auth_level = session.get('user_groups', None)
-        recv_data = request.get_json(force=True)
+        recv_data = request.json
         action = recv_data.get('action', None)
         run_hours = recv_data.get('time', None)
 
@@ -76,16 +81,14 @@ class WorkoutAPI(MethodView):
                             if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
                                 message = f'Cyber Gym Arena {action} Request'
                                 if action != "NUKE":
-                                    topic_name = PubSub.Topics(f'{action}_ARENA')
+                                    topic_name = PubSub.Topics[f'{action}_ARENA'].value
                                     ps_manager = PubSubManager(topic=topic_name)
                                     ps_manager.msg(unit_id=build_id, message=message)
 
                                     # Create Log Event
                                     log_message = "{} action called for Arena {}".format(action, build_id)
-                                    CloudLog(
-                                        logging_id=CloudLog.LogIDS.API,
-                                        severity=CloudLog.LogLevels.INFO
-                                    ).create_log(message=log_message, arena=str(build_id), runtime=str(run_hours))
+                                    CloudLog(severity=CloudLog.LogLevels.INFO
+                                             ).create_log(message=message, arena=str(build_id),runtime=str(run_hours))
                             # Bad Request; Insufficient Privileges
                             abort(403)
                         else:
@@ -95,16 +98,14 @@ class WorkoutAPI(MethodView):
                                 ps_manager = PubSubManager(topic=topic_name)
                                 ps_manager.msg(workout_id=build_id, action=PubSub.WorkoutActions.NUKE)
                             else:
-                                topic_name = PubSub.Topics(f'{action}_VM')
+                                topic_name = PubSub.Topics[f'{action}_VM'].value
                                 ps_manager = PubSubManager(topic=topic_name)
                                 ps_manager.msg(workout_id=build_id, message=message)
 
                             # Create Log Event
                             log_message = "{} action called for server {}".format(action, build_id)
-                            CloudLog(
-                                logging_id=CloudLog.LogIDS.API,
-                                severity=CloudLog.LogLevels.INFO
-                            ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
+                            CloudLog(severity=CloudLog.LogLevels.INFO
+                                     ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
 
                         # Update build and return response
                         ds_manager.put(workout)
@@ -124,7 +125,7 @@ class WorkoutAPI(MethodView):
                 ds_manager = DataStoreManager(key_id=unit_id)
                 workout_list = ds_manager.get_workouts()
                 message = f'Cyber Gym VM {action} Request'
-                topic_name = PubSub.Topics(f'{action}_VM')
+                topic_name = PubSub.Topics[f'{action}_VM'].value
                 ps_manager = PubSubManager(topic=topic_name)
 
                 # For each workout in returned query, update run time and publish action
@@ -138,10 +139,8 @@ class WorkoutAPI(MethodView):
 
                 # Create Log Event
                 log_message = "{} action called for unit {}".format(action, build_id)
-                CloudLog(
-                    logging_id=CloudLog.LogIDS.API,
-                    severity=CloudLog.LogLevels.INFO
-                ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
+                CloudLog(severity=CloudLog.LogLevels.INFO
+                         ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
                 # Return response
                 return json.dumps({'status': 200, 'message': f'{recv_data["action"]} unit, {build_id}'})
             else:
