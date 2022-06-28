@@ -1,6 +1,7 @@
+import logging
+from google.cloud import logging_v2
 from utilities_v2.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from utilities_v2.gcp.cloud_env import CloudEnv
-from utilities_v2.gcp.cloud_log import CloudLog
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -28,12 +29,14 @@ class ArenaAuthorizer:
         ALL_GROUPS = [AUTHORIZED, ADMINS, STUDENTS]
 
     def __init__(self):
-        self.admin_info = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym').get()
+        self.log_client = logging_v2.Client()
+        self.log_client.setup_logging()
+        self.ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO.value, key_id='cybergym')
+        self.admin_info = self.ds_manager.get()
         if self.UserGroups.ADMINS not in self.admin_info:
             admin_email = CloudEnv().admin_email  # myconfig.get_variable.config('admin_email')
             if not admin_email:
-                CloudLog(logging_id=CloudLog.LogIDS.MAIN_APP, severity=CloudLog.LogLevels.ERROR).create_log(
-                    message='Error: Admin Email is not set for this project!')
+                logging.error(msg='Error: Admin Email is not set up for this project!')
             else:
                 self.admin_info[self.UserGroups.ADMINS] = [admin_email]
         if self.UserGroups.AUTHORIZED not in self.admin_info:
@@ -42,7 +45,7 @@ class ArenaAuthorizer:
             self.admin_info[self.UserGroups.STUDENTS] = []
         if self.UserGroups.PENDING not in self.admin_info:
             self.admin_info[self.UserGroups.PENDING] = []
-        DataStoreManager().put(self.admin_info)
+        self.ds_manager.put(self.admin_info)
 
     def get_user_groups(self, user):
         """
@@ -58,11 +61,9 @@ class ArenaAuthorizer:
                 user_groups.append(group)
 
         if not user_groups and user not in self.admin_info[self.UserGroups.PENDING]:
-            CloudLog(logging_id=CloudLog.LogIDS.USER_AUTHORIZATION, severity=CloudLog.LogLevels.ERROR).create_log(
-                message=f"Unauthorized User: {user}. Adding to pending authorization")
+            logging.error(msg=f'Unauthorized user: {user}. Adding to pending authorization')
             self.admin_info[self.UserGroups.PENDING].append(user)
-            DataStoreManager().put(self.admin_info)
+            self.ds_manager.put(self.admin_info)
 
-        CloudLog(CloudLog.LogIDS.USER_AUTHORIZATION, severity=CloudLog.LogLevels.INFO).create_log(
-            message=f'{user} logged in under groups {user_groups}')
+        logging.info(f'{user} logged in under groups {user_groups}')
         return user_groups

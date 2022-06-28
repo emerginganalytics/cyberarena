@@ -22,7 +22,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class ClassroomAPI(MethodView):
+class Classroom(MethodView):
     decorators = [auth_required]
 
     def get(self, class_name=None):

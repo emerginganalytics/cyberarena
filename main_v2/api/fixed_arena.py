@@ -12,7 +12,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class FixedArenaAPI(MethodView):
+class FixedArena(MethodView):
     decorators = [auth_required]
 
     def get(self, fixed_arena_id=None):

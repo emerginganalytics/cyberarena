@@ -163,7 +163,19 @@
         $(document).ready(function (){
             document.querySelector('#start-vm-form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const data = Object.fromEntries(new FormData(e.target).entries());
+                const data = Object.fromEntries(new FormData(e.target));
+                console.log(data);
+                send_action(data, workout_id='{{ workout.key.name }}');
+            });
+            document.querySelector('#stop-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                console.log(data);
+                send_action(data, workout_id='{{ workout.key.name }}');
+            });
+            document.querySelector('#reset-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
                 console.log(data);
                 send_action(data, workout_id='{{ workout.key.name }}');
             });
@@ -224,8 +236,8 @@
                         </form>
                     </div>
                     <div class='control_button'>
-                        <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
-                            <input type="hidden" id="stop-vm" name="action" value="STOP">
+                        <form class="control_form" id="stop-vm-form">
+                            <input type="hidden" id="stop_vm" name="action" value="STOP">
                             <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                             <div class="btn-ctn">
                                 {% if is_expired %}
@@ -241,8 +253,9 @@
                         </form>
                     </div>
                     <div class='control_button'>
-                        <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
+                        <form class="control_form" id="reset-vm-form">
                             <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
+                            <input type="hidden" id="reset_vm" name="action" value="RESET">
                             <div class="btn-ctn">
                                 <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
                             </div>
@@ -269,9 +282,7 @@
                 {% endif %}
                 {% if build_type == "compute" %}
                     <br>
-
                     <h2>Workout Servers</h2>
-
                     <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                         <tr>
                             <th>Server Name</th>
@@ -351,7 +362,6 @@
                 {% endif %}
             </div>
             <div id="workout_id" hidden>{{ workout.key.name }}</div>
-            
                 {% if assessment %}
                 <script>
                     function reveal_assessment(){
@@ -393,7 +403,6 @@
                         {% endif %}
                         </form><br>
                     {% endfor %}
-
                         <div id="submitted_answers" style="margin-top: 1em;">
                         {% if 'submitted_answers' in workout %}
                             <h5>Submitted Answers</h5>

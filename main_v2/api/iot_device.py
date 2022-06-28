@@ -10,7 +10,8 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
-class IoTDeviceAPI(MethodView):
+
+class IoTDevice(MethodView):
     decorators = [auth_required]
 
     def get(self, device_id=None):

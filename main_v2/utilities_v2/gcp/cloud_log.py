@@ -1,9 +1,10 @@
+import logging
 from google.cloud import logging_v2
 from enum import Enum
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Andrew Bomberger", "Philip Huff"]
+__credits__ = ["Andrew Bomberger"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -19,9 +20,8 @@ class CloudLog:
     @type severity: Integer
     @return: None
     """
-    def __init__(self, logging_id, severity):
+    def __init__(self, severity):
         self.log_client = logging_v2.Client()
-        self.logging_id = logging_id
         self.severity = severity
 
     class LogLevels(Enum):
@@ -35,24 +35,13 @@ class CloudLog:
         ALERT = 700
         EMERGENCY = 800
 
-    class LogIDS(str, Enum):
-        MAIN_APP = 'cyberarena-app'
-        USER_AUTHORIZATION = 'cyberarena-login'
-        STUDENT_APP = 'student-app'
-        TEACHER_APP = 'teacher-app'
-        ADMIN_APP = 'admin-app'
-        APP_ERRORS = 'cybergym-app-errors'
-        API = 'cyberarena-api'
-
     def create_log(self, message, **kwargs):
         """
         Creates log event based on passed arguments
         @param message: Logging message
         """
-        g_logger = self.log_client.logger(self.logging_id)
-        g_logger.log_struct(
-            {
-                "message": message,
-                "details": str([kwargs])
-            }, severity=self.severity
-        )
+        msg = f'{message}: {kwargs}'
+        if self.severity == self.LogLevels.INFO:
+            logging.info(msg=msg)
+        elif self.severity == self.LogLevels.ERROR:
+            logging.error(msg=msg)

@@ -12,7 +12,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class InjectorAPI(MethodView):
+class Injector(MethodView):
     decorators = [auth_required]
 
     def get(self, inject_id=None):
