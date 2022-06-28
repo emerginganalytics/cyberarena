@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, validate
 
-from utilities_v2.globals import BuildConstants
+from utilities.globals import BuildConstants
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

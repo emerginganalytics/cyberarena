@@ -2,7 +2,7 @@ import logging
 from google.cloud import logging_v2
 from google.cloud import pubsub_v1
 
-from utilities_v2.gcp.cloud_env import CloudEnv
+from utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

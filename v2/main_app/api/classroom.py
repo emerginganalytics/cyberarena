@@ -9,7 +9,7 @@ from utilities.yaml_functions import YamlFunctions
 from flask import request, session, jsonify
 from flask.views import View, MethodView
 from api.utilities import auth_required, admin_required, instructor_required
-from utilities_v2.infrastructure_as_code import build_spec_to_cloud, schema
+from utilities.infrastructure_as_code import build_spec_to_cloud, schema
 
 
 __author__ = "Andrew Bomberger"

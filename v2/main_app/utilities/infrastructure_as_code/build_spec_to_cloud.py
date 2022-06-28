@@ -11,11 +11,11 @@ from google.cloud import logging_v2
 import random
 import string
 
-from utilities_v2.globals import BuildConstants, DatastoreKeyTypes, PubSub
-from utilities_v2.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaWorkoutSchema
-from utilities_v2.gcp.cloud_env import CloudEnv
-from utilities_v2.gcp.datastore_manager import DataStoreManager
-from utilities_v2.gcp.pubsub_manager import PubSubManager
+from utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub
+from utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaWorkoutSchema
+from utilities.gcp.cloud_env import CloudEnv
+from utilities.gcp.datastore_manager import DataStoreManager
+from utilities.gcp.pubsub_manager import PubSubManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

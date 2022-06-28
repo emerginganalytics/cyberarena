@@ -1,6 +1,6 @@
 from flask import abort, session
 from functools import wraps
-from utilities_v2.gcp.arena_authorizer import ArenaAuthorizer
+from utilities.gcp.arena_authorizer import ArenaAuthorizer
 
 
 __author__ = "Andrew Bomberger"
