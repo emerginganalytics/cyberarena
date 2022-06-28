@@ -1,11 +1,11 @@
 from api.utilities import auth_required, admin_required, instructor_required
 from flask import abort, request, json, session
 from flask.views import MethodView
-from utilities_v2.gcp.arena_authorizer import ArenaAuthorizer
-from utilities_v2.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
-from utilities_v2.gcp.pubsub_manager import PubSubManager
-from utilities_v2.globals import PubSub, BuildConstants
-from utilities_v2.gcp.cloud_log import CloudLog
+from utilities.gcp.arena_authorizer import ArenaAuthorizer
+from utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
+from utilities.gcp.pubsub_manager import PubSubManager
+from utilities.globals import PubSub, BuildConstants
+from utilities.gcp.cloud_log import CloudLog
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

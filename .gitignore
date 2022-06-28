@@ -24,3 +24,4 @@ design-files/private/
 /test.py
 /admin_scripts/temp/
 /admin_scripts/bryce_test_scripts/
+admin_scripts/quick_command.py
