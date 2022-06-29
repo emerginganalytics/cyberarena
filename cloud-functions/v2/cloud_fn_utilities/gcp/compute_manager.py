@@ -50,7 +50,7 @@ class ComputeManager:
         else:
             self.server_spec = None
             self.parent_id = None
-        #self.parent_id = self.server_spec['parent_id']
+           # self.parent_id = self.server_spec['parent_id']
 
     def build(self):
         """

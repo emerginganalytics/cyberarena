@@ -158,7 +158,7 @@ class FixedArenaWorkoutBuild:
             self.state_manager.state_transition(self.s.STOPPING)
             logging.info(f"Finished stopping the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
 
-    def delete(self): # works but accidently deleted cln-stoc-seb-server and do not know how to fix that
+    def delete(self):
         self.state_manager.state_transition(self.s.DELETED)
         display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         servers_to_delete = [display_proxy]
@@ -189,7 +189,9 @@ class FixedArenaWorkoutBuild:
 
     def nuke(self):
         self.delete()
+        print("I got here")
         self.build()
+        print("I finished nuke")
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()

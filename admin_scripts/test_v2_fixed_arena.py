@@ -41,7 +41,7 @@ class TestFixedArena:
         build_spec = yaml.safe_load(fixed_arena_yaml)
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fab = FixedArenaBuild(fixed_arena_id=build_spec['id'], debug=True)
+        fab = FixedArenaBuild(build_id=build_spec['id'], debug=True)
         fab.build_fixed_arena()
 
 
