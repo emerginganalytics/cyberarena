@@ -162,10 +162,6 @@ class FixedArenaWorkoutBuild:
         self.state_manager.state_transition(self.s.DELETED)
         display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         servers_to_delete = [display_proxy]
-        for server in self.fixed_arena_workout['fixed_arena_servers']:
-            self.fixed_arena_workout.get('fixed_arena_id')
-            server_name = f"{self.fixed_arena_workout['parent_id']}-{server}"
-            servers_to_delete.append(server_name)
         for ws_id in self.fixed_arena_workout_id:
             ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
@@ -189,9 +185,7 @@ class FixedArenaWorkoutBuild:
 
     def nuke(self):
         self.delete()
-        print("I got here")
         self.build()
-        print("I finished nuke")
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()

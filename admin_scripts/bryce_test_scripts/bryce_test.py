@@ -50,7 +50,7 @@ class TestFixedArenaWorkout:
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
         # fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)
-        fawb = FixedArenaWorkoutBuild(build_id='mvbqtquyyd', debug=True)
+        fawb = FixedArenaWorkoutBuild(build_id='ikfxkfymhf', debug=True)
         # fawb.build()
         fawb.start()
         # fawb.stop()
