@@ -1,10 +1,9 @@
 from google.cloud import datastore
-
 from utilities.globals import DatastoreKeyTypes
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff", "Andrew Bomberger"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -34,6 +33,21 @@ class DataStoreManager:
         self.key = self.ds_client.key(key_type, self.key_id)
 
     def get_servers(self):
+        """ Get servers from workout"""
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
         query_servers.add_filter('workout', '=', self.key_id)
         return list(query_servers.fetch())
+
+    def get_workouts(self):
+        """Get workouts from unit"""
+        query_workouts = self.ds_client.query(kind=DatastoreKeyTypes.CYBERGYM_WORKOUT)
+        query_workouts.add_filter('unit_id', '=', self.key_id)
+        return list(query_workouts.fetch())
+
+    def get_classroom(self):
+        query_classroom = self.ds_client.query(kind=DatastoreKeyTypes.CLASSROOM)
+        query_classroom.add_filter('teacher_email', '=', self.key_id)
+        return list(query_classroom.fetch())
+
+    def get_injection(self):
+        pass
