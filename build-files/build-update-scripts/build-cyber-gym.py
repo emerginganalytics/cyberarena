@@ -61,9 +61,9 @@ if (confirmation == 'y'):
 confirmation = str(input("Do you want to copy over yaml files and instructions at this time? (y/N): "))
 if (confirmation == 'y'):
     path = r'..\\'
-    yamlpath = os.path.join(os.path.normpath(path), r'\build-files\*.yaml')
-    scriptpath = os.path.join(os.path.normpath(path), r'\build-files\startup-scripts\*')
-    introtocyberpath = os.path.join(os.path.normpath(path), r'\build-files\intro-to-cyber\*.yaml')
+    yamlpath = os.path.join(os.path.normpath(path) , r'\build-files\*.yaml')
+    scriptpath = os.path.join(os.path.normpath(path) , r'\build-files\startup-scripts\*')
+    introtocyberpath = os.path.join(os.path.normpath(path) , r'\build-files\intro-to-cyber\*.yaml')
     storage_client = storage.Client()
     assessment_upload_bucket = project_name + "_assessment_upload"
     bucket = storage_client.create_bucket(assessment_upload_bucket)

@@ -393,11 +393,10 @@ class BuildSpecToCloud:
         class_list.add_filter('teacher_email', '=', self.email)
         class_list.add_filter('class_name', '=', self.class_name)
         self.class_record = list(class_list.fetch())[0]
-        if self.class_record:
-            for student_name in self.class_record['roster']:
-                if self.class_record['student_auth'] == 'email':
-                    self.student_emails.append(student_name['student_email'])
-                self.student_names.append(student_name)
+        for student_name in self.class_record['roster']:
+            if self.class_record['student_auth'] == 'email':
+                self.student_emails.append(student_name['student_email'])
+            self.student_names.append(student_name)
 
     def _cloud_update_class(self):
         class_unit = {
@@ -407,14 +406,13 @@ class BuildSpecToCloud:
             "build_type": self.build_type,
             "timestamp": str(calendar.timegm(time.gmtime()))
         }
-        if self.class_record:
-            if 'unit_list' not in self.class_record:
-                unit_list = []
-                unit_list.append(class_unit)
-                self.class_record['unit_list'] = unit_list
-            else:
-                self.class_record['unit_list'].append(class_unit)
-            ds_client.put(self.class_record)
+        if 'unit_list' not in self.class_record:
+            unit_list = []
+            unit_list.append(class_unit)
+            self.class_record['unit_list'] = unit_list
+        else:
+            self.class_record['unit_list'].append(class_unit)
+        ds_client.put(self.class_record)
 
     def _commit_workout_servers(self, workout_id, new_workout):
         """
@@ -438,7 +436,6 @@ class BuildSpecToCloud:
             combine_student_networks = self.additional_build_directives.get('combine_student_networks', None)
             if combine_student_networks:
                 StudentNetworkCombiner(self.cloud_ready_specs, combine_student_networks).combine_network
-
 
 class Error(Exception):
     """Base class for exceptions in this module."""
