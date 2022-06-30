@@ -183,9 +183,11 @@ class FixedArenaWorkoutBuild:
             self.state_manager.state_transition(self.s.DELETED)
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
 
-    def nuke(self):
+    def nuke(self):  # does not work I beleive is timing out
         self.delete()
+        print("I got here")
         self.build()
+        print("I completed")
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()
