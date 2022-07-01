@@ -52,10 +52,10 @@ class TestFixedArenaWorkout:
         # fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)
         fawb = FixedArenaWorkoutBuild(build_id='ikfxkfymhf', debug=True)
         # fawb.build()
-        # fawb.start()
+        fawb.start()
         # fawb.stop()
         # fawb.delete()
-        fawb.nuke()
+        # fawb.nuke()
 
 
 if __name__ == "__main__":
