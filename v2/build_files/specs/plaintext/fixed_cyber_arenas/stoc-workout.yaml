@@ -1,0 +1,28 @@
+version: '2'
+
+build_type: fixed_arena_workout
+
+parent_id: 'cln-stoc'
+
+summary:
+  name: "Example STOC Workout"
+  description: "Instructors can use a STOC Workout to create individual student workspaces"
+  teacher_instructions_url:
+  student_instructions_url:
+  hourly_cost:
+  author:
+
+# Note that for student_servers, the networking fields are automatically determined.
+workspace_servers:
+  - name: kali
+    image: image-cyberarena-kali-desktop
+    machine_type: "e2-standard-2"
+    human_interaction:
+      - display: true
+        protocol: rdp
+        username: cyberarena
+        password: "P@55w0rd!"
+        security_mode: Any
+
+fixed_arena_servers: # Servers to turn on for the workout.
+  - 'web-server'
