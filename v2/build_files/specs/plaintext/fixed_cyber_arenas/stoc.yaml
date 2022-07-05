@@ -1,0 +1,62 @@
+id: cln-stoc
+version: '2'
+build_type: fixed_arena
+
+summary:
+  name: "Cyber Learn Network Secure Training and Operations Center"
+  description: "A cybersecurity simulation network for CLN partners"
+  teacher_instructions_url:
+  student_instructions_url:
+  hourly_cost: 0.25
+  author: "Philip Huff"
+
+networks:
+  - name: enterprise
+    subnets:
+     - name: default
+       ip_subnet: 10.1.1.0/24
+  - name: dmz
+    subnets:
+      - name: default
+        ip_subnet: 10.1.2.0/24
+
+servers:
+  - name: ad-domain-controler
+    image: image-cybergym-activedirectory-domaincontroller
+    machine_type: "e2-standard-2"
+    human_interaction:
+      - display: true
+        protocol: rdp
+        username: gymboss
+        password: "Let's workout!"
+        domain: CYBERGYM
+    nics:
+      - network: enterprise
+        internal_ip: 10.1.1.2
+        subnet_name: default
+        external_nat: false
+  - name: web-server
+    image: image-cybergym-teenyweb
+    machine_type: "e2-small"
+    sshkey: "gymboss:ecdsa-sha2-nistp384 AAAAE2VjZHNhLXNoYTItbmlzdHAzODQAAAAIbmlzdHAzODQAAABhBG9/Wlvf3Ngl/6I1d80aN3uDSv1wuZYMvcuEESTk34jS/zwjUQyC1JvUOcPDq9lwFvdr0VS3+mEqc20dSiqySi6vs9z7kjIYL6a1evy/KA6LKV1Z/zyJxlh9XsXaRzlikg=="
+    nics:
+      - network: dmz
+        internal_ip: 10.1.2.2
+        subnet_name: default
+        external_nat: false
+
+firewalls:
+  - name: cln-firewall
+    type: fortinet
+    gateway: external
+    networks:
+      - enterprise
+      - dmz
+
+firewall_rules:
+  - name: allow-all-local-external
+    network: external-network
+    target_tags: []
+    protocol: tcp
+    ports: ["tcp/any", "udp/any", "icmp/any"]
+    source_ranges: ["10.0.0.0/16"]
