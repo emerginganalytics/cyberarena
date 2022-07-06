@@ -372,55 +372,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
             {% else %}
                 <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
-                {% if build_type == "compute" %}
-                    <div class='control_button'>
-                        <form class="control_form" id='start_vm' action="/start_vm" method="post">
-                            <div class="input-field form-group" >
-                                <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
-                                <input type="number" id="time" class="form-control" name="time" value="2" min="1" max="10" style="margin-top:1em;">
-                                <label>Run time (1 - 10 hours)</label>
-                            </div>
-                            <div class="btn-ctn">
-                                {% if is_expired %}
-                                    <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
-                                {% else %}
-                                    {% if state == "READY" %}
-                                        <button type="submit" id="start-vm" class="waves-effect waves-light btn" >START WORKOUT</button>
-                                    {% else %}
-                                        <button type="submit" id="start-vm" class="waves-effect waves-light btn" disabled>START WORKOUT</button>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                        </form>
-                    </div>
-                    <div class='control_button'>
-                        <form class="control_form" id="stop_vm" action="/stop_vm" method="post">
-                            <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
-                            <div class="btn-ctn">
-                                {% if is_expired %}
-                                    <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
-                                {% else %}
-                                    {% if state == "RUNNING" %}
-                                        <button id="stop-vm" class="waves-effect waves-light btn" >STOP WORKOUT</button>
-                                    {% else %}
-                                        <button id="stop-vm" class="waves-effect waves-light btn" disabled>STOP WORKOUT</button>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                        </form>
-                    </div>
-                    <div class='control_button'>
-                        <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
-                            <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
-                            <div class="btn-ctn">
-                                <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
-                            </div>
-                        </form>
-                    </div>
-                    {% if is_expired == False %}
-                        {{ nuke.nukeButton(workout.key.name|string) }}
-                    {% endif %}
-                {% endif %}
             {% endif %}
             {% if workout['registration_required'] %}
                 <hr><a href="/student/home" class="btn">Home</a>
