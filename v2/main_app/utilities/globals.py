@@ -9,6 +9,9 @@ class DatastoreKeyTypes(str, Enum):
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
     SERVER = 'cybergym-server'
+    INSTRUCTOR = 'cybergym-instructor'
+    CYBERARENA_ATTACK = 'cyberarena-attack'
+    IOT_DEVICE = 'cybergym-iot-device'
 
 
 class BuildConstants:
@@ -78,6 +81,7 @@ class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
         MANAGE_SERVER = 'manage-server'
+        BUILD_ARENA = 'build_arena'
         BUILD_WORKOUTS = 'build-workouts'
         ADMIN_SCRIPTS = 'admin-scripts'
         START_VM = 'start-vm'
@@ -120,3 +124,4 @@ class Buckets:
     class Folders(str, Enum):
         FIXED_ARENA = "yaml-build-files/v2/fixed_arena/"
         FIXED_ARENA_WORKOUT = "yaml-build-files/v2/fixed_arena_workout/"
+        CYBERGYM_WORKOUT = "yaml-build-files/"

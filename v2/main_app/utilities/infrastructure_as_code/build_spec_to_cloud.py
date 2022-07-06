@@ -58,7 +58,6 @@ class BuildSpecToCloud:
             self.action = PubSub.BuildActions.FIXED_ARENA_WORKOUT.value
         self.debug = debug
 
-
     def commit(self):
         self.datastore_manager.put(self.cyber_arena_spec)
         if not self.debug:

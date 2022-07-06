@@ -1,15 +1,9 @@
 import json
-from utilities.child_project_manager import ChildProjectManager
-from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, InvalidBuildSpecification
-from utilities.datastore_functions import *
-from utilities.workout_validator import WorkoutValidator
-from utilities.yaml_functions import YamlFunctions
-
-
-from flask import request, session, jsonify
-from flask.views import View, MethodView
-from api.utilities import auth_required, admin_required, instructor_required
-from utilities.infrastructure_as_code import build_spec_to_cloud, schema
+from flask import abort, request, session, jsonify
+from flask.views import MethodView
+from api.decorators import auth_required, admin_required, instructor_required
+from utilities.gcp.datastore_manager import DataStoreManager
+from utilities.globals import DatastoreKeyTypes
 
 
 __author__ = "Andrew Bomberger"
@@ -23,21 +17,31 @@ __status__ = "Testing"
 
 
 class Classroom(MethodView):
-    decorators = [auth_required]
+    decorators = [instructor_required]
 
     def get(self, class_name=None):
         """Get Classroom"""
-        if class_name:
-            return f'{class_name}'
-        return 'CLASSROOM'
+        user_data = request.json
+        user_email = user_data.get('user_email', None)
+        if user_email:
+            if class_name:
+                class_query = DataStoreManager(key_id=str(user_email)).get_classroom(class_name=class_name)
+            else:
+                class_query = DataStoreManager(key_id=str(user_email)).get_classroom()
+            class_list = []
+            for class_object in class_query:
+                class_list.append(class_object)
+            return json.dumps(class_list)
+        abort(400)
 
-    def post(self):
+    def post(self, class_name=None):
         """Create Classroom"""
         pass
 
-    def delete(self, user_id):
-        pass
+    def delete(self, class_name=None):
+        abort(405)
 
-    def put(self, user_id):
+    def put(self, class_name=None):
         """Update Existing Classroom"""
+        recv_data = request.json
         pass

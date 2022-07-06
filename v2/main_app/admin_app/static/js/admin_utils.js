@@ -83,7 +83,6 @@ function calculate_workout_cost(hourly_cost, runtime){
 }
 function fill_active_workout_table(data){
     let table = document.getElementById('active_workout_display');
-
     for(let i = 0; i < data.length; i++){
         //let new_workout = document.createElement('tr')
         var row = add_element("tr", {id: "workout_row_" + data[i]['id']});

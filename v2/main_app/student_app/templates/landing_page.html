@@ -196,7 +196,7 @@
             <div id="loading-msg"></div>
             {% if workout['state'] == "START" %}
                 <div class='control_button'>
-                    <form class="control_form" id='build_workout' action="/build_workout" method="post">
+                    <form class="control_form" id='build-workout-form' action="/api/workout/{{ workout.key.name }}" method="post">
                         <div class="input-field" >
                             <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
                         </div>
