@@ -1,13 +1,13 @@
 import logging
 from calendar import calendar
 from datetime import time
-
 from google import pubsub_v1
 from google.cloud import logging_v2
-
 from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
+from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
+
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -21,7 +21,6 @@ __status__ = "Testing"
 from common.globals import log_client, compute, project, zone, LOG_LEVELS, ds_client, BUILD_STATES, PUBSUB_TOPICS, \
     WORKOUT_TYPES, cloud_log, workout_globals, SERVER_STATES
 from common.state_transition import state_transition
-
 
 
 class MaintenanceHandler:
@@ -48,8 +47,8 @@ class MaintenanceHandler:
             raise ValueError
 
     def delete_server(self, build_id) -> object:
-        #query_old_units = ds_client.query(kind = 'cybergym-unit')
-        #query_old_units.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - self.DEFAULT_LOOKBACK))
+        # query_old_units = ds_client.query(kind = 'cybergym-unit')
+        # query_old_units.add_filter("timestamp", ">", str(calendar.timegm(time.gmtime()) - self.DEFAULT_LOOKBACK))
         query_old_units = ds_client.query(kind='cybergym-workout')
         query_old_units.add_filter('workout_ID', '=', build_id)
         for unit in list(query_old_units.fetch()):

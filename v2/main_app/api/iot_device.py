@@ -1,5 +1,5 @@
 from flask.views import View, MethodView
-from api.utilities import auth_required, admin_required, instructor_required
+from api.decorators import auth_required, admin_required, instructor_required
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

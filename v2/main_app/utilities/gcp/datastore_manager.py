@@ -32,9 +32,14 @@ class DataStoreManager:
         self.key_id = key_id
         self.key = self.ds_client.key(key_type, self.key_id)
 
+    def query(self):
+        """Returns query object"""
+        query = self.ds_client.query(kind=self.key_id)
+        return query
+
     def get_servers(self):
-        """ Get servers from workout"""
-        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
+        """Get servers from workout"""
+        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER.value)
         query_servers.add_filter('workout', '=', self.key_id)
         return list(query_servers.fetch())
 
@@ -44,10 +49,18 @@ class DataStoreManager:
         query_workouts.add_filter('unit_id', '=', self.key_id)
         return list(query_workouts.fetch())
 
-    def get_classroom(self):
-        query_classroom = self.ds_client.query(kind=DatastoreKeyTypes.CLASSROOM)
+    def get_classroom(self, class_name=None):
+        """Queries for corresponding cybergym-class"""
+        query_classroom = self.ds_client.query(kind=DatastoreKeyTypes.CLASSROOM.value)
         query_classroom.add_filter('teacher_email', '=', self.key_id)
+        if class_name:
+            query_classroom.add_filter('class_name', '=', str(class_name))
         return list(query_classroom.fetch())
 
     def get_injection(self):
         pass
+
+    def get_attack_specs(self):
+        """returns list of attack specs stored in datastore"""
+        query_attacks = self.ds_client.query(kind=DatastoreKeyTypes.CYBERARENA_ATTACK.value)
+        return list(query_attacks.fetch())
