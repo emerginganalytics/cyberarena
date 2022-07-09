@@ -40,6 +40,7 @@ class ShellCommands:
         SCHEDULER = "gcloud services enable cloudscheduler.googleapis.com"
         APP_ENGINE = "gcloud services enable appengine.googleapis.com"
         SQL_ADMIN = "gcloud services enable sqladmin.googleapis.com"
+        IAM = "gcloud services enable iam.googleapis.com"
         
     class ServiceAccount(str, Enum):
         CREATE_ACCOUNT = "gcloud iam service-accounts create cyberarena-service --display-name " \
@@ -50,6 +51,9 @@ class ShellCommands:
         ADD_ROLE_PUBSUB = "gcloud projects add-iam-policy-binding {project} " \
                           "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
                           "--role=\"roles/pubsub.admin\""
+        ADD_ROLE_STORAGE = "gcloud projects add-iam-policy-binding {project} " \
+                           "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
+                           "--role=\"roles/storage.admin\""
 
     class PubSubTopics(str, Enum):
         CYBER_ARENA = "gcloud pubsub topics create cyber_arena"
