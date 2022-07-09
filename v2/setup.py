@@ -74,10 +74,10 @@ def main():
 
 def test_gcp_credentials(project):
     try:
-        service = discovery.build('iam', 'v1')
-        service.projects().serviceAccounts().list(name=f'projects/{project}').execute()
+        service = discovery.build('compute', 'v1')
+        service.instances().list(project=project, zone="us-central1-b").execute()
         return True
-    except (DefaultCredentialsError, HttpError):
+    except (DefaultCredentialsError, HttpError) as err:
         return False
 
 

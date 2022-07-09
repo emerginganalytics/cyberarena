@@ -5,6 +5,15 @@ from googleapiclient import discovery
 
 from install_update.utilities.globals import ShellCommands
 
+__author__ = "Philip Huff"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Philip Huff"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Philip Huff"
+__email__ = "pdhuff@ualr.edu"
+__status__ = "Testing"
+
 
 class EnvironmentVariables:
     COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
