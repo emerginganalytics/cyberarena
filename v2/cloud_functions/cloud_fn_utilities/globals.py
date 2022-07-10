@@ -5,6 +5,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERGYM_WORKOUT = 'cybergym-workout'
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
+    FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
     SERVER = 'cybergym-server'
     ADMIN_INFO = 'cybergym-admin-info'
 

@@ -142,7 +142,7 @@ class FixedArenaWorkoutStateManager:
                         continue
             for server in self.build['fixed_arena_servers']:
                 server_name = f"{self.build['parent_id']}-{server}"
-                server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name).get()
+                server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name).get()   #added .get() to this line
                 if server_ds.get('state', None) != self.server_states.RUNNING.value:
                     servers_finished = False
                     continue

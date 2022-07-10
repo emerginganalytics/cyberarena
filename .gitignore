@@ -25,3 +25,4 @@ design-files/private/
 /admin_scripts/temp/
 /admin_scripts/bryce_test_scripts/
 admin_scripts/quick_command.py
+!/admin_scripts/bryce_test_scripts/bryce_test_fixed_arena_workout_build.py

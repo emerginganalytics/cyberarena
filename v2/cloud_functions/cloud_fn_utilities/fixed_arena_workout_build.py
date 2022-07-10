@@ -44,7 +44,11 @@ class FixedArenaWorkoutBuild:
         if not self.fixed_arena_workout:
             logging.error(f"The datastore record for {self.fixed_arena_workout_id} no longer exists!")
             raise LookupError
-        self.fixed_arena_workstations_ids = []
+        self.workspace_records_ids = self._get_workspace_records_ids()    # I added this line
+        self.fixed_arena_workspace_ids = []
+        for i in range(self.workspace_records_ids.__len__()):   # I added this for loop
+            workspace = self.workspace_records_ids[i]
+            self.fixed_arena_workspace_ids.append(workspace)
         ip_range = BuildConstants.Networks.Reservations.FIXED_ARENA_WORKOUT_SERVER_RANGE
         self.ip_reservations = list(iter_iprange(ip_range[0], ip_range[1]))
         self.next_reservation = 0
@@ -104,22 +108,25 @@ class FixedArenaWorkoutBuild:
         self.state_manager.state_transition(self.s.START)
         display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         servers_to_start = [display_proxy]
+
         for server in self.fixed_arena_workout['fixed_arena_servers']:
             self.fixed_arena_workout.get('fixed_arena_id')
             server_name = f"{self.fixed_arena_workout['parent_id']}-{server}"
             servers_to_start.append(server_name)
-        for ws_id in self.fixed_arena_workout_id:
-            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
             for ws_server in ws_servers:
-                servers_to_start.append(ws_server)
+                server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
+                servers_to_start.append(server_name)
 
         for server in servers_to_start:
             if self.debug:
                 ComputeManager(server).start()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
-                                        action=PubSub.MaintenanceActions.START_SERVER, server_name=server)
+                                        action=PubSub.MaintenanceActions.START_SERVER.name, server_name=server)
 
         if not self.state_manager.are_servers_started():
             self.state_manager.state_transition(self.s.BROKEN)
@@ -137,11 +144,12 @@ class FixedArenaWorkoutBuild:
             self.fixed_arena_workout.get('fixed_arena_id')
             server_name = f"{self.fixed_arena_workout['parent_id']}-{server}"
             servers_to_stop.append(server_name)
-        for ws_id in self.fixed_arena_workout_id:
-            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
             for ws_server in ws_servers:
-                servers_to_stop.append(ws_server)
+                server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
+                servers_to_stop.append(server_name)
 
         for server in servers_to_stop:
             if self.debug:
@@ -162,11 +170,12 @@ class FixedArenaWorkoutBuild:
         self.state_manager.state_transition(self.s.DELETED)
         display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         servers_to_delete = [display_proxy]
-        for ws_id in self.fixed_arena_workout_id:
-            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+        for ws_id in self.fixed_arena_workspace_ids:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
             for ws_server in ws_servers:
-                servers_to_delete.append(ws_server)
+                server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
+                servers_to_delete.append(server_name)
 
         for server in servers_to_delete:
             if self.debug:
@@ -200,6 +209,7 @@ class FixedArenaWorkoutBuild:
         for i in range(count):
             id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             workspace_record = {
+                'id': id,
                 'parent_id': self.fixed_arena_workout_id,
                 'parent_build_type': self.fixed_arena_workout['build_type'],
                 'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
@@ -210,6 +220,16 @@ class FixedArenaWorkoutBuild:
                 workspace_record['workspace_email'] = student_list[i]
             workspace_datastore.put(workspace_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=id)
             workspace_ids.append(id)
+        return workspace_ids
+
+    def _get_workspace_records_ids(self):       # I added this function
+        workspace_datastore = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT
+                                                                , build_id=self.fixed_arena_workout['id'])
+        workspace_ids = []
+        for i in range(workspace_datastore.__len__()):
+            workspace = workspace_datastore[i]
+            workspace_id = workspace['id']
+            workspace_ids.append(workspace_id)
         return workspace_ids
 
     def _get_workspace_network_config(self):
