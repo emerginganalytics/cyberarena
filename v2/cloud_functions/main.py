@@ -1,5 +1,7 @@
 import logging
 import time
+
+import schedule as schedule
 from google.cloud import logging_v2
 
 from cloud_fn_utilities.globals import PubSub
@@ -45,4 +47,7 @@ def cyber_arena_cloud_function(event, context):
         if handler == PubSub.Handlers.BUILD:
             BuildHandler(event['attributes']).route()
         elif handler == PubSub.Handlers.MAINTENANCE:
-            MaintenanceHandler(event['attributes']).route()
+            MaintenanceHandler(event['attributes']).route
+while True:
+   schedule.run_pending()
+   time.sleep(1)

@@ -154,6 +154,31 @@ class FixedArenaWorkoutBuild:
             workspace_ids.append(id)
         return workspace_ids
 
+    def delete(self):
+        self.state_manager.state_transition(self.s.DELETED)
+        display_proxy = f"{self.fixed_arena_workout_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
+        servers_to_delete = [display_proxy]
+        for ws_id in self.fixed_arena_workout_id:
+            ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_servers = ws_ds.get_servers()
+            for ws_server in ws_servers:
+                servers_to_delete.append(ws_server)
+
+        for server in servers_to_delete:
+            if self.debug:
+                ComputeManager(server).delete()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE,
+                                        action=PubSub.MaintenanceActions.DELETE_SERVER, server_name=server)
+
+        if not self.state_manager.are_servers_deleted():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_workout_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.DELETED)
+            logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
+
     def _get_workspace_network_config(self):
         network_config = [{
             'network': BuildConstants.Networks.GATEWAY_NETWORK_NAME,
