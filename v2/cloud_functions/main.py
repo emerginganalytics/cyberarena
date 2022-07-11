@@ -47,7 +47,7 @@ def cyber_arena_cloud_function(event, context):
         if handler == PubSub.Handlers.BUILD:
             BuildHandler(event['attributes']).route()
         elif handler == PubSub.Handlers.MAINTENANCE:
-            MaintenanceHandler(event['attributes']).route
+            MaintenanceHandler(event['attributes']).route()
 while True:
    schedule.run_pending()
    time.sleep(1)

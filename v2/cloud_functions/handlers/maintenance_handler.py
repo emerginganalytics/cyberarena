@@ -3,6 +3,7 @@ from calendar import calendar
 from datetime import time, datetime
 
 import googleapiclient
+import self
 from google import pubsub_v1
 from google.cloud import logging_v2
 from googleapiclient.errors import HttpError
@@ -23,6 +24,10 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+from cloud_fn_utilities.maintenance_tasks.delete_expired_workout import DeleteExpiredWorkout
+from cloud_fn_utilities.maintenance_tasks.stop_everything import StopEverything
+from cloud_fn_utilities.maintenance_tasks.stop_lapsed_arena import StopLapsedArena
+
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
 
@@ -32,7 +37,6 @@ from common.globals import log_client, compute, project, zone, LOG_LEVELS, ds_cl
     WORKOUT_TYPES, cloud_log, workout_globals, SERVER_STATES, SERVER_ACTIONS, dns_suffix, parent_project, dnszone, \
     gcp_operation_wait
 from common.state_transition import state_transition
-
 
 
 class MaintenanceHandler:
@@ -51,9 +55,18 @@ class MaintenanceHandler:
         self.compute = googleapiclient.discovery.build('compute', 'v1')
     #    self.server_states = ServerStateManag.States
         #self.lookback_seconds = self.lookback_seconds
+        self.current_time = datetime.now()
 
     def route(self):
+        if self.current_time.minute <= 7 or self.current_time.minute >= 52:
+            self._hourly_fn()
+        elif  self.current_time=='00:00':
+            self._midnight_()
+        else:
+            self._quarterly()
         action = self.event_attributes('action', None)
+        if action == PubSub.MaintenanceActions.DELETE_SERVER:
+            DeleteExpiredWorkout().run(deletion_type='Expired')
         if not action:
             logging.error(f"No action provided in cloud function maintenance handler")
             raise ValueError
@@ -67,3 +80,17 @@ class MaintenanceHandler:
             logging.error(f"Unsupported action supplied to the maintenance handler")
             raise ValueError
 
+    def _hourly_fn(self):
+        action = self.event_attributes('action', None)
+        if action == PubSub.MaintenanceActions.DELETE_SERVER:
+            DeleteExpiredWorkout().run(deletion_type='Expired')
+
+    def _quarterly(self):
+        action = self.event_attributes('action', None)
+        if action == PubSub.MaintenanceActions.STOP_SERVER:
+            StopLapsedArena().run()
+
+    def _midnight(self):
+        action = self.event_attributes('action', None)
+        if action == PubSub.MaintenanceActions.STOP_SERVER:
+            StopEverything().run()

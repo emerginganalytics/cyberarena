@@ -14,7 +14,6 @@ from common.state_transition import state_transition
 DEFAULT_LOOKBACK = 10512000
 
 class DeleteExpiredWorkout:
-
     class DeleteType:
      EXPIRED = "Expired"
 
@@ -24,6 +23,7 @@ class DeleteExpiredWorkout:
         self.build_id = build_id
         self.build_type = build_type
         self.lookback_seconds = lookback_seconds
+        self.df = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT)
 
     def run(self, deletion_type=None):
 
@@ -37,9 +37,6 @@ class DeleteExpiredWorkout:
                 self._delete_expired_arenas()
 
         return True
-
-    def __init__(self):
-        self.df = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT)
 
     def _delete_expired_arenas(self):
 
