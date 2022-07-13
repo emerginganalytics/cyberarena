@@ -42,13 +42,13 @@ class FixedArenaWorkspaceProxy:
         self.workspace_ids = workspace_ids
         self.guac_connections = []
         self.ds = DataStoreManager()
-        self.build_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=self.build_id)
+        self.build_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.build_id)
         self.guac = GuacamoleConfiguration(self.build_id)
 
     def build(self):
         proxy_configs = []
         for ws_id in self.workspace_ids:
-            ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             proxy_connections = []
             for server in ws_record['servers']:
                 human_interaction = server.get('human_interaction', None)
@@ -66,13 +66,13 @@ class FixedArenaWorkspaceProxy:
                             }
                             proxy_connections.append(connection)
             ws_record['proxy_connections'] = proxy_connections
-            self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT, key_id=ws_id)
+            self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
 
         guac_startup_script = self.guac.get_guac_startup_script(proxy_configs)
         server_spec = {
             'parent_build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
             'parent_id': self.build_id,
-            'grandparent_id': self.build_record['parent_id'],
+            'fixed_arena_id': self.build_record.get('fixed_arena_id', self.build_record['parent_id']),
             'name': self.server_name,
             'image': BuildConstants.MachineImages.GUACAMOLE,
             'tags': {'items': ['student-entry']},
@@ -85,7 +85,7 @@ class FixedArenaWorkspaceProxy:
                     "internal_ip": BuildConstants.Networks.Reservations.WORKSPACE_PROXY_SERVER
                 }
             ],
-            'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKOUT,
+            'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
             'dns_hostname': f"{self.build_id}-display",
             'guacamole_startup_script': guac_startup_script
         }

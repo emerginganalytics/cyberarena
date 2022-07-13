@@ -6,6 +6,7 @@ from cloud_fn_utilities.globals import PubSub
 from cloud_fn_utilities.budget_manager import BudgetManager
 from handlers.build_handler import BuildHandler
 from handlers.maintenance_handler import MaintenanceHandler
+from handlers.control_handler import ControlHandler
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -44,5 +45,7 @@ def cyber_arena_cloud_function(event, context):
     else:
         if handler == PubSub.Handlers.BUILD:
             BuildHandler(event['attributes']).route()
+        elif handler == PubSub.Handlers.CONTROL:
+            ControlHandler(event['attributes']).route()
         elif handler == PubSub.Handlers.MAINTENANCE:
-            MaintenanceHandler(event['attributes']).route()
+            MaintenanceHandler().route()
