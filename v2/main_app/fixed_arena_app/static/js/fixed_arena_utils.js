@@ -131,3 +131,19 @@ function remove_fields(ele_id, clear=false){
        rem_elem.innerHTML = "";
    }
 }
+
+function copy_student_links(){
+    var temp_div = document.createElement("textarea");
+
+    var links = document.getElementsByClassName('workout-link');
+
+    for(var i = 0; i < links.length; i++){
+        temp_div.value += links[i].href + "\n";
+    }
+    temp_div.id = "temp_div";
+    document.getElementById('loading-msg').append(temp_div);
+    temp_div.select();
+    document.execCommand("copy");
+    document.getElementById('loading-msg').removeChild(temp_div);
+    document.getElementById('copy_link_text').style.display = "block";
+}
