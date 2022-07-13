@@ -1,10 +1,12 @@
 from enum import Enum
+from datetime import datetime, timezone, timedelta
 
 
 class DatastoreKeyTypes(str, Enum):
     CYBERGYM_WORKOUT = 'cybergym-workout'
     FIXED_ARENA = 'fixed-arena'
-    FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
+    FIXED_ARENA_CLASS = 'fixed-arena-class'
+    FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
     SERVER = 'cybergym-server'
     ADMIN_INFO = 'cybergym-admin-info'
 
@@ -13,7 +15,7 @@ class BuildConstants:
     class BuildType(str, Enum):
         ARENA = "arena"
         FIXED_ARENA = "fixed_arena"
-        FIXED_ARENA_WORKOUT = "fixed_arena_workout"
+        FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
         WORKOUT = "workout"
 
@@ -82,6 +84,7 @@ class PubSub:
         BUDGET = "BUDGET"
         BUILD = "BUILD"
         MAINTENANCE = "MAINTENANCE"
+        CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
         BOTNET = "BOTNET"
@@ -90,17 +93,27 @@ class PubSub:
         WORKOUT = 0
         ARENA = 1
         FIXED_ARENA = 2
-        FIXED_ARENA_WORKOUT = 3
+        FIXED_ARENA_CLASS = 3
         SERVER = 4
         DISPLAY_PROXY = 5
         FIREWALL_SERVER = 6
         FIXED_ARENA_WORKSPACE_PROXY = 7
 
-    class MaintenanceActions(Enum):
-        START_SERVER = 5
-        DELETE_SERVER = 6
-        STOP_SERVER = 7
-        REBUILD_SERVER = 8
-        SNAPSHOT_SERVER = 9
-        RESTORE_SERVER = 10
+    class Actions(Enum):
+        BUILD = 1
+        START = 2
+        DELETE = 3
+        STOP = 4
+        REBUILD = 5
+        SNAPSHOT = 6
+        RESTORE = 7
+        NUKE = 8
 
+    class CyberArenaObjects(Enum):
+        FIXED_ARENA = 1
+        FIXED_ARENA_CLASS = 2
+        FIXED_ARENA_WORKSPACE = 3
+        SERVER = 4
+
+def get_current_timestamp_utc(add_minutes=0):
+    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()

@@ -115,6 +115,15 @@ class FixedArenaStateManager:
         else:
             return False
 
+    @staticmethod
+    def get_expired():
+        """
+        This function returns a list of fixed_arena classes which have expired.
+        @return: List of IDs for retired classes
+        @rtype: list
+        """
+        return DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS).get_expired()
+
     def _is_fixed_arena_valid_transition(self, existing_state, new_state):
         if new_state == self.s.START and not existing_state:
             return True

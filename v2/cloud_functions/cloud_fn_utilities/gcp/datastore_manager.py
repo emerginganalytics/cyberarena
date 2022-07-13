@@ -1,8 +1,9 @@
 from google.cloud import datastore
+from datetime import datetime, timedelta
 import logging
 from google.cloud import logging_v2
 
-from cloud_fn_utilities.globals import DatastoreKeyTypes
+from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,10 +19,11 @@ class DataStoreManager:
     def __init__(self, key_type=None, key_id=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
+        self.key_type = key_type
         self.key_id = key_id
         self.ds_client = datastore.Client()
-        if key_type:
-            self.key = self.ds_client.key(key_type, key_id)
+        if self.key_type and self.key_id:
+            self.key = self.ds_client.key(self.key_type, self.key_id)
         else:
             self.key = None
 
@@ -57,6 +59,13 @@ class DataStoreManager:
         query_workspaces = self.ds_client.query(kind=key_type)
         query_workspaces.add_filter('parent_id', '=', build_id)
         return list(query_workspaces.fetch())
+
+    def get_expired(self):
+        query_expired = self.ds_client.query(kind=self.key_type)
+        if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
+            query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
+            return list(query_expired.fetch())
+
 
     @staticmethod
     def _create_safe_entity(entity):

@@ -43,7 +43,11 @@ class ComputeManager:
         log_client.setup_logging()
         self.server_name = server_name
         self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
-        self.parent_id = self.server_spec['parent_id']
+        if not self.server_spec:
+            logging.error(f"No record exists for compute record {server_name}")
+            raise LookupError
+        else:
+            self.parent_id = self.server_spec['parent_id']
 
     def build(self):
         """
@@ -282,7 +286,7 @@ class ComputeManager:
         self.server_spec['metadata'] = metadata
 
     def _add_nics(self):
-        network_prefix = self._get_network_name_prefix(self.server_spec.get('parent_build_type', None))
+        network_prefix = self.server_spec.get('fixed_arena_id', self.server_spec['parent_id'])
         network_interfaces = []
         for network in self.server_spec['nics']:
             if network.get("external_nat", None):
@@ -304,15 +308,6 @@ class ComputeManager:
                 add_network_interface['aliasIpRanges'] = network['alias_ip_ranges']
             network_interfaces.append(add_network_interface)
         self.server_spec['network_interfaces'] = network_interfaces
-
-    def _get_network_name_prefix(self, parent_build_type):
-        if parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKOUT:
-            network_prefix = self.server_spec['great_grandparent_id']
-        elif parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
-            network_prefix = self.server_spec['grandparent_id']
-        else:
-            network_prefix = self.parent_id
-        return network_prefix
 
     @staticmethod
     def _lookup_machine_type(machine_type):

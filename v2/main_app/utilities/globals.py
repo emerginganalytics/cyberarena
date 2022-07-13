@@ -1,4 +1,5 @@
 from enum import Enum
+from datetime import datetime, timezone, timedelta
 
 
 class DatastoreKeyTypes(str, Enum):
@@ -7,7 +8,8 @@ class DatastoreKeyTypes(str, Enum):
     CYBERGYM_WORKOUT = 'cybergym-workout'
     CYBERGYM_UNIT = 'cybergym-unit'
     FIXED_ARENA = 'fixed-arena'
-    FIXED_ARENA_WORKOUT = 'fixed-arena-workout'
+    FIXED_ARENA_CLASS = 'fixed-arena-class'
+    FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
     SERVER = 'cybergym-server'
     INSTRUCTOR = 'cybergym-instructor'
     CYBERARENA_ATTACK = 'cyberarena-attack'
@@ -18,7 +20,8 @@ class BuildConstants:
     class BuildType(str, Enum):
         ARENA = "arena"
         FIXED_ARENA = "fixed_arena"
-        FIXED_ARENA_WORKOUT = "fixed_arena_workout"
+        FIXED_ARENA_CLASS = "fixed_arena_class"
+        FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
         WORKOUT = "workout"
 
     class Protocols(str, Enum):
@@ -61,6 +64,7 @@ class BuildConstants:
     class Networks:
         class Reservations:
             DISPLAY_SERVER = '10.1.0.3'
+            WORKSPACE_PROXY_SERVER = '10.1.0.4'
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
         GATEWAY_NETWORK_NAME = 'gateway'
         GATEWAY_NETWORK_CONFIG = {
@@ -80,14 +84,6 @@ class BuildConstants:
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
-        MANAGE_SERVER = 'manage-server'
-        BUILD_ARENA = 'build_arena'
-        BUILD_WORKOUTS = 'build-workouts'
-        ADMIN_SCRIPTS = 'admin-scripts'
-        START_VM = 'start-vm'
-        STOP_VM = 'stop-vm'
-        START_ARENA = 'start-arena'
-        STOP_ARENA = 'stop-arena'
 
     class Handlers(str, Enum):
         BUDGET = "BUDGET"
@@ -101,27 +97,33 @@ class PubSub:
         WORKOUT = 0
         ARENA = 1
         FIXED_ARENA = 2
-        FIXED_ARENA_WORKOUT = 3
+        FIXED_ARENA_CLASS = 3
         SERVER = 4
         DISPLAY_PROXY = 5
         FIREWALL_SERVER = 6
         FIXED_ARENA_WORKSPACE_PROXY = 7
 
-    class MaintenanceActions(Enum):
-        START_SERVER = 5
-        DELETE_SERVER = 6
-        STOP_SERVER = 7
-        REBUILD_SERVER = 8
-        SNAPSHOT_SERVER = 9
-        RESTORE_SERVER = 10
+    class Actions(Enum):
+        BUILD = 1
+        START = 2
+        DELETE = 3
+        STOP = 4
+        REBUILD = 5
+        SNAPSHOT = 6
+        RESTORE = 7
+        NUKE = 8
 
-    class WorkoutActions(str, Enum):
-        BUILD: 'BUILD'
-        NUKE: 'NUKE'
+    class CyberArenaObjects(Enum):
+        FIXED_ARENA = 1
+        FIXED_ARENA_CLASS = 2
+        FIXED_ARENA_WORKSPACE = 3
+        SERVER = 4
 
 
 class Buckets:
     class Folders(str, Enum):
-        FIXED_ARENA = "yaml-build-files/v2/fixed_arena/"
-        FIXED_ARENA_WORKOUT = "yaml-build-files/v2/fixed_arena_workout/"
-        CYBERGYM_WORKOUT = "yaml-build-files/"
+        SPECS = "specs/"
+
+
+def get_current_timestamp_utc(add_minutes=0):
+    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()

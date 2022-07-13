@@ -41,7 +41,7 @@ class BucketManager:
 
     def get_workouts(self):
         """Retrieves list of standard Cyber Gym workout spec files"""
-        folder_name = Buckets.Folders.CYBERGYM_WORKOUT.value
+        folder_name = Buckets.Folders.SPECS.value
         bucket = self.bucket_manager.get_bucket(CloudEnv().spec_bucket)
 
         workout_specs = []

@@ -1,10 +1,12 @@
+from google.cloud import datastore
+from datetime import datetime, timedelta, timezone
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from utilities.globals import Buckets
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.bucket_manager import BucketManager
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
-from v2.cloud_functions.cloud_fn_utilities.fixed_arena_build import FixedArenaBuild
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
 
 __author__ = "Philip Huff"
@@ -24,23 +26,30 @@ parser.add_argument("-a", "--fixed-arena", default=None, help="Fixed Arena Speci
 args = vars(parser.parse_args())
 
 # Set up parameters
-fixed_arena = args.get('fixed_arena')
+fixed_arena_class = args.get('fixed_arena_class')
 
 
-class TestFixedArena:
+class TestFixedArenaWorkout:
     def __init__(self):
         self.env = CloudEnv()
         self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.FIXED_ARENA}{fixed_arena}.yaml")
+        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
+                                       file=f"{Buckets.Folders.SPECS}{fixed_arena_class}.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
+        build_spec['workspace_settings'] = {
+            'count': 2,
+            'registration_required': False,
+            'student_list': [],
+            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
+        }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fab = FixedArenaBuild(fixed_arena_id=build_spec['id'], debug=True)
-        fab.build_fixed_arena()
+        fac = FixedArenaClass(build_id=build_spec['id'], debug=True)
+        fac.build()
 
 
 if __name__ == "__main__":
-    fixed_arena = 'stoc' if not fixed_arena else fixed_arena
-    TestFixedArena().build()
+    fixed_arena_class = 'stoc-class' if not fixed_arena_class else fixed_arena_class
+    TestFixedArenaWorkout().build()

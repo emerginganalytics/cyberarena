@@ -27,9 +27,9 @@ class FixedArenaSchema(Schema):
         strict = True
 
 
-class FixedArenaWorkoutSchema(Schema):
+class FixedArenaClassSchema(Schema):
     id = fields.Str(required=True)
-    creation_timestamp = fields.DateTime()
+    creation_timestamp = fields.Float()
     version = fields.Str(required=True)
     workspace_settings = fields.Nested('WorkspaceSettingsSchema')
     build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
@@ -46,7 +46,7 @@ class WorkspaceSettingsSchema(Schema):
     registration_required = fields.Bool(description='Whether students must login to access this build', default=False)
     student_list = fields.List(fields.Dict, description='Email addresses of students when registration is required',
                                many=True, required=False)
-    expires = fields.DateTime(required=True)
+    expires = fields.Float(required=True)
 
 
 class CyberArenaSummarySchema(Schema):
