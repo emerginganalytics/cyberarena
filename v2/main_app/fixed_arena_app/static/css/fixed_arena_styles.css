@@ -28,6 +28,7 @@ textarea {
     color: white;
 }
 .prevent-select {
+    -webkit-touch-callout: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -261,8 +262,8 @@ input:checked + .slider:before {
     box-shadow: 1px 3px 5px 0 gray;
     min-width: 780px;
 }
-.server-table-div table tr th:hover {
-    pointer-events: none;
+#server-header-row:hover {
+    background: white !important;
 }
 
 /* Auto Shutoff Modal Styles */

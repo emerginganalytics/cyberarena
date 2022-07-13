@@ -10,6 +10,7 @@ from admin_app.routes import admin_app
 from student_app.routes import student_app
 from teacher_app.routes import teacher_app
 from faqs_app.routes import faqs_app
+from fixed_arena_app.routes import fixed_arena_app
 
 # API Views
 from api.classroom import Classroom
@@ -23,6 +24,7 @@ app.register_blueprint(admin_app)
 app.register_blueprint(student_app)
 app.register_blueprint(teacher_app)
 app.register_blueprint(faqs_app)
+app.register_blueprint(fixed_arena_app)
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
 app.jinja_env.globals['project'] = CloudEnv().project
 

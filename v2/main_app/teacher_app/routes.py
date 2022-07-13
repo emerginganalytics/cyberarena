@@ -7,6 +7,7 @@ from utilities.gcp.bucket_manager import BucketManager
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.datastore_manager import DataStoreManager
 from utilities.globals import DatastoreKeyTypes
+from utilities.gcp.arena_authorizer import ArenaAuthorizer
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
@@ -137,7 +138,6 @@ def arena_list(unit_id):
     unit_query = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT, key_id=str(unit_id))
     unit = unit_query.get()
     workout_list = DataStoreManager().get_workouts()
-
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
@@ -159,39 +159,3 @@ def arena_list(unit_id):
         return render_template('arena_list.html', unit_teams=unit_teams, teacher_instructions=teacher_instructions_url,
                                workout_list=workout_list, student_instructions=student_instructions_url,
                                description=unit['description'], unit_id=unit_id, start_time=start_time)
-
-
-@teacher_app.route('/fixed-arena/', methods=['GET', 'POST'])
-def fixed_arena():
-    """
-    Kind id parent_id build_type
-    fixed-arena-workout, ohzuxkhxee, cln-stoc, fixed_arena_workout
-
-    Kind build_type id
-    fixed-arena, fixed_arena, cln-stoc
-
-    Workspaces are denoted by fixed-arena-workout.workspace_servers
-    :return:
-    """
-    auth_config = CloudEnv().auth_config
-    standard_workout_opt = BucketManager().get_workouts()
-    # TODO: Store attack spec in Datastore
-    attack_yaml = DataStoreManager().get_attack_specs()
-
-    # TODO: Get Network build specs from stored Datastore object
-    # TODO: Get current network build from stored Datastore object
-    # This is all the possible variation of quick builds templates that are available
-    network_builds = [{'name': 'Access Control', 'id': 'access_control'},
-                      {'name': 'Logging', 'id': 'logging'},
-                      {'name': 'Firewall', 'id': 'firewall'},
-                      {'name': 'Full Build', 'id': 'full'}]
-
-    # Get List of Servers available to for Fixed Network
-    fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id='cln-stoc').get()
-    server_list = list(fixed_arena['servers'])
-
-    # TODO: Get list of workstations available for fixed network
-    # Render template
-    return render_template('fixed_arena_home.html', workout_titles=standard_workout_opt,
-                           auth_config=auth_config, attack_spec=attack_yaml, network_builds=network_builds,
-                           server_list=server_list, fixed_workout_list=server_list, workstations=None)

@@ -4,10 +4,9 @@
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
 {% block title %}Teacher Home Page{% endblock %}
 {% block content %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/fixed_arena_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
     <script src='{{ url_for("static", filename="js/login.js") }}'></script>
-    <script type="text/javascript" src="{{ url_for('teacher_app.static', filename='js/fixed_arena_utils.js') }}"></script>
-    <script type="text/javascript" src="{{url_for('teacher_app.static', filename='js/teacher_utils.js')}}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena_utils.js') }}"></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -40,29 +39,6 @@
   <div id="teacher_controls" class="nav flex-column nav-pills col-2" role="tablist" aria-orientation="vertical">
     {{logo.logo_div() }}
     <h2 style="text-align: center;"><span id='user_name_header'></span>!</h2>
-    <a class="nav-link" id="class_tab" href="/teacher/home">Classes</a>
-    <a class="nav-link" id="unit_tab" href="/teacher/home#current_unit_container">Current Units</a>
-    <a class="nav-link" id="expired_unit_tab" href="/teacher/home#expired_unit_container">Expired Units</a>
-    <a class="nav-link active" id="fixed_arena_tab" data-toggle="pill" href="#fixed_arena_container" type="button" role="tab" aria-controls="fixed_arena_container" aria-selected="true">Secure Training and Operations Center</a>
-
-    <div  id="build_workout_widget" class="input-group unit_build_container">
-      <div class="input-group-prepend container nav-item dropright" style="padding:0;">
-        <a class="nav-link" onclick="to_build_page()" href="#">Build Unit</a>
-        <a class="nav-link dropdown-toggle dropdown-toggle-split" id="unit_build_dropdown" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
-
-        <div class="dropdown-menu" id="unit_select" style="overflow-y: auto;max-height:360px;" aria-labelledby="unit_build_dropdown" href="#">
-          <option selected>Select unit type...</option>
-          {% for workout in workout_titles %}
-            {% if workout != 'attack' %}
-              <option class="dropdown-item build_unit_type" value="{{workout}}">{{workout}}</option>
-            {% endif %}
-          {% endfor %}
-        </div>
-        <div class="selected_build_unit" style="align-items:center;justify-content:center; flex-grow:1;">
-          <p class="nav-link" id="build_unit_display" style="display:none;margin:0;height:100%;width:100%;"></p>
-        </div>
-      </div>
-    </div>
     <a id="sign-out" href="#" class='nav-link'>Sign out</a>
   </div>
     <div id='info_display' class='tab-content col fixed-arena-container'>
@@ -111,7 +87,6 @@
                         </div>
                         <div class="network-template-div">
                             <table id="network-build-table" class="table table-hover">
-                                <!-- TODO: Highlight based on which preset is currently active -->
                                 {{ fixed_arena_macros.build_network_form_table(network_builds) }}
                             </table>
                             <div id="network-template-btn-div">
@@ -151,27 +126,27 @@
                         </div>
                         <div class="server-toolbar-div">
                             <ul class="server-toolbar">
-                                    <li class="server-control">
+                                    <li class="server-control prevent-select">
                                         <button type="button" class='server-control-btn' value="start-selected"><span><img class="button-icon" src="{{ url_for('teacher_app.static', filename='imgs/start-icon.png') }}"></span>Start</button>
                                     </li>
-                                    <li class="server-control">
+                                    <li class="server-control  prevent-select">
                                         <button type="button" class='server-control-btn' value="stop-selected"><span><img class="button-icon" src="{{ url_for('teacher_app.static', filename='imgs/stop-icon.png') }}"></span>Stop</button>
                                     </li>
-                                    <li class="server-control">
+                                    <li class="server-control  prevent-select">
                                         <button type="button" class='server-control-btn' value="restart-selected"><span><img class="button-icon" src="{{ url_for('teacher_app.static', filename='imgs/restart-icon.png') }}"></span>Restart</button>
                                     </li>
                             </ul>
                         </div>
                         <div class="server-table-div">
-                            <!--This table is used for showing status on built machines on the network-->
                             <table id="server-table" class="server-table table table-hover table-small">
-                                <tr class="prevent-select">
-                                    <th><input type="checkbox" class='select-all-servers' id='boot-select-all' value=""/></th>
-                                    <th>Server Name</th>
-                                    <th>State</th>
-                                    <th>Display</th>
-                                </tr>
-                                <!--TODO: Build table based on incoming jinja dict objects-->
+                                <thead>
+                                    <tr id="server-header-row">
+                                        <th><input type="checkbox" class='select-all-servers' id='boot-select-all' value=""/></th>
+                                        <th  class="prevent-select">Server Name</th>
+                                        <th  class="prevent-select">State</th>
+                                        <th  class="prevent-select">Display</th>
+                                    </tr>
+                                </thead>
                                 <tr>
                                     <td><input type="checkbox" value=""/></td>
                                     <td>adfsadf-kali</td>
@@ -198,7 +173,6 @@
                     <h2>Create a Lab</h2>
                 </div>
                 <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
-                    <!--Holds both form builder and attack results table-->
                     <div id="vuln-templates-container">
                          <table class="table table-hover" id="vuln-templates-table">
                              {{ vuln_macros.display_vulns(attack_spec.attack) }}
@@ -230,8 +204,6 @@
                         </div>
                     </div>
                     <div id="attack-results-container">
-                        <!-- TODO: Build a TABLE that shows list of all attacks for current unit
-                                    Table can be filtered based on status, attack_type, timestamp(?)-->
                         <table id="attack-results-table" class="table">
                             <thead>
                             <tr>
@@ -249,19 +221,7 @@
                 </div>
                 <div id="settings-container" class="tab-pane fade" aria-labelledby="nav-settings-btn">
                     <div class="server-manage-wrapper" id="server-manage-wrapper">
-                        <!--TODO: functionality:
-                            - List all servers available for network (built and not built)
-                            - Allow:
-                                |: Build new server on network
-                                |: Restart server on network
-                                |: Delete server from network
-                                |: Rebuild server on network
-                         -->
                         <div class="server-toolbar-div">
-                            <!--TODO:
-                                Toolbar used to Build, delete, or rebuild machines selected in
-                                div/form below-->
-
                             <ul id="manage-server-nav" class="server-toolbar">
                                 <li class="server-control">
                                     <button type="button" class='server-control-btn' value="start-selected" disabled><span><img class="button-icon" src="{{ url_for('teacher_app.static', filename='imgs/start-icon.png') }}"></span>Build</button>
@@ -277,13 +237,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <!-- TODO:
-                            Each machine cell will display:
-                                |: Select CheckBox
-                                |: Machine name
-                                |: Network
-                                |:
-                        -->
                         <table id="manage-server-table" class="table">
                             <thead id="manage-server-header">
                                 <tr>
@@ -322,6 +275,7 @@
                 </div>
             </div>
       </div>
+    </div>
 </div>
 <script type="text/javascript">
     // Vulnerability Builder Functions
