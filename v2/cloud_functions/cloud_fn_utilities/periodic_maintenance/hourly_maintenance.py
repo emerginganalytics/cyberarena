@@ -25,10 +25,7 @@ class HourlyMaintenance:
         for fixed_arena_class in expired_classes:
             build_id = fixed_arena_class.key.name
             if self.debug:
-                try:
-                    FixedArenaClass(build_id=build_id, debug=self.debug).delete()
-                except LookupError:
-                    continue
+                FixedArenaClass(build_id=build_id, debug=self.debug).delete()
             else:
                 self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                      cyber_arena_object=PubSub.CyberArenaObjects.FIXED_ARENA_CLASS,

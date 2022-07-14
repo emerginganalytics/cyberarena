@@ -115,5 +115,22 @@ class PubSub:
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
 
+class ServerStates(Enum):
+    START = 0
+    BUILDING = 1
+    READY = 2
+    STARTING = 3
+    RUNNING = 4
+    STOPPING = 5
+    STOPPED = 6
+    EXPIRED = 7
+    MISFIT = 8
+    RESETTING = 9
+    RELOADING = 10
+    BROKEN = 11
+    DELETING = 12
+    DELETED = 13
+
+
 def get_current_timestamp_utc(add_minutes=0):
     return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()

@@ -5,7 +5,7 @@ from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes
+from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,25 +18,8 @@ __status__ = "Testing"
 
 
 class ServerStateManager:
-
-    class States(Enum):
-        START = 0
-        BUILDING = 1
-        READY = 2
-        STARTING = 3
-        RUNNING = 4
-        STOPPING = 5
-        STOPPED = 6
-        EXPIRED = 7
-        MISFIT = 8
-        RESETTING = 9
-        RELOADING = 10
-        BROKEN = 11
-        DELETING = 12
-        DELETED = 13
-
     def __init__(self, initial_build_id=None):
-        self.s = ServerStateManager.States
+        self.s = ServerStates
         if initial_build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=initial_build_id)
             self.build = self.ds.get()

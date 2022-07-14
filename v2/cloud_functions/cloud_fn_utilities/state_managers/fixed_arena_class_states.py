@@ -4,8 +4,7 @@ from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes
-from cloud_fn_utilities.state_managers.server_states import ServerStateManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -52,7 +51,7 @@ class FixedArenaClassStateManager:
 
     def __init__(self, initial_build_id=None):
         self.s = FixedArenaClassStateManager.States
-        self.server_states = ServerStateManager.States
+        self.server_states = ServerStates
         self.build_id = initial_build_id
         if self.build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.build_id)

@@ -121,11 +121,14 @@ class FixedArenaClass:
 
     def delete(self):
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
-        servers_to_delete = self._get_servers()
+        servers_to_delete = self._get_servers(for_deletion=True)
 
         for server in servers_to_delete:
             if self.debug:
-                ComputeManager(server).delete()
+                try:
+                    ComputeManager(server).delete()
+                except LookupError:
+                    continue
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
                                         server_name=server)
@@ -138,12 +141,13 @@ class FixedArenaClass:
             self.state_manager.state_transition(self.s.DELETED)
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
 
-    def _get_servers(self):
+    def _get_servers(self, for_deletion=False):
         display_proxy = f"{self.fixed_arena_class_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         servers = [display_proxy]
-        for server in self.fixed_arena_class['fixed_arena_servers']:
-            server_name = f"{self.fixed_arena_class['parent_id']}-{server}"
-            servers.append(server_name)
+        if not for_deletion:
+            for server in self.fixed_arena_class['fixed_arena_servers']:
+                server_name = f"{self.fixed_arena_class['parent_id']}-{server}"
+                servers.append(server_name)
         for ws_id in self.fixed_arena_workspace_ids:
             ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
