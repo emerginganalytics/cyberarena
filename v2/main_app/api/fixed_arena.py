@@ -1,6 +1,11 @@
-from flask.views import View, MethodView
-from api.utilities import auth_required, admin_required, instructor_required
-
+from flask import abort, json, session, request
+from flask.views import MethodView
+from api.decorators import admin_required, instructor_required
+from utilities.gcp.cloud_env import CloudEnv
+from utilities.gcp.datastore_manager import DataStoreManager
+from utilities.gcp.pubsub_manager import PubSubManager
+from utilities.gcp.arena_authorizer import ArenaAuthorizer
+from utilities.globals import PubSub, DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -13,21 +18,66 @@ __status__ = "Testing"
 
 
 class FixedArena(MethodView):
-    decorators = [auth_required]
+    def __init__(self):
+        self.authorizer = ArenaAuthorizer()
 
-    def get(self, fixed_arena_id=None):
-        """Get Classroom"""
-        if fixed_arena_id:
-            return f'{fixed_arena_id}'
-        return 'FIXED ARENA'
+    def get(self, build_id=None):
+        """Get Fixed Arena"""
+        user_email = session.get('user_email', None)
+        user_group = session.get('user_group', None)
+        if build_id:
+            fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT.value, key_id=build_id).get()
+            server_query = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query()
+            server_query.add_filter('parent_id', '=', build_id)
+            server_list = list(server_query.fetch())
+            if user_email and fixed_arena['registration_required']:
+                if user_email == fixed_arena['student_email'] or self.authorizer.UserGroups.AUTHORIZED in user_group:
+                    return json.dumps({'fixed_arena': fixed_arena, 'workstations': server_list})
+                # Bad Request; Unauthorized User
+                else:
+                    abort(403)
+            else:
+                return json.dumps({'state': fixed_arena['state'], 'workstations': server_list})
+        # Bad request; No build_id given
+        abort(400)
 
-    def post(self):
-        """Create Classroom"""
+    @instructor_required
+    def post(self, build_id=None):
+        """Create Fixed Arena"""
         pass
 
-    def delete(self, user_id):
-        pass
+    @instructor_required
+    def delete(self, build_id=None):
+        # Instructors should be allowed to delete machines on an existing STOC network
+        user_email = session.get('user_email', None)
+        user_group = session.get('user_group', None)
+        if build_id:
+            pass
+        else:
+            # Only admins should be allowed to delete an entire STOC network
+            if self.authorizer.UserGroups.ADMINS in user_group:
+                pass
+            else:
+                abort(403)
 
-    def put(self, user_id):
-        """Update Existing Classroom"""
-        pass
+    @instructor_required
+    def put(self, build_id=None):
+        """
+        :parameter build_id: Machine to do action against. If no build_id is given
+         action is done against fixed network instead.
+         Actions can be any of the following: Start, Stop, Restart, or Nuke (Rebuild)
+        """
+        # Action on specific server
+        recv_data = request.json
+        action = recv_data.get('action', None)
+        if action:
+            if build_id:
+                pass
+            # Action on Fixed Arena
+            else:
+                if action == PubSub.WorkoutActions.NUKE:
+                    PubSubManager(topic=PubSub.Topics.BUILD_ARENA.value).msg(action=action, data=recv_data, build_type='FIXED_ARENA')
+                else:
+                    PubSubManager(topic=PubSub.Topics.BUILD_ARENA.value, data=recv_data, built_type='FIXED_ARENA')
+        else:
+            abort(400)

@@ -40,6 +40,8 @@ Helpful Guides
 workouts in the Cyber Arena.
 * [Cloud Functions](cloud-functions/README.md) - Cloud functions support building and maintaining workouts in the 
 Cyber Arena.
+* [Version 2](v2/README.md) - Version 2 of the Cyber Arena is in progress. Currently, this features an in-class build 
+intended for instructors to use as part of their course.
 
 ## Authors
 * Andrew Bomberger

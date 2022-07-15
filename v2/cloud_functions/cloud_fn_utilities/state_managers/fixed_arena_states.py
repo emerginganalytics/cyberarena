@@ -4,8 +4,7 @@ from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes
-from cloud_fn_utilities.state_managers.server_states import ServerStateManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -50,7 +49,7 @@ class FixedArenaStateManager:
 
     def __init__(self, initial_build_id=None):
         self.s = FixedArenaStateManager.States
-        self.server_states = ServerStateManager.States
+        self.server_states = ServerStates
         if initial_build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=initial_build_id)
             self.build = self.ds.get()
@@ -114,6 +113,15 @@ class FixedArenaStateManager:
             return True
         else:
             return False
+
+    @staticmethod
+    def get_expired():
+        """
+        This function returns a list of fixed_arena classes which have expired.
+        @return: List of IDs for retired classes
+        @rtype: list
+        """
+        return DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS).get_expired()
 
     def _is_fixed_arena_valid_transition(self, existing_state, new_state):
         if new_state == self.s.START and not existing_state:

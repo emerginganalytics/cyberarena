@@ -1,11 +1,10 @@
-from api.utilities import auth_required, admin_required, instructor_required
+from api.decorators import auth_required, admin_required
 from flask import abort, request, json, session
 from flask.views import MethodView
 from utilities.gcp.arena_authorizer import ArenaAuthorizer
 from utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.globals import PubSub, BuildConstants
-from utilities.gcp.cloud_log import CloudLog
+from utilities.globals import PubSub
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -25,7 +24,7 @@ class Workout(MethodView):
             user_email = session.get('user_email', None)
             user_group = session.get('user_group', None)
             workout = DataStoreManager(
-                key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT,
+                key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT.value,
                 key_id=build_id).get()
             if workout:
                 if user_email and workout['registration_required']:
@@ -46,12 +45,37 @@ class Workout(MethodView):
         # Bad Request; No build_id given
         abort(400)
 
-    @instructor_required
-    def post(self):
-        """Create Workout"""
-        pass
-
     @auth_required
+    def post(self, build_id):
+        """Create Workout"""
+        if build_id:
+            workout = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT.value, key_id=build_id).get()
+            if workout['state'] == 'READY':
+                data = request.json
+                workout_id = data.get('workout_id', None)
+                # No workout_id given
+                if not workout_id:
+                    abort(404)
+                ps_manager = PubSubManager(topic=PubSub.Topics.BUILD_WORKOUTS.value)
+                message = f"Student initiated cloud build for workout {workout_id}"
+                ps_manager.msg(workout_id=workout_id, message=message)
+                return 'Workout Built'
+            # Bad Request; Already Built
+            else:
+                abort(400)
+        else:
+            auth_level = session.get('user_groups', None)
+            if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
+               # TODO: Write logic to support standard workout creation requests
+                return '200'
+            # Invalid Request; Insufficient Permissions
+            else:
+                abort(403)
+
+    @admin_required
+    def delete(self):
+        abort(405)
+
     def put(self, build_id=None):
         """
         Change build state based on action (START, STOP, NUKE, etc)
@@ -59,90 +83,59 @@ class Workout(MethodView):
         auth_level = session.get('user_groups', None)
         recv_data = request.json
         action = recv_data.get('action', None)
+        # TODO: Move calculating run_hours to function that is called by PubSub request.
+        #       This will allow us to remove all datastore queries out of this method
         run_hours = recv_data.get('time', None)
-
-        # Build_id is supplied. Build type is of either workout or arena type
-        if build_id:
-            # Get workout from datastore and update run time
-            ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT, key_id=build_id)
-            workout = ds_manager.get()
-            if workout:
-                # Set new run time
-                if run_hours:
-                    workout['run_hours'] = min(int(run_hours), 10)
+        if action:
+            # Build_id is supplied. Build type is of either workout or arena type
+            if build_id:
+                # Request is sent to start a specific server
+                if recv_data.get('manage_server', False):
+                    server_name = recv_data.get('server_name', None)
+                    PubSubManager(topic=PubSub.Topics.MANAGE_SERVER).msg(
+                        action=action, server_name=server_name)
                 else:
-                    workout['run_hours'] = 2
-
-                # Send PubSub message to start machines
-                if action:
-                    build_type = workout.get('build_type', None)
-                    if build_type:
-                        if build_type == BuildConstants.BuildType.ARENA:
-                            if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
-                                message = f'Cyber Gym Arena {action} Request'
-                                if action != "NUKE":
-                                    topic_name = PubSub.Topics[f'{action}_ARENA'].value
-                                    ps_manager = PubSubManager(topic=topic_name)
-                                    ps_manager.msg(unit_id=build_id, message=message)
-
-                                    # Create Log Event
-                                    log_message = "{} action called for Arena {}".format(action, build_id)
-                                    CloudLog(severity=CloudLog.LogLevels.INFO
-                                             ).create_log(message=message, arena=str(build_id),runtime=str(run_hours))
-                            # Bad Request; Insufficient Privileges
-                            abort(403)
+                    ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT.value, key_id=build_id)
+                    workout = ds_manager.get()
+                    if workout:
+                        if run_hours:
+                            workout['run_hours'] = min(int(run_hours), 10)
                         else:
-                            message = f'Cyber Gym VM {action} Request'
-                            if action == "NUKE":
-                                topic_name = PubSub.Topics.BUILD_WORKOUTS
-                                ps_manager = PubSubManager(topic=topic_name)
-                                ps_manager.msg(workout_id=build_id, action=PubSub.WorkoutActions.NUKE)
-                            else:
-                                topic_name = PubSub.Topics[f'{action}_VM'].value
-                                ps_manager = PubSubManager(topic=topic_name)
-                                ps_manager.msg(workout_id=build_id, message=message)
-
-                            # Create Log Event
-                            log_message = "{} action called for server {}".format(action, build_id)
-                            CloudLog(severity=CloudLog.LogLevels.INFO
-                                     ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
-
-                        # Update build and return response
+                            workout['run_hours'] = 2
+                        if action == PubSub.WorkoutActions.NUKE.value:
+                            topic_name = PubSub.Topics.BUILD_WORKOUTS.value
+                        else:
+                            topic_name = PubSub.Topics[f'{action}_VM'].value
+                        PubSubManager(topic=topic_name).msg(workout_id=build_id, action=action, data=recv_data)
                         ds_manager.put(workout)
-                        response = {'status': 200, 'message': f'{recv_data["action"]} workout, {build_id}'}
+                        response = {'status': 200, 'message': f'{action} workout, {build_id}'}
                         return json.dumps(response)
-                else:
-                    # Bad request; No action given
-                    abort(400)
-            else:
-                # Bad request; Workout not found
-                abort(404)
-        else:
-            # If no build_id is given, assume unit level vm actions
-            # Make sure user is authorized to make request
-            if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
-                unit_id = recv_data.get('unit_id')
-                ds_manager = DataStoreManager(key_id=unit_id)
-                workout_list = ds_manager.get_workouts()
-                message = f'Cyber Gym VM {action} Request'
-                topic_name = PubSub.Topics[f'{action}_VM'].value
-                ps_manager = PubSubManager(topic=topic_name)
-
-                # For each workout in returned query, update run time and publish action
-                for workout in workout_list:
-                    if run_hours:
-                        workout['run_hours'] = min(int(run_hours), 10)
                     else:
-                        workout['run_hours'] = 2
-                    ds_manager.put(workout)
-                    ps_manager.msg(workout_id=workout.key.name, message=message)
-
-                # Create Log Event
-                log_message = "{} action called for unit {}".format(action, build_id)
-                CloudLog(severity=CloudLog.LogLevels.INFO
-                         ).create_log(message=log_message, workout=str(build_id), runtime=str(run_hours))
-                # Return response
-                return json.dumps({'status': 200, 'message': f'{recv_data["action"]} unit, {build_id}'})
+                        # Bad request; Workout not found
+                        abort(404)
             else:
-                # Bad request; Insufficient Privileges
-                abort(403)
+                # If no build_id is given, assumed unit level vm actions
+                # Make sure user is authorized to make request
+                if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
+                    unit_id = recv_data.get('unit_id')
+                    ds_manager = DataStoreManager(key_id=unit_id)
+                    if action == PubSub.WorkoutActions.NUKE.value:
+                        topic_name = PubSub.Topics.BUILD_WORKOUTS.value
+                    else:
+                        topic_name = PubSub.Topics[f'{action}_VM'].value
+                    ps_manager = PubSubManager(topic=topic_name)
+
+                    # For each workout in returned query, update run time and publish action
+                    for workout in ds_manager.get_workouts():
+                        if run_hours:
+                            workout['run_hours'] = min(int(run_hours), 10)
+                        else:
+                            workout['run_hours'] = 2
+                        ds_manager.put(workout)
+                        ps_manager.msg(workout_id=workout.key.name, action=action, data=recv_data)
+                    return json.dumps({'status': 200, 'message': f'{recv_data["action"]} unit, {build_id}'})
+                else:
+                    # Bad request; Insufficient Privileges
+                    abort(403)
+        else:
+            abort(400)

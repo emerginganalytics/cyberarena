@@ -1,13 +1,13 @@
 import logging
 from google.cloud import logging_v2
 
-from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
+from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
-from cloud_fn_utilities.fixed_arena_build import FixedArenaBuild
-from cloud_fn_utilities.fixed_arena_workout_build import FixedArenaWorkoutBuild
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
 
 __author__ = "Philip Huff"
@@ -37,13 +37,13 @@ class BuildHandler:
             if not build_id:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
-            FixedArenaBuild(build_id=build_id).build_fixed_arena()
-        elif action == PubSub.BuildActions.FIXED_ARENA_WORKOUT:
+            FixedArena(build_id=build_id).build_fixed_arena()
+        elif action == PubSub.BuildActions.FIXED_ARENA_CLASS:
             build_id = self.event_attributes.get('build_id', None)
             if not build_id:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
-            FixedArenaWorkoutBuild(build_id=build_id)
+            FixedArenaClass(build_id=build_id)
         elif action == PubSub.BuildActions.SERVER:
             server_name = self.event_attributes.get('server_name', None)
             if not server_name:

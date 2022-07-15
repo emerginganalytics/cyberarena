@@ -9,7 +9,7 @@ from googleapiclient.errors import HttpError
 from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.dns_manager import DnsManager
-from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager, ServerStates
 from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 
 __author__ = "Philip Huff"
@@ -38,19 +38,17 @@ class ComputeManager:
         self.env = CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.dns_manager = DnsManager()
-        self.s = ServerStateManager.States
+        self.s = ServerStates
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_name = server_name
-        # self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
-        server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
-        if server_spec:
-            self.server_spec = server_spec.get()
-            self.parent_id = self.server_spec.get('parent_id', None)
+        self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
+        if not self.server_spec:
+            logging.error(f"No record exists for compute record {server_name}")
+            raise LookupError
         else:
-            self.server_spec = None
-            self.parent_id = None
-           # self.parent_id = self.server_spec['parent_id']
+            self.parent_id = self.server_spec['parent_id']
+        self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):
         """
@@ -59,8 +57,8 @@ class ComputeManager:
         :param build_id: ID of the build used for the predicate
         :return: A boolean status on the success of the build
         """
-        state_manager = ServerStateManager(initial_build_id=self.server_name)
-        state_manager.state_transition(self.s.BUILDING)
+
+        self.state_manager.state_transition(self.s.BUILDING)
         self._add_disks()
         self._add_metadata()
         self._add_nics()
@@ -116,10 +114,10 @@ class ComputeManager:
 
         if success:
             logging.info(f'Successfully built server {self.server_name}!')
-            state_manager.state_transition(self.s.RUNNING)
+            self.state_manager.state_transition(self.s.RUNNING)
         else:
             logging.error(f'Timeout in trying to build server {self.server_name}')
-            state_manager.state_transition(self.s.BROKEN)
+            self.state_manager.state_transition(self.s.BROKEN)
             raise ConnectionError
 
         # If the server is an external proxy, then register its DNS name
@@ -131,15 +129,14 @@ class ComputeManager:
         # Now stop the server before completing
         logging.info(f'Stopping {self.server_name}')
         self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
-        state_manager.state_transition(self.s.STOPPED)
+        self.state_manager.state_transition(self.s.STOPPED)
 
     def start(self):
         """
         Starts a server based on the specification in the Datastore entity with name server_name. A guacamole server
         is also registered with DNS.
         """
-        state_manager = ServerStateManager(initial_build_id=self.server_name)
-        state_manager.state_transition(self.s.STARTING)
+        self.state_manager.state_transition(self.s.STARTING)
         i = 0
         start_success = False
         while not start_success and i < 5:
@@ -152,21 +149,7 @@ class ComputeManager:
                 logging.info(f'Sent job to start {self.server_name}, and waiting for response')
             except BrokenPipeError:
                 i += 1
-        i = 0
-        success = False
-        while not success and i < 5:
-            try:
-                self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
-                                                   operation=response["id"]).execute()
-                success = True
-            except timeout:
-                i += 1
-                logging.warning(f'Response timeout for starting server {self.server_name}. Trying again')
-                pass
-        if not success:
-            logging.error(f'Timeout in trying to start server {self.server_name}')
-            state_manager.state_transition(self.s.BROKEN)
-            raise ConnectionError
+        self._wait_to_finish(response['id'])
 
         # If the server is an external proxy, then register its DNS name
         dns_hostname = self.server_spec.get('dns_hostname', None)
@@ -174,17 +157,15 @@ class ComputeManager:
             dns_record = dns_hostname + self.env.dns_suffix + "."
             self.dns_manager.add_dns_record(dns_record, self.server_name)
 
-        state_manager.state_transition(self.s.RUNNING)
+        self.state_manager.state_transition(self.s.RUNNING)
         logging.info(f"Finished starting {self.server_name}")
 
     def stop(self):
         """
         Stops a server based on the specification in the Datastore entity with name server_name.
         """
-        state_manager = ServerStateManager(initial_build_id=self.server_name)
-
-        if state_manager.get_state() != self.s.STOPPED.value:
-            state_manager.state_transition(self.s.STOPPING)
+        if self.state_manager.get_state() != self.s.STOPPED.value:
+            self.state_manager.state_transition(self.s.STOPPING)
             i = 0
             stop_success = False
             while not stop_success and i < 5:
@@ -195,24 +176,9 @@ class ComputeManager:
                     logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
                 except BrokenPipeError:
                     i += 1
+            self._wait_to_finish(response['id'])
 
-            i = 0
-            success = False
-            while not success and i < 5:
-                try:
-                    self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
-                                                       operation=response["id"]).execute()
-                    success = True
-                except timeout:
-                    i += 1
-                    logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
-                    pass
-            if not success:
-                logging.error(f'Timeout in trying to stop server {self.server_name}')
-                state_manager.state_transition(self.s.BROKEN)
-                raise ConnectionError
-
-            state_manager.state_transition(self.s.STOPPED)
+            self.state_manager.state_transition(self.s.STOPPED)
             logging.info(f"Finished stopping {self.server_name}")
         else:
             logging.info(f"Server {self.server_name} is not running")
@@ -229,15 +195,17 @@ class ComputeManager:
         """
         Deletes a server based on the specification in the Datastore entity with the name server_name.
         """
-        state_manager = ServerStateManager(initial_build_id=self.server_name)
-        state_manager.state_transition(self.s.DELETING)
+        self.state_manager.state_transition(self.s.DELETING)
 
         logging.info(f'Deleting {self.server_name}')
-        response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
-                                                   instance=self.server_name).execute()
-        self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
-                                           operation=response["id"]).execute()
-        state_manager.state_transition(self.s.DELETED)
+        try:
+            response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
+                                                       instance=self.server_name).execute()
+        except HttpError as err:
+            if err.resp.status in [404]:
+                self.state_manager.state_transition(self.s.DELETED)
+                return
+        self._wait_to_finish(response['id'])
 
     def _add_disks(self):
         disks = None
@@ -289,7 +257,7 @@ class ComputeManager:
         self.server_spec['metadata'] = metadata
 
     def _add_nics(self):
-        network_prefix = self._get_network_name_prefix(self.server_spec.get('parent_build_type', None))
+        network_prefix = self.server_spec.get('fixed_arena_id', self.server_spec['parent_id'])
         network_interfaces = []
         for network in self.server_spec['nics']:
             if network.get("external_nat", None):
@@ -312,14 +280,22 @@ class ComputeManager:
             network_interfaces.append(add_network_interface)
         self.server_spec['network_interfaces'] = network_interfaces
 
-    def _get_network_name_prefix(self, parent_build_type):
-        if parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKOUT:
-            network_prefix = self.server_spec['great_grandparent_id']
-        elif parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
-            network_prefix = self.server_spec['grandparent_id']
-        else:
-            network_prefix = self.parent_id
-        return network_prefix
+    def _wait_to_finish(self, response_id):
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                                   operation=response_id).execute()
+                success = True
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in operation on server {self.server_name}')
+            self.state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
 
     @staticmethod
     def _lookup_machine_type(machine_type):

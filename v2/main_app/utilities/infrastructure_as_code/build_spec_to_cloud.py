@@ -11,8 +11,8 @@ from google.cloud import logging_v2
 import random
 import string
 
-from utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub
-from utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaWorkoutSchema
+from utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
+from utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.datastore_manager import DataStoreManager
 from utilities.gcp.pubsub_manager import PubSubManager
@@ -41,7 +41,7 @@ class BuildSpecToCloud:
         if 'build_type' not in cyber_arena_spec:
             raise ValidationError
 
-        cyber_arena_spec['creation_timestamp'] = datetime.utcnow().isoformat()
+        cyber_arena_spec['creation_timestamp'] = get_current_timestamp_utc()
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
@@ -49,15 +49,14 @@ class BuildSpecToCloud:
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA.value
-        elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_WORKOUT.value:
+        elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
             self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             cyber_arena_spec['id'] = self.build_id
-            self.cyber_arena_spec = FixedArenaWorkoutSchema().load(cyber_arena_spec)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT,
+            self.cyber_arena_spec = FixedArenaClassSchema().load(cyber_arena_spec)
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS,
                                                       key_id=self.build_id)
-            self.action = PubSub.BuildActions.FIXED_ARENA_WORKOUT.value
+            self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
         self.debug = debug
-
 
     def commit(self):
         self.datastore_manager.put(self.cyber_arena_spec)

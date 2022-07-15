@@ -1,6 +1,17 @@
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
 from common.globals import ds_client, BUILD_STATES, project
 from common.build_workout import build_workout
 from common.state_transition import state_transition
+
+# Parse command line arguments
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("-w", "--workout_id", default=None, help="Workout ID to rebuild")
+
+args = vars(parser.parse_args())
+
+# Set up parameters
+workout_id = args.get('workout_id')
 
 
 def rebuild_workout(workout_id):
@@ -13,3 +24,6 @@ def rebuild_workout(workout_id):
     build_workout(workout_id)
     return
 
+
+if __name__ == "__main__":
+    rebuild_workout(workout_id)

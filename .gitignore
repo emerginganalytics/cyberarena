@@ -23,4 +23,7 @@ design-files/private/
 /local_files/
 /test.py
 /admin_scripts/temp/
+/admin_scripts/bryce_test_scripts/
 admin_scripts/quick_command.py
+/v2/build_files/instructions/teacher/plaintext/
+/v2/build_files/specs/plaintext/
