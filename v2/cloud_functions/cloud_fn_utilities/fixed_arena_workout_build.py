@@ -2,6 +2,8 @@ import logging
 import random
 import string
 from datetime import datetime
+
+from socket import timeout
 from netaddr import IPNetwork, IPAddress, iter_iprange
 
 from google.cloud import logging_v2
@@ -44,11 +46,11 @@ class FixedArenaWorkoutBuild:
         if not self.fixed_arena_workout:
             logging.error(f"The datastore record for {self.fixed_arena_workout_id} no longer exists!")
             raise LookupError
-        self.workspace_records_ids = self._get_workspace_records_ids()    # I added this line
-        self.fixed_arena_workspace_ids = []
-        for i in range(self.workspace_records_ids.__len__()):   # I added this for loop
-            workspace = self.workspace_records_ids[i]
-            self.fixed_arena_workspace_ids.append(workspace)
+        # self.workspace_records_ids = self._get_workspace_records_ids()    # I added this line
+        #self.fixed_arena_workspace_ids = []
+        # for i in range(self.workspace_records_ids.__len__()):   # I added this for loop
+        #     workspace = self.workspace_records_ids[i]
+        #     self.fixed_arena_workspace_ids.append(workspace)
         ip_range = BuildConstants.Networks.Reservations.FIXED_ARENA_WORKOUT_SERVER_RANGE
         self.ip_reservations = list(iter_iprange(ip_range[0], ip_range[1]))
         self.next_reservation = 0
@@ -193,8 +195,35 @@ class FixedArenaWorkoutBuild:
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_workout_id}!")
 
     def nuke(self):
-        self.delete()
-        self.build()
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.delete()
+                success = True
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for starting fixed arena workout {self.fixed_arena_workout_id}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in trying to start fixed arena workout {self.fixed_arena_workout_id}')
+            self.state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
+
+        i = 0
+        success = False
+        while not success and i < 5:
+            try:
+                self.build()
+                success = True
+            except timeout:
+                i += 1
+                logging.warning(f'Response timeout for starting fixed arena workout {self.fixed_arena_workout_id}. Trying again')
+                pass
+        if not success:
+            logging.error(f'Timeout in trying to start fixed arena workout {self.fixed_arena_workout_id}')
+            self.state_manager.state_transition(self.s.BROKEN)
+            raise ConnectionError
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()

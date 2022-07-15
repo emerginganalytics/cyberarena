@@ -8,7 +8,8 @@ from utilities.globals import BuildConstants, Buckets
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.bucket_manager import BucketManager
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
-from v2.cloud_functions.cloud_fn_utilities.fixed_arena_workout_build import FixedArenaWorkoutBuild
+from  v2.cloud_functions.cloud_fn_utilities.fixed_arena_build import FixedArenaWorkoutBuild
+from v2.cloud_functions.cloud_fn_utilities.fixed_arena_build import FixedArenaBuild
 import time
 from v2.cloud_functions.cloud_fn_utilities.gcp.compute_manager import ComputeManager
 
@@ -49,13 +50,15 @@ class TestFixedArenaWorkout:
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        # fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)    #need to build a new workout to test with.
-        fawb = FixedArenaWorkoutBuild(build_id='gfkkgecktt', debug=True)
-        fawb.build()
-        # fawb.start()
-        # fawb.stop()
-        # fawb.delete()
-        # fawb.nuke()
+       #  fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)    #need to build a new workout to test with.
+       # # fawb = FixedArenaWorkoutBuild(build_id='gfkkgecktt', debug=True)
+       #  #fawb.build()
+       #  fawb.start()
+       #  # fawb.stop()
+       #  # fawb.delete()
+       #  # fawb.nuke()
+        fab = FixedArenaBuild(build_id='cln-stoc', debug=True)
+        fab.delete()
 
 
 if __name__ == "__main__":
