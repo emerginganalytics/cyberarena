@@ -13,7 +13,7 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
-from cloud_fn_utilities.fixed_arena_workout_build import FixedArenaWorkoutBuild
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

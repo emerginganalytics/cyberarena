@@ -44,7 +44,7 @@ class FixedArenaClass:
         if not self.fixed_arena_class:
             logging.error(f"The datastore record for {self.fixed_arena_class_id} no longer exists!")
             raise LookupError
-        self.fixed_arena_workspace_ids = []
+        self.fixed_arena_workspace_ids = self._get_fixed_arena_workspace_ids()
         ip_range = BuildConstants.Networks.Reservations.FIXED_ARENA_WORKOUT_SERVER_RANGE
         self.ip_reservations = list(iter_iprange(ip_range[0], ip_range[1]))
         self.next_reservation = 0
@@ -108,7 +108,7 @@ class FixedArenaClass:
             if self.debug:
                 ComputeManager(server).start()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.START,
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START),
                                         server_name=server)
 
         if not self.state_manager.are_servers_started():
@@ -117,6 +117,25 @@ class FixedArenaClass:
                           f"complete!")
         else:
             self.state_manager.state_transition(self.s.RUNNING)
+            logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
+
+    def stop(self):
+        self.state_manager.state_transition(self.s.STOPPING)
+        servers_to_stop = self._get_servers()
+
+        for server in servers_to_stop:
+            if self.debug:
+                ComputeManager(server).stop()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP),
+                                        server_name=server)
+
+        if not self.state_manager.are_servers_stopped():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.STOPPING)
             logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
 
     def delete(self):
@@ -130,7 +149,7 @@ class FixedArenaClass:
                 except LookupError:
                     continue
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.DELETE),
                                         server_name=server)
 
         if not self.state_manager.are_servers_deleted():
@@ -152,8 +171,20 @@ class FixedArenaClass:
             ws_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             ws_servers = ws_ds.get_servers()
             for ws_server in ws_servers:
-                servers.append(ws_server)
+                server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
+                servers.append(server_name)
+                # servers.append(ws_server)
         return servers
+
+    def _get_fixed_arena_workspace_ids(self):
+        workspace_datastore = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE
+                                                                , build_id=self.fixed_arena_class['id'])
+        workspace_ids = []
+        for i in range(workspace_datastore.__len__()):
+            workspace = workspace_datastore[i]
+            workspace_id = workspace['id']
+            workspace_ids.append(workspace_id)
+        return workspace_ids
 
     def _create_workspace_records(self):
         workspace_datastore = DataStoreManager()
@@ -168,6 +199,7 @@ class FixedArenaClass:
         for i in range(count):
             id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             workspace_record = {
+                'id': id,
                 'parent_id': self.fixed_arena_class_id,
                 'parent_build_type': BuildConstants.BuildType.FIXED_ARENA_CLASS,
                 'fixed_arena_id': self.fixed_arena_class['parent_id'],

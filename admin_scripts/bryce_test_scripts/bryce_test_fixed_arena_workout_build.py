@@ -1,27 +1,23 @@
-import os
-import sys
-from datetime import datetime, timedelta
+from google.cloud import datastore
+from datetime import datetime, timedelta, timezone
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from google.cloud import pubsub_v1
-from utilities.globals import BuildConstants, Buckets
+from utilities.globals import Buckets
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.bucket_manager import BucketManager
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
-from  v2.cloud_functions.cloud_fn_utilities.fixed_arena_build import FixedArenaWorkoutBuild
-from v2.cloud_functions.cloud_fn_utilities.fixed_arena_build import FixedArenaBuild
-import time
-from v2.cloud_functions.cloud_fn_utilities.gcp.compute_manager import ComputeManager
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
 
-__author__ = "Philip Huff, Bryce Ebsen"
+__author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Bryce Ebsen"]
+__credits__ = ["Philip Huff"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Production"
+
 
 # Parse command line arguments
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
@@ -30,7 +26,7 @@ parser.add_argument("-a", "--fixed-arena", default=None, help="Fixed Arena Speci
 args = vars(parser.parse_args())
 
 # Set up parameters
-fixed_arena_workout = args.get('fixed_arena_workout')
+fixed_arena_class = args.get('fixed_arena_class')
 
 
 class TestFixedArenaWorkout:
@@ -40,30 +36,23 @@ class TestFixedArenaWorkout:
 
     def build(self):
         fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                       file=f"{Buckets.Folders.FIXED_ARENA_WORKOUT}{fixed_arena_workout}.yaml")
+                                       file=f"{Buckets.Folders.SPECS}{fixed_arena_class}.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
         build_spec['workspace_settings'] = {
             'count': 2,
             'registration_required': False,
             'student_list': [],
-            'expires': (datetime.now() + timedelta(hours=3)).isoformat()
+            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-       #  fawb = FixedArenaWorkoutBuild(build_id=build_spec['id'], debug=True)    #need to build a new workout to test with.
-       # # fawb = FixedArenaWorkoutBuild(build_id='gfkkgecktt', debug=True)
-       #  #fawb.build()
-       #  fawb.start()
-       #  # fawb.stop()
-       #  # fawb.delete()
-       #  # fawb.nuke()
-        fab = FixedArenaBuild(build_id='cln-stoc', debug=True)
-        fab.delete()
+        # fac = FixedArenaClass(build_id=build_spec['id'], debug=True)
+        fac = FixedArenaClass(build_id='ppbblmcjub', debug=True)
+        # fac.build()
+        # fac.start()
+        fac.stop()
 
 
 if __name__ == "__main__":
-    #cln_server = ComputeManager(server_name='cln-stoc-web-server')
-    #cln_server.build()
-
-    fixed_arena_workout = 'stoc-workout' if not fixed_arena_workout else fixed_arena_workout
+    fixed_arena_class = 'stoc-class' if not fixed_arena_class else fixed_arena_class
     TestFixedArenaWorkout().build()

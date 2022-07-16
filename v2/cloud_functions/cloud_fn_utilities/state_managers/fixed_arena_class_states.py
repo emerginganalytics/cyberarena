@@ -105,6 +105,9 @@ class FixedArenaClassStateManager:
     def are_servers_started(self):
         return self._server_state_check(server_states=[self.server_states.RUNNING.value])
 
+    def are_servers_stopped(self):
+        return self._server_state_check(server_states=[self.server_states.STOPPED.value])
+
     def are_servers_deleted(self):
         return self._server_state_check(server_states=[self.server_states.DELETED.value])
 
