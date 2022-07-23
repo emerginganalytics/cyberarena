@@ -1,6 +1,5 @@
 import ast
 import logging
-import tkinter
 
 import googleapiclient.discovery
 from google.cloud import logging_v2

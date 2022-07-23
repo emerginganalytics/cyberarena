@@ -7,6 +7,9 @@ from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.bucket_manager import BucketManager
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
+from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
+from cloud_fn_utilities.globals import PubSub
+from cloud_fn_utilities.globals import DatastoreKeyTypes
 
 
 __author__ = "Philip Huff"
@@ -46,13 +49,20 @@ class TestFixedArenaWorkout:
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        # fac = FixedArenaClass(build_id=build_spec['id'], debug=True)
-        fac = FixedArenaClass(build_id='ppbblmcjub', debug=True)
+        # fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
+        fac = FixedArenaClass(build_id='ocpuffzqkl', debug=False)
         # fac.build()
         # fac.start()
-        fac.stop()
+        # fac._get_servers(fac)
+        # fac.stop()
+        # fac.delete()      # does not work at all no idea why
+        # fac.nuke()        # will create new datastore entries for the kali machines but not create any new vms or delete anything
 
 
 if __name__ == "__main__":
     fixed_arena_class = 'stoc-class' if not fixed_arena_class else fixed_arena_class
+    # pub = PubSubManager(topic='cyber_arena')
+    # pub.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START.value),
+    #                    server_name='cln-stoc-web-server')
+
     TestFixedArenaWorkout().build()

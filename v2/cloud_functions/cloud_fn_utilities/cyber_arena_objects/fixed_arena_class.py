@@ -108,7 +108,7 @@ class FixedArenaClass:
             if self.debug:
                 ComputeManager(server).start()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START),
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START.value),
                                         server_name=server)
 
         if not self.state_manager.are_servers_started():
@@ -159,6 +159,10 @@ class FixedArenaClass:
         else:
             self.state_manager.state_transition(self.s.DELETED)
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
+
+    def nuke(self):
+        self.delete()
+        self.build()
 
     def _get_servers(self, for_deletion=False):
         display_proxy = f"{self.fixed_arena_class_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"

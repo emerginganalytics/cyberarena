@@ -132,10 +132,12 @@ class FixedArenaClassStateManager:
                         continue
             # Only run this conditional if looking for servers to start. Fixed arena servers are not built or deleted
             # with the fixed-arena-class
+            # does not work because cln-stoc-webserver does not keep track of its state in the datastore so it returns
+            # a null type and not a int which throws a type error.
             if self.server_states.RUNNING.value in server_states:
                 for server in self.build['fixed_arena_servers']:
                     server_name = f"{self.build['parent_id']}-{server}"
-                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
+                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)     #this line specificly does not work because no entity called cln-stoc-webserver exist in the datastore
                     server_state = server_ds.get('state', None)
                     if server_state not in server_states:
                         check_complete = False
@@ -149,6 +151,7 @@ class FixedArenaClassStateManager:
             return False
 
     def _is_fixed_arena_valid_transition(self, existing_state, new_state):
+        new_state = self.s(new_state)
         if new_state == self.s.START and not existing_state:
             return True
         elif new_state == self.s.BUILDING_ASSESSMENT and existing_state in [self.s.START, self.s.BROKEN]:
