@@ -109,7 +109,8 @@ class FixedArenaClass:
                 ComputeManager(server).start()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START.value),
-                                        server_name=server)
+                                        build_id=server,
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
 
         if not self.state_manager.are_servers_started():
             self.state_manager.state_transition(self.s.BROKEN)
@@ -127,8 +128,9 @@ class FixedArenaClass:
             if self.debug:
                 ComputeManager(server).stop()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP),
-                                        server_name=server)
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP.value),
+                                        build_id=server,
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
 
         if not self.state_manager.are_servers_stopped():
             self.state_manager.state_transition(self.s.BROKEN)
@@ -149,8 +151,9 @@ class FixedArenaClass:
                 except LookupError:
                     continue
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.DELETE),
-                                        server_name=server)
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.DELETE.value),
+                                        build_id=server,
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
 
         if not self.state_manager.are_servers_deleted():
             self.state_manager.state_transition(self.s.BROKEN)

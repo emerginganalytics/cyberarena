@@ -38,24 +38,24 @@ class TestFixedArenaWorkout:
         self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                       file=f"{Buckets.Folders.SPECS}{fixed_arena_class}.yaml")
-        build_spec = yaml.safe_load(fixed_arena_yaml)
-        build_spec['workspace_settings'] = {
-            'count': 2,
-            'registration_required': False,
-            'student_list': [],
-            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
-        }
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
-        build_spec_to_cloud.commit()
+        # fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
+        #                                file=f"{Buckets.Folders.SPECS}{fixed_arena_class}.yaml")
+        # build_spec = yaml.safe_load(fixed_arena_yaml)
+        # build_spec['workspace_settings'] = {
+        #     'count': 2,
+        #     'registration_required': False,
+        #     'student_list': [],
+        #     'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
+        # }
+        # build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
+        # build_spec_to_cloud.commit()
         # fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
         fac = FixedArenaClass(build_id='ocpuffzqkl', debug=False)
         # fac.build()
         # fac.start()
         # fac._get_servers(fac)
         # fac.stop()
-        # fac.delete()      # does not work at all no idea why
+        fac.delete()
         # fac.nuke()        # will create new datastore entries for the kali machines but not create any new vms or delete anything
 
 

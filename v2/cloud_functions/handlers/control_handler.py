@@ -25,7 +25,7 @@ class ControlHandler:
         log_client.setup_logging()
         self.event_attributes = event_attributes
         self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
-        self.action = self.event_attributes('action', None)
+        self.action = self.event_attributes.get('action', None)
         self.cyber_arena_object = self.event_attributes.get('cyber_arena_object', None)
         self.build_id = self.event_attributes.get('build_id', None)
         if not self.action:
@@ -39,9 +39,9 @@ class ControlHandler:
             raise ValueError
 
     def route(self):
-        if self.action == PubSub.Actions.START:
+        if self.action == str(PubSub.Actions.START.value):
             self._start()
-        elif self.action == PubSub.Actions.DELETE:
+        elif self.action == str(PubSub.Actions.DELETE.value):
             self._delete()
         else:
             logging.error(f"Unsupported action supplied to the control handler")
@@ -49,15 +49,19 @@ class ControlHandler:
 
     def _start(self):
         # TODO: Fill out the start functions here.
-        if self.cyber_arena_object == PubSub.CyberArenaObjects.SERVER:
+        if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
             ComputeManager(server_name=self.build_id).start()
+
+    def _stop(self):
+        if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
+            ComputeManager(server_name=self.build_id).stop()
             
     def _delete(self):
-        if self.cyber_arena_object == PubSub.CyberArenaObjects.SERVER:
+        if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
             ComputeManager(server_name=self.build_id).delete()
-        elif self.cyber_arena_object == PubSub.CyberArenaObjects.FIXED_ARENA_CLASS:
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
-        elif self.cyber_arena_object == PubSub.CyberArenaObjects.FIXED_ARENA:
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")

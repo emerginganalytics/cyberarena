@@ -137,7 +137,7 @@ class FixedArenaClassStateManager:
             if self.server_states.RUNNING.value in server_states:
                 for server in self.build['fixed_arena_servers']:
                     server_name = f"{self.build['parent_id']}-{server}"
-                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)     #this line specificly does not work because no entity called cln-stoc-webserver exist in the datastore
+                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name).get()
                     server_state = server_ds.get('state', None)
                     if server_state not in server_states:
                         check_complete = False
