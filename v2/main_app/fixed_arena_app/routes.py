@@ -28,7 +28,7 @@ def home():
     :return:
     """
     auth_config = CloudEnv().auth_config
-    standard_workout_opt = BucketManager().get_workouts()
+    # standard_workout_opt = BucketManager().get_workouts()
     # TODO: Store attack spec in Datastore
     attack_yaml = DataStoreManager().get_attack_specs()
 
@@ -41,17 +41,20 @@ def home():
                       {'name': 'Full Build', 'id': 'full'}]
 
     # Get List of Servers available to for Fixed Network
-    fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id='cln-stoc').get()
+    """fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id='cln-stoc').get()
     server_list = list(fixed_arena['servers'])
 
-    workouts = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT.value, key_id='cln-stoc').get()
+    workouts = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id='cln-stoc').get()
+    fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id='cln-stoc').get()"""
 
+    workouts = []
+    server_list = []
+    fixed_arena_class = []
     # TODO: Get list of workstations available for fixed network
     # Render template
     return render_template('fixed_arena_home.html', auth_config=auth_config, attack_spec=attack_yaml,
-                           workout_titles=standard_workout_opt, network_builds=network_builds,
-                           server_list=server_list, fixed_workout_list=server_list, workstations=None,
-                           workouts=workouts)
+                           network_builds=network_builds, server_list=server_list, fixed_workout_list=server_list,
+                           workstations=workouts, workouts=fixed_arena_class)
 
 
 @fixed_arena_app.route('/create_class', methods=['GET', 'POST'])
