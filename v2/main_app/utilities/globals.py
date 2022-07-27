@@ -80,6 +80,54 @@ class BuildConstants:
     class Servers:
         FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
 
+    class FixedArenaStates(Enum):
+        START = 0
+        BUILDING_ASSESSMENT = 1
+        BUILDING_NETWORKS = 2
+        COMPLETED_NETWORKS = 3
+        BUILDING_SERVERS = 4
+        COMPLETED_SERVERS = 5
+        BUILDING_FIREWALL = 6
+        COMPLETED_FIREWALL = 7
+        BUILDING_ROUTES = 8
+        COMPLETED_ROUTES = 9
+        BUILDING_FIREWALL_RULES = 10
+        COMPLETED_FIREWALL_RULES = 11
+        BUILDING_STUDENT_ENTRY = 12
+        COMPLETED_STUDENT_ENTRY = 13
+        GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
+        RUNNING = 50
+        STOPPING = 51
+        STARTING = 52
+        READY = 53
+        EXPIRED = 60
+        MISFIT = 61
+        BROKEN = 62
+        DELETING_SERVERS = 70
+        COMPLETED_DELETING_SERVERS = 71
+        DELETED = 72
+
+    class FixedArenaClassStates(Enum):
+        START = 0
+        BUILDING_ASSESSMENT = 1
+        BUILDING_WORKSPACE_SERVERS = 3
+        BUILDING_WORKSPACE_PROXY = 4
+        COMPLETED_BUILDING_SERVERS = 5
+        BUILDING_ROUTES = 8
+        COMPLETED_ROUTES = 9
+        BUILDING_FIREWALL_RULES = 10
+        COMPLETED_FIREWALL_RULES = 11
+        PROXY_SERVER_TIMEOUT = 28
+        RUNNING = 50
+        STOPPING = 51
+        STARTING = 52
+        READY = 53
+        EXPIRED = 60
+        MISFIT = 61
+        BROKEN = 62
+        DELETING_SERVERS = 70
+        COMPLETED_DELETING_SERVERS = 71
+        DELETED = 72
 
 class PubSub:
     class Topics(str, Enum):
@@ -89,6 +137,7 @@ class PubSub:
         BUDGET = "BUDGET"
         BUILD = "BUILD"
         MAINTENANCE = "MAINTENANCE"
+        CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
         BOTNET = "BOTNET"

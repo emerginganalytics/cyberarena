@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta name="description" content="UA Little Rock Cyber Gym"/>
+    <meta name="description" content="UA Little Rock Cyber Arena"/>
  	  <meta name="author" content="UA Little Rock"/>
-    <title>Cyber Gym - {% block title %}{% endblock %}</title>
+    <title>Cyber Arena - {% block title %}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
@@ -23,88 +23,88 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
-
-    <!-- <script src='../static/main.js'></script> -->
-    <style>
-      html {
+</head>
+<body id="homePage">
+<style>
+    html {
         height:100%;
         background: var(--main_color, #6e2639); /* #2d2d30 */
         color: #a7a9ac;
-      }
-      body {
-          font-family: 'Montserrat', sans-serif;
-          background: var(--main_color, #6e2639); /* #2d2d30 */
-          color: #a7a9ac; /*#bdbdbd */
-          margin: auto;
-          width: 96%;
-      }
-      h3, h4, h5 {
+    }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--main_color, #6e2639); /* #2d2d30 */
+      color: #a7a9ac; /*#bdbdbd */
+      margin: auto;
+      width: 96%;
+    }
+    h3, h4, h5 {
         margin: 10px 0 30px 0;
         letter-spacing: 2px;  /* 10px */
         font-size: 20px;
         color: #111; /* #111 */
-        }
-      .bg-1 {
+    }
+    .bg-1 {
         background: var(--main_color, #6e2639); /* #2d2d30 */
         color: #a7a9ac; /*#bdbdbd */
-        }
-      .bg-1 h3 {
-        color: #a7a9ac; /* #fff */
-        }
-        .bg-1 p {
-                font-style: italic;
-        }
-      .btn-ctn {
-          text-align: center;
-          margin-top: 0.5em;
-          margin-bottom: 0.5em;
-      }
-      .btn {
+    }
+    .bg-1 h3 {
+    color: #a7a9ac; /* #fff */
+    }
+    .bg-1 p {
+        font-style: italic;
+    }
+    .btn-ctn {
+        text-align: center;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+    }
+    .btn {
         background-color:var(--main_color, #6e2639);
         color:white;
         width:100%;
-      }
-      .btn:hover {
+    }
+    .btn:hover {
         color:var(--main_color, #6e2639);
         background-color:white;
-      }
-      .btn:focus {
+    }
+    .btn:focus {
         color:var(--main_color, #6e2639);
         background-color:white;
-      }
+    }
 
-      .btn-deactivated {
+    .btn-deactivated {
         color:var(--main_color, #6e2639);
         background-color:grey;
-      }
-      .control_button {
+    }
+    .control_button {
         margin-top:2%;
         text-align:center;
-      }
+    }
 
-      .landing_container {
+    .landing_container {
           margin:auto;
           background-color: white;
           min-height: 100%;
           position: relative;
-      }
-      footer {
-          position: static;
-          background-color: var(--main_color, #6e2639); /* #2d2d30 */
-          color: #f5f5f5;
-          padding: 32px;
-          bottom: 0;
-          width: 100%;
-          text-align: center;
-      }
-      footer a {
-          color: #f5f5f5;
-      }
-      footer a:hover {
-          color: #777;
-          text-decoration: none;
-      }
-      .loader {
+    }
+    footer {
+        position: static;
+        background-color: var(--main_color, #6e2639); /* #2d2d30 */
+        color: #f5f5f5;
+        padding: 32px;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+    }
+    footer a {
+      color: #f5f5f5;
+    }
+    footer a:hover {
+      color: #777;
+      text-decoration: none;
+    }
+    .loader {
         border: 5px solid #f3f3f3; /* Light grey */
         border-top: 5px solid var(--main_color, #6e2639); /* BG color */
         border-radius: 50%;
@@ -112,64 +112,57 @@
         width: 40px;
         height: 40px;
         animation: spin 2s linear infinite;
-      }
+    }
 
-      @keyframes spin {
+    @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
-      }
+    }
 
-      ol.teams {
+    ol.teams {
         list-style-type: none;
         counter-reset: elementcounter;
         padding-left: 0;
-      }
+    }
 
-      li.teams:before {
+    li.teams:before {
         content: "Team " counter(elementcounter) ": ";
         counter-increment: elementcounter;
         font-weight: bold;
-      }
+    }
 
-      td, th {
-          text-align: center;
-      }
-      .nav {
+    td, th {
+    text-align: center;
+    }
+    .nav {
         padding:0;
-      }
-      .nav-pills .nav-link, .dropright .nav-link{
+    }
+    .nav-pills .nav-link, .dropright .nav-link{
         transition: background-color 0.3s ease;
         background-color: white;
         color: var(--main_color, #6e2639);
         border: none;
         border-radius: 0;
         border-bottom: 1px solid var(--main_color, #6e2639);
-      }
-      .nav-pills .nav-link:hover{
+    }
+    .nav-pills .nav-link:hover{
         background-color: #a7a9ac;
-      }
-      .nav-pills .nav-link.active, .dropright .nav-link:focus{
+    }
+    .nav-pills .nav-link.active, .dropright .nav-link:focus{
         background-color: var(--main_color, #6e2639);
-      }
-    </style>
-</head>
-<body id="homePage">
-
+    }
+</style>
   <div id="workout-form" class='landing_container col-lg-12'>
-          <!-- <img src="/static/CyberGymLogo_small.png" alt="UA Little Rock Cyber Gym Logo"/> -->
-          {% block content %}{% endblock %}
+      {% block content %}{% endblock %}
   </div>
   {%  block footer_block %}
     <footer class="text-center">
         <br><br>
         <p>UA Little Rock Emerging Analytics Center</p>
         <p>This material is based upon work supported by the National Science Foundation under Grant No. 1623628</p>
-
         <br><br>
-
     <!-- Modal Link -->
     <a href="" data-toggle="modal" data-target="#commentsModal">Comments for the engineers?</a>
-
     <!-- Modal -->
     <div class="modal fade" id="commentsModal" tabindex="-1" role="dialog" aria-labelledby="commentsModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -188,7 +181,7 @@
                     <input type="text" id="comment_text" name="comment_text" placeholder="Comment: ">
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn-secondary" data-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Send</button>
                     </div>
                 </form>

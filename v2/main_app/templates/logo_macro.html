@@ -1,5 +1,7 @@
 {% macro logo_div() -%}
-    <div class='image_container' style='text-align: center;'>
-        <img onerror='this.src="{{ url_for('static', filename='imgs/CyberGymLogo_small.png') }}"' style='text-align:center;' class="img-fluid" src="https://storage.googleapis.com/{{project}}_cloudbuild/logo/logo.png" alt="UA Little Rock Cyber Gym Logo"/>
+    <div class='image-container'>
+        <img onerror='this.src="{{ url_for('static', filename='imgs/logo.png') }}"'
+             class="img-fluid nav-img" src="https://storage.googleapis.com/{{ project }}_cloudbuild/logo/logo.png"
+             alt="UA Little Rock Cyber Gym Logo"/>
     </div>
 {%- endmacro %}

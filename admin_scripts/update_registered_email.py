@@ -1,6 +1,5 @@
 import click
-from common.globals import ds_client
-
+from google.cloud import datastore
 
 @click.command()
 @click.argument('class_name')
@@ -15,6 +14,7 @@ def update_registered_email(class_name, curr_email, new_email):
     :param new_email:  Email we want to update with
     """
     # Query target class
+    ds_client = datastore.Client(project='nsa-healthcare')
     cybergym_class = ds_client.query(kind='cybergym-class')
     cybergym_class.add_filter('class_name', '=', class_name)
     cybergym_class_list = list(cybergym_class.fetch())

@@ -1,5 +1,5 @@
+
 function configureFirebaseLogin() {
-      
     //Used in the initial login page 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
@@ -27,7 +27,6 @@ function configureFirebaseLogin() {
       }
     });
     // [END gae_python_state_change]
-
 }
 
 function configureFirebaseLoginWidget() {
@@ -62,7 +61,6 @@ function configureFirebaseLoginWidget() {
         // Terms of service url
         // 'tosUrl': '<your-tos-url>',
     };
-
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
 }

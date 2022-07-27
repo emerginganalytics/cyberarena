@@ -32,10 +32,13 @@ class DataStoreManager:
         self.key_id = key_id
         self.key = self.ds_client.key(key_type, self.key_id)
 
-    def query(self):
+    def query(self, filter_key=None, op=None, value=None):
         """Returns query object"""
-        query = self.ds_client.query(kind=self.key_id)
-        return query
+        if filter_key and op and value:
+            query = self.ds_client.query(kind=self.key_id)
+            query.add_filter(filter_key, f"{op}", value)
+            return list(query.fetch())
+        return self.ds_client.query(kind=self.key_id)
 
     def get_servers(self):
         """Get servers from workout"""
