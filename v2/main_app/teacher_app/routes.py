@@ -7,7 +7,6 @@ from utilities.gcp.bucket_manager import BucketManager
 from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.datastore_manager import DataStoreManager
 from utilities.globals import DatastoreKeyTypes
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")

@@ -1,11 +1,10 @@
-from flask import abort, json, session, request
+from flask import json, request
 from flask.views import MethodView
-from api.decorators import admin_required, instructor_required
-from utilities.gcp.cloud_env import CloudEnv
+from api.decorators import instructor_required, admin_required
 from utilities.gcp.datastore_manager import DataStoreManager
 from utilities.gcp.pubsub_manager import PubSubManager
 from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.globals import PubSub, DatastoreKeyTypes
+from utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,64 +19,66 @@ __status__ = "Testing"
 class FixedArena(MethodView):
     def __init__(self):
         self.authorizer = ArenaAuthorizer()
+        self.actions = PubSub.Actions
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.handler = PubSub.Handlers
+        self.states = BuildConstants.FixedArenaStates
 
     def get(self, build_id=None):
-        """Get Fixed Arena"""
-        user_email = session.get('user_email', None)
-        user_group = session.get('user_group', None)
+        """Gets fixed-arena object. If build_id and state are in request, view returns
+            the fixed-arena state instead"""
         if build_id:
-            fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT.value, key_id=build_id).get()
-            server_query = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query()
-            server_query.add_filter('parent_id', '=', build_id)
-            server_list = list(server_query.fetch())
-            if user_email and fixed_arena['registration_required']:
-                if user_email == fixed_arena['student_email'] or self.authorizer.UserGroups.AUTHORIZED in user_group:
-                    return json.dumps({'fixed_arena': fixed_arena, 'workstations': server_list})
-                # Bad Request; Unauthorized User
-                else:
-                    abort(403)
+            state = request.args.get('state', None)
+            fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=build_id).get()
+            if fixed_arena:
+                if state:
+                    return json.dumps({'state': self.states(fixed_arena['state']).name})
+                return json.dumps({'fixed_arena': fixed_arena})
             else:
-                return json.dumps({'state': fixed_arena['state'], 'workstations': server_list})
-        # Bad request; No build_id given
-        abort(400)
-
-    @instructor_required
-    def post(self, build_id=None):
-        """Create Fixed Arena"""
-        pass
-
-    @instructor_required
-    def delete(self, build_id=None):
-        # Instructors should be allowed to delete machines on an existing STOC network
-        user_email = session.get('user_email', None)
-        user_group = session.get('user_group', None)
-        if build_id:
-            pass
+                return "NOT FOUND", 404
         else:
-            # Only admins should be allowed to delete an entire STOC network
-            if self.authorizer.UserGroups.ADMINS in user_group:
-                pass
-            else:
-                abort(403)
+            """Returns list of fixed-arenas in project"""
+            fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
+            fixed_arenas = list(fixed_arenas_query.fetch())
+            if fixed_arenas:
+                return json.dumps({'fixed_arena': fixed_arenas})
+            return "NOT FOUND", 404
+
+    @admin_required
+    def post(self):
+        """Create Fixed Arena"""
+        recv_data = request.json
+        build_id = recv_data.get('build_id', None)
+        action = recv_data.get('action', None)
+
+        # Send build/rebuild request
+        if build_id and action in [self.actions.BUILD.name, self.actions.REBUILD.name]:
+            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                    action=self.actions[action], build_id=build_id)
+            return "OK", 200
+        # Bad request; Either no build_id was found or received an invalid build action
+        return "BAD REQUEST", 400
+
+    @admin_required
+    def delete(self, build_id=None):
+        # Only admins should be allowed to delete an entire fixed-arena
+        if build_id:
+            self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)
+            return "OK", 200
+        return "BAD REQUEST", 400
 
     @instructor_required
     def put(self, build_id=None):
         """
-        :parameter build_id: Machine to do action against. If no build_id is given
-         action is done against fixed network instead.
-         Actions can be any of the following: Start, Stop, Restart, or Nuke (Rebuild)
+        :parameter build_id: fixed-arena to do action against
+        A valid action can be any either START or STOP
         """
-        # Action on specific server
-        recv_data = request.json
-        action = recv_data.get('action', None)
-        if action:
-            if build_id:
-                pass
-            # Action on Fixed Arena
-            else:
-                if action == PubSub.WorkoutActions.NUKE:
-                    PubSubManager(topic=PubSub.Topics.BUILD_ARENA.value).msg(action=action, data=recv_data, build_type='FIXED_ARENA')
-                else:
-                    PubSubManager(topic=PubSub.Topics.BUILD_ARENA.value, data=recv_data, built_type='FIXED_ARENA')
-        else:
-            abort(400)
+        if build_id:
+            args = request.args
+            action = args.get('action', None)
+            valid_actions = [self.actions.START.value, self.actions.STOP.value]
+            if action and action in valid_actions:
+                self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)
+                return "OK", 200
+        # Bad request; No build_id given or received an invalid CONTROL action
+        return "BAD REQUEST", 400

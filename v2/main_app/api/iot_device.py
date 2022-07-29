@@ -1,3 +1,4 @@
+from flask import session, request, json
 from flask.views import View, MethodView
 from api.decorators import auth_required, admin_required, instructor_required
 

@@ -1,0 +1,310 @@
+/*
+ main-color: #1c2538
+ main-subcolor: #161e2d
+*/
+/* General Styles */
+body, html {
+    height: 100%;
+    overflow: hidden;
+}
+
+html {
+    min-height: 100%;
+    position: relative;
+    background: whitesmoke;
+    color: #000000;
+    font-family: 'Montserrat', sans-serif;
+}
+body {
+    background-color: whitesmoke;
+    color: #a7a9ac;
+    margin-bottom: 60px;
+    padding-top: 4rem;
+}
+.title-ctn {
+    text-align: center;
+}
+h3, h4, h5 {
+    margin: 10px 0 30px 0;
+    letter-spacing: 2px;  /* 10px */
+    font-size: 20px;
+    color: #111111;
+}
+.vh-100 {
+    height: 100vh;
+}
+/* Container styles */
+#content-container {
+    background-color: white;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid gray;
+    border-radius: 1px;
+    box-shadow: 1px 1px 5px #000000;
+}
+#content-row {
+    height: 100vh;
+}
+/* TODO: Needs to be removed from templates once styles have been updated */
+.landing_container {
+    margin:auto;
+    background-color: white;
+    min-height: 100%;
+    position: relative;
+}
+.image-container {
+    text-align: center;
+    padding: 1rem;
+    background: whitesmoke;
+    border: whitesmoke;
+    border-radius: 4px;
+}
+.form-ctn {
+    width: 40%;
+    margin-top: 10vh;
+    -webkit-box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    box-shadow: 0px 10px 13px -7px #000000, 15px 16px 8px -13px rgba(0,0,0,0.62);
+    padding: 2%;
+    background-color: white;
+}
+.input-field {
+    margin-top: 5vh;
+}
+.vm-ctn {
+    margin-bottom: 10vh;
+}
+.vm-list-ctn {
+    margin: 0 auto;
+}
+.vm-card {
+    margin-bottom: 5vh;
+}
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+/* Footer styles */
+footer {
+    position: absolute;
+    bottom: 0;
+    height: 60px;
+    line-height: 10px;
+    background-color: #f5f5f5;
+}
+footer p {
+    color: black;
+}
+footer a:hover {
+    color: var(--main_color, #6e2639);
+    text-decoration: none;
+}
+
+
+/* General Nav styles */
+.nav-pills > li {
+    padding-top: 10px;
+}
+.nav-pills > li:last-child {
+    padding-bottom: 10px;
+}
+
+/* Main Navbar styles */
+.top-navbar {
+    background: #1c2538;
+    color: #ffffff;
+    border-bottom: #535353 solid 0.1vh;
+    box-shadow: 1px 1px 10px #000000;
+}
+.top-navbar-pill {
+    padding-right: 10px;
+}
+.btn.top-navbar-btn {
+    background-color: #1c2538;
+    color: white;
+    width: 100%;
+    margin-right: 10px;
+}
+.btn.top-navbar-btn:last-child {
+    background-color: #1d8037;
+}
+.btn.top-navbar-btn:last-child:hover {
+    background-color: whitesmoke;
+    color: black;
+}
+.navbar-icon {
+    width: 30px;
+    height: auto;
+    filter: invert(1);
+    -webkit-filter: invert(1);
+    transform: rotate(45deg);
+}
+/* Sidebar styles */
+.nav-sidebar {
+    padding-top: 1.5rem;
+    background-color: #161e2d;
+}
+@media (min-width: 768px) {
+    .nav-sidebar {
+        top: 0;
+        position: fixed;
+    }
+}
+.nav-img {
+    text-align: center;
+    background: whitesmoke;
+}
+
+/*  Off Canvas sidebar at medium breakpoint */
+@media screen and (max-width: 992px) {
+
+  .row-offcanvas {
+    position: relative;
+    -webkit-transition: all 0.25s ease-out;
+    -moz-transition: all 0.25s ease-out;
+    transition: all 0.25s ease-out;
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -33%;
+  }
+
+  .row-offcanvas-left.active {
+    left: 33%;
+    margin-left: -6px;
+  }
+
+  .sidebar-offcanvas {
+    position: absolute;
+    top: 0;
+    width: 33%;
+    height: 100%;
+    overflow: auto;
+  }
+}
+
+/* Off Canvas wider at sm breakpoint */
+@media screen and (max-width: 34em) {
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -45%;
+  }
+
+  .row-offcanvas-left.active {
+    left: 45%;
+    margin-left: -6px;
+  }
+
+  .sidebar-offcanvas {
+    width: 45%;
+  }
+}
+
+
+/* Nav link styles: Subject to change in future iterations*/
+
+/*
+.nav-pills .nav-link, .dropright .nav-link {
+    transition: background-color 0.3s ease;
+    border: none;
+    border-radius: 0;
+}
+.nav-link, .dropright .nav-link{
+    background-color: white;
+    color: var(--main_color, #6e2639);
+    border-bottom: 1px solid var(--main_color, #6e2639);
+}
+.nav-link:hover{
+    background-color: #a7a9ac;
+}
+.nav-link.active, .dropright .nav-link:focus{
+    background-color: var(--main_color, #6e2639);
+}
+*/
+
+/* Misc. Styles */
+ol.teams {
+    list-style-type: none;
+    counter-reset: elementcounter;
+    padding-left: 0;
+}
+li.teams:before {
+    content: "Team " counter(elementcounter) ": ";
+    counter-increment: elementcounter;
+    font-weight: bold;
+}
+td, th {
+    text-align: center;
+}
+
+/* Button Styles */
+.bg-1 {
+    background: var(--main_color, #6e2639); /* #2d2d30 */
+    color: #a7a9ac; /*#bdbdbd */
+}
+.bg-1 h3 {
+    color: #a7a9ac; /* #fff */
+}
+.bg-1 p {
+    font-style: italic;
+}
+.btn-ctn {
+    text-align: center;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+.btn-ctn {
+    text-align: center;
+    margin-top: 5vh;
+}
+.btn {
+    background-color: var(--main_color, #6e2639);
+    color:white;
+    width:100%;
+}
+.btn:hover {
+    color:var(--main_color, #6e2639);
+    background-color:white;
+}
+.btn:focus {
+    color:var(--main_color, #6e2639);
+    background-color:white;
+}
+.btn-deactivated {
+    color: var(--main_color, #6e2639);
+    background-color:grey;
+}
+.btn-primary {
+    background-color: var(--main_color, #6e2639) !important;
+    color: whitesmoke !important;
+}
+.control_button {
+    margin-top:2%;
+    text-align:center;
+}
+.start-stop-btn {
+    margin-left: 2vw;
+}
+
+/* Load animation styles*/
+.loader {
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid var(--main_color, #6e2639); /* BG color */
+    border-radius: 50%;
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+#loading {
+    text-align: center;
+    margin-top: 5vh;
+}
+
