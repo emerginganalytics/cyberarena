@@ -34,7 +34,7 @@ class DisplayProxy:
         """
         self.env = CloudEnv()
         self.server_name = f"{build_id}-display-guacamole-server"
-        self.s = ServerStateManager.States
+        self.s = ServerStateManager
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None

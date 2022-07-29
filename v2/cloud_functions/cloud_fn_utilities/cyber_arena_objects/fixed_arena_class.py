@@ -73,7 +73,10 @@ class FixedArenaClass:
                     if self.debug:
                         ComputeManager(server_name=server_name).build()
                     else:
-                        self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.SERVER,
+                        self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                                action=str(PubSub.BuildActions.SERVER.value),
+                                                key_type=str(DatastoreKeyTypes.SERVER),
+                                                build_id=str(self.fixed_arena_class_id),
                                                 server_name=server_name)
                     ws_servers.append(server)
                 # Store the server information with IP addresses back with each fixed arena workout before looping
@@ -88,9 +91,11 @@ class FixedArenaClass:
                     FixedArenaWorkspaceProxy(build_id=self.fixed_arena_class_id,
                                              workspace_ids=self.fixed_arena_workspace_ids).build()
                 else:
-                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.DISPLAY_PROXY,
-                                            build_id=self.fixed_arena_class_id,
-                                            workspace_ids=self.fixed_arena_workspace_ids)
+                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                            action=str(PubSub.BuildActions.DISPLAY_PROXY.value),
+                                            key_type=DatastoreKeyTypes.FIXED_ARENA,
+                                            build_id=str(self.fixed_arena_class_id),
+                                            workspace_ids=str(self.fixed_arena_workspace_ids))
 
         if not self.state_manager.are_server_builds_finished():
             self.state_manager.state_transition(self.s.BROKEN)

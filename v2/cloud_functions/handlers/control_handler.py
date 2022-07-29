@@ -41,6 +41,8 @@ class ControlHandler:
     def route(self):
         if self.action == str(PubSub.Actions.START.value):
             self._start()
+        elif self.action == str(PubSub.Actions.STOP.value):
+            self._stop()
         elif self.action == str(PubSub.Actions.DELETE.value):
             self._delete()
         else:
