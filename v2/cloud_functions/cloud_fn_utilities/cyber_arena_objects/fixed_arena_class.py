@@ -19,7 +19,7 @@ from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import Fixed
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Bryce Ebsen, Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -75,7 +75,7 @@ class FixedArenaClass:
                     else:
                         self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
                                                 action=str(PubSub.BuildActions.SERVER.value),
-                                                key_type=str(DatastoreKeyTypes.SERVER),
+                                                key_type=str(DatastoreKeyTypes.FIXED_ARENA_CLASS),
                                                 build_id=str(self.fixed_arena_class_id),
                                                 server_name=server_name)
                     ws_servers.append(server)
@@ -83,7 +83,6 @@ class FixedArenaClass:
                 ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
                 ws_record['servers'] = ws_servers
                 self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
-
             # Now build the Workspace Proxy Server
             if self.state_manager.get_state() <= self.s.BUILDING_WORKSPACE_PROXY.value:
                 self.state_manager.state_transition(self.s.BUILDING_WORKSPACE_PROXY)
@@ -92,10 +91,9 @@ class FixedArenaClass:
                                              workspace_ids=self.fixed_arena_workspace_ids).build()
                 else:
                     self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
-                                            action=str(PubSub.BuildActions.DISPLAY_PROXY.value),
-                                            key_type=DatastoreKeyTypes.FIXED_ARENA,
+                                            action=str(PubSub.BuildActions.FIXED_ARENA_WORKSPACE_PROXY.value),
                                             build_id=str(self.fixed_arena_class_id),
-                                            workspace_ids=str(self.fixed_arena_workspace_ids))
+                                            workspace_ids=' '.join(self.fixed_arena_workspace_ids))
 
         if not self.state_manager.are_server_builds_finished():
             self.state_manager.state_transition(self.s.BROKEN)

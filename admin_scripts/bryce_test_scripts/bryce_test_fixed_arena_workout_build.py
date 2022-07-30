@@ -49,14 +49,14 @@ class TestFixedArenaWorkout:
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
-        # fac = FixedArenaClass(build_id='flgrpctqga', debug=False)       #still exists
-        fac.build()
+        # fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
+        fac = FixedArenaClass(build_id='mqvdsuxfzw', debug=False)       #still exists
+        #fac.build()
         # fac.start()
         # fac._get_servers(fac)
         # fac.stop()
         # fac.delete()
-        # fac.nuke()        # will create new datastore entries for the kali machines but not create any new vms or delete anything
+        fac.nuke()        # will create new datastore entries for the kali machines but not create any new vms or delete anything
 
 
 if __name__ == "__main__":

@@ -89,7 +89,7 @@ class BuildHandler:
                 logging.error(f"No build_id provided for the build handler with action "
                               f"BUILD_DISPLAY_PROXY")
                 raise ValueError
-            FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids).build()
+            FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split()).build()
         else:
             logging.error(f"Unsupported action supplied to build handler")
             raise ValueError
