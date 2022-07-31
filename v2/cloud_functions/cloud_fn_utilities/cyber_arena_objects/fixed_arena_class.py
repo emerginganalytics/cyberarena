@@ -167,8 +167,27 @@ class FixedArenaClass:
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
 
     def nuke(self):
-        self.delete()
-        self.build()
+        servers_to_nuke = self._get_servers(for_deletion=True)
+
+        for server in servers_to_nuke:
+            if self.debug:
+                try:
+                    ComputeManager(server).nuke()
+                except LookupError:
+                    continue
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.NUKE.value),
+                                        build_id=server,
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
+
+        if not self.state_manager.are_server_builds_finished():
+            self.state_manager.state_transition(self.s.BROKEN)
+            logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Timed out waiting for server builds to "
+                          f"complete!")
+        else:
+            self.state_manager.state_transition(self.s.READY)
+            logging.info(f"Finished nukeing Fixed Arena {self.fixed_arena_class_id}!")
+
 
     def _get_servers(self, for_deletion=False):
         display_proxy = f"{self.fixed_arena_class_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"

@@ -45,6 +45,8 @@ class ControlHandler:
             self._stop()
         elif self.action == str(PubSub.Actions.DELETE.value):
             self._delete()
+        elif self.action == str(PubSub.Actions.NUKE.value):
+            self._nuke()
         else:
             logging.error(f"Unsupported action supplied to the control handler")
             raise ValueError
@@ -63,6 +65,17 @@ class ControlHandler:
             ComputeManager(server_name=self.build_id).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
+            pass
+        else:
+            logging.error(f"Unsupported object passed to the control handler for action {self.action}")
+            raise ValueError
+
+    def _nuke(self):
+        if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
+            ComputeManager(server_name=self.build_id).nuke()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
+            FixedArenaClass(build_id=self.build_id, debug=self.debug).nuke()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         else:
