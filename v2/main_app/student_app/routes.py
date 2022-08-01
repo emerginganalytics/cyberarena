@@ -174,3 +174,76 @@ def unit_signup(unit_id):
                     return redirect('/student/landing/%s' % claimed_workout.key.name)
         return render_template('unit_signup.html', unit_full=True)
     return render_template('unit_signup.html')
+
+@student_app.route('/fixed-arena-landing/<workout_id>', methods=['GET', 'POST'])
+def fixed_arena_landing_page(workout_id):
+    unit_list = ds_client.query(kind='cybergym-unit')
+    workouts_list = list(unit_list.add_filter('workouts', '=', str(workout_id)).fetch())
+    if not workouts_list:
+        return redirect('/404')
+    else:
+        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
+        unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
+        admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
+
+    registration_required = workout.get('registration_required', False)
+    logged_in_user = session.get('user_email', None)
+    registered_user = workout.get('student_email', None)
+    instructor_user = unit.get('instructor_id', None)
+    allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
+    workout_server_query = ds_client.query(kind='cybergym-server')
+    workout_server_query.add_filter('workout', '=', workout_id)
+    server_list = []
+    survey_yaml = YamlFunctions().parse_yaml(yaml_filename='survey')
+    survey = survey_yaml.get('survey', None) if survey_yaml else None
+    for server in list(workout_server_query.fetch()):
+        server_name = server['name'][11:]
+        server['name'] = server_name
+        try:
+            snapshots = compute.snapshots().list(project=project, filter=f"name = {server.key.name}*").execute()
+            server['snapshots'] = []
+            for snapshot in snapshots['items']:
+                server['snapshots'].append({'snapshot_name': snapshot['name'], 'creation_date': snapshot['creationTimestamp']})
+        except Exception as e:
+            pass
+        server_list.append(server)
+    if registration_required and logged_in_user not in allowed_users:
+        return render_template('login.html', auth_config=auth_config)
+
+    if workout:
+        assessment_manager = CyberArenaAssessment(workout_id)
+        expiration = None
+        is_expired = True
+        if 'expiration' in workout:
+            if (int(time.time()) - (int(workout['timestamp']) + ((int(workout['expiration'])) * 60 * 60 * 24))) < 0:
+                is_expired = False
+            expiration = time.strftime('%d %B %Y', (
+                time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
+        shutoff = None
+        if 'run_hours' in workout:
+            run_hours = int(workout['run_hours'])
+            if run_hours == 0:
+                shutoff = "expired"
+            else:
+                shutoff = time.strftime('%d %B %Y at %I:%M %p',
+                                    (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
+        build_type = unit['build_type']
+        container_url = None
+        if build_type == 'container':
+            container_url = workout['container_url']
+
+        assessment = None
+        if 'assessment' in workout and workout['assessment']:
+            assessment = assessment_manager.get_assessment_questions()
+        build_now = unit.get('build_now', True)
+        if request.method == "POST":
+            attempt = assessment_manager.submit()
+            return json.dumps(attempt)
+        return render_template('fixed_arena_landing_page.html', build_type=build_type, workout=workout,
+                               description=unit['description'], container_url=container_url, dns_suffix=dns_suffix,
+                               expiration=expiration, shutoff=shutoff, assessment=assessment,
+                               is_expired=is_expired, build_now=build_now, auth_config=auth_config, servers=server_list,
+                               survey=survey)
+    else:
+        return redirect('/no-workout')
+
