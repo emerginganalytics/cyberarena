@@ -72,6 +72,11 @@ class FirewallServer:
             ComputeManager(server_name=firewall_name).build()
             self._add_routes(fw)
 
+    def delete(self):
+        for fw in self.firewall_spec:
+            firewall_name = f"{self.build_id}-{fw['name']}"
+            ComputeManager(server_name=firewall_name).delete()
+
     def _add_nics(self, firewall_spec):
         for network in firewall_spec['networks']:
             for network_spec in self.full_build_spec['networks']:
