@@ -52,9 +52,9 @@ class TestFixedArenaWorkout:
         # fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
         fac = FixedArenaClass(build_id='dbewzcviso', debug=False)
         # fac.build()
-        fac.start()
+        # fac.start()
         # fac.stop()
-        # fac.delete()
+        fac.delete()
         # fac.nuke()
 
 
