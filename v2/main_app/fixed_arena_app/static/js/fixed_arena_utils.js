@@ -1,3 +1,50 @@
+function manage_class(action, build_id=null) {
+    if (action === 2) {
+        url = '/api/fixed-arena/class/' + build_id;
+        var request = fetch(url, {
+            method: 'DELETE',
+        }).then(response => response.text()).then(response => console.log(response));
+    }
+}
+function enable_object(obj_id, enable=false, clear=false) {
+    var obj = $('#' + obj_id);
+    if (typeof enable == "boolean") {
+        obj.prop("disabled", enable);
+        obj.prop('hidden', enable)
+
+        // Cases where we want to remove old form artifacts,
+        // i.e Template filter buttons
+        if (clear === true) {
+            obj.innerHTML = "";
+        }
+    }
+}
+
+$(document).ready(function() {
+    const createClassForm = document.querySelector('#create-class-form');
+    if (createClassForm) {
+        createClassForm.addEventListener("submit", function(e){
+            const submitCreateClass = document.getElementById('submitCreateClass');
+            submitCreateClass.disabled = true;
+
+            /* Convert form to json object */
+            const formData = {};
+            for (const pair of new FormData(createClassForm)){
+                formData[pair[0]] = pair[1]
+            }
+            /* Send POST request */
+            let url = '/api/fixed-arena/class/'
+            const request = fetch(url, {
+                method: "POST",
+                headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+                 },
+                body: JSON.stringify(formData)
+            }).then(response => response.text()).then(response => console.log(response));
+        });
+    }
+});
+
 $(document).ready(function() {
     // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
     //       new page
@@ -19,7 +66,7 @@ $(document).ready(function() {
         var table = $('#vuln-templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
-        remove_fields('vuln-template-btn');
+        enable_object('vuln-template-btn');
     });
 
     // Vuln form listener
@@ -120,23 +167,10 @@ function build_form(data){
    // Form is built; Toggle form modal
     $('#vuln-form-modal').modal();
 }
-function remove_fields(ele_id, clear=false){
-   var rem_elem = $('#' + ele_id);
-   rem_elem.prop("disabled", true);
-   rem_elem.prop("hidden", true);
-
-   // Cases where we want to remove old form artifacts,
-   // i.e Template filter buttons
-   if (clear === true){
-       rem_elem.innerHTML = "";
-   }
-}
 
 function copy_student_links(){
     var temp_div = document.createElement("textarea");
-
     var links = document.getElementsByClassName('workout-link');
-
     for(var i = 0; i < links.length; i++){
         temp_div.value += links[i].href + "\n";
     }

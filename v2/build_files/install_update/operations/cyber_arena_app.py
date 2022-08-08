@@ -22,7 +22,7 @@ class CyberArenaApp:
     DEPLOY_COULD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
                                     "--region={region} --memory=1024Mi " \
                                     "--entry-point=cyber_arena_cloud_function " \
-                                    "--runtime=python39 --source=\"../../cloud_functions/\" " \
+                                    "--runtime=python39 --source=\"./cloud_functions/\" " \
                                     "--service-account=cyberarena-service@{project}.iam.gserviceaccount.com " \
                                     "--timeout=540s " \
                                     "--trigger-topic=cyber-arena"

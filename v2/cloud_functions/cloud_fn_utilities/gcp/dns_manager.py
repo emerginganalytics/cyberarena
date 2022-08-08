@@ -1,6 +1,5 @@
 import ast
 import logging
-import tkinter
 
 import googleapiclient.discovery
 from google.cloud import logging_v2
@@ -61,7 +60,6 @@ class DnsManager:
             except HttpError as e:
                 logging.warning(f"Another error when attempting to only add the DNS record {dns_record}: "
                                 f"{e.error_details}")
-
 
     def delete_dns(self, build_id, ip_address):
         """

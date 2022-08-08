@@ -10,17 +10,13 @@
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
-            {% if request.path == '/fixed-arena/home' %}
+            {% if request.endpoint.split(".")[0] == 'fixed_arena' %}
                 <li class="nav-item">
-                    <button class="nav-link" id="nav-boot-btn" data-toggle="pill"
-                            type="button"
-                            aria-selected="true">Cyber Arena</button>
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                <button class="nav-link" id="nav-boot-btn" data-toggle="pill"
-                        type="button"
-                        aria-selected="true">STOC</button>
+                    <a href="{{ url_for(fixed_arena_app.home) }}" class="nav-link text-center">STOC</a>
                 </li>
             {% endif %}
             <!-- TODO: if not student, button to send to teacher home -->
@@ -28,8 +24,6 @@
         </ul>
     </div>
     <div class="navbar-nav ml-auto">
-        <!--If signed in, display, else display Sign In Button-->
-        <!--Sign out button isn't functioning properly; Returns bad jason object error-->
         <button id="contact-us" class="nav-item btn top-navbar-btn"
                 data-toggle="modal" data-target="#commentsModal">Contact Us</button>
         <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
@@ -73,19 +67,6 @@
                             aria-controls="nav-boot"
                             aria-selected="true">Home</button>
                 </li>
-                <!-- This tab currently does nothing-->
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-create-lab-btn" data-toggle="pill"
-                            data-target="#create-lab-container" type="button" role="tab"
-                            aria-controls="nav-create-lab"
-                            aria-selected="false">Create a Lab</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-vuln-tab" data-toggle="pill"
-                            data-target="#vuln-tab" type="button" role="tab"
-                            aria-controls="nav-attacks"
-                            aria-selected="false">Command and Control</button>
-                </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="fa-config-btn" data-toggle="pill"
                             data-target="#settings-container" type="button" role="tab"
@@ -99,46 +80,100 @@
         <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
                 <div class="tab-pane fade active show" id="fa-home" role="tabpanel" aria-labelledby="fa-home-tab">
-                    <div id="home-content-ctn">
-                        <div id="stoc-table-div" class="table-responsive table-ctn">
+                    <div id="home-content-ctn" class="d-inline-flex">
+                        <div id="stoc-table-div" class="table-responsive table-ctn col-10">
                             <table id="stoc-table" class="table table-hover text-nowrap table-large">
                                 <thead>
                                     <tr id="stoc-table-headers">
                                         <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value=""/></th>
                                         <th class="prevent-select text-center">STOC</th>
-                                        <th class="prevent-select text-center">Current State</th>
-                                        <th class="prevent-select text-center">Action</th>
-                                        <th class="prevent-select text-center">Details</th>
+                                        <th class="prevent-select text-center">Class</th>
+                                        <th class="prevent-select text-center">Description</th>
                                     </tr>
                                 </thead>
                                 <!--Each row id will be the STOC id-->
-                                <tr>
-                                    <td><input type="checkbox" value=""/></td>
-                                    <td>cln-stoc</td>
-                                    <td>STOPPED</td>
-                                    <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
-                                    <td>STOC object, description, or list of fixed servers for STOC</td>
-                                </tr>
+                                {% set ns = namespace(hourly_cost=0) %}
+                                {% for stoc in fixed_arenas %}
+                                    <tr>
+                                        <td><input id="{{ stoc.key.name }}" type="checkbox" value=""/></td>
+                                        <td>{{ stoc.key.name }}</td>
+                                        <td>
+                                            {% if stoc.class.state == 'IN SESSION' %}
+                                                <a href="/fixed-arena/class/{{ stoc.class.id }}" class="btn-fa d-inline-flex col-5">View Class</a>
+                                                <a href="#" class="btn-fa d-inline-flex col-5" onclick="manage_class('2', '{{ stoc.class.id }}');">Delete Class</a></td>
+                                            {% else %}
+                                                <button type="button" class="btn-fa d-inline-flex col-5" data-toggle="modal" data-target="#create-class-modal">New Class</button>
+                                            {% endif %}
+                                        <td>{{ stoc.summary.description }}</td>
+                                    </tr>
+                                    {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
+                                {% endfor %}
                                 <tr>
                                     <td><input type="checkbox" value=""/></td>
                                     <td>untapped</td>
-                                    <td>NOT BUILT</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
                                 </tr>
                                 <tr>
                                     <td><input type="checkbox" value=""/></td>
                                     <td>Forensics</td>
-                                    <td>IN SESSION</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
 
                                 </tr>
                             </table>
                         </div><!--End stoc-table-div-->
+                        <div id="cost-summary" class="card bg-light mb-3 col-3 col-sm-2">
+                            <div class="card-header">Cost Summary</div>
+                            <div class="card-body">
+                                <h5 class="card-title">${{ ns.hourly_cost }} / hour</h5>
+                            </div>
+                        </div><!-- End cost-summary div-->
+                        <div id="create-class-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-class-modal" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-slideout modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="create-class-modal-header">Create Class</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">x</span>
+                                        </button>
+                                    </div> <!-- End modal-header -->
+                                    <div class="modal-body">
+                                        <form id="create-class-form" action="">
+                                            <div class="form-row">
+                                                <label for="stoc-id">Target Network</label>
+                                                <select id="stoc-id" name="stoc_id" required>
+                                                    {% for stoc in fixed_arenas %}
+                                                        <option value="{{ stoc.key.name }}">{{ stoc.key.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-row">
+                                                <label for="classType">Class Build</label>
+                                                <select id="classType" name="build_id" required>
+                                                    <option value="class_id">Class 1D</option>
+                                                    <option value="class_id">Class 2D</option>
+                                                    <option value="class_id">Class 3D</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-row">
+                                                <label for="build-count">Number of workspaces:</label>
+                                                <input id="build-count" name='build_count' type="number" required min="1" value="1"/>
+                                            </div>
+                                            <div class="form-row">
+                                                <label for="class-expire-date">Expire Date</label>
+                                                <input id="class-expire-date" name="expire_date" type="date">
+                                            </div>
+                                            <div class="form-group">
+                                                <button type="submit" class="btn-fa w-100" id="submitCreateClass">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div> <!-- End modal-body -->
+                                </div> <!-- End modal-content -->
+                            </div> <!-- End modal-dialog -->
+                        </div> <!-- End create-class-modal -->
                     </div><!-- End home-content-ctn-->
                 </div><!--End fa-home div-->
-                <div class="tab-pane fade" id="vuln-tab" aria-labelledby="fa-vuln-tab"></div><!--End vuln-tab-->
                 <div class="tab-pane fade" id="config-tab" aria-labelledby="fa-config-btn"></div><!-- End config-tab-->
             </div> <!--End tab-container div-->
             <!-- TODO: Footer is not displaying for some reason. Need to eventually discover why -->

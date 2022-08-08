@@ -14,10 +14,12 @@ def update_registered_email(class_name, curr_email, new_email):
     :param new_email:  Email we want to update with
     """
     # Query target class
-    ds_client = datastore.Client(project='nsa-healthcare')
+    ds_client = datastore.Client(project='')
     cybergym_class = ds_client.query(kind='cybergym-class')
     cybergym_class.add_filter('class_name', '=', class_name)
     cybergym_class_list = list(cybergym_class.fetch())
+
+    new_email = new_email.lower()
 
     # Update class roster
     for classes in cybergym_class_list:

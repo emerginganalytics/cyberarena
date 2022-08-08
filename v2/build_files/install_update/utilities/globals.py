@@ -56,7 +56,7 @@ class ShellCommands:
                            "--role=\"roles/storage.admin\""
 
     class PubSubTopics(str, Enum):
-        CYBER_ARENA = "gcloud pubsub topics create cyber_arena"
+        CYBER_ARENA = "gcloud pubsub topics create cyber-arena"
         BUDGET = "gcloud pubsub topics create budget"
 
     class EnvironmentVariables(str, Enum):
