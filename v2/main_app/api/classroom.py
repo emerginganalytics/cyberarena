@@ -1,10 +1,9 @@
 import json
-from flask import abort, request, session, jsonify
+from flask import request
 from flask.views import MethodView
-from api.decorators import auth_required, admin_required, instructor_required
+from api.utilities.decorators import instructor_required
+from api.utilities.http_response import HttpResponse
 from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
-
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -19,6 +18,9 @@ __status__ = "Testing"
 class Classroom(MethodView):
     decorators = [instructor_required]
 
+    def __init__(self):
+        self.http_resp = HttpResponse
+
     def get(self, class_name=None):
         """Get Classroom"""
         user_data = request.json
@@ -32,16 +34,16 @@ class Classroom(MethodView):
             for class_object in class_query:
                 class_list.append(class_object)
             return json.dumps(class_list)
-        abort(400)
+        return self.http_resp(code=400)
 
-    def post(self, class_name=None):
+    def post(self):
         """Create Classroom"""
-        pass
+        return self.http_resp(code=400)
 
     def delete(self, class_name=None):
-        abort(405)
+        return self.http_resp(code=405)
 
     def put(self, class_name=None):
         """Update Existing Classroom"""
         recv_data = request.json
-        pass
+        return self.http_resp(code=400)

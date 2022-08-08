@@ -175,8 +175,17 @@ def unit_signup(unit_id):
         return render_template('unit_signup.html', unit_full=True)
     return render_template('unit_signup.html')
 
+
 @student_app.route('/fixed-arena-landing/<workout_id>', methods=['GET', 'POST'])
 def fixed_arena_landing_page(workout_id):
+    """
+    TODO: This route is not correct. We don't need any workout or unit logic for the student
+        fixed-arena landing pages. It might be worth considering to build the logic from scratch
+        as fixed-arenas are handled differently from how we handle the standard workout and unit.
+        We also want to refrain from using any cloud specific logic
+        in the routes. If we need to get GCP datastore objects, use the DatastoreManger helper
+        class that was created in v2/utilities/gcp/datastore_manager.
+    """
     unit_list = ds_client.query(kind='cybergym-unit')
     workouts_list = list(unit_list.add_filter('workouts', '=', str(workout_id)).fetch())
     if not workouts_list:
@@ -246,4 +255,3 @@ def fixed_arena_landing_page(workout_id):
                                survey=survey)
     else:
         return redirect('/no-workout')
-

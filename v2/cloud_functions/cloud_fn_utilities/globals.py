@@ -9,6 +9,8 @@ class DatastoreKeyTypes(str, Enum):
     FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
     SERVER = 'cybergym-server'
     ADMIN_INFO = 'cybergym-admin-info'
+    CYBERARENA_ATTACK = 'cyberarena-attack'
+    CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
 
 
 class BuildConstants:

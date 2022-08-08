@@ -38,7 +38,7 @@
         <select name="target_workout" id="target_workout" required>
             <option value="" selected disabled hidden style="text-align: center">--Send to Workout--</option>
             {% for workout in workout_list %}
-                {% if workout.studnet_name %}
+                {% if workout.student_name %}
                     {% if registration_required %}
                         <option value="{{ workout.name }}">{{ workout.name }} | {{ workout.student_name.student_name }}</option>
                     {% else %}
@@ -52,7 +52,7 @@
     </div>
 {% endmacro %}
 
-<!-- [REPLACED] For each template in the template list, builds a form and adds that form to a table -->
+<!-- [ARTIFACT] For each template in the template list, builds a form and adds that form to a table -->
 {% macro build_form_table(templates, uid, workout_list, registration_required) -%}
     <style>
         .hiddenRow {

@@ -1,4 +1,3 @@
-
 function configureFirebaseLogin() {
     //Used in the initial login page 
     firebase.auth().onAuthStateChanged(function(user) {
@@ -64,41 +63,37 @@ function configureFirebaseLoginWidget() {
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
 }
-
 function enable_signout(){
   //Enables signout button after successful login
   var signOutBtn = $('#sign-out');
-    signOutBtn.click(function(event) {
-      event.preventDefault();
-      $.ajax({
-        type: "POST",
-        url: "/logout",
-        success: function(){
-          firebase.auth().signOut().then(function() {
-        
-            console.log("Sign out successful");
-            window.location.href = "/login";
-          }, function(error) {
-            console.log(error);
-          });
-        }
-      });
+  signOutBtn.prop('disabled', false);
+  signOutBtn.prop('hidden', false);
+  signOutBtn.click(function(event) {
+    event.preventDefault();
+    $.ajax({
+      type: "POST",
+      url: "/logout",
+      success: function(){
+        firebase.auth().signOut().then(function() {
+          console.log("Sign out successful");
+          window.location.href = "/login";
+        }, function(error) {
+          console.log(error);
+        });
+      }
     });
+  });
 }
-
 function initApp(authConfig){
   //Initialize firebase app with API key, domain, and GCP project
   firebase.initializeApp(authConfig);
   return new Promise(function(resolve, reject){
     firebase.auth().onAuthStateChanged((user) => {
-      if(user){
-        //POST to server to check user role
+      if (user){
+        // get user auth level
         $.ajax({
-          type: "POST",
-          url: "/check_user_level",
-          data: JSON.stringify({
-              "user_email": user.email
-          }),
+          type: "GET",
+          url: "/api/user",
           success: function(data){
             let json = $.parseJSON(data)
             let ret_data = {
@@ -106,15 +101,15 @@ function initApp(authConfig){
               "admin": "",
               "student": "",
               "display_name": user.displayName
-            } 
-            if(json['authorized'] == false){
+            }
+            if (json['authorized'] == false){
               location.href = "/unauthorized";
             } else {
               ret_data['email'] = user.email;
-              if(json['admin'] == true){
+              if (json['admin'] == true){
                 ret_data['admin'] = true;
               }
-              if(json['student'] == true){
+              if (json['student'] == true){
                 ret_data['student'] = true;
               }
             }

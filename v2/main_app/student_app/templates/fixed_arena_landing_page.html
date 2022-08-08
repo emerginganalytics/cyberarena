@@ -4,60 +4,35 @@
 {% import 'logo_macro.html' as logo %}
 
 {% block content%}
+    <!-- Development guide:
+
+    - A small thing, but we should consider updating the verbage to match that of a fixed-arena. For example,
+    using workspace instead of workout in the title block.
+
+    - Since workspaces are controlled by the instructor, students shouldn't need to have access to
+    start/stop/rebuild workspace machines.
+
+    - Around line 125, we are checking if workout is of type 'compute' or not. This won't be necessary as
+    fixed-arenas will always be working with vms and currently do not involve any cloud run containers.
+
+    - The state checking logic can be cleaned up to remove the functions and buttons that we don't need for
+    fixed-arena workouts. Considering the size of the branch, it might be easier to rewrite the update_state
+    function from scratch.
+
+    - We'll need to add a space to display a network diagram that Ryan is currently working on. This diagram can
+    either be passed in during the initial page load or via a GET request after the page is loaded. The latter
+    might allow for more dynamic diagram creation in the future
+
+    - For any resource that is needed after page load, use the API as much as possible. For the workspace landing page,
+    most of the traffic can be directed through the fixed_arena_workspace api.
+
+    - Finally, as the app styles and templates are in the process of being updated, we'll be using static/main-styles.css
+    and fixed_arena_app/templates/fa_base.html as our baseline templates instead of the old 'base.html' and 'styles.css'
+    files.
+    -->
     <!--suppress ALL -->
 
 <script>
-    function server_action(action, server_name){
-        $.ajax({
-            type: "POST",
-            url: "/student/server_management/{{ workout.key.name }}",
-            contentType: "application/json",
-            data: JSON.stringify({
-                "action": action,
-                "server_name": server_name
-            })
-        })
-    }
-
-    function prepare_survey(){
-        //Set up display modal for student feedback survey
-        var modal = document.getElementById("surveyModal");
-        var btn = document.getElementById("surveyBtn");
-        var span = document.getElementsByClassName("close-modal")[0];
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-        
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        $("#survey_form").on('submit',function(event){
-            event.preventDefault();
-            var feedback_data = new FormData(this);
-            $.ajax({
-                    type: "POST",
-                    url: "/student/feedback/{{ workout.key.name }}",
-                    data: feedback_data,
-                    contentType: "application/json;charset=utf-8",
-                    data: feedback_data,
-                    contentType: false,
-                    processData: false,
-                    success: function(data){
-                        var jsonData = JSON.parse(data);
-                        alert("Survey submitted!");
-                    }
-                })
-        });
-    }
-
     function prepare_assessment(){
         $(".workout_assessment_form").submit(function(e) {
             e.preventDefault();
@@ -129,15 +104,11 @@
         
         //Set up workout assessment
         prepare_assessment();
-        
-        //Set up student feeback survey
-        prepare_survey();
-
     });
     
     </script>
 {% if workout['registration_required'] %}
-    <script src="../static/login.js"></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script>
         var auth_config = {
             apiKey: '{{auth_config["api_key"]}}',
@@ -151,17 +122,23 @@
         })
     </script>
 {% endif %}
-{% if build_type == "compute" %}
+{% if build_type == "compute" %}f
     <script>
         //Used if the workout involves VMs
         //Regularly check the state, and update the current state indicator
         //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
         function check_workout_state(){
-            var state = $.ajax({
-                type:"POST",
-                url: "/workout_state/{{ workout.key.name }}",
+            var resp = $.ajax({
+                type:"GET",
+                url: "/api/fixed-arena/workspace/{{ workout.key.name }}",
                 traditional: "true",
             });
+            if (resp.status == '200') {
+                state = resp['workspaces'][0]['state'];
+            }
+            else {
+                state = 'NOT BUILT'
+            }
             return state;
         }
 
@@ -222,7 +199,6 @@
                     $(".loader").remove();  
                 }
             });
-            
         }
         $(document).ready(function(){
             update_state();
@@ -513,34 +489,13 @@ body {font-family: Arial, Helvetica, sans-serif;}
                         {% endif %}
                         </div>
                     <p>Need help with your workout? Check the <a href="/faq">FAQ page</a></p>
-        {% if workout['type'] %}
-        <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
-        {% endif %}
-                    <button id="surveyBtn" class="survey_btn">Complete Survey</button>
-
-                    <div id="surveyModal" class="modal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="survey-title">SURVEY FORM</h1>
-                                <span class="close-modal">&times;</span>
-                            </div>
-                            <div class="modal-body">
-                                <form id="survey_form" method="post" enctype="multipart/form-data">
-                                    {% for key in survey.keys() %}
-                                        <label for={{survey[key]}}>{{survey[key]}}</label>
-                                        <input type='textarea' class="text-input" id={{survey[key]}} size="60" name={{survey[key]}}/>
-                                        <br>
-                                    {% endfor %}
-                                    <input type="submit" value="Submit Survey" name="Submit" class="survey_btn"/>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    {% if workout['type'] %}
+                        <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
+                    {% endif %}
                 </div> <!--Assessment Dropdown-->
                 {% endif %}
         </div>
     </div> <!--Main Container-->
 </div>
-
 {% endblock %}
 

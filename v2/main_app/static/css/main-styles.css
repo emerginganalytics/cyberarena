@@ -241,6 +241,23 @@ td, th {
 }
 
 /* Button Styles */
+.nav-item button:hover {
+    box-shadow: inset 0 0 5px black;
+}
+.nav-item button.active:hover {
+    box-shadow: none;
+    pointer-events: none;
+}
+.nav-link a:hover {
+    color: black;
+    box-shadow: inset 0 0 5px black;
+}
+.nav-link a.active:hover {
+    color: black;
+    box-shadow: none;
+    pointer-events: none;
+}
+
 .bg-1 {
     background: var(--main_color, #6e2639); /* #2d2d30 */
     color: #a7a9ac; /*#bdbdbd */
@@ -276,6 +293,34 @@ td, th {
 .btn-deactivated {
     color: var(--main_color, #6e2639);
     background-color:grey;
+}
+.btn-fa {
+    background-color: #161e2d;
+    color: white;
+    width: auto;
+    border-radius: 4px;
+    margin-right: 3px;
+    padding: 10px;
+    text-decoration: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-fa:hover {
+    color: #161e2d;
+    background-color: whitesmoke;
+    text-decoration: none;
+    box-shadow: inset 0 0 5px #c1c1c1;
+}
+.btn-fa:focus {
+    background-color: whitesmoke;
+    color: #161e2d;
+    text-decoration: none;
+}
+.btn-fa-deactivated {
+    color: #161e2d;
+    background-color: gray;
+    text-decoration: none;
 }
 .btn-primary {
     background-color: var(--main_color, #6e2639) !important;

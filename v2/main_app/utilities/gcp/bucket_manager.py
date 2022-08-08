@@ -51,3 +51,17 @@ class BucketManager:
             if formatted_blob_name != "":
                 workout_specs.append(formatted_blob_name)
         return workout_specs
+
+    def get_attacks(self):
+        # TODO: Update the following two lines to match current standards
+        bucket_name = 'ualr-cybersecurity_cloudbuild'
+        folder_name = 'yaml-build-files'
+        # attack_spec = self.get(bucket=bucket_name, file='attack')
+        bucket = self.bucket_manager.get_bucket(bucket_name)
+        for blob in bucket.list_blobs(prefix=folder_name):
+            blob_name = blob.name
+            formatted_blob_name = blob_name.replace(folder_name, "").split('/')[1]
+            if formatted_blob_name == 'attack.yaml':
+                attack_spec = blob.download_as_string()
+                return attack_spec
+        # return attack_spec

@@ -13,6 +13,7 @@ class DatastoreKeyTypes(str, Enum):
     SERVER = 'cybergym-server'
     INSTRUCTOR = 'cybergym-instructor'
     CYBERARENA_ATTACK = 'cyberarena-attack'
+    CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
 
 
@@ -128,6 +129,7 @@ class BuildConstants:
         DELETING_SERVERS = 70
         COMPLETED_DELETING_SERVERS = 71
         DELETED = 72
+
 
 class PubSub:
     class Topics(str, Enum):

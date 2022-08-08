@@ -1,8 +1,8 @@
-from flask import abort, json, session, request
+from flask import json, request
 from flask.views import MethodView
-from api.decorators import instructor_required, admin_required
+from api.utilities.http_response import HttpResponse
 from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import PubSub, DatastoreKeyTypes
+from utilities.globals import DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,6 +17,7 @@ __status__ = "Testing"
 class FixedArenaWorkspace(MethodView):
     def __init__(self):
         self.kind = DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value
+        self.http_resp = HttpResponse
 
     def get(self, build_id=None):
         args = request.args
@@ -34,17 +35,17 @@ class FixedArenaWorkspace(MethodView):
             # If object exists, return
             if workspaces:
                 return json.dumps({'workspaces': workspaces})
-            return "NOT FOUND", 404
-        return "BAD REQUEST", 400
+            return self.http_resp(code=404)
+        return self.http_resp(code=400)
 
     def post(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405)
 
     def delete(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405)
 
     def put(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405)
