@@ -24,7 +24,6 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
-
 class FixedArena:
     def __init__(self, build_id, debug=False):
         self.fixed_arena_id = build_id
@@ -90,19 +89,3 @@ class FixedArena:
         else:
             self.state_manager.state_transition(self.s.READY)
             logging.info(f"Finished building Fixed Arena {self.fixed_arena_id}!")
-
-    def delete(self):
-        #workouts = []
-        for server in self.fixed_arena['servers']:
-            server_name = f"{self.fixed_arena_id}-{server['name']}"
-            if self.debug:
-                ComputeManager(server_name=server_name).delete()
-            else:
-                self.pubsub_manager.msg(handler=PubSub.MaintenanceActions, action=PubSub.MaintenanceActions.DELETE_SERVER,
-                                        server_name=server_name)
-
-        for fixed_arena_workout_entity in self.ds.get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKOUT,
-                                                                 build_id=self.fixed_arena_id):
-            fixed_arena_workout = FixedArenaWorkoutBuild(fixed_arena_workout_entity['id'])
-            #fixed_arena_workout.delete()
-            #workouts.append(fixed_arena_workout) #fixedArenaWorkoutEntity['id'])
