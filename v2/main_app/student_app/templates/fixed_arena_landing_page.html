@@ -1,16 +1,22 @@
-{% extends "base.html" %}
-{% block title%} Workout {{ workout_name }} {% endblock %}
-{% import 'nuke_macro.html' as nuke %}
+{% extends "fa_base.html" %}
+{% block title%} Workspace {{ workspace_name }} {% endblock %}
 {% import 'logo_macro.html' as logo %}
 
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item">
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+                </li>
+{% endblock %}
 {% block content%}
     <!-- Development guide:
 
     - A small thing, but we should consider updating the verbage to match that of a fixed-arena. For example,
-    using workspace instead of workout in the title block.
+    using workspace instead of workout in the title block. (fixed)
 
     - Since workspaces are controlled by the instructor, students shouldn't need to have access to
-    start/stop/rebuild workspace machines.
+    start/stop/rebuild workspace machines. (fixed)
 
     - Around line 125, we are checking if workout is of type 'compute' or not. This won't be necessary as
     fixed-arenas will always be working with vms and currently do not involve any cloud run containers.
@@ -28,100 +34,11 @@
 
     - Finally, as the app styles and templates are in the process of being updated, we'll be using static/main-styles.css
     and fixed_arena_app/templates/fa_base.html as our baseline templates instead of the old 'base.html' and 'styles.css'
-    files.
+    files. (half-fixed)
     -->
     <!--suppress ALL -->
 
-<script>
-    function prepare_assessment(){
-        $(".workout_assessment_form").submit(function(e) {
-            e.preventDefault();
-            $("#loading-msg").html('Please wait while the process completes' +
-                '</br><div class="loader"></div>');
 
-            var form = $(this);
-            var url = form.attr('action');
-
-            //Serialize form data
-            var assessment_data = new FormData(this);
-            $.ajax({
-                //Send data to server and add the submitted answer to the answered questions display
-                type: "POST",
-                url: url,
-                data: assessment_data,
-                contentType: false,
-                processData: false,
-                success: function(data)
-                {
-                    $("#loading-msg").html("");
-                    var jsonData = JSON.parse(data);
-                    if(jsonData["answer"]){
-                        //Find previous submission and update answer on page
-                        var submitted_answers = document.querySelectorAll(".submitted_answer_group > .submitted_question");
-                        for(var i = 0; i < submitted_answers.length; i++){
-                            if(submitted_answers[i].innerHTML == "Question: " + jsonData["question"]){
-                                let answer_element = submitted_answers[i].nextElementSibling;
-                                answer_element.innerText = "Submission: " + jsonData['answer'];
-                                return;
-                            }
-                        }
-                        //If no previous attempt, create new submission div for this question
-                        var new_submission_element = document.createElement('div');
-                        new_submission_element.className = "submitted_answer_group";
-
-                        var question_element = document.createElement('p');
-                        question_element.innerHTML = "Question: " + jsonData["question"];
-                        question_element.className = "submitted_question";
-                        new_submission_element.appendChild(question_element);
-
-                        var answer_element = document.createElement('p');
-                        answer_element.innerHTML = "Submission: " + jsonData["answer"];
-                        answer_element.className = "submitted_answer";
-                        new_submission_element.appendChild(answer_element);
-
-                        $("#submitted_answers").append(new_submission_element);
-                    }
-                }
-            });
-            //Reset form and activate the submission indicator check mark
-            this.reset();
-            var form_question = this.querySelectorAll(".question_group > p > .submission_indicator");
-            form_question.forEach(element => element.innerHTML = "&#10004");
-            return false;
-        });
-        $("assessment_reveal").click(function(){
-            $("#assessment_form").fadeIn();
-        });
-    }
-
-    $(document).ready(function(){
-        var snapshot_timestamps = document.getElementsByClassName('snapshot_time');
-        for(var i = 0; i < snapshot_timestamps.length; i++){
-            var raw_timestamp = snapshot_timestamps[i].innerHTML;
-            var formatted_timestamp = Date.parse(raw_timestamp);
-            snapshot_timestamps[i].innerHTML = new Date(formatted_timestamp).toLocaleString();
-        }
-        
-        //Set up workout assessment
-        prepare_assessment();
-    });
-    
-    </script>
-{% if workout['registration_required'] %}
-    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
-    <script>
-        var auth_config = {
-            apiKey: '{{auth_config["api_key"]}}',
-            authDomain: '{{auth_config["auth_domain"]}}',
-            projectId: '{{auth_config["project_id"]}}'
-        };
-        initApp(auth_config).then(value => {
-            if(value['admin'] == false && value['student'] == false){
-                location.href = "/login";
-            }
-        })
-    </script>
-{% endif %}
 {% if build_type == "compute" %}f
     <script>
         //Used if the workout involves VMs
@@ -142,220 +59,46 @@
             return state;
         }
 
-        function update_state(){
-            var state_display = document.getElementById("workout_state_display");
-            var workout_link = document.getElementById("workout_link");
-            var build_workout = document.getElementById("build_workout");
-            check_workout_state().then( new_state => {
-                if(new_state == "RUNNING"){
-                    workout_link.style.visibility = "visible";
-                    state_display.style.color = "green";
-                    state_display.innerHTML = "RUNNING";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").removeAttr("disabled");     
-                    $("#reset-vm").removeAttr("disabled");   
-                    $(".nuke_btn").removeAttr("disabled");
-                    $(".loader").remove();                   
-                } else if(new_state == "READY"){
-                    workout_link.style.visibility = "hidden";
-
-                    state_display.style.color = "red";
-                    state_display.innerHTML = "STOPPED";
-                    $("#start-vm").removeAttr("disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').removeAttr('disabled');
-                    $(".loader").remove();                    }
-                else if(new_state == "START"){
-                    workout_link.style.visibility = "hidden";
-                    build_workout.style.visibility = "visible";
-
-                    state_display.style.color = "red";
-                    state_display.innerHTML = "NOT BUILT";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();
-                } else if(new_state == "DELETED"){
-                    workout_link.style.visibility = "hidden";
-
-                    state_display.style.color = "black";
-                    state_display.innerHTML = "NO LONGER AVAILABLE";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();
-                } else {
-                    workout_link.style.visibility = "hidden";
-
-                    state_display.style.color = "orange";
-                    state_display.innerHTML = "WORKING";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();  
-                }
-            });
-        }
-        $(document).ready(function(){
-            update_state();
-            var state_checker = setInterval(update_state, 10000);
-
-            $(".control_form").submit(function(event){
-                event.preventDefault();
-                clearInterval(state_checker);
-                check_workout_state().then(new_state => {
-                    
-                    var currentState = new_state;
-                    $('#start-vm').attr('disabled','disabled');
-                    $('#stop-vm').attr('disabled','disabled');
-                    $('#reset-vm').attr('disabled','disabled');
-                    $('.nuke_btn').attr('disabled', 'disabled');
-                    $("#loading-msg").html('Please wait while the process completes' +
-                        '</br><div class="loader"></div>');
-                    var route = "/" + event.target.id;
-                    var workout_id = document.getElementById("workout_id").value;
-                    var runtime = document.getElementById('time').value;
-                    
-                    $.ajax({
-                        type: "POST",
-                        url: route,
-                        data: JSON.stringify({
-                                "workout_id": workout_id,
-                                "time": runtime,
-                            }),
-                        contentType: "application/json;charset=utf-8",
-                        success: function(data){
-                            var temp_state = currentState.toString();
-                            var state_update = setInterval(function(){
-                                check_workout_state().then(test_state => {
-                                    if(test_state !== currentState){
-                                        clearInterval(state_update);
-                                        update_state();
-                                        state_checker = setInterval(update_state, 10000);
-                                    }
-                                });
-                            }, 5000);
-                        }
-                    })
-                })
-            }); 
-        });
+        function update_state(){}
     </script>
 {% endif %}
 
-<style>
-    .server_control_container{
-        display:flex;
-        flex-direction:row;
-    }
-    .btn:hover{
-        background-color:white!important;
-        color:var(--main_color, #6e2639)!important;
-    }
-    .assessment_question{
-        margin-bottom:0;
-    }
-    .question_group{
-        border: 1px solid lightgray;
-        margin-bottom:0;
-    }
-    .survey_btn {
-        background-color: var(--main_color, #6e2639)!important;
-        color: white !important;
-        width: 10em;
-        border-radius: 4px;
-        border: None;
-        margin-bottom: 20px;
-        padding: 5px;
-    }
-    .survey_btn:hover {
-        background-color:white!important;
-        color:var(--main_color, #6e2639)!important;
-    }
-</style>
-
-<style>
-body {font-family: Arial, Helvetica, sans-serif;}
-
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    padding-top: 100px;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgb(0,0,0);
-    background-color: rgba(0,0,0,0.4);
-}
-
-.modal-content {
-    background-color: #fefefe;
-    margin: auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-}
-.close-modal {
-    color: #aaaaaa;
-    font-size: 2.2em;
-    font-weight: bold;
-    padding-right: 20px;
-}
-.close-modal:hover {cursor: pointer}
-.text-input {
-    display:block;
-    width:75%;
-    height:100%;
-    margin-right:45%;
-}
-</style>
-
 <div class='landing_container col-lg-12'>
     <div class='row'>
-        <div class='workout_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+        <div class='workspace_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
             {{ logo.logo_div() }}
-            <br><h2>Workout Control</h2><br>
-            <p>Workout status: 
+            <br><h2>Workspace Control</h2><br>
+            <p>Workspace status:
                 {% if build_type == "container" %}
-                    <span id="workout_state_display" style="color:green;">RUNNING</span>
+                    <span id="workspace_state_display" style="color:green;">RUNNING</span>
                 {% else %}
-                    <span id='workout_state_display' style="color:red;">STOPPED</span>
+                    <span id='workspace_state_display' style="color:red;">STOPPED</span>
                 {% endif %}</p><br>
             <div id="loading-msg"></div>
             {% if build_type == 'container' %}
-                <a style="width:100%" class="btn" id="container_workout_link"
-                href="{{container_url}}/{{workout.key.name}}"
-                target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
+                <a style="width:100%" class="btn" id="container_workspace_link"
+                href="{{container_url}}/{{workspace.key.name}}"
+                target="_blank" rel="noopener noreferrer">ENTER WORKSPACE!</a>
             {% else %}
-                <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
+                <a style="width:100%; visibility:hidden" class="btn" id="workspace_link" href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKSPACE!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
-            {% if workout['registration_required'] %}
-                <hr><a href="/student/home" class="btn">Home</a>
-            {% endif %}
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
-            <div id='workout_info' class='container' style="margin:0;">
-                <h2>Welcome to your {{ workout['workout_name'] }} workout!</h2>
-                <p>{{ description }}</p>
+            <div id='workspace_info' class='container' style="margin:0;">
+                <h2>Welcome to your {{ fixed_arena_class.summary.name }} workspace!</h2>
+                <p>{{ fixed_arena_class.summary.description }}</p>
                 {% if is_expired %}
-                    <p><b>*This workout has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
+                    <p><b>*This workspace has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
                 {% endif %}
-                {% if workout['student_instructions_url'] %}
-                    <a href="{{ workout['student_instructions_url'] }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workout Instructions</a><br>
+                {% if fixed_arena_class.summary.student_instructions_url %}
+                    <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
                 {% endif %}
                 {% if build_type == "compute" %}
                     <br>
 
-                    <h2>Workout Servers</h2>
+                    <h2>Workspace Servers</h2>
 
-                    <table id='workout_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
+                    <table id='workspace_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
                         <tr>
                             <th>Server Name</th>
                             <th>IP</th>
@@ -376,122 +119,11 @@ body {font-family: Arial, Helvetica, sans-serif;}
                                     <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
                                 </div>
                             </td>
-                            <td>
-                            {% if 'guacamole' not in server['name'] %}
-                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{server['name']}}_snapshot_modal">
-                                    Manage Snapshots
-                                </button>
-                                <div class="modal fade" id="{{server['name']}}_snapshot_modal" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{workout.name}}" aria-hidden="true">
-                                    <div class="modal-dialog" role="document">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="ModalLabel_{{workout.name}}">Snapshot Management: {{server.key.name}}</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                            </div>
-                                            <div class="modal-body">
-                                                {% if 'snapshots' in server and server['snapshots']%}
-                                                    <!-- {{server['snapshots']}} -->
-                                                    <div id="{{server.key.name}}_snapshot_restore">
-                                                        <table class="table">
-                                                            <tr>
-                                                                <th>Snapshot Name</th>
-                                                                <th>Creation Date</th>
-                                                            </tr>
-                                                            {% for snapshot in server['snapshots'] | sort(attribute='creation_date') %}
-                                                                <tr>
-                                                                    <td>{{snapshot['snapshot_name']}}</td>
-                                                                    <td class="snapshot_time">{{snapshot['creation_date']}}</td>
-                                                                </tr>
-                                                            {% endfor %}
-
-                                                        </table>
-                                                        <a class="btn" href="#" onclick="server_action('RESTORE', '{{server.key.name}}')">Restore</a>
-                                                    </div>
-                                                {% endif %}
-                                                <div id="{{server.key.name}}_new_snapshot" style="margin-top: 1em;">
-                                                    <a href="#" class="btn" onclick="server_action('SNAPSHOT', '{{server.key.name}}')">Create New Snapshot</a>
-                                                    <p><small>Snapshots are automatically created at midnight. Creating a new snapshot will overwrite the previous one.</small></p>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer" style="justify-content:center;">
-                                                <button type="button" class="btn" data-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endif %}
-                            </td>
                         </tr>
                     {% endfor %}
                 </table>
                 {% endif %}
                 <br>
-                {% if score %}
-                    <p>Assessment Results: {{ score }}</p>
-                    <p>*Results may not be final</p>
-                {% endif %}
-            </div>
-            <div id="workout_id" hidden>{{ workout.key.name }}</div>
-            
-                {% if assessment %}
-                <script>
-                    function reveal_assessment(){
-                        $(".workout_assessment_form").fadeToggle();
-                    }
-                </script>
-                <br>  
-                <div class='container' id='assessment'>
-                    <a class='landing_dropdown btn' href="#" id='assessment_dropdown_control' onclick="reveal_assessment()">Assessment</a><br>
-                    {% for question in assessment%}
-                        <form class='workout_assessment_form' method="POST" style="display:none; margin-top:2em;" enctype="multipart/form-data">
-
-                        {% if question['type'] == 'input' %}
-                            <div class='question_group form-group'>
-                                <input type="hidden" name="question" value="{{ question['question'] }}" />
-                                <p class="assessment_question">{{ question['question'] }}<span class="submission_indicator" style="color: green;"></span></p><br>
-                                <input type='text' class="form-control" name="answer" required/>
-                                <button type='submit' class="btn" style="margin-top:0;text-align:center;" >Submit</button><br>
-                            </div>
-                        {% elif question['type'] == 'upload' %}
-                            <div class='question_group form-group'>
-                                <input type="hidden" name="upload_prompt" value="{{ question['question'] }}" />
-                                <input type="hidden" name="upload_index" value="{{loop.index}}" />
-                                <p class="assessment_question">{{ question['question'] }}<span class="submission_indicator" style="color: green;"></span></p><br>
-                                <input type='file' id='assessment_file_upload' class="form-control-file" name='file_upload'><br><br>
-                                <button type='submit' class="btn" style="margin-top:0;text-align:center;" >Submit</button><br>
-                            </div>
-                        {% elif question['type'] == 'auto' %}
-                            <div class='question_group form-group'>
-                                <input type="hidden" name="question" value="{{ question['question'] }}" />
-                                <p class="assessment_question">{{ question['question'] }}</p> 
-                                {% if question['complete'] %}
-                                <span style='color:green;'>Complete</span>
-                                {% else %}
-                                <span style='color:red;'>Not completed</span>
-                                {% endif %}
-                                <br>
-                            </div>
-                        {% endif %}
-                        </form><br>
-                    {% endfor %}
-
-                        <div id="submitted_answers" style="margin-top: 1em;">
-                        {% if 'submitted_answers' in workout %}
-                            <h5>Submitted Answers</h5>
-                            {% for submission in workout['submitted_answers'] %}
-                                <div class="submitted_answer_group">
-                                    <p class="submitted_question" style="margin-bottom:0;" >Question: {{submission['question']}}</p>
-                                    <p class="submitted_answer">Submission: {{submission['answer']}}</p>
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                        </div>
-                    <p>Need help with your workout? Check the <a href="/faq">FAQ page</a></p>
-                    {% if workout['type'] %}
-                        <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
-                    {% endif %}
                 </div> <!--Assessment Dropdown-->
                 {% endif %}
         </div>
