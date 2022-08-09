@@ -74,6 +74,9 @@ class FirewallServer:
 
     def delete(self):
         for fw in self.firewall_spec:
+            firewall_type = fw['type']
+            if firewall_type == BuildConstants.Firewalls.FORTINET:
+                self._delete_fortinet_features()
             firewall_name = f"{self.build_id}-{fw['name']}"
             ComputeManager(server_name=firewall_name).delete()
 
@@ -132,6 +135,10 @@ class FirewallServer:
         ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=fortinet_server_name)
         ds.put(fortinet_license_server)
         ComputeManager(server_name=fortinet_server_name).build()
+
+    def _delete_fortinet_features(self):
+        fortinet_server_name = f"{self.build_id}-fortimanager"
+        ComputeManager(server_name=fortinet_server_name).delete()
 
     def _add_routes(self, firewall_spec):
         routes = []

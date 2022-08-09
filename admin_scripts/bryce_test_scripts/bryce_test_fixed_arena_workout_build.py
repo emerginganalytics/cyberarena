@@ -7,6 +7,7 @@ from utilities.gcp.cloud_env import CloudEnv
 from utilities.gcp.bucket_manager import BucketManager
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.globals import PubSub
 from cloud_fn_utilities.globals import DatastoreKeyTypes
@@ -50,11 +51,13 @@ class TestFixedArenaWorkout:
         # build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         # build_spec_to_cloud.commit()
         # fac = FixedArenaClass(build_id=build_spec['id'], debug=False)
-        fac = FixedArenaClass(build_id='dbewzcviso', debug=False)
+        #fac = FixedArenaClass(build_id='dbewzcviso', debug=False)
+        fa = FixedArena(build_id='cln-stoc', debug=False)
         # fac.build()
         # fac.start()
         # fac.stop()
-        fac.delete()
+        fa.build_fixed_arena()
+        #fac.delete()
         # fac.nuke()
 
 

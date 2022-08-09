@@ -93,5 +93,5 @@ class DisplayProxy:
 
     def delete(self):       # also probably does not work but is my best guess also unfinished.
         ComputeManager(server_name=self.server_name).delete()
-        while self.s.get_state() != :
-            time.sleep(5)
+        #while self.s.get_state() != :
+            #time.sleep(5)
