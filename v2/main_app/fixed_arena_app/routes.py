@@ -69,7 +69,11 @@ def class_landing(build_id):
     attack_yaml = DataStoreManager().get_attack_specs()
     fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
     if fa_class:
-        workspaces = []
+        workspace_query = DataStoreManager(key_id=DatastoreKeyTypes.CYBERGYM_WORKOUT.value).query()
+        workspace_query.add_filter('parent_id', '=', fa_class.key.name)
+        workspace_query.add_filter('parent_build_type', '=', 'fixed_arena_class')
+        workspaces = list(workspace_query.fetch())
+
         return render_template('fixed_arena_class.html', auth_config=auth_config, fixed_arena_class=fa_class,
                                workspaces=workspaces, attack_spec=attack_yaml)
     abort(404)

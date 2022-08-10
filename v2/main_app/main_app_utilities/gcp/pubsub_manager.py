@@ -1,4 +1,3 @@
-import logging
 from google.cloud import logging_v2
 from google.cloud import pubsub_v1
 

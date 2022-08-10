@@ -1,5 +1,5 @@
 {% extends "fa_base.html" %}
-{% import 'logo_macro.html' as logo %}
+{% import 'cyber_learn_logo.html' as logo %}
 {% import "vuln_macros.html" as vuln_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
 {% block title %}{{ fixed_arena_class.summary.name }}{% endblock title %}
@@ -88,10 +88,33 @@
                         <p>{{ fixed_arena_class.summary.description }}</p>
                     </div>
                     <div id="workspace-servers">
+                        <!--
+                        {'machine_type': 'e2-standard-2',
+                        'human_interaction': [<Entity {'protocol': 'rdp', 'username': 'cyberarena', 'password': 'P@55w0rd!', 'security_mode': 'Any', 'display': True}>],
+                        'name': 'kali', 'image': 'image-cyberarena-kali-desktop'
+                        }-->
+                        <table id="workspace-table" class="table table-hover text-nowrap table-large">
+                            <thead>
+                                <tr id="stoc-table-headers">
+                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value=""/></th>
+                                    <th class="prevent-select text-center">Status</th>
+                                    <th class="prevent-select text-center">Workspace ID</th>
+                                     <th class="prevent-select text-center">Student</th>
+                                    <th class="prevent-select text-center">Manage</th>
+                                </tr>
+                            </thead>
+                            {% for workspace in workspaces %}
+                            <tr>
+                                <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
+                                <td><a href="{{ url_for('student_app.fixed_arena_landing') }}">{{ workspace.key.name }}</a></td>
+                            </tr>
+                            {% endfor %}
+                        </table>
                         {% for server in fixed_arena_class.workspace_servers %}
                             <p>{{ server }}</p>
                         {% endfor %}
                     </div>
+                    <button type="button" class='btn-fa' onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')">START</button>
                 </div>
                 <div class="tab-pane fade" id="vuln-tab" aria-labelledby="fa-vuln-tab">
                     <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
