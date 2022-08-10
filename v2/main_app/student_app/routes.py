@@ -1,7 +1,11 @@
 import datetime
 import json
 import time
+<<<<<<< Updated upstream
 from datetime import datetime
+=======
+from datetime import datetime, timezone
+>>>>>>> Stashed changes
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 from utilities.gcp.arena_authorizer import ArenaAuthorizer
 from utilities.gcp.cloud_env import CloudEnv
@@ -197,6 +201,7 @@ def fixed_arena_landing_page(build_id):
     if fixed_arena_class:
         expiration = fixed_arena_class['workspace_settings'].get('expires', None)
         is_expired = True
+<<<<<<< Updated upstream
         if expiration:
             if int(time.time()) == int(expiration):
                 is_expired = False
@@ -205,7 +210,14 @@ def fixed_arena_landing_page(build_id):
         #  expires={'ts': expiration, 'is_expired': bool}
 
         # Get entry point from fixed_arena_class
+=======
+        ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
+        if ts <= expiration:
+            is_expired = False
+    # Get entry point from fixed_arena_class
+>>>>>>> Stashed changes
         entry_point = None
+        expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
         for server in fixed_arena_class['workspace_servers']:
             entry_point = server.get('human_interaction', None)
             if entry_point:
@@ -213,6 +225,6 @@ def fixed_arena_landing_page(build_id):
 
         return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class,
                                expiration=expiration, is_expired=is_expired, auth_config=auth_config,
-                               servers=workspace_servers, entry_point=entry_point)
+                               servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)
     else:
         return redirect('/no-workout')

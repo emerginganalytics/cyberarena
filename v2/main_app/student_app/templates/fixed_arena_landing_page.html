@@ -1,15 +1,48 @@
 {% extends "fa_base.html" %}
 {% block title%} Workspace {{ workspace_name }} {% endblock %}
 {% import 'logo_macro.html' as logo %}
-
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed_arena_landing_styles.css') }}">
+{% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
                 <li class="nav-item">
                     <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
                 </li>
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <button id="contact-us" class="nav-item btn top-navbar-btn"
+                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
+        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    </div>
 {% endblock %}
 {% block content%}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+            apiKey: '{{auth_config["api_key"]}}',
+            authDomain: '{{auth_config["auth_domain"]}}',
+            projectId: '{{auth_config["project_id"]}}'
+          };
+          initApp(auth_config).then(value => {
+            enable_signout();
+            if(value['admin'] === true){
+              var admin_button = document.createElement("a");
+              admin_button.href = "/admin/home";
+              admin_button.className = "nav-link";
+              admin_button.innerHTML = "Admin Page";
+            }
+            if(value['student'] === true){
+              var student_home_link = document.createElement("a");
+              student_home_link = '/student/home';
+              student_home_link.className = "nav-link";
+              student_home_link.innerHTML = "Your Student Page";
+            }
+          });
+    </script>
     <!-- Development guide:
 
     - A small thing, but we should consider updating the verbage to match that of a fixed-arena. For example,
@@ -118,9 +151,19 @@
             <br><h2>Workout Control</h2><br>
             <p>Workout status:
             <div id="loading-msg"></div>
+<<<<<<< Updated upstream
                 <a style="width:100%; visibility:hidden" class="btn" id="workout_link"
                    href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKOUT!</a>
                 <p>Expiration date: {{ expiration }}</p><br>
+=======
+            {% if build_type == 'container' %}
+                <a style="width:100%" class="btn" id="container_workspace_link"
+                href="{{container_url}}/{{workspace.key.name}}"
+                target="_blank" rel="noopener noreferrer">ENTER WORKSPACE!</a>
+            {% else %}
+                <a style="width:100%; visibility:hidden" class="btn" id="workspace_link" href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKSPACE!</a>
+                <p>Expiration date: {{ expiration_iso8601 }}</p><br>
+>>>>>>> Stashed changes
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
             <div id='workspace_info' class='container' style="margin:0;">
