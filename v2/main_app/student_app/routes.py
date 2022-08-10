@@ -210,7 +210,7 @@ def fixed_arena_student(build_id):
             servername = server.get('name', None)
             if entry_point:
                 break
-        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix,
+        return render_template('fixed_arena_student.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix,
                                expiration=expiration, is_expired=is_expired, auth_config=auth_config, serverip=serverip, servername=servername,
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)
     else:
