@@ -16,8 +16,6 @@ __status__ = "Testing"
 
 
 class FixedArenaClass(MethodView):
-    decorators = [instructor_required]
-
     def __init__(self):
         self.kind = DatastoreKeyTypes.FIXED_ARENA_CLASS
         self.pubsub_actions = PubSub.Actions
@@ -32,13 +30,17 @@ class FixedArenaClass(MethodView):
             return "NOT FOUND", 404
         return "BAD REQUEST", 400
 
-    def post(self, build_id=None):
-        if build_id:
-            recv_data = request.json
-            stoc_id = recv_data.get('stoc_id', None)
-            build_count = recv_data.get('build_count', None)
-            expire_date = recv_data.get('expire_date', None)
+    @instructor_required
+    def post(self):
+        recv_data = request.json
 
+        # Parse Form Data
+        stoc_id = recv_data.get('stoc_id', None)
+        build_count = recv_data.get('build_count', None)
+        expire_datetime = recv_data.get('expires', None)
+        registration_required = recv_data.get('registration_required', False)
+        build_id = recv_data.get('build_id', None)
+        if build_id:
             # make sure that no running class already exists for fixed-arena
             class_query = DataStoreManager(key_id=self.kind).query()
             class_query.add_filter('parent_id', '=', stoc_id)
@@ -52,6 +54,7 @@ class FixedArenaClass(MethodView):
             return "CONFLICT", 409
         return "BAD REQUEST", 400
 
+    @instructor_required
     def delete(self, build_id=None):
         if build_id:
             self.pubsub_mgr.msg(handler=self.handler.CONTROL, build_id=build_id,
@@ -59,12 +62,14 @@ class FixedArenaClass(MethodView):
                                 cyber_arena_object=PubSub.CyberArenaObjects.FIXED_ARENA_CLASS)
         return "BAD REQUEST", 400
 
+    @instructor_required
     def put(self, build_id=None):
         if build_id:
-            args = request.args
+            args = request.json
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value]
             if action and action in valid_actions:
-                self.pubsub_mgr.msg(handler=PubSub.Handlers.CONTROL,
-                                    action=PubSub.Actions[action], build_id=build_id)
-        return "BAD REQUEST", 400
+                self.pubsub_mgr.msg(handler=PubSub.Handlers.CONTROL, action=action, build_id=build_id)
+                return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400).prepare_response()
+
