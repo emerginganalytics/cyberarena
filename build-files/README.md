@@ -14,8 +14,7 @@ Before running the setup scripts, perform the following steps to prepare your cl
     4. Create API credentials to use in the main application by going to 
         https://console.cloud.google.com/apis/credentials and clicking on Create Credentials and selecting API key. 
         Copy this API key. You will need to use this when deploying the application.
-5. Enable the DNS service and create a new managed domain (e.g. mycyberarena.com)
-6. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
+5. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
     1. Compute Engine API (Subnetworks) - MCB * 2
     2. Compute Engine API (Networks) - MCB * 1
     3. Compute Engine API (Firewall Rules) - MCB * 3
