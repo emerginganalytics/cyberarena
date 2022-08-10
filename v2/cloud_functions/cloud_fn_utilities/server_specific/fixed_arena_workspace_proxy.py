@@ -34,7 +34,6 @@ class FixedArenaWorkspaceProxy:
         """
         self.env = CloudEnv()
         self.server_name = f"{build_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
-        self.s = ServerStateManager
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None
