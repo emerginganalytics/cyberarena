@@ -1,11 +1,6 @@
-import datetime
 import json
 import time
-<<<<<<< Updated upstream
-from datetime import datetime
-=======
 from datetime import datetime, timezone
->>>>>>> Stashed changes
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 from utilities.gcp.arena_authorizer import ArenaAuthorizer
 from utilities.gcp.cloud_env import CloudEnv
@@ -184,9 +179,16 @@ def unit_signup(unit_id):
 
 @student_app.route('/fixed-arena-landing/<build_id>', methods=['GET', 'POST'])
 def fixed_arena_landing_page(build_id):
+    """
+    TODO: This route is not correct. We don't need any workout or unit logic for the student
+        fixed-arena landing pages. It might be worth considering to build the logic from scratch
+        as fixed-arenas are handled differently from how we handle the standard workout and unit.
+        We also want to refrain from using any cloud specific logic
+        in the routes. If we need to get GCP datastore objects, use the DatastoreManger helper
+        class that was created in v2/utilities/gcp/datastore_manager.
+    """
     auth_config = CloudEnv().auth_config
-    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(
-        filter_key='id', op='=', value=build_id)[0]
+    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(filter_key='id', op='=', value=build_id)[0]
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
     logged_in_user = session.get('user_email', None)
     # registered_user = fix.get('student_email', None)
@@ -201,28 +203,16 @@ def fixed_arena_landing_page(build_id):
     if fixed_arena_class:
         expiration = fixed_arena_class['workspace_settings'].get('expires', None)
         is_expired = True
-<<<<<<< Updated upstream
-        if expiration:
-            if int(time.time()) == int(expiration):
-                is_expired = False
-            expiration = datetime.fromtimestamp(int(expiration))
-        # TODO: Consider passing expiration and is_expired as one object:
-        #  expires={'ts': expiration, 'is_expired': bool}
-
-        # Get entry point from fixed_arena_class
-=======
         ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
         if ts <= expiration:
             is_expired = False
     # Get entry point from fixed_arena_class
->>>>>>> Stashed changes
         entry_point = None
         expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
         for server in fixed_arena_class['workspace_servers']:
             entry_point = server.get('human_interaction', None)
             if entry_point:
                 break
-
         return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class,
                                expiration=expiration, is_expired=is_expired, auth_config=auth_config,
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)

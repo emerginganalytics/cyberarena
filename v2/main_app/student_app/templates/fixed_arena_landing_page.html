@@ -70,6 +70,8 @@
     files. (half-fixed)
     -->
     <!--suppress ALL -->
+
+
 {% if build_type == "compute" %}f
     <script>
         //Used if the workout involves VMs
@@ -78,7 +80,7 @@
         function check_workout_state(){
             var resp = $.ajax({
                 type:"GET",
-                url: "/api/fixed-arena/workspace/{{ workspace.key.name }}",
+                url: "/api/fixed-arena/workspace/{{ workout.key.name }}",
                 traditional: "true",
             });
             if (resp.status == '200') {
@@ -93,69 +95,19 @@
         function update_state(){}
     </script>
 {% endif %}
-{% if workout['registration_required'] %}
-    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
-    <script>
-        var auth_config = {
-            apiKey: '{{auth_config["api_key"]}}',
-            authDomain: '{{auth_config["auth_domain"]}}',
-            projectId: '{{auth_config["project_id"]}}'
-        };
-        initApp(auth_config).then(value => {
-            if(value['admin'] == false && value['student'] == false){
-                location.href = "/login";
-            }
-        })
-    </script>
-{% endif %}
-
-<script>
-    //Used if the workout involves VMs
-    //Regularly check the state, and update the current state indicator
-    //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
-    function check_class_state(){
-        var resp = $.ajax({
-            type:"GET",
-            url: "/api/fixed-arena/class/{{ workout.key.name }}",
-            traditional: "true",
-        });
-        if (resp.status == '200') {
-            state = resp['workspaces'][0]['state'];
-        }
-        else {
-            state = 'NOT BUILT'
-        }
-        return state;
-    }
-
-    function update_state(){
-
-    }
-
-</script>
-<style>
-    .server_control_container{
-        display:flex;
-        flex-direction:row;
-    }
-    .btn:hover{
-        background-color:white!important;
-        color:var(--main_color, #6e2639)!important;
-    }
-</style>
 
 <div class='landing_container col-lg-12'>
     <div class='row'>
         <div class='workspace_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
             {{ logo.logo_div() }}
-            <br><h2>Workout Control</h2><br>
-            <p>Workout status:
+            <br><h2>Workspace Control</h2><br>
+            <p>Workspace status:
+                {% if build_type == "container" %}
+                    <span id="workspace_state_display" style="color:green;">RUNNING</span>
+                {% else %}
+                    <span id='workspace_state_display' style="color:red;">STOPPED</span>
+                {% endif %}</p><br>
             <div id="loading-msg"></div>
-<<<<<<< Updated upstream
-                <a style="width:100%; visibility:hidden" class="btn" id="workout_link"
-                   href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKOUT!</a>
-                <p>Expiration date: {{ expiration }}</p><br>
-=======
             {% if build_type == 'container' %}
                 <a style="width:100%" class="btn" id="container_workspace_link"
                 href="{{container_url}}/{{workspace.key.name}}"
@@ -163,7 +115,6 @@
             {% else %}
                 <a style="width:100%; visibility:hidden" class="btn" id="workspace_link" href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKSPACE!</a>
                 <p>Expiration date: {{ expiration_iso8601 }}</p><br>
->>>>>>> Stashed changes
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
             <div id='workspace_info' class='container' style="margin:0;">
