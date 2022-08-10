@@ -57,7 +57,7 @@ class TestFixedArenaWorkout:
         FixedArenaClass(build_id=build_id, debug=True).start()
 
     def stop(self):
-        FixedArenaClass(build_id=build_id, debug=True).stop()
+        FixedArenaClass(build_id=build_id, debug=False).stop()
 
 if __name__ == "__main__":
     fixed_arena_class = 'stoc-class' if not fixed_arena_class else fixed_arena_class

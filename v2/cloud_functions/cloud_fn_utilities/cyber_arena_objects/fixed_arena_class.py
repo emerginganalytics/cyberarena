@@ -216,7 +216,8 @@ class FixedArenaClass:
         workspace_datastore = DataStoreManager()
         registration_required = self.fixed_arena_class['workspace_settings'].get('registration_required', False)
         if registration_required:
-            student_list = self.fixed_arena_class['workspace_settings']['student_list']
+            student_emails = self.fixed_arena_class['workspace_settings']['student_emails']
+            student_names = self.fixed_arena_class['workspace_settings']['student_names']
             count = min(self.env.max_workspaces, len(student_list))
         else:
             count = min(self.env.max_workspaces, self.fixed_arena_class['workspace_settings']['count'])
@@ -234,7 +235,8 @@ class FixedArenaClass:
                 'registration_required': registration_required,
             }
             if registration_required:
-                workspace_record['workspace_email'] = student_list[i]
+                workspace_record['student_email'] = student_emails[i]
+                workspace_record['student_name'] = student_names[i]
             workspace_datastore.put(workspace_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=id)
             workspace_ids.append(id)
         return workspace_ids

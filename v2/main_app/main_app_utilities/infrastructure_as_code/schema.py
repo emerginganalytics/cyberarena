@@ -44,8 +44,10 @@ class FixedArenaClassSchema(Schema):
 class WorkspaceSettingsSchema(Schema):
     count = fields.Int(description='The number of distinct workstation builds to deploy', required=True)
     registration_required = fields.Bool(description='Whether students must login to access this build', default=False)
-    student_list = fields.List(fields.Dict, description='Email addresses of students when registration is required',
-                               many=True, required=False)
+    student_emails = fields.List(fields.Str, description='Email addresses of students when registration is required',
+                                 many=True, required=False)
+    student_names = fields.List(fields.Str, description='Name of the student assigned to the workspaces',
+                                many=True, required=False)
     expires = fields.Float(required=True)
 
 

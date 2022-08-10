@@ -165,6 +165,8 @@ class FixedArenaClassStateManager:
             return True
         elif new_state in self.COMPLETION_STATES:
             return True
+        elif new_state == self.s.RUNNING:
+            return True
         else:
             logging.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "
                             f"the build is currently in the state {self.s(existing_state).name}")
