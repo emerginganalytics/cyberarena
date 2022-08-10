@@ -43,15 +43,6 @@
     </script>
     <!-- Development guide:
 
-    - A small thing, but we should consider updating the verbage to match that of a fixed-arena. For example,
-    using workspace instead of workout in the title block. (fixed)
-
-    - Since workspaces are controlled by the instructor, students shouldn't need to have access to
-    start/stop/rebuild workspace machines. (fixed)
-
-    - Around line 125, we are checking if workout is of type 'compute' or not. This won't be necessary as
-    fixed-arenas will always be working with vms and currently do not involve any cloud run containers.
-
     - The state checking logic can be cleaned up to remove the functions and buttons that we don't need for
     fixed-arena workouts. Considering the size of the branch, it might be easier to rewrite the update_state
     function from scratch.
@@ -63,14 +54,9 @@
     - For any resource that is needed after page load, use the API as much as possible. For the workspace landing page,
     most of the traffic can be directed through the fixed_arena_workspace api.
 
-    - Finally, as the app styles and templates are in the process of being updated, we'll be using static/main-styles.css
-    and fixed_arena_app/templates/fa_base.html as our baseline templates instead of the old 'base.html' and 'styles.css'
-    files. (half-fixed)
     -->
     <!--suppress ALL -->
 
-
-{% if build_type == "compute" %}f
     <script>
         //Used if the workout involves VMs
         //Regularly check the state, and update the current state indicator
@@ -78,7 +64,7 @@
         function check_workout_state(){
             var resp = $.ajax({
                 type:"GET",
-                url: "/api/fixed-arena/workspace/{{ workout.key.name }}",
+                url: "/api/fixed-arena/class/{{ fixed_arena_workout.fixed_arena_class_id }}",
                 traditional: "true",
             });
             if (resp.status == '200') {
@@ -92,7 +78,6 @@
 
         function update_state(){}
     </script>
-{% endif %}
 
 <div class='landing_container col-lg-12'>
     <div class='row'>
@@ -129,16 +114,14 @@
                             <th>IP</th>
                             <th>Server State</th>
                         </tr>
-                    {% for server in servers if not 'guacamole' in server['name']%}
                         <tr>
-                            <td>{{server['name']}}</td>
-                            <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
-                            <td>{{server['state']}}</td>
+                            <td>{{fixed_arena_workout.name}}</td>
+                            <td>{{fixed_arena_workout.nics.internal_ip }}</td>
+                            <td>{{fixed_arena_workout.state}}</td>
                         </tr>
-                    {% endfor %}
                 </table>
                 <br>
-                </div> <!--Assessment Dropdown-->
+            </div> <!--Assessment Dropdown-->
         </div>
     </div> <!--Main Container-->
 </div>

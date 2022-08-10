@@ -215,7 +215,7 @@ def fixed_arena_landing_page(build_id):
             entry_point = server.get('human_interaction', None)
             if entry_point:
                 break
-        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class,
+        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout,
                                expiration=expiration, is_expired=is_expired, auth_config=auth_config,
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)
     else:
