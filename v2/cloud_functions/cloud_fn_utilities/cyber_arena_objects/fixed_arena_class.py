@@ -218,7 +218,7 @@ class FixedArenaClass:
         if registration_required:
             student_emails = self.fixed_arena_class['workspace_settings']['student_emails']
             student_names = self.fixed_arena_class['workspace_settings']['student_names']
-            count = min(self.env.max_workspaces, len(student_list))
+            count = min(self.env.max_workspaces, len(student_names))
         else:
             count = min(self.env.max_workspaces, self.fixed_arena_class['workspace_settings']['count'])
 
