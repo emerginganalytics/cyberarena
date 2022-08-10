@@ -1,8 +1,8 @@
 import logging
 from google.cloud import logging_v2
 from google.cloud import storage
-
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.globals import Buckets
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

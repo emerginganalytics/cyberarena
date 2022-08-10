@@ -1,9 +1,21 @@
+
 function manage_class(action, build_id=null) {
-    if (action === 2) {
+    if (action === 3) {
         url = '/api/fixed-arena/class/' + build_id;
         var request = fetch(url, {
             method: 'DELETE',
-        }).then(response => response.text()).then(response => console.log(response));
+        }).then(response => response.json()).then(response => console.log(response));
+    }
+    else if (action === 2 || action === 4) {
+        url = '/api/fixed-arena/class/' + build_id;
+        var request = fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({'action': action})
+        }).then(request => request.json()).then(request => console.log(request));
     }
 }
 function enable_object(obj_id, enable=false, clear=false) {
@@ -44,7 +56,6 @@ $(document).ready(function() {
         });
     }
 });
-
 $(document).ready(function() {
     // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
     //       new page

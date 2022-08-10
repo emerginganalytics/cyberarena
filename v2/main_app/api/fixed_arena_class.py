@@ -22,8 +22,6 @@ __status__ = "Testing"
 
 
 class FixedArenaClass(MethodView):
-    decorators = [instructor_required]
-
     def __init__(self):
         self.kind = DatastoreKeyTypes.FIXED_ARENA_CLASS.value
         self.pubsub_actions = PubSub.Actions
@@ -41,6 +39,7 @@ class FixedArenaClass(MethodView):
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def post(self):
         recv_data = request.json
 
@@ -79,6 +78,7 @@ class FixedArenaClass(MethodView):
             return self.http_resp(code=409).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def delete(self, build_id=None):
         if build_id:
             print(f'delete request for {build_id}')
@@ -89,13 +89,14 @@ class FixedArenaClass(MethodView):
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def put(self, build_id=None):
         if build_id:
-            args = request.args
+            args = request.json
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value]
             if action and action in valid_actions:
-                self.pubsub_mgr.msg(handler=PubSub.Handlers.CONTROL,
-                                    action=PubSub.Actions[action], build_id=build_id)
+                self.pubsub_mgr.msg(handler=PubSub.Handlers.CONTROL, action=action, build_id=build_id)
                 return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
+

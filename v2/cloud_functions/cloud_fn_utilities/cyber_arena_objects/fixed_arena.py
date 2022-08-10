@@ -13,6 +13,7 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -22,7 +23,6 @@ __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
-
 
 class FixedArena:
     def __init__(self, build_id, debug=False):
