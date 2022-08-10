@@ -180,9 +180,9 @@ def unit_signup(unit_id):
 @student_app.route('/fixed-arena/<build_id>', methods=['GET'])
 def fixed_arena_student(build_id):
     auth_config = CloudEnv().auth_config
-    fixed_arena_workout = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=', value=build_id)[0]
-    parent_id = fixed_arena_workout.get('fixed_arena_class_id', None)
-    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(filter_key='id', op='=', value=parent_id)[0]
+    fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id=build_id).get()
+    parent_id = fixed_arena_workout.get('parent_id', None)
+    fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
     logged_in_user = session.get('user_email', None)
     # registered_user = fix.get('student_email', None)
@@ -200,15 +200,18 @@ def fixed_arena_student(build_id):
         ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
         if ts <= expiration:
             is_expired = False
+        dns_suffix = CloudEnv()
     # Get entry point from fixed_arena_class
         entry_point = None
         expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
-        for server in fixed_arena_class['workspace_servers']:
-            entry_point = server.get('human_interaction', None)
+        for server in fixed_arena_workout['servers']:
+            entry_point = server.get('human_interaction', None)[0]
+            serverip = server.get('nics', None)[0]
+            servername = server.get('name', None)
             if entry_point:
                 break
-        return render_template('fixed_arena_student.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout,
-                               expiration=expiration, is_expired=is_expired, auth_config=auth_config,
+        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix,
+                               expiration=expiration, is_expired=is_expired, auth_config=auth_config, serverip=serverip, servername=servername,
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)
     else:
         return redirect('/no-workout')

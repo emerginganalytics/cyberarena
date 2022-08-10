@@ -2,7 +2,7 @@
 {% block title%} Workspace {{ workspace_name }} {% endblock %}
 {% import 'cln_logo_macro.html' as logo %}
 {% block styles %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed_arena_landing_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed-arena-landing-styles.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -85,13 +85,13 @@
             {{ logo.logo_div() }}
             <br><h2>Workspace Control</h2><br>
             <p>Workspace status:
-                {% if build_type == "container" %}
+                {% if fixed_arena_class.state == 4 %}
                     <span id="workspace_state_display" style="color:green;">RUNNING</span>
                 {% else %}
                     <span id='workspace_state_display' style="color:red;">STOPPED</span>
                 {% endif %}</p><br>
             <div id="loading-msg"></div>
-                <a style="width:100%; visibility:hidden" class="btn" id="workspace_link" href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKSPACE!</a>
+                <a style="width:100%; background-color: #1c2538;" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections.username }}&password={{fixed_arena_workout.proxy_connections.password}}" target="_blank">ENTER WORKSPACE!</a>
                 <p>Expiration date: {{ expiration_iso8601 }}</p><br>
         </div>
         <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
@@ -115,9 +115,9 @@
                             <th>Server State</th>
                         </tr>
                         <tr>
-                            <td>{{fixed_arena_workout.name}}</td>
-                            <td>{{fixed_arena_workout.nics.internal_ip }}</td>
-                            <td>{{fixed_arena_workout.state}}</td>
+                            <td>{{servername}}</td>
+                            <td>{{serverip.internal_ip }}</td>
+                            <td>{{fixed_arena_class.state}}</td>
                         </tr>
                 </table>
                 <br>
