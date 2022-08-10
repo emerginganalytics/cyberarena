@@ -1,4 +1,3 @@
-
 function manage_class(action, build_id=null) {
     if (action === 3) {
         url = '/api/fixed-arena/class/' + build_id;
@@ -31,7 +30,6 @@ function enable_object(obj_id, enable=false, clear=false) {
         }
     }
 }
-
 $(document).ready(function() {
     const createClassForm = document.querySelector('#create-class-form');
     if (createClassForm) {
