@@ -205,13 +205,11 @@ class FixedArenaClass:
         return servers
 
     def _get_fixed_arena_workspace_ids(self):
-        workspace_datastore = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE
+        workspaces = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE
                                                                 , build_id=self.fixed_arena_class['id'])
         workspace_ids = []
-        for i in range(workspace_datastore.__len__()):
-            workspace = workspace_datastore[i]
-            workspace_id = workspace['id']
-            workspace_ids.append(workspace_id)
+        for workspace in workspaces:
+            workspace_ids.append(workspace.key.name)
         return workspace_ids
 
     def _create_workspace_records(self):
