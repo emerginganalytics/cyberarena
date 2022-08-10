@@ -302,7 +302,7 @@ $confirmation = Read-Host "Do you want to create the main application at this ti
 if ($confirmation -eq 'y') {
     $sourcepath = Join-Path (Resolve-Path ..\..\).Path "main"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
-    gcloud run deploy --image gcr.io/$project/cybergym --memory=512Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud run deploy --image gcr.io/$project/cybergym --memory=1Gi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
     gcloud beta run domain-mappings create --service cybergym --domain=cybergym"$dns_suffix" --platform=managed --region=$region
 }
 
@@ -311,7 +311,7 @@ $confirmation = Read-Host "Do you want to create the vulnerability defender appl
 if ($confirmation -eq 'y') {
     $sourcepath = Join-Path (Resolve-Path ..\..\).Path "\container-applications\vulnerability-defender"
     gcloud builds submit $sourcepath --tag gcr.io/$project/vulnerability-defender
-    gcloud run deploy --image gcr.io/$project/vulnerability-defender --memory=256Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud run deploy --image gcr.io/$project/vulnerability-defender --memory=512Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
     gcloud beta run domain-mappings create --service vulnerability-defender --domain=vulnerability-defender"$dns_suffix" --platform=managed --region=$region
 }
 
