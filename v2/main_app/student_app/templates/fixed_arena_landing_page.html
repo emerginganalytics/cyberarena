@@ -8,13 +8,11 @@
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
                 <li class="nav-item">
-                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Home</a>
                 </li>
         </ul>
     </div>
     <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
         <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
     </div>
 {% endblock %}
@@ -108,11 +106,6 @@
                     <span id='workspace_state_display' style="color:red;">STOPPED</span>
                 {% endif %}</p><br>
             <div id="loading-msg"></div>
-            {% if build_type == 'container' %}
-                <a style="width:100%" class="btn" id="container_workspace_link"
-                href="{{container_url}}/{{workspace.key.name}}"
-                target="_blank" rel="noopener noreferrer">ENTER WORKSPACE!</a>
-            {% else %}
                 <a style="width:100%; visibility:hidden" class="btn" id="workspace_link" href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKSPACE!</a>
                 <p>Expiration date: {{ expiration_iso8601 }}</p><br>
         </div>
@@ -126,7 +119,6 @@
                 {% if fixed_arena_class.summary.student_instructions_url %}
                     <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
                 {% endif %}
-                {% if build_type == "compute" %}
                     <br>
 
                     <h2>Workspace Servers</h2>
@@ -136,8 +128,6 @@
                             <th>Server Name</th>
                             <th>IP</th>
                             <th>Server State</th>
-                            <th>Operations</th>
-                            <th>Snapshots</th>
                         </tr>
                     {% for server in servers if not 'guacamole' in server['name']%}
                         <tr>
@@ -146,19 +136,12 @@
                             <td>{{server['state']}}</td>
                             <td>
                                 <div class="server_control_container" id='{{server["name"]}}_operations'>
-                                <div class="server_control_container" id='{{server["name"]}}_operations'>
-                                    <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
-                                    <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
-                                    <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
-                                </div>
                             </td>
                         </tr>
                     {% endfor %}
                 </table>
-                {% endif %}
                 <br>
                 </div> <!--Assessment Dropdown-->
-                {% endif %}
         </div>
     </div> <!--Main Container-->
 </div>
