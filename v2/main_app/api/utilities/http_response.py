@@ -3,7 +3,7 @@ import json
 
 class HttpResponse:
     """Takes input http code and returns json formatted response"""
-    def __init__(self, code, msg=None):
+    def __init__(self, code, msg=None, data=None):
         self.http_codes = {
             200: "OK",
             400: "BAD REQUEST",
@@ -15,11 +15,16 @@ class HttpResponse:
         }
         self.code = code
         self.msg = msg
-        # Return HTTP Response based on input code
-        self.prepare_response()
+        self.data = data
 
     def prepare_response(self):
-        if not self.msg:
-            return json.dumps({'status': self.code, 'message': self.http_codes[self.code]})
-        else:
-            return json.dumps({'status': self.code, 'message': self.msg})
+        response = {
+            'status': self.code,
+            'message': self.http_codes[self.code],
+            'data': []
+        }
+        if self.msg:
+            response['message'] = self.msg
+        if self.data:
+            response['data'] = self.data
+        return json.dumps(response)

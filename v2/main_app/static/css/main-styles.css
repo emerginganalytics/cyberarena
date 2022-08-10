@@ -277,19 +277,6 @@ td, th {
     text-align: center;
     margin-top: 5vh;
 }
-.btn {
-    background-color: var(--main_color, #6e2639);
-    color:white;
-    width:100%;
-}
-.btn:hover {
-    color:var(--main_color, #6e2639);
-    background-color:white;
-}
-.btn:focus {
-    color:var(--main_color, #6e2639);
-    background-color:white;
-}
 .btn-deactivated {
     color: var(--main_color, #6e2639);
     background-color:grey;
@@ -352,4 +339,6 @@ td, th {
     text-align: center;
     margin-top: 5vh;
 }
+
+/* FontAwesome Icon Styles */
 

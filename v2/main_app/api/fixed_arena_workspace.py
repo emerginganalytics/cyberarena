@@ -34,18 +34,18 @@ class FixedArenaWorkspace(MethodView):
                 workspaces = DataStoreManager(key_type=self.kind, key_id=build_id).get()
             # If object exists, return
             if workspaces:
-                return json.dumps({'workspaces': workspaces})
-            return self.http_resp(code=404)
-        return self.http_resp(code=400)
+                return self.http_resp(code=200, data=workspaces).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     def post(self):
         # Method not allowed
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     def delete(self):
         # Method not allowed
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     def put(self):
         # Method not allowed
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()

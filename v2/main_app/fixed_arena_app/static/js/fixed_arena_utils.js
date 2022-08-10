@@ -34,13 +34,13 @@ $(document).ready(function() {
             }
             /* Send POST request */
             let url = '/api/fixed-arena/class/'
-            const request = fetch(url, {
+            const response = fetch(url, {
                 method: "POST",
                 headers: {
                 'Content-type': 'application/json; charset=UTF-8'
                  },
                 body: JSON.stringify(formData)
-            }).then(response => response.text()).then(response => console.log(response));
+            }).then(response => response.json()).then(response => console.log(response));
         });
     }
 });

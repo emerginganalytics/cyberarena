@@ -1,5 +1,7 @@
+import datetime
 import json
 import time
+from datetime import datetime
 from flask import Blueprint, jsonify, redirect, render_template, request, session
 from utilities.gcp.arena_authorizer import ArenaAuthorizer
 from utilities.gcp.cloud_env import CloudEnv
@@ -176,82 +178,41 @@ def unit_signup(unit_id):
     return render_template('unit_signup.html')
 
 
-@student_app.route('/fixed-arena-landing/<workout_id>', methods=['GET', 'POST'])
-def fixed_arena_landing_page(workout_id):
-    """
-    TODO: This route is not correct. We don't need any workout or unit logic for the student
-        fixed-arena landing pages. It might be worth considering to build the logic from scratch
-        as fixed-arenas are handled differently from how we handle the standard workout and unit.
-        We also want to refrain from using any cloud specific logic
-        in the routes. If we need to get GCP datastore objects, use the DatastoreManger helper
-        class that was created in v2/utilities/gcp/datastore_manager.
-    """
-    unit_list = ds_client.query(kind='cybergym-unit')
-    workouts_list = list(unit_list.add_filter('workouts', '=', str(workout_id)).fetch())
-    if not workouts_list:
-        return redirect('/404')
-    else:
-        workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
-        unit = ds_client.get(ds_client.key('cybergym-unit', workout['unit_id']))
-        admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
-
-    registration_required = workout.get('registration_required', False)
+@student_app.route('/fixed-arena-landing/<build_id>', methods=['GET', 'POST'])
+def fixed_arena_landing_page(build_id):
+    auth_config = CloudEnv().auth_config
+    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(
+        filter_key='id', op='=', value=build_id)[0]
+    registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
     logged_in_user = session.get('user_email', None)
-    registered_user = workout.get('student_email', None)
-    instructor_user = unit.get('instructor_id', None)
-    allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
-    workout_server_query = ds_client.query(kind='cybergym-server')
-    workout_server_query.add_filter('workout', '=', workout_id)
+    # registered_user = fix.get('student_email', None)
+    # instructor_user = fix.get('instructor_id', None)
+    # allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
+    workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='fixed_arena_class_id', op='=', value=build_id)
     server_list = []
-    survey_yaml = YamlFunctions().parse_yaml(yaml_filename='survey')
-    survey = survey_yaml.get('survey', None) if survey_yaml else None
-    for server in list(workout_server_query.fetch()):
-        server_name = server['name'][11:]
-        server['name'] = server_name
-        try:
-            snapshots = compute.snapshots().list(project=project, filter=f"name = {server.key.name}*").execute()
-            server['snapshots'] = []
-            for snapshot in snapshots['items']:
-                server['snapshots'].append({'snapshot_name': snapshot['name'], 'creation_date': snapshot['creationTimestamp']})
-        except Exception as e:
-            pass
-        server_list.append(server)
-    if registration_required and logged_in_user not in allowed_users:
-        return render_template('login.html', auth_config=auth_config)
 
-    if workout:
-        assessment_manager = CyberArenaAssessment(workout_id)
-        expiration = None
+    """if registration_required and logged_in_user not in allowed_users:
+        return render_template('login.html', auth_config=auth_config)"""
+
+    if fixed_arena_class:
+        expiration = fixed_arena_class['workspace_settings'].get('expires', None)
         is_expired = True
-        if 'expiration' in workout:
-            if (int(time.time()) - (int(workout['timestamp']) + ((int(workout['expiration'])) * 60 * 60 * 24))) < 0:
+        if expiration:
+            if int(time.time()) == int(expiration):
                 is_expired = False
-            expiration = time.strftime('%d %B %Y', (
-                time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
-        shutoff = None
-        if 'run_hours' in workout:
-            run_hours = int(workout['run_hours'])
-            if run_hours == 0:
-                shutoff = "expired"
-            else:
-                shutoff = time.strftime('%d %B %Y at %I:%M %p',
-                                    (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
-        build_type = unit['build_type']
-        container_url = None
-        if build_type == 'container':
-            container_url = workout['container_url']
+            expiration = datetime.fromtimestamp(int(expiration))
+        # TODO: Consider passing expiration and is_expired as one object:
+        #  expires={'ts': expiration, 'is_expired': bool}
 
-        assessment = None
-        if 'assessment' in workout and workout['assessment']:
-            assessment = assessment_manager.get_assessment_questions()
-        build_now = unit.get('build_now', True)
-        if request.method == "POST":
-            attempt = assessment_manager.submit()
-            return json.dumps(attempt)
-        return render_template('fixed_arena_landing_page.html', build_type=build_type, workout=workout,
-                               description=unit['description'], container_url=container_url, dns_suffix=dns_suffix,
-                               expiration=expiration, shutoff=shutoff, assessment=assessment,
-                               is_expired=is_expired, build_now=build_now, auth_config=auth_config, servers=server_list,
-                               survey=survey)
+        # Get entry point from fixed_arena_class
+        entry_point = None
+        for server in fixed_arena_class['workspace_servers']:
+            entry_point = server.get('human_interaction', None)
+            if entry_point:
+                break
+
+        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class,
+                               expiration=expiration, is_expired=is_expired, auth_config=auth_config,
+                               servers=workspace_servers, entry_point=entry_point)
     else:
         return redirect('/no-workout')

@@ -47,13 +47,14 @@ class BuildSpecToCloud:
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             self.build_id = cyber_arena_spec['id']
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value,
+                                                      key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA.value
         elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
             self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             cyber_arena_spec['id'] = self.build_id
             self.cyber_arena_spec = FixedArenaClassSchema().load(cyber_arena_spec)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS,
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value,
                                                       key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
         self.debug = debug
