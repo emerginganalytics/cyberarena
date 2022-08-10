@@ -188,7 +188,9 @@ def fixed_arena_landing_page(build_id):
         class that was created in v2/utilities/gcp/datastore_manager.
     """
     auth_config = CloudEnv().auth_config
-    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(filter_key='id', op='=', value=build_id)[0]
+    fixed_arena_workout = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=', value=build_id)[0]
+    parent_id = fixed_arena_workout.get('fixed_arena_class_id', None)
+    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(filter_key='id', op='=', value=parent_id)[0]
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
     logged_in_user = session.get('user_email', None)
     # registered_user = fix.get('student_email', None)
