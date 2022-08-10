@@ -4,12 +4,12 @@ from flask import json, request
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
-from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

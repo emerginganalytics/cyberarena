@@ -1,12 +1,11 @@
 import json
 import logging as logger
 from flask import abort, Blueprint, render_template, redirect, request
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.compute_manager import ComputeManager
-# from utilities.iot_manager import IotManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.compute_manager import ComputeManager
 
 admin_app = Blueprint('admin', __name__, url_prefix="/admin",
                       static_folder="./static", template_folder="./templates")

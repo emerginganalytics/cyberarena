@@ -2,10 +2,10 @@ from google.cloud import datastore
 from datetime import datetime, timedelta, timezone
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from utilities.globals import Buckets
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from main_app_utilities.globals import Buckets
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
 

@@ -2,10 +2,10 @@ from api.utilities.decorators import auth_required, admin_required
 from api.utilities.http_response import HttpResponse
 from flask import abort, request, json, session
 from flask.views import MethodView
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.globals import PubSub
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.globals import PubSub
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

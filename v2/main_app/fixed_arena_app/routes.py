@@ -2,10 +2,10 @@ import json
 import flask
 import requests
 from flask import abort, Blueprint, redirect, render_template, request, session
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes, BuildConstants
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants
 
 
 fixed_arena_app = Blueprint('fixed_arena', __name__, url_prefix="/fixed-arena",

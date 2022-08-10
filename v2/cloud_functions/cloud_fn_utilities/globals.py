@@ -134,5 +134,10 @@ class ServerStates(Enum):
     DELETED = 13
 
 
+class Buckets:
+    class Folders(str, Enum):
+        SPECS = "specs/"
+
+
 def get_current_timestamp_utc(add_minutes=0):
     return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()
