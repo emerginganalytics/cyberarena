@@ -190,3 +190,28 @@ function copy_student_links(){
     document.getElementById('loading-msg').removeChild(temp_div);
     document.getElementById('copy_link_text').style.display = "block";
 }
+function manage_student(student_num, build_id, registration_required){
+    // Changes a student's name and/or email
+    var name_element = document.getElementById("name_change_field_" + student_num);
+    var email_element = document.getElementById("email_change_field_" + student_num)
+    var new_name = name_element.value;
+    var new_email = email_element.value;
+
+    if(new_name == ""){
+        return false;
+    }
+    var data = {
+        "build_id": build_id,
+        "new_name": new_name,
+        "new_email": new_email
+    }
+    $.ajax({
+        type: "PUT",
+        url: "/api/fixed-arena/class/" + build_id,
+        data: data,
+        success: function(update){
+            document.getElementById('workspace' + workout_id).innerHTML = update;
+            name_element.value = "";
+        }
+    });
+}

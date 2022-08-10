@@ -1,0 +1,25 @@
+{% extends "fa_base.html" %}
+{% block title%}Fixed Arena Workspace Registration{% endblock%}
+{% block nav_title %}Fixed Arena Workspace Registration{% endblock %}
+{% block styles %}
+        <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
+{% endblock styles %}
+{% block navbar %}{% endblock %}
+{% block content %}
+    <div class="">
+        {% if class_full %}
+            <h2>Class Full</h2>
+            <p>Please contact your instructor to access your workspace</p>
+        {% else %}
+            <h2>Workspace Registration</h2>
+                <div id="workspace_registration_input">
+                    <form id="student_info" action="" method="POST">
+                        <input name="student_name" type="text" placeholder="Your name here">
+                        <label for="student_name">Enter your name</label>
+                        <input class="btn-fa" type="submit">
+                    </form>
+                </div>
+            <br>
+        {% endif %}
+    </div>
+{% endblock %}

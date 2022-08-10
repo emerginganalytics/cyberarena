@@ -84,35 +84,82 @@
         <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
                 <div class="tab-pane fade active show" id="class-tab" aria-labelledby="fa-class-tab">
-                    <div id="class-summary">
-                        <p>{{ fixed_arena_class.summary.description }}</p>
+                    <div id="class-info-ctn">
+                        <div id="class-summary">
+                            <h2>{{ fixed_arena_class.summary.name }}</h2>
+                            <p>{{ fixed_arena_class.summary.description }}</p>
+                        </div>
+                        <div id="distribution_container" style="margin-top:2em; margin-bottom:1em;">
+                            <h4>Distribution</h4>
+                            <p>Otherwise, click the button below to copy all the student links to your clipboard (from top to bottom). You can then paste them into a column in a spreadsheet.</p>
+                            {% if fixed_arena_class.workspace_settings.registration_required %}
+                                <p>Students in this unit will have a link to their registered workout from their home page.</p>
+                            {% else %}
+                                <p>To allow students to register themselves for this unit, send them the following link: <span id="registration_link" style="color:blue">{{ main_app_url }}/student/fixed-arena/class/{{ fixed_arena_class.key.name }}/signup</span></p>
+                                <p>This will allow students to claim unnamed workouts, as well as provide their own names.</p>
+                            {% endif %}
+                            <a onclick="copy_student_links()" href="#" class="btn" style="width:50%;">Copy Student Links</a>
+                            <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
+                        </div>
                     </div>
                     <div id="workspace-servers">
-                        <!--
-                        {'machine_type': 'e2-standard-2',
-                        'human_interaction': [<Entity {'protocol': 'rdp', 'username': 'cyberarena', 'password': 'P@55w0rd!', 'security_mode': 'Any', 'display': True}>],
-                        'name': 'kali', 'image': 'image-cyberarena-kali-desktop'
-                        }-->
                         <table id="workspace-table" class="table table-hover text-nowrap table-large">
                             <thead>
                                 <tr id="stoc-table-headers">
                                     <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value=""/></th>
                                     <th class="prevent-select text-center">Status</th>
                                     <th class="prevent-select text-center">Workspace ID</th>
-                                     <th class="prevent-select text-center">Student</th>
+                                     <th class="prevent-select text-center">Student Name</th>
+                                     <th class="prevent-select text-center">Student Email</th>
                                     <th class="prevent-select text-center">Manage</th>
                                 </tr>
                             </thead>
                             {% for workspace in workspaces %}
-                            <tr>
-                                <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
-                                <td><a href="{{ url_for('student_app.fixed_arena_landing') }}">{{ workspace.key.name }}</a></td>
-                            </tr>
+                                {% set student_count = loop.index %}
+                                <tr>
+                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
+                                    <td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}"><span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}"></span></td>
+                                    <td><span class="workspace-status"></span></td>
+                                    <td><a href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
+                                    <td id="workspace_student_name_{{ student_count }}">workspace.student_name</td>
+                                    {% if fixed_arena_class.workspace_settings.registration_required %}
+                                        <td id="workspace_student_email_{{ student_count }}">workspace.student_email</td>
+                                    {% else %}
+                                        <td id="workspace_student_email_{{ student_count }}">N/A</td>
+                                    {% endif %}
+                                    <td>
+                                        <!-- data-target and id = #manage_student_<workspace.student.name> -->
+                                        <button class="btn-fa" data-toggle="modal" data-target="#manage_student_{{ student_count }}">Manage Student</button>
+                                        <div class="modal fade" id="manage_student_{{ student_count }}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{ student_count }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">Manage Student</h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">x</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="change_student_info">
+                                                            <label for="name_change_field_{{ student_count }}">New Name: </label>
+                                                            <input id="name_change_field_{{ student_count }}" name="new_name"
+                                                                   placeholder="New Student Name" type="text" style="margin-bottom: 1em;"/>
+                                                            {% if fixed_arena_class.workspace_settings.registration_required %}
+                                                                <label for="email_change_field_{{ student_count }}">New Email: </label>
+                                                                <input id="email_change_field_{{ student_count }}" name="new_email"
+                                                                       placeholder="New Student Email" type="text" style="margin-bottom: 1em;"/>
+                                                            {% endif %}
+                                                            <a onclick="manage_student({{ student_count }}, '{{ workspace.key.name }}', {{ fixed_arena_class.workspace_settings.registration_required }})"
+                                                               class="btn-fa">Change</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                             {% endfor %}
                         </table>
-                        {% for server in fixed_arena_class.workspace_servers %}
-                            <p>{{ server }}</p>
-                        {% endfor %}
                     </div>
                     <button type="button" class='btn-fa' onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')">START</button>
                 </div>
