@@ -65,3 +65,23 @@ class BucketManager:
                 attack_spec = blob.download_as_string()
                 return attack_spec
         # return attack_spec
+
+    def get_class_list(self):
+        """Returns list of all spec names used for building fixed-arena classes"""
+        bucket = self.bucket_manager.get_bucket(self.env.spec_bucket)
+        class_list = []
+        for blob in bucket.list_blobs():
+            formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
+            if 'class' in formatted_blob_name:
+                class_list.append(formatted_blob_name.strip(".yaml"))
+        return class_list
+
+    def get_fixed_arena_list(self):
+        """Returns list of all spec names used for fixed-arena builds"""
+        bucket = self.bucket_manager.get_bucket(self.env.spec_bucket)
+        fa_list = []
+        for blob in bucket.list_blobs():
+            formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
+            if 'class' not in formatted_blob_name and 'workout' not in formatted_blob_name:
+                fa_list.append(formatted_blob_name.strip(".yaml"))
+        return fa_list

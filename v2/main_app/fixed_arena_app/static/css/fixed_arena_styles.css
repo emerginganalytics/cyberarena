@@ -323,6 +323,14 @@ input:checked + .slider:before {
     margin: 0 0 0 auto;
     background: #fff;
 }
+@media (min-width: 400px) {
+    .modal-sm {
+        max-width: 400px;
+    }
+}
+.modal-dialog-slideout.modal-sm {
+    
+}
 .modal.fade .modal-dialog.modal-dialog-slideout {
     -webkit-transform: translate(100%,0)scale(1);
     transform: translate(100%,0)scale(1);

@@ -95,14 +95,20 @@
                                 {% set ns = namespace(hourly_cost=0) %}
                                 {% for stoc in fixed_arenas %}
                                     <tr>
-                                        <td><input id="{{ stoc.key.name }}" type="checkbox" value=""/></td>
+                                        <td><input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
+                                        name="stoc_id"/></td>
                                         <td>{{ stoc.key.name }}</td>
                                         <td>
                                             {% if stoc.class.state == 'IN SESSION' %}
-                                                <a href="/fixed-arena/class/{{ stoc.class.id }}" class="btn-fa d-inline-flex col-5">View Class</a>
-                                                <a href="#" class="btn-fa d-inline-flex col-5" onclick="manage_class('2', '{{ stoc.class.id }}');">Delete Class</a></td>
+                                                <a href="/fixed-arena/class/{{ stoc.class.id }}"
+                                                   class="btn-fa d-inline-flex col-5" target="_blank">
+                                                    <i class="fa fa-expand"></i> View Class</a>
+                                                <a href="#" class="btn-fa d-inline-flex col-5"
+                                                   onclick="manage_class('2', '{{ stoc.class.id }}');"><i class="fa fa-minus-circle mr-2"></i> Delete Class</a></td>
                                             {% else %}
-                                                <button type="button" class="btn-fa d-inline-flex col-5" data-toggle="modal" data-target="#create-class-modal">New Class</button>
+                                                <button type="button" class="btn btn-fa d-inline-flex col-6 newClassBtn"
+                                                        data-toggle="modal" value="{{ stoc.key.name }}"
+                                                        data-target="#create-class-modal"><i class="fa fa-plus-circle mr-2"></i>New Class</button>
                                             {% endif %}
                                         <td>{{ stoc.summary.description }}</td>
                                     </tr>
@@ -140,31 +146,28 @@
                                     </div> <!-- End modal-header -->
                                     <div class="modal-body">
                                         <form id="create-class-form" action="">
-                                            <div class="form-row">
-                                                <label for="stoc-id">Target Network</label>
-                                                <select id="stoc-id" name="stoc_id" required>
-                                                    {% for stoc in fixed_arenas %}
-                                                        <option value="{{ stoc.key.name }}">{{ stoc.key.name }}</option>
+                                            <div class="form-group " id="stoc-id-div">
+                                                <!--This div input gets filled based on row the create class button was created-->
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="classType">Class Build:</label>
+                                                <select id="classType" name="build_id" required class="form-control">
+                                                    {% for class_spec in class_spec_list %}
+                                                        <option value="{{ class_spec }}">{{ class_spec.upper() }}</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
-                                            <div class="form-row">
-                                                <label for="classType">Class Build</label>
-                                                <select id="classType" name="build_id" required>
-                                                    <option value="class_id">Class 1D</option>
-                                                    <option value="class_id">Class 2D</option>
-                                                    <option value="class_id">Class 3D</option>
-                                                </select>
-                                            </div>
-                                            <div class="form-row">
+                                            <div class="form-group">
                                                 <label for="build-count">Number of workspaces:</label>
-                                                <input id="build-count" name='build_count' type="number" required min="1" value="1"/>
-                                            </div>
-                                            <div class="form-row">
-                                                <label for="class-expire-date">Expire Date</label>
-                                                <input id="class-expire-date" name="expire_date" type="date">
+                                                <input id="build-count" name='build_count' type="number"
+                                                       class="form-control" required min="1" value="1"/>
                                             </div>
                                             <div class="form-group">
+                                                <label for="class-expire-date">Expires: </label>
+                                                <input id="class-expire-date" class="form-control" name="expires"
+                                                       type="datetime-local">
+                                            </div>
+                                            <div class="form-">
                                                 <button type="submit" class="btn-fa w-100" id="submitCreateClass">Submit</button>
                                             </div>
                                         </form>
@@ -210,8 +213,31 @@
                 }
             }
         });
+        $(document).on('click', '#stoc-table button.newClassBtn', function (){
+            // Get target div and clear previous content
+            var stocInputDiv = document.getElementById('stoc-id-div');
+            stocInputDiv.innerHTML = '';
+
+            // Create input
+            let btnValue = $(this).val();
+            var stocInput = document.createElement('input');
+            stocInput.id = 'stocIdInput'
+            stocInput.type = 'text';
+            stocInput.value = btnValue;
+            stocInput.name = 'stoc_id';
+            stocInput.readOnly = true;
+            stocInput.className = 'form-control';
+            stocInput.textContent = btnValue.toUpperCase();
+            var stocLabel = document.createElement('label');
+            stocLabel.htmlFor = 'stocIdInput';
+            stocLabel.textContent = 'STOC ID:';
+
+            // Append elements to target div
+            stocInputDiv.append(stocLabel);
+            stocInputDiv.append(stocInput);
+        });
         $(document).ready(function() {
-            // Send request to server for attack template and build form
+             // Send request to server for attack template and build form
             $('#vuln-template-btn').on('click', function (e) {
                 $.ajax({
                     type: 'POST',

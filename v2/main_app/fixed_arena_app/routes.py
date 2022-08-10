@@ -52,10 +52,14 @@ def home():
             '''
     # Get fixed-arena workspaces
     workspaces = []
+    # Get fixed-arena and fixed-arena class spec names
+    bm = BucketManager()
+    class_specs = bm.get_class_list()
+    fixed_arena_specs = bm.get_fixed_arena_list()
 
     # Render template
     return render_template('fixed_arena_home.html', auth_config=auth_config, fixed_arenas=fixed_arenas,
-                           workspaces=workspaces)
+                           workspaces=workspaces, class_spec_list=class_specs, fixed_arena_spec_list=fixed_arena_specs)
 
 
 @fixed_arena_app.route('/class/<build_id>', methods=['GET'])
