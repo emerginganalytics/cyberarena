@@ -187,6 +187,7 @@
         </div> <!-- End content div -->
     </div> <!--End content-row div-->
     <script type="text/javascript">
+        // TODO: Clean up the javascript functions; Reduce the amount of $(function(){...}); declarations
         // Vulnerability Builder Functions
         var selectedTemplateID = '';
         // Handle attack template table clicks
@@ -235,6 +236,28 @@
             // Append elements to target div
             stocInputDiv.append(stocLabel);
             stocInputDiv.append(stocInput);
+        });
+        $(document).ready(function (){
+           var today = new Date();
+           var day = today.getDay();
+           var month = today.getMonth();
+           var year = today.getFullYear();
+           if (day < 10) {
+               day = '0' + day;
+           }
+           if (month < 10) {
+               // Max date allowed for classes is 3 months
+               if (month + 3 >= 10) {
+                   month = month + 3;
+               }
+               else {
+                   month = '0' + month;
+               }
+           }
+           var min_date = year + '-' + month + '-' + day;
+           var max_date = year + '-' + month + '-' + day;
+           document.getElementById('class-expire-date').setAttribute("min", min_date);
+           document.getElementById('class-expire-date').setAttribute("max", max_date);
         });
         $(document).ready(function() {
              // Send request to server for attack template and build form
