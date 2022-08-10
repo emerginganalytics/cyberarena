@@ -202,6 +202,7 @@ class FixedArenaClass:
             for ws_server in ws_servers:
                 server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
                 servers.append(server_name)
+                # servers.append(ws_server)
         return servers
 
     def _get_fixed_arena_workspace_ids(self):

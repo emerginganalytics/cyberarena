@@ -39,3 +39,33 @@ class RouteManager:
                 "nextHopInstance": next_hop_instance
             }
             self.compute.routes().insert(project=self.env.project, body=route_body).execute()
+
+    def delete(self):
+        logging.info(self.build_id, f"Deleting routes for workout {self.build_id}")
+
+        result = self.compute.routes().list(project=self.env.project,
+                                            filter='name = {}*'.format(self.build_id)).execute()
+        if 'items' in result:
+            for route in result['items']:
+                response = self.compute.routes().delete(project=self.env.project, route=route["name"]).execute()
+                try:
+                    self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
+                except HttpError:
+                    logging.info(self.build_id, f"Timeout when deleting routes for {self.build_id}")
+                    return
+        self._wait_for_deletion()
+
+    def _wait_for_deletion(self):
+        i = 0
+        success = False
+        while not success and i < 10:
+            result = self.compute.routes().list(project=self.env.project, filter=f"name = {self.build_id}*").execute()
+            if 'items' not in result:
+                success = True
+            else:
+                i += 1
+                time.sleep(10)
+
+        if not success:
+            logging.error(f'Timeout in deleting {self.build_id} routes')
+            raise ConnectionError

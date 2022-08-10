@@ -73,6 +73,7 @@ class FirewallServer:
             self._add_routes(fw)
 
     def delete(self):
+        self._delete_routes()
         for fw in self.firewall_spec:
             firewall_type = fw['type']
             if firewall_type == BuildConstants.Firewalls.FORTINET:
@@ -162,6 +163,10 @@ class FirewallServer:
                     routes.append(new_route)
         rm = RouteManager(self.build_id)
         rm.build(routes)
+
+    def _delete_routes(self):
+        rm = RouteManager(self.build_id)
+        rm.delete()
 
 
 class FirewallSettings:
