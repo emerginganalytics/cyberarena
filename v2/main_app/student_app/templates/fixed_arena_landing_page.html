@@ -1,0 +1,172 @@
+{% extends "fa_base.html" %}
+{% block title%} Workspace {{ workspace_name }} {% endblock %}
+{% import 'logo_macro.html' as logo %}
+
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item">
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+                </li>
+{% endblock %}
+{% block content%}
+    <!-- Development guide:
+
+    - A small thing, but we should consider updating the verbage to match that of a fixed-arena. For example,
+    using workspace instead of workout in the title block. (fixed)
+
+    - Since workspaces are controlled by the instructor, students shouldn't need to have access to
+    start/stop/rebuild workspace machines. (fixed)
+
+    - Around line 125, we are checking if workout is of type 'compute' or not. This won't be necessary as
+    fixed-arenas will always be working with vms and currently do not involve any cloud run containers.
+
+    - The state checking logic can be cleaned up to remove the functions and buttons that we don't need for
+    fixed-arena workouts. Considering the size of the branch, it might be easier to rewrite the update_state
+    function from scratch.
+
+    - We'll need to add a space to display a network diagram that Ryan is currently working on. This diagram can
+    either be passed in during the initial page load or via a GET request after the page is loaded. The latter
+    might allow for more dynamic diagram creation in the future
+
+    - For any resource that is needed after page load, use the API as much as possible. For the workspace landing page,
+    most of the traffic can be directed through the fixed_arena_workspace api.
+
+    - Finally, as the app styles and templates are in the process of being updated, we'll be using static/main-styles.css
+    and fixed_arena_app/templates/fa_base.html as our baseline templates instead of the old 'base.html' and 'styles.css'
+    files. (half-fixed)
+    -->
+    <!--suppress ALL -->
+{% if build_type == "compute" %}f
+    <script>
+        //Used if the workout involves VMs
+        //Regularly check the state, and update the current state indicator
+        //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
+        function check_workout_state(){
+            var resp = $.ajax({
+                type:"GET",
+                url: "/api/fixed-arena/workspace/{{ workspace.key.name }}",
+                traditional: "true",
+            });
+            if (resp.status == '200') {
+                state = resp['workspaces'][0]['state'];
+            }
+            else {
+                state = 'NOT BUILT'
+            }
+            return state;
+        }
+
+        function update_state(){}
+    </script>
+{% endif %}
+{% if workout['registration_required'] %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script>
+        var auth_config = {
+            apiKey: '{{auth_config["api_key"]}}',
+            authDomain: '{{auth_config["auth_domain"]}}',
+            projectId: '{{auth_config["project_id"]}}'
+        };
+        initApp(auth_config).then(value => {
+            if(value['admin'] == false && value['student'] == false){
+                location.href = "/login";
+            }
+        })
+    </script>
+{% endif %}
+
+<script>
+    //Used if the workout involves VMs
+    //Regularly check the state, and update the current state indicator
+    //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
+    function check_class_state(){
+        var resp = $.ajax({
+            type:"GET",
+            url: "/api/fixed-arena/class/{{ workout.key.name }}",
+            traditional: "true",
+        });
+        if (resp.status == '200') {
+            state = resp['workspaces'][0]['state'];
+        }
+        else {
+            state = 'NOT BUILT'
+        }
+        return state;
+    }
+
+    function update_state(){
+
+    }
+
+</script>
+<style>
+    .server_control_container{
+        display:flex;
+        flex-direction:row;
+    }
+    .btn:hover{
+        background-color:white!important;
+        color:var(--main_color, #6e2639)!important;
+    }
+</style>
+
+<div class='landing_container col-lg-12'>
+    <div class='row'>
+        <div class='workspace_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
+            {{ logo.logo_div() }}
+            <br><h2>Workout Control</h2><br>
+            <p>Workout status:
+            <div id="loading-msg"></div>
+                <a style="width:100%; visibility:hidden" class="btn" id="workout_link"
+                   href="http://{{ fixed_arena_class.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{ entry_point['username'] }}&password={{entry_point['password']}}" target="_blank">ENTER WORKOUT!</a>
+                <p>Expiration date: {{ expiration }}</p><br>
+        </div>
+        <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+            <div id='workspace_info' class='container' style="margin:0;">
+                <h2>Welcome to your {{ fixed_arena_class.summary.name }} workspace!</h2>
+                <p>{{ fixed_arena_class.summary.description }}</p>
+                {% if is_expired %}
+                    <p><b>*This workspace has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
+                {% endif %}
+                {% if fixed_arena_class.summary.student_instructions_url %}
+                    <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
+                {% endif %}
+                {% if build_type == "compute" %}
+                    <br>
+
+                    <h2>Workspace Servers</h2>
+
+                    <table id='workspace_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
+                        <tr>
+                            <th>Server Name</th>
+                            <th>IP</th>
+                            <th>Server State</th>
+                            <th>Operations</th>
+                            <th>Snapshots</th>
+                        </tr>
+                    {% for server in servers if not 'guacamole' in server['name']%}
+                        <tr>
+                            <td>{{server['name']}}</td>
+                            <td>{{ server['config']['networkInterfaces'][0]['networkIP'] }}</td>
+                            <td>{{server['state']}}</td>
+                            <td>
+                                <div class="server_control_container" id='{{server["name"]}}_operations'>
+                                <div class="server_control_container" id='{{server["name"]}}_operations'>
+                                    <a style="background-color:green;" class="btn" onclick="server_action('START', '{{server['name']}}')">Start</a>
+                                    <a class="btn server_control_button" onclick="server_action('STOP', '{{server['name']}}')">Stop</a>
+                                    <a class="btn server_control_button" style="background-color:red;" onclick="server_action('REBUILD', '{{server['name']}}')">Rebuild</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                {% endif %}
+                <br>
+                </div> <!--Assessment Dropdown-->
+                {% endif %}
+        </div>
+    </div> <!--Main Container-->
+</div>
+{% endblock %}
+

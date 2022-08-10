@@ -3,10 +3,10 @@ import json
 import time
 from flask import Blueprint, redirect, render_template, request, session
 from forms.forms import CreateWorkoutForm
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")

@@ -1,6 +1,5 @@
-from flask import session, request, json
-from flask.views import View, MethodView
-from api.decorators import auth_required, admin_required, instructor_required
+from flask.views import MethodView
+from api.utilities.decorators import auth_required, admin_required, instructor_required
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

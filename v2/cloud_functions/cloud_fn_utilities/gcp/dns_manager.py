@@ -61,7 +61,6 @@ class DnsManager:
                 logging.warning(f"Another error when attempting to only add the DNS record {dns_record}: "
                                 f"{e.error_details}")
 
-
     def delete_dns(self, build_id, ip_address):
         """
         Deletes a DNS record based on the build_id host name and IP address.

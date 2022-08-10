@@ -9,6 +9,8 @@ class DatastoreKeyTypes(str, Enum):
     FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
     SERVER = 'cybergym-server'
     ADMIN_INFO = 'cybergym-admin-info'
+    CYBERARENA_ATTACK = 'cyberarena-attack'
+    CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
 
 
 class BuildConstants:
@@ -130,6 +132,11 @@ class ServerStates(Enum):
     BROKEN = 11
     DELETING = 12
     DELETED = 13
+
+
+class Buckets:
+    class Folders(str, Enum):
+        SPECS = "specs/"
 
 
 def get_current_timestamp_utc(add_minutes=0):

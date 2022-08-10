@@ -1,11 +1,13 @@
+import datetime
 import json
 import time
+from datetime import datetime
 from flask import Blueprint, jsonify, redirect, render_template, request, session
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.compute_manager import ComputeManager
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.compute_manager import ComputeManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         static_folder="./static",
@@ -174,3 +176,43 @@ def unit_signup(unit_id):
                     return redirect('/student/landing/%s' % claimed_workout.key.name)
         return render_template('unit_signup.html', unit_full=True)
     return render_template('unit_signup.html')
+
+
+@student_app.route('/fixed-arena-landing/<build_id>', methods=['GET', 'POST'])
+def fixed_arena_landing_page(build_id):
+    auth_config = CloudEnv().auth_config
+    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(
+        filter_key='id', op='=', value=build_id)[0]
+    registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
+    logged_in_user = session.get('user_email', None)
+    # registered_user = fix.get('student_email', None)
+    # instructor_user = fix.get('instructor_id', None)
+    # allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
+    workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='fixed_arena_class_id', op='=', value=build_id)
+    server_list = []
+
+    """if registration_required and logged_in_user not in allowed_users:
+        return render_template('login.html', auth_config=auth_config)"""
+
+    if fixed_arena_class:
+        expiration = fixed_arena_class['workspace_settings'].get('expires', None)
+        is_expired = True
+        if expiration:
+            if int(time.time()) == int(expiration):
+                is_expired = False
+            expiration = datetime.fromtimestamp(int(expiration))
+        # TODO: Consider passing expiration and is_expired as one object:
+        #  expires={'ts': expiration, 'is_expired': bool}
+
+        # Get entry point from fixed_arena_class
+        entry_point = None
+        for server in fixed_arena_class['workspace_servers']:
+            entry_point = server.get('human_interaction', None)
+            if entry_point:
+                break
+
+        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class,
+                               expiration=expiration, is_expired=is_expired, auth_config=auth_config,
+                               servers=workspace_servers, entry_point=entry_point)
+    else:
+        return redirect('/no-workout')

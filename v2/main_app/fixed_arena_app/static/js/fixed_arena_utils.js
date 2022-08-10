@@ -77,7 +77,7 @@ $(document).ready(function() {
         var table = $('#vuln-templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
-        remove_fields('vuln-template-btn');
+        enable_object('vuln-template-btn');
     });
 
     // Vuln form listener
@@ -178,23 +178,10 @@ function build_form(data){
    // Form is built; Toggle form modal
     $('#vuln-form-modal').modal();
 }
-function remove_fields(ele_id, clear=false){
-   var rem_elem = $('#' + ele_id);
-   rem_elem.prop("disabled", true);
-   rem_elem.prop("hidden", true);
-
-   // Cases where we want to remove old form artifacts,
-   // i.e Template filter buttons
-   if (clear === true){
-       rem_elem.innerHTML = "";
-   }
-}
 
 function copy_student_links(){
     var temp_div = document.createElement("textarea");
-
     var links = document.getElementsByClassName('workout-link');
-
     for(var i = 0; i < links.length; i++){
         temp_div.value += links[i].href + "\n";
     }

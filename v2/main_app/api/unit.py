@@ -1,10 +1,7 @@
-from flask import abort, json, session, request
+from flask import request
 from flask.views import MethodView
-from api.decorators import instructor_required, admin_required
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.globals import PubSub, DatastoreKeyTypes
+from api.utilities.decorators import instructor_required
+from api.utilities.http_response import HttpResponse
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,22 +17,25 @@ class Unit(MethodView):
     """Method View to handle API requests for Cyber Arena Units"""
     decorators = [instructor_required]
 
+    def __init__(self):
+        self.http_resp = HttpResponse
+
     def get(self, build_id=None):
         # TODO: Add GET logic
         args = request.args
         if build_id:
             pass
         # Invalid request; No build_id given
-        return "BAD REQUEST", 400
+        return self.http_resp(code=400)
 
     def post(self):
         # TODO: Add POST logic
-        return "BAD REQUEST", 400
+        return self.http_resp(code=400)
 
     def delete(self):
         # TODO: Add DELETE logic
-        return "BAD REQUEST", 400
+        return self.http_resp(code=400)
 
     def put(self):
         # TODO: Add PUT logic
-        return "BAD REQUEST", 400
+        return self.http_resp(code=400)
