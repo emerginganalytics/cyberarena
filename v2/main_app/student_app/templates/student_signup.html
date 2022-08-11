@@ -1,4 +1,5 @@
 {% extends "fa_base.html" %}
+{% import 'cyber_learn_logo.html' as logo %}
 {% block title%}Fixed Arena Workspace Registration{% endblock%}
 {% block nav_title %}Fixed Arena Workspace Registration{% endblock %}
 {% block styles %}
@@ -6,20 +7,44 @@
 {% endblock styles %}
 {% block navbar %}{% endblock %}
 {% block content %}
-    <div class="">
-        {% if class_full %}
-            <h2>Class Full</h2>
-            <p>Please contact your instructor to access your workspace</p>
-        {% else %}
-            <h2>Workspace Registration</h2>
-                <div id="workspace_registration_input">
-                    <form id="student_info" action="" method="POST">
-                        <input name="student_name" type="text" placeholder="Your name here">
-                        <label for="student_name">Enter your name</label>
-                        <input class="btn-fa" type="submit">
-                    </form>
+    <style>
+        body {
+            padding-top: 3rem;
+        }
+    </style>
+     <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100' style="padding-top: 0;">
+        <!--TODO: Create toggle sidebar button in top navbar -->
+        <!--<div id="sidebar-div" class="col-sm-3 col-md-2 sticky-top nav-sidebar">-->
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+            </ul>
+        </div> <!--End sidebar-menu div
+        col-md-10 col-sm-10 col-10
+        -->
+        <div class="container">
+            <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto justify-content-between">
+                <div class="info-container text-center">
+                    {% if class_full %}
+                        <h2>Class Full</h2>
+                        <p>Please contact your instructor to access your workspace</p>
+                    {% else %}
+                        <h2>Workspace Registration</h2>
+                            <div id="workspace_registration_input">
+                                <p></p>
+                                <form id="student_info" action="" method="POST" style="padding-top: 10px;">
+                                    <div class="form-group">
+                                        <label for="student_name"></label>
+                                        <input name="student_name" type="text" placeholder="Your name" class="form-control d-inline-block" style="width: 300px;">
+                                        <input class="btn-fa d-inline-block" type="submit" style="width: 150px; padding: 5px;">
+                                    </div>
+                                    <p style="font-size: 14px; font-weight: bold;">*This is a one time process. After claiming a workspace, you'll be redirected automatically.</p>
+                                </form>
+                            </div>
+                        <br>
+                    {% endif %}
                 </div>
-            <br>
-        {% endif %}
-    </div>
+            </div>
+        </div>
+     </div>
 {% endblock %}

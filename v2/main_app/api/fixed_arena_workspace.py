@@ -27,7 +27,7 @@ class FixedArenaWorkspace(MethodView):
                 print(build_id)
                 # for list_all, build_id references the parent fixed-arena-class id
                 workspaces = DataStoreManager(key_id=self.kind).query(
-                    filter_key='parent_id', op='=', value=build_id
+                    filter_key='fixed_arena_class_id', op='=', value=build_id
                 )
             else:
                 # query single fixed-arena-workspace with id=build_id

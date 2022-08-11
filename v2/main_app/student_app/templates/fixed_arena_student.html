@@ -78,52 +78,57 @@
 
         function update_state(){}
     </script>
-
-<div class='landing_container col-lg-12'>
-    <div class='row'>
-        <div class='workspace_links col-sm-2' style="margin-top:1em;border-right:1px solid black">
-            {{ logo.logo_div() }}
-            <br><h2>Workspace Control</h2><br>
-            <p>Workspace status:
-                {% if fixed_arena_class.state == 4 %}
-                    <span id="workspace_state_display" style="color:green;">RUNNING</span>
-                {% else %}
-                    <span id='workspace_state_display' style="color:red;">STOPPED</span>
-                {% endif %}</p><br>
-            <div id="loading-msg"></div>
-                <a style="width:100%; background-color: #1c2538;" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections.username }}&password={{fixed_arena_workout.proxy_connections.password}}" target="_blank">ENTER WORKSPACE!</a>
-                <p>Expiration date: {{ expiration_iso8601 }}</p><br>
-        </div>
-        <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
-            <div id='workspace_info' class='container' style="margin:0;">
-                <h2>Welcome to your {{ fixed_arena_class.summary.name }} workspace!</h2>
-                <p>{{ fixed_arena_class.summary.description }}</p>
-                {% if is_expired %}
-                    <p><b>*This workspace has expired. You can still view your assessment, but if you need to continue working please contact your instructor.</b></p>
-                {% endif %}
-                {% if fixed_arena_class.summary.student_instructions_url %}
-                    <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
-                {% endif %}
-                    <br>
-
-                    <h2>Workspace Servers</h2>
-
-                    <table id='workspace_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
-                        <tr>
-                            <th>Server Name</th>
-                            <th>IP</th>
-                            <th>Server State</th>
-                        </tr>
-                        <tr>
-                            <td>{{servername}}</td>
-                            <td>{{serverip.internal_ip }}</td>
-                            <td>{{fixed_arena_class.state}}</td>
-                        </tr>
-                </table>
-                <br>
-            </div> <!--Assessment Dropdown-->
-        </div>
-    </div> <!--Main Container-->
+ <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
+        <!--TODO: Create toggle sidebar button in top navbar -->
+        <!--<div id="sidebar-div" class="col-sm-3 col-md-2 sticky-top nav-sidebar">-->
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <li><h2 style="color:whitesmoke;">Workspace Control</h2></li>
+                <li><p><span style="color:whitesmoke;">Workspace Status:</span>
+                        {% if fixed_arena_class.state == 4 %}
+                            <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
+                        {% else %}
+                            <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
+                        {% endif %}
+                    </p>
+                </li>
+                <li><div id="loading-msg"></div></li>
+                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections.username }}&password={{fixed_arena_workout.proxy_connections.password}}" target="_blank">ENTER WORKSPACE!</a></li>
+                <li><p style="color: whitesmoke;">Expiration date: {{ expiration_iso8601 }}</p></li>
+            </ul>
+        </div> <!--End sidebar-menu div
+        col-md-10 col-sm-10 col-10
+        -->
+        <div id="content-div" class="col main mt-3 h-100 pr-3 overflow-auto">
+            <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
+                <div id='workspace_info' class='container' style="margin:0;">
+                    <h2>Welcome to your {{ fixed_arena_class.summary.name }} workspace!</h2>
+                    <p>{{ fixed_arena_class.summary.description }}</p>
+                    {% if is_expired %}
+                        <p><b>*This workspace has expired. If you need to continue working please contact your instructor.</b></p>
+                    {% endif %}
+                    {% if fixed_arena_class.summary.student_instructions_url %}
+                        <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
+                    {% endif %}
+                        <br>
+                        <h2>Workspace Servers</h2>
+                        <table id='workspace_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
+                            <tr>
+                                <th>Server Name</th>
+                                <th>IP</th>
+                                <th>Server State</th>
+                            </tr>
+                            <tr>
+                                <td>{{servername}}</td>
+                                <td>{{serverip.internal_ip }}</td>
+                                <td>{{fixed_arena_class.state}}</td>
+                            </tr>
+                        </table>
+                        <br>
+                </div>
+            </div>
+        </div> <!--Main Container-->
 </div>
 {% endblock %}
 

@@ -179,7 +179,7 @@ function build_form(data){
 
 function copy_student_links(){
     var temp_div = document.createElement("textarea");
-    var links = document.getElementsByClassName('workout-link');
+    var links = document.getElementsByClassName('workspace-link');
     for(var i = 0; i < links.length; i++){
         temp_div.value += links[i].href + "\n";
     }
@@ -188,7 +188,12 @@ function copy_student_links(){
     temp_div.select();
     document.execCommand("copy");
     document.getElementById('loading-msg').removeChild(temp_div);
-    document.getElementById('copy_link_text').style.display = "block";
+
+    // display copy success message
+    var copy_link_text = document.getElementById('copy_link_text')
+    copy_link_text.style.display = "inline-text";
+    sleep(30);
+    copy_link_text.style.display = 'none';
 }
 function manage_student(student_num, build_id, registration_required){
     // Changes a student's name and/or email
