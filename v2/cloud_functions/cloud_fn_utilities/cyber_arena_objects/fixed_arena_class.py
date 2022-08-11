@@ -12,7 +12,7 @@ from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, FixedArenaClassStates
 from cloud_fn_utilities.state_managers.fixed_arena_class_states import FixedArenaClassStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
@@ -28,13 +28,14 @@ __status__ = "Testing"
 
 
 class FixedArenaClass:
-    def __init__(self, build_id, debug=False):
+    def __init__(self, build_id, debug=False, force=False):
         self.fixed_arena_class_id = build_id
         self.debug = debug
+        self.force = force
         self.env = CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
-        self.s = FixedArenaClassStateManager.States
+        self.s = FixedArenaClassStates
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.state_manager = FixedArenaClassStateManager(initial_build_id=self.fixed_arena_class_id)
         self.firewall_manager = FirewallManager()
@@ -44,12 +45,19 @@ class FixedArenaClass:
         if not self.fixed_arena_class:
             logging.error(f"The datastore record for {self.fixed_arena_class_id} no longer exists!")
             raise LookupError
+
+        fixed_arena_id = self.fixed_arena_class.get('parent_id', None)
+        self.ds_fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=fixed_arena_id)
+        self.fixed_arena = self.ds_fixed_arena.get()
         self.fixed_arena_workspace_ids = self._get_fixed_arena_workspace_ids()
         ip_range = BuildConstants.Networks.Reservations.FIXED_ARENA_WORKOUT_SERVER_RANGE
         self.ip_reservations = list(iter_iprange(ip_range[0], ip_range[1]))
         self.next_reservation = 0
 
     def build(self):
+        # If a class already exists and a force delete is not set, this function will fail with a value error.
+        self._set_active_class()
+
         if not self.state_manager.get_state():
             self.state_manager.state_transition(self.s.START)
 
@@ -57,8 +65,8 @@ class FixedArenaClass:
         self.fixed_arena_workspace_ids = self._create_workspace_records()
 
         # Build workspace servers
-        if self.state_manager.get_state() <= self.s.BUILDING_WORKSPACE_SERVERS.value:
-            self.state_manager.state_transition(self.s.BUILDING_WORKSPACE_SERVERS)
+        if self.state_manager.get_state() <= self.s.BUILDING_SERVERS.value:
+            self.state_manager.state_transition(self.s.BUILDING_SERVERS)
             for ws_id in self.fixed_arena_workspace_ids:
                 ws_servers = []
                 for server in self.fixed_arena_class['workspace_servers']:
@@ -84,8 +92,8 @@ class FixedArenaClass:
                 ws_record['servers'] = ws_servers
                 self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
             # Now build the Workspace Proxy Server
-            if self.state_manager.get_state() <= self.s.BUILDING_WORKSPACE_PROXY.value:
-                self.state_manager.state_transition(self.s.BUILDING_WORKSPACE_PROXY)
+            if self.state_manager.get_state() <= self.s.BUILDING_STUDENT_ENTRY.value:
+                self.state_manager.state_transition(self.s.BUILDING_STUDENT_ENTRY)
                 if self.debug:
                     FixedArenaWorkspaceProxy(build_id=self.fixed_arena_class_id,
                                              workspace_ids=self.fixed_arena_workspace_ids).build()
@@ -152,7 +160,10 @@ class FixedArenaClass:
                 try:
                     ComputeManager(server).delete()
                 except LookupError:
-                    continue
+                    logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Could not find server record "
+                                  f"for {server}. Marking Fixed Arena Classroom record as broken.")
+                    self.state_manager.state_transition(self.s.BROKEN)
+                    return
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.DELETE.value),
                                         build_id=server,
@@ -165,6 +176,7 @@ class FixedArenaClass:
         else:
             self.state_manager.state_transition(self.s.DELETED)
             logging.info(f"Finished deleting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
+        self._clear_active_class()
 
     def nuke(self):
         servers_to_nuke = self._get_servers(for_deletion=True)
@@ -188,6 +200,9 @@ class FixedArenaClass:
             self.state_manager.state_transition(self.s.READY)
             logging.info(f"Finished nukeing Fixed Arena {self.fixed_arena_class_id}!")
 
+    def mark_broken(self):
+        self.fixed_arena_class['state'] = self.s.BROKEN
+        self.ds.put(self.fixed_arena_class)
 
     def _get_servers(self, for_deletion=False):
         display_proxy = f"{self.fixed_arena_class_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
@@ -250,3 +265,22 @@ class FixedArenaClass:
         }]
         self.next_reservation += 1
         return network_config
+
+    def _set_active_class(self):
+        active_class = self.fixed_arena.get('active_class', None)
+        if active_class:
+            if self.force:
+                FixedArenaClass(build_id=active_class, debug=True).delete()
+            else:
+                logging.error(
+                    f"Fixed Arena Class {self.fixed_arena_class_id}: Cannot build fixed arena! The active class "
+                    f"with id {active_class} already exists!")
+                raise ValueError
+
+        # TODO: Fix race condition
+        self.fixed_arena['active_class'] = self.fixed_arena_class_id
+        self.ds_fixed_arena.put(self.fixed_arena)
+
+    def _clear_active_class(self):
+        self.fixed_arena['active_class'] = None
+        self.ds_fixed_arena.put(self.fixed_arena)

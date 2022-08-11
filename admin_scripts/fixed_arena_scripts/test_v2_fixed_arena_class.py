@@ -45,12 +45,12 @@ class TestFixedArenaWorkout:
         build_spec['workspace_settings'] = {
             'count': 2,
             'registration_required': False,
-            'student_list': [],
+            'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fac = FixedArenaClass(build_id=build_spec['id'], debug=True)
+        fac = FixedArenaClass(build_id=build_spec['id'], debug=True, force=True)
         fac.build()
 
     def start(self):

@@ -141,7 +141,7 @@ class FixedArenaStateManager:
             return True
         elif new_state == self.s.READY and existing_state in [self.s.COMPLETED_SERVERS]:
             return True
-        elif new_state in self.COMPLETION_STATES:
+        elif new_state in self.COMPLETION_STATES and existing_state not in [self.s.DELETED, self.s.BROKEN]:
             return True
         else:
             logging.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "

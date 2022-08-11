@@ -61,15 +61,12 @@ class DataStoreManager:
         return list(query_workspaces.fetch())
 
     def get_expired(self):
+        expired = []
         query_expired = self.ds_client.query(kind=self.key_type)
         if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
-            return list(query_expired.fetch())
-        ready_to_delete = []
-        for record in query_expired:
-            if record.get('state', None) not in [ServerStates.DELETED, ServerStates.BROKEN]:
-                ready_to_delete.append(record)
-        return ready_to_delete
+            expired += list(query_expired.fetch())
+        return expired
 
 
     @staticmethod

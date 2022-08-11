@@ -69,7 +69,7 @@ class FixedArenaClass(MethodView):
                 build_spec['workspace_settings'] = {
                     'count': build_count,
                     'registration_required': registration_required,
-                    'student_list': [],
+                    'student_emails': [],
                     'expires': expire_ts
                 }
                 build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=False)
