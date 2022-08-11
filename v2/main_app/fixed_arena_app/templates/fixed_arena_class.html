@@ -53,6 +53,16 @@
             }
         });
     </script>
+    <style>
+        button.btn.play::before {
+          font-family: fontAwesome;
+          content: "\f04b\00a0";
+        }
+        button.btn.play::before {
+          font-family: fontAwesome;
+          content: "\f04d\00a0";
+        }
+    </style>
     <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
         <!--TODO: Create toggle sidebar button in top navbar -->
         <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 nav-sidebar" role="navigation">
@@ -114,10 +124,11 @@
                                 <ul class="server-toolbar">
                                     <li class="server-control">
                                         <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
-                                        class="fa fa-play">Start Workspaces</button>
+                                            class="play btn-fa">Start Workspaces</button>
                                     </li>
                                     <li class="server-control">
-                                        <button type="button"
+                                        <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="stop btn-fa">Stop Workspaces</button>
                                     </li>
                                 </ul>
                             </div>
