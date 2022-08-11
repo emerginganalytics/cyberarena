@@ -69,7 +69,8 @@ class FixedArenaClass:
             self.state_manager.state_transition(self.s.BUILDING_SERVERS)
             for ws_id in self.fixed_arena_workspace_ids:
                 ws_servers = []
-                for server in self.fixed_arena_class['workspace_servers']:
+                for server_template in self.fixed_arena_class['workspace_servers']:
+                    server = server_template.copy()
                     server_name = f"{ws_id}-{server['name']}"
                     server['parent_id'] = ws_id
                     server['parent_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE
@@ -152,6 +153,8 @@ class FixedArenaClass:
             logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
 
     def delete(self):
+        # First stop the servers because some servers are permanent and would otherwise continue running.
+        self.stop()
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
         servers_to_delete = self._get_servers(for_deletion=True)
 

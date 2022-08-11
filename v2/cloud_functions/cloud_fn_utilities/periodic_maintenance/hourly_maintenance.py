@@ -1,7 +1,6 @@
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
-import time
 
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
@@ -21,7 +20,10 @@ class HourlyMaintenance:
         self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.fa_state_manager = FixedArenaStateManager()
 
-    def delete_expired(self):
+    def run(self):
+        self._delete_expired()
+
+    def _delete_expired(self):
         expired_classes = self.fa_state_manager.get_expired()
         for fixed_arena_class in expired_classes:
             fac_state = fixed_arena_class.get('state', None)
