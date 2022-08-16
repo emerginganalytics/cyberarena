@@ -34,26 +34,6 @@ def home():
     fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
     fixed_arenas = list(fixed_arenas_query.fetch())
 
-    # For each fixed-arena, check for any existing classes
-    if fixed_arenas:
-        for fixed_arena in fixed_arenas:
-            """ # Correct class check; If the active class field is filled for each arena, then return that class
-            fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, 
-                            key_id=fixed_arena['active_class']).get()
-            """
-            fa_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(
-                filter_key='parent_id', op='=', value=fixed_arena['id']
-            )
-            if fa_class:
-                fixed_arena['class'] = {'id': fa_class[0].key.name, 'state': fa_class[0]['state']}
-
-            # TODO: Need to return the only current active class if it exists
-            '''
-            if fa_class:
-                for i in fa_class:
-                    if i['state'] == BuildConstants.FixedArenaClassStates.RUNNING.value:
-                        fixed_arena['class'] = {'id': i['id'], 'state': i['state']}
-            '''
     # Get fixed-arena workspaces
     workspaces = []
     # Get fixed-arena and fixed-arena class spec names
@@ -80,3 +60,4 @@ def class_landing(build_id):
         return render_template('fixed_arena_class.html', auth_config=auth_config, fixed_arena_class=fa_class,
                                workspaces=workspaces, attack_spec=attack_yaml, main_app_url=CloudEnv().main_app_url)
     abort(404)
+

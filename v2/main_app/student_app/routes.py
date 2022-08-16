@@ -233,7 +233,8 @@ def fixed_arena_student(build_id):
         ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
         if ts <= expiration:
             is_expired = False
-        dns_suffix = CloudEnv()
+        dns_suffix = CloudEnv().dns_suffix
+
     # Get entry point from fixed_arena_class
         entry_point = None
         expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)

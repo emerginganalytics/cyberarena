@@ -1,24 +1,77 @@
-function manage_class(action, build_id=null) {
-    if (action === 3) {
-        url = '/api/fixed-arena/class/' + build_id;
-        var request = fetch(url, {
-            method: 'DELETE',
-        }).then(response => response.json()).then(response => console.log(response));
+$(document).ready(function() {
+    createClassManager();
+    vulnTemplateManager();
+});
+
+function send_request(args){
+    // Build the URL
+    let url = '';
+    if (!('url') in args) {
+        url = '/api/fixed-arena/' + args['build_type'] + '/';
+        if ('build_id' in args) {
+            url = '/api/fixed-arena/' + args['build_type'] + '/' + args['build_id'];
+        }
     }
-    else if (action === 2 || action === 4) {
-        url = '/api/fixed-arena/class/' + build_id;
-        var request = fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({'action': action})
-        }).then(request => request.json()).then(request => console.log(request));
+    else {
+        url = args['url'];
+    }
+    let request_headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    if ('data' in args) {
+        fetch(url, {
+            method: args['method'],
+            headers: request_headers,
+            body: JSON.stringify(args['data'])
+        })
+            .then((request) =>
+                request.json())
+            .then((response) => {
+                success(response);})
+            .catch((err) => {
+                error(err);
+            });
+    }
+    else {
+        fetch(url, {
+            method: args['method'],
+            headers: request_headers
+        })
+            .then((request) =>
+                request.json())
+            .then((response) => {
+                success(response);})
+            .catch((err) => {
+                error(err);
+            });
+    }
+    // Response functions
+    function success(resp) {
+        console.log(resp);
+        console.log(resp['status']);
+        if (resp['status'] === 200){
+            window.location.replace(window.location.href);
+        }
+        else {
+            let errorDiv = $('error-msg-div');
+            errorDiv.addClass(["text-center", "p-3", "col-10"]);
+
+            // Create error element
+            let errorP = document.createElement("p");
+            errorP.id = 'error-msg-p';
+            errorP.textContent = resp['message'];
+            errorP.className = "text-danger";
+            errorDiv.append(errorP);
+        }
+    }
+    function error (err) {
+        // Will only be called for HTTP 500
+        console.log(err);
     }
 }
 function enable_object(obj_id, enable=false, clear=false) {
-    var obj = $('#' + obj_id);
+    let obj = $('#' + obj_id);
     if (typeof enable == "boolean") {
         obj.prop("disabled", enable);
         obj.prop('hidden', enable)
@@ -30,33 +83,51 @@ function enable_object(obj_id, enable=false, clear=false) {
         }
     }
 }
-$(document).ready(function() {
+function manage_class(action, build_id=null) {
+    let args = {'build_type': undefined, 'build_id': undefined, 'method': undefined, 'data': undefined};
+    if (action === 2 || action === 4) {
+        let body_data = {'action': action}
+        args = {'build_type': 'class', 'build_id': build_id, 'method': 'PUT', 'data': body_data}
+        send_request(args);
+    }
+    else if (action === 3) {
+        // Hide modal and send Delete request
+        let deleteModal = $("modal_" + build_id);
+        deleteModal.modal('toggle');
+        deleteModal.modal('hide');
+        args = {'build_type': 'class', 'build_id': build_id, 'method': 'DELETE'};
+        send_request(args);
+    }
+}
+function createClassManager(){
+    let args = {}
     const createClassForm = document.querySelector('#create-class-form');
     if (createClassForm) {
-        createClassForm.addEventListener("submit", function(e){
+        createClassForm.addEventListener("submit", function (e) {
             const submitCreateClass = document.getElementById('submitCreateClass');
             submitCreateClass.disabled = true;
 
             /* Convert form to json object */
             const formData = {};
-            for (const pair of new FormData(createClassForm)){
+            for (const pair of new FormData(createClassForm)) {
                 formData[pair[0]] = pair[1]
             }
-            /* Send POST request */
-            let url = '/api/fixed-arena/class/'
+            args = {'build_type': 'class', 'method': 'POST', 'data': formData}
+            send_request(args)
+            /*let url = '/api/fixed-arena/class/'
             const response = fetch(url, {
                 method: "POST",
                 headers: {
-                'Content-type': 'application/json; charset=UTF-8'
-                 },
+                    'Content-type': 'application/json; charset=UTF-8'
+                },
                 body: JSON.stringify(formData)
-            }).then(response => response.json()).then(response => console.log(response));
+            }).then(response => response.json()).then(response => console.log(response));*/
         });
     }
-});
-$(document).ready(function() {
-    // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
-    //       new page
+};
+function vulnTemplateManager(){
+       // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
+       //       new page
     $('#vuln-templates-table').DataTable({
         "paging": false,
         "bInfo": false,
@@ -90,10 +161,13 @@ $(document).ready(function() {
         for (var key in serialized){
             form_data[serialized[key].split("=")[0]] = serialized[key].split("=")[1];
         }
-        // TODO: GET UNIT_ID for current fixed arena
-        form_data['unit_id'] = 'temp_unit_id';
+        form_data['stoc_id'] = 'temp_stoc_id';
         console.log(form_data);
         $('#vuln-form-modal').modal('hide');
+
+        let args = {'url': post_url, 'method': request_method, 'data': form_data}
+        send_request(args);
+        /*
         $.ajax({
             type: request_method,
             contentType: 'application/json;charset=utf-8',
@@ -110,10 +184,11 @@ $(document).ready(function() {
                 console.log(errorThrown);
             }
        });
+       */
     });
-});
-// Builds form with data received from vuln-template-table POST request
+}
 function build_form(data){
+    // Builds form with data received from vuln-template-table POST request
     var vulnForm = $('#vuln-template-args');
     // First clean up any old form values
    document.getElementById('vuln-template-args').innerHTML = '';
@@ -176,11 +251,11 @@ function build_form(data){
    // Form is built; Toggle form modal
     $('#vuln-form-modal').modal();
 }
-
 function copy_student_links(){
     var temp_div = document.createElement("textarea");
     var links = document.getElementsByClassName('workspace-link');
-    for(var i = 0; i < links.length; i++){
+    for (var i = 0; i < links.length; i++){
+
         temp_div.value += links[i].href + "\n";
     }
     temp_div.id = "temp_div";
@@ -189,7 +264,7 @@ function copy_student_links(){
     document.execCommand("copy");
     document.getElementById('loading-msg').removeChild(temp_div);
 
-    // display copy success message
+    // Display copy success message
     var copy_link_text = document.getElementById('copy_link_text')
     copy_link_text.style.display = "inline-text";
     sleep(30);
@@ -220,3 +295,4 @@ function manage_student(student_num, build_id, registration_required){
         }
     });
 }
+// [ eof ]
