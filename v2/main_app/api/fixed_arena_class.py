@@ -4,12 +4,12 @@ from flask import json, request
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
-from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -22,8 +22,6 @@ __status__ = "Testing"
 
 
 class FixedArenaClass(MethodView):
-    decorators = [instructor_required]
-
     def __init__(self):
         self.kind = DatastoreKeyTypes.FIXED_ARENA_CLASS.value
         self.pubsub_actions = PubSub.Actions
@@ -41,6 +39,7 @@ class FixedArenaClass(MethodView):
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def post(self):
         recv_data = request.json
 
@@ -76,6 +75,7 @@ class FixedArenaClass(MethodView):
                 return self.http_resp(code=409, msg="CONFLICT: Class already exists for requested STOC!").prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def delete(self, build_id=None):
         if build_id:
             print(f'delete class {build_id}')
@@ -85,9 +85,10 @@ class FixedArenaClass(MethodView):
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def put(self, build_id=None):
         if build_id:
-            args = request.args
+            args = request.json
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value]
             if action and action in valid_actions:

@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import logging
 from google.cloud import logging_v2
 
-from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc
+from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -61,10 +61,12 @@ class DataStoreManager:
         return list(query_workspaces.fetch())
 
     def get_expired(self):
+        expired = []
         query_expired = self.ds_client.query(kind=self.key_type)
         if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
-            return list(query_expired.fetch())
+            expired += list(query_expired.fetch())
+        return expired
 
 
     @staticmethod

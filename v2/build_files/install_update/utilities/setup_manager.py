@@ -47,10 +47,6 @@ class SetupManager:
             CyberArenaApp().deploy_main_app()
         elif self.selection == SetupOptions.BUILD_SPECS:
             BuildSpecification().run()
-        elif self.selection == SetupOptions.COMPUTE_IMAGES:
-            pass
-        elif self.selection == SetupOptions.INSTRUCTIONS:
-            pass
         elif self.selection == SetupOptions.ENV:
             EnvironmentVariables(project=self.project).run()
         else:

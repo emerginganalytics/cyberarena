@@ -1,5 +1,6 @@
 .nav-link {
     width: auto;
+    min-width: 100px;
     padding: .5rem;
 }
 .nav-link-tabs {
@@ -23,10 +24,14 @@
 
 
 /* General Table Styles */
+.info-container > table {
+    padding: 0px;
+    width: 100%;
+}
 .table-ctn {
     table-layout: auto;
     border: 1px solid darkgray;
-    box-shadow: 1px 3px 5px 0 gray;
+    box-shadow: 1px 2px 3px 0 gray;
     border-collapse: collapse;
 }
 @media (max-width: 979px) {

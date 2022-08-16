@@ -255,6 +255,7 @@ function copy_student_links(){
     var temp_div = document.createElement("textarea");
     var links = document.getElementsByClassName('workspace-link');
     for (var i = 0; i < links.length; i++){
+
         temp_div.value += links[i].href + "\n";
     }
     temp_div.id = "temp_div";

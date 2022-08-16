@@ -4,8 +4,7 @@ from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes
-from cloud_fn_utilities.state_managers.server_states import ServerStateManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -50,7 +49,7 @@ class FixedArenaStateManager:
 
     def __init__(self, initial_build_id=None):
         self.s = FixedArenaStateManager.States
-        self.server_states = ServerStateManager.States
+        self.server_states = ServerStates
         if initial_build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=initial_build_id)
             self.build = self.ds.get()
@@ -142,7 +141,7 @@ class FixedArenaStateManager:
             return True
         elif new_state == self.s.READY and existing_state in [self.s.COMPLETED_SERVERS]:
             return True
-        elif new_state in self.COMPLETION_STATES:
+        elif new_state in self.COMPLETION_STATES and existing_state not in [self.s.DELETED, self.s.BROKEN]:
             return True
         else:
             logging.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "

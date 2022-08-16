@@ -1,9 +1,9 @@
 import json
 import logging as logger
 from flask import abort, Flask, jsonify, redirect, render_template, request, session
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import *
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import *
 
 # App Blueprints
 from admin_app.routes import admin_app

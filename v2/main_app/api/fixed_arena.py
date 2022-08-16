@@ -2,10 +2,10 @@ from flask import json, request
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required, admin_required
 from api.utilities.http_response import HttpResponse
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

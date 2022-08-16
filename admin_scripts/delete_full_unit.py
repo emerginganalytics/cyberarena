@@ -23,3 +23,7 @@ def delete_unit(unit_id, delete_key=False, delete_immediately=False):
         print("Completed deleting workouts")
     else:
         print("Cannot delete misfits. Budget exceeded variable is set for this project.")
+
+if __name__ == "__main__":
+    unit_id = 'jqpipbsovv'
+    delete_unit(unit_id)

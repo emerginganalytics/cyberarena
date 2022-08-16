@@ -1,9 +1,9 @@
 from marshmallow import ValidationError
-from utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.command_and_control.schema import AttackSchema
+from main_app_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.command_and_control.schema import AttackSchema
 
 
 class AttackSpecToCloud:

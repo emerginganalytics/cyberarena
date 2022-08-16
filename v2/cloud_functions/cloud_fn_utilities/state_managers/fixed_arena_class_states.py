@@ -4,8 +4,7 @@ from enum import Enum
 import logging
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes
-from cloud_fn_utilities.state_managers.server_states import ServerStateManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates, FixedArenaClassStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,41 +17,20 @@ __status__ = "Testing"
 
 
 class FixedArenaClassStateManager:
-    class States(Enum):
-        START = 0
-        BUILDING_ASSESSMENT = 1
-        BUILDING_WORKSPACE_SERVERS = 3
-        BUILDING_WORKSPACE_PROXY = 4
-        COMPLETED_BUILDING_SERVERS = 5
-        BUILDING_ROUTES = 8
-        COMPLETED_ROUTES = 9
-        BUILDING_FIREWALL_RULES = 10
-        COMPLETED_FIREWALL_RULES = 11
-        PROXY_SERVER_TIMEOUT = 28
-        RUNNING = 50
-        STOPPING = 51
-        STARTING = 52
-        READY = 53
-        EXPIRED = 60
-        MISFIT = 61
-        BROKEN = 62
-        DELETING_SERVERS = 70
-        COMPLETED_DELETING_SERVERS = 71
-        DELETED = 72
-
     class ServerStateCheck(Enum):
         READY = 0
         RUNNING = 1
         DELETED = 2
 
-    COMPLETION_STATES = [States.COMPLETED_DELETING_SERVERS, States.COMPLETED_ROUTES, States.COMPLETED_BUILDING_SERVERS]
+    COMPLETION_STATES = [FixedArenaClassStates.COMPLETED_DELETING_SERVERS, FixedArenaClassStates.COMPLETED_ROUTES,
+                         FixedArenaClassStates.COMPLETED_SERVERS]
 
     MAX_WAIT_TIME = 300
     SLEEP_TIME = 10
 
     def __init__(self, initial_build_id=None):
-        self.s = FixedArenaClassStateManager.States
-        self.server_states = ServerStateManager.States
+        self.s = FixedArenaClassStates
+        self.server_states = ServerStates
         self.build_id = initial_build_id
         if self.build_id:
             self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.build_id)
@@ -83,9 +61,9 @@ class FixedArenaClassStateManager:
         if self._is_fixed_arena_valid_transition(existing_state, new_state):
             self.build['state'] = new_state.value
             self.build['state-timestamp'] = datetime.utcnow().isoformat()
-            if new_state == self.States.DELETED:
+            if new_state == self.s.DELETED:
                 self.build['active'] = False
-            elif new_state == self.States.READY:
+            elif new_state == self.s.READY:
                 self.build['active'] = True
             logging.info(f"State Transition {self.build.key.name}: Transitioning from {existing_state.name} to "
                          f"{new_state.name}")
@@ -106,8 +84,11 @@ class FixedArenaClassStateManager:
     def are_servers_started(self):
         return self._server_state_check(server_states=[self.server_states.RUNNING.value])
 
+    def are_servers_stopped(self):
+        return self._server_state_check(server_states=[self.server_states.STOPPED.value])
+
     def are_servers_deleted(self):
-        return self._server_state_check(server_states=[self.server_states.DELETED.value])
+        return self._server_state_check(server_states=[self.server_states.DELETING.value])
 
     def _server_state_check(self, server_states):
         wait_time = 0
@@ -130,10 +111,12 @@ class FixedArenaClassStateManager:
                         continue
             # Only run this conditional if looking for servers to start. Fixed arena servers are not built or deleted
             # with the fixed-arena-class
+            # does not work because cln-stoc-webserver does not keep track of its state in the datastore so it returns
+            # a null type and not a int which throws a type error.
             if self.server_states.RUNNING.value in server_states:
                 for server in self.build['fixed_arena_servers']:
                     server_name = f"{self.build['parent_id']}-{server}"
-                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
+                    server_ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=server_name).get()
                     server_state = server_ds.get('state', None)
                     if server_state not in server_states:
                         check_complete = False
@@ -147,18 +130,21 @@ class FixedArenaClassStateManager:
             return False
 
     def _is_fixed_arena_valid_transition(self, existing_state, new_state):
+        new_state = self.s(new_state)
         if new_state == self.s.START and not existing_state:
             return True
         elif new_state == self.s.BUILDING_ASSESSMENT and existing_state in [self.s.START, self.s.BROKEN]:
             return True
-        elif new_state in [self.s.BUILDING_WORKSPACE_SERVERS, self.s.BUILDING_WORKSPACE_PROXY] \
+        elif new_state in [self.s.BUILDING_SERVERS, self.s.BUILDING_STUDENT_ENTRY] \
                 and existing_state.value < new_state.value:
             return True
-        elif new_state == self.s.BUILDING_WORKSPACE_PROXY and existing_state.value < new_state.value:
+        elif new_state == self.s.BUILDING_STUDENT_ENTRY and existing_state.value < new_state.value:
             return True
-        elif new_state == self.s.READY and existing_state in [self.s.COMPLETED_BUILDING_SERVERS]:
+        elif new_state == self.s.READY and existing_state in [self.COMPLETION_STATES]:
             return True
         elif new_state in self.COMPLETION_STATES:
+            return True
+        elif new_state in [self.s.RUNNING, self.s.BROKEN, self.s.DELETED]:
             return True
         else:
             logging.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "

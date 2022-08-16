@@ -5,8 +5,8 @@ from googleapiclient import discovery
 from google.auth.exceptions import DefaultCredentialsError
 from googleapiclient.errors import HttpError
 
-from install_update.utilities.globals import SetupOptions
-from install_update.utilities.setup_manager import SetupManager
+from build_files.install_update.utilities.globals import SetupOptions
+from build_files.install_update.utilities.setup_manager import SetupManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

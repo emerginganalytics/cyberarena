@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 
 class HttpResponse:
@@ -27,4 +28,10 @@ class HttpResponse:
             response['message'] = self.msg
         if self.data:
             response['data'] = self.data
-        return json.dumps(response)
+        return json.dumps(response, cls=self.DateTimeEncoder)
+
+    class DateTimeEncoder(json.JSONEncoder):
+        def default(self, o):
+            if isinstance(o, datetime):
+                return o.isoformat()
+            return super().default(o)

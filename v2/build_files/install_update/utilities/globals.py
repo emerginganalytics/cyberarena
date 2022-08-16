@@ -22,11 +22,9 @@ class SetupOptions(bytes, Enum):
     UPDATE = (1, "Update Main Application and Cloud Functions")
     CLOUD_FUNCTION = (2, "Update Cloud Function Only")
     MAIN_APP = (3, "Update Main Application Only")
-    BUILD_SPECS = (4, "Synchronize Build Specifications and Compute Images")
-    COMPUTE_IMAGES = (5, "Synchronize Build Specifications Only")
-    INSTRUCTIONS = (6, "Synchronize Instructions")
-    ENV = (7, "Synchronize Environment Variables")
-    EXIT = (8, "Exit")
+    BUILD_SPECS = (4, "Synchronize Build Specifications, Instructions, and Compute Images")
+    ENV = (5, "Synchronize Environment Variables")
+    EXIT = (6, "Exit")
 
 
 class ShellCommands:   

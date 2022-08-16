@@ -29,12 +29,14 @@ class BuildSpecification:
     def __init__(self, suppress=True):
         self.suppress = suppress
         self.env = CloudEnv()
-        self.build_specs_plaintext = os.path.join("..", "specs", "plaintext")
-        self.build_specs_encrypted = os.path.join("..", "specs", "encrypted")
-        self.build_startup_scripts = os.path.join("..", "startup_scripts")
-        self.build_student_instructions = os.path.join("..", "instructions", "student")
-        self.build_teacher_instructions_plaintext = os.path.join("..", "instructions", "teacher", "plaintext")
-        self.build_teacher_instructions_encrypted = os.path.join("..", "instructions", "teacher", "encrypted")
+        self.build_specs_plaintext = os.path.join("build_files", "specs", "plaintext")
+        self.build_specs_encrypted = os.path.join("build_files", "specs", "encrypted")
+        self.build_startup_scripts = os.path.join("build_files", "startup_scripts")
+        self.build_student_instructions = os.path.join("build_files", "instructions", "student")
+        self.build_teacher_instructions_plaintext = os.path.join("build_files", "instructions", "teacher", "plaintext")
+        self.build_teacher_instructions_encrypted = os.path.join("build_files", "instructions", "teacher", "encrypted")
+        self._create_directories()
+
         self.storage_client = storage.Client()
         self.service = discovery.build('compute', 'v1')
         try:
@@ -128,3 +130,16 @@ class BuildSpecification:
                     return False
                 else:
                     return True
+
+    def _create_directories(self):
+        directories = [
+            self.build_specs_plaintext,
+            self.build_specs_encrypted,
+            self.build_teacher_instructions_encrypted,
+            self.build_startup_scripts,
+            self.build_teacher_instructions_plaintext,
+            self.build_student_instructions
+        ]
+        for directory in directories:
+            if not os.path.exists(directory):
+                os.makedirs(directory)

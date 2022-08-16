@@ -1,0 +1,27 @@
+.btn:hover{
+    background-color:white!important;
+    color:var(--main_color, #1c2538)!important;
+}
+.btn-ctn {
+    text-align: center;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+.btn {
+    background-color:var(--main_color, #1c2538);
+    color:white;
+    width:100%;
+}
+.btn:hover {
+    color:var(--main_color, #1c2538);
+    background-color:white;
+}
+.btn:focus {
+    color:var(--main_color, #1c2538);
+    background-color:white;
+}
+
+.btn-deactivated {
+    color:var(--main_color, #1c2538);
+    background-color:grey;
+}

@@ -1,12 +1,12 @@
 import json
 import time
 from datetime import datetime, timezone
-from flask import Blueprint, jsonify, redirect, render_template, request, session
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.compute_manager import ComputeManager
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
+from flask import abort, Blueprint, jsonify, redirect, render_template, request, session
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.compute_manager import ComputeManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         static_folder="./static",
@@ -160,7 +160,7 @@ def unit_signup(unit_id):
                 if workout['student_name'] == None or workout['student_name'] == "":
                     claimed_workout = workout
                     claimed_workout['student_name'] = request.form['student_name']
-                    DataStoreManager().put(obj=claimed_workout)
+                    DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).put(obj=claimed_workout)
                     if unit['build_type'] == 'arena':
                         return redirect('/student/arena_landing/%s' % claimed_workout.key.name)
                     else:
@@ -168,13 +168,46 @@ def unit_signup(unit_id):
             else:
                 claimed_workout = workout
                 claimed_workout['student_name'] = request.form['student_name']
-                DataStoreManager().put(obj=claimed_workout)
+                DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).put(obj=claimed_workout)
                 if unit['build_type'] == 'arena':
                     return redirect('/student/arena_landing/%s' % claimed_workout.key.name)
                 else:
                     return redirect('/student/landing/%s' % claimed_workout.key.name)
         return render_template('unit_signup.html', unit_full=True)
     return render_template('unit_signup.html')
+
+
+@student_app.route('/fixed-arena/class/<build_id>/signup', methods=['GET', 'POST'])
+def fixed_arena_signup(build_id):
+    if request.method == 'POST':
+        recv_data = request.form
+        print(recv_data)
+        student_name = recv_data.get('student_name', None)
+        if not student_name:
+            abort(400)
+        # Query the workspaces for the current class
+        workspace_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).query(
+            filter_key='parent_id', op='=', value=build_id)
+
+        # Check for unclaimed workspace
+        claimed_workspace = None
+        for workspace in workspace_query:
+            if 'student_name' in workspace:
+                if workspace['student_name'] == None or workspace['student_name'] == "":
+                    claimed_workspace = workspace
+                    claimed_workspace['student_name'] = student_name
+                    DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
+                                     key_id=claimed_workspace.key.name).put(obj=claimed_workspace)
+                    return redirect('/student/fixed-arena/%s' % claimed_workspace.key.name)
+            else:
+                claimed_workspace = workspace
+                claimed_workspace['student_name'] = student_name
+                DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
+                                 key_id=claimed_workspace.key.name).put(obj=claimed_workspace)
+                return redirect('/student/fixed-arena/%s' % claimed_workspace.key.name)
+        return render_template('student_signup.html', class_full=True)
+    else:
+        return render_template('student_signup.html')
 
 
 @student_app.route('/fixed-arena/<build_id>', methods=['GET'])
@@ -201,6 +234,7 @@ def fixed_arena_student(build_id):
         if ts <= expiration:
             is_expired = False
         dns_suffix = CloudEnv().dns_suffix
+
     # Get entry point from fixed_arena_class
         entry_point = None
         expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
