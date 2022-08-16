@@ -2,10 +2,12 @@
 {% import 'logo_macro.html' as logo %}
 {% import "vuln_macros.html" as vuln_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
+{% import "delete_class_macro.html" as delete_class_macro %}
 {% block title %}Secure Training and Operations Center{% endblock %}
 {% block nav_title %}Secure Training and Operations Center{% endblock %}
 {% block styles %}
-        <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -80,6 +82,8 @@
         <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
                 <div class="tab-pane fade active show" id="fa-home" role="tabpanel" aria-labelledby="fa-home-tab">
+                    <div id="error-msg-div">
+                    </div>
                     <div id="home-content-ctn" class="d-inline-flex">
                         <div id="stoc-table-div" class="table-responsive table-ctn col-10">
                             <table id="stoc-table" class="table table-hover text-nowrap table-large">
@@ -95,21 +99,25 @@
                                 {% set ns = namespace(hourly_cost=0) %}
                                 {% for stoc in fixed_arenas %}
                                     <tr>
-                                        <td><input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
-                                        name="stoc_id"/></td>
+                                        <td>
+                                            <input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
+                                            name="stoc_id"/>
+                                        </td>
                                         <td>{{ stoc.key.name }}</td>
                                         <td>
-                                            {% if stoc.class.state == 'IN SESSION' %}
+                                            {% if stoc.active_class %}
                                                 <a href="/fixed-arena/class/{{ stoc.class.id }}"
                                                    class="btn-fa d-inline-flex col-5" target="_blank">
-                                                    <i class="fa fa-expand"></i> View Class</a>
-                                                <a href="#" class="btn-fa d-inline-flex col-5"
-                                                   onclick="manage_class('2', '{{ stoc.class.id }}');"><i class="fa fa-minus-circle mr-2"></i> Delete Class</a></td>
+                                                    <i class="fa fa-laptop fa-lg icon-light"></i> View Class</a>
+                                                <!--<button type="button" class="btn-fa d-inline-flex col-5 btn-delete"
+                                                   onclick="manage_class(3, '{{ stoc.class.id }}');"><i class="fa fa-trash fa-lg icon-light"></i> Delete Class</button>-->
+                                                {{ delete_class_macro.deleteClass(build_id=stoc.class.id, stoc_id=stoc.key.name ) }}
                                             {% else %}
-                                                <button type="button" class="btn btn-fa d-inline-flex col-6 newClassBtn"
+                                                <button type="button" class="btn-fa d-inline-flex col-6 newClassBtn"
                                                         data-toggle="modal" value="{{ stoc.key.name }}"
-                                                        data-target="#create-class-modal"><i class="fa fa-plus-circle mr-2"></i>New Class</button>
+                                                        data-target="#create-class-modal"><i class="fa fa-plus-circle icon-light"></i>New Class</button>
                                             {% endif %}
+                                        </td>
                                         <td>{{ stoc.summary.description }}</td>
                                     </tr>
                                     {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
@@ -129,7 +137,7 @@
                                 </tr>
                             </table>
                         </div><!--End stoc-table-div-->
-                        <div id="cost-summary" class="card bg-light mb-3 col-3 col-sm-2">
+                        <div id="cost-summary" class="card bg-light mb-3 col-3 col-sm-2 mr-auto">
                             <div class="card-header">Cost Summary</div>
                             <div class="card-body">
                                 <h5 class="card-title">${{ ns.hourly_cost }} / hour</h5>

@@ -34,6 +34,7 @@ class FixedArena(MethodView):
             state = request.args.get('state', None)
             fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=build_id).get()
             if fixed_arena:
+                state_ts = fixed_arena.get('state-timestamp', None)
                 if state:
                     return self.http_resp(code=200, data={'state': self.states(fixed_arena["state"]).name}).prepare_response()
                 return self.http_resp(code=200, data={'fixed_arena': fixed_arena}).prepare_response()

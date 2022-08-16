@@ -177,28 +177,20 @@ def unit_signup(unit_id):
     return render_template('unit_signup.html')
 
 
-@student_app.route('/fixed-arena-landing/<build_id>', methods=['GET', 'POST'])
-def fixed_arena_landing_page(build_id):
-    """
-    TODO: This route is not correct. We don't need any workout or unit logic for the student
-        fixed-arena landing pages. It might be worth considering to build the logic from scratch
-        as fixed-arenas are handled differently from how we handle the standard workout and unit.
-        We also want to refrain from using any cloud specific logic
-        in the routes. If we need to get GCP datastore objects, use the DatastoreManger helper
-        class that was created in v2/utilities/gcp/datastore_manager.
-    """
+@student_app.route('/fixed-arena/<build_id>', methods=['GET'])
+def fixed_arena_student(build_id):
     auth_config = CloudEnv().auth_config
-    fixed_arena_workout = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=', value=build_id)[0]
-    parent_id = fixed_arena_workout.get('fixed_arena_class_id', None)
-    fixed_arena_class = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_CLASS.value).query(filter_key='id', op='=', value=parent_id)[0]
+    fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id=build_id).get()
+    parent_id = fixed_arena_workout.get('parent_id', None)
+    fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
     logged_in_user = session.get('user_email', None)
     # registered_user = fix.get('student_email', None)
     # instructor_user = fix.get('instructor_id', None)
     # allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
-    workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='fixed_arena_class_id', op='=', value=build_id)
+    workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id',
+                                                                                      op='=', value=build_id)
     server_list = []
-
     """if registration_required and logged_in_user not in allowed_users:
         return render_template('login.html', auth_config=auth_config)"""
 
@@ -208,15 +200,18 @@ def fixed_arena_landing_page(build_id):
         ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
         if ts <= expiration:
             is_expired = False
+        dns_suffix = CloudEnv()
     # Get entry point from fixed_arena_class
         entry_point = None
         expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
-        for server in fixed_arena_class['workspace_servers']:
-            entry_point = server.get('human_interaction', None)
+        for server in fixed_arena_workout['servers']:
+            entry_point = server.get('human_interaction', None)[0]
+            serverip = server.get('nics', None)[0]
+            servername = server.get('name', None)
             if entry_point:
                 break
-        return render_template('fixed_arena_landing_page.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout,
-                               expiration=expiration, is_expired=is_expired, auth_config=auth_config,
+        return render_template('fixed_arena_student.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix,
+                               expiration=expiration, is_expired=is_expired, auth_config=auth_config, serverip=serverip, servername=servername,
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601)
     else:
         return redirect('/no-workout')
