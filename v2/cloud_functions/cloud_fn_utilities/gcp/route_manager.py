@@ -9,7 +9,7 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -53,7 +53,7 @@ class RouteManager:
                 except HttpError:
                     logging.info(self.build_id, f"Timeout when deleting routes for {self.build_id}")
                     return
-        self._wait_for_deletion()
+            self._wait_for_deletion()
 
     def _wait_for_deletion(self):
         i = 0

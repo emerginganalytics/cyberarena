@@ -13,7 +13,7 @@ from cloud_fn_utilities.gcp.route_manager import RouteManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -168,6 +168,11 @@ class FirewallServer:
         rm = RouteManager(self.build_id)
         rm.delete()
 
+    # def _wait_for_deletion(self):
+    #     i = 0
+    #     success = False
+    #     while not success and i < 5:
+    #         result = compute.firewalls().list(project=project, filter=f"name = {self.build_id}*").execute()
 
 class FirewallSettings:
     class Vyos:

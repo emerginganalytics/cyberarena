@@ -17,7 +17,7 @@ from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaC
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -91,5 +91,23 @@ class FixedArena:
             self.state_manager.state_transition(self.s.READY)
             logging.info(f"Finished building Fixed Arena {self.fixed_arena_id}!")
 
-    def delete_fixed_arina(self):
+    def delete_fixed_arena(self):
         logging.info(f"Deleting workout {self.fixed_arena_id}")
+        if self.fixed_arena.get('firewalls', None):
+            FirewallServer(initial_build_id=self.fixed_arena_id, full_build_spec=self.fixed_arena).delete()
+        self.firewall_manager.delete(self.fixed_arena_id)
+
+        if self.debug:
+            DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena).delete()
+        else:
+            self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE, action=PubSub.Actions.DELETE,
+                                    key_type=DatastoreKeyTypes.SERVER, build_id=self.fixed_arena_id)
+
+        self.state_manager.state_transition(self.s.DELETING_SERVERS)
+        for server in self.fixed_arena['servers']:
+            if self.debug:
+                ComputeManager(server_name=server).delete()
+            else:
+                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
+                                        key_type=DatastoreKeyTypes.FIXED_ARENA, build_id=self.fixed_arena_id)
+        self.state_manager.state_transition(self.s.COMPLETED_DELETING_SERVERS)
