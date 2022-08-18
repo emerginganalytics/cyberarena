@@ -13,7 +13,7 @@ from cloud_fn_utilities.gcp.route_manager import RouteManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -72,6 +72,15 @@ class FirewallServer:
             ComputeManager(server_name=firewall_name).build()
             self._add_routes(fw)
 
+    def delete(self):
+        self._delete_routes()
+        for fw in self.firewall_spec:
+            firewall_type = fw['type']
+            if firewall_type == BuildConstants.Firewalls.FORTINET:
+                self._delete_fortinet_features()
+            firewall_name = f"{self.build_id}-{fw['name']}"
+            ComputeManager(server_name=firewall_name).delete()
+
     def _add_nics(self, firewall_spec):
         for network in firewall_spec['networks']:
             for network_spec in self.full_build_spec['networks']:
@@ -128,6 +137,10 @@ class FirewallServer:
         ds.put(fortinet_license_server)
         ComputeManager(server_name=fortinet_server_name).build()
 
+    def _delete_fortinet_features(self):
+        fortinet_server_name = f"{self.build_id}-fortimanager"
+        ComputeManager(server_name=fortinet_server_name).delete()
+
     def _add_routes(self, firewall_spec):
         routes = []
         for network in firewall_spec['networks']:
@@ -151,6 +164,15 @@ class FirewallServer:
         rm = RouteManager(self.build_id)
         rm.build(routes)
 
+    def _delete_routes(self):
+        rm = RouteManager(self.build_id)
+        rm.delete()
+
+    # def _wait_for_deletion(self):
+    #     i = 0
+    #     success = False
+    #     while not success and i < 5:
+    #         result = compute.firewalls().list(project=project, filter=f"name = {self.build_id}*").execute()
 
 class FirewallSettings:
     class Vyos:
