@@ -5,6 +5,7 @@
 {% block title %}{{ fixed_arena_class.summary.name }}{% endblock title %}
 {% block nav_title %}{{ fixed_arena_class.summary.name }}{% endblock nav_title %}
 {% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
 {% endblock styles %}
 {% block navbar %}
@@ -117,6 +118,7 @@
                             <a onclick="copy_student_links()" href="#" class="btn-fa">Copy Student Links</a>
                             <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
                         </div>
+                        {{ fixed_arena_class.key.name }}
                     </div>
                     <div id="workspace-servers" class="info-container">
                         <div class="server-manage-wrapper">
@@ -124,11 +126,11 @@
                                 <ul class="server-toolbar">
                                     <li class="server-control">
                                         <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
-                                            class="play btn-fa">Start Workspaces</button>
+                                            class="server-control-btn no-select"><i class="fa fa-play-circle fa-lg margin-r-5"></i>Start Class</button>
                                     </li>
                                     <li class="server-control">
                                         <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
-                                                class="stop btn-fa">Stop Workspaces</button>
+                                            class="server-control-btn no-select"><i class="fa fa-play-circle fa-lg margin-r-5"></i>Stop Class</button>
                                     </li>
                                 </ul>
                             </div>
@@ -136,7 +138,7 @@
                         <table id="workspace-table" class="table table-hover text-nowrap table-large">
                             <thead>
                                 <tr id="stoc-table-headers">
-                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value=""/></th>
+                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value="" onclick="select_all(this, 'select-workspace')"/></th>
                                     <th class="prevent-select text-center">Status</th>
                                     <th class="prevent-select text-center">Workspace ID</th>
                                      <th class="prevent-select text-center">Student Name</th>
@@ -147,11 +149,17 @@
                             {% for workspace in workspaces %}
                                 {% set student_count = loop.index %}
                                 <tr>
-                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
+                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id" class="select-workspace"/></td>
                                     <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
                                         <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
-                                        </span><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
-                                    <td><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>
+                                        </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
+                                    {% if workspace.state == 'RUNNING' %}
+                                        <td><i class="fa fa-circle" style="color: #1d8037; font-size: 20px;"></i></td>
+                                    {% elif workspace.state == 'STOPPED' %}
+                                        <td><i class="fa fa-stop-circle" style="color: #838683; font-size: 20px;"></i></td>
+                                    {% else %}
+                                        <td><i class="fa fa-circle" style="color: #b3be27; font-size: 20px;"></i></td>
+                                    {% endif %}
                                     <td><a class='workspace-link' href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
                                     <td id="workspace_student_name_{{ student_count }}">{{ workspace.student_name }}</td>
                                     {% if fixed_arena_class.workspace_settings.registration_required %}
@@ -182,7 +190,7 @@
                                                                        placeholder="New Student Email" type="text" style="margin-bottom: 1em;"/>
                                                             {% endif %}
                                                             <a onclick="manage_student({{ student_count }}, '{{ workspace.key.name }}', {{ fixed_arena_class.workspace_settings.registration_required }})"
-                                                               class="btn-fa">Change</a>
+                                                               class="btn-fa no-select">Change</a>
                                                         </div>
                                                     </div>
                                                 </div>

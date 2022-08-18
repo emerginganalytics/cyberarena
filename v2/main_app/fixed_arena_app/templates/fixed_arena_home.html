@@ -43,7 +43,7 @@
           };
           initApp(auth_config).then(value => {
             enable_signout();
-            if(value['admin'] === true){
+            if (value['admin'] === true){
               var admin_button = document.createElement("a");
               admin_button.href = "/admin/home";
               admin_button.className = "nav-link";
@@ -82,14 +82,39 @@
         <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
                 <div class="tab-pane fade active show" id="fa-home" role="tabpanel" aria-labelledby="fa-home-tab">
-                    <div id="error-msg-div">
-                    </div>
+                    <div id="error-msg-div"></div>
                     <div id="home-content-ctn" class="d-inline-flex">
                         <div id="stoc-table-div" class="table-responsive table-ctn col-10">
+                            <div class="server-manage-wrapper">
+                                <div class="server-toolbar-div">
+                                    <ul class="server-toolbar">
+                                        <li class="server-control">
+                                            <button type="button" onclick="manage_stoc(2);"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-plus-circle fa-lg margin-r-5" style="color: blue;"></i>Create</button>
+                                        </li>
+                                        <li class="server-control">
+                                            <button type="button" onclick="manage_stoc(2);"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-play-circle fa-lg margin-r-5"></i>Start</button>
+                                        </li>
+                                        <li class="server-control">
+                                            <button type="button" onclick="manage_stoc(4)"
+                                                    class="server-control-btn no-select">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5"></i>Stop</button>
+                                        </li>
+                                       <li class="server-control">
+                                           <button type="button" onclick="manage_stoc(3);"
+                                                class="server-control-btn btn-delete no-select">
+                                               <i class="fa fa-trash fa-lg margin-r-5"></i>Delete</button>
+                                       </li>
+                                    </ul>
+                                </div>
+                            </div>
                             <table id="stoc-table" class="table table-hover text-nowrap table-large">
                                 <thead>
                                     <tr id="stoc-table-headers">
-                                        <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value=""/></th>
+                                        <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value="" onclick="select_all(this, 'stocIdRow');"/></th>
                                         <th class="prevent-select text-center">STOC</th>
                                         <th class="prevent-select text-center">Class</th>
                                         <th class="prevent-select text-center">Description</th>
@@ -106,12 +131,12 @@
                                         <td>{{ stoc.key.name }}</td>
                                         <td>
                                             {% if stoc.active_class %}
-                                                <a href="/fixed-arena/class/{{ stoc.class.id }}"
+                                                <a href="/fixed-arena/class/{{ stoc.active_class }}"
                                                    class="btn-fa d-inline-flex col-5" target="_blank">
                                                     <i class="fa fa-laptop fa-lg icon-light"></i> View Class</a>
                                                 <!--<button type="button" class="btn-fa d-inline-flex col-5 btn-delete"
-                                                   onclick="manage_class(3, '{{ stoc.class.id }}');"><i class="fa fa-trash fa-lg icon-light"></i> Delete Class</button>-->
-                                                {{ delete_class_macro.deleteClass(build_id=stoc.class.id, stoc_id=stoc.key.name ) }}
+                                                   onclick="manage_class(3, '{{ stoc.active_class }}');"><i class="fa fa-trash fa-lg icon-light"></i> Delete Class</button>-->
+                                                {{ delete_class_macro.deleteClass(build_id=stoc.active_class, stoc_id=stoc.key.name ) }}
                                             {% else %}
                                                 <button type="button" class="btn-fa d-inline-flex col-6 newClassBtn"
                                                         data-toggle="modal" value="{{ stoc.key.name }}"
@@ -123,13 +148,13 @@
                                     {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
                                 {% endfor %}
                                 <tr>
-                                    <td><input type="checkbox" value=""/></td>
+                                    <td><input id="untapped_stoc" class="stocIdRow" type="checkbox" value=""/></td>
                                     <td>untapped</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
                                 </tr>
                                 <tr>
-                                    <td><input type="checkbox" value=""/></td>
+                                    <td><input class="stocIdRow" id="forensics_stoc" type="checkbox" value=""/></td>
                                     <td>Forensics</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>

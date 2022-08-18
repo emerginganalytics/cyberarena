@@ -5,8 +5,9 @@ $(document).ready(function() {
 
 function send_request(args){
     // Build the URL
+    console.log(args['build_id']);
     let url = '';
-    if (!('url') in args) {
+    if (!('url' in args)) {
         url = '/api/fixed-arena/' + args['build_type'] + '/';
         if ('build_id' in args) {
             url = '/api/fixed-arena/' + args['build_type'] + '/' + args['build_id'];
@@ -83,8 +84,50 @@ function enable_object(obj_id, enable=false, clear=false) {
         }
     }
 }
+function select_all(caller, class_name){
+    // Takes in caller obj and class name to search for.
+    let checkboxes = document.getElementsByClassName('' + class_name);
+    for (let i=0, n=checkboxes.length; i < n; i++){
+        checkboxes[i].checked = caller.checked;
+    }
+ }
+function manage_stoc(action){
+    let selected = []
+    $('.stocIdRow:checked').each(function () {
+        selected.push(this.id);
+    })
+    console.log(selected);
+
+    let method = '';
+    if (action === 3) {
+        method = 'DELETE';
+    }
+    else if (action === 2 || action === 4) {
+        method = 'PUT';
+    }
+    console.log('' + action + ':' + method);
+    send_request({'url': '/api/fixed-arena/', 'action': action, 'method': method, 'data': selected});
+}
+function create_stoc(){
+    const createStocForm = document.querySelector('#create-stoc-form');
+    if (createStocForm) {
+        createStocForm.addEventListener("submit", function (e) {
+            const submitCreateStoc = document.getElementById('submitCreateStoc');
+            submitCreateStoc.disabled = true;
+
+            /* Convert form to json object */
+            const formData = {};
+            for (const pair of new FormData(createStocForm)) {
+                formData[pair[0]] = pair[1]
+            }
+            send_request({'url': '/api/fixed-arena/', 'method': 'POST', 'data': formData});
+        });
+    }
+}
 function manage_class(action, build_id=null) {
-    let args = {'build_type': undefined, 'build_id': undefined, 'method': undefined, 'data': undefined};
+    let args = {}
+    console.log(build_id)
+    console.log(action)
     if (action === 2 || action === 4) {
         let body_data = {'action': action}
         args = {'build_type': 'class', 'build_id': build_id, 'method': 'PUT', 'data': body_data}
@@ -124,7 +167,7 @@ function createClassManager(){
             }).then(response => response.json()).then(response => console.log(response));*/
         });
     }
-};
+}
 function vulnTemplateManager(){
        // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
        //       new page
@@ -157,7 +200,7 @@ function vulnTemplateManager(){
         let serialized = $(this).serialize().split("&");
 
         // build json object from serialized form
-        var form_data = {}
+        let form_data = {}
         for (var key in serialized){
             form_data[serialized[key].split("=")[0]] = serialized[key].split("=")[1];
         }
@@ -189,22 +232,22 @@ function vulnTemplateManager(){
 }
 function build_form(data){
     // Builds form with data received from vuln-template-table POST request
-    var vulnForm = $('#vuln-template-args');
+    let vulnForm = $('#vuln-template-args');
     // First clean up any old form values
    document.getElementById('vuln-template-args').innerHTML = '';
 
    // Create field for attack_id
-   var aid_div = document.createElement('div');
+   let aid_div = document.createElement('div');
    aid_div.className = 'form-group';
    // Attack ID Input
-   var aid_input = document.createElement('input');
+   let aid_input = document.createElement('input');
    aid_input.type = 'text';
    aid_input.name = 'attack_id';
    aid_input.value = data.id;
    aid_input.readOnly = true;
    aid_input.className = 'readOnly';
    // Attack ID label
-   var aid_label = document.createElement('label');
+   let aid_label = document.createElement('label');
    aid_label.htmlFor = 'attack_id';
    aid_label.innerText = 'Attack ID: ';
    // Add fields to form
@@ -213,13 +256,13 @@ function build_form(data){
    vulnForm.append(aid_div);
 
     // Create arg label and select field
-   for (var arg = 0; arg < data.args.length; arg++){
+   for (let arg = 0; arg < data.args.length; arg++){
        if (data.args[arg].id !== 'target_network'){
            // Create wrapper div
-           var arg_div = document.createElement('div');
+           let arg_div = document.createElement('div');
            arg_div.className = 'form-group';
            // Create arg select field
-           var arg_select = document.createElement("select");
+           let arg_select = document.createElement("select");
            arg_select.name = data.args[arg].id;
            arg_select.id = data.args[arg].id;
            // Create arg label
@@ -227,15 +270,15 @@ function build_form(data){
            arg_label.htmlFor = data.args[arg].id;
            arg_label.textContent = data.args[arg].name + ':';
            if ('Choices' in data.args[arg]){
-               for (var i = 0; i < data.args[arg].Choices.length; i++){
-                    var option_i = document.createElement('option');
-                    var option_key = Object.keys(data.args[arg]['Choices'][i])[0];
+               for (let i = 0; i < data.args[arg].Choices.length; i++){
+                    let option_i = document.createElement('option');
+                    let option_key = Object.keys(data.args[arg]['Choices'][i])[0];
                     option_i.name = option_key;
                     option_i.value = option_key.toString();
                     option_i.textContent = option_key;
 
                     // check for default value
-                    var current_choice = data['args'][arg]['Choices'][i];
+                    let current_choice = data['args'][arg]['Choices'][i];
                     if (current_choice === data.args[arg].default){
                         option_i.defaultSelected = true;
                     }
@@ -252,8 +295,8 @@ function build_form(data){
     $('#vuln-form-modal').modal();
 }
 function copy_student_links(){
-    var temp_div = document.createElement("textarea");
-    var links = document.getElementsByClassName('workspace-link');
+    let temp_div = document.createElement("textarea");
+    let links = document.getElementsByClassName('workspace-link');
     for (var i = 0; i < links.length; i++){
 
         temp_div.value += links[i].href + "\n";
@@ -265,22 +308,22 @@ function copy_student_links(){
     document.getElementById('loading-msg').removeChild(temp_div);
 
     // Display copy success message
-    var copy_link_text = document.getElementById('copy_link_text')
+    let copy_link_text = document.getElementById('copy_link_text')
     copy_link_text.style.display = "inline-text";
     sleep(30);
     copy_link_text.style.display = 'none';
 }
 function manage_student(student_num, build_id, registration_required){
     // Changes a student's name and/or email
-    var name_element = document.getElementById("name_change_field_" + student_num);
-    var email_element = document.getElementById("email_change_field_" + student_num)
-    var new_name = name_element.value;
-    var new_email = email_element.value;
+    let name_element = document.getElementById("name_change_field_" + student_num);
+    let email_element = document.getElementById("email_change_field_" + student_num)
+    let new_name = name_element.value;
+    let new_email = email_element.value;
 
     if(new_name == ""){
         return false;
     }
-    var data = {
+    let data = {
         "build_id": build_id,
         "new_name": new_name,
         "new_email": new_email

@@ -33,6 +33,16 @@ h3, h4, h5 {
 .vh-100 {
     height: 100vh;
 }
+.margin-r-5 {
+    margin-right: 5px;
+}
+.no-select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 /* Container styles */
 #content-container {
     background-color: white;
@@ -322,11 +332,17 @@ td, th {
     background-color: var(--main_color, #6e2639) !important;
     color: whitesmoke !important;
 }
-.btn-fa.btn-delete:hover, .btn-fa.btn-delete:active, .btn-fa.btn-delete:focus {
+.btn-fa.btn-delete:hover, .btn-fa.btn-delete:active {
     background-color: firebrick;
     color: whitesmoke;
     box-shadow: inset 0 0 5px #861a1a;
     border: 1px solid #861a1a;
+    cursor: pointer;
+}
+button.btn-delete:hover, button.btn-delete:active{
+    background-color: firebrick;
+    color: whitesmoke;
+    box-shadow: inset 0 0 5px #861a1a;
     cursor: pointer;
 }
 .control_button {
