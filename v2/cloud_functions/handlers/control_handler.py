@@ -54,13 +54,27 @@ class ControlHandler:
             raise ValueError
 
     def _start(self):
-        # TODO: Fill out the start functions here.
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
             ComputeManager(server_name=self.build_id).start()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
+            FixedArenaClass(build_id=self.build_id, debug=self.debug).start()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
+            pass
+        else:
+            logging.error(f"Unsupported object passed to the control handler for action {self.action}")
+            raise ValueError
+
 
     def _stop(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
             ComputeManager(server_name=self.build_id).stop()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
+            FixedArenaClass(build_id=self.build_id, debug=self.debug).stop()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
+            pass
+        else:
+            logging.error(f"Unsupported object passed to the control handler for action {self.action}")
+            raise ValueError
             
     def _delete(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):

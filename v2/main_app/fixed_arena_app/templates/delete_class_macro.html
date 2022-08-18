@@ -1,0 +1,22 @@
+{% macro deleteClass(build_id, stoc_id) -%}
+<button type="button" class="btn-fa d-inline-flex col-5 btn-delete" data-toggle="modal" data-target="#modal_{{ build_id }}">
+    <i class="fa fa-trash fa-lg icon-light"></i> Delete Class
+</button>
+<div class="modal fade" id="modal_{{build_id}}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{build_id}}" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width: 50%;">
+    <div class="modal-content">
+        <div class="modal-header" style='justify-content:center;'>
+        <h2 style='text-align:center;' class="modal-title" id="ModalLabel_{{build_id}}">CAUTION</h2>
+        </div>
+        <div class="modal-body" style="display: block; word-wrap: break-word; white-space: normal">
+            <p>You are about to delete the active class for the following STOC, <em>{{ stoc_id }}</em>.
+                This action can't be undone!</p>
+        </div>
+        <div class="modal-footer" style="justify-content:space-around;">
+            <button type="button" style="margin-right: 1em;" class="btn-fa popup_close" data-dismiss="modal">Cancel</button>
+            <a onclick="manage_class(3, '{{ build_id }}');" class="btn-fa btn-delete" style="color: white;">Continue!</a>
+        </div>
+    </div>
+    </div>
+</div>
+{%- endmacro %}

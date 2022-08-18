@@ -272,7 +272,7 @@ class ComputeManager:
                     accessConfigs
                 ]
             }
-            if 'internal_IP' in network:
+            if 'internal_ip' in network:
                 add_network_interface['networkIP'] = network["internal_ip"]
 
             if 'alias_ip_ranges' in network:

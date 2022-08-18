@@ -1,9 +1,11 @@
 import json
-from flask import Blueprint, redirect, render_template, request, session
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import DatastoreKeyTypes
+import flask
+import requests
+from flask import abort, Blueprint, redirect, render_template, request, session
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants
 
 
 fixed_arena_app = Blueprint('fixed_arena', __name__, url_prefix="/fixed-arena",
@@ -28,44 +30,34 @@ def home():
     :return:
     """
     auth_config = CloudEnv().auth_config
-    # standard_workout_opt = BucketManager().get_workouts()
-    # TODO: Store attack spec in Datastore
-    attack_yaml = DataStoreManager().get_attack_specs()
+    # Get built fixed-arenas for project
+    fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
+    fixed_arenas = list(fixed_arenas_query.fetch())
 
-    # TODO: Get Network build specs from stored Datastore object
-    # TODO: Get current network build from stored Datastore object
-    # This is all the possible variation of quick builds templates that are available
-    network_builds = [{'name': 'Access Control', 'id': 'access_control'},
-                      {'name': 'Logging', 'id': 'logging'},
-                      {'name': 'Firewall', 'id': 'firewall'},
-                      {'name': 'Full Build', 'id': 'full'}]
+    # Get fixed-arena workspaces
+    workspaces = []
+    # Get fixed-arena and fixed-arena class spec names
+    bm = BucketManager()
+    class_specs = bm.get_class_list()
+    fixed_arena_specs = bm.get_fixed_arena_list()
 
-    # Get List of Servers available to for Fixed Network
-    """fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id='cln-stoc').get()
-    server_list = list(fixed_arena['servers'])
-
-    workouts = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id='cln-stoc').get()
-    fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id='cln-stoc').get()"""
-
-    workouts = []
-    server_list = []
-    fixed_arena_class = []
-    # TODO: Get list of workstations available for fixed network
     # Render template
-    return render_template('fixed_arena_home.html', auth_config=auth_config, attack_spec=attack_yaml,
-                           network_builds=network_builds, server_list=server_list, fixed_workout_list=server_list,
-                           workstations=workouts, workouts=fixed_arena_class)
+    return render_template('fixed_arena_home.html', auth_config=auth_config, fixed_arenas=fixed_arenas,
+                           workspaces=workspaces, class_spec_list=class_specs, fixed_arena_spec_list=fixed_arena_specs)
 
 
-@fixed_arena_app.route('/create_class', methods=['GET', 'POST'])
-def create_class():
-    # TODO: It is possible that this handle is redundant and that all logic can be handled in the
-    # fixed-arena/home page instead
+@fixed_arena_app.route('/class/<build_id>', methods=['GET'])
+def class_landing(build_id):
     auth_config = CloudEnv().auth_config
-    build_types = ['build_1', 'build_2', 'build_3']
-    if request.method == 'POST':
-        # TODO: Future POST requests will be handled by fixed-arena api instead
-        print(request.form)
-        redirect('/fixed-arena/home')
-    return render_template('create_class.html', auth_config=auth_config, build_types=build_types)
+    # TODO: Store/Get attack specs in/from Datastore
+    attack_yaml = DataStoreManager().get_attack_specs()
+    fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
+    if fa_class:
+        workspace_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).query()
+        workspace_query.add_filter('parent_id', '=', fa_class.key.name)
+        workspaces = list(workspace_query.fetch())
+
+        return render_template('fixed_arena_class.html', auth_config=auth_config, fixed_arena_class=fa_class,
+                               workspaces=workspaces, attack_spec=attack_yaml, main_app_url=CloudEnv().main_app_url)
+    abort(404)
 

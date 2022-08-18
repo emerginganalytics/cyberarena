@@ -24,7 +24,6 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
-
 class FixedArena:
     def __init__(self, build_id, debug=False):
         self.fixed_arena_id = build_id

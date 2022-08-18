@@ -1,10 +1,11 @@
-from api.decorators import auth_required, admin_required
+from api.utilities.decorators import auth_required, admin_required
+from api.utilities.http_response import HttpResponse
 from flask import abort, request, json, session
 from flask.views import MethodView
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
-from utilities.gcp.pubsub_manager import PubSubManager
-from utilities.globals import PubSub
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.globals import PubSub
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,9 +19,10 @@ __status__ = "Testing"
 
 class Workout(MethodView):
     def __init__(self):
-        self.handler = PubSub.Handlers
         self.topic = DatastoreKeyTypes.CYBERGYM_WORKOUT.value
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.handler = PubSub.Handlers
+        self.http_resp = HttpResponse
 
     def get(self, build_id=None):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
@@ -35,18 +37,18 @@ class Workout(MethodView):
                         return json.dumps(workout)
                     # Bad Request; Unauthorized User
                     else:
-                        return "UNAUTHORIZED", 403
+                        return self.http_resp(code=403)
                 else:
                     # Anonymous user, return only workout state
                     workout_state = workout.get('state', None)
                     if workout_state:
-                        return workout_state
+                        return self.http_resp(code=200, msg=workout_state)
                     else:
-                        return "RUNNING"
+                        return self.http_resp(code=200, msg="RUNNING")
             # Bad Request; Workout not found
-            return "NOT FOUND", 404
+            return self.http_resp(code=404)
         # Bad Request; No build_id given
-        return "BAD REQUEST", 400
+        return self.http_resp(code=400)
 
     @auth_required
     def post(self, build_id):
@@ -59,25 +61,24 @@ class Workout(MethodView):
                 # No workout_id given
                 if not workout_id:
                     abort(404)
-                ps_manager = PubSubManager()
                 message = f"Student initiated cloud build for workout {workout_id}"
-                ps_manager.msg(workout_id=workout_id, message=message)
+                self.pubsub_manager.msg(workout_id=workout_id, message=message)
                 return 'Workout Built'
             # Bad Request; Already Built
             else:
-                return "BAD REQUEST", 400
+                return self.http_resp(code=400)
         else:
             auth_level = session.get('user_groups', None)
             if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
                # TODO: Write logic to support standard workout creation requests
-                return '200'
+                return self.http_resp(code=200)
             # Invalid Request; Insufficient Permissions
             else:
-                abort(403)
+                return self.http_resp(code=403)
 
     @admin_required
     def delete(self):
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405)
 
     def put(self, build_id=None):
         """
@@ -99,5 +100,5 @@ class Workout(MethodView):
                         handler = PubSub.Handlers.CONTROL
                     self.pubsub_manager.msg(handler=handler, build_id=build_id, action=action,
                                             cyber_arena_object=PubSub.CyberArenaObjects.WORKOUT)
-                return "OK", 200
-        return "BAD REQUEST", 400
+                return self.http_resp(code=200)
+        return self.http_resp(code=400)

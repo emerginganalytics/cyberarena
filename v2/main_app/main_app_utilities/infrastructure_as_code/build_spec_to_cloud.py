@@ -11,11 +11,11 @@ from google.cloud import logging_v2
 import random
 import string
 
-from utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
-from utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
+from main_app_utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -47,13 +47,14 @@ class BuildSpecToCloud:
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             self.build_id = cyber_arena_spec['id']
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value,
+                                                      key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA.value
         elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
             self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             cyber_arena_spec['id'] = self.build_id
             self.cyber_arena_spec = FixedArenaClassSchema().load(cyber_arena_spec)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS,
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value,
                                                       key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
         self.debug = debug

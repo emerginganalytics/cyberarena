@@ -1,5 +1,5 @@
 from google.cloud import datastore
-from utilities.globals import DatastoreKeyTypes
+from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

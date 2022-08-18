@@ -1,9 +1,8 @@
 import logging
 from google.cloud import logging_v2
 from google.cloud import storage
-
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.globals import Buckets
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.globals import Buckets
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -51,3 +50,37 @@ class BucketManager:
             if formatted_blob_name != "":
                 workout_specs.append(formatted_blob_name)
         return workout_specs
+
+    def get_attacks(self):
+        # TODO: Update the following two lines to match current standards
+        bucket_name = 'ualr-cybersecurity_cloudbuild'
+        folder_name = 'yaml-build-files'
+        # attack_spec = self.get(bucket=bucket_name, file='attack')
+        bucket = self.bucket_manager.get_bucket(bucket_name)
+        for blob in bucket.list_blobs(prefix=folder_name):
+            blob_name = blob.name
+            formatted_blob_name = blob_name.replace(folder_name, "").split('/')[1]
+            if formatted_blob_name == 'attack.yaml':
+                attack_spec = blob.download_as_string()
+                return attack_spec
+        # return attack_spec
+
+    def get_class_list(self):
+        """Returns list of all spec names used for building fixed-arena classes"""
+        bucket = self.bucket_manager.get_bucket(self.env.spec_bucket)
+        class_list = []
+        for blob in bucket.list_blobs():
+            formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
+            if 'class' in formatted_blob_name:
+                class_list.append(formatted_blob_name.strip(".yaml"))
+        return class_list
+
+    def get_fixed_arena_list(self):
+        """Returns list of all spec names used for fixed-arena builds"""
+        bucket = self.bucket_manager.get_bucket(self.env.spec_bucket)
+        fa_list = []
+        for blob in bucket.list_blobs():
+            formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
+            if 'class' not in formatted_blob_name and 'workout' not in formatted_blob_name:
+                fa_list.append(formatted_blob_name.strip(".yaml"))
+        return fa_list

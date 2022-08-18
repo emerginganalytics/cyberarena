@@ -1,0 +1,253 @@
+{% extends "fa_base.html" %}
+{% import 'cyber_learn_logo.html' as logo %}
+{% import "vuln_macros.html" as vuln_macros %}
+{% import "fixed_arena_macros.html" as fixed_arena_macros %}
+{% block title %}{{ fixed_arena_class.summary.name }}{% endblock title %}
+{% block nav_title %}{{ fixed_arena_class.summary.name }}{% endblock nav_title %}
+{% block styles %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            {% if request.endpoint.split(".")[0] == 'fixed_arena' %}
+                <li class="nav-item">
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a href="{{ url_for(fixed_arena_app.home) }}" class="nav-link text-center">STOC</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <button id="contact-us" class="nav-item btn top-navbar-btn"
+                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
+        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena_utils.js') }}"></script>
+    <script>
+        var teacher_email = null;
+        var auth_config = {
+            apiKey: '{{auth_config["api_key"]}}',
+            authDomain: '{{auth_config["auth_domain"]}}',
+            projectId: '{{auth_config["project_id"]}}'
+        };
+        initApp(auth_config).then(value => {
+            enable_signout();
+            if (value['admin'] === true){
+                var admin_button = document.createElement("a");
+                admin_button.href = "/admin/home";
+                admin_button.className = "nav-link";
+                admin_button.innerHTML = "Admin Page";
+            }
+            if (value['student'] === true){
+                var student_home_link = document.createElement("a");
+                student_home_link = '/student/home';
+                student_home_link.className = "nav-link";
+                student_home_link.innerHTML = "Your Student Page";
+            }
+        });
+    </script>
+    <style>
+        button.btn.play::before {
+          font-family: fontAwesome;
+          content: "\f04b\00a0";
+        }
+        button.btn.play::before {
+          font-family: fontAwesome;
+          content: "\f04d\00a0";
+        }
+    </style>
+    <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
+        <!--TODO: Create toggle sidebar button in top navbar -->
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <li class="nav-item" role="presentation">
+                    <a href="/fixed-arena/home" class="nav-link text-center" id="fa-home-btn">Home</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="fa-class-btn" data-toggle="pill"
+                            data-target="#class-tab" type="button" role="tab"
+                            aria-controls="nav-class"
+                            aria-selected="true">Class</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fa-vuln-btn" data-toggle="pill"
+                            data-target="#vuln-tab" type="button" role="tab"
+                            aria-controls="nav-attacks"
+                            aria-selected="false">Command and Control</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="fa-config-btn" data-toggle="pill"
+                            data-target="#settings-container" type="button" role="tab"
+                            aria-controls="nav-settings"
+                            aria-selected="false">Manage STOC</button>
+                </li>
+            </ul>
+        </div> <!--End sidebar-menu div -->
+        <div id="content-div" class="col main mt-3 h-100 pr-3 overflow-auto" style="overflow-y: scroll;">
+            <div id="tab-container" class="tab-content">
+                <div class="tab-pane fade active show" id="class-tab" aria-labelledby="fa-class-tab">
+                    <div id="class-info-ctn" class="info-container">
+                        <div id="class-summary">
+                            <h2>{{ fixed_arena_class.summary.name }}</h2>
+                            <p>{{ fixed_arena_class.summary.description }}</p>
+                            {% if fixed_arena_class.summary.teacher_instructions_url %}
+                                <a class='btn-fa' href="{{ fixed_arena_class.summary.teacher_instructions_url }}"
+                                   target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
+                            {% endif %}
+                        </div>
+                        <div id="distribution_container" style="margin-top:2em; margin-bottom:1em;">
+                            <h4>Distribution</h4>
+                            <p>To begin, click on an available workspace link below. It may take several minutes before workspaces are available.</p>
+                            <p>Otherwise, click the button below to copy all the student links to your clipboard (from top to bottom). You can then paste them into a column in a spreadsheet.</p>
+                            {% if fixed_arena_class.workspace_settings.registration_required %}
+                                <p>Students in this unit will have a link to their registered workout from their home page.</p>
+                            {% else %}
+                                <p>To allow students to register themselves for this unit, send them the following link:
+                                    <span id="registration_link" style="color:blue">{{ main_app_url }}/student/fixed-arena/class/{{ fixed_arena_class.key.name }}/signup</span></p>
+                                <p>This will allow students to claim unnamed workouts, as well as provide their own names.</p>
+                            {% endif %}
+                            <a onclick="copy_student_links()" href="#" class="btn-fa">Copy Student Links</a>
+                            <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
+                        </div>
+                    </div>
+                    <div id="workspace-servers" class="info-container">
+                        <div class="server-manage-wrapper">
+                            <div class="server-toolbar-div">
+                                <ul class="server-toolbar">
+                                    <li class="server-control">
+                                        <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
+                                            class="play btn-fa">Start Workspaces</button>
+                                    </li>
+                                    <li class="server-control">
+                                        <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="stop btn-fa">Stop Workspaces</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <table id="workspace-table" class="table table-hover text-nowrap table-large">
+                            <thead>
+                                <tr id="stoc-table-headers">
+                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value=""/></th>
+                                    <th class="prevent-select text-center">Status</th>
+                                    <th class="prevent-select text-center">Workspace ID</th>
+                                     <th class="prevent-select text-center">Student Name</th>
+                                     <th class="prevent-select text-center">Student Email</th>
+                                    <th class="prevent-select text-center">Manage</th>
+                                </tr>
+                            </thead>
+                            {% for workspace in workspaces %}
+                                {% set student_count = loop.index %}
+                                <tr>
+                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
+                                    <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
+                                        <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
+                                        </span><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
+                                    <td><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>
+                                    <td><a class='workspace-link' href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
+                                    <td id="workspace_student_name_{{ student_count }}">{{ workspace.student_name }}</td>
+                                    {% if fixed_arena_class.workspace_settings.registration_required %}
+                                        <td id="workspace_student_email_{{ student_count }}">workspace.student_email</td>
+                                    {% else %}
+                                        <td id="workspace_student_email_{{ student_count }}">N/A</td>
+                                    {% endif %}
+                                    <td>
+                                        <!-- data-target and id = #manage_student_<workspace.student.name> -->
+                                        <button class="btn-fa" data-toggle="modal" data-target="#manage_student_{{ student_count }}">Manage Student</button>
+                                        <div class="modal fade" id="manage_student_{{ student_count }}" tabindex="-1" role="dialog" aria-labelledby="ModalLabel_{{ student_count }}" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h4 class="modal-title">Manage Student</h4>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">x</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="change_student_info">
+                                                            <label for="name_change_field_{{ student_count }}">New Name: </label>
+                                                            <input id="name_change_field_{{ student_count }}" name="new_name"
+                                                                   placeholder="New Student Name" type="text" style="margin-bottom: 1em;"/>
+                                                            {% if fixed_arena_class.workspace_settings.registration_required %}
+                                                                <label for="email_change_field_{{ student_count }}">New Email: </label>
+                                                                <input id="email_change_field_{{ student_count }}" name="new_email"
+                                                                       placeholder="New Student Email" type="text" style="margin-bottom: 1em;"/>
+                                                            {% endif %}
+                                                            <a onclick="manage_student({{ student_count }}, '{{ workspace.key.name }}', {{ fixed_arena_class.workspace_settings.registration_required }})"
+                                                               class="btn-fa">Change</a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="vuln-tab" aria-labelledby="fa-vuln-tab">
+                    <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
+                        <!--Holds both form builder and attack results table-->
+                        <div id="vuln-templates-container">
+                             <table class="table table-hover" id="vuln-templates-table">
+                                 {{ vuln_macros.display_vulns(attack_spec.attack) }}
+                             </table>
+                            <div id="vuln-template-btn-div">
+                                <button id='vuln-template-btn' class="btn btn-sm" type="button" disabled hidden>Select Template</button>
+                            </div>
+                        </div>
+                        <div id='vuln-form-modal' class="modal" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Attack Template Form</h5>
+                                        <button type="button" class="close cancel-form" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form id="vuln-template-form" name="vuln-template-form" method="post" action="/api/inject/">
+                                            <div id="vuln-template-args"></div>
+                                            {{ vuln_macros.target_network('vuln-template-form', workspaces, fixed_arena_class.workspace_settings.registration_required) }}
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary" form="vuln-template-form">Submit</button>
+                                        <button type="button" class="btn btn-secondary cancel-form" data-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="attack-results-container">
+                            <!-- TODO: Build a TABLE that shows list of all attacks for current unit
+                                        Table can be filtered based on status, attack_type, timestamp(?)-->
+                            <table id="attack-results-table" class="table">
+                                <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Mode (Inject or Attack)</th>
+                                    <th>AttackID</th>
+                                    <th>Type</th>
+                                    <th>Network</th>
+                                    <th>Time (Start)</th>
+                                    <th>Args</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div><!--End vuln-tab-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="loading-msg"></div>
+{% endblock %}

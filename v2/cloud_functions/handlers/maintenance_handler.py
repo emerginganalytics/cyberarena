@@ -7,6 +7,7 @@ from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
+from cloud_fn_utilities.periodic_maintenance.hourly_maintenance import HourlyMaintenance
 
 
 __author__ = "Philip Huff"
@@ -42,7 +43,8 @@ class MaintenanceHandler:
             pass
 
         if self.hourly:
-            pass
+            logging.info(f"Running hourly maintenance tasks")
+            HourlyMaintenance().run()
 
         if self.daily:
             pass

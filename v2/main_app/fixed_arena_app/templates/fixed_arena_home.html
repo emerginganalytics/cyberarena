@@ -1,26 +1,24 @@
 {% extends "fa_base.html" %}
-{% import 'logo_macro.html' as logo %}
+{% import 'cyber_learn_logo.html' as logo %}
 {% import "vuln_macros.html" as vuln_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
+{% import "delete_class_macro.html" as delete_class_macro %}
 {% block title %}Secure Training and Operations Center{% endblock %}
 {% block nav_title %}Secure Training and Operations Center{% endblock %}
 {% block styles %}
-        <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
-            {% if request.path == '/fixed-arena/home' %}
+            {% if request.endpoint.split(".")[0] == 'fixed_arena' %}
                 <li class="nav-item">
-                    <button class="nav-link" id="nav-boot-btn" data-toggle="pill"
-                            type="button"
-                            aria-selected="true">Cyber Arena</button>
+                    <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                <button class="nav-link" id="nav-boot-btn" data-toggle="pill"
-                        type="button"
-                        aria-selected="true">STOC</button>
+                    <a href="{{ url_for(fixed_arena_app.home) }}" class="nav-link text-center">STOC</a>
                 </li>
             {% endif %}
             <!-- TODO: if not student, button to send to teacher home -->
@@ -28,8 +26,6 @@
         </ul>
     </div>
     <div class="navbar-nav ml-auto">
-        <!--If signed in, display, else display Sign In Button-->
-        <!--Sign out button isn't functioning properly; Returns bad jason object error-->
         <button id="contact-us" class="nav-item btn top-navbar-btn"
                 data-toggle="modal" data-target="#commentsModal">Contact Us</button>
         <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
@@ -73,19 +69,6 @@
                             aria-controls="nav-boot"
                             aria-selected="true">Home</button>
                 </li>
-                <!-- This tab currently does nothing-->
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-create-lab-btn" data-toggle="pill"
-                            data-target="#create-lab-container" type="button" role="tab"
-                            aria-controls="nav-create-lab"
-                            aria-selected="false">Create a Lab</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-vuln-tab" data-toggle="pill"
-                            data-target="#vuln-tab" type="button" role="tab"
-                            aria-controls="nav-attacks"
-                            aria-selected="false">Command and Control</button>
-                </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="fa-config-btn" data-toggle="pill"
                             data-target="#settings-container" type="button" role="tab"
@@ -99,46 +82,108 @@
         <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
                 <div class="tab-pane fade active show" id="fa-home" role="tabpanel" aria-labelledby="fa-home-tab">
-                    <div id="home-content-ctn">
-                        <div id="stoc-table-div" class="table-responsive table-ctn">
+                    <div id="error-msg-div">
+                    </div>
+                    <div id="home-content-ctn" class="d-inline-flex">
+                        <div id="stoc-table-div" class="table-responsive table-ctn col-10">
                             <table id="stoc-table" class="table table-hover text-nowrap table-large">
                                 <thead>
                                     <tr id="stoc-table-headers">
                                         <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value=""/></th>
                                         <th class="prevent-select text-center">STOC</th>
-                                        <th class="prevent-select text-center">Current State</th>
-                                        <th class="prevent-select text-center">Action</th>
-                                        <th class="prevent-select text-center">Details</th>
+                                        <th class="prevent-select text-center">Class</th>
+                                        <th class="prevent-select text-center">Description</th>
                                     </tr>
                                 </thead>
                                 <!--Each row id will be the STOC id-->
-                                <tr>
-                                    <td><input type="checkbox" value=""/></td>
-                                    <td>cln-stoc</td>
-                                    <td>STOPPED</td>
-                                    <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
-                                    <td>STOC object, description, or list of fixed servers for STOC</td>
-                                </tr>
+                                {% set ns = namespace(hourly_cost=0) %}
+                                {% for stoc in fixed_arenas %}
+                                    <tr>
+                                        <td>
+                                            <input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
+                                            name="stoc_id"/>
+                                        </td>
+                                        <td>{{ stoc.key.name }}</td>
+                                        <td>
+                                            {% if stoc.active_class %}
+                                                <a href="/fixed-arena/class/{{ stoc.class.id }}"
+                                                   class="btn-fa d-inline-flex col-5" target="_blank">
+                                                    <i class="fa fa-laptop fa-lg icon-light"></i> View Class</a>
+                                                <!--<button type="button" class="btn-fa d-inline-flex col-5 btn-delete"
+                                                   onclick="manage_class(3, '{{ stoc.class.id }}');"><i class="fa fa-trash fa-lg icon-light"></i> Delete Class</button>-->
+                                                {{ delete_class_macro.deleteClass(build_id=stoc.class.id, stoc_id=stoc.key.name ) }}
+                                            {% else %}
+                                                <button type="button" class="btn-fa d-inline-flex col-6 newClassBtn"
+                                                        data-toggle="modal" value="{{ stoc.key.name }}"
+                                                        data-target="#create-class-modal"><i class="fa fa-plus-circle icon-light"></i>New Class</button>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ stoc.summary.description }}</td>
+                                    </tr>
+                                    {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
+                                {% endfor %}
                                 <tr>
                                     <td><input type="checkbox" value=""/></td>
                                     <td>untapped</td>
-                                    <td>NOT BUILT</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
                                 </tr>
                                 <tr>
                                     <td><input type="checkbox" value=""/></td>
                                     <td>Forensics</td>
-                                    <td>IN SESSION</td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
-
                                 </tr>
                             </table>
                         </div><!--End stoc-table-div-->
+                        <div id="cost-summary" class="card bg-light mb-3 col-3 col-sm-2 mr-auto">
+                            <div class="card-header">Cost Summary</div>
+                            <div class="card-body">
+                                <h5 class="card-title">${{ ns.hourly_cost }} / hour</h5>
+                            </div>
+                        </div><!-- End cost-summary div-->
+                        <div id="create-class-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-class-modal" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-slideout modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="create-class-modal-header">Create Class</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">x</span>
+                                        </button>
+                                    </div> <!-- End modal-header -->
+                                    <div class="modal-body">
+                                        <form id="create-class-form" action="">
+                                            <div class="form-group " id="stoc-id-div">
+                                                <!--This div input gets filled based on row the create class button was created-->
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="classType">Class Build:</label>
+                                                <select id="classType" name="build_id" required class="form-control">
+                                                    {% for class_spec in class_spec_list %}
+                                                        <option value="{{ class_spec }}">{{ class_spec.upper() }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="build-count">Number of workspaces:</label>
+                                                <input id="build-count" name='build_count' type="number"
+                                                       class="form-control" required min="1" value="1"/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="class-expire-date">Expires: </label>
+                                                <input id="class-expire-date" class="form-control" name="expires"
+                                                       type="datetime-local">
+                                            </div>
+                                            <div class="form-">
+                                                <button type="submit" class="btn-fa w-100" id="submitCreateClass">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div> <!-- End modal-body -->
+                                </div> <!-- End modal-content -->
+                            </div> <!-- End modal-dialog -->
+                        </div> <!-- End create-class-modal -->
                     </div><!-- End home-content-ctn-->
                 </div><!--End fa-home div-->
-                <div class="tab-pane fade" id="vuln-tab" aria-labelledby="fa-vuln-tab"></div><!--End vuln-tab-->
                 <div class="tab-pane fade" id="config-tab" aria-labelledby="fa-config-btn"></div><!-- End config-tab-->
             </div> <!--End tab-container div-->
             <!-- TODO: Footer is not displaying for some reason. Need to eventually discover why -->
@@ -149,6 +194,7 @@
         </div> <!-- End content div -->
     </div> <!--End content-row div-->
     <script type="text/javascript">
+        // TODO: Clean up the javascript functions; Reduce the amount of $(function(){...}); declarations
         // Vulnerability Builder Functions
         var selectedTemplateID = '';
         // Handle attack template table clicks
@@ -175,8 +221,53 @@
                 }
             }
         });
+        $(document).on('click', '#stoc-table button.newClassBtn', function (){
+            // Get target div and clear previous content
+            var stocInputDiv = document.getElementById('stoc-id-div');
+            stocInputDiv.innerHTML = '';
+
+            // Create input
+            let btnValue = $(this).val();
+            var stocInput = document.createElement('input');
+            stocInput.id = 'stocIdInput'
+            stocInput.type = 'text';
+            stocInput.value = btnValue;
+            stocInput.name = 'stoc_id';
+            stocInput.readOnly = true;
+            stocInput.className = 'form-control';
+            stocInput.textContent = btnValue.toUpperCase();
+            var stocLabel = document.createElement('label');
+            stocLabel.htmlFor = 'stocIdInput';
+            stocLabel.textContent = 'STOC ID:';
+
+            // Append elements to target div
+            stocInputDiv.append(stocLabel);
+            stocInputDiv.append(stocInput);
+        });
+        $(document).ready(function (){
+           var today = new Date();
+           var day = today.getDay();
+           var month = today.getMonth();
+           var year = today.getFullYear();
+           if (day < 10) {
+               day = '0' + day;
+           }
+           if (month < 10) {
+               // Max date allowed for classes is 3 months
+               if (month + 3 >= 10) {
+                   month = month + 3;
+               }
+               else {
+                   month = '0' + month;
+               }
+           }
+           var min_date = year + '-' + month + '-' + day;
+           var max_date = year + '-' + month + '-' + day;
+           document.getElementById('class-expire-date').setAttribute("min", min_date);
+           document.getElementById('class-expire-date').setAttribute("max", max_date);
+        });
         $(document).ready(function() {
-            // Send request to server for attack template and build form
+             // Send request to server for attack template and build form
             $('#vuln-template-btn').on('click', function (e) {
                 $.ajax({
                     type: 'POST',

@@ -1,7 +1,7 @@
 import logging
 from google.cloud import logging_v2
-from utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
-from utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
+from main_app_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

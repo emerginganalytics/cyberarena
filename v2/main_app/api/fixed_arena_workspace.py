@@ -1,8 +1,8 @@
-from flask import abort, json, session, request
+from flask import json, request
 from flask.views import MethodView
-from api.decorators import instructor_required, admin_required
-from utilities.gcp.datastore_manager import DataStoreManager
-from utilities.globals import PubSub, DatastoreKeyTypes
+from api.utilities.http_response import HttpResponse
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,6 +17,7 @@ __status__ = "Testing"
 class FixedArenaWorkspace(MethodView):
     def __init__(self):
         self.kind = DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value
+        self.http_resp = HttpResponse
 
     def get(self, build_id=None):
         args = request.args
@@ -26,25 +27,25 @@ class FixedArenaWorkspace(MethodView):
                 print(build_id)
                 # for list_all, build_id references the parent fixed-arena-class id
                 workspaces = DataStoreManager(key_id=self.kind).query(
-                    filter_key='parent_id', op='=', value=build_id
+                    filter_key='fixed_arena_class_id', op='=', value=build_id
                 )
             else:
                 # query single fixed-arena-workspace with id=build_id
                 workspaces = DataStoreManager(key_type=self.kind, key_id=build_id).get()
             # If object exists, return
             if workspaces:
-                return json.dumps({'workspaces': workspaces})
-            return "NOT FOUND", 404
-        return "BAD REQUEST", 400
+                return self.http_resp(code=200, data=workspaces).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     def post(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405).prepare_response()
 
     def delete(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405).prepare_response()
 
     def put(self):
         # Method not allowed
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405).prepare_response()

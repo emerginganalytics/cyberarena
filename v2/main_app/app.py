@@ -1,9 +1,9 @@
 import json
 import logging as logger
 from flask import abort, Flask, jsonify, redirect, render_template, request, session
-from utilities.gcp.arena_authorizer import ArenaAuthorizer
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.datastore_manager import *
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import *
 
 # App Blueprints
 from admin_app.routes import admin_app
@@ -19,8 +19,10 @@ from api.fixed_arena_class import FixedArenaClass
 from api.fixed_arena_workspace import FixedArenaWorkspace
 from api.unit import Unit
 from api.workout import Workout
-from api.injector import Injector
+from api.attack_specs import AttackSpecs
+from api.command_and_control import CommandAndControl
 from api.iot_device import IoTDevice
+from api.user import Users
 
 # --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
@@ -69,35 +71,8 @@ def login():
 @app.route('/logout', methods=['POST'])
 def logout():
     if request.method == 'POST':
-        print(request.get_json(force=True))
         session.clear()
         return json.dumps({'logged_out': True})
-
-
-@app.route('/check_user_level', methods=['POST'])
-def check_user_level():
-    if request.method == 'POST':
-        user_info = request.get_json(force=True)
-        user_email = user_info.get('user_email', None)
-        arena_auth = ArenaAuthorizer()
-        user_groups = arena_auth.get_user_groups(user_email)
-        authorized = admin = False
-        if user_groups:
-            authorized = True
-            admin = True if ArenaAuthorizer.UserGroups.ADMINS in user_groups else False
-            student = True if ArenaAuthorizer.UserGroups.STUDENTS in user_groups else False
-            response = {
-                'authorized': authorized,
-                'admin': admin,
-                'student': student
-            }
-            return json.dumps(response)
-        else:
-            return json.dumps({
-                'authorized': False,
-                'admin': False,
-                'student': False
-            })
 
 
 @app.route('/leave_comment', methods=['POST'])
@@ -300,8 +275,10 @@ register_api(view=IoTDevice, endpoint='iot', url='/api/iot/', pk='device_id')
 register_api(view=FixedArena, endpoint='fixed-arena', url='/api/fixed-arena/', pk='build_id')
 register_api(view=FixedArenaClass, endpoint='class', url='/api/fixed-arena/class/', pk='build_id')
 register_api(view=FixedArenaWorkspace, endpoint='workspace', url='/api/fixed-arena/workspace/', pk='build_id')
-register_api(view=Injector, endpoint='inject', url='/api/inject/', pk='inject_id')
+register_api(view=CommandAndControl, endpoint='inject', url='/api/inject/', pk='build_id')
+register_api(view=AttackSpecs, endpoint='templates', url='/api/inject/templates/', pk='build_id')
+register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
 
 
 if __name__ == '__main__':
-     app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)
+    app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)

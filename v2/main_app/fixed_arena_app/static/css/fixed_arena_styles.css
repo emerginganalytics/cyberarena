@@ -1,5 +1,6 @@
 .nav-link {
     width: auto;
+    min-width: 100px;
     padding: .5rem;
 }
 .nav-link-tabs {
@@ -21,11 +22,16 @@
 }
 /* Home Tab Grid Styles */
 
+
 /* General Table Styles */
+.info-container > table {
+    padding: 0px;
+    width: 100%;
+}
 .table-ctn {
     table-layout: auto;
     border: 1px solid darkgray;
-    box-shadow: 1px 3px 5px 0 gray;
+    box-shadow: 1px 2px 3px 0 gray;
     border-collapse: collapse;
 }
 @media (max-width: 979px) {
@@ -67,6 +73,9 @@ thead {
 .table-small tr {
     padding: 5px;
     white-space: nowrap;
+}
+.td.btn-fa:last-child {
+    margin-right: 0;
 }
 .checkmark {
     display:inline-block;
@@ -311,6 +320,47 @@ input:checked + .slider:before {
 }
 .auto-shutoff-btn:hover {
     box-shadow: 0 1px 1px 0 gray;
+}
+
+/* Create Class Slideout modal */
+.modal-dialog-slideout {
+    min-height: 100%;
+    margin: 0 0 0 auto;
+    background: #fff;
+}
+@media (min-width: 400px) {
+    .modal-sm {
+        max-width: 400px;
+    }
+}
+.modal-dialog-slideout.modal-sm {
+    
+}
+.modal.fade .modal-dialog.modal-dialog-slideout {
+    -webkit-transform: translate(100%,0)scale(1);
+    transform: translate(100%,0)scale(1);
+}
+.modal.fade.show .modal-dialog.modal-dialog-slideout {
+    -webkit-transform: translate(0,0);
+    transform: translate(0,0);
+    display: flex;
+    align-items: stretch;
+    -webkit-box-align: stretch;
+    height: 100%;
+}
+.modal.fade.show .modal-dialog.modal-dialog-slideout .modal-body{
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+.modal-dialog-slideout .modal-content{
+    border: 0;
+}
+.modal-dialog-slideout .modal-header, .modal-dialog-slideout .modal-footer {
+    height: 69px;
+    display: block;
+}
+.modal-dialog-slideout .modal-header h5 {
+    float:left;
 }
 
 /* Server Management Styles */
