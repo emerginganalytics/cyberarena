@@ -57,8 +57,8 @@ class FixedArena(MethodView):
 
         # Send build/rebuild request
         if build_id and action in [self.actions.BUILD.name, self.actions.REBUILD.name]:
-            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
-                                    action=self.actions[action], build_id=build_id)
+            """self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                    action=self.actions[action], build_id=build_id)"""
             return self.http_resp(code=200).prepare_response()
         # Bad request; Either no build_id was found or received an invalid build action
         return self.http_resp(code=400).prepare_response()
@@ -67,7 +67,7 @@ class FixedArena(MethodView):
     def delete(self, build_id=None):
         # Only admins should be allowed to delete an entire fixed-arena
         if build_id:
-            self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)
+            """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)"""
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -77,12 +77,20 @@ class FixedArena(MethodView):
         :parameter build_id: fixed-arena to do action against
         A valid action can be any either START or STOP
         """
-        if build_id:
-            args = request.args
-            action = args.get('action', None)
-            valid_actions = [self.actions.START.value, self.actions.STOP.value]
-            if action and action in valid_actions:
-                self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)
+        valid_actions = [self.actions.START.value, self.actions.STOP.value]
+        args = request.args
+        action = args.get('action', None)
+
+        # Action against single fixed-arena or multiple
+        if action and action in valid_actions:
+            if build_id:
+                """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)"""
                 return self.http_resp(code=200).prepare_response()
+            else:
+                if 'stoc_ids' in args:
+                    for stoc_id in args['stoc_ids']:
+                        """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=stoc_id)"""
+                        print(f'{action} for stoc, {stoc_id}')
+                    return self.http_resp(code=200).prepare_response()
         # Bad request; No build_id given or received an invalid CONTROL action
         return self.http_resp(code=400).prepare_response()
