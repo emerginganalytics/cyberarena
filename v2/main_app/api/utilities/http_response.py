@@ -7,6 +7,7 @@ class HttpResponse:
     def __init__(self, code, msg=None, data=None):
         self.http_codes = {
             200: "OK",
+            205: "RESET CONTENT",
             400: "BAD REQUEST",
             403: "UNAUTHORIZED",
             404: "NOT FOUND",

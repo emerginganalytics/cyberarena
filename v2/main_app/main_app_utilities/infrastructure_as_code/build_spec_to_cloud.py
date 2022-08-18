@@ -62,5 +62,5 @@ class BuildSpecToCloud:
     def commit(self):
         self.datastore_manager.put(self.cyber_arena_spec)
         if not self.debug:
-            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=str(self.action),
-                                    fixed_arena_workout_id=self.build_id)
+            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value), action=str(self.action),
+                                    build_id=str(self.build_id))

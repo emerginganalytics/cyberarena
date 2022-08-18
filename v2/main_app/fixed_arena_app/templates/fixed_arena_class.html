@@ -118,7 +118,6 @@
                             <a onclick="copy_student_links()" href="#" class="btn-fa">Copy Student Links</a>
                             <p id="copy_link_text" style="display:none;">Links Copied!<br>You can paste the links into a column in a spreadsheet. Links are copied in order from top to bottom</p>
                         </div>
-                        {{ fixed_arena_class.key.name }}
                     </div>
                     <div id="workspace-servers" class="info-container">
                         <div class="server-manage-wrapper">
@@ -130,7 +129,7 @@
                                     </li>
                                     <li class="server-control">
                                         <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
-                                            class="server-control-btn no-select"><i class="fa fa-play-circle fa-lg margin-r-5"></i>Stop Class</button>
+                                            class="server-control-btn no-select"><i class="fa fa-stop-circle fa-lg margin-r-5"></i>Stop Class</button>
                                     </li>
                                 </ul>
                             </div>
@@ -153,9 +152,10 @@
                                     <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
                                         <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
                                         </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
-                                    {% if workspace.state == 'RUNNING' %}
+                                    {% if fixed_arena_class.state == 50 %}
+                                    <!-- if fixed_arena_class.state == 4 -->
                                         <td><i class="fa fa-circle" style="color: #1d8037; font-size: 20px;"></i></td>
-                                    {% elif workspace.state == 'STOPPED' %}
+                                    {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
                                         <td><i class="fa fa-stop-circle" style="color: #838683; font-size: 20px;"></i></td>
                                     {% else %}
                                         <td><i class="fa fa-circle" style="color: #b3be27; font-size: 20px;"></i></td>

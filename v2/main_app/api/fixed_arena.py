@@ -54,11 +54,10 @@ class FixedArena(MethodView):
         recv_data = request.json
         build_id = recv_data.get('build_id', None)
         action = recv_data.get('action', None)
-
         # Send build/rebuild request
-        if build_id and action in [self.actions.BUILD.name, self.actions.REBUILD.name]:
-            """self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
-                                    action=self.actions[action], build_id=build_id)"""
+        if build_id and action in [str(self.actions.BUILD.value), str(self.actions.REBUILD.value)]:
+            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                    action=self.actions[action], build_id=build_id)
             return self.http_resp(code=200).prepare_response()
         # Bad request; Either no build_id was found or received an invalid build action
         return self.http_resp(code=400).prepare_response()
@@ -67,8 +66,16 @@ class FixedArena(MethodView):
     def delete(self, build_id=None):
         # Only admins should be allowed to delete an entire fixed-arena
         if build_id:
+            print(f'delete request for {build_id}')
             """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)"""
             return self.http_resp(code=200).prepare_response()
+        else:
+            args = request.args
+            if 'stoc_ids' in args:
+                for stoc_id in args['stoc_ids']:
+                    print(f'DELETE request for stoc, {stoc_id}')
+                    """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)"""
+                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required

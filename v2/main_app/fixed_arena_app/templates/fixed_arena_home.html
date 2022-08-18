@@ -89,8 +89,8 @@
                                 <div class="server-toolbar-div">
                                     <ul class="server-toolbar">
                                         <li class="server-control">
-                                            <button type="button" onclick="manage_stoc(2);"
-                                                class="server-control-btn no-select">
+                                            <button type="button" data-toggle="modal" data-target="#create-stoc-modal"
+                                                class="server-control-btn no-select newStocBtn">
                                                 <i class="fa fa-plus-circle fa-lg margin-r-5" style="color: blue;"></i>Create</button>
                                         </li>
                                         <li class="server-control">
@@ -201,6 +201,49 @@
                                             </div>
                                             <div class="form-">
                                                 <button type="submit" class="btn-fa w-100" id="submitCreateClass">Submit</button>
+                                            </div>
+                                        </form>
+                                    </div> <!-- End modal-body -->
+                                </div> <!-- End modal-content -->
+                            </div> <!-- End modal-dialog -->
+                        </div> <!-- End create-class-modal -->
+                        <div id="create-stoc-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-stoc-modal" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-slideout modal-sm" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">x</span>
+                                        </button>
+                                    </div> <!-- End modal-header -->
+                                    <div class="modal-body">
+                                        <form id="create-stoc-form" action="">
+                                            <div class="form-group">
+                                                <label for="stocType">STOC Build:</label>
+                                                <ul style="list-style: none; margin: 0; padding: 0;">
+                                                    <!--Instead of filtering over yaml files, it might be worth filtering over a datastore template instead-->
+                                                    {%  for stoc_spec in fixed_arena_spec_list %}
+                                                        <li>
+                                                            <input id="{{ stoc_spec }}_spec" type="radio" value="{{ stoc_spec }}" name="build_id" required/>
+                                                            <label for="{{ stoc_spec }}_spec">{{ stoc_spec.upper() }}</label>
+                                                            <div>
+                                                                <!--STOC description and machine summary (if needed) go here-->
+                                                                <p>A cybersecurity simulation network for CLN partners</p>
+                                                            </div>
+                                                        </li>
+                                                    {% endfor %}
+                                                    <li>
+                                                        <input id="forensics_spec" type="radio" value="forensics_spec" name="build_id" required/>
+                                                        <label for="forensics_spec">FORENSICS (Example Value)</label>
+                                                        <div>
+                                                            <!--STOC description and machine summary (if needed) go here-->
+                                                            <p>A cybersecurity forensics simulation network for CLN partners</p>
+                                                        </div>
+                                                    </li>
+                                                </ul>
+                                                <input type="number" value="1" hidden readonly name="action">
+                                            </div>
+                                            <div class="form-">
+                                                <button type="submit" class="btn-fa w-100" id="submitCreateStoc">Submit</button>
                                             </div>
                                         </form>
                                     </div> <!-- End modal-body -->
