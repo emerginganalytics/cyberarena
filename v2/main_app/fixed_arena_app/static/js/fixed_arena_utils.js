@@ -1,11 +1,11 @@
 $(document).ready(function() {
+    createStocManager();
     createClassManager();
     vulnTemplateManager();
 });
 
 function send_request(args){
     // Build the URL
-    console.log(args['build_id']);
     let url = '';
     if (!('url' in args)) {
         url = '/api/fixed-arena/' + args['build_type'] + '/';
@@ -13,27 +13,43 @@ function send_request(args){
             url = '/api/fixed-arena/' + args['build_type'] + '/' + args['build_id'];
         }
     }
-    else {
-        url = args['url'];
-    }
+    else { url = args['url']; }
     let request_headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json; charset=UTF-8'
     }
     if ('data' in args) {
-        fetch(url, {
-            method: args['method'],
-            headers: request_headers,
-            body: JSON.stringify(args['data'])
-        })
+        if (args['method'] === 'POST'){
+           fetch(url, {
+                method: args['method'],
+                headers: request_headers,
+                body: JSON.stringify(args['data'])
+            })
             .then((request) =>
                 request.json())
             .then((response) => {
-                success(response);})
+                success(response, true);})
             .catch((err) => {
                 error(err);
             });
+        }
+        else {
+            fetch(url, {
+                method: args['method'],
+                headers: request_headers,
+                body: JSON.stringify(args['data'])
+            })
+            .then((request) =>
+                request.json())
+            .then((response) => {
+                success(response);
+            })
+            .catch((err) => {
+                error(err);
+            });
+        }
     }
+    // Not sure where this is used
     else {
         fetch(url, {
             method: args['method'],
@@ -48,11 +64,15 @@ function send_request(args){
             });
     }
     // Response functions
-    function success(resp) {
+    function success(resp, clear=null) {
         console.log(resp);
         console.log(resp['status']);
         if (resp['status'] === 200){
-            window.location.replace(window.location.href);
+            if (clear)
+                // Clear post submission history
+                window.history.replaceState("", "", window.location.href)
+            // Request successful, refresh location and clear any query strings, if any
+            window.location.replace(window.location.href.split('?')[0]);
         }
         else {
             let errorDiv = $('error-msg-div');
@@ -101,17 +121,21 @@ function manage_stoc(action){
     let method = '';
     if (action === 3) {
         method = 'DELETE';
+        if (selected.length > 1){
+            let url = '/api/fixed-arena/?stoc_ids=' + JSON.stringify(selected)
+            send_request({'url': url, 'action': action, 'method': method});
+        }
     }
     else if (action === 2 || action === 4) {
         method = 'PUT';
+        send_request({'url': '/api/fixed-arena/', 'action': action, 'method': method, 'data': selected});
     }
-    console.log('' + action + ':' + method);
-    send_request({'url': '/api/fixed-arena/', 'action': action, 'method': method, 'data': selected});
 }
-function create_stoc(){
+function createStocManager(){
     const createStocForm = document.querySelector('#create-stoc-form');
     if (createStocForm) {
         createStocForm.addEventListener("submit", function (e) {
+            e.preventDefault();
             const submitCreateStoc = document.getElementById('submitCreateStoc');
             submitCreateStoc.disabled = true;
 
@@ -120,6 +144,7 @@ function create_stoc(){
             for (const pair of new FormData(createStocForm)) {
                 formData[pair[0]] = pair[1]
             }
+            console.log(formData);
             send_request({'url': '/api/fixed-arena/', 'method': 'POST', 'data': formData});
         });
     }
@@ -147,6 +172,7 @@ function createClassManager(){
     const createClassForm = document.querySelector('#create-class-form');
     if (createClassForm) {
         createClassForm.addEventListener("submit", function (e) {
+            e.preventDefault();
             const submitCreateClass = document.getElementById('submitCreateClass');
             submitCreateClass.disabled = true;
 

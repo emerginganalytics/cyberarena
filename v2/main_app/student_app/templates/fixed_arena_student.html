@@ -94,7 +94,7 @@
                     </p>
                 </li>
                 <li><div id="loading-msg"></div></li>
-                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections.username }}&password={{fixed_arena_workout.proxy_connections.password}}" target="_blank">ENTER WORKSPACE!</a></li>
+                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections[0].username }}&password={{fixed_arena_workout.proxy_connections[0].password}}" target="_blank">ENTER WORKSPACE!</a></li>
                 <li><p style="color: whitesmoke;">Expiration date: {{ expiration_iso8601 }}</p></li>
             </ul>
         </div> <!--End sidebar-menu div
