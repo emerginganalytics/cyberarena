@@ -65,8 +65,6 @@ function send_request(args){
     }
     // Response functions
     function success(resp, clear=null) {
-        console.log(resp);
-        console.log(resp['status']);
         if (resp['status'] === 200){
             if (clear)
                 // Clear post submission history
@@ -110,19 +108,22 @@ function select_all(caller, class_name){
     for (let i=0, n=checkboxes.length; i < n; i++){
         checkboxes[i].checked = caller.checked;
     }
- }
+}
 function manage_stoc(action){
     let selected = []
     $('.stocIdRow:checked').each(function () {
         selected.push(this.id);
     })
-    console.log(selected);
 
     let method = '';
     if (action === 3) {
         method = 'DELETE';
         if (selected.length > 1){
             let url = '/api/fixed-arena/?stoc_ids=' + JSON.stringify(selected)
+            send_request({'url': url, 'action': action, 'method': method});
+        }
+        else {
+            let url = '/api/fixed-arena/' + selected[0];
             send_request({'url': url, 'action': action, 'method': method});
         }
     }
@@ -138,6 +139,9 @@ function createStocManager(){
             e.preventDefault();
             const submitCreateStoc = document.getElementById('submitCreateStoc');
             submitCreateStoc.disabled = true;
+            let stocModal = $("create-stoc-modal");
+            stocModal.modal('toggle');
+            stocModal.modal('hide');
 
             /* Convert form to json object */
             const formData = {};
@@ -175,6 +179,9 @@ function createClassManager(){
             e.preventDefault();
             const submitCreateClass = document.getElementById('submitCreateClass');
             submitCreateClass.disabled = true;
+            let classModal = $('create-class-modal');
+            classModal.modal('toggle');
+            classModal.modal('hide');
 
             /* Convert form to json object */
             const formData = {};
@@ -183,14 +190,6 @@ function createClassManager(){
             }
             args = {'build_type': 'class', 'method': 'POST', 'data': formData}
             send_request(args)
-            /*let url = '/api/fixed-arena/class/'
-            const response = fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8'
-                },
-                body: JSON.stringify(formData)
-            }).then(response => response.json()).then(response => console.log(response));*/
         });
     }
 }
