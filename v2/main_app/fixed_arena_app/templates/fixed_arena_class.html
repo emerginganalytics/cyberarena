@@ -31,6 +31,7 @@
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena_utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/injector.js') }}"></script>
     <script>
         var teacher_email = null;
         var auth_config = {
@@ -154,13 +155,17 @@
                                         </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
                                     {% if fixed_arena_class.state == 50 %}
                                     <!-- if fixed_arena_class.state == 4 -->
-                                        <td><i class="fa fa-circle" style="color: #1d8037; font-size: 20px;"></i></td>
+                                        <td class="class-status"><i class="fa fa-circle" style="color: #1d8037; font-size: 20px;"></i></td>
                                     {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
-                                        <td><i class="fa fa-stop-circle" style="color: #838683; font-size: 20px;"></i></td>
+                                        <td class="class-status"><i class="fa fa-stop-circle" style="color: #838683; font-size: 20px;"></i></td>
                                     {% else %}
-                                        <td><i class="fa fa-circle" style="color: #b3be27; font-size: 20px;"></i></td>
+                                        <td class="class-status"><i class="fa fa-circle" style="color: #b3be27; font-size: 20px;"></i></td>
                                     {% endif %}
-                                    <td><a class='workspace-link' href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
+                                    <td>
+                                        <a class='workspace-link'
+                                           href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}"
+                                           target="_blank">{{ workspace.key.name }}</a>
+                                    </td>
                                     <td id="workspace_student_name_{{ student_count }}">{{ workspace.student_name }}</td>
                                     {% if fixed_arena_class.workspace_settings.registration_required %}
                                         <td id="workspace_student_email_{{ student_count }}">workspace.student_email</td>

@@ -33,7 +33,7 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
-    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena_utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena.js') }}"></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -95,17 +95,17 @@
                                         </li>
                                         <li class="server-control">
                                             <button type="button" onclick="manage_stoc(2);"
-                                                class="server-control-btn no-select">
+                                                class="server-control-btn no-select server-action">
                                                 <i class="fa fa-play-circle fa-lg margin-r-5"></i>Start</button>
                                         </li>
                                         <li class="server-control">
                                             <button type="button" onclick="manage_stoc(4)"
-                                                    class="server-control-btn no-select">
+                                                    class="server-control-btn no-select server-action">
                                                 <i class="fa fa-stop-circle fa-lg margin-r-5"></i>Stop</button>
                                         </li>
                                        <li class="server-control">
                                            <button type="button" onclick="manage_stoc(3);"
-                                                class="server-control-btn btn-delete no-select">
+                                                class="server-control-btn btn-delete no-select server-action">
                                                <i class="fa fa-trash fa-lg margin-r-5"></i>Delete</button>
                                        </li>
                                     </ul>
@@ -126,7 +126,7 @@
                                     <tr>
                                         <td>
                                             <input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
-                                            name="stoc_id"/>
+                                            name="stoc_id" onclick="toggleServerControl(this, 'server-action')"/>
                                         </td>
                                         <td>{{ stoc.key.name }}</td>
                                         <td>
@@ -262,32 +262,11 @@
         </div> <!-- End content div -->
     </div> <!--End content-row div-->
     <script type="text/javascript">
-        // TODO: Clean up the javascript functions; Reduce the amount of $(function(){...}); declarations
-        // Vulnerability Builder Functions
-        var selectedTemplateID = '';
-        // Handle attack template table clicks
-        $('#vuln-templates-table tr').click(function () {
-            var row = $(this);
-            var checkmark = $(this).find('span');
-            var vulnBtn = $('#vuln-template-btn');
-            if (row.attr("id") !== 'vuln-table-header') {
-                // Current template is deselected
-                if (row.hasClass('selected')) {
-                    row.removeClass('selected');
-                    checkmark.removeClass('checkmark');
-                    vulnBtn.prop('disabled', true);
-                    vulnBtn.prop('hidden', true);
-                }
-                // A different row is selected
-                else {
-                    row.addClass('selected').siblings().removeClass('selected');
-                    row.siblings().find('span').removeClass('checkmark');
-                    checkmark.addClass('checkmark');
-                    selectedTemplateID = row.attr('id');
-                    vulnBtn.prop('disabled', false);
-                    vulnBtn.prop('hidden', false);
-                }
-            }
+        $(document).ready(function (){
+            // imports from fixed_arena.js
+            createStocManager();
+            createClassManager();
+            setDatetimeLimits();
         });
         $(document).on('click', '#stoc-table button.newClassBtn', function (){
             // Get target div and clear previous content
@@ -296,7 +275,7 @@
 
             // Create input
             let btnValue = $(this).val();
-            var stocInput = document.createElement('input');
+            let stocInput = document.createElement('input');
             stocInput.id = 'stocIdInput'
             stocInput.type = 'text';
             stocInput.value = btnValue;
@@ -304,133 +283,13 @@
             stocInput.readOnly = true;
             stocInput.className = 'form-control';
             stocInput.textContent = btnValue.toUpperCase();
-            var stocLabel = document.createElement('label');
+            let stocLabel = document.createElement('label');
             stocLabel.htmlFor = 'stocIdInput';
             stocLabel.textContent = 'STOC ID:';
 
             // Append elements to target div
             stocInputDiv.append(stocLabel);
             stocInputDiv.append(stocInput);
-        });
-        $(document).ready(function (){
-           var today = new Date();
-           var day = today.getDay();
-           var month = today.getMonth();
-           var year = today.getFullYear();
-           if (day < 10) {
-               day = '0' + day;
-           }
-           if (month < 10) {
-               // Max date allowed for classes is 3 months
-               if (month + 3 >= 10) {
-                   month = month + 3;
-               }
-               else {
-                   month = '0' + month;
-               }
-           }
-           var min_date = year + '-' + month + '-' + day;
-           var max_date = year + '-' + month + '-' + day;
-           document.getElementById('class-expire-date').setAttribute("min", min_date);
-           document.getElementById('class-expire-date').setAttribute("max", max_date);
-        });
-        $(document).ready(function() {
-             // Send request to server for attack template and build form
-            $('#vuln-template-btn').on('click', function (e) {
-                $.ajax({
-                    type: 'POST',
-                    contentType: 'application/json;charset=utf-8',
-                    traditional: true,
-                    url: '/teacher/api/vuln/templates/filter',
-                    data: JSON.stringify({'attack_id': selectedTemplateID}),
-                    dataType: 'json',
-                    success: function (data) {
-                        // reset selectedID value to NULL
-                        build_form(data, selectedTemplateID);
-                    }
-                })
-            });
-        });
-
-        // Network Build Functions
-        var selectedBuildID = '';
-        // Handle attack template table clicks
-        $('#network-build-table tr').click(function () {
-            var row = $(this);
-            var checkmark = $(this).find('span');
-            var networkBtn = $('#network-build-btn');
-            if (row.attr("id") !== 'network-build-header') {
-                // Current template is deselected
-                if (row.hasClass('selected')) {
-                    row.removeClass('selected');
-                    checkmark.removeClass('checkmark');
-                    networkBtn.prop('disabled', true);
-                    networkBtn.prop('hidden', true);
-                }
-                // A different row is selected
-                else {
-                    if (row.hasClass('active-build')) {
-                        return
-                    }
-                    row.addClass('selected').siblings().removeClass('selected');
-                    row.siblings().find('span').removeClass('checkmark');
-                    checkmark.addClass('checkmark');
-                    selectedBuildID = row.attr('id');
-                    networkBtn.prop('disabled', false);
-                    networkBtn.prop('hidden', false);
-                }
-            }
-        });
-        $(document).ready(function() {
-            // Send request to server for attack template and build form
-            $('#network-build-btn').on('click', function (e) {
-                $.ajax({
-                    type: 'POST',
-                    contentType: 'application/json;charset=utf-8',
-                    traditional: true,
-                    url: '/teacher/api/fixed-arena/update',
-                    data: JSON.stringify({'attack_id': selectedBuildID, 'network_id': 'network-adsfasdf'}),
-                    dataType: 'json',
-                    success: function (data) {
-                        // reset selectedBuildID value to NULL
-                        console.log(data);
-                    }
-                })
-            });
-        });
-        $(document).ready(function(){
-            $('.count').prop('disabled', true);
-            $(document).on('click','.plus',function(){
-                var countObj = $('#auto-shutoff-time')
-                var count = countObj.val(parseInt(countObj.val()));
-                console.log(count.val());
-                if (count.val() < 10) {
-                    countObj.val(parseInt(countObj.val()) + 1);
-                    //$('.count').val(parseInt($('.count').val()) + 1);
-                }
-                else if (count.val() >= 10) {
-                    $('.count').val('10');
-                }
-            });
-            $(document).on('click','.minus',function(){
-                var countObj = $('#auto-shutoff-time');
-                countObj.val(parseInt(countObj.val()) - 1);
-               //  $('.count').val(parseInt($('.count').val()) - 1 );
-                if (countObj.val() == 0) {
-                    countObj.val(1);
-                }
-            });
-        });
-        $('.select-all-servers').click(function(event){
-            var selectState = this.checked;
-            if (this.id === 'boot-select-all') {
-                $('#server-table input[type="checkbox"]').prop('checked', selectState);
-            }
-            else if (this.id === 'manage-select-all') {
-                $('#manage-server-table input[type="checkbox"]').prop('checked', selectState);
-                // TODO: This isn't functioning properly
-                $('#manage-server-nav:button').each(function(){ this.disabled(selectState); });
-            }
         });
     </script>
 {% endblock content %}
