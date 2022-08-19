@@ -207,10 +207,13 @@
                 <li>{{ logo.logo_div() }}</li>
                 <li><h2 style="color:whitesmoke;">Workspace Control</h2></li>
                 <li><p><span style="color:whitesmoke;">Workspace Status:</span>
-                        {% if fixed_arena_class.state == 4 %}
-                            <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
+                        {% if fixed_arena_class.state == 50 %}
+                        <!-- if fixed_arena_class.state == 4 -->
+                        <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
+                        {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
+                        <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
                         {% else %}
-                            <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
+                        <span id='workspace_state_display' style="color:#b3be27;">WORKING</span>
                         {% endif %}
                     </p>
                 </li>
