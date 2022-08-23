@@ -233,15 +233,6 @@ if ($confirmation -eq 'y') {
         --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=medic
-    gcloud functions deploy --quiet function-admin-scripts `
-        --region=$region `
-        --memory=256MB `
-        --entry-point=cloud_fn_admin_scripts `
-        --runtime=python37 `
-        --source=$sourcepath `
-        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
-        --timeout=540s `
-        --trigger-topic=admin-scripts
     gcloud functions deploy --quiet function-budget-manager `
         --region=$region `
         --memory=256MB `
