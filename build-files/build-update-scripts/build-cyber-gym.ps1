@@ -113,7 +113,8 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
     gcloud beta runtime-config configs variables set "main_app_url" "https://cybergym$dns_suffix" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "admin_email" $admin_email --config-name "cybergym"
-    $sqlpassword = Read-Host "Type in the Shodan API? "
+    $guac_password = Read-Host "Please type in an arbitrary password for the apache guacamole database. You will not need to remember this "
+    gcloud beta runtime-config configs variables set "guac_password" $guac_password --config-name "cybergym"
 }
 # Create project database
 $confirmation = Read-Host "Do you want to create the mysql database at this time? (y/N)"

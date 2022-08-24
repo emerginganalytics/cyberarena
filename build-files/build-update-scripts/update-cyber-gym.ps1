@@ -9,13 +9,9 @@ gcloud config set project $project
 # Update the main application
 $confirmation = Read-Host "Do you want to update the main applications? (y/N)"
 if ($confirmation -eq 'y') {
-    $app = Read-Host "What is the application name? (cybergym) "
-    if ($app -eq 'y') {
-        $app = "cybergym"
-    }
-    $sourcepath = Join-Path (Resolve-Path ..\..\).Path "\main"
-    gcloud builds submit $sourcepath --tag gcr.io/$project/$app
-    gcloud run deploy "$app" --image gcr.io/"$project"/"$app" --memory=1024Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    $sourcepath = Join-Path (Resolve-Path ..\..\).Path "main"
+    gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym
+    gcloud run deploy --image gcr.io/$project/cybergym --memory=1Gi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
 
 # Update cybergym-classified
