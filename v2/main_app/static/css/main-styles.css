@@ -373,14 +373,33 @@ button.btn-delete:hover, button.btn-delete:active{
     height: 40px;
     animation: spin 2s linear infinite;
 }
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
 #loading {
     text-align: center;
     margin-top: 5vh;
 }
+.loadAnimationWrapper {
+    float: left;
+    padding-bottom: 10px;
+    margin-left: 5px;
+}
+.loadAnimation {
+    /* Creates a spinning circle animation */
+    border: 5px solid #f3f3f3; /* Light grey */
+    border-top: 5px solid #d00072;; /* BG color */
+    border-radius: 50%;
+    margin: auto;
+    width: 40px;
+    height: 40px;
+    animation: spin 2s linear infinite;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
 /* FontAwesome Icon Styles */
-
+.buildState {font-size: 30px;}
+.buildState.running {color: #1d8037;}
+.buildState.stopped {color: #838683;}
+.buildState.deleted {color: #000000;}
+.buildState.transition {color: #b3be27;}

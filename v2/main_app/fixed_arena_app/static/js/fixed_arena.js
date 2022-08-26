@@ -1,4 +1,14 @@
+$(document).ready(function() {
+    createStocManager();
+    createClassManager();
+});
+
 function send_request(args){
+    /*
+    * This function is adding unneeded complexity. Each object action function should have
+    * their own fetch request attached. This will help with readability and reduce the amount
+    * of logic needed to write at the cost of adding a few extra lines :)
+    * */
     // Build the URL
     let url = '';
     if (!('url' in args)) {
@@ -133,37 +143,6 @@ function setDatetimeLimits(){
     document.getElementById('class-expire-date').setAttribute("min", min_date);
     document.getElementById('class-expire-date').setAttribute("max", max_date);
 }
-function waitingAnimation(class_name, build_id, build_type){
-    // Takes input class name and adds a loading animation for each returned element.
-    // Once the condition is met, refresh the page
-    let url = '/api/fixed-arena'
-    let status_obj = document.getElementsByClassName(class_name);
-    for (let i = 0; i < status_obj.length; i++ ){
-        // clear the object
-        status_obj[i].innerHTML = "";
-        // create and insert loading animation object
-        let spinner = document.createElement('span');
-        spinner.className = 'spinner-border spinner-border-sm';
-        spinner.setAttribute('aria-hidden', 'true');
-        spinner.setAttribute('role', 'status');
-        status_obj[i].append(spinner);
-    }
-    if (build_type === 'class'){
-        let url = '/fixed-arena/' + build_type + '/' + build_id;
-        fetch(url, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
-        })
-            .then(response => response.json())
-            .then(response => function () {
-            })
-    } else if (build_type === 'fixed-arena'){
-        url = url + '/' + build_id;
-    }
-}
 function manage_stoc(action){
     let selected = []
     $('.stocIdRow:checked').each(function () {
@@ -213,7 +192,6 @@ function manage_class(action, build_id=null) {
     console.log(build_id)
     console.log(action)
     if (action === 2 || action === 4) {
-        waitingAnimation('class-status');
         let body_data = {'action': action}
         args = {'build_type': 'class', 'build_id': build_id, 'method': 'PUT', 'data': body_data}
         send_request(args);
