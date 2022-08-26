@@ -33,7 +33,7 @@ class FixedArenaClass(MethodView):
 
     def get(self, build_id=None):
         if build_id:
-            fa_class = DataStoreManager(key_id=self.kind).query(filter_key='id', op='=', value=build_id)
+            fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
             if fa_class:
                 return self.http_resp(code=200, data=fa_class).prepare_response()
             return self.http_resp(code=404).prepare_response()

@@ -16,7 +16,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class CommandAndControl(MethodView):
+class Controller(MethodView):
     """
     API to manage the simulated Botnet
     Each method, requires an id, build_id that either refers to:
@@ -44,15 +44,15 @@ class CommandAndControl(MethodView):
                 injects_query.add_filter('parent_id', '=', build_id)
                 injects = list(injects_query.fetch())
                 if injects:
-                    return json.dumps({'data': injects})
+                    return self.http_resp(code=200, data={'data': injects}).prepare_response()
             else:
                 inject = DataStoreManager(key_type=self.kind, key_id=build_id).get()
                 if inject:
                     if args.get('state', False):
                         return json.dumps({'state': inject['state']})
-                    return json.dumps({'data': inject})
-            return self.http_resp(code=404)
-        return self.http_resp(code=400)
+                    return self.http_resp(code=200, data={'data': inject}).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     def post(self):
         """Handles inject creation requests"""
@@ -68,13 +68,13 @@ class CommandAndControl(MethodView):
         if build_id and network and mode and args and expires:
             self.pubsub_manager.msg(handler=PubSub.Handlers.BOTNET, build_id=build_id,
                                     network=network, mode=mode, args=args)
-            return self.http_resp(code=200)
-        return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST')
+            return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST').prepare_response()
 
     @admin_required
     def delete(self, build_id=None):
         """Not needed for current implementations"""
-        return "NOT ALLOWED", 405
+        return self.http_resp(code=405).prepare_response()
 
     def put(self, build_id=None):
         """Update Existing Inject"""
@@ -85,5 +85,5 @@ class CommandAndControl(MethodView):
             expires = args.get('expires', 2)
             if action in [PubSub.Actions.STOP.value, PubSub.Actions.START.value]:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.BOTNET, action=action, expires=expires)
-                return self.http_resp(code=200)
-        return self.http_resp(code=400)
+                return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400).prepare_response()
