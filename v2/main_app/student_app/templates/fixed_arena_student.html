@@ -61,14 +61,14 @@
         //Used if the workout involves VMs
         //Regularly check the state, and update the current state indicator
         //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
-        function check_workout_state(){
+        function check_workspace_state(){
             var resp = $.ajax({
                 type:"GET",
-                url: "/api/fixed-arena/class/{{ fixed_arena_workout.fixed_arena_class_id }}",
+                url: "/api/fixed-arena/class/{{ fixed_arena_workout.parent_id }}",
                 traditional: "true",
             });
             if (resp.status == '200') {
-                state = resp['workspaces'][0]['state'];
+                state = resp['workspace_settiings'][0]['state'];
             }
             else {
                 state = 'NOT BUILT'
@@ -76,7 +76,128 @@
             return state;
         }
 
-        function update_state(){}
+        function update_state(){
+            var state_display = document.getElementById("workspace_state_display");
+            var workspace_link = document.getElementById("workspace_link");
+            var build_workspace = document.getElementById("build_workspace");
+            check_workspace_state().then( new_state => {
+                if(new_state == "RUNNING"){
+                    workspace_link.style.visibility = "visible";
+                    state_display.style.color = "green";
+                    state_display.innerHTML = "RUNNING";
+                    $("#start-vm").attr("disabled", "disabled");
+                    $("#stop-vm").removeAttr("disabled");
+                    $("#reset-vm").removeAttr("disabled");
+                    $(".nuke_btn").removeAttr("disabled");
+                    $(".loader").remove();
+                } else if(new_state == "READY"){
+                    workspace_link.style.visibility = "hidden";
+
+                    state_display.style.color = "red";
+                    state_display.innerHTML = "STOPPED";
+                    $("#start-vm").removeAttr("disabled");
+                    $("#stop-vm").attr("disabled", "disabled");
+                    $("#reset-vm").attr("disabled", "disabled");
+                    $('.nuke_btn').removeAttr('disabled');
+                    $(".loader").remove();                    }
+                else if(new_state == "START"){
+                    workspace_link.style.visibility = "hidden";
+                    build_workspace.style.visibility = "visible";
+
+                    state_display.style.color = "red";
+                    state_display.innerHTML = "NOT BUILT";
+                    $("#start-vm").attr("disabled", "disabled");
+                    $("#stop-vm").attr("disabled", "disabled");
+                    $("#reset-vm").attr("disabled", "disabled");
+                    $('.nuke_btn').attr("disabled", "disabled");
+                    $(".loader").remove();
+                } else if(new_state == "DELETED"){
+                    workspace_link.style.visibility = "hidden";
+
+                    state_display.style.color = "black";
+                    state_display.innerHTML = "NO LONGER AVAILABLE";
+                    $("#start-vm").attr("disabled", "disabled");
+                    $("#stop-vm").attr("disabled", "disabled");
+                    $("#reset-vm").attr("disabled", "disabled");
+                    $('.nuke_btn').attr("disabled", "disabled");
+                    $(".loader").remove();
+                } else {
+                    workspace_link.style.visibility = "hidden";
+
+                    state_display.style.color = "orange";
+                    state_display.innerHTML = "WORKING";
+                    $("#start-vm").attr("disabled", "disabled");
+                    $("#stop-vm").attr("disabled", "disabled");
+                    $("#reset-vm").attr("disabled", "disabled");
+                    $('.nuke_btn').attr("disabled", "disabled");
+                    $(".loader").remove();
+                }
+            });
+        }
+        $(document).ready(function(){
+            update_state();
+            var state_checker = setInterval(update_state, 30000);
+
+            $(".control_form").submit(function(event){
+                event.preventDefault();
+                clearInterval(state_checker);
+                check_workspace_state().then(new_state => {
+
+                    var currentState = new_state;
+                    $('#start-vm').attr('disabled','disabled');
+                    $('#stop-vm').attr('disabled','disabled');
+                    $('#reset-vm').attr('disabled','disabled');
+                    $('.nuke_btn').attr('disabled', 'disabled');
+                    $("#loading-msg").html('Please wait while the process completes' +
+                        '</br><div class="loader"></div>');
+                    var route = "/" + event.target.id;
+                    var workspace_id = document.getElementById("workspace_id").value;
+                    var runtime = document.getElementById('time').value;
+
+                    $.ajax({
+                        type: "POST",
+                        url: route,
+                        data: JSON.stringify({
+                                "workspace_id": workspace_id,
+                                "time": runtime,
+                            }),
+                        contentType: "application/json;charset=utf-8",
+                        success: function(data){
+                            var temp_state = currentState.toString();
+                            var state_update = setInterval(function(){
+                                check_workout_state().then(test_state => {
+                                    if(test_state !== currentState){
+                                        clearInterval(state_update);
+                                        update_state();
+                                        state_checker = setInterval(update_state, 30000);
+                                    }
+                                });
+                            }, 5000);
+                        }
+                    })
+                })
+            });
+        });
+        $(document).ready(function (){
+            document.querySelector('#start-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                console.log(data);
+                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
+            });
+            document.querySelector('#stop-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                console.log(data);
+                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
+            });
+            document.querySelector('#reset-vm-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const data = Object.fromEntries(new FormData(e.target));
+                console.log(data);
+                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
+            });
+        });
     </script>
  <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
         <!--TODO: Create toggle sidebar button in top navbar -->
@@ -86,15 +207,18 @@
                 <li>{{ logo.logo_div() }}</li>
                 <li><h2 style="color:whitesmoke;">Workspace Control</h2></li>
                 <li><p><span style="color:whitesmoke;">Workspace Status:</span>
-                        {% if fixed_arena_class.state == 4 %}
-                            <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
+                        {% if fixed_arena_class.state == 50 %}
+                        <!-- if fixed_arena_class.state == 4 -->
+                        <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
+                        {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
+                        <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
                         {% else %}
-                            <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
+                        <span id='workspace_state_display' style="color:#b3be27;">WORKING</span>
                         {% endif %}
                     </p>
                 </li>
                 <li><div id="loading-msg"></div></li>
-                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix.dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections[0].username }}&password={{fixed_arena_workout.proxy_connections[0].password}}" target="_blank">ENTER WORKSPACE!</a></li>
+                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections[0].username }}&password={{fixed_arena_workout.proxy_connections[0].password}}" target="_blank">ENTER WORKSPACE!</a></li>
                 <li><p style="color: whitesmoke;">Expiration date: {{ expiration_iso8601 }}</p></li>
             </ul>
         </div> <!--End sidebar-menu div

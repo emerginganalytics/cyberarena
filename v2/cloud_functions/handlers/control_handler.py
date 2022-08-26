@@ -16,6 +16,8 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
+
 
 class ControlHandler:
     def __init__(self, event_attributes, debug=False):

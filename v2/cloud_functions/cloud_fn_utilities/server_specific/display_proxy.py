@@ -22,7 +22,6 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
-
 class DisplayProxy:
     def __init__(self, build_id, build_spec):
         """
@@ -90,3 +89,6 @@ class DisplayProxy:
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
         ComputeManager(server_name=self.server_name).build()
+
+    def delete(self):
+        ComputeManager(server_name=self.server_name).delete()

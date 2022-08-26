@@ -3,8 +3,6 @@ import json
 import sys
 from json.decoder import JSONDecodeError
 
-from admin_scripts.add_child_project import add_child_project
-from admin_scripts.create_dns_forwarding_for_unit import create_dns_forwarding
 from common.build_competition_arena import CompetitionArena
 from common.build_workout import build_workout
 from common.compute_management import server_build, server_start, server_delete, server_stop, Snapshot
@@ -20,14 +18,6 @@ from common.nuke_workout import nuke_workout
 from common.start_vm import start_vm, start_arena
 from common.stop_compute import stop_workout, stop_lapsed_workouts, stop_lapsed_arenas, stop_everything
 from common.publish_compute_image import create_production_image
-from admin_scripts.create_dns_forwarding_for_unit import create_dns_forwarding
-from admin_scripts.add_child_project import add_child_project
-from admin_scripts.delete_full_unit import delete_unit
-from admin_scripts.nuke_rebuild_server import nuke_rebuild_server
-from admin_scripts.nuke_rebuild_unit import nuke_rebuild_unit
-from admin_scripts.fix_student_entry_in_workout import fix_student_entry_in_workout
-from admin_scripts.create_new_workout_in_unit import create_new_workout_in_unit
-from admin_scripts.create_new_server_in_unit import create_new_server_in_unit
 from attack.nmap import Nmap
 from attack.attack_globals import AttackScripts
 
@@ -290,64 +280,6 @@ def cloud_fn_daily_maintenance(event, context):
     Snapshot.snapshot_all()
     if mysql_ip:
         nvd_update()
-
-
-def cloud_fn_admin_scripts(event, context):
-    """
-    Provides access to backend maintenance scripts to perform a variety of different tasks
-    """
-    if not bm.check_budget():
-        cloud_log(LogIDs.BUDGET_MANAGEMENT, "BUDGET ALERT: Cannot run cloud_fn_admin_scripts because the budget "
-                                            "exceeded variable is set for the project", LOG_LEVELS.ERROR)
-        return
-
-    script_info = json.loads(event['attributes'].get('script_dict'))
-    action = Utilities.check_variable(script_info, 'function_name', 'test', LogIDs.ADMIN_SCRIPTS)
-    params = Utilities.check_variable(script_info, 'params', 'test', LogIDs.ADMIN_SCRIPTS)
-    cloud_log(LogIDs.ADMIN_SCRIPTS, message=f"{action}\n{params}", severity=LOG_LEVELS.INFO)
-    # build_id = event['attributes'].get('build_id', None)
-    if action == AdminActions.CREATE_DNS_FORWARDING_FOR_UNIT:
-        build_id = Utilities.check_variable(params, 'build_id', AdminActions.CREATE_DNS_FORWARDING_FOR_UNIT, LogIDs.ADMIN_SCRIPTS)
-        ip_address = Utilities.check_variable(params, 'ip_address', AdminActions.CREATE_DNS_FORWARDING_FOR_UNIT, build_id)
-        network = Utilities.check_variable(params, 'network', AdminActions.CREATE_DNS_FORWARDING_FOR_UNIT, build_id)
-        create_dns_forwarding(build_id, ip_address, network)
-
-    elif action == AdminActions.ADD_CHILD_PROJECT:
-        child_project = Utilities.check_variable(params, 'child_project', AdminActions.ADD_CHILD_PROJECT, project)
-        add_child_project(child_project)
-
-    elif action == AdminActions.CREATE_PRODUCTION_IMAGE:
-        server_name = Utilities.check_variable(params, 'server_name', AdminActions.CREATE_PRODUCTION_IMAGE, project)
-        create_production_image(server_name)
-        
-    elif action == AdminActions.DELETE_FULL_UNIT:
-        unit_id = Utilities.check_variable(params, 'unit_id', AdminActions.DELETE_FULL_UNIT, project)
-        delete_unit(unit_id)
-
-    elif action == AdminActions.NUKE_REBUILD_SERVER:
-        server_name = Utilities.check_variable(params, 'server_name', AdminActions.NUKE_REBUILD_SERVER, LogIDs.ADMIN_SCRIPTS)
-        cloud_log(LogIDs.ADMIN_SCRIPTS, message=f"Nuking and Rebuilding {server_name}", severity=LOG_LEVELS.INFO)
-        nuke_rebuild_server(server_name)
-
-    elif action == AdminActions.NUKE_REBUILD_UNIT:
-        unit_id = Utilities.check_variable(params, 'unit_id', AdminActions.NUKE_REBUILD_UNIT, LogIDs.ADMIN_SCRIPTS)
-        nuke_rebuild_unit(unit_id)
-
-    elif action == AdminActions.FIX_STUDENT_ENTRY_IN_WORKOUT:
-        workout_id = Utilities.check_variable(params, 'workout_id', AdminActions.FIX_STUDENT_ENTRY_IN_WORKOUT, LogIDs.ADMIN_SCRIPTS)
-        fix_student_entry_in_workout(workout_id)
-
-    elif action == AdminActions.CREATE_NEW_WORKOUT_IN_UNIT:
-        unit_id = Utilities.check_variable(params, 'unit_id', AdminActions.CREATE_NEW_WORKOUT_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        student_name = Utilities.check_variable(params, 'student_name', AdminActions.CREATE_NEW_WORKOUT_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        email_address = Utilities.check_variable(params, 'email_address', AdminActions.CREATE_NEW_WORKOUT_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        registration_required = Utilities.check_variable(params, 'registration_required', AdminActions.CREATE_NEW_WORKOUT_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        create_new_workout_in_unit(unit_id, student_name, email_address, registration_required)
-
-    elif action == AdminActions.CREATE_NEW_SERVER_IN_UNIT:
-        unit_id = Utilities.check_variable(params, 'unit_id', AdminActions.CREATE_NEW_SERVER_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        build_server_spec = Utilities.check_variable(params, 'build_server_spec', AdminActions.CREATE_NEW_SERVER_IN_UNIT, LogIDs.ADMIN_SCRIPTS)
-        create_new_server_in_unit(unit_id, build_server_spec)
 
 
 def cloud_fn_iot_capture_sensor(event, context):

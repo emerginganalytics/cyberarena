@@ -93,6 +93,13 @@ function send_request(args){
         console.log(err);
     }
 }
+function toggleServerControl(class_name){
+    // Enables the server control buttons based on class
+    let target_buttons = document.getElementsByClassName(class_name);
+    for (let i=0, n=target_buttons.length; i < n; i++){
+        enable_object(target_buttons[i].id, target_buttons[i].checked);
+    }
+}
 function enable_object(obj_id, enable=false, clear=false) {
     let obj = $('#' + obj_id);
     if (typeof enable == "boolean") {
@@ -107,11 +114,34 @@ function enable_object(obj_id, enable=false, clear=false) {
     }
 }
 function select_all(caller, class_name){
-    // Takes in caller obj and class name to search for.
+    // Takes in caller obj and class name to search for and selects all checkboxes
+    // containing the input class name.
     let checkboxes = document.getElementsByClassName('' + class_name);
     for (let i=0, n=checkboxes.length; i < n; i++){
         checkboxes[i].checked = caller.checked;
     }
+}
+function setDatetimeLimits(){
+    let today = new Date();
+    let day = today.getDay();
+    let month = today.getMonth();
+    let year = today.getFullYear();
+    if (day < 10) {
+        day = '0' + day;
+    }
+    if (month < 10) {
+        // Max date allowed for classes is 3 months
+        if (month + 3 >= 10) {
+            month = month + 3;
+        }
+        else {
+            month = '0' + month;
+        }
+    }
+    let min_date = year + '-' + month + '-' + day;
+    let max_date = year + '-' + month + '-' + day;
+    document.getElementById('class-expire-date').setAttribute("min", min_date);
+    document.getElementById('class-expire-date').setAttribute("max", max_date);
 }
 function manage_stoc(action){
     let selected = []
@@ -241,5 +271,4 @@ function manage_student(student_num, build_id, registration_required){
         }
     });
 }
-
 // [ eof ]

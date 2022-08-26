@@ -166,7 +166,11 @@
                                             <i class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="bottom" title="WORKING"></i>
                                         {% endif %}
                                     </td>
-                                    <td><a class='workspace-link' href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
+                                    <td>
+                                        <a class='workspace-link'
+                                           href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}"
+                                           target="_blank">{{ workspace.key.name }}</a>
+                                    </td>
                                     <td id="workspace_student_name_{{ student_count }}">{{ workspace.student_name }}</td>
                                     {% if fixed_arena_class.workspace_settings.registration_required %}
                                         <td id="workspace_student_email_{{ student_count }}">workspace.student_email</td>
