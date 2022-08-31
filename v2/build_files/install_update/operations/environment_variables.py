@@ -19,6 +19,7 @@ class EnvironmentVariables:
     COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
+    VARIABLES = ['dns_suffix', 'script_repository', 'api_key', 'main_app_url', 'admin_email', 'guac_password']
 
     def __init__(self, project, suppress=True):
         self.project = project
@@ -41,7 +42,7 @@ class EnvironmentVariables:
             self._set_variable("project", self.project)
             self._set_region()
             self._set_zone()
-            for var in self.Variables:
+            for var in self.VARIABLES:
                 self._set_variable(var)
 
     def _set_variable(self, var, new_value=None):

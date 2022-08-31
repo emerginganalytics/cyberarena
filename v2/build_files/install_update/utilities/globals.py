@@ -56,18 +56,3 @@ class ShellCommands:
     class PubSubTopics(str, Enum):
         CYBER_ARENA = "gcloud pubsub topics create cyber-arena"
         BUDGET = "gcloud pubsub topics create budget"
-
-    class EnvironmentVariables(str, Enum):
-        PROJECT = "gcloud beta runtime-config configs variables set 'project' {project} --config-name 'cybergym'"
-        REGION = "gcloud beta runtime-config configs variables set 'region' {region} --config-name 'cybergym'"
-        ZONE = "gcloud beta runtime-config configs variables set 'zone' {zone} --config-name 'cybergym'"
-        DNS_SUFFIX = "gcloud beta runtime-config configs variables set 'dns_suffix' {dns_suffix} " \
-                     "--config-name 'cybergym'"
-        SCRIPT_REPOSITORY = "gcloud beta runtime-config configs variables set 'script_repository' " \
-                            "gs://{project}_cloudbuild/startup-scripts/ --config-name 'cybergym'"
-        FIREBASE_API_KEY = "gcloud beta runtime-config configs variables set 'api_key' {firebase_api_key} " \
-                           "--config-name 'cybergym'"
-        MAIN_APP_URL = "gcloud beta runtime-config configs variables set 'main_app_url' '{main_app_url}' " \
-                       "--config-name 'cybergym'"
-        ADMIN_EMAIL = "gcloud beta runtime-config configs variables set 'admin_email' {admin_email} " \
-                      "--config-name 'cybergym'"
