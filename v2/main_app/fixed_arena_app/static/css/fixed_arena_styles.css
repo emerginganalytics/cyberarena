@@ -428,6 +428,9 @@ li button {
     height: auto;
     padding-right: 2px;
 }
+.fa-trash:hover, .fa-trash:active, .fa-trash:after {
+    color: white;
+}
 .server-control-btn:hover img, .server-control-btn:active img {
     filter: invert(100%);
 }

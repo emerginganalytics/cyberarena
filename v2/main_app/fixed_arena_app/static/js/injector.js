@@ -26,7 +26,7 @@ function vulnTemplateManager(){
         var table = $('#vuln-templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
-        enable_object('vuln-template-btn');
+        enable_object('vuln-template-btn', false);
     });
 
     // Vuln form listener

@@ -31,7 +31,7 @@
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/state_checker.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/state_manager.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/controller.js') }}"></script>
     <script>
         var teacher_email = null;
@@ -127,12 +127,26 @@
                             <div class="server-toolbar-div">
                                 <ul class="server-toolbar">
                                     <li class="server-control">
-                                        <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
-                                            class="server-control-btn no-select"><i class="fa fa-play-circle fa-lg margin-r-5"></i>Start Class</button>
+                                         {% if fixed_arena_class.state == 51 %}
+                                            <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start Class</button>
+                                        {% else %}
+                                             <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select disabled" disabled aria-disabled="true">
+                                                 <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start Class</button>
+                                        {% endif %}
                                     </li>
                                     <li class="server-control">
-                                        <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
-                                            class="server-control-btn no-select"><i class="fa fa-stop-circle fa-lg margin-r-5"></i>Stop Class</button>
+                                        {% if fixed_arena_class.state == 50 %}
+                                            <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop Class</button>
+                                        {% else %}
+                                            <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select disabled" disabled aria-disabled="true">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop Class</button>
+                                        {% endif %}
                                     </li>
                                 </ul>
                             </div>
@@ -140,7 +154,7 @@
                         <table id="workspace-table" class="table table-hover text-nowrap table-large">
                             <thead>
                                 <tr id="stoc-table-headers">
-                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value="" onclick="select_all(this, 'select-workspace')"/></th>
+                                    <!--<th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value="" onclick="select_all(this, 'select-workspace')"/></th>-->
                                     <th class="prevent-select text-center">Status</th>
                                     <th class="prevent-select text-center">Workspace ID</th>
                                      <th class="prevent-select text-center">Student Name</th>
@@ -151,7 +165,8 @@
                             {% for workspace in workspaces %}
                                 {% set student_count = loop.index %}
                                 <tr>
-                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id" class="select-workspace"/></td>
+                                    <!--This is not needed at the moment as a class will either be in a total start or stop state;
+                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id" class="select-workspace"/></td>-->
                                     <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
                                         <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
                                         </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
