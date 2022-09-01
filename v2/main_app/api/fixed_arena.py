@@ -34,7 +34,6 @@ class FixedArena(MethodView):
             state = request.args.get('state', None)
             fixed_arena = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=build_id).get()
             if fixed_arena:
-                state_ts = fixed_arena.get('state-timestamp', None)
                 if state:
                     return self.http_resp(code=200, data={'state': self.states(fixed_arena["state"]).name}).prepare_response()
                 return self.http_resp(code=200, data={'fixed_arena': fixed_arena}).prepare_response()
@@ -69,13 +68,6 @@ class FixedArena(MethodView):
             print(f'delete request for {build_id}')
             """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)"""
             return self.http_resp(code=200).prepare_response()
-        else:
-            args = request.args
-            if 'stoc_ids' in args:
-                for stoc_id in args['stoc_ids']:
-                    print(f'DELETE request for stoc, {stoc_id}')
-                    """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=PubSub.Actions.DELETE, build_id=build_id)"""
-                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required
@@ -85,7 +77,7 @@ class FixedArena(MethodView):
         A valid action can be any either START or STOP
         """
         valid_actions = [self.actions.START.value, self.actions.STOP.value]
-        args = request.args
+        args = request.json
         action = args.get('action', None)
 
         # Action against single fixed-arena or multiple

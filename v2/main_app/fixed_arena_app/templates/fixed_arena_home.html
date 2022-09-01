@@ -1,6 +1,6 @@
 {% extends "fa_base.html" %}
 {% import 'cyber_learn_logo.html' as logo %}
-{% import "vuln_macros.html" as vuln_macros %}
+{% import "controller_macros.html" as vuln_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
 {% import "delete_class_macro.html" as delete_class_macro %}
 {% block title %}Secure Training and Operations Center{% endblock %}
@@ -34,6 +34,7 @@
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/state_manager.js') }}"></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -85,6 +86,7 @@
                     <div id="error-msg-div"></div>
                     <div id="home-content-ctn" class="d-inline-flex">
                         <div id="stoc-table-div" class="table-responsive table-ctn col-10">
+                            <div class="loadAnimationWrapper"><div id="loadAnimation"></div></div>
                             <div class="server-manage-wrapper">
                                 <div class="server-toolbar-div">
                                     <ul class="server-toolbar">
@@ -94,19 +96,21 @@
                                                 <i class="fa fa-plus-circle fa-lg margin-r-5" style="color: blue;"></i>Create</button>
                                         </li>
                                         <li class="server-control">
-                                            <button type="button" onclick="manage_stoc(2);"
-                                                class="server-control-btn no-select server-action">
-                                                <i class="fa fa-play-circle fa-lg margin-r-5"></i>Start</button>
+                                            <button id="startStocBtn" type="button" onclick="manage_stoc(2);"
+                                                class="server-control-btn no-select server-action disabled" data-toggle="tooltip"
+                                                   data-placement="bottom" title="Select a build" disabled aria-disabled="true">
+                                                <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start</button>
                                         </li>
                                         <li class="server-control">
-                                            <button type="button" onclick="manage_stoc(4)"
-                                                    class="server-control-btn no-select server-action">
-                                                <i class="fa fa-stop-circle fa-lg margin-r-5"></i>Stop</button>
+                                            <button id="stopStocBtn" type="button" onclick="manage_stoc(4)"
+                                                    class="server-control-btn no-select server-action disabled" data-toggle="tooltip"
+                                                   data-placement="bottom" title="Select a build" disabled aria-disabled="true">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop</button>
                                         </li>
-                                       <li class="server-control">
-                                           <button type="button" onclick="manage_stoc(3);"
-                                                class="server-control-btn btn-delete no-select server-action">
-                                               <i class="fa fa-trash fa-lg margin-r-5"></i>Delete</button>
+                                       <li class="server-control" title="Select a build" data-toggle="tooltip" data-placement="bottom">
+                                           <button id='deleteStocBtn' type="button" onclick="manage_stoc(3);"
+                                                class="server-control-btn btn-delete no-select server-action disabled" disabled aria-disabled="true">
+                                               <i class="fa fa-trash fa-lg margin-r-5 icon-light" style="color: blue;"></i>Delete</button>
                                        </li>
                                     </ul>
                                 </div>
@@ -116,6 +120,7 @@
                                     <tr id="stoc-table-headers">
                                         <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value="" onclick="select_all(this, 'stocIdRow');"/></th>
                                         <th class="prevent-select text-center">STOC</th>
+                                        <th class="prevent-select text-center">Status</th>
                                         <th class="prevent-select text-center">Class</th>
                                         <th class="prevent-select text-center">Description</th>
                                     </tr>
@@ -126,9 +131,20 @@
                                     <tr>
                                         <td>
                                             <input id="{{ stoc.key.name }}" class="stocIdRow" type="checkbox" value=""
-                                            name="stoc_id" onclick="toggleServerControl(this, 'server-action')"/>
+                                            name="stoc_id"/>
                                         </td>
                                         <td>{{ stoc.key.name }}</td>
+                                        <td id="{{ stoc.key.name }}StatusDiv">
+                                            {% if stoc.state == 50 %}
+                                                <i class="fa fa-circle fa-lg buildState running" data-toggle="tooltip" data-placement="bottom" title="RUNNING"></i>
+                                            {% elif stoc.state == 53 %}
+                                                <i class="fa fa-stop-circle fa-lg buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
+                                            {% elif stoc.state == 70 %}
+                                                <i class="fa fa-stop-circle fa-lg buildState deleted" data-toggle="tooltip" data-placement="bottom" title="DELETED"></i>
+                                            {% else %}
+                                                <i class="fa fa-circle fa-lg buildState transition" data-toggle="tooltip" data-placement="bottom" title="WORKING"></i>
+                                            {% endif %}
+                                        </td>
                                         <td>
                                             {% if stoc.active_class %}
                                                 <a href="/fixed-arena/class/{{ stoc.active_class }}"
@@ -148,14 +164,20 @@
                                     {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
                                 {% endfor %}
                                 <tr>
-                                    <td><input id="untapped_stoc" class="stocIdRow" type="checkbox" value=""/></td>
+                                    <td><input id="untapped_stoc" class="stocIdRow" type="checkbox" value="" name="stoc_id"/></td>
                                     <td>untapped</td>
+                                    <td>
+                                        <i class="fa fa-stop-circle buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
+                                    </td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
                                 </tr>
                                 <tr>
-                                    <td><input class="stocIdRow" id="forensics_stoc" type="checkbox" value=""/></td>
+                                    <td><input class="stocIdRow" id="forensics_stoc" type="checkbox" value="" name="stoc_id"/></td>
                                     <td>Forensics</td>
+                                    <td>
+                                        <i class="fa fa-stop-circle buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
+                                    </td>
                                     <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
                                     <td>STOC object, description, or list of fixed servers for STOC</td>
                                 </tr>

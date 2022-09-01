@@ -1,7 +1,12 @@
 $(document).ready(function() {
     createStocManager();
     createClassManager();
+    toggleServerControl();
 });
+var json_headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8'
+}
 
 function send_request(args){
     /*
@@ -93,19 +98,62 @@ function send_request(args){
         console.log(err);
     }
 }
-function toggleServerControl(class_name){
-    // Enables the server control buttons based on class
-    let target_buttons = document.getElementsByClassName(class_name);
-    for (let i=0, n=target_buttons.length; i < n; i++){
-        enable_object(target_buttons[i].id, target_buttons[i].checked);
-    }
+function toggleServerControl(){
+    // Enables the server control buttons based on class, server-action
+    let target_buttons = document.getElementsByClassName('server-action');
+    $('.stocIdRow').on('change', function (){
+        var checked_stocs = $('input[name=stoc_id]:checked');
+            for (let i=0, n=target_buttons.length; i < n; i++){
+                if (target_buttons[i].id === 'deleteStocBtn') {
+                    let msg = '';
+                    if (!checked_stocs.length === 1){
+                        let btnParent = target_buttons[i].parentElement;
+                        if (checked_stocs.length > 1) {
+                            msg = 'Cannot delete multiple!';
+                        } else if (!checked_stocs.length) {
+                            msg = 'Must select a build!';
+                        }
+                        btnParent.setAttribute('title', msg);
+                        btnParent.setAttribute('data-original-title', msg);
+                        btnParent.setAttribute('tooltip', 'update');
+                        btnParent.setAttribute('tooltip', 'show');
+                        continue;
+                    }
+                }
+                enable_object(target_buttons[i].id, this.checked);
+            } // end for
+    });
+    $('.select-all').on('change', function (){
+        // Add event listener for select-all checkbox
+        for (let i=0, n=target_buttons.length; i < n; i++){
+            if (target_buttons[i].id === 'deleteStocBtn') {
+                let msg = '';
+                msg = 'Cannot delete multiple!';
+                let btnParent = target_buttons[i].parentElement;
+                btnParent.setAttribute('title', msg);
+                btnParent.setAttribute('data-original-title', msg);
+                btnParent.setAttribute('tooltip', 'update');
+                btnParent.setAttribute('tooltip', 'show');
+                continue;
+            }
+            enable_object(target_buttons[i].id, this.checked);
+        } // end for
+    });
 }
-function enable_object(obj_id, enable=false, clear=false) {
+function enable_object(obj_id, enable, hide=false, clear=false) {
     let obj = $('#' + obj_id);
     if (typeof enable == "boolean") {
-        obj.prop("disabled", enable);
-        obj.prop('hidden', enable)
-
+        obj.attr('hidden', hide);
+        console.log('disabled = ' + enable);
+        if (enable === true) {
+            obj.prop('disabled', false);
+            obj.prop('aria-disabled', false);
+            obj.removeClass('disabled');
+        } else {
+            obj.addClass('disabled');
+            obj.prop('disabled', true);
+            obj.prop('aria-disabled', true);
+        }
         // Cases where we want to remove old form artifacts,
         // i.e Template filter buttons
         if (clear === true) {
@@ -120,6 +168,7 @@ function select_all(caller, class_name){
     for (let i=0, n=checkboxes.length; i < n; i++){
         checkboxes[i].checked = caller.checked;
     }
+    toggleServerControl('server-action');
 }
 function setDatetimeLimits(){
     let today = new Date();
@@ -148,22 +197,51 @@ function manage_stoc(action){
     $('.stocIdRow:checked').each(function () {
         selected.push(this.id);
     })
-
-    let method = '';
+    let url = '/api/fixed-arena/';
     if (action === 3) {
-        method = 'DELETE';
-        if (selected.length > 1){
-            let url = '/api/fixed-arena/?stoc_ids=' + JSON.stringify(selected)
-            send_request({'url': url, 'action': action, 'method': method});
-        }
-        else {
-            let url = '/api/fixed-arena/' + selected[0];
-            send_request({'url': url, 'action': action, 'method': method});
+        if (selected.length === 1) {
+            url = url + selected[0];
+            fetch(url, {
+                method: 'DELETE',
+                headers: json_headers,
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data['status'] === 200) {
+                        new StateManager(2, build_id, 72).getState();
+                    }
+                });
+        } else {
+            console.warn('400: BAD REQUEST!');
         }
     }
     else if (action === 2 || action === 4) {
-        method = 'PUT';
-        send_request({'url': '/api/fixed-arena/', 'action': action, 'method': method, 'data': selected});
+        // START or STOP request
+        let jsonData = '';
+        if (selected.length === 1) {
+            var build_id = selected[0];
+            url = url + build_id;
+            jsonData = JSON.stringify({'build_id': build_id, 'action': action});
+        } else {
+            jsonData = JSON.stringify({'stoc_ids': selected, 'action': action});
+        }
+        fetch(url, {
+            method: 'PUT',
+            headers: json_headers,
+            body: jsonData,
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data['status'] === 200) {
+                    let endState = ''
+                    if (action === 2) {
+                        endState = 50;
+                    } else {
+                        endState = 51;
+                    }
+                    new StateManager(2, build_id, endState).getState();
+                }
+            });
     }
 }
 function createStocManager(){
@@ -231,7 +309,6 @@ function copy_student_links(){
     let temp_div = document.createElement("textarea");
     let links = document.getElementsByClassName('workspace-link');
     for (var i = 0; i < links.length; i++){
-
         temp_div.value += links[i].href + "\n";
     }
     temp_div.id = "temp_div";

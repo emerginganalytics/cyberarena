@@ -363,6 +363,11 @@ button.btn-delete:hover, button.btn-delete:active{
     color: whitesmoke;
 }
 
+.server-control-btn:disabled {
+    pointer-events: none;
+    opacity: 0.3;
+}
+
 /* Load animation styles*/
 .loader {
     border: 5px solid #f3f3f3; /* Light grey */
