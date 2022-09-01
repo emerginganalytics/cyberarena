@@ -17,45 +17,6 @@
         })
     }
 
-    function prepare_survey(){
-        //Set up display modal for student feedback survey
-        var modal = document.getElementById("surveyModal");
-        var btn = document.getElementById("surveyBtn");
-        var span = document.getElementsByClassName("close-modal")[0];
-
-        btn.onclick = function() {
-            modal.style.display = "block";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-        }
-        
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        $("#survey_form").on('submit',function(event){
-            event.preventDefault();
-            var feedback_data = new FormData(this);
-            $.ajax({
-                    type: "POST",
-                    url: "/student/feedback/{{ workout.key.name }}",
-                    data: feedback_data,
-                    contentType: "application/json;charset=utf-8",
-                    data: feedback_data,
-                    contentType: false,
-                    processData: false,
-                    success: function(data){
-                        var jsonData = JSON.parse(data);
-                        alert("Survey submitted!");
-                    }
-                })
-        });
-    }
-
     function prepare_assessment(){
         $(".workout_assessment_form").submit(function(e) {
             e.preventDefault();
@@ -127,10 +88,6 @@
         
         //Set up workout assessment
         prepare_assessment();
-        
-        //Set up student feeback survey
-        prepare_survey();
-
     });
     
     </script>
@@ -284,19 +241,6 @@
     .question_group{
         border: 1px solid lightgray;
         margin-bottom:0;
-    }
-    .survey_btn {
-        background-color: var(--main_color, #6e2639)!important;
-        color: white !important;
-        width: 10em;
-        border-radius: 4px;
-        border: None;
-        margin-bottom: 20px;
-        padding: 5px;
-    }
-    .survey_btn:hover {
-        background-color:white!important;
-        color:var(--main_color, #6e2639)!important;
     }
 </style>
 
@@ -576,26 +520,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
         {% if workout['type'] %}
         <p>Check the <a href="/{{workout['type']}}_faq">{{workout['type']}} FAQ page</a></p>
         {% endif %}
-                    <button id="surveyBtn" class="survey_btn">Complete Survey</button>
-
-                    <div id="surveyModal" class="modal">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="survey-title">SURVEY FORM</h1>
-                                <span class="close-modal">&times;</span>
-                            </div>
-                            <div class="modal-body">
-                                <form id="survey_form" method="post" enctype="multipart/form-data">
-                                    {% for key in survey.keys() %}
-                                        <label for={{survey[key]}}>{{survey[key]}}</label>
-                                        <input type='textarea' class="text-input" id={{survey[key]}} size="60" name={{survey[key]}}/>
-                                        <br>
-                                    {% endfor %}
-                                    <input type="submit" value="Submit Survey" name="Submit" class="survey_btn"/>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 </div> <!--Assessment Dropdown-->
                 {% endif %}
         </div>

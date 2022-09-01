@@ -2,6 +2,17 @@ from common.globals import ds_client, BUILD_STATES, WORKOUT_TYPES
 from common.delete_expired_workouts import DeletionManager
 from common.state_transition import state_transition
 from common.budget_management import BudgetManager
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
+
+
+# Parse command line arguments
+parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
+parser.add_argument("-u", "--unit", default=None, help="Unit to delete")
+
+args = vars(parser.parse_args())
+
+# Set up parameters
+unit_id = args.get('unit', None)
 
 
 def delete_unit(unit_id, delete_key=False, delete_immediately=False):
@@ -25,5 +36,13 @@ def delete_unit(unit_id, delete_key=False, delete_immediately=False):
         print("Cannot delete misfits. Budget exceeded variable is set for this project.")
 
 if __name__ == "__main__":
-    unit_id = 'jqpipbsovv'
+    if not unit_id:
+        unit_id = str(input(f"What unit ID do you wish to delete?: "))
     delete_unit(unit_id)
+    while True:
+        response = str(input("Do you wish to delete any additional units (y/N)?"))
+        if not response or str.upper(response) == "N":
+            break
+        else:
+            unit_id = str(input(f"What unit ID do you wish to delete?: "))
+            delete_unit(unit_id)
