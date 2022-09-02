@@ -1,9 +1,9 @@
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from v2.cloud_functions.cloud_fn_utilities.globals import Buckets
-from v2.cloud_functions.cloud_fn_utilities.gcp.cloud_env import CloudEnv
-from v2.main_app.main_app_utilities.gcp.bucket_manager import BucketManager
-from v2.main_app.main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from utilities.globals import Buckets
+from utilities.gcp.cloud_env import CloudEnv
+from utilities.gcp.bucket_manager import BucketManager
+from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 
 
