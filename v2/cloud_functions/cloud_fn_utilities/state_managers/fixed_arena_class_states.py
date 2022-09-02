@@ -140,7 +140,7 @@ class FixedArenaClassStateManager:
             return True
         elif new_state == self.s.BUILDING_STUDENT_ENTRY and existing_state.value < new_state.value:
             return True
-        elif new_state == self.s.READY and existing_state in [self.COMPLETION_STATES]:
+        elif new_state == self.s.READY and existing_state in [self.COMPLETION_STATES, self.s.BUILDING_STUDENT_ENTRY]:
             return True
         elif new_state in self.COMPLETION_STATES:
             return True
