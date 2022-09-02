@@ -45,6 +45,7 @@ class BuildSpecToCloud:
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
+            cyber_arena_spec['creation_timestamp'] = str(datetime.fromtimestamp(get_current_timestamp_utc()))
             self.build_id = cyber_arena_spec['id']
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value,
