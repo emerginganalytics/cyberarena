@@ -5,6 +5,8 @@ import googleapiclient.discovery
 import logging
 from google.cloud import logging_v2
 from googleapiclient.errors import HttpError
+from googleapiclient import errors
+from oauth2client.client import GoogleCredentials
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
@@ -210,8 +212,13 @@ class ComputeManager:
     def _add_disks(self):
         disks = None
         if self.server_spec.get('build_type', None) != BuildConstants.ServerBuildType.MACHINE_IMAGE:
-            image_response = self.compute.images()\
-                .get(project=self.env.project, image=self.server_spec['image']).execute()
+            try:
+                image_response = self.compute.images()\
+                    .get(project=self.env.project, image=self.server_spec['image']).execute()
+            except errors.HttpError as err:
+                # Something went wrong, print out some information.
+                print('There was an error creating the model. Check the details:')
+                print(err._get_reason())
             image = image_response['selfLink']
             disks = [
                 {

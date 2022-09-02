@@ -33,11 +33,11 @@ class TestFixedArena:
         self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{fixed_arena}.yaml")
+        fixed_arena_yaml = self.bm.get(bucket='cyber-learn-test_build-specs', file=f"{Buckets.Folders.SPECS}{fixed_arena}.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
-        fab = FixedArena(fixed_arena_id=build_spec['id'], debug=True)
+        fab = FixedArena(build_id=build_spec['id'], debug=True)
         fab.build_fixed_arena()
 
 
