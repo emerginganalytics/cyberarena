@@ -37,7 +37,7 @@ class FixedArenaClassSchema(Schema):
     summary = fields.Nested('CyberArenaSummarySchema', required=True)
     workspace_servers = fields.Nested('ServerSchema', many=True, required=True)
     fixed_arena_servers = fields.List(fields.Str, description='A list of servers to turn on in the fixed arena.',
-                                      required=True)
+                                      default=[])
     assessment = fields.Nested('AssessmentSchema', required=False)
 
 

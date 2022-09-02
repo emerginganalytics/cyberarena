@@ -31,7 +31,10 @@ class StateManager {
         this.old_state = '';
         this.bad_states = [60, 61, 62, 72];
         this.url = this.__getURL__();
+        // Polling animation Boolean values
         this.waiting = false; // False if no wait animation was set
+        this.table_animation = false; // False if no table animation was set
+        this.create_class_animation = false; // False if no create class animation was set
 
         /* If check_multiple === false, __update_visuals__ will only update specified build
            (e.g. a single fixed-arena was started in table of existing fixed-arenas). */
@@ -39,11 +42,12 @@ class StateManager {
 
     }
     getState(){
-        // TODO: Need to update to handle monitoring multiple individual builds simultaneously
-        // Ideally, as each build completes, stop poll only for that build. Once all builds
-        // complete,
+        // This method initiates state polling for basic build actions (START, STOP, etc)
 
-        // Call this method to initiate state polling
+        /* TODO: Need to update to handle monitoring multiple individual builds simultaneously
+        *        Ideally, as each build completes, stop poll only for that build. Once all builds
+        *        complete
+        * */
         fetch(this.url, {
             method: 'GET',
             headers: {
@@ -58,6 +62,57 @@ class StateManager {
                 console.log('StateManager returned ' + result);
             })
             .catch(error => console.warn(error));
+    }
+    poll_create_stoc(table_id){
+        /*
+        * When resources are during build state, there will be a brief period of time where the build_id
+        * doesn't exist yet. This
+        * */
+        // Create table load animation
+        if (this.build_type === 2) {
+            if (!this.table_animation){
+                this.__table_row_animation__(table_id);
+                this.table_animation = true;
+            }
+        } else if (this.build_type === 3) {
+            fetch(this.url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json; charset=UTF-8'
+                }
+            })
+                .then(response => response.json())
+                .then((data) => {
+                    console.log(data);
+                })
+                .catch(error => console.warn(error));
+        }
+    }
+    poll_create_class() {
+        /* description.
+        * - 1. Hide create class modal in fixed_arena.js
+        * - 2. Check for build_id in fixed_arena['active_class']
+        * - 3. If (active_class exists) => refresh page
+        *   Else => wait 15s, poll again
+        * */
+        fetch(this.url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+        })
+            .then(response => response.json())
+            .then((data) => {
+                this.__waiting_animation__(data['state']);
+                if (data['active_class' !== 'null'] && data['active_class'] !==  ''){
+                    window.location.reload();
+                } else {
+                    this.__sleep__(100);
+                    this.poll_create_class();
+                }
+            })
     }
     __getURL__(){
         if (this.build_type === 2){
@@ -94,9 +149,9 @@ class StateManager {
                 } else {
                     // Build action is not complete; Wait 30s before checking again
                     this.__updateVisuals__(response['data']['state']);
-                    await this.__sleep__(300)
+                    await this.__sleep__(3000)
                         .then(() => {
-                            this.getState()
+                            this.getState();
                         });
                 }
             } else {
@@ -163,20 +218,32 @@ class StateManager {
                 current_dot.setAttribute('tooltip', 'update');
                 current_dot.setAttribute('tooltip', 'show');
             }
-            // If this is the first time running, init the load animation
-            if (!(this.waiting)) {
-                let loadElem = $('.loadAnimationWrapper').find('#loadAnimation');
-                if (!(state === this.end_state)) {
-                    loadElem.addClass('loadAnimation');
-                    // Set waiting to true to avoid triggering the animation multiple times
-                    this.waiting = true;
-                } else {
-                    // End state met; Remove animation
-                    loadElem.classList.remove('loadAnimation');
-                    this.waiting = false;
-                }
-            }
+            this.__waiting_animation__(state);
             this.old_state = state;
+        }
+    }
+    __waiting_animation__(state){
+        // If animation is not already created, insert class
+        if (!this.waiting){
+            let loadElem = $('.loadAnimationWrapper').find('#loadAnimation');
+            if (!(state === this.end_state)) {
+                loadElem.addClass('loadAnimation');
+                // Set waiting to true to avoid triggering the animation multiple times
+                this.waiting = true;
+            } else {
+                // End state met; Remove animation
+                loadElem.classList.remove('loadAnimation');
+                this.waiting = false;
+            }
+        }
+    }
+    __table_row_animation__(table_id){
+        let table = document.getElementById("" + table_id);
+        let row = table.insertRow(0);
+        let cells = $('#' + table_id).find('th').length
+        for (let i = 0; i < cells; i++){
+            let new_cell = row.insertCell(i);
+            new_cell.classList.add('table-row-animation');
         }
     }
     __sleep__(ms){

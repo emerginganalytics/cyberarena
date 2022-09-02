@@ -8,96 +8,23 @@ var json_headers = {
     'Content-Type': 'application/json; charset=UTF-8'
 }
 
-function send_request(args){
-    /*
-    * This function is adding unneeded complexity. Each object action function should have
-    * their own fetch request attached. This will help with readability and reduce the amount
-    * of logic needed to write at the cost of adding a few extra lines :)
-    * */
-    // Build the URL
-    let url = '';
-    if (!('url' in args)) {
-        url = '/api/fixed-arena/' + args['build_type'] + '/';
-        if ('build_id' in args) {
-            url = '/api/fixed-arena/' + args['build_type'] + '/' + args['build_id'];
-        }
-    }
-    else { url = args['url']; }
-    let request_headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json; charset=UTF-8'
-    }
-    if ('data' in args) {
-        if (args['method'] === 'POST'){
-           fetch(url, {
-                method: args['method'],
-                headers: request_headers,
-                body: JSON.stringify(args['data'])
-            })
-            .then((request) =>
-                request.json())
-            .then((response) => {
-                success(response, true);})
-            .catch((err) => {
-                error(err);
-            });
-        }
-        else {
-            fetch(url, {
-                method: args['method'],
-                headers: request_headers,
-                body: JSON.stringify(args['data'])
-            })
-            .then((request) =>
-                request.json())
-            .then((response) => {
-                success(response);
-            })
-            .catch((err) => {
-                error(err);
-            });
-        }
-    }
-    // Not sure where this is used
-    else {
-        fetch(url, {
-            method: args['method'],
-            headers: request_headers
-        })
-            .then((request) =>
-                request.json())
-            .then((response) => {
-                success(response);})
-            .catch((err) => {
-                error(err);
-            });
-    }
-    // Response functions
-    function success(resp, clear=null) {
-        if (resp['status'] === 200){
-            if (clear)
-                // Clear post submission history
-                window.history.replaceState("", "", window.location.href)
-            // Request successful, refresh location and clear any query strings, if any
-            window.location.replace(window.location.href.split('?')[0]);
-        }
-        else {
-            let errorDiv = $('error-msg-div');
-            errorDiv.addClass(["text-center", "p-3", "col-10"]);
+/*
+success(){
+    let errorDiv = $('error-msg-div');
+    errorDiv.addClass(["text-center", "p-3", "col-10"]);
 
-            // Create error element
-            let errorP = document.createElement("p");
-            errorP.id = 'error-msg-p';
-            errorP.textContent = resp['message'];
-            errorP.className = "text-danger";
-            errorDiv.append(errorP);
-        }
-    }
-    function error (err) {
-        // Will only be called for HTTP 500
-        console.log(err);
-    }
+    // Create error element
+    let errorP = document.createElement("p");
+    errorP.id = 'error-msg-p';
+    errorP.textContent = resp['message'];
+    errorP.className = "text-danger";
+    errorDiv.append(errorP);
 }
+function error (err) {
+    // Will only be called for HTTP 500
+    console.log(err);
+}
+*/
 function toggleServerControl(){
     // Enables the server control buttons based on class, server-action
     let target_buttons = document.getElementsByClassName('server-action');
@@ -251,57 +178,86 @@ function createStocManager(){
             e.preventDefault();
             const submitCreateStoc = document.getElementById('submitCreateStoc');
             submitCreateStoc.disabled = true;
-            let stocModal = $("create-stoc-modal");
-            stocModal.modal('toggle');
-            stocModal.modal('hide');
-
+            $("#create-stoc-modal").modal('toggle');
             /* Convert form to json object */
             const formData = {};
             for (const pair of new FormData(createStocForm)) {
                 formData[pair[0]] = pair[1]
             }
             console.log(formData);
-            send_request({'url': '/api/fixed-arena/', 'method': 'POST', 'data': formData});
+            fetch('/api/fixed-arena/', {
+                method: 'POST',
+                headers: json_headers,
+                body: JSON.stringify(formData),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data['status'] === 200) {
+                            new StateManager(2, formData['stoc_id'], 53).poll_create_stoc();
+                        }
+                    });
         });
     }
 }
 function manage_class(action, build_id=null) {
-    let args = {}
-    console.log(build_id)
-    console.log(action)
+    let end_state = 0;
     if (action === 2 || action === 4) {
         let body_data = {'action': action}
-        args = {'build_type': 'class', 'build_id': build_id, 'method': 'PUT', 'data': body_data}
-        send_request(args);
+        fetch('/api/fixed-arena/class/' + build_id, {
+            method: 'PUT',
+            headers: json_headers,
+            body: JSON.stringify(body_data)
+        })
+            .then(response => response.json())
+            .then((data) => {
+                if (action === 4) {
+                    end_state = 53;
+                } else {
+                    end_state = 50;
+                }
+                new StateManager(3, build_id, end_state).getState();
+            });
     }
     else if (action === 3) {
         // Hide modal and send Delete request
-        let deleteModal = $("modal_" + build_id);
-        deleteModal.modal('toggle');
-        deleteModal.modal('hide');
-        args = {'build_type': 'class', 'build_id': build_id, 'method': 'DELETE'};
-        send_request(args);
+        $("#modal_" + build_id).modal('toggle');
+        fetch('/api/fixed-arena/class/' + build_id, {
+            method: 'DELETE',
+            headers: json_headers
+        })
+            .then(response => response.json())
+            .then((data) => {
+                new StateManager(3, build_id, 72).getState();
+            });
     }
 }
 function createClassManager(){
-    let args = {}
     const createClassForm = document.querySelector('#create-class-form');
     if (createClassForm) {
         createClassForm.addEventListener("submit", function (e) {
+            e.stopImmediatePropagation();
             e.preventDefault();
             const submitCreateClass = document.getElementById('submitCreateClass');
             submitCreateClass.disabled = true;
-            let classModal = $('create-class-modal');
-            classModal.modal('toggle');
-            classModal.modal('hide');
+            // Close modal
+            $('#create-class-modal').modal('hide');
 
             /* Convert form to json object */
             const formData = {};
             for (const pair of new FormData(createClassForm)) {
                 formData[pair[0]] = pair[1]
             }
-            args = {'build_type': 'class', 'method': 'POST', 'data': formData}
-            send_request(args)
+            fetch('/api/fixed-arena/class/', {
+                method: 'POST',
+                headers: json_headers,
+                body: JSON.stringify(formData),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data['status'] === 200) {
+                            new StateManager(3, formData['stoc_id'], 53).poll_create_class();
+                        }
+                    });
         });
     }
 }
