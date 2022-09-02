@@ -18,7 +18,7 @@ class CyberArenaApp:
     DEPLOY_CLOUD_RUN_COMMAND = "gcloud run deploy cyberarena-v2 --image gcr.io/{project}/cyberarena --memory=1024Mi " \
                                "--platform=managed --region={region} --allow-unauthenticated " \
                                "--service-account=cyberarena-service@{project}.iam.gserviceaccount.com"
-    MAP_DNS_COMMAND = "gcloud beta run domain-mappings create --service cyberarena-v2 --domain={dns}"
+    MAP_DNS_COMMAND = "gcloud beta run domain-mappings create --service cyberarena-v2 --domain={dns} --region={region}"
     DEPLOY_COULD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
                                     "--region={region} --memory=1024Mi " \
                                     "--entry-point=cyber_arena_cloud_function " \
@@ -59,7 +59,7 @@ class CyberArenaApp:
                                  f"{self.env.main_app_url}? (Y/n): ")).upper() \
             if not self.suppress else "Y"
         if confirmation == "Y":
-            command = self.MAP_DNS_COMMAND.format(dns=self.env.main_app_url)
+            command = self.MAP_DNS_COMMAND.format(dns=self.env.main_app_url, region=self.env.region)
             ret = subprocess.run(command, capture_output=True, shell=True)
             print(ret.stderr.decode())
         return True

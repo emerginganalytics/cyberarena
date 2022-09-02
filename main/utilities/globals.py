@@ -26,7 +26,7 @@ else:
     dnszone = 'cybergym-public'
 main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
 guac_db_password = myconfig.get_variable('guac_password')
-guac_db_password = guac_db_password.value.decode("utf-8")
+guac_db_password = guac_db_password.value.decode("utf-8") if guac_db_password else None
 
 ds_client = datastore.Client()
 compute = googleapiclient.discovery.build('compute', 'v1')

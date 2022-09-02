@@ -20,7 +20,7 @@ from api.fixed_arena_workspace import FixedArenaWorkspace
 from api.unit import Unit
 from api.workout import Workout
 from api.attack_specs import AttackSpecs
-from api.command_and_control import CommandAndControl
+from api.controller import Controller
 from api.iot_device import IoTDevice
 from api.user import Users
 
@@ -261,7 +261,7 @@ def privacy():
 
 def register_api(view, endpoint, url, pk='id', pk_type='string'):
     view_func = view.as_view(endpoint)
-    app.add_url_rule(url, view_func=view_func, methods=['GET'])
+    app.add_url_rule(url, view_func=view_func, methods=['GET', 'PUT'])
     app.add_url_rule(url, view_func=view_func, methods=['POST'])
     app.add_url_rule(f'{url}<{pk_type}:{pk}>', view_func=view_func,
                      methods=['GET', 'PUT', 'DELETE'])
@@ -275,8 +275,8 @@ register_api(view=IoTDevice, endpoint='iot', url='/api/iot/', pk='device_id')
 register_api(view=FixedArena, endpoint='fixed-arena', url='/api/fixed-arena/', pk='build_id')
 register_api(view=FixedArenaClass, endpoint='class', url='/api/fixed-arena/class/', pk='build_id')
 register_api(view=FixedArenaWorkspace, endpoint='workspace', url='/api/fixed-arena/workspace/', pk='build_id')
-register_api(view=CommandAndControl, endpoint='inject', url='/api/inject/', pk='build_id')
-register_api(view=AttackSpecs, endpoint='templates', url='/api/inject/templates/', pk='build_id')
+register_api(view=Controller, endpoint='controller', url='/api/controller/', pk='build_id')
+register_api(view=AttackSpecs, endpoint='templates', url='/api/controller/templates/', pk='build_id')
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
 
 

@@ -12,7 +12,7 @@
     4. Create API credentials to use in the main application by going to 
         https://console.cloud.google.com/apis/credentials and clicking on Create Credentials and selecting API key. 
         Copy this API key. You will need to use this when deploying the application.
-4. Enable the DNS service and create a new managed domain (e.g. mycyberarena.com)
+4. Enable the DNS service and create a new managed domain (e.g. mycyberarena.com). **The zone must be named cybergym-public.**
 5. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
     1. Compute Engine API (Subnetworks) - MCB * 2
     2. Compute Engine API (Networks) - MCB * 1

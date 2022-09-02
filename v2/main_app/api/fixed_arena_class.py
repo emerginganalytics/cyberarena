@@ -33,7 +33,7 @@ class FixedArenaClass(MethodView):
 
     def get(self, build_id=None):
         if build_id:
-            fa_class = DataStoreManager(key_id=self.kind).query(filter_key='id', op='=', value=build_id)
+            fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
             if fa_class:
                 return self.http_resp(code=200, data=fa_class).prepare_response()
             return self.http_resp(code=404).prepare_response()
@@ -67,9 +67,8 @@ class FixedArenaClass(MethodView):
                         'student_emails': [],
                         'expires': expire_ts
                     }
-                    """build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=False)
-                    build_spec_to_cloud.commit()"""
-                    print(f'Building {build_id}')
+                    build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+                    build_spec_to_cloud.commit()
                     return self.http_resp(code=200).prepare_response()
                 # Requested STOC already has an active class; Return 409 CONFLICT
                 return self.http_resp(code=409, msg="CONFLICT: Class already exists for requested STOC!").prepare_response()
@@ -78,10 +77,9 @@ class FixedArenaClass(MethodView):
     @instructor_required
     def delete(self, build_id=None):
         if build_id:
-            print(f'delete class {build_id}')
-            """self.pubsub_mgr.msg(handler=str(self.handler.CONTROL.value), build_id=str(build_id),
+            self.pubsub_mgr.msg(handler=str(self.handler.CONTROL.value), build_id=str(build_id),
                                 action=str(self.pubsub_actions.DELETE.value),
-                                cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value))"""
+                                cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value))
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -93,8 +91,8 @@ class FixedArenaClass(MethodView):
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value]
             if action and action in valid_actions:
                 print(f'{build_id} :: {args}')
-                """self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                     build_id=str(build_id),
-                                    cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value))"""
+                                    cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value))
                 return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()

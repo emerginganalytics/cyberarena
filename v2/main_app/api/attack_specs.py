@@ -37,8 +37,8 @@ class AttackSpecs(MethodView):
             attack_specs_query = DataStoreManager(key_id=build_id).query()
             attack_specs = list(attack_specs_query.fetch())
             if attack_specs:
-                return json.dumps({'data': attack_specs})
-            return self.http_resp(code=404)
+                return self.http_resp(code=200, data={'data': attack_specs}).prepare_response()
+            return self.http_resp(code=404).prepare_response()
 
     def post(self):
         """Takes filter items and returns a filtered template list
@@ -59,18 +59,18 @@ class AttackSpecs(MethodView):
                 if check:
                     filtered_specs.append(spec)
         if filtered_specs:
-            return json.dumps({'data': filtered_specs})
-        return self.http_resp(code=404)
+            return self.http_resp(code=200, data={'data': filtered_specs}).prepare_response()
+        return self.http_resp(code=404).prepare_response()
 
     def delete(self, build_id):
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     @admin_required
     def put(self, build_id=None):
         recv_data = request.json
         if recv_data.get('update', None):
             AttackSpecToCloud().update()
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     @staticmethod
     def apply_filter(obj=None, filters=None):

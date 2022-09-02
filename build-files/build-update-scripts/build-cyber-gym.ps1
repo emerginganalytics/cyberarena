@@ -5,7 +5,7 @@ This script uses gcloud and gsutil to build a new Cyber Gym for a Google Cloud P
 
 Preqrequisites:
     1. Set up the Identity Platform service and obtain the API key as specified in the documentation.
-    2. Enable the DNS service and create a new managed domain
+    2. Enable the DNS service and create a new managed domain. The zone must be named cybergym-public
     3. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
         a. Compute Engine API (Subnetworks) - MCB * 2
         b. Compute Engine API (Networks) - MCB * 1
@@ -113,7 +113,8 @@ if ($confirmation -eq 'y') {
     gcloud beta runtime-config configs variables set "api_key" $api_key --config-name "cybergym"
     gcloud beta runtime-config configs variables set "main_app_url" "https://cybergym$dns_suffix" --config-name "cybergym"
     gcloud beta runtime-config configs variables set "admin_email" $admin_email --config-name "cybergym"
-    $sqlpassword = Read-Host "Type in the Shodan API? "
+    $guac_password = Read-Host "Enter the password for the Apache guacamole database used in the lab-entry compute image."
+    gcloud beta runtime-config configs variables set "guac_password" $guac_password --config-name "cybergym"
 }
 # Create project database
 $confirmation = Read-Host "Do you want to create the mysql database at this time? (y/N)"
@@ -233,15 +234,6 @@ if ($confirmation -eq 'y') {
         --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
         --timeout=540s `
         --trigger-topic=medic
-    gcloud functions deploy --quiet function-admin-scripts `
-        --region=$region `
-        --memory=256MB `
-        --entry-point=cloud_fn_admin_scripts `
-        --runtime=python37 `
-        --source=$sourcepath `
-        --service-account=cybergym-service@"$project".iam.gserviceaccount.com `
-        --timeout=540s `
-        --trigger-topic=admin-scripts
     gcloud functions deploy --quiet function-budget-manager `
         --region=$region `
         --memory=256MB `

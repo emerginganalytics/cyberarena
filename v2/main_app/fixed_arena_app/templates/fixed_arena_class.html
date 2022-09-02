@@ -1,10 +1,11 @@
 {% extends "fa_base.html" %}
 {% import 'cyber_learn_logo.html' as logo %}
-{% import "vuln_macros.html" as vuln_macros %}
+{% import "controller_macros.html" as ctrl_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
 {% block title %}{{ fixed_arena_class.summary.name }}{% endblock title %}
 {% block nav_title %}{{ fixed_arena_class.summary.name }}{% endblock nav_title %}
 {% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('fixed_arena.static', filename='css/fixed_arena_styles.css') }}">
 {% endblock styles %}
 {% block navbar %}
@@ -29,7 +30,9 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
-    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena_utils.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/fixed_arena.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/state_manager.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('fixed_arena.static', filename='js/controller.js') }}"></script>
     <script>
         var teacher_email = null;
         var auth_config = {
@@ -119,16 +122,31 @@
                         </div>
                     </div>
                     <div id="workspace-servers" class="info-container">
+                        <div class="loadAnimationWrapper"><div id="loadAnimation"></div></div>
                         <div class="server-manage-wrapper">
                             <div class="server-toolbar-div">
                                 <ul class="server-toolbar">
                                     <li class="server-control">
-                                        <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
-                                            class="play btn-fa">Start Workspaces</button>
+                                         {% if fixed_arena_class.state == 51 %}
+                                            <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start Class</button>
+                                        {% else %}
+                                             <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select disabled" disabled aria-disabled="true">
+                                                 <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start Class</button>
+                                        {% endif %}
                                     </li>
                                     <li class="server-control">
-                                        <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
-                                                class="stop btn-fa">Stop Workspaces</button>
+                                        {% if fixed_arena_class.state == 50 %}
+                                            <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop Class</button>
+                                        {% else %}
+                                            <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
+                                                class="server-control-btn no-select disabled" disabled aria-disabled="true">
+                                                <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop Class</button>
+                                        {% endif %}
                                     </li>
                                 </ul>
                             </div>
@@ -136,7 +154,7 @@
                         <table id="workspace-table" class="table table-hover text-nowrap table-large">
                             <thead>
                                 <tr id="stoc-table-headers">
-                                    <th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value=""/></th>
+                                    <!--<th class="text-center"><input type="checkbox" class="select-all" id="workspace-select-all" value="" onclick="select_all(this, 'select-workspace')"/></th>-->
                                     <th class="prevent-select text-center">Status</th>
                                     <th class="prevent-select text-center">Workspace ID</th>
                                      <th class="prevent-select text-center">Student Name</th>
@@ -147,12 +165,27 @@
                             {% for workspace in workspaces %}
                                 {% set student_count = loop.index %}
                                 <tr>
-                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id"/></td>
+                                    <!--This is not needed at the moment as a class will either be in a total start or stop state;
+                                    <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id" class="select-workspace"/></td>-->
                                     <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
                                         <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
-                                        </span><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
-                                    <td><i class="fa fa-circle" style="color: #1d8037; font-size: 36px;"></i></td>
-                                    <td><a class='workspace-link' href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}">{{ workspace.key.name }}</a></td>
+                                        </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
+                                    <td>
+                                        {% if fixed_arena_class.state == 50 %}
+                                            <i class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="bottom" title="RUNNING"></i>
+                                        {% elif fixed_arena_class.state == 53 %}
+                                            <i class="fa fa-stop-circle buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
+                                        {% elif fixed_arena_class.state == 70 %}
+                                            <i class="fa fa-stop-circle buildState deleted" data-toggle="tooltip" data-placement="bottom" title="DELETED"></i>
+                                        {% else %}
+                                            <i class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="bottom" title="WORKING"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a class='workspace-link'
+                                           href="{{ url_for('student_app.fixed_arena_student', build_id=workspace.key.name) }}"
+                                           target="_blank">{{ workspace.key.name }}</a>
+                                    </td>
                                     <td id="workspace_student_name_{{ student_count }}">{{ workspace.student_name }}</td>
                                     {% if fixed_arena_class.workspace_settings.registration_required %}
                                         <td id="workspace_student_email_{{ student_count }}">workspace.student_email</td>
@@ -182,7 +215,7 @@
                                                                        placeholder="New Student Email" type="text" style="margin-bottom: 1em;"/>
                                                             {% endif %}
                                                             <a onclick="manage_student({{ student_count }}, '{{ workspace.key.name }}', {{ fixed_arena_class.workspace_settings.registration_required }})"
-                                                               class="btn-fa">Change</a>
+                                                               class="btn-fa no-select">Change</a>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -199,7 +232,7 @@
                         <!--Holds both form builder and attack results table-->
                         <div id="vuln-templates-container">
                              <table class="table table-hover" id="vuln-templates-table">
-                                 {{ vuln_macros.display_vulns(attack_spec.attack) }}
+                                 {{ ctrl_macros.display_vulns(attack_spec.attack) }}
                              </table>
                             <div id="vuln-template-btn-div">
                                 <button id='vuln-template-btn' class="btn btn-sm" type="button" disabled hidden>Select Template</button>
@@ -217,7 +250,7 @@
                                     <div class="modal-body">
                                         <form id="vuln-template-form" name="vuln-template-form" method="post" action="/api/inject/">
                                             <div id="vuln-template-args"></div>
-                                            {{ vuln_macros.target_network('vuln-template-form', workspaces, fixed_arena_class.workspace_settings.registration_required) }}
+                                            {{ ctrl_macros.target_network('vuln-template-form', workspaces, fixed_arena_class.workspace_settings.registration_required) }}
                                         </form>
                                     </div>
                                     <div class="modal-footer">
