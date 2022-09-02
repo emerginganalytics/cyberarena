@@ -58,7 +58,7 @@ class FixedArena:
             self.state_manager.state_transition(self.s.BUILDING_SERVERS)
             for server in self.fixed_arena['servers']:
                 server_name = f"{self.fixed_arena_id}-{server['name']}"
-                server['parent_id'] = self.fixed_arena_id,
+                server['parent_id'] = self.fixed_arena_id
                 server['parent_build_type'] = self.fixed_arena['build_type']
                 self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
                 if self.debug:
