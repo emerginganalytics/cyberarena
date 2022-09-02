@@ -31,7 +31,7 @@ class FirewallServer:
         @type full_build_spec: dict
         """
         self.env = CloudEnv()
-        self.s = ServerStateManager.States
+      #  self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None
@@ -119,6 +119,7 @@ class FirewallServer:
         self.firewall_server_spec['image'] = FirewallSettings.Fortinet.IMAGE
         fortinet_license_server = {
             'build_id': self.build_id,
+            'parent_id': self.build_id,
             'name': 'fortimanager',
             'build_type': BuildConstants.ServerBuildType.MACHINE_IMAGE,
             'machine_type': BuildConstants.MachineTypes.SMALL.value,

@@ -128,8 +128,8 @@ class BuildSpecification:
                           f"error and resync. The specification will not be uploaded to the project until the error "
                           f"is corrected.")
                     return False
-                else:
-                    return True
+                # else:
+                #    return True
 
     def _create_directories(self):
         directories = [

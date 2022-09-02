@@ -41,7 +41,7 @@ class BuildSpecToCloud:
         if 'build_type' not in cyber_arena_spec:
             raise ValidationError
 
-        cyber_arena_spec['creation_timestamp'] = str(datetime.fromtimestamp(get_current_timestamp_utc()))
+        cyber_arena_spec['creation_timestamp'] = get_current_timestamp_utc()       
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
