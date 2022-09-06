@@ -5,6 +5,7 @@ from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes
+from main_app_utilities.command_and_control.attack_spec_to_cloud import AttackSpecToCloud
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,8 +19,8 @@ __status__ = "Testing"
 
 class Controller(MethodView):
     """
-    API to manage the simulated Botnet
-    Each method, requires an id, build_id that either refers to:
+    API to manage the simulated Botnet; Specifically handlers the networ injects
+    Each method, requires a build_id that either refers to:
         - A specific attack (GET, PUT),
         - A fixed-arena to get all attack history from (GET)
         - An attack template to build (POST)
@@ -65,9 +66,12 @@ class Controller(MethodView):
         expires = recv_data.get('expires', None)
 
         # Send pubsub if all data exists
+        # TODO: Need to move the pubsub request to a Controller utilities class similar to
+        #  infrastructure_as_code.build_spec_to_cloud
         if build_id and network and mode and args and expires:
-            self.pubsub_manager.msg(handler=PubSub.Handlers.BOTNET, build_id=build_id,
-                                    network=network, mode=mode, args=args)
+            # Validate build and send to datastore
+            attack_to_cloud = AttackSpecToCloud().attack_to_ds(build_id=build_id,  network=network, mode=mode, args=args)
+            attack_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST').prepare_response()
 
@@ -84,6 +88,6 @@ class Controller(MethodView):
             # TODO: I'm not sure if we need an expire time for inject objects
             expires = args.get('expires', 2)
             if action in [PubSub.Actions.STOP.value, PubSub.Actions.START.value]:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.BOTNET, action=action, expires=expires)
+                self.pubsub_manager.msg(handler=PubSub.Handlers.BOTNET, build_id=build_id, action=action, expires=expires)
                 return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
