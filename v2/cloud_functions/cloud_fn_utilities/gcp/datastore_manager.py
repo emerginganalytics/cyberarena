@@ -45,11 +45,6 @@ class DataStoreManager:
             ds_entity = datastore.Entity(self.key)
             ds_entity.update(obj)
             self.ds_client.put(self._create_safe_entity(ds_entity))
-        except ValueError:
-            # An attribute error occurs when passing in a dictionary. In this case, create a new entity from the dict
-            ds_entity = datastore.Entity(self.key)
-            ds_entity.update(obj)
-            self.ds_client.put(self._create_safe_entity(ds_entity))
 
     def set(self, key_type, key_id):
         self.key_id = key_id
