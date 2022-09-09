@@ -22,6 +22,7 @@ __status__ = "Testing"
 class BuildSpecification:
     BUILD_SPEC_BUCKET_SUFFIX = "build-specs"
     SPEC_FOLDER = 'specs/'
+    ATTACK_FOLDER = 'attacks/'
     STARTUP_SCRIPT_FOLDER = "startup_scripts/"
     TEACHER_FOLDER = "teacher_instructions/"
     STUDENT_FOLDER = "student_instructions/"
@@ -29,6 +30,7 @@ class BuildSpecification:
     def __init__(self, suppress=True):
         self.suppress = suppress
         self.env = CloudEnv()
+        self.build_attacks_specs = os.path.join("build_files", "specs", "attacks")
         self.build_specs_plaintext = os.path.join("build_files", "specs", "plaintext")
         self.build_specs_encrypted = os.path.join("build_files", "specs", "encrypted")
         self.build_startup_scripts = os.path.join("build_files", "startup_scripts")
@@ -57,7 +59,7 @@ class BuildSpecification:
         self._upload_folder_to_cloud(self.build_teacher_instructions_encrypted, self.TEACHER_FOLDER)
         self._upload_folder_to_cloud(self.build_student_instructions, self.STUDENT_FOLDER)
         self._upload_folder_to_cloud(self.build_startup_scripts, self.STARTUP_SCRIPT_FOLDER)
-
+        self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
 
     def _sync_locked_folder(self, plaintext_dir, encrypted_dir, extension):
         spec_crypto_lock = CryptoLock(plaintext_dir=plaintext_dir, encrypted_dir=encrypted_dir,
@@ -82,7 +84,7 @@ class BuildSpecification:
                     if not extension or file.suffix == f".{extension}":
                         self._upload_file_to_cloud(file)
             if item.is_file():
-                if file.suffix == f".{extension}":
+                if item.suffix == f".{extension}":
                     self._upload_file_to_cloud(item, cloud_directory)
 
     def _upload_file_to_cloud(self, file, cloud_directory):
@@ -108,8 +110,8 @@ class BuildSpecification:
                     if self._sync_computer_images(file):
                         specs_to_upload.append(file)
             if item.is_file():
-                if self._sync_computer_images(file):
-                    specs_to_upload.append(file)
+                if self._sync_computer_images(item):
+                    specs_to_upload.append(item)
         return specs_to_upload
 
     def _sync_computer_images(self, file):
@@ -133,6 +135,7 @@ class BuildSpecification:
 
     def _create_directories(self):
         directories = [
+            self.build_attacks_specs,
             self.build_specs_plaintext,
             self.build_specs_encrypted,
             self.build_teacher_instructions_encrypted,

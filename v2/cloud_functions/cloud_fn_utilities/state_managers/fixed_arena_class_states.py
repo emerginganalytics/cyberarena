@@ -140,11 +140,11 @@ class FixedArenaClassStateManager:
             return True
         elif new_state == self.s.BUILDING_STUDENT_ENTRY and existing_state.value < new_state.value:
             return True
-        elif new_state == self.s.READY and existing_state in [self.COMPLETION_STATES]:
+        elif new_state == self.s.READY and existing_state in [self.COMPLETION_STATES, self.s.BUILDING_STUDENT_ENTRY]:
             return True
         elif new_state in self.COMPLETION_STATES:
             return True
-        elif new_state in [self.s.RUNNING, self.s.BROKEN, self.s.DELETED]:
+        elif new_state in [self.s.RUNNING, self.s.BROKEN, self.s.DELETED, self.s.READY]:
             return True
         else:
             logging.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "
