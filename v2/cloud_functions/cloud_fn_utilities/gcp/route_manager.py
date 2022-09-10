@@ -41,7 +41,7 @@ class RouteManager:
             self.compute.routes().insert(project=self.env.project, body=route_body).execute()
 
     def delete(self):
-        logging.info(self.build_id, f"Deleting routes for workout {self.build_id}")
+        logging.info(f"Deleting routes for workout {self.build_id}")
 
         result = self.compute.routes().list(project=self.env.project,
                                             filter='name = {}*'.format(self.build_id)).execute()

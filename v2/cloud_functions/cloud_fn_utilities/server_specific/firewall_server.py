@@ -53,7 +53,7 @@ class FirewallServer:
             firewall_name = f"{self.build_id}-{fw['name']}"
             self.firewall_server_spec = {
                 'parent_id': self.build_id,
-                'parent_type': self.build,
+                #'parent_type': self.build,
                 'name': fw['name'],
                 'machine_type': BuildConstants.MachineTypes.LARGE.value,
                 'can_ip_forward': True,
