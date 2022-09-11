@@ -61,3 +61,38 @@ class VpcManager:
                     pass
                 else:
                     raise err
+
+    def delete(self, network_spec):
+        network_name = f"{self.build_id}-{network_spec['name']}"
+        logging.info(f"Deleting network {network_name}")
+
+        for subnet in network_spec['subnets']:
+            subnet_name = f"{network_name}-{subnet['name']}"
+            logging.info(f"Deleting subnetwork {subnet_name}")
+            try:
+                response = self.compute.subnetworks().delete(project=self.env.project, region=self.env.region,
+                                                             subnetwork=subnet_name).execute()
+                self.compute.regionOperations().wait(project=self.env.project, region=self.env.region,
+                                                     operation=response["id"]).execute()
+            except HttpError as err:
+                logging.info(f"Error deleting subnetwork {subnet_name}")
+                if err.resp.status in [404]:
+                    pass
+                else:
+                    raise err
+
+        try:
+            response = self.compute.networks().delete(project=self.env.project, network=network_name).execute()
+            self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
+            time.sleep(3)
+        except HttpError as err:
+            logging.info(f"Error deleting network {network_name}")
+            if err.resp.status in [404]:
+                pass
+            else:
+                raise err
+
+
+
+
+

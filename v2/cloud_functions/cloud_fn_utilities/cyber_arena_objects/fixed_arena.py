@@ -91,7 +91,7 @@ class FixedArena:
             logging.info(f"Finished building Fixed Arena {self.fixed_arena_id}!")
 
     def delete_fixed_arena(self):
-        #logging.info(f"Deleting workout {self.fixed_arena_id}")
+        logging.info(f"Deleting workout {self.fixed_arena_id}")
         if self.fixed_arena.get('firewalls', None):
             FirewallServer(initial_build_id=self.fixed_arena_id, full_build_spec=self.fixed_arena).delete()
         self.firewall_manager.delete(self.fixed_arena_id)
@@ -111,3 +111,7 @@ class FixedArena:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
                                         key_type=DatastoreKeyTypes.SERVER, build_id=server_name)
         self.state_manager.state_transition(self.s.COMPLETED_DELETING_SERVERS)
+
+        self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
+        for network in self.fixed_arena['networks']:
+            self.vpc_manager.delete(network_spec=network)

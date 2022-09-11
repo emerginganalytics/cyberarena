@@ -169,12 +169,6 @@ class FirewallServer:
         rm = RouteManager(self.build_id)
         rm.delete()
 
-    # def _wait_for_deletion(self):
-    #     i = 0
-    #     success = False
-    #     while not success and i < 5:
-    #         result = compute.firewalls().list(project=project, filter=f"name = {self.build_id}*").execute()
-
 class FirewallSettings:
     class Vyos:
         IMAGE = "image-cyberarena-vyos"

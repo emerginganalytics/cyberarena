@@ -51,7 +51,7 @@ class RouteManager:
                 try:
                     self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
                 except HttpError:
-                    logging.info(self.build_id, f"Timeout when deleting routes for {self.build_id}")
+                    logging.info(f"Timeout when deleting routes for {self.build_id}")
                     return
             self._wait_for_deletion()
 
