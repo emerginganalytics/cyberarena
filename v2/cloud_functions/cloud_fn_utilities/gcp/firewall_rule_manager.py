@@ -55,7 +55,7 @@ class FirewallManager:
                     pass
 
     def delete(self, build_id):
-        logging.info(build_id, f"Deleting firewall for workout build_id")
+        logging.info(f"Deleting firewall for workout build_id")
         try:
             result = self.compute.firewalls().list(project=self.env.project, filter='name = {}*'.format(build_id))\
                 .execute()
@@ -66,12 +66,12 @@ class FirewallManager:
                 try:
                     self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
                 except HttpError:
-                    logging.info(build_id, f"Error in waiting for firewall rule deletion")
+                    logging.info(f"Error in waiting for firewall rule deletion")
                     pass
             self._wait_for_deletion(build_id)
             return True
         except():
-            logging.info(build_id, f"Error in deleting firewall rules for workout {build_id}")
+            logging.info(f"Error in deleting firewall rules for workout {build_id}")
             return False
 
     def _wait_for_deletion(self, build_id):

@@ -1,9 +1,9 @@
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from utilities.globals import Buckets
-from utilities.gcp.cloud_env import CloudEnv
-from utilities.gcp.bucket_manager import BucketManager
-from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from v2.cloud_functions.cloud_fn_utilities.globals import Buckets
+from v2.cloud_functions.cloud_fn_utilities.gcp.cloud_env import CloudEnv
+from v2.main_app.main_app_utilities.gcp.bucket_manager import BucketManager
+from v2.main_app.main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 
 
@@ -33,12 +33,12 @@ class TestFixedArena:
         self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{fixed_arena}.yaml")
+        fixed_arena_yaml = self.bm.get(bucket='cyber-learn-test_build-specs', file=f"{Buckets.Folders.SPECS}{fixed_arena}.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
-        build_spec_to_cloud.commit()
-        fab = FixedArena(fixed_arena_id=build_spec['id'], debug=True)
-        fab.build_fixed_arena()
+        #build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
+        #build_spec_to_cloud.commit()
+        fab = FixedArena(build_id=build_spec['id'], debug=True)
+        fab.delete_fixed_arena()
 
 
 if __name__ == "__main__":

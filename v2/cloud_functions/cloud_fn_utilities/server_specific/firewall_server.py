@@ -13,7 +13,7 @@ from cloud_fn_utilities.gcp.route_manager import RouteManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Ryan Ebsen"]
+__credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -31,7 +31,7 @@ class FirewallServer:
         @type full_build_spec: dict
         """
         self.env = CloudEnv()
-        self.s = ServerStateManager.States
+      #  self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_spec = None
@@ -53,7 +53,7 @@ class FirewallServer:
             firewall_name = f"{self.build_id}-{fw['name']}"
             self.firewall_server_spec = {
                 'parent_id': self.build_id,
-                'parent_type': self.build,
+                #'parent_type': self.build,
                 'name': fw['name'],
                 'machine_type': BuildConstants.MachineTypes.LARGE.value,
                 'can_ip_forward': True,
@@ -119,6 +119,7 @@ class FirewallServer:
         self.firewall_server_spec['image'] = FirewallSettings.Fortinet.IMAGE
         fortinet_license_server = {
             'build_id': self.build_id,
+            'parent_id': self.build_id,
             'name': 'fortimanager',
             'build_type': BuildConstants.ServerBuildType.MACHINE_IMAGE,
             'machine_type': BuildConstants.MachineTypes.SMALL.value,
@@ -167,12 +168,6 @@ class FirewallServer:
     def _delete_routes(self):
         rm = RouteManager(self.build_id)
         rm.delete()
-
-    # def _wait_for_deletion(self):
-    #     i = 0
-    #     success = False
-    #     while not success and i < 5:
-    #         result = compute.firewalls().list(project=project, filter=f"name = {self.build_id}*").execute()
 
 class FirewallSettings:
     class Vyos:
