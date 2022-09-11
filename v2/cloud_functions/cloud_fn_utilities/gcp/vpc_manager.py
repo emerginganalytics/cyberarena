@@ -8,7 +8,7 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff, Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -64,8 +64,6 @@ class VpcManager:
 
     def delete(self, network_spec):
         network_name = f"{self.build_id}-{network_spec['name']}"
-        logging.info(f"Deleting network {network_name}")
-
         for subnet in network_spec['subnets']:
             subnet_name = f"{network_name}-{subnet['name']}"
             logging.info(f"Deleting subnetwork {subnet_name}")
@@ -81,6 +79,7 @@ class VpcManager:
                 else:
                     raise err
 
+        logging.info(f"Deleting network {network_name}")
         try:
             response = self.compute.networks().delete(project=self.env.project, network=network_name).execute()
             self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
@@ -91,8 +90,3 @@ class VpcManager:
                 pass
             else:
                 raise err
-
-
-
-
-

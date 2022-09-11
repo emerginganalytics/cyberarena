@@ -112,6 +112,7 @@ class FixedArena:
                                         key_type=DatastoreKeyTypes.SERVER, build_id=server_name)
         self.state_manager.state_transition(self.s.COMPLETED_DELETING_SERVERS)
 
-        self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
         for network in self.fixed_arena['networks']:
             self.vpc_manager.delete(network_spec=network)
+        # Im not sure if this is needed
+        #self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
