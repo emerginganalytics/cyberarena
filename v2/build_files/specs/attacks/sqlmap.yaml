@@ -1,0 +1,12 @@
+# SQL Map Attack template
+id: sqlmap
+name: SQL Vulnerability Scan
+mitre_attack: T9999
+attack_type: scanning
+description: Use sqlmap to detect and exploit database vulnerabilities.
+mode: 'attack'
+args:
+  - id: target_network
+    name: Target Network
+    type: string
+    hint: The network or host to scan.

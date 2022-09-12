@@ -14,7 +14,7 @@ attack:
         name: Scan Type
         default: Aggressive
         type: choice
-        Choices:
+        choices:
           - Aggressive: '-T5'
           - Ping Sweep: '-Pn'
           - Quick Scan: '-sn'

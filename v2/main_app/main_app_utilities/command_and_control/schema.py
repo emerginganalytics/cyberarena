@@ -32,4 +32,3 @@ class NetworkSchema(Schema):
     id = fields.Str(required=True)
     name = fields.Str(required=True)
     ip = fields.Str(required=True)
-

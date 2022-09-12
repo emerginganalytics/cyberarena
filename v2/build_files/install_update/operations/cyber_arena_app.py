@@ -12,6 +12,11 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+"""
+=======
+    BUILD_CLOUD_RUN_COMMAND = "gcloud builds submit ./main_app/ --tag gcr.io/{project}/cyberarena"
+>>>>>>> Stashed changes
+"""
 
 class CyberArenaApp:
     BUILD_CLOUD_RUN_COMMAND = "gcloud builds submit main_app/ --tag gcr.io/{project}/cyberarena"

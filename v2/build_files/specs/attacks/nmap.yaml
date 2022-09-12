@@ -1,0 +1,20 @@
+# Template for building Nmap attacks
+id: nmap_scanning
+name: NMAP Scanning
+mitre_attack: T1595
+attack_type: scanning
+description: Probe network for vulnerabilities
+mode: 'attack'
+args:
+  - id: target_network
+    name: Target Network
+    type: string
+    hint: The network name to scan
+  - id: scan_type
+    name: Scan Type
+    default: Aggressive
+    type: choice
+    Choices:
+      - Aggressive: '-T5'
+      - Ping Sweep: '-Pn'
+      - Quick Scan: '-sn'

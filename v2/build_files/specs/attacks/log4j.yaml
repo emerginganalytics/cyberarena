@@ -1,22 +1,12 @@
-mitre-attack: T1133
-metasploit-package: blah
-input:
-  - key: target
-    type: ip_address
-  - key: username
-    type: str
-  - key: password
-    type: str
-  - key: protocol
-    type: str
-    default: ssh
-
-mitre-attack: T1595
-input:
-  - key: target
-    type: ip_range
-  - key: scan_type
-    type: str
-    default: agressive
-    options:
-      - normal
+# Log4j Attack template
+id: log4j
+name: Log4J Vulnerability Attack
+mitre_attack: T1133
+attack_type: inject
+description: Use Metastploit to exploit Log4j vulnerabilities
+mode: 'attack'
+args:
+  - id: target_network
+    name: Target Network
+    type: string
+    hint: The network or host to initiate attack on

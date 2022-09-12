@@ -83,12 +83,12 @@ class FixedArena(MethodView):
         # Action against single fixed-arena or multiple
         if action and action in valid_actions:
             if build_id:
-                """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)"""
+                self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)
                 return self.http_resp(code=200).prepare_response()
             else:
                 if 'stoc_ids' in args:
                     for stoc_id in args['stoc_ids']:
-                        """self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=stoc_id)"""
+                        self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=stoc_id)
                         print(f'{action} for stoc, {stoc_id}')
                     return self.http_resp(code=200).prepare_response()
         # Bad request; No build_id given or received an invalid CONTROL action
