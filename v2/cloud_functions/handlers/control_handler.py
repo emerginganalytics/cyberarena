@@ -6,6 +6,8 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
+from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
+
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -82,7 +84,7 @@ class ControlHandler:
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
-            pass
+            FixedArena(build_id=self.build_id, debug=self.debug).delete_fixed_arena()
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError

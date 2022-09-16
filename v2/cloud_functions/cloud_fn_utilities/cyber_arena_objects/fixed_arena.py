@@ -24,6 +24,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+
 class FixedArena:
     def __init__(self, build_id, debug=False):
         self.fixed_arena_id = build_id
@@ -110,3 +111,8 @@ class FixedArena:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
                                         key_type=DatastoreKeyTypes.FIXED_ARENA, build_id=self.fixed_arena_id)
         self.state_manager.state_transition(self.s.COMPLETED_DELETING_SERVERS)
+
+        for network in self.fixed_arena['networks']:
+            self.vpc_manager.delete(network_spec=network)
+        # I'm not sure if this is needed
+        # self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
