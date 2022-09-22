@@ -1,11 +1,16 @@
+import yaml
 from flask import json, request
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required, admin_required
 from api.utilities.http_response import HttpResponse
+from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
+from main_app_utilities.gcp.bucket_manager import BucketManager, Buckets
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
+
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -23,9 +28,11 @@ class FixedArena(MethodView):
         self.http_resp = HttpResponse
         self.actions = PubSub.Actions
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
-        self.pubsub_actions = PubSub.Actions
+        self.cyber_arena_objects = PubSub.CyberArenaObjects
         self.handler = PubSub.Handlers
         self.states = BuildConstants.FixedArenaStates
+        self.bm = BucketManager()
+        self.env = CloudEnv()
 
     @instructor_required
     def get(self, build_id=None):
@@ -56,8 +63,11 @@ class FixedArena(MethodView):
         action = recv_data.get('action', None)
         # Send build/rebuild request
         if build_id and action in [str(self.actions.BUILD.value), str(self.actions.REBUILD.value)]:
-            self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
-                                    action=self.actions[action], build_id=build_id)
+            fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
+                                           file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
+            build_spec = yaml.safe_load(fixed_arena_yaml)
+            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+            build_spec_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
         # Bad request; Either no build_id was found or received an invalid build action
         return self.http_resp(code=400).prepare_response()
@@ -66,9 +76,10 @@ class FixedArena(MethodView):
     def delete(self, build_id=None):
         # Only admins should be allowed to delete an entire fixed-arena
         if build_id:
+            print(f'delete request for {build_id}')
             self.pubsub_manager.msg(handler=str(self.handler.CONTROL.value), build_id=str(build_id),
-                                    action=str(self.pubsub_actions.DELETE.value),
-                                    cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA.value))
+                                    action=str(self.actions.DELETE.value),
+                                    cyber_arena_object=str(self.cyber_arena_objects.FIXED_ARENA.value))
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -76,26 +87,6 @@ class FixedArena(MethodView):
     def put(self, build_id=None):
         """
         :parameter build_id: fixed-arena to do action against
-        A valid action can be any either START or STOP
-
-        TODO: Not sure if we need this method. Fixed Arenas will be controlled on the class level.
-              i.e Specific portions will be turned on or off depending on which class is currently
-              active in the FA
+        Method currently not needed
         """
-        valid_actions = [self.actions.START.value, self.actions.STOP.value]
-        args = request.json
-        action = args.get('action', None)
-
-        # Action against single fixed-arena or multiple
-        if action and action in valid_actions:
-            if build_id:
-                self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=build_id)
-                return self.http_resp(code=200).prepare_response()
-            else:
-                if 'stoc_ids' in args:
-                    for stoc_id in args['stoc_ids']:
-                        self.pubsub_manager.msg(handler=self.handler.CONTROL, action=action, build_id=stoc_id)
-                        print(f'{action} for stoc, {stoc_id}')
-                    return self.http_resp(code=200).prepare_response()
-        # Bad request; No build_id given or received an invalid CONTROL action
-        return self.http_resp(code=400).prepare_response()
+        return self.http_resp(code=405).prepare_response()

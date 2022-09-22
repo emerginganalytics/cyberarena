@@ -46,8 +46,6 @@ class ComputeManager:
         if not self.server_spec:
             logging.error(f"No record exists for compute record {server_name}")
             raise LookupError
-        else:
-            self.parent_id = self.server_spec['parent_id']
         self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):

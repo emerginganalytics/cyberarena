@@ -17,7 +17,7 @@ from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaC
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
+__credits__ = ["Philip Huff", "Ryan Ebsen", "Bryce Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -65,14 +65,16 @@ class FixedArena:
                 if self.debug:
                     ComputeManager(server_name=server_name).build()
                 else:
-                    self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.SERVER,
-                                            server_name=server_name)
+                    self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                            action=str(PubSub.BuildActions.SERVER.value), server_name=str(server_name))
             # Don't forget to build the Display Proxy Server!
             if self.debug:
                 DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena).build()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD, action=PubSub.BuildActions.DISPLAY_PROXY,
-                                        key_type=DatastoreKeyTypes.FIXED_ARENA, build_id=self.fixed_arena_id)
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                        action=str(PubSub.BuildActions.DISPLAY_PROXY.value),
+                                        key_type=str(DatastoreKeyTypes.FIXED_ARENA.value),
+                                        build_id=str(self.fixed_arena_id))
 
         if self.state_manager.get_state() < self.s.BUILDING_FIREWALL_RULES.value:
             self.state_manager.state_transition(self.s.BUILDING_FIREWALL_RULES)
@@ -100,16 +102,18 @@ class FixedArena:
         if self.debug:
             DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena).delete()
         else:
-            self.pubsub_manager.msg(handler=PubSub.Handlers.MAINTENANCE, action=PubSub.Actions.DELETE,
-                                    key_type=DatastoreKeyTypes.SERVER, build_id=self.fixed_arena_id)
+            self.pubsub_manager.msg(handler=str(PubSub.Handlers.MAINTENANCE.value),
+                                    action=str(PubSub.Actions.DELETE.value),
+                                    key_type=str(DatastoreKeyTypes.SERVER.value), build_id=self.fixed_arena_id)
 
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
         for server in self.fixed_arena['servers']:
             if self.debug:
                 ComputeManager(server_name=server).delete()
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=PubSub.Actions.DELETE,
-                                        key_type=DatastoreKeyTypes.FIXED_ARENA, build_id=self.fixed_arena_id)
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
+                                        action=str(PubSub.Actions.DELETE.value),
+                                        key_type=str(DatastoreKeyTypes.SERVER.value), build_id=server_name)
         self.state_manager.state_transition(self.s.COMPLETED_DELETING_SERVERS)
 
         for network in self.fixed_arena['networks']:

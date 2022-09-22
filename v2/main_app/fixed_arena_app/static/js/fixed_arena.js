@@ -248,20 +248,28 @@ function createStocManager(){
     const createStocForm = document.querySelector('#create-stoc-form');
     if (createStocForm) {
         createStocForm.addEventListener("submit", function (e) {
+            e.stopImmediatePropagation();
             e.preventDefault();
             const submitCreateStoc = document.getElementById('submitCreateStoc');
             submitCreateStoc.disabled = true;
-            let stocModal = $("create-stoc-modal");
-            stocModal.modal('toggle');
-            stocModal.modal('hide');
-
+            $("#create-stoc-modal").modal('hide');
             /* Convert form to json object */
             const formData = {};
             for (const pair of new FormData(createStocForm)) {
                 formData[pair[0]] = pair[1]
             }
             console.log(formData);
-            send_request({'url': '/api/fixed-arena/', 'method': 'POST', 'data': formData});
+            fetch('/api/fixed-arena/', {
+                method: 'POST',
+                headers: json_headers,
+                body: JSON.stringify(formData),
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data['status'] === 200) {
+                            new StateManager(2, formData['stoc_id'], 53).poll_create_stoc('stoc-table');
+                        }
+                    });
         });
     }
 }

@@ -8,7 +8,6 @@ from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 
-
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff"]
