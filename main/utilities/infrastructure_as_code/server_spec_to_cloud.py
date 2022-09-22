@@ -65,6 +65,7 @@ class ServerSpecToCloud:
 
         # Add the network configuration
         self.networks = []
+        self.dns = None
         for n in server_spec['nics']:
             n['external_NAT'] = n['external_NAT'] if 'external_NAT' in n else False
             nic = {
@@ -81,6 +82,9 @@ class ServerSpecToCloud:
                     alias_ip_ranges.append({"ipCidrRange": ipaddr})
                 nic['aliasIpRanges'] = alias_ip_ranges
             self.networks.append(nic)
+
+            if n.get('dns', False):
+                self.dns = f"{self.server_name}"
         # Competitions may have meta_data defined, but compute workouts use assessments. First, check for meta_data
         # if this is a competition, and then look for startup scripts which have been identified from the assessment
         self.meta_data = server_spec.get("meta_data", None)
@@ -171,7 +175,8 @@ class ServerSpecToCloud:
             'state-timestamp': str(calendar.timegm(time.gmtime())),
             'student_entry': self.student_entry,
             'guacamole_startup_script': self.guacamole_startup_script,
-            'snapshot': self.snapshot
+            'snapshot': self.snapshot,
+            'dns': self.dns
         })
 
         if self.options:

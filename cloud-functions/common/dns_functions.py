@@ -5,7 +5,7 @@ from googleapiclient.errors import HttpError
 
 
 # Create a new DNS record for the server and add the information to the datastore for later management
-def add_dns_record(build_id, new_ip):
+def add_dns_record(dns_prefix, new_ip):
     service = googleapiclient.discovery.build('dns', 'v1')
 
     # Use the parent project when modifying the DNS otherwise, if this IS the parent, then use the current project
@@ -13,14 +13,14 @@ def add_dns_record(build_id, new_ip):
 
     # First, get the existing workout DNS
     response = service.resourceRecordSets().list(project=target_project, managedZone=dnszone,
-                                                 name=build_id + dns_suffix + ".").execute()
+                                                 name=dns_prefix + dns_suffix + ".").execute()
     existing_rrset = response['rrsets']
     change_body = {
         "deletions": existing_rrset,
         "additions": [
             {
                 "kind": "dns#resourceRecordSet",
-                "name": build_id + dns_suffix + ".",
+                "name": dns_prefix + dns_suffix + ".",
                 "rrdatas": [new_ip],
                 "type": "A",
                 "ttl": 30
@@ -40,7 +40,7 @@ def add_dns_record(build_id, new_ip):
             pass
 
 
-def delete_dns(build_id, ip_address):
+def delete_dns(dns_prefix, ip_address):
     """
     Deletes a DNS record based on the build_id host name and IP address.
     :param build_id: The Datastore entity build_id, which is also the record host name.
@@ -55,7 +55,7 @@ def delete_dns(build_id, ip_address):
         change_body = {"deletions": [
             {
                 "kind": "dns#resourceRecordSet",
-                "name": build_id + dns_suffix + ".",
+                "name": dns_prefix + dns_suffix + ".",
                 "rrdatas": [ip_address],
                 "type": "A",
                 "ttl": 30
@@ -63,8 +63,8 @@ def delete_dns(build_id, ip_address):
         ]}
         service.changes().create(project=target_project, managedZone=dnszone, body=change_body).execute()
     except():
-        g_logger = log_client.logger(str(build_id))
-        g_logger.log_text("Error in deleting DNS record for workout {}".format(build_id), severity=LOG_LEVELS.ERROR)
+        g_logger = log_client.logger(str(dns_prefix))
+        g_logger.log_text("Error in deleting DNS record for workout {}".format(dns_prefix), severity=LOG_LEVELS.ERROR)
         return False
     return True
 

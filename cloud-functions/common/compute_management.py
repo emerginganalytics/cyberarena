@@ -168,6 +168,15 @@ def server_build(server_name):
         ds_client.put(server)
         server = ds_client.get(ds_client.key('cybergym-server', server_name))
 
+    # If the server otherwise needs a DNS mapping, set that now.
+    server_dns = server.get('dns', None)
+    if server_dns:
+        ip_address = get_server_ext_address(server_name)
+        server['external_ip'] = ip_address
+        ds_client.put(server)
+        add_dns_record(server_dns, ip_address)
+        server = ds_client.get(ds_client.key('cybergym-server', server_name))
+
     # Now stop the server before completing
     g_logger.log_text(f'Stopping {server_name}')
     compute.instances().stop(project=project, zone=zone, instance=server_name).execute()

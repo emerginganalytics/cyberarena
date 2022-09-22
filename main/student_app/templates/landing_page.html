@@ -312,7 +312,17 @@ body {font-family: Arial, Helvetica, sans-serif;}
                 href="{{container_url}}/{{workout.key.name}}"
                 target="_blank" rel="noopener noreferrer">ENTER WORKOUT!</a>
             {% else %}
-                <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
+                {% if 'workout_credentials' in workout %}
+                    <div id="workout_link" class='container' style="margin:0;">
+                    {% for credential in workout['workout_credentials'] %}
+                            <a style="width:100%;" class="btn"
+                                href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{credential['workout_user']}}&password={{credential['workout_password']}}"
+                                target="_blank">Workspace {{ loop.index }}</a>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <a style="width:100%; visibility:hidden" class="btn" id="workout_link" href="http://{{ workout.key.name }}{{ dns_suffix }}:8080/guacamole/#/?username={{workout['workout_user']}}&password={{workout['workout_password']}}" target="_blank">ENTER WORKOUT!</a>
+                {% endif %}
                 <p>Expiration date: {{ expiration }}</p><br>
                 {% if build_type == "compute" %}
                     <div class='control_button'>
@@ -351,17 +361,6 @@ body {font-family: Arial, Helvetica, sans-serif;}
                             </div>
                         </form>
                     </div>
-                    <div class='control_button'>
-                        <form class="control_form" id="reset_vm" action="/reset_vm" method="post">
-                            <input type="hidden" id="workout_id" name="workout_id" value="{{ workout.key.name }}">
-                            <div class="btn-ctn">
-                                <button id="reset-vm" class="waves-effect waves-light btn" disabled>RESET WORKOUT</button>
-                            </div>
-                        </form>
-                    </div>
-                    {% if is_expired == False %}
-                        {{ nuke.nukeButton(workout.key.name|string) }}
-                    {% endif %}
                 {% endif %}
             {% endif %}
             {% if workout['registration_required'] %}

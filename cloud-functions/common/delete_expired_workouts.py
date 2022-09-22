@@ -301,6 +301,9 @@ class DeletionManager:
         query_workout_servers.add_filter("workout", "=", self.build_id)
 
         for server in list(query_workout_servers.fetch()):
+            server_dns = server.get('dns', None)
+            if server_dns:
+                delete_dns(server_dns, server.get('external_ip', None))
             # Publish to a server management topic
             pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
             publisher = pubsub_v1.PublisherClient()
