@@ -72,6 +72,7 @@ def main():
         except ValueError:
             print("Invalid selection")
 
+
 def test_gcp_credentials(project):
     try:
         service = discovery.build('compute', 'v1')
@@ -79,7 +80,6 @@ def test_gcp_credentials(project):
         return True
     except (DefaultCredentialsError, HttpError) as err:
         return False
-
 
 
 if __name__ == '__main__':

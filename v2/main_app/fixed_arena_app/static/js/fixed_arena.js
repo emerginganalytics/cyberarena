@@ -135,7 +135,7 @@ function manage_stoc(action){
                 .then((response) => response.json())
                 .then((data) => {
                     if (data['status'] === 200) {
-                        new StateManager(2, build_id, 72).getState();
+                        new StateManager(2, selected[0], 72).getState();
                     }
                 });
         } else {
@@ -164,7 +164,7 @@ function manage_stoc(action){
                     if (action === 2) {
                         endState = 50;
                     } else {
-                        endState = 51;
+                        endState = 53;
                     }
                     new StateManager(2, build_id, endState).getState();
                 }
@@ -175,10 +175,11 @@ function createStocManager(){
     const createStocForm = document.querySelector('#create-stoc-form');
     if (createStocForm) {
         createStocForm.addEventListener("submit", function (e) {
+            e.stopImmediatePropagation();
             e.preventDefault();
             const submitCreateStoc = document.getElementById('submitCreateStoc');
             submitCreateStoc.disabled = true;
-            $("#create-stoc-modal").modal('toggle');
+            $("#create-stoc-modal").modal('hide');
             /* Convert form to json object */
             const formData = {};
             for (const pair of new FormData(createStocForm)) {
@@ -193,7 +194,7 @@ function createStocManager(){
                     .then((response) => response.json())
                     .then((data) => {
                         if (data['status'] === 200) {
-                            new StateManager(2, formData['stoc_id'], 53).poll_create_stoc();
+                            new StateManager(2, formData['stoc_id'], 53).poll_create_stoc('stoc-table');
                         }
                     });
         });
