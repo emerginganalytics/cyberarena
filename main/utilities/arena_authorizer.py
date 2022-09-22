@@ -1,3 +1,4 @@
+from google.cloud import datastore
 from utilities.globals import ds_client, myconfig, cloud_log, LogIDs, LOG_LEVELS
 
 
@@ -18,8 +19,11 @@ class ArenaAuthorizer:
 
     def __init__(self):
         self.admin_info = ds_client.get(ds_client.key('cybergym-admin-info', 'cybergym'))
-        if self.UserGroups.ADMINS not in self.admin_info:
-            admin_email = myconfig.get_variable.config('admin_email')
+        if not self.admin_info or self.UserGroups.ADMINS not in self.admin_info:
+            if not self.admin_info:
+                self.admin_info = datastore.Entity(ds_client.key('cybergym-admin-info', 'cybergym'))
+            admin_email_config = myconfig.get_variable('admin_email')
+            admin_email = admin_email_config.value.decode("utf-8") if admin_email_config else None
             if not admin_email:
                 cloud_log(LogIDs.MAIN_APP, f"Error: Admin Email is not set for this project!", LOG_LEVELS.ERROR)
             else:

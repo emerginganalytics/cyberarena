@@ -189,7 +189,7 @@ def workout_list(unit_id):
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']
 
-    attack_yaml = YamlFunctions().parse_yaml('attack')
+    # attack_yaml = YamlFunctions().parse_yaml('attack')
 
     # For updating individual workout ready state
     if request.method=="POST":
@@ -199,7 +199,7 @@ def workout_list(unit_id):
 
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', workout_list=workout_list, unit=unit,
-                               teacher_instructions=teacher_instructions_url, main_app_url=main_app_url, attack_spec=attack_yaml)
+                               teacher_instructions=teacher_instructions_url, main_app_url=main_app_url)
     else:
         return render_template('no_workout.html')
 

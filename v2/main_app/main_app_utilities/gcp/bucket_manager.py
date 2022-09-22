@@ -73,7 +73,7 @@ class BucketManager:
         for blob in bucket.list_blobs():
             formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
             if 'class' in formatted_blob_name:
-                class_list.append(formatted_blob_name.strip(".yaml"))
+                class_list.append(formatted_blob_name.split(".yaml")[0])
         return class_list
 
     def get_fixed_arena_list(self):
@@ -83,5 +83,5 @@ class BucketManager:
         for blob in bucket.list_blobs():
             formatted_blob_name = blob.name.replace(self.env.spec_bucket, "").split('/')[1]
             if 'class' not in formatted_blob_name and 'workout' not in formatted_blob_name:
-                fa_list.append(formatted_blob_name.strip(".yaml"))
+                fa_list.append(formatted_blob_name.split(".yaml")[0])
         return fa_list

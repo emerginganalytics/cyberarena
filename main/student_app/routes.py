@@ -57,8 +57,6 @@ def landing_page(workout_id):
     workout_server_query = ds_client.query(kind='cybergym-server')
     workout_server_query.add_filter('workout', '=', workout_id)
     server_list = []
-    survey_yaml = YamlFunctions().parse_yaml(yaml_filename='survey')
-    survey = survey_yaml.get('survey', None) if survey_yaml else None
     for server in list(workout_server_query.fetch()):
         server_name = server['name'][11:]
         server['name'] = server_name
@@ -105,8 +103,7 @@ def landing_page(workout_id):
         return render_template('landing_page.html', build_type=build_type, workout=workout,
                                description=unit['description'], container_url=container_url, dns_suffix=dns_suffix,
                                expiration=expiration, shutoff=shutoff, assessment=assessment,
-                               is_expired=is_expired, build_now=build_now, auth_config=auth_config, servers=server_list,
-                               survey=survey)
+                               is_expired=is_expired, build_now=build_now, auth_config=auth_config, servers=server_list)
     else:
         return render_template('no_workout.html')
 

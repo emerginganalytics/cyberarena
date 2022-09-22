@@ -90,7 +90,6 @@ class FixedArenaClass(MethodView):
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value]
             if action and action in valid_actions:
-                print(f'{build_id} :: {args}')
                 self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                     build_id=str(build_id),
                                     cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value))

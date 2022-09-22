@@ -24,6 +24,8 @@ class BuildConstants:
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
         WORKOUT = "workout"
+        FIXED_ARENA_WEAKNESS = 'fixed_arena_weakness'
+        FIXED_ARENA_ATTACK = 'fixed_arena_attack'
 
     class Protocols(str, Enum):
         RDP = "rdp"

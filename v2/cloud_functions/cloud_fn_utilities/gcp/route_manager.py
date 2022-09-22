@@ -41,7 +41,7 @@ class RouteManager:
             self.compute.routes().insert(project=self.env.project, body=route_body).execute()
 
     def delete(self):
-        logging.info(self.build_id, f"Deleting routes for workout {self.build_id}")
+        logging.info(f"Deleting routes for workout {self.build_id}")
 
         result = self.compute.routes().list(project=self.env.project,
                                             filter='name = {}*'.format(self.build_id)).execute()
@@ -51,7 +51,7 @@ class RouteManager:
                 try:
                     self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
                 except HttpError:
-                    logging.info(self.build_id, f"Timeout when deleting routes for {self.build_id}")
+                    logging.info(f"Timeout when deleting routes for {self.build_id}")
                     return
             self._wait_for_deletion()
 
