@@ -1,6 +1,7 @@
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
+from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
@@ -25,14 +26,11 @@ class DailyMaintenance:
             if fac_state not in [FixedArenaClassStates.BROKEN.value, FixedArenaClassStates.DELETED.value]:
                 build_id = fixed_arena_class.key.name
                 if self.debug:
-                    FixedArenaClass(build_id=build_id, debug=self.debug).stop()
+                    ComputeManager(server_name=build_id).stop()
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),
                                          build_id=build_id, action=str(PubSub.Actions.STOP.value))
-        running_classes = self.fa_state_manager.get_running()
-        # for obj in running_classes:
-        #     print(obj)
 
     def delete_expired(self):
         pass
