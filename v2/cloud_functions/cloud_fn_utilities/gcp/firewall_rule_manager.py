@@ -68,8 +68,8 @@ class FirewallManager:
                 except HttpError:
                     logging.info(f"Error in waiting for firewall rule deletion")
                     pass
-            self._wait_for_deletion(build_id)
-            return True
+            #self._wait_for_deletion(build_id)
+            #return True
         except():
             logging.info(f"Error in deleting firewall rules for workout {build_id}")
             return False

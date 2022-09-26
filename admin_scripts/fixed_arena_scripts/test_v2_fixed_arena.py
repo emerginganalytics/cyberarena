@@ -38,7 +38,7 @@ class TestFixedArena:
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
         fab = FixedArena(build_id=build_spec['id'], debug=True)
-        fab.delete_fixed_arena()
+        fab.build_fixed_arena()
 
 
 if __name__ == "__main__":
