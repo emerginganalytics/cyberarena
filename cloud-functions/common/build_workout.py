@@ -80,13 +80,16 @@ def build_workout(workout_id):
     if check_ordered_workout_state(workout, BUILD_STATES.BUILDING_FIREWALL):
         state_transition(entity=workout, new_state=BUILD_STATES.BUILDING_FIREWALL)
         firewall_rules = []
+        unique_names = []
         for rule in workout['firewall_rules']:
-            firewall_rules.append({"name": "%s-%s" % (workout_id, rule['name']),
-                                   "network": "%s-%s" % (workout_id, rule['network']),
-                                   "targetTags": rule['target_tags'],
-                                   "protocol": rule['protocol'],
-                                   "ports": rule['ports'],
-                                   "sourceRanges": rule['source_ranges']})
+            if rule['name'] not in unique_names:
+                firewall_rules.append({"name": "%s-%s" % (workout_id, rule['name']),
+                                       "network": "%s-%s" % (workout_id, rule['network']),
+                                       "targetTags": rule['target_tags'],
+                                       "protocol": rule['protocol'],
+                                       "ports": rule['ports'],
+                                       "sourceRanges": rule['source_ranges']})
+                unique_names.append(rule['name'])
         create_firewall_rules(firewall_rules)
         state_transition(entity=workout, new_state=BUILD_STATES.COMPLETED_FIREWALL)
     cloud_log(workout_id, f"Finished the build process with a final state: {workout['state']}", LOG_LEVELS.INFO)
