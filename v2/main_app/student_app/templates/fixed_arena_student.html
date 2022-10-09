@@ -41,20 +41,6 @@
             }
           });
     </script>
-    <!-- Development guide:
-
-    - The state checking logic can be cleaned up to remove the functions and buttons that we don't need for
-    fixed-arena workouts. Considering the size of the branch, it might be easier to rewrite the update_state
-    function from scratch.
-
-    - We'll need to add a space to display a network diagram that Ryan is currently working on. This diagram can
-    either be passed in during the initial page load or via a GET request after the page is loaded. The latter
-    might allow for more dynamic diagram creation in the future
-
-    - For any resource that is needed after page load, use the API as much as possible. For the workspace landing page,
-    most of the traffic can be directed through the fixed_arena_workspace api.
-
-    -->
     <!--suppress ALL -->
 
     <script>
@@ -207,10 +193,9 @@
                 <li>{{ logo.logo_div() }}</li>
                 <li><h2 style="color:whitesmoke;">Workspace Control</h2></li>
                 <li><p><span style="color:whitesmoke;">Workspace Status:</span>
-                        {% if fixed_arena_class.state == 50 %}
-                        <!-- if fixed_arena_class.state == 4 -->
+                        {% if fixed_arena_class.state == 4 %}
                         <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
-                        {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
+                        {% elif fixed_arena_class.state == 6 %}
                         <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
                         {% else %}
                         <span id='workspace_state_display' style="color:#b3be27;">WORKING</span>
