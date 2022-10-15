@@ -22,6 +22,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+
 class DisplayProxy:
     def __init__(self, build_id, build_spec):
         """

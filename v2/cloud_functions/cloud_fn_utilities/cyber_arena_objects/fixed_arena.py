@@ -107,8 +107,17 @@ class FixedArena:
                                     key_type=str(DatastoreKeyTypes.SERVER.value), build_id=self.fixed_arena_id)
 
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
+        active_class = self.fixed_arena.get('active_class', None)
+        if active_class:
+            if self.debug:
+                FixedArenaClass(build_id=active_class, debug=self.debug).delete()
+            else:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
+                                        action=str(PubSub.Actions.DELETE.value),
+                                        key_type=str(DatastoreKeyTypes.FIXED_ARENA_CLASS.value), build_id=active_class)
+
         for server in self.fixed_arena['servers']:
-            server_name = f"{self.fixed_arena_id}-{server['name']}"
+            server_name = f'{self.fixed_arena_id}-{server["name"]}'
             if self.debug:
                 ComputeManager(server_name=server_name).delete()
             else:
@@ -119,5 +128,6 @@ class FixedArena:
 
         for network in self.fixed_arena['networks']:
             self.vpc_manager.delete(network_spec=network)
-        # Im not sure if this is needed
+
+        # I'm not sure if this is needed
         # self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)

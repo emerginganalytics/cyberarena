@@ -8,7 +8,7 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
+__credits__ = ["Philip Huff", "Ryan Ebsen", "Bryce Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -55,7 +55,7 @@ class FirewallManager:
                     pass
 
     def delete(self, build_id):
-        logging.info(f"Deleting firewall for workout build_id")
+        logging.info(f"Deleting firewall for workout {build_id}")
         try:
             result = self.compute.firewalls().list(project=self.env.project, filter='name = {}*'.format(build_id))\
                 .execute()
@@ -66,7 +66,7 @@ class FirewallManager:
                 try:
                     self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
                 except HttpError:
-                    logging.info(f"Error in waiting for firewall rule deletion")
+                    logging.info(f"Error in waiting for firewall rule deletion {build_id}")
                     pass
             self._wait_for_deletion(build_id)
             return True

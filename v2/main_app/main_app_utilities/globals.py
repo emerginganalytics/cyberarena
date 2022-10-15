@@ -20,6 +20,7 @@ class DatastoreKeyTypes(str, Enum):
 class BuildConstants:
     class BuildType(str, Enum):
         ARENA = "arena"
+        AGENT_MACHINE = "agent_machine"
         FIXED_ARENA = "fixed_arena"
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
@@ -69,6 +70,7 @@ class BuildConstants:
             DISPLAY_SERVER = '10.1.0.3'
             WORKSPACE_PROXY_SERVER = '10.1.0.4'
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
+            AGENT_MACHINE = '10.1.0.210'
         GATEWAY_NETWORK_NAME = 'gateway'
         GATEWAY_NETWORK_CONFIG = {
             'name': GATEWAY_NETWORK_NAME,
@@ -171,6 +173,7 @@ class PubSub:
         FIXED_ARENA_CLASS = 2
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
+        AGENT_MACHINE = 5
 
 
 class Buckets:
