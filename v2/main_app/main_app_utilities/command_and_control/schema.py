@@ -20,16 +20,17 @@ class ArgSchema(Schema):
     type = fields.Str(required=True)
     hint = fields.Str(required=True)
     name = fields.Str(required=True)
-    network = fields.Nested('NetworkSchema', required=True)
+    target = fields.Nested('TargetSchema', required=True)
     choices = fields.Nested('ArgChoiceSchema', many=True, required=False)
 
 
 class ArgChoiceSchema(Schema):
     choice = fields.Str(required=True)
 
-
-class NetworkSchema(Schema):
-    id = fields.Str(required=True)
+"""
+class TargetSchema(Schema):
+    id = fields.List(required=True)
     name = fields.Str(required=True)
     ip = fields.Str(required=True)
+"""
 

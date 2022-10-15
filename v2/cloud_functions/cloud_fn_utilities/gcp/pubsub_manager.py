@@ -4,6 +4,7 @@ import logging
 from google.cloud import logging_v2
 from google.cloud import pubsub_v1
 from googleapiclient.errors import HttpError
+from google.api_core.exceptions import AlreadyExists
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
@@ -24,6 +25,17 @@ class PubSubManager:
         log_client.setup_logging()
         self.publisher = pubsub_v1.PublisherClient()
         self.topic_path = self.publisher.topic_path(self.env.project, topic)
+
+    def create_topic(self):
+        try:
+            response = self.publisher.create_topic(request={"name": self.topic_path})
+            logging.info(f'Created topic:\n{response}')
+        except AlreadyExists:
+            logging.warning(f'Topic with {self.topic_path} already exists!')
+
+    def delete_topic(self):
+        logging.info(f'Deleting topic: {self.topic_path}')
+        self.publisher.delete_topic(request={'topic': self.topic_path})
 
     def msg(self, **args):
         self.publisher.publish(self.topic_path, data=b'Cyber Arena PubSub Message', **args)

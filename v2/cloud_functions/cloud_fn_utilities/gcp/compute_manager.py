@@ -16,7 +16,7 @@ from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Bryce Ebsen, Ryan Ebsen"]
+__credits__ = ["Philip Huff", "Bryce Ebsen", "Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -44,7 +44,7 @@ class ComputeManager:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.server_name = server_name
-        self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name).get()
+        self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER.value, key_id=self.server_name).get()
         if not self.server_spec:
             logging.error(f"No record exists for compute record {server_name}")
             raise LookupError

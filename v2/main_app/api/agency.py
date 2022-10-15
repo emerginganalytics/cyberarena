@@ -5,7 +5,7 @@ from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes
-from main_app_utilities.command_and_control.attack_spec_to_cloud import AttackSpecToCloud
+from main_app_utilities.command_and_control.build_attack_to_cloud import AttackSpecToCloud
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,7 +17,7 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 
-class Controller(MethodView):
+class Agency(MethodView):
     """
     API to manage the simulated Botnet; Specifically handlers the networ injects
     Each method, requires a build_id that either refers to:

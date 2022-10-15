@@ -68,7 +68,6 @@ class DataStoreManager:
             expired += list(query_expired.fetch())
         return expired
 
-
     @staticmethod
     def _create_safe_entity(entity):
         exclude_from_indexes = []
