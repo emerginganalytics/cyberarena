@@ -24,7 +24,7 @@ class BotnetHandler:
             - network: fixed-arena to inject into
             - mode: Attack or inject
             - args: Template arguments
-            - expires: Time event expires on
+            - expires: Time event expires on (possibly not needed)
         :param event_attributes:
         """
         self.env = CloudEnv()
@@ -35,6 +35,10 @@ class BotnetHandler:
         self.attack_obj = {}
 
     def route(self):
+        if 'build' in self.event_attributes:
+            self.build_agent()
+
+    def build_agent(self):
         pass
 
     def __create_ds_entry(self, attack_obj):

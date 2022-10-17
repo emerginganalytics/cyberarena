@@ -68,16 +68,6 @@ class DataStoreManager:
             expired += list(query_expired.fetch())
         return expired
 
-    def get_running(self):      # does not work
-        expired = []
-        query_expired = self.ds_client.query(kind=self.key_type)
-        if self.key_type == DatastoreKeyTypes.SERVER:
-            query_expired.add_filter('state', '=', ServerStates.RUNNING.value)
-            expired += list(query_expired.fetch())
-        return expired
-
-
-
     @staticmethod
     def _create_safe_entity(entity):
         exclude_from_indexes = []
