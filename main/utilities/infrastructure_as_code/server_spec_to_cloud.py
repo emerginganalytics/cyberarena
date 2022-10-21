@@ -65,14 +65,14 @@ class ServerSpecToCloud:
 
         # Add the network configuration
         self.networks = []
-        self.dns = None
+        self.dns = []
         for n in server_spec['nics']:
             n['external_NAT'] = n['external_NAT'] if 'external_NAT' in n else False
             nic = {
                 "network": f"{build_id}-{n['network']}",
                 "internal_IP": n['internal_IP'],
                 "subnet": f"{build_id}-{n['network']}-{n['subnet']}",
-                "external_NAT": n['external_NAT']
+                "external_NAT": n['external_NAT'],
             }
             # Nested VMs are sometimes used for vulnerable servers. This adds those specified IP addresses as
             # aliases to the NIC
@@ -83,8 +83,14 @@ class ServerSpecToCloud:
                 nic['aliasIpRanges'] = alias_ip_ranges
             self.networks.append(nic)
 
-            if n.get('dns', False):
-                self.dns = f"{self.server_name}"
+            # Now add any DNS entries to use for the server based on the network interface.
+            dns_host_suffix = n.get('dns_host_suffix', None)
+            if dns_host_suffix:
+                dns = {
+                    'dns_host': f"{build_id}-{dns_host_suffix}" if dns_host_suffix else None,
+                    'external_ip': None
+                }
+                self.dns.append(dns)
         # Competitions may have meta_data defined, but compute workouts use assessments. First, check for meta_data
         # if this is a competition, and then look for startup scripts which have been identified from the assessment
         self.meta_data = server_spec.get("meta_data", None)
@@ -134,6 +140,7 @@ class ServerSpecToCloud:
                     add_network_interface['aliasIpRanges'] = network['aliasIpRanges']
                 network_interfaces.append(add_network_interface)
             config['networkInterfaces'] = network_interfaces
+
         # Allow the instance to access cloud storage and logging.
         config['serviceAccounts'] = [{
             'email': 'default',

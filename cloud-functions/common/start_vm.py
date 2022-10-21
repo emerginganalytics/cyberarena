@@ -8,6 +8,7 @@ import time
 from common.globals import BUILD_STATES, compute, dnszone, dns_suffix, ds_client, log_client, LOG_LEVELS, project, \
     PUBSUB_TOPICS, SERVER_ACTIONS, workout_globals
 from common.state_transition import state_transition
+from common.compute_management import server_start
 from google.cloud import pubsub_v1
 from googleapiclient.errors import HttpError
 
@@ -15,7 +16,7 @@ from googleapiclient.errors import HttpError
 expired_workout = []
 
 
-def start_vm(workout_id):
+def start_vm(workout_id, debug=False):
     g_logger = log_client.logger(str(workout_id))
     g_logger.log_struct(
         {
@@ -31,13 +32,16 @@ def start_vm(workout_id):
     query_workout_servers = ds_client.query(kind='cybergym-server')
     query_workout_servers.add_filter("workout", "=", workout_id)
     for server in list(query_workout_servers.fetch()):
-        # Publish to a server management topic
-        pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
-        publisher = pubsub_v1.PublisherClient()
-        topic_path = publisher.topic_path(project, pubsub_topic)
-        future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
-                                   action=SERVER_ACTIONS.START)
-        print(future.result())
+        if debug:
+            server_start(server['name'])
+        else:
+            # Publish to a server management topic
+            pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+            publisher = pubsub_v1.PublisherClient()
+            topic_path = publisher.topic_path(project, pubsub_topic)
+            future = publisher.publish(topic_path, data=b'Server Build', server_name=server['name'],
+                                       action=SERVER_ACTIONS.START)
+            print(future.result())
 
 
 def start_arena(unit_id):

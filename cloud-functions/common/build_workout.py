@@ -2,12 +2,13 @@ import time
 from google.cloud import pubsub_v1
 from common.globals import ds_client, log_client, project, compute, region, zone, BUILD_STATES, LOG_LEVELS, \
     PUBSUB_TOPICS, SERVER_ACTIONS, cloud_log, LogIDs
+from common.compute_management import server_build
 from common.networking_functions import create_route, create_firewall_rules, workout_route_setup
 from common.state_transition import state_transition, check_ordered_workout_state
 from googleapiclient.errors import HttpError
 
 
-def build_workout(workout_id):
+def build_workout(workout_id, debug=False):
     """
     Builds a workout compute environment according to the specification referenced in the datastore with key workout_id
     :param workout_id: The workout_id key in the datastore holding the build specification
@@ -66,7 +67,10 @@ def build_workout(workout_id):
         for server in workout['servers']:
             server_name = f"{workout_id}-{server['name']}"
             cloud_log(workout_id, f"Sending pubsub message to build {server_name}", LOG_LEVELS.INFO)
-            publisher.publish(topic_path, data=b'Server Build', server_name=server_name, action=SERVER_ACTIONS.BUILD)
+            if debug:
+                server_build(server_name)
+            else:
+                publisher.publish(topic_path, data=b'Server Build', server_name=server_name, action=SERVER_ACTIONS.BUILD)
         # Also build the student entry server for the workout
         publisher.publish(topic_path, data=b'Server Build', server_name=f"{workout_id}-student-guacamole",
                           action=SERVER_ACTIONS.BUILD)

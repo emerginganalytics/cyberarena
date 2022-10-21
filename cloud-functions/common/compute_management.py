@@ -14,16 +14,21 @@ from common.state_transition import state_transition
 from requests.exceptions import ConnectionError
 from common.publish_compute_image import create_production_image, create_snapshot_from_disk
 
-def get_server_ext_address(server_name):
+
+def get_server_ext_address(server_name, interface_inx=0):
     """
     Provides the IP address of a given server name. Right now, this is used for managing DNS entries.
     :param server_name: The server name in the cloud project
     :return: The IP address of the server or throws an error
+    @param server_name: The name of the server
+    @type server_name: str
+    @param interface_inx: The interface index on which to search for the IP address
+    @type interface_inx: int
     """
     g_logger = log_client.logger(str(server_name))
     try:
         new_instance = compute.instances().get(project=project, zone=zone, instance=server_name).execute()
-        ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+        ip_address = new_instance['networkInterfaces'][interface_inx]['accessConfigs'][0]['natIP']
     except KeyError:
         g_logger.log_text('Server %s does not have an external IP address' % server_name)
         return False
@@ -68,6 +73,28 @@ def register_student_entry(build_id, server_name):
 
     # Return the IP address used for the server build function to set the server datastore element
     return ip_address
+
+
+def set_dns(server):
+    server_name = server.get('name')
+    for i, dns_mapping in enumerate(server['dns']):
+        dns_host = dns_mapping.get('dns_host', None)
+        if dns_host:
+            ip_address = get_server_ext_address(server_name, i)
+            server['dns'][i]['external_ip'] = ip_address
+            ds_client.put(server)
+            add_dns_record(dns_host, ip_address)
+            server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    return server
+
+
+def try_delete_dns(server):
+    for dns_mapping in server['dns']:
+        dns_host = dns_mapping.get('dns_host', None)
+        if dns_host:
+            ip_address = server.get('external_ip', None)
+            if ip_address:
+                delete_dns(dns_host, ip_address)
 
 
 def check_build_state_change(build_id, check_server_state, change_build_state):
@@ -168,14 +195,8 @@ def server_build(server_name):
         ds_client.put(server)
         server = ds_client.get(ds_client.key('cybergym-server', server_name))
 
-    # If the server otherwise needs a DNS mapping, set that now.
-    server_dns = server.get('dns', None)
-    if server_dns:
-        ip_address = get_server_ext_address(server_name)
-        server['external_ip'] = ip_address
-        ds_client.put(server)
-        add_dns_record(server_dns, ip_address)
-        server = ds_client.get(ds_client.key('cybergym-server', server_name))
+    # If the server otherwise needs any DNS mapping, set that now.
+    server = set_dns(server)
 
     # Now stop the server before completing
     g_logger.log_text(f'Stopping {server_name}')
@@ -208,6 +229,13 @@ def server_start(server_name):
             response = compute.instances().start(project=project, zone=zone, instance=server_name).execute()
             start_success = True
             g_logger.log_text(f'Sent job to start {server_name}, and waiting for response')
+        except HttpError as err:
+            # A 400 error means the resource is not ready, which can happen when trying to start the server too early.
+            if err.resp.status in [400]:
+                time.sleep(20)
+                i += 1
+            else:
+                raise err
         except BrokenPipeError:
             i += 1
 
@@ -232,6 +260,9 @@ def server_start(server_name):
         g_logger.log_text(f'Setting DNS record for {server_name}')
         ip_address = register_student_entry(server['workout'], server_name)
         server['external_ip'] = ip_address
+
+    # If the server contains any DNS mappings, set those now
+    server = set_dns(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.RUNNING)
     g_logger.log_text(f"Finished starting {server_name}")
@@ -297,6 +328,9 @@ def server_delete(server_name):
         g_logger.log_text(f'Deleting DNS record for {server_name}')
         ip_address = server['external_ip']
         delete_dns(server['workout'], ip_address)
+
+    # Delete any other DNS records for this server
+    try_delete_dns(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.DELETED)
     g_logger.log_text(f"Finished deleting {server_name}")
