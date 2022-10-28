@@ -2,9 +2,8 @@ import os
 import yaml
 
 from utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from common.build_workout import build_workout
+from common.start_vm import start_vm
+from common.delete_expired_workouts import DeletionManager
 
-
-cln_yaml = os.path.join("..", "build-files", "workout-specs", "needs-encrypted", "static-arenas", "cln_stoc.yaml")
-with open(cln_yaml) as f:
-    fixed_arena = yaml.safe_load(f)
-spec = BuildSpecToCloud(cyber_arena_spec=fixed_arena)
+DeletionManager(deletion_type=DeletionManager.DeletionType.EXPIRED)
