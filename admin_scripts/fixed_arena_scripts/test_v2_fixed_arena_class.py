@@ -40,7 +40,7 @@ class TestFixedArenaWorkout:
 
     def build(self):
         fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                       file=f"{Buckets.Folders.SPECS}{fixed_arena_class}.yaml")
+                                       file=f"{Buckets.Folders.SPECS}linux-stoc-class.yaml")
         build_spec = yaml.safe_load(fixed_arena_yaml)
         build_spec['workspace_settings'] = {
             'count': 2,
@@ -48,6 +48,7 @@ class TestFixedArenaWorkout:
             'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
+        build_spec['add_attacker'] = True
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
         fac = FixedArenaClass(build_id=build_spec['id'], debug=True, force=True)
@@ -58,6 +59,7 @@ class TestFixedArenaWorkout:
 
     def stop(self):
         FixedArenaClass(build_id=build_id, debug=False).stop()
+
 
 if __name__ == "__main__":
     fixed_arena_class = 'stoc-class' if not fixed_arena_class else fixed_arena_class

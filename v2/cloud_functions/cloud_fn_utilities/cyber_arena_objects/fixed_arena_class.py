@@ -16,10 +16,11 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
 from cloud_fn_utilities.state_managers.fixed_arena_class_states import FixedArenaClassStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
+from cloud_fn_utilities.cyber_arena_objects.cyberarena_attacker import CyberGymAttacker
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Bryce Ebsen, Ryan Ebsen"]
+__credits__ = ["Philip Huff", "Bryce Ebsen", "Ryan Ebsen", "Andrew Bomberger"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -64,6 +65,10 @@ class FixedArenaClass:
         # Create datastore records for each workspace under the key type fixed-arena-workout
         self.fixed_arena_workspace_ids = self._create_workspace_records()
 
+        # Build attack Pubsub topics if needed
+        if self.fixed_arena_class['add_attacker']:
+            CyberGymAttacker(parent_id=self.fixed_arena_class_id).create_topics()
+
         # Build workspace servers
         if self.state_manager.get_state() <= self.s.BUILDING_SERVERS.value:
             self.state_manager.state_transition(self.s.BUILDING_SERVERS)
@@ -88,10 +93,30 @@ class FixedArenaClass:
                                                 build_id=str(self.fixed_arena_class_id),
                                                 server_name=server_name)
                     ws_servers.append(server)
+
+                # Build workspace attack machine if needed
+                if self.fixed_arena_class['add_attacker']:
+                    agent = CyberGymAttacker(build_id=ws_id).config()
+                    agent['parent_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE
+                    agent['fixed_arena_class_id'] = self.fixed_arena_class_id
+                    agent['fixed_arena_id'] = self.fixed_arena_class['parent_id']
+                    agent_name = agent['name']
+                    self.ds.put(agent, key_type=DatastoreKeyTypes.SERVER, key_id=agent_name)
+                    if self.debug:
+                        ComputeManager(server_name=agent_name).build()
+                    else:
+                        self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
+                                                action=str(PubSub.BuildActions.SERVER.value),
+                                                key_type=str(DatastoreKeyTypes.FIXED_ARENA_CLASS),
+                                                build_id=str(self.fixed_arena_class_id),
+                                                server_name=agent_name)
+                    ws_servers.append(agent)
+
                 # Store the server information with IP addresses back with each fixed arena workout before looping
                 ws_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
                 ws_record['servers'] = ws_servers
                 self.ds.put(ws_record, key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, key_id=ws_id)
+
             # Now build the Workspace Proxy Server
             if self.state_manager.get_state() <= self.s.BUILDING_STUDENT_ENTRY.value:
                 self.state_manager.state_transition(self.s.BUILDING_STUDENT_ENTRY)
@@ -201,7 +226,7 @@ class FixedArenaClass:
                           f"complete!")
         else:
             self.state_manager.state_transition(self.s.READY)
-            logging.info(f"Finished nukeing Fixed Arena {self.fixed_arena_class_id}!")
+            logging.info(f"Finished nuking Fixed Arena {self.fixed_arena_class_id}!")
 
     def mark_broken(self):
         self.fixed_arena_class['state'] = self.s.BROKEN
@@ -220,7 +245,6 @@ class FixedArenaClass:
             for ws_server in ws_servers:
                 server_name = f"{ws_server['parent_id']}-{ws_server['name']}"
                 servers.append(server_name)
-                # servers.append(ws_server)
         return servers
 
     def _get_fixed_arena_workspace_ids(self):
