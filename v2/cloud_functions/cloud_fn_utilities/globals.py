@@ -16,7 +16,7 @@ class DatastoreKeyTypes(str, Enum):
 class BuildConstants:
     class BuildType(str, Enum):
         ARENA = "arena"
-        AGENT = 'agent'
+        AGENT_SERVER = 'agent'
         FIXED_ARENA = "fixed_arena"
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
@@ -84,6 +84,7 @@ class BuildConstants:
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
+        AGENT_TELEMETRY = 'agency-telemetry'
 
     class Handlers(str, Enum):
         BUDGET = "BUDGET"
@@ -93,6 +94,7 @@ class PubSub:
         ADMIN = "ADMIN"
         IOT = "IOT"
         BOTNET = "BOTNET"
+        REPORT = 'REPORT'
 
     class BuildActions(Enum):
         WORKOUT = 0
@@ -119,6 +121,9 @@ class PubSub:
         FIXED_ARENA_CLASS = 2
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
+
+    class Reports:
+        ATTACK = 2
 
 
 class ServerStates(Enum):

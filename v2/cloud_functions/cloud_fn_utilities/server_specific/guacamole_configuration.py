@@ -17,6 +17,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+
 class GuacamoleConfiguration:
     def __init__(self, build_id):
         self.build_id = build_id

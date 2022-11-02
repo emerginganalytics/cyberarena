@@ -1,5 +1,4 @@
-from marshmallow import Schema, fields, validate
-from main_app_utilities.globals import BuildConstants
+from marshmallow import Schema, fields
 
 
 class AttackSchema(Schema):
@@ -9,10 +8,10 @@ class AttackSchema(Schema):
     attack_name = fields.Str(required=True)
     attack_type = fields.Str(required=True)
     mitre_attack = fields.Str(required=True)
+    module = fields.Str(required=True)
     mode = fields.Str(required=True)
     args = fields.Nested('ArgSchema', many=True, required=True)
     creation_timestamp = fields.Float()
-    expires = fields.Float(required=True)
 
 
 class ArgSchema(Schema):
@@ -27,10 +26,8 @@ class ArgSchema(Schema):
 class ArgChoiceSchema(Schema):
     choice = fields.Str(required=True)
 
-"""
+
 class TargetSchema(Schema):
-    id = fields.List(required=True)
+    id = fields.Str(required=True)
     name = fields.Str(required=True)
-    ip = fields.Str(required=True)
-"""
 
