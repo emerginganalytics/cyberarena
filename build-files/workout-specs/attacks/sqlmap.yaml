@@ -1,0 +1,12 @@
+  id: sqlmap_injection
+  name: Sqlmap
+  module: sqlmap
+  mitre_attack: T1190
+  attack_type: injection
+  description: Use sqlmap to detect and exploit database vulnerabilities.
+  args:
+      target_addr:
+          id: target_addr
+          name: Target Network
+          type: string
+          hint: The network or url to scan.
