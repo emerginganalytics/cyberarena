@@ -65,7 +65,6 @@ class ControlHandler:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError
 
-
     def _stop(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
             ComputeManager(server_name=self.build_id).stop()

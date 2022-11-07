@@ -4,7 +4,6 @@ from api.utilities.decorators import instructor_required, admin_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.globals import DatastoreKeyTypes
-from main_app_utilities.command_and_control.build_attack_to_cloud import AttackSpecToCloud
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -32,7 +31,7 @@ class AttackSpecs(MethodView):
             attack_spec = DataStoreManager(key_type=self.kind, key_id=build_id).get()
             if attack_spec:
                 return json.dumps({'data': attack_spec})
-            return self.http_resp(code=404)
+            return self.http_resp(code=404).prepare_response()
         else:
             attack_specs_query = DataStoreManager(key_id=build_id).query()
             attack_specs = list(attack_specs_query.fetch())
@@ -67,10 +66,7 @@ class AttackSpecs(MethodView):
 
     @admin_required
     def put(self, build_id=None):
-        recv_data = request.json
-        if recv_data.get('update', None):
-            AttackSpecToCloud().update()
-        return self.http_resp(code=405).prepare_response()
+        return self.http_resp(code=403).prepare_response()
 
     @staticmethod
     def apply_filter(obj=None, filters=None):

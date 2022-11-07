@@ -52,6 +52,7 @@ class BuildConstants:
     class MachineImages:
         GUACAMOLE = "image-labentry"
         FORTIMANAGER = "image-fortimanager"
+        AGENT = 'image-cybergym-kali'
 
     class AssessmentTypes(str, Enum):
         PERCENTAGE = "percentage"

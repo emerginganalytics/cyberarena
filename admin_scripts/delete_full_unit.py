@@ -8,11 +8,13 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 # Parse command line arguments
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument("-u", "--unit", default=None, help="Unit to delete")
+parser.add_argument("-d", "--debug", default=True, help="Whether to debug ")
 
 args = vars(parser.parse_args())
 
 # Set up parameters
 unit_id = args.get('unit', None)
+debug = args.get('debug', False)
 
 
 def delete_unit(unit_id, delete_key=False, delete_immediately=False):
@@ -30,7 +32,7 @@ def delete_unit(unit_id, delete_key=False, delete_immediately=False):
         ds_client.put(workout)
     print("All workouts marked as misfits. Starting to process the delete workouts function")
     if bm.check_budget():
-        DeletionManager(deletion_type=DeletionManager.DeletionType.MISFIT).run()
+        DeletionManager(deletion_type=DeletionManager.DeletionType.MISFIT, debug=debug).run()
         print("Completed deleting workouts")
     else:
         print("Cannot delete misfits. Budget exceeded variable is set for this project.")

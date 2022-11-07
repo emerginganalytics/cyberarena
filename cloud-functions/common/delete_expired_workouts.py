@@ -4,6 +4,7 @@
 import calendar
 import time
 from common.dns_functions import delete_dns
+from common.compute_management import server_delete
 from common.globals import ArenaWorkoutDeleteType, BUILD_STATES, compute, cloud_log, ds_client, gcp_operation_wait, \
     LOG_LEVELS, LogIDs, project, PUBSUB_TOPICS, region, SERVER_ACTIONS,  WORKOUT_TYPES, zone
 from common.start_vm import state_transition
@@ -44,13 +45,14 @@ class DeletionManager:
         MISFIT = "misfit"
 
     def __init__(self, deletion_type=DeletionType.EXPIRED, build_id=None, build_type=WORKOUT_TYPES.WORKOUT,
-                 lookback_seconds=DEFAULT_LOOKBACK):
+                 lookback_seconds=DEFAULT_LOOKBACK, debug=False):
         self.deletion_type = deletion_type
         self.build_id = build_id
         self.build_type = build_type
         self.lookback_seconds = lookback_seconds
+        self.debug = debug
 
-    def run(self, deletion_type=None):
+    def run(self, deletion_type=None, debug=False):
         """
         Runs the deletion job based on the parameters passed into the init function
         @return:
@@ -191,8 +193,13 @@ class DeletionManager:
 
                     elif misfit_type == WORKOUT_TYPES.WORKOUT:
                         state_transition(build, BUILD_STATES.READY_DELETE)
-                        publisher.publish(topic_path, data=b'Workout Delete', workout_type=WORKOUT_TYPES.WORKOUT,
-                                          workout_id=build_id)
+                        if self.debug:
+                            dm = DeletionManager(deletion_type=DeletionManager.DeletionType.SPECIFIC,
+                                                 build_id=build_id, build_type=WORKOUT_TYPES.WORKOUT, debug=True)
+                            dm.run()
+                        else:
+                            publisher.publish(topic_path, data=b'Workout Delete', workout_type=WORKOUT_TYPES.WORKOUT,
+                                              workout_id=build_id)
         cloud_log(LogIDs.DELETION_MANAGEMENT, f"PubSub commands sent to delete misfit {misfit_type}", LOG_LEVELS.INFO)
 
     def _delete_specific_workout(self):
@@ -205,14 +212,6 @@ class DeletionManager:
         if not workout:
             return False
         cloud_log(self.build_id, f"Deleting workout {self.build_id}", LOG_LEVELS.INFO)
-        try:
-            delete_dns(self.build_id, workout["external_ip"])
-        except HttpError:
-            cloud_log(self.build_id, f"DNS record does not exist for workout {self.build_id}", LOG_LEVELS.WARNING)
-            pass
-        except KeyError:
-            cloud_log(self.build_id, f"Workout {self.build_id} has no external IP address", LOG_LEVELS.WARNING)
-            pass
         if 'state' in workout:
             if workout['state'] in [BUILD_STATES.READY, BUILD_STATES.RUNNING]:
                 state_transition(workout, BUILD_STATES.DELETING_SERVERS)
@@ -301,16 +300,16 @@ class DeletionManager:
         query_workout_servers.add_filter("workout", "=", self.build_id)
 
         for server in list(query_workout_servers.fetch()):
-            server_dns = server.get('dns', None)
-            if server_dns:
-                delete_dns(server_dns, server.get('external_ip', None))
             # Publish to a server management topic
-            pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
-            publisher = pubsub_v1.PublisherClient()
-            topic_path = publisher.topic_path(project, pubsub_topic)
-            future = publisher.publish(topic_path, data=b'Server Delete', server_name=server['name'],
-                                       action=SERVER_ACTIONS.DELETE)
-            print(future.result())
+            if self.debug:
+                server_delete(server_name=server['name'])
+            else:
+                pubsub_topic = PUBSUB_TOPICS.MANAGE_SERVER
+                publisher = pubsub_v1.PublisherClient()
+                topic_path = publisher.topic_path(project, pubsub_topic)
+                future = publisher.publish(topic_path, data=b'Server Delete', server_name=server['name'],
+                                           action=SERVER_ACTIONS.DELETE)
+                print(future.result())
 
     def _delete_firewall_rules(self):
         cloud_log(self.build_id, f"Deleting firewall for workout {self.build_id}", LOG_LEVELS.INFO)

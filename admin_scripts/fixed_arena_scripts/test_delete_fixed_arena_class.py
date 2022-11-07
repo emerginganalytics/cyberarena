@@ -16,7 +16,7 @@ class TestFixedArenaDelete:
         pass
 
     def run(self):
-        HourlyMaintenance(debug=True).delete_expired()
+        HourlyMaintenance(debug=True)._delete_expired()
 
 
 if __name__ == "__main__":

@@ -1,3 +1,4 @@
+import time
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 
 from common.globals import ds_client, BUILD_STATES, project
@@ -31,7 +32,9 @@ def rebuild_workout(workout_id):
         return
     workout = ds_client.get(ds_client.key('cybergym-workout', workout_id))
     state_transition(entity=workout, new_state=BUILD_STATES.START)
-    build_workout(workout_id)
+    # This will allow the resources to delete before recreating.
+    time.sleep(30)
+    build_workout(workout_id, debug=True)
     return
 
 

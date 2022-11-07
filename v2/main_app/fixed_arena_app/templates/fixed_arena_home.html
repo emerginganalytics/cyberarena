@@ -95,7 +95,7 @@
                                                 class="server-control-btn no-select newStocBtn">
                                                 <i class="fa fa-plus-circle fa-lg margin-r-5" style="color: blue;"></i>Create</button>
                                         </li>
-                                        <li class="server-control">
+                                        <!--<li class="server-control">
                                             <button id="startStocBtn" type="button" onclick="manage_stoc(2);"
                                                 class="server-control-btn no-select server-action disabled" data-toggle="tooltip"
                                                    data-placement="bottom" title="Select a build" disabled aria-disabled="true">
@@ -106,13 +106,31 @@
                                                     class="server-control-btn no-select server-action disabled" data-toggle="tooltip"
                                                    data-placement="bottom" title="Select a build" disabled aria-disabled="true">
                                                 <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop</button>
-                                        </li>
+                                        </li>-->
                                        <li class="server-control" title="Select a build" data-toggle="tooltip" data-placement="bottom">
-                                           <button id='deleteStocBtn' type="button" onclick="manage_stoc(3);"
-                                                class="server-control-btn btn-delete no-select server-action disabled" disabled aria-disabled="true">
+                                           <button id='deleteStocBtn' type="button"
+                                                   class="server-control-btn btn-delete no-select server-action disabled"
+                                                   disabled aria-disabled="true" data-toggle="modal" data-target="#modal_delete_fa">
                                                <i class="fa fa-trash fa-lg margin-r-5 icon-light" style="color: blue;"></i>Delete</button>
                                        </li>
                                     </ul>
+                                    <div class="modal fade" id="modal_delete_fa" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_delete_fa" aria-hidden="true">
+                                        <div class="modal-dialog" role="document" style="width: 50%;">
+                                        <div class="modal-content">
+                                            <div class="modal-header" style='justify-content:center;'>
+                                            <h2 style='text-align:center;' class="modal-title" id="ModalLabel_delete_fa">CAUTION</h2>
+                                            </div>
+                                            <div class="modal-body" style="display: block; word-wrap: break-word; white-space: normal">
+                                                <p>You are about to delete a STOC. Any active class using this arena will be deleted.
+                                                    This action can't be undone!</p>
+                                            </div>
+                                            <div class="modal-footer" style="justify-content:space-around;">
+                                                <button type="button" style="margin-right: 1em; border: none;" class="btn-fa popup_close" data-dismiss="modal">Cancel</button>
+                                                <a onclick="manage_stoc(3);" class="btn-fa btn-delete" style="color: white;">Continue!</a>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <table id="stoc-table" class="table table-hover text-nowrap table-large">

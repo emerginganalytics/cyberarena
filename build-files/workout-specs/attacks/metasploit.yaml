@@ -1,0 +1,36 @@
+  id: metasploit
+  name: Metasploit
+  module: msfconsole
+  mitre_attack: T1059
+  attack_type: exploitation
+  description: Directly exploit the target.
+  args:
+      target_port:
+        id: RPORT
+        name: Remote Port
+        type: int
+        hint: The target port you want to attack
+      target_addr:
+        id: RHOSTS
+        name: Remote Host(s)
+        type: int
+        hint: The target IP(s) you want to attack
+      agent_port:
+        id: LPORT
+        name: Listening Port
+        type: int
+        hint: The listening port for the attacker
+      agent_addr:
+        id: LHOSTS
+        name: Listening Host(s)
+        type: int
+        hint: The listening IP for the attacker
+      payload:
+        id: payload
+        name: Payload for exploit
+        type: string
+        hint: Payload to execute
+        default: windows/x64/meterpreter/reverse_tcp
+
+
+
