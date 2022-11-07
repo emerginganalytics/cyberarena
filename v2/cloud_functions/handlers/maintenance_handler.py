@@ -8,6 +8,7 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.periodic_maintenance.hourly_maintenance import HourlyMaintenance
+from cloud_fn_utilities.periodic_maintenance.quarter_hourly_maintenance import QuarterHourlyMaintenance
 
 
 __author__ = "Philip Huff"
@@ -40,7 +41,8 @@ class MaintenanceHandler:
 
     def route(self):
         if self.quarter_hourly:
-            pass
+            logging.info(f"Running quarter hourly maintenance tasks")
+            QuarterHourlyMaintenance().run()
 
         if self.hourly:
             logging.info(f"Running hourly maintenance tasks")

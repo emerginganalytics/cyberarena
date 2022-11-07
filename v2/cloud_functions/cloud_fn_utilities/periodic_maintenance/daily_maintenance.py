@@ -5,6 +5,14 @@ from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 
+__author__ = "Philip Huff"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Philip Huff"
+__email__ = "pdhuff@ualr.edu"
+__status__ = "Testing"
 
 class DailyMaintenance:
     def __init__(self, debug=False):
@@ -31,6 +39,3 @@ class DailyMaintenance:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),
                                          build_id=build_id, action=str(PubSub.Actions.STOP.value))
-
-    def delete_expired(self):
-        pass
