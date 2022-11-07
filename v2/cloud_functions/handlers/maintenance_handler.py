@@ -9,6 +9,7 @@ from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.periodic_maintenance.hourly_maintenance import HourlyMaintenance
 from cloud_fn_utilities.periodic_maintenance.quarter_hourly_maintenance import QuarterHourlyMaintenance
+from cloud_fn_utilities.periodic_maintenance.daily_maintenance import DailyMaintenance
 
 
 __author__ = "Philip Huff"
@@ -49,4 +50,5 @@ class MaintenanceHandler:
             HourlyMaintenance().run()
 
         if self.daily:
-            pass
+            logging.info(f"Running daily maintenance tasks")
+            DailyMaintenance().run()
