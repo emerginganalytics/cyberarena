@@ -57,3 +57,12 @@ class ServerStateManager:
 
     def get_state_timestamp(self):
         return self.build['state-timestamp']
+
+    @staticmethod
+    def get_expired():
+        """
+        This function returns servers which have expired.
+        @return: List of IDs for retired classes
+        @rtype: list
+        """
+        return DataStoreManager(key_type=DatastoreKeyTypes.SERVER).get_expired()
