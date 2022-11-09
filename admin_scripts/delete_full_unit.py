@@ -8,7 +8,7 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 # Parse command line arguments
 parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
 parser.add_argument("-u", "--unit", default=None, help="Unit to delete")
-parser.add_argument("-d", "--debug", default=True, help="Whether to debug ")
+parser.add_argument("-d", "--debug", default=False, help="Whether to debug ")
 
 args = vars(parser.parse_args())
 
