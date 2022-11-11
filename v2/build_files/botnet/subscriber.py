@@ -1,22 +1,21 @@
-import os
-import subprocess
 from google.cloud import pubsub_v1
 from concurrent.futures import TimeoutError
-from google.cloud import runtimeconfig
 from attacks import *
 import attack_manager
+import cloud_env
+
+__author__ = "Ryan Ronquillo"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Ryan Ronquillo"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Ryan Ronquillo"
+__email__ = "rfronquillo@ualr.edu"
+__status__ = "Testing"
 
 class Subscriber:
     def __init__(self):
-        runtimeconfig_client = runtimeconfig.Client()
-        myconfig = runtimeconfig_client.config('cybergym')
-        self.project = myconfig.get_variable('project').value.decode('utf-8')
-        self.region = myconfig.get_variable('region').value.decode('utf-8')
-        self.zone = myconfig.get_variable('zone').value.decode('utf-8')
-        self.dns_suffix = myconfig.get_variable('dns_suffix').value.decode('utf-8')
-
-creds = '/home/walker/Downloads/ualr-cybersecurity-38b2dd265fa9.json'
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = creds
+        self.env = CloudEnv()
 
 timeout = 5.0
 
