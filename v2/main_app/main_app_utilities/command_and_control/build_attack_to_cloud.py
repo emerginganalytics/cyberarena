@@ -1,5 +1,5 @@
 from marshmallow import ValidationError
-from main_app_utilities.command_and_control.schema import AttackSchema
+from main_app_utilities.command_and_control.attack_schema import AttackSchema
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
@@ -29,22 +29,12 @@ class AttackSpecToCloud:
         cyber_arena_attack['creation_timestamp'] = get_current_timestamp_utc()
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value)
         self.build_type = cyber_arena_attack['build_type']
-        if self.build_type == BuildConstants.BuildType.FIXED_ARENA_WEAKNESS.value:
-            """
-            TODO: Determine if this portion is needed or if we can combine both inject and weakness
-            together into one spec_to_cloud/schema classes
-            """
-            self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
-            self.cyber_arena_attack = AttackSchema().load(cyber_arena_attack)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value,
-                                                      key_id=self.build_id)
-            self.action = PubSub.BuildActions.FIXED_ARENA_WEAKNESS.value
-        elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_ATTACK.value:
+        if self.build_type == BuildConstants.BuildType.FIXED_ARENA_ATTACK.value:
             self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             cyber_arena_attack['id'] = self.build_id
-            self.expires = cyber_arena_attack['expires']
             self.args = cyber_arena_attack['args']
             self.cyber_arena_attack = AttackSchema().load(cyber_arena_attack)
+            self.cyber_arena_attack['logs'] = []
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK.value,
                                                       key_id=self.build_id)
 

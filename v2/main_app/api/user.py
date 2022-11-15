@@ -45,7 +45,7 @@ class Users(MethodView):
 
     def post(self):
         """Method not needed for current model"""
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     @admin_required
     def delete(self, user_id=None):
@@ -54,7 +54,7 @@ class Users(MethodView):
 
         Only admins should be allowed to delete users
         """
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     @admin_required
     def put(self, user_id=None):
@@ -63,4 +63,4 @@ class Users(MethodView):
         :parameter user_id: user to do action against: authorize or deauth users
         """
         # Bad request
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()

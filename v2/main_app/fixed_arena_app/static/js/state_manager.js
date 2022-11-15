@@ -31,6 +31,7 @@ class StateManager {
         this.old_state = '';
         this.bad_states = [60, 61, 62, 72];
         this.url = this.__getURL__();
+
         // Polling animation Boolean values
         this.waiting = false; // False if no wait animation was set
         this.table_animation = false; // False if no table animation was set
@@ -149,7 +150,7 @@ class StateManager {
                 } else {
                     // Build action is not complete; Wait 30s before checking again
                     this.__updateVisuals__(response['data']['state']);
-                    await this.__sleep__(3000)
+                    await this.__sleep__(30000)
                         .then(() => {
                             this.getState();
                         });

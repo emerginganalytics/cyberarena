@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import logging
 from google.cloud import logging_v2
 
-from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates, FixedArenaClassStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -66,7 +66,27 @@ class DataStoreManager:
         if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
             expired += list(query_expired.fetch())
+        elif self.key_type == DatastoreKeyTypes.SERVER:
+            query_expired.add_filter('state', '=', ServerStates.EXPIRED.value)
+            expired += list(query_expired.fetch())
+
         return expired
+
+    def get_running(self):
+        """
+        returns a list of running entities associated with the key_type
+        @return:
+        """
+        running = []
+        query_running = self.ds_client.query(kind=self.key_type)
+        if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
+            query_running.add_filter('state', '=', FixedArenaClassStates.RUNNING.value)
+            running += list(query_running.fetch())
+        elif self.key_type == DatastoreKeyTypes.SERVER:
+            query_running.add_filter('state', '=', ServerStates.EXPIRED.value)
+            running += list(query_running.fetch())
+
+        return running
 
     @staticmethod
     def _create_safe_entity(entity):

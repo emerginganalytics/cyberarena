@@ -128,6 +128,7 @@ function manage_stoc(action){
     if (action === 3) {
         if (selected.length === 1) {
             url = url + selected[0];
+            $("#modal_delete_fa").modal('toggle');
             fetch(url, {
                 method: 'DELETE',
                 headers: json_headers,

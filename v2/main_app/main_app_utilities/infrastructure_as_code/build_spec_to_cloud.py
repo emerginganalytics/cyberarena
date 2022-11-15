@@ -16,6 +16,7 @@ from main_app_utilities.infrastructure_as_code.schema import FixedArenaSchema, F
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.global_objects.agent import Agent
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -58,15 +59,6 @@ class BuildSpecToCloud:
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value,
                                                       key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
-        elif self.build_type == BuildConstants.BuildType.AGENT_MACHINE.value:
-            # cyber_arena_spec references th e agent_machine spec that is updated to
-            # contain workspace NICs and build_id where (build_id = fixed-arena-class.build_id + '-telemetry')
-            self.build_id = f'{cyber_arena_spec["parent_id"]}-telemetry'
-            cyber_arena_spec['id'] = self.build_id
-            # Not entirely sure how to handle this. It's possible that I need to implement a class similar to the
-            # original server_spec_to_cloud class created for v1 of the CyberArena. This class would need to sit
-            # at both this point and possible in a location accessible by the cloud_functions.
-            self.cyber_arena_spec = 'TBD'
         self.debug = debug
 
     def commit(self):

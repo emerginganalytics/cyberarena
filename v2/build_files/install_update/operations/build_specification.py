@@ -6,6 +6,7 @@ from googleapiclient import discovery
 from google.api_core.exceptions import NotFound, Forbidden
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from install_update.utilities.crypto_lock import CryptoLock
 from install_update.utilities.computer_image_sync import ComputerImageSync
 
@@ -60,6 +61,7 @@ class BuildSpecification:
         self._upload_folder_to_cloud(self.build_student_instructions, self.STUDENT_FOLDER)
         self._upload_folder_to_cloud(self.build_startup_scripts, self.STARTUP_SCRIPT_FOLDER)
         self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
+        self._sync_attacks_to_cloud(self.build_attacks_specs)
 
     def _sync_locked_folder(self, plaintext_dir, encrypted_dir, extension):
         spec_crypto_lock = CryptoLock(plaintext_dir=plaintext_dir, encrypted_dir=encrypted_dir,
@@ -82,7 +84,7 @@ class BuildSpecification:
             if item.is_dir():
                 for file in os.scandir(item.path):
                     if not extension or file.suffix == f".{extension}":
-                        self._upload_file_to_cloud(file)
+                        self._upload_file_to_cloud(file, cloud_directory)
             if item.is_file():
                 if item.suffix == f".{extension}":
                     self._upload_file_to_cloud(item, cloud_directory)
@@ -130,8 +132,18 @@ class BuildSpecification:
                           f"error and resync. The specification will not be uploaded to the project until the error "
                           f"is corrected.")
                     return False
-                # else:
-                #    return True
+
+    def _sync_attacks_to_cloud(self):
+        local_directory = os.path.join('v2', "build_files", "specs", "attacks")
+        ds_manager = DataStoreManager()
+
+        # First update files stored in Cloud buckets
+        self._upload_folder_to_cloud(local_directory, self.ATTACK_FOLDER)
+        # Load file into python objects and update each datastore entry
+        for filename in os.listdir(local_directory):
+            attack = yaml.safe_load(open(os.path.join(local_directory, filename)))
+            ds_manager.set(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value, key_id=attack['id'])
+            ds_manager.put(attack)
 
     def _create_directories(self):
         directories = [

@@ -1,31 +1,64 @@
 attack:
-  - id: nmap_scanning
-    name: NMAP Scanning
-    mitre_attack: T1595
-    attack_type: scanning
-    description: Probe network for vulnerabilities
-    mode: 'attack'
-    args:
-      - id: target_network
-        name: Target Network
-        type: string
-        hint: The network name to scan
-      - id: scan_type
-        name: Scan Type
-        default: Aggressive
-        type: choice
-        Choices:
-          - Aggressive: '-T5'
-          - Ping Sweep: '-Pn'
-          - Quick Scan: '-sn'
-  - id: sqlmap
-    name: SQL Vulnerability Scan
-    mitre_attack: T9999
-    attack_type: scanning
-    description: Use sqlmap to detect and exploit database vulnerabilities.
-    mode: 'attack'
-    args:
-      - id: target_network
-        name: Target Network
-        type: string
-        hint: The network or host to scan.
+	- id: nmap_scanning
+  name: NMAP Scanning
+	  Mitre-attack: T1595
+	  attack_type: scanning
+	  description: Probe network for vulnerabilities.
+	  Args:
+	     - id: target_network
+      name: "Target Network"
+	       type: string
+	       hint: The network name to scan
+	     - id: scan_type
+      name: "Scan Type"
+	      default: Aggressive
+	      type: choice
+	      Choices:
+		  - Aggressive
+	 	  - Ping Sweep
+		  - Quick Scan
+
+	- id: hping3_flood
+  name: hping3 flood
+	  Mitre-attack: T1498.001
+	  attack_type: denial_of_service
+	  description: Directly flood network.
+	  Args:
+	     - id: target_network
+      name: "Target Network"
+	       type: string
+	       hint: The network name to scan
+	     - id: scan_type
+      name: "Port"
+           type: int
+           hint: Service you want to attack
+         - id: service
+      default: hping3 -S --flood -V -p 80
+
+  id: metasploit
+  name: metasploit_exploit
+	  Mitre-attack: T1059
+	  attack_type: exploitation
+	  description: Directly exploit the target.
+	  Args:
+	     - id: RPORT
+      name: "Remote Port"
+	       type: int
+	       hint: The target port you want to attack
+	     - id: RHOSTS
+      name: "Remote Host(s)"
+           type: int
+           hint: The target IP(s) you want to attack
+	     - id: LPORT
+      name: "Listening Port"
+	       type: int
+	       hint: The listening port for the attacker
+	     - id: LHOSTS
+      name: "Listening Host(s)"
+           type: int
+           hint: The target IP(s) you want to listen on
+		  - id: Payload
+	  name: "payload"
+	  	   type: string
+		   hint: Payload to execute
+		   default: 'windows/x64/meterpreter/reverse_tcp'

@@ -128,6 +128,3 @@ class FixedArena:
 
         for network in self.fixed_arena['networks']:
             self.vpc_manager.delete(network_spec=network)
-
-        # I'm not sure if this is needed
-        # self.vpc_manager.delete(network_spec=BuildConstants.Networks.GATEWAY_NETWORK_CONFIG)
