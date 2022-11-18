@@ -5,7 +5,8 @@ from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes
-from main_app_utilities.command_and_control.attack_spec_to_cloud import AttackSpecToCloud
+from main_app_utilities.command_and_control.build_attack_to_cloud import AttackSpecToCloud
+from main_app_utilities.globals import BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -56,21 +57,48 @@ class Controller(MethodView):
         return self.http_resp(code=400).prepare_response()
 
     def post(self):
-        """Handles inject creation requests"""
-        recv_data = request.json
-        # Parse Form data
-        build_id = recv_data.get('build_id', None)
-        network = recv_data.get('network', None)
-        mode = recv_data.get('mode', None)
-        args = recv_data.get('args', None)
-        expires = recv_data.get('expires', None)
+        """Handles inject creation requests
+            build_id: id of inject to use
+            parent_id: id of parent to send inject to
+            mode: inject types [attack, weakness]
+            args: arguments used to build script
+        """
+        # Get form data
+        recv_data = json.loads(request.data.decode())
 
-        # Send pubsub if all data exists
-        # TODO: Need to move the pubsub request to a Controller utilities class similar to
-        #  infrastructure_as_code.build_spec_to_cloud
-        if build_id and network and mode and args and expires:
+        # Parse Form data
+        attack_id = recv_data.get('attack_id', None)
+        parent_id = recv_data.get('parent_id', None)
+
+        if attack_id and parent_id:
             # Validate build and send to datastore
-            attack_to_cloud = AttackSpecToCloud().attack_to_ds(build_id=build_id,  network=network, mode=mode, args=args)
+            args = {}
+            attack_ds = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC, key_id=attack_id).get()
+            attack_obj = attack_ds.copy()
+            # Set attack scope to either single workspace or entire class
+            target_class = recv_data.get('target_class', None)
+            if target_class:
+                args['target_build_type'] = BuildConstants.BuildType.FIXED_ARENA_CLASS.value
+                args['target_id'] = parent_id
+            else:
+                args['target_id'] = recv_data.get('target_workspace')
+                args['target_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value
+            # Load attack option
+            attack_option = recv_data.get('attack_option', None)
+            if attack_option:
+                args['option'] = attack_ds['args'][1]['Choices'].get(attack_option)
+            attack_obj['args'] = args
+            # Get parent id and build type
+            attack_obj['parent_id'] = parent_id
+            attack_obj['parent_build_type'] = recv_data.get('parent_build_type', BuildConstants.BuildType.FIXED_ARENA_CLASS.value)
+            # Set inject mode (attack or weakness)
+            mode = recv_data.get('mode', 'attack')
+            if mode == 'attack':
+                attack_obj['mode'] = BuildConstants.BuildType.FIXED_ARENA_ATTACK.value
+            elif mode == 'weakness':
+                attack_obj['mode'] = BuildConstants.BuildType.FIXED_ARENA_WEAKNESS.value
+            # Validate object before sending the request
+            attack_to_cloud = AttackSpecToCloud(cyber_arena_attack=attack_obj)
             attack_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST').prepare_response()

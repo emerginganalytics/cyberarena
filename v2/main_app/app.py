@@ -20,7 +20,8 @@ from api.fixed_arena_workspace import FixedArenaWorkspace
 from api.unit import Unit
 from api.workout import Workout
 from api.attack_specs import AttackSpecs
-from api.controller import Controller
+from api.agency import Agency
+from api.agency_telemetry import AgencyTelemetry
 from api.iot_device import IoTDevice
 from api.user import Users
 
@@ -275,8 +276,9 @@ register_api(view=IoTDevice, endpoint='iot', url='/api/iot/', pk='device_id')
 register_api(view=FixedArena, endpoint='fixed-arena', url='/api/fixed-arena/', pk='build_id')
 register_api(view=FixedArenaClass, endpoint='class', url='/api/fixed-arena/class/', pk='build_id')
 register_api(view=FixedArenaWorkspace, endpoint='workspace', url='/api/fixed-arena/workspace/', pk='build_id')
-register_api(view=Controller, endpoint='controller', url='/api/controller/', pk='build_id')
-register_api(view=AttackSpecs, endpoint='templates', url='/api/controller/templates/', pk='build_id')
+register_api(view=Agency, endpoint='agency', url='/api/agency/', pk='build_id')
+register_api(view=AgencyTelemetry, endpoint='telemetry', url='/api/agency/telemetry/', pk='build_id')
+register_api(view=AttackSpecs, endpoint='templates', url='/api/agency/templates/', pk='build_id')
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
 
 

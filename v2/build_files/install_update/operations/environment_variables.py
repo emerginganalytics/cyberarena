@@ -30,18 +30,19 @@ class EnvironmentVariables:
 
     def run(self):
         reply = str(input(f"Do you want to update a specific environment variable or ALL environmental variables "
-                          f"for {self.project}? [s]pecific/[A]ll")).upper()
+                          f"for {self.project}? [s]pecific/[A]ll: ")).upper()
         if reply in ["S", "SPECIFIC"]:
             while True:
-                var = str(input(f"Which variable do you want to update?"))
+                var = str(input(f"Which variable do you want to update?: "))
                 self._set_variable(var)
-                response = str(input("Would you like to set another variable? (y/N)")).upper()
+                response = str(input("Would you like to set another variable? (y/N): ")).upper()
                 if not response or response == "N":
                     break
         else:
             self._set_variable("project", self.project)
             self._set_region()
             self._set_zone()
+            self._set_project_number()
             for var in self.VARIABLES:
                 self._set_variable(var)
 
@@ -52,9 +53,9 @@ class EnvironmentVariables:
             print("Given value is the same as the set value. No change is needed.")
             return
         elif new_value:
-            prompt = f"The current value of {var} is {current_val}. Do you wish to set it to {new_value}? (Y/n)"
+            prompt = f"The current value of {var} is {current_val}. Do you wish to set it to {new_value}? (Y/n): "
         else:
-            prompt = f"The current value of {var} is {current_val}. Do you wish to set it? (Y/n)"
+            prompt = f"The current value of {var} is {current_val}. Do you wish to set it? (Y/n): "
         reply = str(input(prompt)).upper()
         if not reply or reply == "Y":
             if not new_value:
@@ -72,7 +73,7 @@ class EnvironmentVariables:
             options_string += f"[{i}] {region_option['name']}\n"
 
         reply = input(f"Region options:\n{options_string}Enter the number beside the region in which you like to "
-                      f"run the Cyber Arena? Default is {self.DEFAULT_REGION}")
+                      f"run the Cyber Arena? Default is {self.DEFAULT_REGION}: ")
         region = region_options[int(reply)] if reply.isnumeric() else self.DEFAULT_REGION
         self._set_variable("region", region)
 
@@ -85,9 +86,14 @@ class EnvironmentVariables:
             options_string += f"[{i}] {zone_option['name']}\n"
 
         reply = input(f"Zone options:\n{options_string}Enter the number beside the zone in which you like to "
-                      f"run the Cyber Arena? Default is {self.DEFAULT_ZONE}")
+                      f"run the Cyber Arena? Default is {self.DEFAULT_ZONE}: ")
         zone = zone_options[int(reply)] if reply.isnumeric() else self.DEFAULT_ZONE
         self._set_variable("zone", zone)
+
+    def _set_project_number(self):
+        command = f'gcloud projects list --filter="{self.project}" --format="value(PROJECT_NUMBER)"'
+        project_number = subprocess.run(command, capture_output=True, shell=True).stdout.decode()
+        self._set_variable("project_number", project_number)
 
     class Variables(str, Enum):
         DNS_SUFFIX = "dns_suffix"

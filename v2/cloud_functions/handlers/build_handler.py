@@ -90,7 +90,12 @@ class BuildHandler:
                               f"BUILD_DISPLAY_PROXY")
                 raise ValueError
             FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split()).build()
+        elif action == str(PubSub.BuildActions.CYBER_ARENA_AGENT.value):
+            build_id = self.event_attributes.get('build_id', None)
+            workspace_ids = self.event_attributes.get('workspace_ids', None)
+            if not build_id:
+                logging.error(f'No build_id provided for the build handler with action '
+                              f'BUILD_AGENT_MACHINE')
         else:
             logging.error(f"Unsupported action supplied to build handler")
             raise ValueError
-

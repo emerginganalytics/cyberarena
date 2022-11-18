@@ -89,7 +89,8 @@ class PubSub:
         CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
-        BOTNET = "BOTNET"
+        REPORT = 'REPORT'
+        AGENCY = 'AGENCY'
 
     class BuildActions(Enum):
         WORKOUT = 0
@@ -100,6 +101,9 @@ class PubSub:
         DISPLAY_PROXY = 5
         FIREWALL_SERVER = 6
         FIXED_ARENA_WORKSPACE_PROXY = 7
+        CYBER_ARENA_AGENT = 8
+        ATTACK = 9
+        WEAKNESS = 10
 
     class Actions(Enum):
         BUILD = 1
@@ -116,6 +120,7 @@ class PubSub:
         FIXED_ARENA_CLASS = 2
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
+        CYBER_ARENA_AGENT = 5
 
 
 class ServerStates(Enum):

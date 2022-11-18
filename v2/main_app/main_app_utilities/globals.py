@@ -144,7 +144,7 @@ class PubSub:
         CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
-        BOTNET = "BOTNET"
+        AGENCY = "AGENCY"
 
     class BuildActions(Enum):
         WORKOUT = 0

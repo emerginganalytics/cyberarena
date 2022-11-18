@@ -232,34 +232,40 @@
                     </div>
                 </div>
                 <div class="tab-pane fade" id="vuln-tab" aria-labelledby="fa-vuln-tab">
-                    <div id="vuln-container" class="tab-pane fade" aria-labelledby="nav-attack-tab"  style="margin-top: 1em; padding: 1em;">
+                    <div id="vuln-container" style="margin-top: 1em; padding: 1em;">
                         <!--Holds both form builder and attack results table-->
                         <div id="vuln-templates-container">
                              <table class="table table-hover" id="vuln-templates-table">
-                                 {{ ctrl_macros.display_vulns(attack_spec.attack) }}
+                                 {{ ctrl_macros.display_vulns(attack_spec) }}
                              </table>
                             <div id="vuln-template-btn-div">
-                                <button id='vuln-template-btn' class="btn btn-sm" type="button" disabled hidden>Select Template</button>
+                                <button id='vuln-template-btn' class="btn btn-sm nav-link"
+                                        type="button" disabled hidden>Select Template</button>
                             </div>
                         </div>
-                        <div id='vuln-form-modal' class="modal" tabindex="-1" role="dialog">
+                        <div id="attack-form-modal" class="modal" tabindex="-1" role="dialog"> <!-- Build vulnerability form modal -->
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Attack Template Form</h5>
-                                        <button type="button" class="close cancel-form" data-dismiss="modal" aria-label="Close">
+                                        <h5 class="modal-title" id="attack-modal-title"></h5>
+                                        <button type="button" class="close cancel-form" data-dismiss="modal"
+                                                aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <form id="vuln-template-form" name="vuln-template-form" method="post" action="/api/inject/">
-                                            <div id="vuln-template-args"></div>
-                                            {{ ctrl_macros.target_network('vuln-template-form', workspaces, fixed_arena_class.workspace_settings.registration_required) }}
+                                        <form id="attack-template-form" name="attack-template-form" method="post" action="/api/agency/">
+                                            <div id="attack-form-variables"></div>
+                                            <div class="form-group">
+                                                {{ ctrl_macros.target_machine('attack-template-form', fixed_arena_class) }}
+                                            </div>
+                                            <div class="form-group">
+                                                {{ ctrl_macros.target_network('attack-template-form', workspaces, fixed_arena_class, registration_required) }}
+                                            </div>
+                                            <div class="form-group">
+                                                <input id="attack-template-submit" class="btn nav-link" type="submit" value="Submit">
+                                            </div>
                                         </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary" form="vuln-template-form">Submit</button>
-                                        <button type="button" class="btn btn-secondary cancel-form" data-dismiss="modal">Cancel</button>
                                     </div>
                                 </div>
                             </div>

@@ -18,58 +18,34 @@ class AttackSpecToCloud:
     """
     def __init__(self, cyber_arena_attack, debug=False):
         self.env = CloudEnv()
-        # Uncomment the following two lines
         # log_client = logging_v2.Client()
         # log_client.setup_logging()
+        self.cyber_arena_attack = cyber_arena_attack
         self.datastore_manager = DataStoreManager()
         self.debug = debug
-        if 'build_type' not in cyber_arena_attack:
-            raise ValidationError
-
-        cyber_arena_attack['creation_timestamp'] = get_current_timestamp_utc()
+        self.parent_build_type = self.cyber_arena_attack.get('parent_build_type', BuildConstants.BuildType.FIXED_ARENA_CLASS.value)
+        self.build_type = self.cyber_arena_attack.get('build_type', self.parent_build_type)
+        if 'mode' not in self.cyber_arena_attack:
+            raise ValidationError(f'Invalid mode given in {self.__class__.__name__}')
+        self.cyber_arena_attack['creation_timestamp'] = get_current_timestamp_utc()
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value)
-        self.build_type = cyber_arena_attack['build_type']
-        if self.build_type == BuildConstants.BuildType.FIXED_ARENA_WEAKNESS.value:
-            """
-            TODO: Determine if this portion is needed or if we can combine both inject and weakness
-            together into one spec_to_cloud/schema classes
-            """
-            self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
-            self.cyber_arena_attack = AttackSchema().load(cyber_arena_attack)
-            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value,
-                                                      key_id=self.build_id)
-            self.action = PubSub.BuildActions.FIXED_ARENA_WEAKNESS.value
-        elif self.build_type == BuildConstants.BuildType.FIXED_ARENA_ATTACK.value:
-            self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
-            cyber_arena_attack['id'] = self.build_id
-            self.expires = cyber_arena_attack['expires']
-            self.args = cyber_arena_attack['args']
-            self.cyber_arena_attack = AttackSchema().load(cyber_arena_attack)
+        self.mode = self.cyber_arena_attack['mode']
+
+        if self.mode == BuildConstants.BuildType.FIXED_ARENA_ATTACK.value:
+            self.attack_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            self.cyber_arena_attack['id'] = self.attack_id
+            self.args = self.cyber_arena_attack['args']
+            self.cyber_arena_attack = AttackSchema().load(self.cyber_arena_attack)
+            self.cyber_arena_attack['logs'] = []
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK.value,
-                                                      key_id=self.build_id)
-
-    def update(self):
-        """
-        Updates Datastore with existing attack templates
-        :return:
-        """
-        attack_specs = BucketManager().get_attacks()
-        # Make sure that the spec file exists in project
-        if not attack_specs:
-            raise ValidationError
-        for attack in attack_specs['attack']:
-            if 'id' not in attack:
-                raise ValidationError
-            attack_id = attack['id']
-            self.datastore_manager.set(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value, key_id=attack_id)
-            attack_spec_obj = AttackSchema().load(attack)
-
-            # Obj is validated; Update datastore entity
-            self.datastore_manager.put(attack_spec_obj)
+                                                      key_id=self.attack_id)
+        else:
+            raise ValidationError(f'Unrecognized value ({self.mode}) for BuildType in BuildAttackToCloud')
 
     def commit(self):
         """Sends PubSub request for requested inject build"""
         self.datastore_manager.put(self.cyber_arena_attack)
         if not self.debug:
-            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BOTNET.value), action=str(self.action),
-                                    build_id=str(self.build_id), expires=str(self.expires), args=str(self.args))
+            self.pubsub_manager.msg(handler=str(PubSub.Handlers.AGENCY.value), build_id=str(self.attack_id),
+                                    action=str(self.mode), build_type=str(self.build_type),
+                                    parent_id=str(self.cyber_arena_attack['parent_id']))
