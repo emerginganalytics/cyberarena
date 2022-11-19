@@ -10,7 +10,7 @@ from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff", "Andrew Bomberger"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -36,6 +36,10 @@ class PubSubManager:
     def delete_topic(self):
         logging.info(f'Deleting topic: {self.topic_path}')
         self.publisher.delete_topic(request={'topic': self.topic_path})
+
+    def list_topics(self):
+        project_path = f'projects/{self.env.project}'
+        return self.publisher.list_topics(request={"project": project_path})
 
     def msg(self, **args):
         self.publisher.publish(self.topic_path, data=b'Cyber Arena PubSub Message', **args)

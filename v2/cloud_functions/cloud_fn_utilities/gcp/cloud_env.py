@@ -15,6 +15,7 @@ class CloudEnv:
         runtimeconfig_client = runtimeconfig.Client()
         myconfig = runtimeconfig_client.config('cybergym')
         self.project = myconfig.get_variable('project').value.decode("utf-8")
+        self.project_number = myconfig.get_variable('project_number').value.decode('utf-8')
         self.region = myconfig.get_variable('region').value.decode("utf-8")
         self.zone = myconfig.get_variable('zone').value.decode("utf-8")
         self.dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")

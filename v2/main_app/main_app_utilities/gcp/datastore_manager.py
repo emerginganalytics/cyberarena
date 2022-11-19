@@ -60,10 +60,7 @@ class DataStoreManager:
             query_classroom.add_filter('class_name', '=', str(class_name))
         return list(query_classroom.fetch())
 
-    def get_injection(self):
-        pass
-
     def get_attack_specs(self):
         """returns list of attack specs stored in datastore"""
-        query_attacks = self.ds_client.query(kind=DatastoreKeyTypes.CYBERARENA_ATTACK.value)
+        query_attacks = self.ds_client.query(kind=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value)
         return list(query_attacks.fetch())

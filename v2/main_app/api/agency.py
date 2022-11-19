@@ -6,6 +6,7 @@ from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes
 from main_app_utilities.command_and_control.build_attack_to_cloud import AttackSpecToCloud
+from main_app_utilities.globals import BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -62,21 +63,58 @@ class Agency(MethodView):
             mode: inject types [attack, weakness]
             args: arguments used to build script
         """
-        recv_data = request.json
-        # Parse Form data
-        build_id = recv_data.get('build_id', None)
-        parent_id = recv_data.get('parent_id', None)
-        mode = recv_data.get('mode', None)
-        args = recv_data.get('args', None)
+        # Get form data
+        recv_data = json.loads(request.data.decode())
 
-        if build_id and parent_id and mode and args:
+        # Parse Form data
+        attack_id = recv_data.get('attack_id', None)
+        parent_id = recv_data.get('parent_id', None)
+        target_machine = recv_data.get('target_machine', None)
+
+        if attack_id and parent_id and target_machine:
             # Validate build and send to datastore
-            attack_obj = {
-                'build_id': build_id,
-                'parent_id': parent_id,
-                'mode': mode,
-                'args': args,
-            }
+            args = {}
+            attack_ds = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC, key_id=attack_id).get()
+            attack_obj = attack_ds.copy()
+            args['target_machine'] = target_machine
+
+            # Set attack scope to either single workspace or entire class
+            target_class = recv_data.get('target_class', None)
+            if target_class:
+                args['target_build_type'] = BuildConstants.BuildType.FIXED_ARENA_CLASS.value
+                args['target_id'] = parent_id
+            else:
+                args['target_id'] = recv_data.get('target_workspace')
+                args['target_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value
+
+            # Load attack option
+            attack_option = recv_data.get('attack_option', None)
+            if attack_option:
+                print(attack_option)
+                for option in attack_ds['args'][1]['Choices']:
+                    if attack_option in option:
+                        args['option'] = option[attack_option]
+                        break
+            else:
+                default = attack_ds['args'][1]['default']
+                for option in attack_ds['args'][1]['Choices']:
+                    if default in option:
+                        args['option'] = option[default]
+                        break
+            attack_obj['args'] = args
+
+            # Get parent id and build type
+            attack_obj['parent_id'] = parent_id
+            attack_obj['parent_build_type'] = recv_data.get('parent_build_type', BuildConstants.BuildType.FIXED_ARENA_CLASS.value)
+
+            # Set inject mode (attack or weakness)
+            mode = recv_data.get('mode', 'attack')
+            if mode == 'attack':
+                attack_obj['mode'] = str(PubSub.BuildActions.CYBER_ARENA_WEAKNESS.value)
+            elif mode == 'weakness':
+                attack_obj['mode'] = str(PubSub.BuildActions.CYBER_ARENA_WEAKNESS.value)
+
+            # Validate object before sending the request
             attack_to_cloud = AttackSpecToCloud(cyber_arena_attack=attack_obj)
             attack_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
