@@ -139,6 +139,8 @@ class BuildConstants:
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
+        AGENT_TELEMETRY = 'agency-telemetry'
+
 
     class Handlers(str, Enum):
         BUDGET = "BUDGET"
@@ -147,7 +149,7 @@ class PubSub:
         CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
-        BOTNET = "BOTNET"
+        AGENCY = "AGENCY"
 
     class BuildActions(Enum):
         WORKOUT = 0
@@ -158,6 +160,9 @@ class PubSub:
         DISPLAY_PROXY = 5
         FIREWALL_SERVER = 6
         FIXED_ARENA_WORKSPACE_PROXY = 7
+        CYBER_ARENA_AGENT = 9
+        CYBER_ARENA_ATTACK = 10
+        CYBER_ARENA_WEAKNESS = 11
 
     class Actions(Enum):
         BUILD = 1

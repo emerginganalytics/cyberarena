@@ -67,6 +67,7 @@ class FixedArenaClass(MethodView):
                         'student_emails': [],
                         'expires': expire_ts
                     }
+                    build_spec['add_attacker'] = recv_data.get('add_attacker', False)
                     build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
                     build_spec_to_cloud.commit()
                     return self.http_resp(code=200).prepare_response()

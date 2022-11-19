@@ -8,6 +8,7 @@ from handlers.build_handler import BuildHandler
 from handlers.maintenance_handler import MaintenanceHandler
 from handlers.control_handler import ControlHandler
 from handlers.report_handler import ReportHandler
+from handlers.agency_handler import AgencyHandler
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -52,3 +53,5 @@ def cyber_arena_cloud_function(event, context):
             MaintenanceHandler().route()
         elif handler == PubSub.Handlers.REPORT:
             ReportHandler(event['attributes']).route()
+        elif handler == PubSub.Handlers.AGENCY:
+            AgencyHandler(event['attributes']).route()

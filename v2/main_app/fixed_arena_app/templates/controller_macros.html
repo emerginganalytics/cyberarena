@@ -16,7 +16,7 @@
 {%- endmacro %}
 
 <!-- Builds target_network input and select fields -->
-{% macro target_network(form_id, workout_list, registration_required) %}
+{% macro target_network(form_id, build_list, parent_obj, registration_required) %}
     <script>
         function disableTargetWorkout(elem, target_field){
             var disable_field = $("#" + target_field);
@@ -32,24 +32,37 @@
     </script>
     {# builds network form fields #}
     <div class="form-group">
-        <label for="target_unit">Send to Unit: </label>
-        <input name="target_unit" type="checkbox" value="check" id="target_unit"
-               onchange="disableTargetWorkout(this, 'target_workout')"/>
-        <select name="target_workout" id="target_workout" required>
-            <option value="" selected disabled hidden style="text-align: center">--Send to Workout--</option>
-            {% for workout in workout_list %}
-                {% if workout.student_name %}
+        <label for="target_class">Send to Class: </label>
+        <input name="target_class" type="checkbox" value="check" id="target_unit"
+               onchange="disableTargetWorkout(this, 'target_workspace')"/>
+        <input type="text" class="readOnly" readonly value="{{ parent_obj.key.name }}" name="parent_id" hidden>
+        <input type="text" class="readOnly" readonly value="{{ parent_obj.build_type }}" name="parent_build_type" hidden>
+        <select name="target_workspace" id="target_workspace" required>
+            <option value="" selected disabled hidden style="text-align: center">--Send to Workspace--</option>
+            {% for build in build_list %}
+                {% if build.student_name %}
                     {% if registration_required %}
-                        <option value="{{ workout.name }}">{{ workout.name }} | {{ workout.student_name.student_name }}</option>
+                        <option value="{{ build.key.name }}">{{ build.key.name }} | {{ build.student_name.student_name }}</option>
                     {% else %}
-                        <option value="{{ workout.name }}">{{ workout.name }} | {{ workout.student_name }}
+                        <option value="{{ build.key.name }}">{{ build.key.name }} | {{ build.student_name }}
                     {% endif %}
                 {% else %}
-                    <option value="{{ workout.name }}">{{ workout.name }}</option>
+                    <option value="{{ build.key.name }}">{{ build.key.name }}</option>
                 {% endif %}
             {% endfor %}
         </select>
     </div>
+{% endmacro %}
+
+<!-- Creates machine image select field in target form -->
+{% macro target_machine(form_id, build_spec) %}
+    <label for="target">Target Machine: </label>
+    <select name="target_machine" id="target" required>
+        <option value="" selected disabled hidden style="text-align: center; align-content: center">--Select Target Machine--</option>
+        {% for machine in build_spec['workspace_servers'] %}
+            <option value="{{ machine.image }}" style="align-content: center">{{ machine.name }} | {{ machine.image.split('image-')[1] }}</option>
+        {% endfor %}
+    </select>
 {% endmacro %}
 
 <!-- [ARTIFACT] For each template in the template list, builds a form and adds that form to a table -->
@@ -113,8 +126,8 @@
     </tbody>
 {%- endmacro %}
 
-<!-- Macro used to build the vulnerability template table. This table can be searched or filtered to send a request
-     to the server to build the form for that template. -->
+<!--Macro used to build the vulnerability template table. This table can be searched or filtered to send a request
+     to the server to build the form for that template.-->
 {% macro display_vulns(templates) -%}
     <thead>
         <tr id="vuln-table-header">
@@ -127,8 +140,8 @@
     <tbody id="vuln-table-body">
     {% for template in templates %}
         {% set outer_loop = loop.index0 %}
-        <tr id="{{ template.id}}">
-            <td><span id="checkmark-span"></span>{{ template.mitre_attack }}</td>
+        <tr id="{{ template.key.name}}">
+            <td><span id="attack-checkmark-span"></span>{{ template.mitre_attack }}</td>
             <td>{{ template.name }}</td>
             <td>{{ template.attack_type }}</td>
             <td>{{ template.description }}</td>
@@ -136,4 +149,4 @@
     {% endfor %}
     </tbody>
 {% endmacro %}
-<!-- [ eof ] -->
+<!--[eof]-->
