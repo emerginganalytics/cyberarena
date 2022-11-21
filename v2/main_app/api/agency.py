@@ -110,9 +110,9 @@ class Agency(MethodView):
             # Set inject mode (attack or weakness)
             mode = recv_data.get('mode', 'attack')
             if mode == 'attack':
-                attack_obj['mode'] = str(PubSub.BuildActions.CYBER_ARENA_WEAKNESS.value)
+                attack_obj['mode'] = str(BuildConstants.BuildType.FIXED_ARENA_ATTACK.value)
             elif mode == 'weakness':
-                attack_obj['mode'] = str(PubSub.BuildActions.CYBER_ARENA_WEAKNESS.value)
+                attack_obj['mode'] = str(BuildConstants.BuildType.FIXED_ARENA_WEAKNESS.value)
 
             # Validate object before sending the request
             attack_to_cloud = AttackSpecToCloud(cyber_arena_attack=attack_obj)

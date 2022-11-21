@@ -37,6 +37,7 @@ class AttackSpecToCloud:
         self.debug = debug
         self.parent_build_type = self.cyber_arena_attack.get('parent_build_type', BuildConstants.BuildType.FIXED_ARENA_CLASS.value)
         self.build_type = self.cyber_arena_attack.get('build_type', self.parent_build_type)
+        self.build_id = self.cyber_arena_attack['args'].get('target_id')
         if 'mode' not in self.cyber_arena_attack:
             raise ValidationError(f'No value for mode given in AttackSpecToCloud')
         self.cyber_arena_attack['creation_timestamp'] = str(datetime.fromtimestamp(get_current_timestamp_utc()))
@@ -64,7 +65,7 @@ class AttackSpecToCloud:
         self.datastore_manager.put(self.cyber_arena_attack)
         if not self.debug:
             self.pubsub_manager.msg(handler=str(PubSub.Handlers.AGENCY.value), action=str(self.action),
-                                    attack_id=self.attack_id, build_id=str(self.attack_id),
+                                    attack_id=self.attack_id, build_id=str(self.build_id),
                                     build_type=str(self.build_type))
 
 # [ eof ]

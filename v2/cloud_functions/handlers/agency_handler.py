@@ -33,7 +33,7 @@ class AgencyHandler:
             if 'attack_id' not in self.event_attributes:
                 logging.error(f"No build_id for agency handler with action {action}")
                 raise ValueError
-            CyberArenaAgent(build_id=self.event_attributes['build_id']).send_command(self.event_attributes)
+            CyberArenaAgent(build_id=self.event_attributes['build_id'], debug=self.debug).send_command(self.event_attributes)
         elif action == str(PubSub.BuildActions.CYBER_ARENA_WEAKNESS.value):
             pass
 

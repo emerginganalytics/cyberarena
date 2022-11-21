@@ -60,7 +60,7 @@
     <select name="target_machine" id="target" required>
         <option value="" selected disabled hidden style="text-align: center; align-content: center">--Select Target Machine--</option>
         {% for machine in build_spec['workspace_servers'] %}
-            <option value="{{ machine.image }}" style="align-content: center">{{ machine.name }} | {{ machine.image.split('image-')[1] }}</option>
+            <option value="{{ machine.name }}" style="align-content: center">{{ machine.name }} | {{ machine.image.split('image-')[1] }}</option>
         {% endfor %}
     </select>
 {% endmacro %}
