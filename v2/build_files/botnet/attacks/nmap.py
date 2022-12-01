@@ -8,4 +8,6 @@ class Nmap:
     def build_attack(self):
         if 'rport' in self.args:
             self.attack = f'{self.attack} -p {self.args["rport"]}'
+        if 'options' in self.args:
+            self.attack = f'{self.attack} {self.args["options"]}'
         return self.attack
