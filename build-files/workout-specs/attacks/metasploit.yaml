@@ -25,7 +25,7 @@
         name: Listening Host(s)
         type: int
         hint: The listening IP for the attacker
-      payload:
+      options:
         id: payload
         name: Payload for exploit
         type: string
