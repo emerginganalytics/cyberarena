@@ -24,6 +24,7 @@ class PubSubManager:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.publisher = pubsub_v1.PublisherClient()
+        self.subscriber = pubsub_v1.SubscriberClient()
         self.topic_path = self.publisher.topic_path(self.env.project, topic)
 
     def create_topic(self):
@@ -40,6 +41,18 @@ class PubSubManager:
     def list_topics(self):
         project_path = f'projects/{self.env.project}'
         return self.publisher.list_topics(request={"project": project_path})
+
+    def create_subscription(self, subscription_id):
+        subscription_path = self.subscriber.subscription_path(self.env.project, subscription_id)
+        with self.subscriber:
+            subscription = self.subscriber.create_subscription(
+                request={"name": subscription_path, "topic": self.topic_path}
+            )
+
+    def delete_subscription(self, subscription_id):
+        subscription_path = self.subscriber.subscription_path(self.env.project, subscription_id)
+        with self.subscriber:
+            self.subscriber.delete_subscription(request={'subscription': subscription_path})
 
     def msg(self, **args):
         self.publisher.publish(self.topic_path, data=b'Cyber Arena PubSub Message', **args)

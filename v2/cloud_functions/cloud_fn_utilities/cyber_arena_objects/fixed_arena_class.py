@@ -101,7 +101,7 @@ class FixedArenaClass:
                     agent['fixed_arena_class_id'] = self.fixed_arena_class_id
                     agent['fixed_arena_id'] = self.fixed_arena_class['parent_id']
                     agent['nics'] = self._get_workspace_network_config()
-                    agent_name = agent['name']
+                    agent_name = f'{ws_id}-{agent["name"]}'
                     self.ds.put(agent, key_type=DatastoreKeyTypes.SERVER, key_id=agent_name)
                     if self.debug:
                         ComputeManager(server_name=agent_name).build()
@@ -183,6 +183,10 @@ class FixedArenaClass:
         # self.stop()
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
         servers_to_delete = self._get_servers(for_deletion=True)
+
+        # Delete Agent PubSub subscription/topic
+        if self.fixed_arena_class.get('add_attacker'):
+            Agent(parent_id=self.fixed_arena_class_id).delete()
 
         for server in servers_to_delete:
             if self.debug:

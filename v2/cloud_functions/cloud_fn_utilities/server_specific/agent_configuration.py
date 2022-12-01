@@ -39,11 +39,13 @@ class Agent(object):
         self.parent_id = parent_id
         self.build_type = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value
         self.agent_topic = f"{self.parent_id}-agency"
+        self.agent_subscription = f'{self.parent_id}-subscription'
         # self.agent_telemetry = PubSub.Topics.AGENT_TELEMETRY.value
 
     def create_topics(self):
-        logging.info(f'Creating Agent PubSub topics: {self.agent_topic}')
+        logging.info(f'Creating topic/subscription for agent with ID: {self.agent_topic}')
         PubSubManager(topic=self.agent_topic).create_topic()
+        PubSubManager(topic=self.agent_topic).create_subscription(self.agent_subscription)
         # PubSubManager(topic=self.agent_telemetry).create_topic()
 
     def delete(self):
@@ -54,7 +56,9 @@ class Agent(object):
         Since each agent is treated like a workspace/workout server,
         we only need to worry about cleaning up the topics
         """
-        logging.info(f'Deleting Agency topic')
+        logging.info(f'Deleting Agency Subscription: {self.agent_subscription}')
+        PubSubManager(topic=self.agent_topic).delete_subscription(self.agent_subscription)
+        logging.info(f'Deleting Agency Topic: {self.agent_topic}')
         PubSubManager(topic=self.agent_topic).delete_topic()
 
     def config(self):
@@ -67,14 +71,15 @@ class Agent(object):
             agent_topic=self.agent_topic,
             build_id=self.build_id,
             build_type=self.build_type,
-            telemetry_url=f'{self.env.main_app_url}/api/agency/telemetry/'
+            telemetry_url=f'{self.env.main_app_url}/api/agency/telemetry/',
+            agent_subscription=self.agent_subscription
         )
 
         # Setup server config
         agent_config = {
             'build_type': BuildConstants.BuildType.AGENT_SERVER.value,
             'parent_id': self.build_id,
-            'name': f'{self.build_id}-agent',
+            'name': 'agent',
             'image': BuildConstants.MachineImages.AGENT,
             'machine_type': BuildConstants.MachineTypes.SMALL.value,
             'tags': {
@@ -84,7 +89,12 @@ class Agent(object):
             'nics': [],
             'serviceAccounts': [{
                 'email': f'{self.env.project_number}-compute@developer.gserviceaccount.com',
-                'scopes': ['default', 'pubsub']
+                'scopes': [
+                    'https://www.googleapis.com/auth/pubsub',
+                    'https://www.googleapis.com/auth/devstorage.read_write',
+                    'https://www.googleapis.com/auth/logging.write',
+                    'https://www.googleapis.com/auth/cloudruntimeconfig'
+                ]
             }]
         }
         return agent_config
@@ -98,6 +108,7 @@ class AttackerStartup:
         'BUILD_ID={build_id}\n' \
         'BUILD_TYPE={build_type}\n' \
         'TELEMETRY_URL={telemetry_url}\n' \
+        'AGENT_SUBSCRIPTION={agent_subscription}\n' \
         'EOF'
 
 # [ eof ]

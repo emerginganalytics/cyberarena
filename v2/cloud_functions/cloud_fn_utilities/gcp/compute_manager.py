@@ -64,6 +64,9 @@ class ComputeManager:
         self._add_nics()
         machine_type = self._lookup_machine_type(self.server_spec.get('machine_type',
                                                                       BuildConstants.MachineTypes.SMALL.value))
+        service_account = self.server_spec.get('serviceAccounts', None)
+        if not service_account:
+            service_account = self.SERVICE_ACCOUNT_CONFIG
         config = {
             'name': self.server_name,
             'machineType': f"zones/{self.env.zone}/machineTypes/{machine_type}",
@@ -72,7 +75,7 @@ class ComputeManager:
             'metadata': self.server_spec.get('metadata', None),
             'canIpForward': self.server_spec.get('can_ip_forward', None),
             'networkInterfaces': self.server_spec.get('network_interfaces', None),
-            'serviceAccounts': self.SERVICE_ACCOUNT_CONFIG,
+            'serviceAccounts': service_account,
             'minCpuPlatform': self.server_spec.get('min_cpu_platform', None)
         }
 
