@@ -66,8 +66,8 @@ class CyberArenaAgent:
                 logging.info(f'Sending command ({attack_obj["id"]}: {attack_obj["module"]} to Agent {self.build_id}')
                 if not self.debug:
                     command = PubSubManager(topic=agent_topic).msg(build_id=str(self.build_id), attack_id=str(attack_obj['id']),
-                                                                   attack_args=str(json.dumps(attack_obj['args'])),
-                                                                   attack_module=str(attack_obj['module']))
+                                                                   args=str(json.dumps(attack_obj['args'])),
+                                                                   module=str(attack_obj['module']))
                 else:
                     print(f'{agent_topic} ==> BUILD_ID: {self.build_id}; ATTACK_ID: {attack_obj["id"]}; '
                           f'ARGS: {attack_obj["args"]}; MODULE: {attack_obj["module"]}')
