@@ -8,7 +8,7 @@ from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.compute_manager import ComputeManager
 
 admin_app = Blueprint('admin', __name__, url_prefix="/admin",
-                      static_folder="./static", template_folder="./templates")
+                      static_folder="./static", template_folder="./email_templates")
 # TODO: Move each API call to its respective API file:
 #           admin_app.register_blueprint(admin_api)
 

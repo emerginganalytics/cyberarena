@@ -9,7 +9,7 @@ arena = Blueprint(
     'arena',
     __name__,
     url_prefix='/arena',
-    template_folder='templates/johnnyarena',
+    template_folder='email_templates/johnnyarena',
     static_folder='static',
 )
 

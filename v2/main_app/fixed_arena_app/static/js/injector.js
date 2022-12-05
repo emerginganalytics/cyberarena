@@ -8,7 +8,7 @@ function vulnTemplateManager(){
 
    // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
    //       new page
-    $('#vuln-templates-table').DataTable({
+    $('#vuln-email_templates-table').DataTable({
         "paging": false,
         "bInfo": false,
         "columns": [
@@ -23,7 +23,7 @@ function vulnTemplateManager(){
 
     // Resets form if modal close or cancel buttons are clicked
     $('button.cancel-form').click(function(){
-        var table = $('#vuln-templates-table');
+        var table = $('#vuln-email_templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
         enable_object('vuln-template-btn', false);
@@ -86,7 +86,7 @@ function selectTemplateByRow (){
     // Vulnerability Builder Functions
     var selectedTemplateID = '';
     // Handle attack template table clicks
-    $('#vuln-templates-table tr').click(function () {
+    $('#vuln-email_templates-table tr').click(function () {
         var row = $(this);
         var checkmark = $(this).find('span');
         var vulnBtn = $('#vuln-template-btn');

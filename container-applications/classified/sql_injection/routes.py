@@ -7,7 +7,7 @@ from sql_injection.config import *
 sql_injection_bp = Blueprint(
     'sql_injection_bp', __name__,
     url_prefix='/sql_injection',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

@@ -10,7 +10,7 @@ from main_app_utilities.globals import DatastoreKeyTypes
 
 student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         static_folder="./static",
-                        template_folder="./templates")
+                        template_folder="./email_templates")
 
 
 @student_app.route('/home', methods=['GET', 'POST'])

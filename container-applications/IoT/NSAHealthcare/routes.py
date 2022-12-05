@@ -11,7 +11,7 @@ from iot_database import IOTDatabase
 iot_nsa_bp = Blueprint(
     'iot_nsa_bp', __name__,
     url_prefix='/healthcare',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

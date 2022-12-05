@@ -9,7 +9,7 @@ from globals import ds_client, publish_status
 johnnyhash = Blueprint(
     'johnnyhash', __name__,
     url_prefix='/johnnyhash',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

@@ -9,7 +9,7 @@ from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.globals import DatastoreKeyTypes
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
-                        static_folder="./static", template_folder="./templates")
+                        static_folder="./static", template_folder="./email_templates")
 # TODO: Move these to each call in teacher_api to the respective API route:
 #  teacher_app.register_blueprint(teacher_api)
 

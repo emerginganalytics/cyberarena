@@ -7,7 +7,7 @@ johnnyGenCipher = Blueprint(
     'johnnyGenCipher',
     __name__,
     url_prefix='/johnnyGenCipher',
-    template_folder='templates/johnnyGenCipher',
+    template_folder='email_templates/johnnyGenCipher',
     static_folder='static',
 )
 

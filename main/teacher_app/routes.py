@@ -15,7 +15,7 @@ from teacher_app.teacher_api import teacher_api
 
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
-                        static_folder="/static", template_folder="templates")
+                        static_folder="/static", template_folder="email_templates")
 teacher_app.register_blueprint(teacher_api)
 
 

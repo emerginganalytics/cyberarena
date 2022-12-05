@@ -6,7 +6,7 @@ from globals import ds_client, publish_status
 arena_snake_bp = Blueprint(
     'arena_snake_bp', __name__,
     url_prefix='/arena_snake',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

@@ -40,7 +40,7 @@ class AttackSpecToCloud:
 
     def update(self):
         """
-        Updates Datastore with existing attack templates
+        Updates Datastore with existing attack email_templates
         :return:
         """
         attack_specs = BucketManager().get_attacks()

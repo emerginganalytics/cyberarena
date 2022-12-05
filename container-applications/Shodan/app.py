@@ -3,7 +3,7 @@ from globals import ds_client, logger
 from globals import populate_datastore
 from ShodanApp.routes import shodan_app
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='email_templates')
 
 # Register Blueprint
 app.register_blueprint(shodan_app)

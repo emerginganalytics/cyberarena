@@ -9,7 +9,7 @@ $(document).ready(function (){
 })
 
 function vulnTemplateManager(){
-    $('#vuln-templates-table').DataTable({
+    $('#vuln-email_templates-table').DataTable({
         "paging": false,
         "bInfo": false,
         "columns": [
@@ -24,7 +24,7 @@ function vulnTemplateManager(){
 
     // Resets form if modal close or cancel buttons are clicked
     $('button.cancel-form').click(function(){
-        var table = $('#vuln-templates-table');
+        var table = $('#vuln-email_templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
         enable_object('vuln-template-btn', false);

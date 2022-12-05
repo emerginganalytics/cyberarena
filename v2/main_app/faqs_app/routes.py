@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template
 
 
-faqs_app = Blueprint('faq', __name__, url_prefix="/faq", static_folder="./static", template_folder="./templates")
+faqs_app = Blueprint('faq', __name__, url_prefix="/faq", static_folder="./static", template_folder="./email_templates")
 
 
 @faqs_app.route('/', methods=['GET'])

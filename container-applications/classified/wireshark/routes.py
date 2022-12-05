@@ -6,7 +6,7 @@ from globals import ds_client
 wireshark_bp = Blueprint(
     'wireshark_bp', __name__,
     url_prefix='/wireshark',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

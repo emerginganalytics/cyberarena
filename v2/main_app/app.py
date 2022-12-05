@@ -276,7 +276,7 @@ register_api(view=FixedArena, endpoint='fixed-arena', url='/api/fixed-arena/', p
 register_api(view=FixedArenaClass, endpoint='class', url='/api/fixed-arena/class/', pk='build_id')
 register_api(view=FixedArenaWorkspace, endpoint='workspace', url='/api/fixed-arena/workspace/', pk='build_id')
 register_api(view=Agency, endpoint='agency', url='/api/agency/', pk='build_id')
-register_api(view=AttackSpecs, endpoint='templates', url='/api/agency/templates/', pk='build_id')
+register_api(view=AttackSpecs, endpoint='email_templates', url='/api/agency/email_templates/', pk='build_id')
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
 
 

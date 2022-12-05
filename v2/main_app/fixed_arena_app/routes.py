@@ -9,7 +9,7 @@ from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants
 
 
 fixed_arena_app = Blueprint('fixed_arena', __name__, url_prefix="/fixed-arena",
-                        static_folder="./static", template_folder="./templates")
+                        static_folder="./static", template_folder="./email_templates")
 
 
 @fixed_arena_app.route('/', methods=['GET'])

@@ -63,7 +63,7 @@ h3, h4, h5 {
     margin-bottom: 20px;
     padding: 20px;
 }
-/* TODO: Needs to be removed from templates once styles have been updated */
+/* TODO: Needs to be removed from email_templates once styles have been updated */
 .landing_container {
     margin:auto;
     background-color: white;

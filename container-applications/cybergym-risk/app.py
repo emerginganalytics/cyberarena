@@ -1,6 +1,6 @@
 from flask import Flask
 
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='email_templates')
 SHODAN_API_KEY = 'zs72fHys8zo5n58zWOsHLJ8kLHOTBtWt'
 import routes
 import os

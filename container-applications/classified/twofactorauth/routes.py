@@ -10,7 +10,7 @@ from twofactorauth.config import *
 twofactorauth_bp = Blueprint(
     'twofactorauth_bp', __name__,
     url_prefix='/tfh',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

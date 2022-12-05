@@ -9,7 +9,7 @@ from utilities.workout_validator import WorkoutValidator
 from utilities.iot_manager import IotManager
 from admin_app.admin_api import admin_api
 
-admin_app = Blueprint('admin', __name__, url_prefix="/admin", static_folder="../static", template_folder="templates")
+admin_app = Blueprint('admin', __name__, url_prefix="/admin", static_folder="../static", template_folder="email_templates")
 admin_app.register_blueprint(admin_api)
 
 

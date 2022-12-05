@@ -8,7 +8,7 @@ johnnycipher = Blueprint(
     'johnnycipher',
     __name__,
     url_prefix='/johnnycipher',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static',
 )
 
@@ -101,5 +101,5 @@ def substitution(workout_id):
 
 @johnnycipher.route('/invalid', methods=['GET'])
 def invalid():
-    template = 'templates/invalid_workout.html'
+    template = 'email_templates/invalid_workout.html'
     return render_template(template)

@@ -7,7 +7,7 @@ import json
 iot_arena_bp = Blueprint(
     'iot_arena_bp', __name__, 
     url_prefix='/iot_arena',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

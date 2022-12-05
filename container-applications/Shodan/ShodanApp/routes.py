@@ -6,7 +6,7 @@ from globals import SHODAN_API_KEY, ds_client, logger
 shodan_app = Blueprint(
     'shodan_app', __name__,
     url_prefix='/shodan_lite',
-    template_folder='templates/',
+    template_folder='email_templates/',
     static_folder='static'
 )
 

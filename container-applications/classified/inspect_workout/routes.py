@@ -6,7 +6,7 @@ from globals import ds_client, publish_status
 inspect_bp = Blueprint(
     'inspect_bp', __name__,
     url_prefix='/inspect',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

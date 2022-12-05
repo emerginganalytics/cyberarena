@@ -9,7 +9,7 @@ from iot_database import IOTDatabase
 iot_bp = Blueprint(
     'iot_bp', __name__,
     url_prefix='/iot',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

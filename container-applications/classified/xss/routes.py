@@ -6,7 +6,7 @@ from xss.config import *
 xss_bp = Blueprint(
     'xss_bp', __name__,
     url_prefix='/xss',
-    template_folder='templates',
+    template_folder='email_templates',
     static_folder='static'
 )
 

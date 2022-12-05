@@ -1,7 +1,7 @@
 $(document).ready(function() {
     // TODO: Remove display number rows option; Set default value to 10 with overflow being sent to
     //       new page
-    $('#vuln-templates-table').DataTable({
+    $('#vuln-email_templates-table').DataTable({
         "paging": false,
         "bInfo": false,
         "columns": [
@@ -16,7 +16,7 @@ $(document).ready(function() {
 
     // Resets form if modal close or cancel buttons are clicked
     $('button.cancel-form').click(function(){
-        var table = $('#vuln-templates-table');
+        var table = $('#vuln-email_templates-table');
         table.find('.selected').removeClass('selected');
         table.find('.checkmark').removeClass('checkmark');
         remove_fields('vuln-template-btn');
