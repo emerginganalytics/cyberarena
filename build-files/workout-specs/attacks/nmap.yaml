@@ -15,8 +15,14 @@
           name: Target Network
           type: string
           hint: The network port to scan
-      scan_type:
+      options:
           id: scan_type
           name: Scan Type
-          type: choice
           default: Aggressive
+          type: choice
+          Choices:
+            - Aggressive: '-T5'
+            - Ping Sweep: '-Pn'
+            - Quick Scan: '-sn'
+
+

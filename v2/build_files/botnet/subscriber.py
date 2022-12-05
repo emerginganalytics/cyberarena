@@ -1,39 +1,42 @@
-import os
-import subprocess
 from google.cloud import pubsub_v1
 from concurrent.futures import TimeoutError
-from google.cloud import runtimeconfig
 from attacks import *
-import attack_manager
+from attack_manager import *
+from cloud_env import *
+
+__author__ = "Ryan Ronquillo"
+__copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
+__credits__ = ["Ryan Ronquillo"]
+__license__ = "MIT"
+__version__ = "1.0.0"
+__maintainer__ = "Ryan Ronquillo"
+__email__ = "rfronquillo@ualr.edu"
+__status__ = "Testing"
 
 class Subscriber:
     def __init__(self):
-        runtimeconfig_client = runtimeconfig.Client()
-        myconfig = runtimeconfig_client.config('cybergym')
-        self.project = myconfig.get_variable('project').value.decode('utf-8')
-        self.region = myconfig.get_variable('region').value.decode('utf-8')
-        self.zone = myconfig.get_variable('zone').value.decode('utf-8')
-        self.dns_suffix = myconfig.get_variable('dns_suffix').value.decode('utf-8')
+        self.env = CloudEnv()
+        self.timeout = 5.0
+        self.subscriber = pubsub_v1.SubscriberClient()
+        self.subscription_path = self.subscriber.subscription_path(self.env.project, self.env.agent_subscription)
 
-creds = '/home/walker/Downloads/ualr-cybersecurity-38b2dd265fa9.json'
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = creds
+    def callback(self, message):
+        print(f'Received message: {message}')
+        print(f'data:{message.data}')
+        message.ack()
+        if message.attributes.build_id == self.env.build_id:
+            AttackManager(message.attributes).parse_message()
 
-timeout = 5.0
+    def run(self):
+        streaming_pull_future = self.subscriber.subscribe(self.subscription_path, callback=self.callback)
+        print(f'Listening for messages on {self.subscription_path}')
 
-subscriber = pubsub_v1.SubscriberClient()
-subscription_path = subscriber.subscription_path('ualr-cybersecurity', 'test-sub')
+        with self.subscriber:
+            try:
+                streaming_pull_future.result()
+            except TimeoutError:
+                streaming_pull_future.cancel()
+                streaming_pull_future.result()
 
-def callback(message):
-    print(f'Received message: {message}')
-    print(f'data:{message.data}')
-    message.ack()
-
-streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
-print(f'Listening for messages on {subscription_path}')
-
-with subscriber:
-    try:
-        streaming_pull_future.result()
-    except TimeoutError:
-        streaming_pull_future.cancel()
-        streaming_pull_future.result()
+if __name__ == '__main__':
+    Subscriber().run()

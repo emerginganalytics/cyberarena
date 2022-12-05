@@ -178,14 +178,14 @@ class DeletionManager:
         topic_path = publisher.topic_path(project, pubsub_topic)
         query_kind = 'cybergym-unit' if misfit_type == WORKOUT_TYPES.ARENA else 'cybergym-workout'
         query_misfits = ds_client.query(kind=query_kind)
-        query_misfits.add_filter('active', '=', True)
+        query_misfits.add_filter('misfit', '=', True)
         for build in list(query_misfits.fetch()):
             workout_project = build.get('build_project_location', project)
             if workout_project == project:
                 build_id = build.key.name
                 is_misfit = build.get('misfit', False)
                 current_state = build.get('state', None)
-                if is_misfit and current_state != BUILD_STATES.DELETED:
+                if current_state != BUILD_STATES.DELETED:
                     if misfit_type == WORKOUT_TYPES.ARENA:
                         state_transition(build, BUILD_STATES.READY_DELETE)
                         publisher.publish(topic_path, data=b'Workout Delete', workout_type=WORKOUT_TYPES.ARENA,

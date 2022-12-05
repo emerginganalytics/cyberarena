@@ -16,7 +16,7 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
 from cloud_fn_utilities.state_managers.fixed_arena_class_states import FixedArenaClassStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
-from cloud_fn_utilities.cyber_arena_objects.cyberarena_attacker import CyberGymAttacker
+from cloud_fn_utilities.server_specific.agent_configuration import Agent
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -67,7 +67,7 @@ class FixedArenaClass:
 
         # Build attack Pubsub topics if needed
         if self.fixed_arena_class['add_attacker']:
-            CyberGymAttacker(parent_id=self.fixed_arena_class_id).create_topics()
+            Agent(parent_id=self.fixed_arena_class_id).create_topics()
 
         # Build workspace servers
         if self.state_manager.get_state() <= self.s.BUILDING_SERVERS.value:
@@ -96,11 +96,12 @@ class FixedArenaClass:
 
                 # Build workspace attack machine if needed
                 if self.fixed_arena_class['add_attacker']:
-                    agent = CyberGymAttacker(build_id=ws_id).config()
+                    agent = Agent(build_id=ws_id, parent_id=self.fixed_arena_class_id).config()
                     agent['parent_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE
                     agent['fixed_arena_class_id'] = self.fixed_arena_class_id
                     agent['fixed_arena_id'] = self.fixed_arena_class['parent_id']
-                    agent_name = agent['name']
+                    agent['nics'] = self._get_workspace_network_config()
+                    agent_name = f'{ws_id}-{agent["name"]}'
                     self.ds.put(agent, key_type=DatastoreKeyTypes.SERVER, key_id=agent_name)
                     if self.debug:
                         ComputeManager(server_name=agent_name).build()
@@ -179,9 +180,13 @@ class FixedArenaClass:
 
     def delete(self):
         # First stop the servers because some servers are permanent and would otherwise continue running.
-        self.stop()
+        # self.stop()
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
         servers_to_delete = self._get_servers(for_deletion=True)
+
+        # Delete Agent PubSub subscription/topic
+        if self.fixed_arena_class.get('add_attacker'):
+            Agent(parent_id=self.fixed_arena_class_id).delete()
 
         for server in servers_to_delete:
             if self.debug:
@@ -229,7 +234,7 @@ class FixedArenaClass:
             logging.info(f"Finished nuking Fixed Arena {self.fixed_arena_class_id}!")
 
     def mark_broken(self):
-        self.fixed_arena_class['state'] = self.s.BROKEN
+        self.fixed_arena_class['state'] = self.s.BROKEN.value
         self.ds.put(self.fixed_arena_class)
 
     def _get_servers(self, for_deletion=False):

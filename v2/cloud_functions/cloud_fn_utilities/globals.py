@@ -21,6 +21,8 @@ class BuildConstants:
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
         WORKOUT = "workout"
+        FIXED_ARENA_WEAKNESS = 'fixed_arena_weakness'
+        FIXED_ARENA_ATTACK = 'fixed_arena_attack'
 
     class Protocols(str, Enum):
         RDP = "rdp"
@@ -65,7 +67,6 @@ class BuildConstants:
             DISPLAY_SERVER = '10.1.0.3'
             WORKSPACE_PROXY_SERVER = '10.1.0.4'
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
-            AGENT_SERVER = '10.1.0.210'
         GATEWAY_NETWORK_NAME = 'gateway'
         GATEWAY_NETWORK_CONFIG = {
             'name': GATEWAY_NETWORK_NAME,
@@ -93,8 +94,8 @@ class PubSub:
         CONTROL = "CONTROL"
         ADMIN = "ADMIN"
         IOT = "IOT"
-        BOTNET = "BOTNET"
         REPORT = 'REPORT'
+        AGENCY = 'AGENCY'
 
     class BuildActions(Enum):
         WORKOUT = 0
@@ -105,6 +106,9 @@ class PubSub:
         DISPLAY_PROXY = 5
         FIREWALL_SERVER = 6
         FIXED_ARENA_WORKSPACE_PROXY = 7
+        CYBER_ARENA_AGENT = 9
+        CYBER_ARENA_ATTACK = 10
+        CYBER_ARENA_WEAKNESS = 11
 
     class Actions(Enum):
         BUILD = 1
@@ -121,6 +125,7 @@ class PubSub:
         FIXED_ARENA_CLASS = 2
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
+        CYBER_ARENA_AGENT = 5
 
     class Reports:
         ATTACK = 2

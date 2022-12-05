@@ -21,11 +21,6 @@ def base():
 def home():
     """
     Kind id parent_id build_type
-    fixed-arena-workout, ohzuxkhxee, cln-stoc, fixed_arena_workout
-
-    Kind build_type id
-    fixed-arena, fixed_arena, cln-stoc
-
     Workspaces are denoted by fixed-arena-workout.workspace_servers
     :return:
     """
@@ -49,7 +44,6 @@ def home():
 @fixed_arena_app.route('/class/<build_id>', methods=['GET'])
 def class_landing(build_id):
     auth_config = CloudEnv().auth_config
-    # TODO: Store/Get attack specs in/from Datastore
     attack_yaml = DataStoreManager().get_attack_specs()
     fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
     if fa_class:
