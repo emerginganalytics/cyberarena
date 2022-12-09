@@ -22,7 +22,7 @@ __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
-__status__ = "Testing"
+__status__ = "Production"
 
 
 class FixedArena:

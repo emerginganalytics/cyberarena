@@ -93,7 +93,8 @@ class FixedArenaClassStateManager:
     def _server_state_check(self, server_states):
         wait_time = 0
         check_complete = False
-        workspaces = self.ds.get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE, build_id=self.build_id)
+        workspaces = self.ds.get_children(child_key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE,
+                                          parent_id=self.build_id)
         while not check_complete and wait_time < self.MAX_WAIT_TIME:
             check_complete = True
             servers = self.ds.get_servers()

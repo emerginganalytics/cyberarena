@@ -1,16 +1,9 @@
-from enum import Enum
-import time
-import string
-import random
-from netaddr import IPAddress, IPNetwork
-from google.cloud import logging_v2
-import logging
-
 from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants, PubSub
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.server_specific.guacamole_configuration import GuacamoleConfiguration
 
 __author__ = "Philip Huff"
@@ -24,7 +17,7 @@ __status__ = "Testing"
 
 
 class DisplayProxy:
-    def __init__(self, build_id, build_spec):
+    def __init__(self, build_id, build_spec, key_type=DatastoreKeyTypes.FIXED_ARENA):
         """
         Creates a guacamole server with the configured connections for proxying servers used for displays
         @param build_id: The build ID used mainly for naming objects in the cloud
@@ -35,18 +28,20 @@ class DisplayProxy:
         self.env = CloudEnv()
         self.server_name = f"{build_id}-display-guacamole-server"
         self.s = ServerStateManager
-        log_client = logging_v2.Client()
-        log_client.setup_logging()
+        self.logger = Logger("cloud_functions.display_proxy").logger
         self.server_spec = None
         self.build_id = build_id
         self.build_spec = build_spec
+        self.key_type = key_type
+        self.build_type = BuildConstants.BuildType(build_spec.get('build_type', BuildConstants.BuildType.FIXED_ARENA.value))
         self.server_specs = build_spec['servers']
         self.guac_connections = []
         self.ds = DataStoreManager()
         self.guac = GuacamoleConfiguration(self.build_id)
+        self._create_network_settings()
 
     def build(self):
-        build_ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.build_id)
+        build_ds = DataStoreManager(key_type=self.key_type, key_id=self.build_id)
         build_record = build_ds.get()
         proxy_configs = []
         proxy_connections = []
@@ -65,7 +60,6 @@ class DisplayProxy:
                             'password': proxy_config['workspace_password']
                         }
                         proxy_connections.append(connection)
-
         build_record['proxy_connections'] = proxy_connections
         build_ds.put(build_record)
 
@@ -78,18 +72,23 @@ class DisplayProxy:
             'machine_type': BuildConstants.MachineTypes.SMALL.value,
             'nics': [
                 {
-                    "network": BuildConstants.Networks.GATEWAY_NETWORK_NAME,
+                    "network": self.network_name,
                     "subnet_name": "default",
                     "external_nat": True,
-                    "internal_ip": BuildConstants.Networks.Reservations.DISPLAY_SERVER
+                    "internal_ip": self.internal_ip
                 }
             ],
-            'build_type': BuildConstants.BuildType.FIXED_ARENA,
+            'build_type': self.build_type,
             'dns_hostname': f"{self.build_id}-display",
             'guacamole_startup_script': guac_startup_script
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
         ComputeManager(server_name=self.server_name).build()
 
-    def delete(self):
-        ComputeManager(server_name=self.server_name).delete()
+    def _create_network_settings(self):
+        if self.build_type in [BuildConstants.BuildType.WORKOUT]:
+            self.network_name = BuildConstants.Networks.WORKOUT_EXTERNAL_NAME
+            self.internal_ip = BuildConstants.Networks.Reservations.WORKOUT_PROXY_SERVER
+        else:
+            self.network_name = BuildConstants.Networks.GATEWAY_NETWORK_NAME
+            self.internal_ip = BuildConstants.Networks.Reservations.DISPLAY_SERVER

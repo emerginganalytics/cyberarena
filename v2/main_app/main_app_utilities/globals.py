@@ -5,11 +5,11 @@ from datetime import datetime, timezone, timedelta
 class DatastoreKeyTypes(str, Enum):
     ADMIN_INFO = 'cybergym-admin-info'
     CLASSROOM = 'cybergym-class'
-    CYBERGYM_WORKOUT = 'cybergym-workout'
-    CYBERGYM_UNIT = 'cybergym-unit'
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_CLASS = 'fixed-arena-class'
     FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
+    UNIT = 'v2-unit'
+    WORKOUT = 'v2-workout'
     SERVER = 'cybergym-server'
     INSTRUCTOR = 'cybergym-instructor'
     CYBERARENA_ATTACK = 'cyberarena-attack'
@@ -19,11 +19,11 @@ class DatastoreKeyTypes(str, Enum):
 
 class BuildConstants:
     class BuildType(str, Enum):
-        ARENA = "arena"
         AGENT_MACHINE = "agent_machine"
         FIXED_ARENA = "fixed_arena"
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
+        UNIT = "unit"
         WORKOUT = "workout"
         FIXED_ARENA_WEAKNESS = 'fixed_arena_weakness'
         FIXED_ARENA_ATTACK = 'fixed_arena_attack'
@@ -70,6 +70,7 @@ class BuildConstants:
         class Reservations:
             DISPLAY_SERVER = '10.1.0.3'
             WORKSPACE_PROXY_SERVER = '10.1.0.4'
+            WORKOUT_PROXY_SERVER = "10.1.1.3"
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
             AGENT_MACHINE = '10.1.0.210'
         GATEWAY_NETWORK_NAME = 'gateway'
@@ -82,6 +83,7 @@ class BuildConstants:
                 }
             ]
         }
+        WORKOUT_EXTERNAL_NAME = 'external'
 
     class Servers:
         FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
@@ -153,7 +155,7 @@ class PubSub:
 
     class BuildActions(Enum):
         WORKOUT = 0
-        ARENA = 1
+        UNIT = 1
         FIXED_ARENA = 2
         FIXED_ARENA_CLASS = 3
         SERVER = 4

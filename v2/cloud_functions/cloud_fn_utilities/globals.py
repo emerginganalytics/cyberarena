@@ -3,23 +3,27 @@ from datetime import datetime, timezone, timedelta
 
 
 class DatastoreKeyTypes(str, Enum):
-    CYBERGYM_WORKOUT = 'cybergym-workout'
+    ADMIN_INFO = 'cybergym-admin-info'
+    CLASSROOM = 'cybergym-class'
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_CLASS = 'fixed-arena-class'
     FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
+    UNIT = 'v2-unit'
+    WORKOUT = 'v2-workout'
     SERVER = 'cybergym-server'
-    ADMIN_INFO = 'cybergym-admin-info'
+    INSTRUCTOR = 'cybergym-instructor'
     CYBERARENA_ATTACK = 'cyberarena-attack'
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
+    IOT_DEVICE = 'cybergym-iot-device'
 
 
 class BuildConstants:
     class BuildType(str, Enum):
-        ARENA = "arena"
         AGENT_SERVER = 'agent'
         FIXED_ARENA = "fixed_arena"
         FIXED_ARENA_CLASS = "fixed_arena_class"
         FIXED_ARENA_WORKSPACE = "fixed_arena_workspace"
+        UNIT = "unit"
         WORKOUT = "workout"
         FIXED_ARENA_WEAKNESS = 'fixed_arena_weakness'
         FIXED_ARENA_ATTACK = 'fixed_arena_attack'
@@ -66,6 +70,7 @@ class BuildConstants:
         class Reservations:
             DISPLAY_SERVER = '10.1.0.3'
             WORKSPACE_PROXY_SERVER = '10.1.0.4'
+            WORKOUT_PROXY_SERVER = "10.1.1.3"
             FIXED_ARENA_WORKOUT_SERVER_RANGE = ('10.1.0.10', '10.1.0.200')
         GATEWAY_NETWORK_NAME = 'gateway'
         GATEWAY_NETWORK_CONFIG = {
@@ -77,6 +82,7 @@ class BuildConstants:
                 }
             ]
         }
+        WORKOUT_EXTERNAL_NAME = 'external'
 
     class Servers:
         FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
@@ -149,6 +155,34 @@ class ServerStates(Enum):
 
 
 class FixedArenaClassStates(Enum):
+    START = 0
+    BUILDING_ASSESSMENT = 1
+    BUILDING_NETWORKS = 2
+    COMPLETED_NETWORKS = 3
+    BUILDING_SERVERS = 4
+    COMPLETED_SERVERS = 5
+    BUILDING_FIREWALL = 6
+    COMPLETED_FIREWALL = 7
+    BUILDING_ROUTES = 8
+    COMPLETED_ROUTES = 9
+    BUILDING_FIREWALL_RULES = 10
+    COMPLETED_FIREWALL_RULES = 11
+    BUILDING_STUDENT_ENTRY = 12
+    COMPLETED_STUDENT_ENTRY = 13
+    GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
+    RUNNING = 50
+    STOPPING = 51
+    STARTING = 52
+    READY = 53
+    EXPIRED = 60
+    MISFIT = 61
+    BROKEN = 62
+    DELETING_SERVERS = 70
+    COMPLETED_DELETING_SERVERS = 71
+    DELETED = 72
+
+
+class UnitStates(Enum):
     START = 0
     BUILDING_ASSESSMENT = 1
     BUILDING_NETWORKS = 2

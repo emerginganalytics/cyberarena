@@ -4,7 +4,9 @@ import time
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from google.cloud import pubsub_v1
-from common.globals import ds_client, PUBSUB_TOPICS, project, SERVER_ACTIONS, compute, zone
+from script_utilities.gcp_credential_manager import GCPCredentialManager
+GCPCredentialManager.check_gcp_credentials()
+from common.globals import ds_client, PUBSUB_TOPICS, project, SERVER_ACTIONS
 from utilities.infrastructure_as_code.server_spec_to_cloud import ServerSpecToCloud
 
 __author__ = "Philip Huff"
@@ -73,9 +75,10 @@ def create_new_server_in_unit(unit_id, server_spec_file):
 
 
 if __name__ == "__main__":
+    if not server_spec:
+        server_spec = str(input(f"What server spec do you want to use? "))
+        if not server_spec.endswith(".yaml"):
+            server_spec += ".yaml"
     if not unit_id:
-        print("Error: Must supply a unit ID")
-    elif not server_spec:
-        print("Error: Must supply a server_spec file")
-    else:
-        create_new_server_in_unit(unit_id, server_spec)
+        unit_id = str(input(f"What unit ID do you want to add this server to?: "))
+    create_new_server_in_unit(unit_id, server_spec)

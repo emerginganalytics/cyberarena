@@ -5,6 +5,7 @@ from google.cloud import logging_v2
 from googleapiclient.errors import HttpError
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,6 +21,7 @@ class FirewallManager:
     def __init__(self):
         self.env = CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
+        self.cloud_log = Logger(log_name="cloud_fn_utilities.gcp.firewall_manager")
         log_client = logging_v2.Client()
         log_client.setup_logging()
 
@@ -55,7 +57,7 @@ class FirewallManager:
                     pass
 
     def delete(self, build_id):
-        logging.info(f"Deleting firewall for workout {build_id}")
+        self.cloud_log.logger.info(f"Deleting firewall for workout {build_id}")
         try:
             result = self.compute.firewalls().list(project=self.env.project, filter='name = {}*'.format(build_id))\
                 .execute()
@@ -66,12 +68,12 @@ class FirewallManager:
                 try:
                     self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
                 except HttpError:
-                    logging.info(f"Error in waiting for firewall rule deletion {build_id}")
+                    self.cloud_log.logger.info(f"Error in waiting for firewall rule deletion {build_id}")
                     pass
-            #self._wait_for_deletion(build_id)
-            #return True
+            self._wait_for_deletion(build_id)
+            return True
         except():
-            logging.info(f"Error in deleting firewall rules for workout {build_id}")
+            self.cloud_log.logger.info(f"Error in deleting firewall rules for workout {build_id}")
             return False
 
     def _wait_for_deletion(self, build_id):
@@ -86,5 +88,5 @@ class FirewallManager:
                 time.sleep(10)
 
         if not success:
-            logging.error(f'Timeout in deleting {build_id} routes')
+            self.cloud_log.logger.error(f'Timeout in deleting {build_id} routes')
             raise ConnectionError

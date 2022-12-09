@@ -12,11 +12,12 @@ import random
 import string
 
 from main_app_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
-from main_app_utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema
+from main_app_utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema, UnitSchema
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.global_objects.agent import Agent
+from main_app_utilities.infrastructure_as_code.object_validators.unit_object_validator import UnitValidator
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -37,16 +38,18 @@ class BuildSpecToCloud:
         :@param debug: Whether to publish to cloud functions or debug the build operations.
         """
         self.env = CloudEnv()
+        self.debug = debug
         log_client = logging_v2.Client()
         log_client.setup_logging()
         if 'build_type' not in cyber_arena_spec:
             raise ValidationError
 
+        if self.debug:
+            cyber_arena_spec['test'] = True
         cyber_arena_spec['creation_timestamp'] = get_current_timestamp_utc()
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
-            cyber_arena_spec['creation_timestamp'] = str(datetime.fromtimestamp(get_current_timestamp_utc()))
             self.build_id = cyber_arena_spec['id']
             self.cyber_arena_spec = FixedArenaSchema().load(cyber_arena_spec)
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value,
@@ -59,10 +62,19 @@ class BuildSpecToCloud:
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value,
                                                       key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
-        self.debug = debug
+        elif self.build_type == BuildConstants.BuildType.UNIT.value:
+            self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            cyber_arena_spec['id'] = self.build_id
+            cyber_arena_spec = UnitSchema().load(cyber_arena_spec)
+            self.cyber_arena_spec = UnitValidator().load(cyber_arena_spec)
+            self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.build_id)
+            self.action = PubSub.BuildActions.UNIT.value
 
     def commit(self):
         self.datastore_manager.put(self.cyber_arena_spec)
         if not self.debug:
             self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value), action=str(self.action),
                                     build_id=str(self.build_id))
+
+    def get_build_id(self):
+        return self.build_id
