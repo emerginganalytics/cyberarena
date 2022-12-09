@@ -43,6 +43,23 @@ class FixedArenaClassSchema(Schema):
                                default=False)
 
 
+class UnitSchema(Schema):
+    id = fields.Str(required=True)
+    creation_timestamp = fields.Float()
+    version = fields.Str(required=True)
+    workspace_settings = fields.Nested('WorkspaceSettingsSchema')
+    build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
+    summary = fields.Nested('CyberArenaSummarySchema', required=True)
+    networks = fields.Nested('NetworkSchema', many=True, required=False)
+    servers = fields.Nested('ServerSchema', many=True, required=False)
+    web_applications = fields.Nested('WebApplicationSchema', many=True, required=False,
+                                     description="Used for cloud container labs")
+    firewall_rules = fields.Nested('FirewallRuleSchema', many=True, description="These are ONLY set by the program to "
+                                                                                "allow all internal traffic")
+    assessment = fields.Nested('AssessmentSchema', required=False)
+    test = fields.Bool(required=False, description="Whether the unit is a test. This helps in cleaning the datastore.")
+
+
 class WorkspaceSettingsSchema(Schema):
     count = fields.Int(description='The number of distinct workstation builds to deploy', required=True)
     registration_required = fields.Bool(description='Whether students must login to access this build', default=False)
@@ -119,6 +136,12 @@ class HumanInteractionSchema(Schema):
     security_mode = fields.Str()
 
 
+class WebApplicationSchema(Schema):
+    name = fields.Str(required=True, description="Display name of the container")
+    host_name = fields.Str(required=True, description="Host name for the URL")
+    starting_directory = fields.Str(required=True, description="The starting web directory for the container URL")
+
+
 class FirewallSchema(Schema):
     name = fields.Str(required=True)
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.Firewalls]))
@@ -141,18 +164,19 @@ class FirewallRuleSchema(Schema):
         strict = True
 
 
-class Assessment(Schema):
+class AssessmentSchema(Schema):
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.AssessmentTypes]))
-    questions = fields.Nested('AssessmentQuestion', many=True)
+    questions = fields.Nested('AssessmentQuestionSchema', many=True)
 
 
-class AssessmentQuestion(Schema):
+class AssessmentQuestionSchema(Schema):
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
+    answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     script = fields.Str(required=False, description="script name (e.g. attack.py)")
     script_language = fields.Str(required=False, description="e.g. python")
-    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of "
-                                                             "servers provided above")
+    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
+                                                    "provided above")
     operating_system = fields.Str(required=False, description="Target server operating system")
     complete = fields.Bool(default=False)
 

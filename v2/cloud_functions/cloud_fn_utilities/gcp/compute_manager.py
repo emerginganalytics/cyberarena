@@ -6,13 +6,13 @@ import logging
 from google.cloud import logging_v2
 from googleapiclient.errors import HttpError
 from googleapiclient import errors
-from oauth2client.client import GoogleCredentials
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes, BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.dns_manager import DnsManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager, ServerStates
 from cloud_fn_utilities.state_managers.server_states import ServerStateManager
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -41,8 +41,7 @@ class ComputeManager:
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.dns_manager = DnsManager()
         self.s = ServerStates
-        log_client = logging_v2.Client()
-        log_client.setup_logging()
+        self.logger = Logger("cloud_functions.compute_manager").logger
         self.server_name = server_name
         self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER.value, key_id=self.server_name).get()
         if not self.server_spec:
@@ -97,11 +96,11 @@ class ComputeManager:
                                                            body=config).execute()
             except HttpError as err:
                 if err.resp.status in [409]:
-                    logging.warning(f"The server {self.server_name} already exists.")
+                    self.logger.warning(f"The server {self.server_name} already exists.")
                     return
                 else:
                     raise err
-        logging.info(f'Sent job to build {self.server_name}, and waiting for response')
+        self.logger.info(f'Sent job to build {self.server_name}, and waiting for response')
         i = 0
         success = False
         while not success and i < self.MAX_TIMEOUT_ITERATIONS:
@@ -111,15 +110,15 @@ class ComputeManager:
                 success = True
             except timeout:
                 i += 1
-                logging.warning(f"Response timeout {i} of {self.MAX_TIMEOUT_ITERATIONS} for build on server "
+                self.logger.warning(f"Response timeout {i} of {self.MAX_TIMEOUT_ITERATIONS} for build on server "
                                 f"{self.server_name}.")
                 pass
 
         if success:
-            logging.info(f'Successfully built server {self.server_name}!')
+            self.logger.info(f'Successfully built server {self.server_name}!')
             self.state_manager.state_transition(self.s.RUNNING)
         else:
-            logging.error(f'Timeout in trying to build server {self.server_name}')
+            self.logger.error(f'Timeout in trying to build server {self.server_name}')
             self.state_manager.state_transition(self.s.BROKEN)
             raise ConnectionError
 
@@ -130,7 +129,7 @@ class ComputeManager:
             self.dns_manager.add_dns_record(dns_record, self.server_name)
 
         # Now stop the server before completing
-        logging.info(f'Stopping {self.server_name}')
+        self.logger.info(f'Stopping {self.server_name}')
         self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
         self.state_manager.state_transition(self.s.STOPPED)
 
@@ -149,9 +148,19 @@ class ComputeManager:
                 response = self.compute.instances().start(project=self.env.project, zone=self.env.zone,
                                                           instance=self.server_name).execute()
                 start_success = True
-                logging.info(f'Sent job to start {self.server_name}, and waiting for response')
+                self.logger.info(f'Sent job to start {self.server_name}, and waiting for response')
+            except HttpError as e:
+                if e.resp.status == 400:
+                    self.logger.info(f"Server {self.server_name} is still building. Trying again...")
+                elif e.resp.status == 409:
+                    self.state_manager.state_transition(self.s.BROKEN)
+                    self.logger.error(f"Server {self.server_name} does not exist! Exiting function.")
+                    return
             except BrokenPipeError:
+                logging.info(f"Broken pipe error when trying to start {self.server_name} Trying again...")
+            if not start_success:
                 i += 1
+            time.sleep(10)
         self._wait_to_finish(response['id'])
 
         # If the server is an external proxy, then register its DNS name
@@ -161,7 +170,7 @@ class ComputeManager:
             self.dns_manager.add_dns_record(dns_record, self.server_name)
 
         self.state_manager.state_transition(self.s.RUNNING)
-        logging.info(f"Finished starting {self.server_name}")
+        self.logger.info(f"Finished starting {self.server_name}")
 
     def stop(self):
         """
@@ -176,15 +185,19 @@ class ComputeManager:
                     response = self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
                                                              instance=self.server_name).execute()
                     stop_success = True
-                    logging.info(f'Sent job to stop {self.server_name}, and waiting for response')
+                    self.logger.info(f'Sent job to stop {self.server_name}, and waiting for response')
+                except HttpError as err:
+                    self.logger.error(f"{err.content}")
+                    self.state_manager.state_transition(self.s.BROKEN)
+                    return
                 except BrokenPipeError:
                     i += 1
             self._wait_to_finish(response['id'])
 
             self.state_manager.state_transition(self.s.STOPPED)
-            logging.info(f"Finished stopping {self.server_name}")
+            self.logger.info(f"Finished stopping {self.server_name}")
         else:
-            logging.info(f"Server {self.server_name} is not running")
+            self.logger.info(f"Server {self.server_name} is not running")
 
     def nuke(self):
         """
@@ -200,15 +213,17 @@ class ComputeManager:
         """
         self.state_manager.state_transition(self.s.DELETING)
 
-        logging.info(f'Deleting {self.server_name}')
+        self.logger.info(f'Deleting {self.server_name}')
         try:
             response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
                                                        instance=self.server_name).execute()
         except HttpError as err:
-            if err.resp.status in [404]:
-                self.state_manager.state_transition(self.s.DELETED)
-                return
+            self.logger.error(f"{err.content}")
+            self.state_manager.state_transition(self.s.BROKEN)
+            return
+
         self._wait_to_finish(response['id'])
+        self.state_manager.state_transition(self.s.DELETED)
 
     def _add_disks(self):
         disks = None
@@ -298,10 +313,10 @@ class ComputeManager:
                 success = True
             except timeout:
                 i += 1
-                logging.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                self.logger.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
                 pass
         if not success:
-            logging.error(f'Timeout in operation on server {self.server_name}')
+            self.logger.error(f'Timeout in operation on server {self.server_name}')
             self.state_manager.state_transition(self.s.BROKEN)
             raise ConnectionError
 

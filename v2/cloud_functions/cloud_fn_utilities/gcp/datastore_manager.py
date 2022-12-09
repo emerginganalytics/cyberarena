@@ -55,9 +55,9 @@ class DataStoreManager:
         query_servers.add_filter('parent_id', '=', self.key_id)
         return list(query_servers.fetch())
 
-    def get_workspaces(self, key_type, build_id):
-        query_workspaces = self.ds_client.query(kind=key_type)
-        query_workspaces.add_filter('parent_id', '=', build_id)
+    def get_children(self, child_key_type, parent_id):
+        query_workspaces = self.ds_client.query(kind=child_key_type)
+        query_workspaces.add_filter('parent_id', '=', parent_id)
         return list(query_workspaces.fetch())
 
     def get_expired(self):
