@@ -1,7 +1,15 @@
-from flask import request
+import yaml
+from datetime import datetime, timedelta, timezone
+from flask import json, request
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.gcp.pubsub_manager import PubSubManager
+from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -18,24 +26,66 @@ class Unit(MethodView):
     decorators = [instructor_required]
 
     def __init__(self):
+        self.key_type = DatastoreKeyTypes.UNIT.value
+        self.pubsub_actions = PubSub.Actions
+        self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.bm = BucketManager()
+        self.env = CloudEnv()
 
     def get(self, build_id=None):
-        # TODO: Add GET logic
-        args = request.args
         if build_id:
-            pass
-        # Invalid request; No build_id given
-        return self.http_resp(code=400)
+            unit = DataStoreManager(key_type=self.key_type, key_id=build_id).get()
+            if unit:
+                return self.http_resp(code=200, data=unit).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
+    @instructor_required
     def post(self):
-        # TODO: Add POST logic
-        return self.http_resp(code=400)
+        recv_data = request.json
 
-    def delete(self):
-        # TODO: Add DELETE logic
-        return self.http_resp(code=400)
+        # Parse Form Data
+        build_count = recv_data.get('build_count', None)
+        expire_datetime = recv_data.get('expires', None)
+        registration_required = recv_data.get('registration_required', False)
+        build_file = recv_data.get('build_file', None)
 
-    def put(self):
-        # TODO: Add PUT logic
-        return self.http_resp(code=400)
+        # make sure that no running class already exists for fixed-arena
+        if build_count and expire_datetime and build_file:
+            unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
+            build_spec = yaml.safe_load(unit_yaml)
+            expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
+            build_spec['workspace_settings'] = {
+                'count': build_count,
+                'registration_required': registration_required,
+                'student_emails': [],
+                'expires': expire_ts
+            }
+            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+            build_spec_to_cloud.commit()
+            return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400).prepare_response()
+
+    @instructor_required
+    def delete(self, build_id=None):
+        if build_id:
+            self.pubsub_mgr.msg(handler=str(self.handler.CONTROL.value), build_id=str(build_id),
+                                action=str(self.pubsub_actions.DELETE.value),
+                                cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value))
+            return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400).prepare_response()
+
+    @instructor_required
+    def put(self, build_id):
+        if build_id:
+            args = request.json
+            action = args.get('action', None)
+            valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE]
+            if action and action in valid_actions:
+                self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                    build_id=str(build_id),
+                                    cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value))
+                return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()

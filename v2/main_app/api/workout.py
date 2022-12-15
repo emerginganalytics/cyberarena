@@ -5,7 +5,7 @@ from flask.views import MethodView
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
-from main_app_utilities.globals import PubSub
+from main_app_utilities.globals import PubSub, WorkoutStates
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -19,7 +19,7 @@ __status__ = "Testing"
 
 class Workout(MethodView):
     def __init__(self):
-        self.topic = DatastoreKeyTypes.CYBERGYM_WORKOUT.value
+        self.topic = DatastoreKeyTypes.WORKOUT.value
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
@@ -44,7 +44,7 @@ class Workout(MethodView):
                     if workout_state:
                         return self.http_resp(code=200, msg=workout_state)
                     else:
-                        return self.http_resp(code=200, msg="RUNNING")
+                        return self.http_resp(code=200, msg=WorkoutStates.RUNNING.name)
             # Bad Request; Workout not found
             return self.http_resp(code=404)
         # Bad Request; No build_id given
@@ -52,10 +52,17 @@ class Workout(MethodView):
 
     @auth_required
     def post(self, build_id):
-        """Create Workout"""
+        """
+        Used for student-initiated build. Otherwise, the workout is built as part of a unit
+        Args:
+            build_id (str): The ID of the workout to build.
+
+        Returns: str
+
+        """
         if build_id:
-            workout = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT.value, key_id=build_id).get()
-            if workout['state'] == 'READY':
+            workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+            if workout.get('state', None) == WorkoutStates.READY:
                 data = request.json
                 workout_id = data.get('workout_id', None)
                 # No workout_id given
@@ -87,18 +94,10 @@ class Workout(MethodView):
         args = request.args
         if build_id:
             action = args.get('action', None)
-            if action:
-                # Control request sent for a specific server
-                if args.get('manage_server', False):
-                    self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=action, build_id=build_id,
-                                            cyber_arena_object=PubSub.CyberArenaObjects.SERVER)
-                else:
-                    # Request to start entire workout
-                    if action == PubSub.Actions.NUKE.value:
-                        handler = PubSub.Handlers.BUILD
-                    else:
-                        handler = PubSub.Handlers.CONTROL
-                    self.pubsub_manager.msg(handler=handler, build_id=build_id, action=action,
-                                            cyber_arena_object=PubSub.CyberArenaObjects.WORKOUT)
-                return self.http_resp(code=200)
+            valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
+            if action and action in valid_actions:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                        build_id=str(build_id),
+                                        cyber_arena_object=PubSub.CyberArenaObjects.WORKOUT.value)
+                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400)

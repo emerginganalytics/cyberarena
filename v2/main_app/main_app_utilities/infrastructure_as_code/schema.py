@@ -57,6 +57,9 @@ class UnitSchema(Schema):
     firewall_rules = fields.Nested('FirewallRuleSchema', many=True, description="These are ONLY set by the program to "
                                                                                 "allow all internal traffic")
     assessment = fields.Nested('AssessmentSchema', required=False)
+    escape_room = fields.Nested('EscapeRoomSchema', required=False,
+                                description="Escape room units include additional specification of the escape room "
+                                            "puzzles associated with each workout")
     test = fields.Bool(required=False, description="Whether the unit is a test. This helps in cleaning the datastore.")
 
 
@@ -93,7 +96,6 @@ class NetworkSchema(Schema):
 class SubNetworkSchema(Schema):
     name = fields.Str(required=True)
     ip_subnet = fields.Str(required=True)
-
     class Meta:
         strict = True
 
@@ -180,3 +182,15 @@ class AssessmentQuestionSchema(Schema):
     operating_system = fields.Str(required=False, description="Target server operating system")
     complete = fields.Bool(default=False)
 
+
+class EscapeRoomSchema(Schema):
+    question = fields.Str(required=True, description="The door to open in the escape room")
+    answer = fields.Str(required=False, description="Answer from the top level-question")
+    puzzles = fields.Nested('PuzzleSchema', many=True)
+
+
+class PuzzleSchema(Schema):
+    type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
+    question = fields.Str(required=True)
+    answer = fields.Str(required=False, description="The answer to the question for questions of type input")
+    reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")

@@ -5,7 +5,7 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, WorkoutStates
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStateManager
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 
@@ -25,7 +25,7 @@ class Workout:
         self.debug = debug
         self.env = CloudEnv()
         self.logger = Logger("cloud_functions.workout").logger
-        self.s = WorkoutStateManager.States
+        self.s = WorkoutStates
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.state_manager = WorkoutStateManager(initial_build_id=self.workout_id)
         self.vpc_manager = VpcManager(build_id=self.workout_id)

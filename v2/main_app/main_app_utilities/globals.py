@@ -27,6 +27,7 @@ class BuildConstants:
         WORKOUT = "workout"
         FIXED_ARENA_WEAKNESS = 'fixed_arena_weakness'
         FIXED_ARENA_ATTACK = 'fixed_arena_attack'
+        ESCAPE_ROOM = 'escape_room'
 
     class Protocols(str, Enum):
         RDP = "rdp"
@@ -138,6 +139,34 @@ class BuildConstants:
         DELETED = 72
 
 
+class WorkoutStates(Enum):
+    START = 0
+    BUILDING_ASSESSMENT = 1
+    BUILDING_NETWORKS = 2
+    COMPLETED_NETWORKS = 3
+    BUILDING_SERVERS = 4
+    COMPLETED_SERVERS = 5
+    BUILDING_FIREWALL = 6
+    COMPLETED_FIREWALL = 7
+    BUILDING_ROUTES = 8
+    COMPLETED_ROUTES = 9
+    BUILDING_FIREWALL_RULES = 10
+    COMPLETED_FIREWALL_RULES = 11
+    BUILDING_STUDENT_ENTRY = 12
+    COMPLETED_STUDENT_ENTRY = 13
+    GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
+    RUNNING = 50
+    STOPPING = 51
+    STARTING = 52
+    READY = 53
+    EXPIRED = 60
+    MISFIT = 61
+    BROKEN = 62
+    DELETING_SERVERS = 70
+    COMPLETED_DELETING_SERVERS = 71
+    DELETED = 72
+
+
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
@@ -182,6 +211,8 @@ class PubSub:
         FIXED_ARENA_WORKSPACE = 3
         SERVER = 4
         AGENT_MACHINE = 5
+        UNIT = 6
+        WORKOUT = 7
 
 
 class Buckets:

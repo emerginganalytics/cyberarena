@@ -1,10 +1,11 @@
 import time
 from datetime import datetime
-from enum import Enum
+from enum import Enum, EnumMeta
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes, ServerStates
 from cloud_fn_utilities.gcp.cloud_logger import Logger
+from cloud_fn_utilities.globals import WorkoutStates
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,41 +18,23 @@ __status__ = "Testing"
 
 
 class WorkoutStateManager:
-    class States(Enum):
-        START = 0
-        BUILDING_ASSESSMENT = 1
-        BUILDING_NETWORKS = 2
-        COMPLETED_NETWORKS = 3
-        BUILDING_SERVERS = 4
-        COMPLETED_SERVERS = 5
-        BUILDING_FIREWALL = 6
-        COMPLETED_FIREWALL = 7
-        BUILDING_ROUTES = 8
-        COMPLETED_ROUTES = 9
-        BUILDING_FIREWALL_RULES = 10
-        COMPLETED_FIREWALL_RULES = 11
-        BUILDING_STUDENT_ENTRY = 12
-        COMPLETED_STUDENT_ENTRY = 13
-        GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
-        RUNNING = 50
-        STOPPING = 51
-        STARTING = 52
-        READY = 53
-        EXPIRED = 60
-        MISFIT = 61
-        BROKEN = 62
-        DELETING_SERVERS = 70
-        COMPLETED_DELETING_SERVERS = 71
-        DELETED = 72
-
-    COMPLETION_STATES = [States.COMPLETED_DELETING_SERVERS, States.COMPLETED_FIREWALL, States.COMPLETED_NETWORKS,
-                         States.COMPLETED_ROUTES, States.COMPLETED_SERVERS, States.COMPLETED_STUDENT_ENTRY]
+    COMPLETION_STATES = [WorkoutStates.COMPLETED_DELETING_SERVERS.value, WorkoutStates.COMPLETED_FIREWALL.value,
+                         WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.COMPLETED_ROUTES.value,
+                         WorkoutStates.COMPLETED_SERVERS.value, WorkoutStates.COMPLETED_STUDENT_ENTRY.value]
+    OTHER_VALID_TRANSITIONS = [
+        (WorkoutStates.START.value, WorkoutStates.DELETING_SERVERS.value),
+        (WorkoutStates.START.value, WorkoutStates.BUILDING_NETWORKS.value),
+        (WorkoutStates.START.value, WorkoutStates.COMPLETED_NETWORKS.value),
+        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_SERVERS.value),
+        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
+        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.READY.value)
+    ]
 
     MAX_WAIT_TIME = 300
     SLEEP_TIME = 10
 
     def __init__(self, initial_build_id=None):
-        self.s = WorkoutStateManager.States
+        self.s = WorkoutStates
         self.server_states = ServerStates
         self.logger = Logger("cloud_functions.workout_states").logger
         if initial_build_id:
@@ -80,16 +63,17 @@ class WorkoutStateManager:
         :param new_state: The new state for the server
         :return: Boolean on success. If the state transition is valid, then return True. Otherwise, return False
         """
+        new_state = new_state.value if type(new_state) != int else new_state
         existing_state = self.build['state']
-        if self._is_fixed_arena_valid_transition(existing_state, new_state):
-            self.build['state'] = new_state.value
+        if self._is_valid_transition(existing_state, new_state):
+            self.build['state'] = new_state
             self.build['state-timestamp'] = datetime.utcnow().isoformat()
-            if new_state == self.States.DELETED:
+            if new_state == WorkoutStates.DELETED:
                 self.build['active'] = False
-            elif new_state == self.States.READY:
+            elif new_state == WorkoutStates.READY:
                 self.build['active'] = True
-            self.logger.info(f"State Transition {self.build.key.name}: Transitioning from {self.s(existing_state).name} to "
-                         f"{self.s(new_state).name}")
+            self.logger.info(f"State Transition {self.build.key.name}: Transitioning from "
+                             f"{self.s(existing_state).name} to {self.s(new_state).name}")
             self.ds.put(self.build)
             return True
         else:
@@ -149,29 +133,32 @@ class WorkoutStateManager:
         """
         return DataStoreManager(key_type=DatastoreKeyTypes.SERVER).get_running()
 
-    def _is_fixed_arena_valid_transition(self, existing_state, new_state):
-        if new_state == self.s.START and not existing_state:
+    def _is_valid_transition(self, existing_state, new_state):
+        if new_state == self.s.START.value and not existing_state or new_state == existing_state:
             return True
-        elif new_state == self.s.BUILDING_NETWORKS and existing_state in \
-                [self.s.START, self.s.BROKEN, self.s.BUILDING_NETWORKS]:
+        elif new_state == self.s.BUILDING_NETWORKS.value and existing_state in \
+                [self.s.START.value, self.s.BROKEN.value, self.s.BUILDING_NETWORKS.value]:
             return True
-        elif new_state == self.s.BUILDING_SERVERS and existing_state in \
-                [self.s.COMPLETED_NETWORKS, self.s.BUILDING_SERVERS]:
+        elif new_state == self.s.BUILDING_SERVERS.value and existing_state in \
+                [self.s.COMPLETED_NETWORKS.value, self.s.BUILDING_SERVERS.value]:
             return True
-        elif new_state == self.s.BUILDING_ROUTES and existing_state in \
-                [self.s.COMPLETED_SERVERS, self.s.BUILDING_ROUTES]:
+        elif new_state == self.s.BUILDING_ROUTES.value and existing_state in \
+                [self.s.COMPLETED_SERVERS.value, self.s.BUILDING_ROUTES.value]:
             return True
-        elif new_state == self.s.BUILDING_FIREWALL and \
-                existing_state in [self.s.COMPLETED_ROUTES, self.s.COMPLETED_SERVERS, self.s.COMPLETED_NETWORKS,
-                                   self.s.BUILDING_FIREWALL]:
+        elif new_state == self.s.BUILDING_FIREWALL.value and \
+                existing_state in [self.s.COMPLETED_ROUTES.value, self.s.COMPLETED_SERVERS.value,
+                                   self.s.COMPLETED_NETWORKS.value, self.s.BUILDING_FIREWALL.value]:
             return True
-        elif new_state == self.s.READY and existing_state in [self.s.COMPLETED_SERVERS]:
+        elif new_state == self.s.READY.value and existing_state in [self.s.COMPLETED_SERVERS.value]:
             return True
-        elif new_state in self.COMPLETION_STATES and existing_state not in [self.s.DELETED, self.s.BROKEN]:
+        elif new_state in self.COMPLETION_STATES and existing_state \
+                not in [self.s.DELETED.value, self.s.BROKEN.value]:
+            return True
+        elif (existing_state, new_state) in self.OTHER_VALID_TRANSITIONS:
             return True
         else:
             self.logger.warning(f"Invalid build state transition! Attempting to move to {self.s(new_state).name}, but "
-                            f"the build is currently in the state {self.s(existing_state).name}")
+                                f"the build is currently in the state {self.s(existing_state).name}")
             return False
 
     def _server_state_check(self, server_states):
