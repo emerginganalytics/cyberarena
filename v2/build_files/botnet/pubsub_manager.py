@@ -7,7 +7,7 @@ import json
 
 class PubSubManager:
     def __init__(self):
-        creds = '/home/walker/Downloads/ualr-cybersecurity-38b2dd265fa9.json'
+        creds = ''
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = creds
         runtimeconfig_client = runtimeconfig.Client()
         myconfig = runtimeconfig_client.config('cybergym')
