@@ -40,6 +40,9 @@ def cyber_arena_cloud_function(event, context):
         logging.error("BUDGET ALERT: Cannot run cloud_fn_build_workout because the budget exceeded variable is set for "
                       "the project")
         return
+    if 'attributes' not in event:
+        logging.error(f"No attributes provided to the cloud function")
+        raise ValueError
     handler = event['attributes'].get('handler', None)
     if not handler:
         logging.error(f"No handler provided to cloud function")

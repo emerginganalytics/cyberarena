@@ -24,10 +24,9 @@ class WorkoutStateManager:
     OTHER_VALID_TRANSITIONS = [
         (WorkoutStates.START.value, WorkoutStates.DELETING_SERVERS.value),
         (WorkoutStates.START.value, WorkoutStates.BUILDING_NETWORKS.value),
-        (WorkoutStates.START.value, WorkoutStates.COMPLETED_NETWORKS.value),
         (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_SERVERS.value),
-        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
-        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.READY.value)
+        (WorkoutStates.BUILDING_SERVERS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
+        (WorkoutStates.BUILDING_FIREWALL_RULES.value, WorkoutStates.COMPLETED_FIREWALL_RULES.value)
     ]
 
     MAX_WAIT_TIME = 300

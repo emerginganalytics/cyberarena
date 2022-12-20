@@ -19,11 +19,11 @@ class EnvironmentVariables:
     COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
-    VARIABLES = ['dns_suffix', 'script_repository', 'api_key', 'main_app_url', 'admin_email', 'guac_password']
+    VARIABLES = ['dns_suffix', 'script_repository', 'api_key', 'main_app_url', 'admin_email', 'guac_password',
+                 'project_number']
 
-    def __init__(self, project, suppress=True):
+    def __init__(self, project):
         self.project = project
-        self.suppress = suppress
         self.service = discovery.build('compute', 'v1')
         runtimeconfig_client = runtimeconfig.Client()
         self.myconfig = runtimeconfig_client.config('cybergym')

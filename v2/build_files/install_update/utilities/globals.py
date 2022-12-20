@@ -24,7 +24,8 @@ class SetupOptions(bytes, Enum):
     MAIN_APP = (3, "Update Main Application Only")
     BUILD_SPECS = (4, "Synchronize Build Specifications, Instructions, and Compute Images")
     ENV = (5, "Synchronize Environment Variables")
-    EXIT = (6, "Exit")
+    BULK_UPDATE = (6, "Update multiple cloud projects at once")
+    EXIT = (7, "Exit")
 
 
 class ShellCommands:   
@@ -56,3 +57,7 @@ class ShellCommands:
     class PubSubTopics(str, Enum):
         CYBER_ARENA = "gcloud pubsub topics create cyber-arena"
         BUDGET = "gcloud pubsub topics create budget"
+
+
+class InstallSettings:
+    BULK_SETTINGS_FILENAME = ".bulk_settings.yaml"

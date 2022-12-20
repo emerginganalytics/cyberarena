@@ -61,7 +61,7 @@ class BuildSpecification:
         self._upload_folder_to_cloud(self.build_student_instructions, self.STUDENT_FOLDER)
         self._upload_folder_to_cloud(self.build_startup_scripts, self.STARTUP_SCRIPT_FOLDER)
         self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
-        self._sync_attacks_to_cloud(self.build_attacks_specs)
+        self._sync_attacks_to_cloud()
 
     def _sync_locked_folder(self, plaintext_dir, encrypted_dir, extension):
         spec_crypto_lock = CryptoLock(plaintext_dir=plaintext_dir, encrypted_dir=encrypted_dir,
@@ -86,7 +86,7 @@ class BuildSpecification:
                     if not extension or file.suffix == f".{extension}":
                         self._upload_file_to_cloud(file, cloud_directory)
             if item.is_file():
-                if item.suffix == f".{extension}":
+                if not extension or item.suffix == f".{extension}":
                     self._upload_file_to_cloud(item, cloud_directory)
 
     def _upload_file_to_cloud(self, file, cloud_directory):
@@ -134,14 +134,13 @@ class BuildSpecification:
                     return False
 
     def _sync_attacks_to_cloud(self):
-        local_directory = os.path.join('v2', "build_files", "specs", "attacks")
         ds_manager = DataStoreManager()
 
         # First update files stored in Cloud buckets
-        self._upload_folder_to_cloud(local_directory, self.ATTACK_FOLDER)
+        self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
         # Load file into python objects and update each datastore entry
-        for filename in os.listdir(local_directory):
-            attack = yaml.safe_load(open(os.path.join(local_directory, filename)))
+        for filename in os.listdir(self.build_attacks_specs):
+            attack = yaml.safe_load(open(os.path.join(self.build_attacks_specs, filename)))
             ds_manager.set(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value, key_id=attack['id'])
             ds_manager.put(attack)
 

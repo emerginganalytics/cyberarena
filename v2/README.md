@@ -26,6 +26,23 @@
 Run `python setup.py` and follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud
 resources and running updates.
 
+### Bulk Deployment
+Multiple projects can be updated by running bulk deployment. To do so, you need to provide a settings file named 
+`.bulk_settings.yaml` in the same directory as `setup.py`. This file should be included in .gitignore. The yaml specification
+for this file should be:
+```yaml
+# Include the list of functions you are wanting to bulk deploy. They may be any of the following
+deploy_functions:
+  - CLOUD_FUNCTION
+  - MAIN_APP
+  - BUILD_SPECS
+  - ENV
+# Include the list of projects to deploy. The list should include the project name and filename of the credential
+gcp_projects:
+  - name: 'sample-project'
+    credential: 'C:\Users\jdoe\.gcp\sample-project.json'
+```
+
 ## Architecture
 The Cyber Arena includes two main application. First, the _main_app_ provides the web application for instructors and students
 to interact with the configured labs. This runs as a cloud run app with Firebase authentication and provides entry into
