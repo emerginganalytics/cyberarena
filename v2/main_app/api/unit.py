@@ -1,6 +1,6 @@
 import yaml
 from datetime import datetime, timedelta, timezone
-from flask import json, request
+from flask import json, request, session
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
@@ -13,7 +13,7 @@ from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildS
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Andrew Bomberger"]
+__credits__ = ["Andrew Bomberger", "Philip Huff"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -44,14 +44,23 @@ class Unit(MethodView):
 
     @instructor_required
     def post(self):
-        recv_data = request.json
+        user_email = session.get('user_email', None)
+        recv_data = request.form
 
         # Parse Form Data
-        build_count = recv_data.get('build_count', None)
         expire_datetime = recv_data.get('expires', None)
         registration_required = recv_data.get('registration_required', False)
         build_file = recv_data.get('build_file', None)
-
+        build_for_class = recv_data.get('build_for_class', None)
+        if not build_for_class:
+            build_count = recv_data.get('build_count', None)
+        else:
+            class_name = recv_data.get('target_class', None)
+            target_class = DataStoreManager(key_id=user_email).get_classroom(class_name=class_name)
+            if target_class:
+                build_count = len(target_class[0]['roster'])
+            else:
+                return self.http_resp(code=404).prepare_response()
         # make sure that no running class already exists for fixed-arena
         if build_count and expire_datetime and build_file:
             unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
