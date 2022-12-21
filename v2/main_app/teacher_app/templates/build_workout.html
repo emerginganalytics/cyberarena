@@ -1,0 +1,175 @@
+{% extends "teacher_base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% block title %}Workout Builder{% endblock %}
+{% block nav_title %}Workout Builder{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="current-user" href="#" class="nav-link text-center disabled no-select"></a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <button id="contact-us" class="nav-item btn top-navbar-btn"
+                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
+        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+              // Set welcome banner
+              const welcome_nav = document.getElementById('current-user');
+              welcome_nav.textContent = value['display_name'];
+              if (value['authorized'] === true){
+                  teacher_email = value['email'];
+                  var teacher_button = document.createElement('a');
+                  teacher_button.href = '/teacher/home/';
+                  teacher_button.className = 'nav-link';
+                  teacher_button.innerHTML = 'Teacher Home';
+                  if (value['admin'] === true){
+                      var admin_button = document.createElement("a");
+                      admin_button.href = "/admin/home";
+                      admin_button.className = "nav-link";
+                      admin_button.innerHTML = "Admin Home";
+                  }
+              } else {
+                  if(value['student'] === true){
+                      var student_home_link = document.createElement("a");
+                      student_home_link = '/student/home';
+                      student_home_link.className = "nav-link";
+                      student_home_link.innerHTML = "Your Student Page";
+                  }
+              }
+          });
+          window.addEventListener('load', function (){
+              document.getElementById('email').value = teacher_email;
+              $.ajax({
+                  type: "GET",
+                  contentType: "application/json;charset=utf-8",
+                  url: '/api/classroom/',
+                  traditional: "true",
+                  dataType: "json",
+                  success: function(data){
+                      let class_list = document.getElementById('target_class');
+
+                      for (let i = 0; i < data['data'].length; i++){
+                          let class_option = document.createElement('option');
+                          class_option.value = data['data'][i]['class_name'];
+                          class_option.innerHTML = data['data'][i]['class_name'];
+                          class_list.append(class_option);
+                      }
+                  }
+              });
+              var class_checkbox = document.getElementById('build_for_class');
+              if (class_checkbox.checked) {
+                  document.getElementById('build-count-div').style.display = 'none';
+                  document.getElementById('build-count-div').style.display = "none";
+                  document.getElementById('class_input').style.display = "block";
+                  $("#class_target").attr("required", "required");
+                  $("#build_count").removeAttr("required");
+                  document.getElementById("build_count").value = "";
+              } else {
+                  document.getElementById('build-count-div').style.display = "block";
+                  document.getElementById('class_input').style.display = "none";
+                  $("#class_target").removeAttr("required");
+                  $("#build_count").attr("required", "required");
+                  document.getElementById("class_target").value = "";
+              }
+              class_checkbox.addEventListener('change', function (){
+                  if (this.checked){
+                      document.getElementById('build-count-div').style.display = "none";
+                      document.getElementById('class_input').style.display = "block";
+                      $("#class_target").attr("required", "required");
+                      $("#build_count").removeAttr("required");
+                      document.getElementById("build_count").value = "";
+                  } else {
+                      document.getElementById('build-count-div').style.display = "block";
+                      document.getElementById('class_input').style.display = "none";
+                      $("#class_target").removeAttr("required");
+                      $("#build_count").attr("required", "required");
+                      document.getElementById("class_target").value = "";
+                  }
+              });
+          });
+    </script>
+    <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <!-- Not Sure if we need this sidebar here on this page -->
+            </ul>
+        </div> <!-- End sidebar-menu div -->
+        <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
+            <div id="error-msg-div"></div>
+            <div id="home-content-ctn" class="d-inline-flex">
+                <div class="container">
+                    <h1>Build <span id="workout_type">{{ workout_type }}</span> workout : </h1>
+                    <div id="form-div">
+                        <form id="build_form" action="/api/unit/" method="POST">
+                            <div class="form-group">
+                                <input type="hidden" name="email" id="email" />
+                                <input type="text" class="form-control" id="unit_name" name="unit_name" required />
+                                <label for="unit_name">Enter Unit Name (for future reference)</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="class-expire-date">Expires: </label>
+                                <input id="class-expire-date" class="form-control" name="expires"
+                                       type="datetime-local">
+                            </div>
+                            <div id="build-count-div" class="form-group">
+                                <input id="build_count" class="form-control" type="number" name="build_count" min="1" />
+                                <label for="build_count">Select number of students (typically less than 20)</label>
+                            </div>
+                            <div id="class_input" class="form-group">
+                                <label for="target_class">Choose a class ...</label>
+                                <select class="form-control" id="target_class" name="target_class">
+                                    <option value="" disabled selected hidden>--Select a class--</option>
+                                </select>
+                            </div>
+                            <input type="checkbox" name="build_for_class" id="build_for_class" checked>
+                            <label for="build_for_class">Build for a class</label><br>
+
+                            <input type="checkbox" name="build_now" id="build_now" checked>
+                            <label for="build_now">Build Now (Uncheck to let students initiate the build)</label><br>
+                            <button type="submit" id="build-workout" class="waves-effect waves-light btn">Build Workout!</button>
+                        </form>
+                    </div> <!-- End form div -->
+                </div> <!-- End container div -->
+                <div id="loading-msg"></div>
+                <script>
+                    $(document).ready(function(){
+                        $("form").submit(function(){
+                            $('#workout-form :input').attr('readonly','readonly');
+                            $('#build-workout').attr('disabled','disabled');
+                            $("#loading-msg").html('Please wait while your workouts are created.</br>' +
+                                'This can take several minutes.</br>' +
+                                'Links to your workouts will be displayed when the process is complete.</br>' +
+                                'Go grab some coffee (or tea, if you prefer).</br>' +
+                                '</br><div class="loader"></div>');
+                        });
+                    });
+                </script>
+            </div> <!-- End home-content-ctn -->
+        </div> <!-- End content-div -->
+    </div> <!-- End content-row ->
+{% endblock %}

@@ -145,6 +145,10 @@ footer a:hover {
     width: 100%;
     margin-right: 10px;
 }
+.btn.top-navbar-btn:hover {
+    background-color: whitesmoke;
+    color: black;
+}
 .btn.top-navbar-btn:last-child {
     background-color: #1d8037;
 }

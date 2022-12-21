@@ -10,8 +10,6 @@ from main_app_utilities.globals import DatastoreKeyTypes
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
-# TODO: Move these to each call in teacher_api to the respective API route:
-#  teacher_app.register_blueprint(teacher_api)
 
 
 @teacher_app.route('/home', methods=['GET', 'POST'])
@@ -19,15 +17,14 @@ def teacher_home():
     auth_config = CloudEnv().auth_config
     if session.get('user_email', None):
         teacher_email = session['user_email']
-        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR,
-                                            key_id=str(teacher_email)).get()
+        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email)).get()
         if not teacher_info:
             # TODO: Add instructor to entity
             """teacher_info = DataStoreManager(key_id=DatastoreKeyTypes.INSTRUCTOR).query()
             teacher_list = list(teacher_info.fetch())
             DataStoreManager(key_id=str(teacher_email)).put(obj=teacher_email)"""
             teacher_info = teacher_email
-        unit_query = DataStoreManager(key_id=DatastoreKeyTypes.CYBERGYM_UNIT.value).query()
+        unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
         unit_query.add_filter('instructor_id', '=', str(teacher_email))
         unit_list = list(unit_query.fetch())
         class_list = DataStoreManager(key_id=str(teacher_email)).get_classroom()
@@ -97,13 +94,13 @@ def index(workout_type):
     auth_config = CloudEnv().auth_config
     logger.info('Request for workout type %s' % workout_type)
     form = CreateWorkoutForm()
-    return render_template('main_page.html', workout_type=workout_type, auth_config=auth_config)
+    return render_template('build_workout.html', workout_type=workout_type, auth_config=auth_config)
 
 
 # Instructor landing page. Displays information and links for a unit of workouts
 @teacher_app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
 def workout_list(unit_id):
-    ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT, key_id=str(unit_id))
+    ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id))
     unit = ds_manager.get()
     build_type = unit['build_type']
     workout_list = DataStoreManager().get_workouts()

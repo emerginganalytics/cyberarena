@@ -1,5 +1,5 @@
 import json
-from flask import request
+from flask import request, session
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
@@ -23,27 +23,25 @@ class Classroom(MethodView):
 
     def get(self, class_name=None):
         """Get Classroom"""
-        user_data = request.json
-        user_email = user_data.get('user_email', None)
+        user_email = session.get('user_email', None)
         if user_email:
             if class_name:
                 class_query = DataStoreManager(key_id=str(user_email)).get_classroom(class_name=class_name)
             else:
                 class_query = DataStoreManager(key_id=str(user_email)).get_classroom()
-            class_list = []
-            for class_object in class_query:
-                class_list.append(class_object)
-            return json.dumps(class_list)
-        return self.http_resp(code=400)
+            if class_query:
+                return self.http_resp(code=200, data=class_query).prepare_response()
+            return self.http_resp(code=404, data=[]).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     def post(self):
         """Create Classroom"""
-        return self.http_resp(code=400)
+        return self.http_resp(code=400).prepare_response()
 
     def delete(self, class_name=None):
-        return self.http_resp(code=405)
+        return self.http_resp(code=405).prepare_response()
 
     def put(self, class_name=None):
         """Update Existing Classroom"""
         recv_data = request.json
-        return self.http_resp(code=400)
+        return self.http_resp(code=400).prepare_response()
