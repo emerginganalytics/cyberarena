@@ -1,0 +1,102 @@
+{% extends "teacher_base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% block title %}Teacher Home{% endblock %}
+{% block nav_title %}Teacher Home{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <button id="contact-us" class="nav-item btn top-navbar-btn"
+                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
+        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
+          });
+          function build_unit(){
+              var build_unit_select = document.getElementById('build-unit-select');
+              selection = build_unit_select.options[build_unit_select.selectedIndex].value;
+              console.log(selection);
+
+              var build_unit_a = document.getElementById('build-unit-a');
+              build_unit_a.setAttribute("href", 'build/' + selection);
+              return false;
+          }
+    </script>
+     <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="teacher-home-btn" data-toggle="pill"
+                            data-target="#home-container" type="button" role="tab"
+                            aria-controls="nav-home" aria-selected="true">Active Workouts</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="teacher-home-btn" data-toggle="pill"
+                            data-target="#expired-workout-container" type="button" role="tab"
+                            aria-controls="nav-home" aria-selected="true">Expired Workouts</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="teacher-roster-btn" data-toggle="pill"
+                            data-target="#roster-container" type="button" role="tab"
+                            aria-controls="nav-home" aria-selected="true">Roster</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="build-workout-btn" data-toggle="pill"
+                            data-target="#build-workout-container" type="button" role="tab"
+                            aria-controls="nav-home" aria-selected="true">Build Workout</button>
+                </li>
+            </ul>
+        </div> <!-- End sidebar-menu div -->
+        <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
+            <div id="tab-conatiner" class="tab-content">
+                <div class="tab-pane fade active show" id="teacher-home" role="tabpanel" aria-labelledby="active-class-tab">
+                    <!-- Tab TBD -->
+                </div>
+                <div id="expired-class-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
+                    <!-- Tab TBD -->
+                </div>
+                <div id="roster-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
+                    <!-- Tab TBD -->
+                </div>
+                <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
+                    <!-- Tab TBD -->
+                </div>
+            </div>
+        </div>
+     </div>
+{% endblock content %}

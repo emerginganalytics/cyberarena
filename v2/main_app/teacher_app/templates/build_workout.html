@@ -10,7 +10,7 @@
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
-                <a id="current-user" href="#" class="nav-link text-center disabled no-select"></a>
+                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
             </li>
             <li class="nav-item">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
@@ -38,27 +38,11 @@
           initApp(auth_config).then(value => {
               enable_signout();
               // Set welcome banner
-              const welcome_nav = document.getElementById('current-user');
+              const welcome_nav = document.getElementById('banner');
               welcome_nav.textContent = value['display_name'];
-              if (value['authorized'] === true){
-                  teacher_email = value['email'];
-                  var teacher_button = document.createElement('a');
-                  teacher_button.href = '/teacher/home/';
-                  teacher_button.className = 'nav-link';
-                  teacher_button.innerHTML = 'Teacher Home';
-                  if (value['admin'] === true){
-                      var admin_button = document.createElement("a");
-                      admin_button.href = "/admin/home";
-                      admin_button.className = "nav-link";
-                      admin_button.innerHTML = "Admin Home";
-                  }
-              } else {
-                  if(value['student'] === true){
-                      var student_home_link = document.createElement("a");
-                      student_home_link = '/student/home';
-                      student_home_link.className = "nav-link";
-                      student_home_link.innerHTML = "Your Student Page";
-                  }
+              if (value['authorized'] === true) {
+                  let user_email = document.getElementById('email');
+                  user_email.value = value['email'];
               }
           });
           window.addEventListener('load', function (){
@@ -128,8 +112,7 @@
                         <form id="build_form" action="/api/unit/" method="POST">
                             <div class="form-group">
                                 <input type="hidden" name="email" id="email" />
-                                <input type="text" class="form-control" id="unit_name" name="unit_name" required />
-                                <label for="unit_name">Enter Unit Name (for future reference)</label>
+                                <input type="hidden" name="build_file" id="build_file" value="{{ workout_type }}">
                             </div>
                             <div class="form-group">
                                 <label for="class-expire-date">Expires: </label>

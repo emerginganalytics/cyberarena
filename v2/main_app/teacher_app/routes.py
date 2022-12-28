@@ -1,8 +1,9 @@
 import logging as logger
 import json
 import time
-from flask import Blueprint, redirect, render_template, request, session
+from flask import abort, Blueprint, redirect, render_template, request, session
 from forms.forms import CreateWorkoutForm
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
@@ -17,47 +18,74 @@ def teacher_home():
     auth_config = CloudEnv().auth_config
     if session.get('user_email', None):
         teacher_email = session['user_email']
+        auth = ArenaAuthorizer()
+        auth_list = auth.get_user_groups(user=teacher_email)  # Get user auth levels
+        # Check if teacher is added to datastore
         teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email)).get()
         if not teacher_info:
+            teacher_info = DataStoreManager().set(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email))
             # TODO: Add instructor to entity
-            """teacher_info = DataStoreManager(key_id=DatastoreKeyTypes.INSTRUCTOR).query()
-            teacher_list = list(teacher_info.fetch())
-            DataStoreManager(key_id=str(teacher_email)).put(obj=teacher_email)"""
-            teacher_info = teacher_email
-        unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
-        unit_query.add_filter('instructor_id', '=', str(teacher_email))
-        unit_list = list(unit_query.fetch())
-        class_list = DataStoreManager(key_id=str(teacher_email)).get_classroom()
+
         teacher_info = {}
-        current_units = []
+        teacher_classes = []
+        class_list = DataStoreManager(key_id=str(teacher_email)).get_classroom()
+        for class_instance in class_list:
+            if 'class_name' in class_instance:
+                class_info = {
+                    'id': class_instance['class_id'],
+                    'name': class_instance['class_name'],
+                    'student_auth': class_instance['student_auth'] if 'student_auth' in class_instance else 'anonymous',
+                    'roster_size': len(class_instance.get('roster', []))
+                }
+                teacher_classes.append(class_info)
+        teacher_info['classes'] = teacher_classes
+
+        # Get all the units for this instructor
+        unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
+        unit_query.add_filter('instructor_id', '=', teacher_email)
+        unit_list = list(unit_query.fetch())
+        # Sort queried units into active and expired
+        active_units = []
         expired_units = []
         teacher_classes = []
-        for unit in unit_list:
-            if 'workout_name' in unit:
-                if 'expiration' in unit:
-                    unit_info = {
-                            'unit_id': unit.key.name,
-                            'workout_name': unit['workout_name'],
-                            'build_type': unit['build_type'],
-                            'unit_name': unit['unit_name'],
-                            'timestamp': unit['timestamp']
+        if unit_list:
+            for unit in unit_list:
+                if 'name' in unit['summary']:
+                    if 'expires' in unit['workspace_settings']:
+                        creation_ts = unit['creation_timestamp']
+                        expire_ts = unit['workspace_settings']['expires']
+                        unit_info = {
+                            'id': unit.key.name,
+                            'name': unit['summary']['name'],
+                            'created': creation_ts,
+                            'expires': expire_ts,
                         }
-                    if (int(time.time()) - (int(unit['timestamp']) + ((int(unit['expiration'])) * 60 * 60 * 24))) < 0: 
-                        current_units.append(unit_info)
-                    else:
-                        expired_units.append(unit_info)
-                else:
-                    unit_info = {
-                            'unit_id': unit.key.name,
-                            'workout_name': unit['workout_name'],
-                            'build_type': unit['build_type'],
-                            'unit_name': unit['unit_name'],
-                            'timestamp': unit['timestamp']
-                        }
-                    expired_units.append(unit_info)
-        current_units = sorted(current_units, key=lambda i: (i['timestamp']), reverse=True)
-        expired_units = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
-        for class_instance in class_list:
+                        if 'class_name' in unit:
+                            unit_info['class_name'] = unit['class_name']
+                        else:
+                            unit_info['class_name'] = 'Demos'
+                        if (int(time.time()) - (int(creation_ts) + (int(expire_ts) * 60 * 60 * 24))) < 0:
+                            active_units.append(unit_info)
+            teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['created']), reverse=True)
+
+        # Get list of workouts from cloud bucket
+        # TODO: Consider preloading all specs into a cyberarena-catalog entity
+        workout_build_options = BucketManager().get_workouts()
+        return render_template('teacher_home.html', auth_config=auth_config, auth_list=auth_list,
+                               teacher_info=teacher_info, workout_titles=workout_build_options)
+    else:
+        return redirect('/login')
+
+
+@teacher_app.route('/class/<class_name>', methods=['GET', 'POST'])
+def teacher_class(class_name):
+    auth_config = CloudEnv().auth_config
+    if session.get('user_email', None):
+        teacher_email = session['user_email']
+        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email)).get()
+        class_instance = DataStoreManager(key_id=str(teacher_email)).get_classroom(class_name=class_name)
+        if class_instance:
+            teacher_classes = []
             if 'class_name' in class_instance:
                 if 'student_auth' in class_instance:
                     auth_method = class_instance['student_auth']
@@ -69,6 +97,7 @@ def teacher_home():
                     class_unit_list = class_instance['unit_list']
                 else:
                     class_unit_list = None
+
                 class_info = {
                     'class_id': class_instance.id,
                     'class_name': class_instance['class_name'],
@@ -77,20 +106,49 @@ def teacher_home():
                     'class_units': class_unit_list
                 }
                 teacher_classes.append(class_info)
-        teacher_info['current_units'] = current_units
-        teacher_info['expired_units'] = expired_units
-        teacher_info['classes'] = teacher_classes
+            teacher_info['classes'] = teacher_classes
 
-        # Get list of workouts from cloud bucket
-        workout_build_options = BucketManager().get_workouts()
-        return render_template('teacher_home.html', auth_config=auth_config, teacher_info=teacher_info,
-                               workout_titles=workout_build_options)
-    else:
-        return redirect('/login')
+            # Get all the units current instructor class
+            unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
+            unit_query.add_filter('id', '=', 'class_name')
+            unit_list = list(unit_query.fetch())
+
+            # Sort queried units into active and expired
+            active_units = []
+            expired_units = []
+            teacher_classes = []
+            if unit_list:
+                for unit in unit_list:
+                    summary = unit['summary']
+                    if 'workout_name' in unit:
+                        if 'expiration' in unit:
+                            creation_ts = unit['creation_timestamp']
+                            expire_ts = unit['workspace_settings']['expires']
+                            unit_info = {
+                                'unit_id': unit.key.name,
+                                'name': unit['summary']['name'],
+                                'timestamp': creation_ts,
+                                'expires': expire_ts,
+                            }
+                            if (int(time.time()) - (int(creation_ts) + (int(expire_ts) * 60 * 60 * 24))) < 0:
+                                active_units.append(unit_info)
+                            else:
+                                expired_units.append(unit_info)
+                        else:
+                            unit_info = {
+                                'unit_id': unit.key.name,
+                                'name': unit['summary']['name'],
+                                'timestamp':  unit['creation_timestamp'],
+                            }
+                            expired_units.append(unit_info)
+                teacher_info['current_info'] = sorted(active_units, key=lambda i: (i['timestamp']), reverse=True)
+                teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
+            return render_template('teacher_classroom.html', auth_config=auth_config, teacher_info=teacher_info)
+    abort(404)
 
 
-@teacher_app.route('/<workout_type>', methods=['GET'])
-def index(workout_type):
+@teacher_app.route('/build/<workout_type>', methods=['GET'])
+def build(workout_type):
     auth_config = CloudEnv().auth_config
     logger.info('Request for workout type %s' % workout_type)
     form = CreateWorkoutForm()

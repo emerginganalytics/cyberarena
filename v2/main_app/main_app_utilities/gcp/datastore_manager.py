@@ -40,6 +40,9 @@ class DataStoreManager:
             return list(query.fetch())
         return self.ds_client.query(kind=self.key_id)
 
+    def delete(self):
+        self.ds_client.delete(self.key)
+
     def get_servers(self):
         """Get servers from workout"""
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER.value)
@@ -48,7 +51,7 @@ class DataStoreManager:
 
     def get_workouts(self):
         """Get workouts from unit"""
-        query_workouts = self.ds_client.query(kind=DatastoreKeyTypes.CYBERGYM_WORKOUT)
+        query_workouts = self.ds_client.query(kind=DatastoreKeyTypes.WORKOUT)
         query_workouts.add_filter('unit_id', '=', self.key_id)
         return list(query_workouts.fetch())
 

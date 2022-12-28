@@ -10,7 +10,7 @@
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
-                <h2>Welcome, <span id="current-user"></span></h2>
+                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
             </li>
             <li class="nav-item">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
@@ -38,7 +38,7 @@
           initApp(auth_config).then(value => {
               enable_signout();
               // Set welcome banner
-              const welcome_nav = document.getElementById('current-user');
+              const welcome_nav = document.getElementById('banner');
               welcome_nav.innerHTML = value['display_name'];
               if (value['authorized'] === true){
                   teacher_email = value['email'];
@@ -76,7 +76,7 @@
                 </li>
                 <li class="nav-item">
                     {% if unit['build_type'] == "compute" %}
-                        
+                        <!-- TODO: Add unit controls -->
                     {% endif %}
                 </li>
                 <!-- Not sure if this is needed right now

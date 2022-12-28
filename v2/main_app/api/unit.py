@@ -42,7 +42,6 @@ class Unit(MethodView):
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    @instructor_required
     def post(self):
         user_email = session.get('user_email', None)
         recv_data = request.form
@@ -55,16 +54,16 @@ class Unit(MethodView):
         if not build_for_class:
             build_count = recv_data.get('build_count', None)
         else:
-            class_name = recv_data.get('target_class', None)
-            target_class = DataStoreManager(key_id=user_email).get_classroom(class_name=class_name)
+            class_id = recv_data.get('target_class', None)
+            target_class = DataStoreManager(key_type=DatastoreKeyTypes.CLASSROOM, key_id=class_id).get()
             if target_class:
-                build_count = len(target_class[0]['roster'])
+                build_count = len(target_class['roster'])
             else:
                 return self.http_resp(code=404).prepare_response()
-        # make sure that no running class already exists for fixed-arena
         if build_count and expire_datetime and build_file:
             unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
             build_spec = yaml.safe_load(unit_yaml)
+            build_spec['instructor_id'] = user_email
             expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
             build_spec['workspace_settings'] = {
                 'count': build_count,
@@ -72,6 +71,9 @@ class Unit(MethodView):
                 'student_emails': [],
                 'expires': expire_ts
             }
+            if build_for_class:
+                build_spec['class_id'] = class_id
+            build_spec['test'] = True  # TODO: Remove after testing
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
             build_spec_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
