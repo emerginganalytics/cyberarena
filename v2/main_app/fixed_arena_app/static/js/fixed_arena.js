@@ -32,20 +32,20 @@ function toggleServerControl(){
         var checked_stocs = $('input[name=stoc_id]:checked');
             for (let i=0, n=target_buttons.length; i < n; i++){
                 if (target_buttons[i].id === 'deleteStocBtn') {
+                    let btnParent = target_buttons[i].parentElement;
                     let msg = '';
                     if (!checked_stocs.length === 1){
-                        let btnParent = target_buttons[i].parentElement;
                         if (checked_stocs.length > 1) {
                             msg = 'Cannot delete multiple!';
                         } else if (!checked_stocs.length) {
                             msg = 'Must select a build!';
                         }
-                        btnParent.setAttribute('title', msg);
-                        btnParent.setAttribute('data-original-title', msg);
-                        btnParent.setAttribute('tooltip', 'update');
-                        btnParent.setAttribute('tooltip', 'show');
-                        continue;
                     }
+                    btnParent.setAttribute('title', msg);
+                    btnParent.setAttribute('data-original-title', msg);
+                    btnParent.setAttribute('tooltip', 'update');
+                    btnParent.setAttribute('tooltip', 'show');
+                    continue;
                 }
                 enable_object(target_buttons[i].id, this.checked);
             } // end for

@@ -47,6 +47,8 @@ class UnitSchema(Schema):
     id = fields.Str(required=True)
     creation_timestamp = fields.Float()
     version = fields.Str(required=True)
+    class_id = fields.Str(required=False)
+    instructor_id = fields.Str(required=True)
     workspace_settings = fields.Nested('WorkspaceSettingsSchema')
     build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
     summary = fields.Nested('CyberArenaSummarySchema', required=True)
