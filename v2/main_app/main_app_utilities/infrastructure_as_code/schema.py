@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields, validate
+import uuid
 
 from main_app_utilities.globals import BuildConstants
 
@@ -188,11 +189,22 @@ class AssessmentQuestionSchema(Schema):
 class EscapeRoomSchema(Schema):
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(required=False, description="Answer from the top level-question")
+    responses = fields.List(fields.Str(), required=True, default=[],
+                            description="Records the team's attempts to answer the question and escape")
+    escaped = fields.Bool(required=True, default=False, description="Whether or not the team has successfully escaped")
+    time_limit = fields.Int(required=True, default=3600, description="Number of seconds the team has to escape from "
+                                                                     "the room")
+    start_time = fields.Float(description="When the escape room started. This will be used to calculate remaining time")
+    remaining_time = fields.Float(required=False)
     puzzles = fields.Nested('PuzzleSchema', many=True)
 
 
 class PuzzleSchema(Schema):
+    id = fields.Str(required=True, default=uuid.uuid4(), description="An ID to use when referring to specific puzzles")
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
+    responses = fields.List(fields.Str(), required=True, default=[],
+                            description="Records the team's attempts to answer the question and escape")
+    correct = fields.Bool(required=True, default=False, description="Whether the puzzle response is correct")
     reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")
