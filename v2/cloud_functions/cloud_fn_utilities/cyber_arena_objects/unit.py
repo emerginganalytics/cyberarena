@@ -103,6 +103,9 @@ class Unit:
                     }
                     processed_web_applications.append(processed_web_application)
                 workout_record['web_applications'] = processed_web_applications
+            escape_room_spec = self.unit.get('escape_room', None)
+            if escape_room_spec:
+                workout_record['escape_room'] = escape_room_spec
             if registration_required:
                 workout_record['student_email'] = student_emails[i]
                 workout_record['student_name'] = student_names[i]

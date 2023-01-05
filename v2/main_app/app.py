@@ -24,6 +24,7 @@ from api.agency import Agency
 from api.agency_telemetry import AgencyTelemetry
 from api.iot_device import IoTDevice
 from api.user import Users
+from api.escape_room import EscapeRoomUnit, EscapeRoomWorkout
 
 # --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
@@ -280,6 +281,9 @@ register_api(view=Agency, endpoint='agency', url='/api/agency/', pk='build_id')
 register_api(view=AgencyTelemetry, endpoint='telemetry', url='/api/agency/telemetry/', pk='build_id')
 register_api(view=AttackSpecs, endpoint='templates', url='/api/agency/templates/', pk='build_id')
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
+register_api(view=EscapeRoomUnit, endpoint='escape-room', url='/api/escape-room/', pk='build_id')
+register_api(view=EscapeRoomWorkout, endpoint='team', url='/api/escape-room/team/', pk='build_id')
+
 
 
 if __name__ == '__main__':
