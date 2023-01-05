@@ -21,10 +21,28 @@
     5. Compute Engine API (In-Use IP Addresses) - MCB * 1
     6. Compute Engine API (CPUs) - MCB * 3
     7. Cloud Build API (Concurrent Builds) - 50
+6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/
 
 ## Deployment
-Run `python setup.py` and follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud
+Create a new project in PyCharm at the root of this directory, and then set `build_files`, `cloud_functions`, and `main_app` directories as _sources root_ in PyCharm (i.e., right click --> mark directory --> sources root). Open `setup.py` and create a new configuration to run `setup.py`. This will ensure the sources directories are easily recognized. Follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud
 resources and running updates.
+
+### Bulk Deployment
+Multiple projects can be updated by running bulk deployment. To do so, you need to provide a settings file named 
+`.bulk_settings.yaml` in the same directory as `setup.py`. This file should be included in .gitignore. The yaml specification
+for this file should be:
+```yaml
+# Include the list of functions you are wanting to bulk deploy. They may be any of the following
+deploy_functions:
+  - CLOUD_FUNCTION
+  - MAIN_APP
+  - BUILD_SPECS
+  - ENV
+# Include the list of projects to deploy. The list should include the project name and filename of the credential
+gcp_projects:
+  - name: 'sample-project'
+    credential: 'C:\Users\jdoe\.gcp\sample-project.json'
+```
 
 ## Architecture
 The Cyber Arena includes two main application. First, the _main_app_ provides the web application for instructors and students

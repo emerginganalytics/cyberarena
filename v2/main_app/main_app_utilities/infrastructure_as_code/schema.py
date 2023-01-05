@@ -1,4 +1,5 @@
 from marshmallow import Schema, fields, validate
+import uuid
 
 from main_app_utilities.globals import BuildConstants
 
@@ -47,6 +48,8 @@ class UnitSchema(Schema):
     id = fields.Str(required=True)
     creation_timestamp = fields.Float()
     version = fields.Str(required=True)
+    class_id = fields.Str(required=False)
+    instructor_id = fields.Str(required=True)
     workspace_settings = fields.Nested('WorkspaceSettingsSchema')
     build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
     summary = fields.Nested('CyberArenaSummarySchema', required=True)
@@ -185,12 +188,24 @@ class AssessmentQuestionSchema(Schema):
 
 class EscapeRoomSchema(Schema):
     question = fields.Str(required=True, description="The door to open in the escape room")
-    answer = fields.Str(required=False, description="Answer from the top level-question")
+    answer = fields.Str(description="Answer from the top level-question")
+    responses = fields.List(fields.Str(), missing=[], description="Records the team's attempts to answer the question "
+                                                                  "and escape")
+    escaped = fields.Bool(missing=False, description="Whether or not the team has successfully escaped")
+    time_limit = fields.Int(missing=3600, description="Number of seconds the team has to escape from the room")
+    start_time = fields.Float(missing=0.0, description="When the escape room started. This will be used to calculate "
+                                                       "remaining time")
+    remaining_time = fields.Float(required=False)
     puzzles = fields.Nested('PuzzleSchema', many=True)
 
 
 class PuzzleSchema(Schema):
-    type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
+    id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific puzzles")
+    type = fields.Str(missing=BuildConstants.QuestionTypes.INPUT,
+                      validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
+    responses = fields.List(fields.Str(), missing=[],
+                            description="Records the team's attempts to answer the question and escape")
+    correct = fields.Bool(missing=False, description="Whether the puzzle response is correct")
     reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")

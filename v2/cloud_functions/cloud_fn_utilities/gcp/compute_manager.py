@@ -271,7 +271,7 @@ class ComputeManager:
         understand, develop, and maintain.
         """
         metadata = {'items': []}
-        if self.server_spec.get('metdata', None):
+        if self.server_spec.get('metadata', None):
             metadata['items'].append(self.server_spec['metadata'])
         if self.server_spec.get('sshkey', None):
             metadata['items'].append({"key": "ssh-keys", "value": self.server_spec['sshkey']})

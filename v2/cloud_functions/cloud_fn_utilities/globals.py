@@ -52,7 +52,7 @@ class BuildConstants:
     class MachineImages:
         GUACAMOLE = "image-labentry"
         FORTIMANAGER = "image-fortimanager"
-        AGENT = 'image-cybergym-kali'
+        AGENT = 'redteam-network-ubuntu'  # 'redteam-network-kali'
 
     class AssessmentTypes(str, Enum):
         PERCENTAGE = "percentage"
@@ -125,6 +125,7 @@ class PubSub:
         SNAPSHOT = 6
         RESTORE = 7
         NUKE = 8
+        START_ESCAPE_ROOM_TIMER = 9
 
     class CyberArenaObjects(Enum):
         FIXED_ARENA = 1

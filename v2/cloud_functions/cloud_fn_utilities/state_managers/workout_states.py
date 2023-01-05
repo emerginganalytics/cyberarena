@@ -24,10 +24,9 @@ class WorkoutStateManager:
     OTHER_VALID_TRANSITIONS = [
         (WorkoutStates.START.value, WorkoutStates.DELETING_SERVERS.value),
         (WorkoutStates.START.value, WorkoutStates.BUILDING_NETWORKS.value),
-        (WorkoutStates.START.value, WorkoutStates.COMPLETED_NETWORKS.value),
         (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_SERVERS.value),
-        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
-        (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.READY.value)
+        (WorkoutStates.BUILDING_SERVERS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
+        (WorkoutStates.BUILDING_FIREWALL_RULES.value, WorkoutStates.COMPLETED_FIREWALL_RULES.value)
     ]
 
     MAX_WAIT_TIME = 300
@@ -149,10 +148,13 @@ class WorkoutStateManager:
                 existing_state in [self.s.COMPLETED_ROUTES.value, self.s.COMPLETED_SERVERS.value,
                                    self.s.COMPLETED_NETWORKS.value, self.s.BUILDING_FIREWALL.value]:
             return True
-        elif new_state == self.s.READY.value and existing_state in [self.s.COMPLETED_SERVERS.value]:
+        elif new_state == self.s.READY.value and existing_state in [self.s.COMPLETED_SERVERS.value,
+                                                                    self.s.COMPLETED_FIREWALL_RULES.value]:
             return True
         elif new_state in self.COMPLETION_STATES and existing_state \
                 not in [self.s.DELETED.value, self.s.BROKEN.value]:
+            return True
+        elif new_state == self.s.DELETING_SERVERS.value and existing_state in [self.s.READY.value, self.s.RUNNING.value]:
             return True
         elif (existing_state, new_state) in self.OTHER_VALID_TRANSITIONS:
             return True

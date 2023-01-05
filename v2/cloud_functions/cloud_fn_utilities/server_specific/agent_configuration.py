@@ -72,7 +72,8 @@ class Agent(object):
             build_id=self.build_id,
             build_type=self.build_type,
             telemetry_url=f'{self.env.main_app_url}/api/agency/telemetry/',
-            agent_subscription=self.agent_subscription
+            agent_subscription=self.agent_subscription,
+            project=self.env.project,
         )
 
         # Setup server config
@@ -109,6 +110,7 @@ class AttackerStartup:
         'BUILD_TYPE={build_type}\n' \
         'TELEMETRY_URL={telemetry_url}\n' \
         'AGENT_SUBSCRIPTION={agent_subscription}\n' \
+        'PROJECT={project}\n' \
         'EOF'
 
 # [ eof ]

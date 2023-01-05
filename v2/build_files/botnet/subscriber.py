@@ -18,7 +18,8 @@ class Subscriber:
         self.env = CloudEnv()
         self.timeout = 5.0
         self.subscriber = pubsub_v1.SubscriberClient()
-        self.subscription_path = self.subscriber.subscription_path(self.env.project, self.env.agent_subscription)
+        self.subscription_path = self.subscriber.subscription_path(
+            self.env.project, self.env.agent_subscription)
 
     def callback(self, message):
         print(f'Received message: {message}')

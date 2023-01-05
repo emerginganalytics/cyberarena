@@ -9,7 +9,7 @@ from main_app_utilities.globals import PubSub, WorkoutStates
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Andrew Bomberger"]
+__credits__ = ["Andrew Bomberger", "Philip Huff"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"

@@ -1,0 +1,8 @@
+deploy_functions:
+  - CLOUD_FUNCTION
+  - MAIN_APP
+gcp_projects:
+  - name: 'ualr-cybersecurity'
+    credential: 'C:\Users\pdhuff\.gcp\ualr-cybersecurity.json'
+  - name: 'trojan-cybergym'
+    credential: 'C:\Users\pdhuff\.gcp\trojan-cybergym.json'

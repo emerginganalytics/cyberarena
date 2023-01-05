@@ -204,6 +204,7 @@ class PubSub:
         SNAPSHOT = 6
         RESTORE = 7
         NUKE = 8
+        START_ESCAPE_ROOM_TIMER = 9
 
     class CyberArenaObjects(Enum):
         FIXED_ARENA = 1

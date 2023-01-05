@@ -7,14 +7,14 @@ import json
 
 class PubSubManager:
     def __init__(self):
-        creds = '/home/walker/Downloads/ualr-cybersecurity-38b2dd265fa9.json'
+        creds = ''
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = creds
         runtimeconfig_client = runtimeconfig.Client()
         myconfig = runtimeconfig_client.config('cybergym')
         self.project = myconfig.get_variable('project').value.decode("utf-8")
         self.region = myconfig.get_variable('region').value.decode("utf-8")
         self.zone = myconfig.get_variable('zone').value.decode("utf-8")
-        self.topic = 'test'#os.environ['AGENT_TELEMETRY']
+        self.topic = 'test'
         self.publisher = pubsub_v1.PublisherClient()
         self.topic_path = self.publisher.topic_path(self.project, self.topic)
 
@@ -22,4 +22,3 @@ class PubSubManager:
         print(self.topic_path, self.project)
         future = self.publisher.publish(self.topic_path, data=output)
         print(f'Published message id {future.result()}')
-        #self.publisher.publish(self.topic_path, data=output)

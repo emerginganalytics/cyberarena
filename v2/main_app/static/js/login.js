@@ -115,8 +115,8 @@ function initApp(authConfig){
             }
             resolve(ret_data);
           }
-        })
+        });
       }
-    })
-  })
+    });
+  });
 }

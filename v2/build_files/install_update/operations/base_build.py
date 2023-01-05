@@ -22,14 +22,14 @@ class BaseBuild:
     def run(self):
         confirmation = str(input("Do you want to enable the necessary APIs at this time? (Y/n): ")).upper() \
             if not self.suppress else "Y"
-        if confirmation == "Y":
+        if confirmation != "N":
             for item in ShellCommands.EnableAPIs:
                 print(f"Running: {item.value}")
                 ret = subprocess.run(item.value, capture_output=True, shell=True)
 
         confirmation = str(input("Do you want to create the service account at this time? (Y/n): ")).upper() \
             if not self.suppress else "Y"
-        if confirmation == "Y":
+        if confirmation != "N":
             name = f'projects/{self.project}'
             response = self.service.projects().serviceAccounts().list(name=name).execute()
             service_account_exists = False
@@ -47,7 +47,7 @@ class BaseBuild:
 
         confirmation = str(input("Do you want to create pubsub topics at this time? (Y/n): ")).upper() \
             if not self.suppress else "Y"
-        if confirmation == "Y":
+        if confirmation != "N":
             for item in ShellCommands.PubSubTopics:
                 print(f"Running: {item.value}")
                 ret = subprocess.run(item.value, capture_output=True, shell=True)

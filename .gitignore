@@ -29,3 +29,4 @@ admin_scripts/quick_command.py
 /v2/build_files/specs/plaintext/
 admin_scripts/reports/
 /admin_scripts/ryan_scripts/
+/v2/.bulk_settings.yaml

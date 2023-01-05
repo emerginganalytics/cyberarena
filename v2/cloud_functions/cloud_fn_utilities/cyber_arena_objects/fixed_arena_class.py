@@ -101,6 +101,7 @@ class FixedArenaClass:
                     agent['fixed_arena_class_id'] = self.fixed_arena_class_id
                     agent['fixed_arena_id'] = self.fixed_arena_class['parent_id']
                     agent['nics'] = self._get_workspace_network_config()
+                    agent['nics'][0]['external_nat'] = True
                     agent_name = f'{ws_id}-{agent["name"]}'
                     self.ds.put(agent, key_type=DatastoreKeyTypes.SERVER, key_id=agent_name)
                     if self.debug:
@@ -253,8 +254,8 @@ class FixedArenaClass:
         return servers
 
     def _get_fixed_arena_workspace_ids(self):
-        workspaces = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE
-                                                                , build_id=self.fixed_arena_class['id'])
+        workspaces = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE,
+                                                       build_id=self.fixed_arena_class['id'])
         workspace_ids = []
         for workspace in workspaces:
             workspace_ids.append(workspace.key.name)

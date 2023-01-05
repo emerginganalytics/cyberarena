@@ -18,11 +18,9 @@
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a href="{{ url_for(fixed_arena_app.home) }}" class="nav-link text-center">STOC</a>
+                    <a href="{{ url_for('fixed_arena.home') }}" class="nav-link text-center">STOC</a>
                 </li>
             {% endif %}
-            <!-- TODO: if not student, button to send to teacher home -->
-            <!-- TODO: if admin, button to send to admin home -->
         </ul>
     </div>
     <div class="navbar-nav ml-auto">
@@ -44,6 +42,9 @@
           };
           initApp(auth_config).then(value => {
             enable_signout();
+            if (value['authorized'] === true){
+                teacher_email = value['email'];
+            }
             if (value['admin'] === true){
               var admin_button = document.createElement("a");
               admin_button.href = "/admin/home";
@@ -244,7 +245,7 @@
                                                 <input id="add-attacker" name="add_attacker" type="checkbox">
                                                 <label for="add-attacker">Add Attacker Machines</label>
                                             </div>
-                                            <div class="form-">
+                                            <div class="form-group">
                                                 <button type="submit" class="btn-fa w-100" id="submitCreateClass">Submit</button>
                                             </div>
                                         </form>
