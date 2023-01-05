@@ -52,26 +52,36 @@ class EscapeRoomUnit(MethodView):
 
     def get(self, build_id=None):
         if build_id:
-            workouts = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=build_id).get_workouts()
+            workouts = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id) \
+                .get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
             if workouts:
                 return self.http_resp(code=200, data=workouts).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    def post(self, recv_data=None):
+    def post(self, data=None):
         """
         Creates a new unit of escape rooms
+        Args:
+            data (str): dictionary of build parameters
+
         Returns: HTTP Response
 
         """
         if not self.debug:
-            recv_data = request.form
+            data = request.form
             user_email = session.get('user_email', None)
-        expires = recv_data.get('expires', 2)
-        build_file = recv_data.get('build_file', None)
-        build_count = recv_data.get('build_count', 1)
+        else:
+            user_email = data.get('user_email', None)
+        expires = data.get('expires', 2)
+        build_file = data.get('build_file', None)
+        build_count = data.get('build_count', 1)
 
-        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
+        try:
+            unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
+        except FileNotFoundError:
+            return self.http_resp(code=404, msg=f"The specification for {build_file} does not exist in the cloud "
+                                                f"project.")
         build_spec = yaml.safe_load(unit_yaml)
         build_spec['instructor_id'] = user_email
         build_spec['workspace_settings'] = {
@@ -80,32 +90,40 @@ class EscapeRoomUnit(MethodView):
             'student_emails': [],
             'expires': (datetime.now() + timedelta(days=expires)).timestamp()
         }
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=self.debug)
         build_spec_to_cloud.commit()
         build_id = build_spec_to_cloud.get_build_id()
         return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
 
-    def put(self, build_id):
+    def put(self, build_id, data=None):
         """
         Start the timer and the workouts similar to the workout functionality.
-        Returns: HTTP Response
+        Args:
+            build_id (str):
+            data (dict):
+
+        Returns: HTTP Response with data containing a list of all workouts in the unit with the updated escape room
+            parameters.
 
         """
         if build_id:
-            args = request.json
+            if not self.debug:
+                args = request.json
+            else:
+                args = data
             unit_action = args.get('unit_action', None)
             time_limit = args.get('time_limit', 3600)
             if unit_action == PubSub.Actions.START_ESCAPE_ROOM_TIMER.value:
-                workouts = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=build_id).get_workouts()
+                ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id)
+                workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
                 if workouts:
                     for workout in workouts:
-                        escape_room_spec: EscapeRoomSchema = EscapeRoomSchema().load(workout['escape_room'])
-                        escape_room_spec.start_time = datetime.now().timestamp() + 60
-                        escape_room_spec.time_limit = time_limit
-                        workout['escape_room'] = escape_room_spec
-                        ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout.key)
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 60
+                        workout['escape_room']['time_limit'] = time_limit
+                        ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)
-                    return self.http_resp(code=200).prepare_response()
+                    workouts = workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
+                    return self.http_resp(code=200, data=workouts).prepare_response()
                 return self.http_resp(code=404).prepare_response()
             else:
                 self.http_resp(code=501, msg="The requested escape room action is not supported.").prepare_response()
@@ -131,7 +149,7 @@ class EscapeRoomWorkout(MethodView):
         self.http_resp = HttpResponse
         self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.env = CloudEnv()
-        self.puzzles: list = []
+        self.workout: dict = {}
         self.debug = debug
 
     def get(self, build_id=None):
@@ -146,56 +164,79 @@ class EscapeRoomWorkout(MethodView):
         if build_id:
             workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
             if workout:
-                escape_room: EscapeRoomSchema = EscapeRoomSchema().load(workout['escape_room'])
                 current_time = datetime.now().timestamp()
-                escape_room.remaining_time = escape_room.time_limit - (current_time - escape_room.start_time)
-                workout['escape_room'] = escape_room
+                time_limit = workout['escape_room']['time_limit']
+                start_time = workout['escape_room']['start_time']
+                workout['escape_room']['remaining_time'] = time_limit - (current_time - start_time)
                 return self.http_resp(code=200, data=workout).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    def put(self, build_id: str = None, question_id: int = None, response: str = None):
+    def put(self, build_id: str = None, escape_attempt: bool = False, question_id: int = None, response: str = None):
         """
         Team submits responses for checking on both the puzzles and their overall escape room
         Args:
             build_id (str): Workout ID
+            escape_attempt (bool): Whether the response represents an escape attempt. If this is provided, the
+                question_id can be null
             question_id (str): The UUID of the question being submitted
             response (str): Provided response for the indicated question.
+
+        Returns: HTTP Response
+
+        """
+        if escape_attempt:
+            question_id = 1
+        if build_id and question_id and response:
+            ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id)
+            self.workout = ds_workout.get()
+            if self.workout:
+                current_time = datetime.now().timestamp()
+                time_limit = self.workout['escape_room']['time_limit']
+                start_time = self.workout['escape_room']['start_time']
+                self.workout['escape_room']['remaining_time'] = time_limit - (current_time - start_time)
+                if self.workout['escape_room']['remaining_time'] > 0:
+                    if escape_attempt:
+                        self._evaluate_escape_room_question(response)
+                    else:
+                        self._evaluate_puzzle_question(question_id, response)
+                    ds_workout.put(self.workout)
+                    return self.http_resp(code=200, data=self.workout).prepare_response()
+                else:
+                    return self.http_resp(code=404, msg="The escape room has no time remaining.")
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
+
+    def _evaluate_escape_room_question(self, response: str):
+        """
+        Evaluate the final escape room question to determine if it was answered correctly.
+        Args:
+            response (str): escape room attempt
 
         Returns: None
 
         """
-        if build_id and question_id and response:
-            ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id)
-            workout = ds_workout.get()
-            if workout:
-                escape_room: EscapeRoomSchema = EscapeRoomSchema().load(workout['escape_room'])
-                current_time = datetime.now().timestamp()
-                escape_room.remaining_time = escape_room.time_limit - (current_time - escape_room.start_time)
-                if escape_room.remaining_time > 0:
-                    self.puzzles = escape_room.puzzles
-                    self._evaluate_question(question_id, response)
-                workout['escape_room'] = escape_room
-                ds_workout.put(workout)
-                return self.http_resp(code=200, data=workout).prepare_response()
-            return self.http_resp(code=404).prepare_response()
-        return self.http_resp(code=400).prepare_response()
+        for puzzle in self.workout['escape_room']['puzzles']:
+            if not puzzle['correct']:
+                return
+        self.workout['escape_room']['responses'].append(response)
+        if str.upper(response) == str.upper(self.workout['escape_room']['answer']):
+            self.workout['escape_room']['escaped'] = True
 
-    def _evaluate_question(self, question_id: int, response: str):
+
+    def _evaluate_puzzle_question(self, question_id: int, response: str):
         """
         Loop through the class puzzles object for the correct question and determine if the response is correct.
         Args:
             question_id (int):
             response (str):
 
-        Returns:
+        Returns: None
 
         """
 
-        for item in self.puzzles:
-            puzzle: PuzzleSchema = PuzzleSchema().load(item)
-            if puzzle.id == question_id and not puzzle.correct:
-                puzzle.responses.append(response)
-                if puzzle.answer == response:
-                    puzzle.correct = True
-        return
+        for puzzle in self.workout['escape_room']['puzzles']:
+            if puzzle['id'] == question_id and not puzzle['correct']:
+                puzzle['responses'].append(response)
+                if puzzle['answer'] == response:
+                    puzzle['correct'] = True

@@ -148,10 +148,13 @@ class WorkoutStateManager:
                 existing_state in [self.s.COMPLETED_ROUTES.value, self.s.COMPLETED_SERVERS.value,
                                    self.s.COMPLETED_NETWORKS.value, self.s.BUILDING_FIREWALL.value]:
             return True
-        elif new_state == self.s.READY.value and existing_state in [self.s.COMPLETED_SERVERS.value]:
+        elif new_state == self.s.READY.value and existing_state in [self.s.COMPLETED_SERVERS.value,
+                                                                    self.s.COMPLETED_FIREWALL_RULES.value]:
             return True
         elif new_state in self.COMPLETION_STATES and existing_state \
                 not in [self.s.DELETED.value, self.s.BROKEN.value]:
+            return True
+        elif new_state == self.s.DELETING_SERVERS.value and existing_state in [self.s.READY.value, self.s.RUNNING.value]:
             return True
         elif (existing_state, new_state) in self.OTHER_VALID_TRANSITIONS:
             return True

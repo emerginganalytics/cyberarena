@@ -62,7 +62,7 @@ class BuildSpecToCloud:
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value,
                                                       key_id=self.build_id)
             self.action = PubSub.BuildActions.FIXED_ARENA_CLASS.value
-        elif self.build_type == BuildConstants.BuildType.UNIT.value:
+        elif self.build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
             self.build_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             cyber_arena_spec['id'] = self.build_id
             cyber_arena_spec = UnitSchema().load(cyber_arena_spec)
