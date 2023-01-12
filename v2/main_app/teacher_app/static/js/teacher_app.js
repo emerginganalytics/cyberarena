@@ -192,6 +192,12 @@ function deleteClass(class_id){
             }
         });
 }
+
+function deleteStudent(class_id, student_name){
+    $('#modal_' + class_id).modal('toggle');
+    // TODO: Send delete request for specific student
+}
+
 function sleep(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
 }

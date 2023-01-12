@@ -55,7 +55,7 @@ class DataStoreManager:
         query_workouts.add_filter('unit_id', '=', self.key_id)
         return list(query_workouts.fetch())
 
-    def get_classroom(self, class_name=None):
+    def get_classrooms(self, class_name=None):
         """Queries for corresponding cybergym-class"""
         query_classroom = self.ds_client.query(kind=DatastoreKeyTypes.CLASSROOM.value)
         query_classroom.add_filter('teacher_email', '=', self.key_id)

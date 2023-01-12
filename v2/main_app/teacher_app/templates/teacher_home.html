@@ -22,11 +22,18 @@
             {% endif %}
         </ul>
     </div>
-    <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
-        <button id="banner" class="nav-link btn top-navbar-btn disabled no-select" disabled style="width: fit-content"></button>
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+     <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal" data-target="modalContactUs">Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 {% block content %}
@@ -118,7 +125,7 @@
                                                            name="class_id"/>
                                                 </td>
                                                 <td>
-                                                    <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/class/{{ class_item.name }}">
+                                                    <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/class/{{ class_item.id }}">
                                                         <i class="fa fa-laptop fa-lg icon-light"></i> View Class</a>
                                                 </td>
                                                 <td>{{ class_item.name }}</td>
@@ -243,7 +250,7 @@
                         </div>
                     </div>
                     {% endfor %}
-                </div>
+                </div> <!-- End Assignments container-->
             </div>
         </div>
      </div>

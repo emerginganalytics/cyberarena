@@ -20,7 +20,7 @@ __status__ = "Testing"
 
 class Agency(MethodView):
     """
-    API to manage the simulated Botnet; Specifically handlers the networ injects
+    API to manage the simulated Botnet; Specifically handler the network injects
     Each method, requires a build_id that either refers to:
         - A specific attack (GET, PUT),
         - A fixed-arena to get all attack history from (GET)
@@ -120,13 +120,126 @@ class Agency(MethodView):
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST').prepare_response()
 
-    @admin_required
-    def delete(self, build_id=None):
-        """Not needed for current implementations"""
-        return self.http_resp(code=405).prepare_response()
 
-    def put(self, build_id=None):
-        """Not needed for current implementations"""
-        return self.http_resp(code=405).prepare_response()
+class AgencyTelemetry(MethodView):
+    """
+    API to manage the simulated Botnet; Specifically handlers the network injects
+    Each method, requires a build_id that either refers to:
+        - A specific attack (GET, PUT),
+        - A fixed-arena to get all attack history from (GET)
+        - An attack template to build (POST)
+    Only available for users with instructor or greater permissions
+    """
+
+    def __init__(self):
+        self.kind = DatastoreKeyTypes.CYBERARENA_ATTACK.value
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.http_resp = HttpResponse
+        self.ds = DataStoreManager
+
+    def get(self, build_id=None):
+        """Retrieve data on either single inject or list of injects for fixed-arena.
+           If state is supplied, view returns state of single inject instead"""
+        return self.http_resp(code=404).prepare_response()
+
+    def post(self):
+        """Handles inject creation requests
+            build_id: id of inject to use
+            parent_id: id of parent to send inject to
+            mode: inject types [attack, weakness]
+            args: arguments used to build script
+        """
+        recv_data = request.json
+        # Parse Form data
+        build_id = recv_data.get('build_id', None)
+        parent_id = recv_data.get('parent_id', None)
+        build_type = recv_data.get('build_type', None)
+
+        # Query for attack object that was created during the initial attack request
+        attack_obj = self.ds(key_type=self.kind, key_id=build_id).get()
+        log_data = recv_data.get('data', None)
+
+        if build_id and parent_id and log_data:
+            # Validate build and send to datastore
+            attack_obj['logs'] = attack_obj['logs'].append(log_data)
+            attack_obj['errors'] = recv_data.get('errors', 'None')
+            attack_obj['status'] = recv_data.get('status', '500')
+            attack_obj['mode'] = recv_data.get('mode', 'attack')
+            self.ds().put(obj=attack_obj)
+            return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=409, msg='UNABLE TO PROCESS REQUEST').prepare_response()
+
+
+class AttackSpecs(MethodView):
+    """
+        API class to handle requests for specific attack specs.
+        GET: Returns single attack specification
+        POST: Takes input filter string and returns list of all specifications that match
+    """
+    decorators = [instructor_required]
+
+    def __init__(self):
+        self.kind = DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value
+        self.http_resp = HttpResponse
+
+    def get(self, build_id=None):
+        """
+        :param build_id:
+        :return:
+        """
+        if build_id:
+            attack_spec = DataStoreManager(key_type=self.kind, key_id=build_id).get()
+            if attack_spec:
+                return json.dumps({'data': attack_spec})
+            return self.http_resp(code=404).prepare_response()
+        else:
+            attack_specs_query = DataStoreManager(key_id=build_id).query()
+            attack_specs = list(attack_specs_query.fetch())
+            if attack_specs:
+                return self.http_resp(code=200, data={'data': attack_specs}).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+
+    def post(self):
+        """Takes filter items and returns a filtered template list
+         Expected filters:
+            - attack_name
+            - attack_type
+            - mitre_attack
+            - mode
+        """
+        recv_data = request.json
+        attack_specs = DataStoreManager(key_id=self.kind).query()
+        attack_specs = list(attack_specs.fetch())
+
+        filtered_specs = []
+        if attack_specs:
+            for spec in attack_specs:
+                check = self.apply_filter(obj=spec, filters=recv_data)
+                if check:
+                    filtered_specs.append(spec)
+        if filtered_specs:
+            return self.http_resp(code=200, data={'data': filtered_specs}).prepare_response()
+        return self.http_resp(code=404).prepare_response()
+
+    @staticmethod
+    def apply_filter(obj=None, filters=None):
+        attack_name = filters.get('attack_name', None)
+        attack_type = filters.get('attack_type', None)
+        mode = filters.get('mode', None)
+        mitre_attack = filters.get('mitre_attack', None)
+        # Apply filters
+        if attack_name:
+            if attack_name.lower() not in obj['attack_name'].lower():
+                return False
+        if attack_type:
+            if attack_type.lower() not in obj['attack_type'].lower():
+                return False
+        if mode:
+            if mode.lower() not in obj['mode'].lower():
+                return False
+        if mitre_attack:
+            if mitre_attack != obj['mitre_attack']:
+                return False
+        return True
 
 # [ eof ]

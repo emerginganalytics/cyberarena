@@ -19,9 +19,7 @@ from api.fixed_arena_class import FixedArenaClass
 from api.fixed_arena_workspace import FixedArenaWorkspace
 from api.unit import Unit
 from api.workout import Workout
-from api.attack_specs import AttackSpecs
-from api.agency import Agency
-from api.agency_telemetry import AgencyTelemetry
+from api.agency import Agency, AgencyTelemetry, AttackSpecs
 from api.iot_device import IoTDevice
 from api.user import Users
 
@@ -280,7 +278,6 @@ register_api(view=Agency, endpoint='agency', url='/api/agency/', pk='build_id')
 register_api(view=AgencyTelemetry, endpoint='telemetry', url='/api/agency/telemetry/', pk='build_id')
 register_api(view=AttackSpecs, endpoint='templates', url='/api/agency/templates/', pk='build_id')
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)
