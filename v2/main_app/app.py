@@ -19,9 +19,7 @@ from api.fixed_arena_class import FixedArenaClass
 from api.fixed_arena_workspace import FixedArenaWorkspace
 from api.unit import Unit
 from api.workout import Workout
-from api.attack_specs import AttackSpecs
-from api.agency import Agency
-from api.agency_telemetry import AgencyTelemetry
+from api.agency import Agency, AgencyTelemetry, AttackSpecs
 from api.iot_device import IoTDevice
 from api.user import Users
 from api.escape_room import EscapeRoomUnit, EscapeRoomWorkout
@@ -283,7 +281,6 @@ register_api(view=AttackSpecs, endpoint='templates', url='/api/agency/templates/
 register_api(view=Users, endpoint='user', url='/api/user', pk='user_id')
 register_api(view=EscapeRoomUnit, endpoint='escape-room', url='/api/escape-room/', pk='build_id')
 register_api(view=EscapeRoomWorkout, endpoint='team', url='/api/escape-room/team/', pk='build_id')
-
 
 
 if __name__ == '__main__':

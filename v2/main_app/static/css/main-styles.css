@@ -1,7 +1,19 @@
-/*
- main-color: #1c2538
- main-subcolor: #161e2d
-*/
+:root {
+    --main-color: #1c2538;
+    --subcolor: #161e2d;
+    --marine-blue: #1c2538;
+    --muted-marine-blue: #161e2d;
+    --maroon: #6e2639;
+    --mint: #00bf78;
+    --grass-green: #1d8037;
+    --running: #1d8037;
+    --stopped: #838683;
+    --deleted: #000000;
+    --transition: #b3be27;
+    --python-yellow: #ffd343;
+    --python-blue: #2b5b84;
+}
+
 /* General Styles */
 body, html {
     height: 100%;
@@ -116,7 +128,7 @@ footer p {
     color: black;
 }
 footer a:hover {
-    color: var(--main_color, #6e2639);
+    color: var(--maroon, #6e2639);
     text-decoration: none;
 }
 
@@ -131,7 +143,7 @@ footer a:hover {
 
 /* Main Navbar styles */
 .top-navbar {
-    background: #1c2538;
+    background: var(--main-color);
     color: #ffffff;
     border-bottom: #535353 solid 0.1vh;
     box-shadow: 1px 1px 10px #000000;
@@ -140,7 +152,7 @@ footer a:hover {
     padding-right: 10px;
 }
 .btn.top-navbar-btn {
-    background-color: #1c2538;
+    background-color: var(--main-color);
     color: white;
     width: 100%;
     margin-right: 10px;
@@ -149,10 +161,10 @@ footer a:hover {
     background-color: whitesmoke;
     color: black;
 }
-.btn.top-navbar-btn:last-child {
-    background-color: #1d8037;
+.btn.top-navbar-btn#sign-out {
+    background-color: var(--grass-green);
 }
-.btn.top-navbar-btn:last-child:hover {
+.btn.top-navbar-btn#sign-out:hover {
     background-color: whitesmoke;
     color: black;
 }
@@ -166,7 +178,7 @@ footer a:hover {
 /* Sidebar styles */
 .nav-sidebar {
     padding-top: 1.5rem;
-    background-color: #161e2d;
+    background-color: var(--subcolor,#161e2d);
 }
 @media (min-width: 768px) {
     .nav-sidebar {
@@ -224,28 +236,6 @@ footer a:hover {
   }
 }
 
-
-/* Nav link styles: Subject to change in future iterations*/
-
-/*
-.nav-pills .nav-link, .dropright .nav-link {
-    transition: background-color 0.3s ease;
-    border: none;
-    border-radius: 0;
-}
-.nav-link, .dropright .nav-link{
-    background-color: white;
-    color: var(--main_color, #6e2639);
-    border-bottom: 1px solid var(--main_color, #6e2639);
-}
-.nav-link:hover{
-    background-color: #a7a9ac;
-}
-.nav-link.active, .dropright .nav-link:focus{
-    background-color: var(--main_color, #6e2639);
-}
-*/
-
 /* Misc. Styles */
 ol.teams {
     list-style-type: none;
@@ -261,6 +251,25 @@ td, th {
     text-align: center;
 }
 
+/* Timer Styles */
+.countdown-timer {
+    pointer-events: none;
+    font-family: 'Share Tech Mono', monospace;
+    color: white;
+    background: #242424;
+    width: auto;
+    box-shadow: inset 0 0 5px black;
+    border-radius: 3px;
+}
+.countdown-timer span {
+    font-size: 32px;
+    color: whitesmoke;
+}
+@media (width: 1090px) {
+    .countdown-timer span {
+        font-size: 20px;
+    }
+}
 /* Button Styles */
 .nav-item button:hover {
     box-shadow: inset 0 0 5px black;
@@ -269,7 +278,6 @@ td, th {
     box-shadow: none;
     pointer-events: none;
 }
-
 .nav-link a:hover {
     color: black;
     box-shadow: inset 0 0 5px black;
@@ -281,7 +289,7 @@ td, th {
 }
 
 .bg-1 {
-    background: var(--main_color, #6e2639); /* #2d2d30 */
+    background: var(--maroon, #6e2639); /* #2d2d30 */
     color: #a7a9ac; /*#bdbdbd */
 }
 .bg-1 h3 {
@@ -300,11 +308,11 @@ td, th {
     margin-top: 5vh;
 }
 .btn-deactivated {
-    color: var(--main_color, #6e2639);
+    color: var(--maroon, #6e2639);
     background-color:grey;
 }
 .btn-fa {
-    background-color: #161e2d;
+    background-color: var(--subcolor, #161e2d);
     color: white;
     width: auto;
     min-width: 100px;
@@ -317,23 +325,23 @@ td, th {
     justify-content: center;
 }
 .btn-fa:hover {
-    color: #161e2d;
+    color: var(--subcolor, #161e2d);
     background-color: whitesmoke;
     text-decoration: none;
     box-shadow: inset 0 0 5px #c1c1c1;
 }
 .btn-fa:focus {
     background-color: whitesmoke;
-    color: #161e2d;
+    color: var(--subcolor, #161e2d);
     text-decoration: none;
 }
 .btn-fa-deactivated {
-    color: #161e2d;
+    color: var(--subcolor, #161e2d);
     background-color: gray;
     text-decoration: none;
 }
 .btn-primary {
-    background-color: var(--main_color, #6e2639) !important;
+    background-color: var(--maroon, #6e2639) !important;
     color: whitesmoke !important;
 }
 .btn-fa.btn-delete:hover, .btn-fa.btn-delete:active {
@@ -361,7 +369,7 @@ button.btn-delete:hover, button.btn-delete:active{
     margin-right: 5px;
 }
 .btn-fa:hover > .icon-light, .btn-fa:active > .icon-light {
-    color: #1c2538;
+    color: var(--main-color, #1c2538);
 }
 .btn-fa.btn-delete:hover > .icon-light {
     color: whitesmoke;
@@ -375,7 +383,7 @@ button.btn-delete:hover, button.btn-delete:active{
 /* Load animation styles*/
 .loader {
     border: 5px solid #f3f3f3; /* Light grey */
-    border-top: 5px solid var(--main_color, #6e2639); /* BG color */
+    border-top: 5px solid var(--maroon, #6e2639); /* BG color */
     border-radius: 50%;
     margin: auto;
     width: 40px;
@@ -408,7 +416,7 @@ button.btn-delete:hover, button.btn-delete:active{
 
 /* FontAwesome Icon Styles */
 .buildState {font-size: 30px;}
-.buildState.running {color: #1d8037;}
-.buildState.stopped {color: #838683;}
-.buildState.deleted {color: #000000;}
-.buildState.transition {color: #b3be27;}
+.buildState.running {color: var(--running, #1d8037);}
+.buildState.stopped {color: var(--stopped, #838683);}
+.buildState.deleted {color: var(--deleted, #000000);}
+.buildState.transition {color: var(--transition, #b3be27);}

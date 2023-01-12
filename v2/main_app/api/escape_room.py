@@ -172,7 +172,7 @@ class EscapeRoomWorkout(MethodView):
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    def put(self, build_id: str = None, escape_attempt: bool = False, question_id: int = None, response: str = None):
+    def put(self, build_id):
         """
         Team submits responses for checking on both the puzzles and their overall escape room
         Args:
@@ -185,7 +185,11 @@ class EscapeRoomWorkout(MethodView):
         Returns: HTTP Response
 
         """
-        if escape_attempt:
+        recv_data = request.json
+        escape_attempt = recv_data.get('ea', False)
+        question_id = recv_data.get('question_id', None)
+        response = recv_data.get('response', None)
+        if escape_attempt and escape_attempt == '4534-9a9d':
             question_id = 1
         if build_id and question_id and response:
             ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id)
@@ -203,7 +207,8 @@ class EscapeRoomWorkout(MethodView):
                     ds_workout.put(self.workout)
                     return self.http_resp(code=200, data=self.workout).prepare_response()
                 else:
-                    return self.http_resp(code=404, msg="The escape room has no time remaining.")
+                    return self.http_resp(code=404, msg="The escape room has no time remaining.").prepare_response()
+
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
