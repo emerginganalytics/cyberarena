@@ -208,6 +208,7 @@ class EscapeRoomWorkout(MethodView):
                     return self.http_resp(code=200, data=self.workout).prepare_response()
                 else:
                     return self.http_resp(code=404, msg="The escape room has no time remaining.").prepare_response()
+
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -226,6 +227,7 @@ class EscapeRoomWorkout(MethodView):
         self.workout['escape_room']['responses'].append(response)
         if str.upper(response) == str.upper(self.workout['escape_room']['answer']):
             self.workout['escape_room']['escaped'] = True
+
 
     def _evaluate_puzzle_question(self, question_id: int, response: str):
         """

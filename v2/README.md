@@ -21,9 +21,10 @@
     5. Compute Engine API (In-Use IP Addresses) - MCB * 1
     6. Compute Engine API (CPUs) - MCB * 3
     7. Cloud Build API (Concurrent Builds) - 50
+6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/
 
 ## Deployment
-Run `python setup.py` and follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud
+Create a new project in PyCharm at the root of this directory, and then set `build_files`, `cloud_functions`, and `main_app` directories as _sources root_ in PyCharm (i.e., right click --> mark directory --> sources root). Open `setup.py` and create a new configuration to run `setup.py`. This will ensure the sources directories are easily recognized. Follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud
 resources and running updates.
 
 ### Bulk Deployment

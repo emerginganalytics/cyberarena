@@ -174,7 +174,7 @@ def workout_list(unit_id):
     ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id))
     unit = ds_manager.get()
     build_type = unit['build_type']
-    workout_list = DataStoreManager().get_workouts()
+    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
     registration_required = unit.get('registration_required', False)
     if not registration_required:
         workout_list = sorted(workout_list, key=lambda i: (i['student_name']))
@@ -204,7 +204,7 @@ def arena_list(unit_id):
     # Get Arena Datastore objects
     unit_query = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT, key_id=str(unit_id))
     unit = unit_query.get()
-    workout_list = DataStoreManager().get_workouts()
+    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
     teacher_instructions_url = None
     if 'teacher_instructions_url' in unit:
         teacher_instructions_url = unit['teacher_instructions_url']

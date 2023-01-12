@@ -1,5 +1,6 @@
 from google.cloud import datastore
 from main_app_utilities.globals import DatastoreKeyTypes
+from google.cloud import logging_v2
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -13,20 +14,34 @@ __status__ = "Testing"
 
 class DataStoreManager:
     def __init__(self, key_type=None, key_id=None):
+        log_client = logging_v2.Client()
+        log_client.setup_logging()
+        self.key_type = key_type
         self.key_id = key_id
         self.ds_client = datastore.Client()
-        if key_type:
-            self.key = self.ds_client.key(key_type, key_id)
+        if self.key_type and self.key_id:
+            self.key = self.ds_client.key(self.key_type, self.key_id)
         else:
             self.key = None
 
-    def get(self):
-        return self.ds_client.get(self.key)
+    def get(self, key_type=None, key_id=None):
+        if key_type:
+            temp_key = self.ds_client.key(key_type, key_id)
+            return self.ds_client.get(temp_key)
+        else:
+            return self.ds_client.get(self.key)
 
-    def put(self, obj):
-        ds_entity = datastore.Entity(key=self.key)
-        ds_entity.update(obj)
-        self.ds_client.put(ds_entity)
+    def put(self, obj, key_type=None, key_id=None):
+        if key_type:
+            self.key = self.ds_client.key(key_type, key_id)
+        try:
+            obj.key = self.key
+            self.ds_client.put(self._create_safe_entity(obj))
+        except AttributeError:
+            # An attribute error occurs when passing in a dictionary. In this case, create a new entity from the dict
+            ds_entity = datastore.Entity(self.key)
+            ds_entity.update(obj)
+            self.ds_client.put(self._create_safe_entity(ds_entity))
 
     def set(self, key_type, key_id):
         self.key_id = key_id
@@ -44,16 +59,26 @@ class DataStoreManager:
         self.ds_client.delete(self.key)
 
     def get_servers(self):
-        """Get servers from workout"""
-        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER.value)
-        query_servers.add_filter('workout', '=', self.key_id)
+        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
+        query_servers.add_filter('parent_id', '=', self.key_id)
         return list(query_servers.fetch())
 
-    def get_workouts(self):
-        """Get workouts from unit"""
-        query_workouts = self.ds_client.query(kind=DatastoreKeyTypes.WORKOUT)
-        query_workouts.add_filter('unit_id', '=', self.key_id)
-        return list(query_workouts.fetch())
+    def get_children(self, child_key_type, parent_id):
+        query_workspaces = self.ds_client.query(kind=child_key_type)
+        query_workspaces.add_filter('parent_id', '=', parent_id)
+        return list(query_workspaces.fetch())
+
+    def get_expired(self):
+        expired = []
+        query_expired = self.ds_client.query(kind=self.key_type)
+        if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
+            query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
+            expired += list(query_expired.fetch())
+        elif self.key_type == DatastoreKeyTypes.SERVER:
+            query_expired.add_filter('state', '=', ServerStates.EXPIRED.value)
+            expired += list(query_expired.fetch())
+
+        return expired
 
     def get_classrooms(self, class_name=None):
         """Queries for corresponding cybergym-class"""
@@ -63,7 +88,11 @@ class DataStoreManager:
             query_classroom.add_filter('class_name', '=', str(class_name))
         return list(query_classroom.fetch())
 
-    def get_attack_specs(self):
-        """returns list of attack specs stored in datastore"""
-        query_attacks = self.ds_client.query(kind=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value)
-        return list(query_attacks.fetch())
+    @staticmethod
+    def _create_safe_entity(entity):
+        exclude_from_indexes = []
+        for item in entity:
+            if type(entity[item]) == str and len(entity[item]) > 1500:
+                exclude_from_indexes.append(item)
+        entity.exclude_from_indexes = exclude_from_indexes
+        return entity
