@@ -1,6 +1,7 @@
+import flask
 import yaml
 from datetime import datetime, timedelta, timezone
-from flask import json, request, session
+from flask import json, request, session, redirect, url_for
 from flask.views import MethodView
 from api.utilities.decorators import instructor_required
 from api.utilities.http_response import HttpResponse
@@ -76,7 +77,7 @@ class Unit(MethodView):
             build_spec['test'] = True  # TODO: Remove after testing
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
             build_spec_to_cloud.commit()
-            return self.http_resp(code=200).prepare_response()
+            return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required

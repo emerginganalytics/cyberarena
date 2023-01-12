@@ -12,10 +12,11 @@ from main_app_utilities.globals import DatastoreKeyTypes
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
 
+auth_config = CloudEnv().auth_config
+
 
 @teacher_app.route('/home', methods=['GET', 'POST'])
 def teacher_home():
-    auth_config = CloudEnv().auth_config
     if session.get('user_email', None):
         teacher_email = session['user_email']
         auth = ArenaAuthorizer()
@@ -27,8 +28,8 @@ def teacher_home():
             # TODO: Add instructor to entity
 
         teacher_info = {}
-        teacher_classes = []
-        class_list = DataStoreManager(key_id=str(teacher_email)).get_classroom()
+        """teacher_classes = []
+        class_list = DataStoreManager(key_id=str(teacher_email)).get_classrooms()
         for class_instance in class_list:
             if 'class_name' in class_instance:
                 class_info = {
@@ -38,7 +39,7 @@ def teacher_home():
                     'roster_size': len(class_instance.get('roster', []))
                 }
                 teacher_classes.append(class_info)
-        teacher_info['classes'] = teacher_classes
+        teacher_info['classes'] = teacher_classes"""
 
         # Get all the units for this instructor
         unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
@@ -59,33 +60,43 @@ def teacher_home():
                             'name': unit['summary']['name'],
                             'created': creation_ts,
                             'expires': expire_ts,
+                            'build_count': unit['workspace_settings']['count']
                         }
-                        if 'class_name' in unit:
-                            unit_info['class_name'] = unit['class_name']
-                        else:
-                            unit_info['class_name'] = 'Demos'
                         if (int(time.time()) - (int(creation_ts) + (int(expire_ts) * 60 * 60 * 24))) < 0:
                             active_units.append(unit_info)
+                        else:
+                            expired_units.append(unit_info)
+                    else:
+                        unit_info = {
+                            'unit_id': unit.key.name,
+                            'name': unit['summary']['name'],
+                            'description': unit['summary']['description'],
+                            'created':  unit['creation_timestamp'],
+                            'build_count': unit['workspace_settings']['count']
+                        }
+                        expired_units.append(unit_info)
             teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['created']), reverse=True)
-
+            teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
         # Get list of workouts from cloud bucket
         # TODO: Consider preloading all specs into a cyberarena-catalog entity
-        workout_build_options = BucketManager().get_workouts()
-        return render_template('teacher_home.html', auth_config=auth_config, auth_list=auth_list,
-                               teacher_info=teacher_info, workout_titles=workout_build_options)
+        workout_specs = {
+            'assignments': BucketManager().get_workouts(),
+            'live': [],
+            'escape_rooms': []
+        }
+        return render_template('teacher_classroom.html', auth_config=auth_config, auth_list=auth_list,
+                               teacher_info=teacher_info, workout_specs=workout_specs)
     else:
         return redirect('/login')
 
 
-@teacher_app.route('/class/<class_name>', methods=['GET', 'POST'])
-def teacher_class(class_name):
-    auth_config = CloudEnv().auth_config
+@teacher_app.route('/class/<class_id>', methods=['GET', 'POST'])
+def teacher_class(class_id):
     if session.get('user_email', None):
         teacher_email = session['user_email']
         teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email)).get()
-        class_instance = DataStoreManager(key_id=str(teacher_email)).get_classroom(class_name=class_name)
+        class_instance = DataStoreManager(key_type=DatastoreKeyTypes.CLASSROOM, key_id=str(class_id)).get()
         if class_instance:
-            teacher_classes = []
             if 'class_name' in class_instance:
                 if 'student_auth' in class_instance:
                     auth_method = class_instance['student_auth']
@@ -99,14 +110,13 @@ def teacher_class(class_name):
                     class_unit_list = None
 
                 class_info = {
-                    'class_id': class_instance.id,
-                    'class_name': class_instance['class_name'],
+                    'id': class_instance['class_id'],
+                    'name': class_instance['class_name'],
                     'roster': sorted_roster,
                     'student_auth': class_instance['student_auth'] if 'student_auth' in class_instance else 'anonymous',
                     'class_units': class_unit_list
                 }
-                teacher_classes.append(class_info)
-            teacher_info['classes'] = teacher_classes
+            teacher_info['class_info'] = class_info
 
             # Get all the units current instructor class
             unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
@@ -127,6 +137,7 @@ def teacher_class(class_name):
                             unit_info = {
                                 'unit_id': unit.key.name,
                                 'name': unit['summary']['name'],
+                                'description': unit['summary']['description'],
                                 'timestamp': creation_ts,
                                 'expires': expire_ts,
                             }
@@ -138,18 +149,20 @@ def teacher_class(class_name):
                             unit_info = {
                                 'unit_id': unit.key.name,
                                 'name': unit['summary']['name'],
+                                'description': unit['summary']['description'],
                                 'timestamp':  unit['creation_timestamp'],
                             }
                             expired_units.append(unit_info)
-                teacher_info['current_info'] = sorted(active_units, key=lambda i: (i['timestamp']), reverse=True)
+                teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['timestamp']), reverse=True)
                 teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
-            return render_template('teacher_classroom.html', auth_config=auth_config, teacher_info=teacher_info)
+            workout_specs = BucketManager().get_workouts()
+            return render_template('teacher_classroom.html', auth_config=auth_config, teacher_info=teacher_info,
+                                   workout_specs=workout_specs)
     abort(404)
 
 
 @teacher_app.route('/build/<workout_type>', methods=['GET'])
 def build(workout_type):
-    auth_config = CloudEnv().auth_config
     logger.info('Request for workout type %s' % workout_type)
     form = CreateWorkoutForm()
     return render_template('build_workout.html', workout_type=workout_type, auth_config=auth_config)
@@ -181,7 +194,7 @@ def workout_list(unit_id):
     if unit and len(str(workout_list)) > 0:
         return render_template('workout_list.html', workout_list=workout_list, unit=unit,
                                teacher_instructions=teacher_instructions_url, main_app_url=CloudEnv().main_app_url,
-                               attack_spec=attack_yaml)
+                               attack_spec=attack_yaml, auth_config=auth_config)
     else:
         return redirect('/no-workout')
 

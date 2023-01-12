@@ -31,9 +31,9 @@ class Classroom(MethodView):
         user_email = session.get('user_email', None)
         if user_email:
             if class_name:
-                class_query = DataStoreManager(key_id=str(user_email)).get_classroom(class_name=class_name)
+                class_query = DataStoreManager(key_id=str(user_email)).get_classrooms(class_name=class_name)
             else:
-                class_query = DataStoreManager(key_id=str(user_email)).get_classroom()
+                class_query = DataStoreManager(key_id=str(user_email)).get_classrooms()
             if class_query:
                 return self.http_resp(code=200, data=class_query).prepare_response()
             return self.http_resp(code=404, data=[]).prepare_response()
@@ -49,7 +49,7 @@ class Classroom(MethodView):
         if class_name and student_auth and instructor_id:
             roster = []
             if 'student_count' in form_data and form_data['student_count'] != '':
-                roster = [f'Student {i + 1}' for i in range(int(form_data['student_count']))]
+                roster = [{'student_name': f'Student {i + 1}'} for i in range(int(form_data['student_count']))]
             class_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             new_class = {
                 'class_id': class_id,

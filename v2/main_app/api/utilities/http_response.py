@@ -13,7 +13,8 @@ class HttpResponse:
             404: "NOT FOUND",
             405: "NOT ALLOWED",
             409: "CONFLICT",
-            500: "INTERNAL SERVER ERROR"
+            500: "INTERNAL SERVER ERROR",
+            501: "NOT IMPLEMENTED",
         }
         self.code = code
         self.msg = msg

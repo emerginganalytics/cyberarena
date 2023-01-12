@@ -1,0 +1,206 @@
+{% extends "v2-base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% import 'student_app_macros.html' as student_macros %}
+{% block title %}Escape Room{% endblock %}
+{% block nav_title %}Escape Room{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student_app.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+     <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
+                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
+          });
+           $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+
+               // Start timer
+               {% if workout.escape_room.remaining_time > 0 %}
+                   let countdownTimer = new Timer("{{ workout['id'] }}");
+                   let times = {
+                       'start_time': {{ workout.escape_room.start_time }},
+                       'time_limit': {{ workout.escape_room.time_limit }},
+                       'expired': {{ workout.escape_room.expired | lower }}
+                   }
+                   countdownTimer.start(times);
+               {% endif %}
+           });
+    </script>
+     <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <!-- Not Sure if we need this sidebar here on this page -->
+                <li class="nav-item disabled">
+                    {%  if workout.escape_room.escaped == True %}
+                        <div id="room-timer-div" class="nav-link">
+                            <h5 class="nav-link room-complete">Room Escaped!</h5>
+                        </div>
+                    {% else %}
+                        {% if workout.escape_room.expired == False %}
+                            <div id="room-timer-div" class="countdown-timer">
+                                <p class="text-center no-select">
+                                    <span id="room-timer"></span>
+                                </p>
+                            </div>
+                        {% else %}
+                            <div id="room-timer-div" class="nav-link disabled">
+                                <h5 class="text-center">Room Expired</h5>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-toggle="pill"
+                            data-target="#home-container" type="button" role="tab"
+                            aria-controls="home-container" aria-selected="true"><i class="fa fa-puzzle-piece fa-lg"></i> Puzzles</button>
+                </li>
+            </ul>
+        </div> <!-- End sidebar-menu div -->
+        <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
+            <div id="tab-container" class="tab-content">
+                <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>
+                <div id="home-container" class="tab-pane fade active show" role="tabpanel" aria-labelledby="home-tab">
+                    <div id='puzzle-card-container' class="row card-columns">
+                        {% for puzzle in workout.escape_room.puzzles %}
+                            <div class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('{{ loop.index }}')">
+                                <div class="card-body">
+                                    <h4 class="card-title">{{ puzzle.question }}</h4>
+                                    {% if puzzle.correct == True %}
+                                        <h6 class="card-subtitle">{{ puzzle.reveal }}</h6>
+                                    {% else %}
+                                        <h6 class="card-subtitle">Incomplete</h6>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle{{ loop.index }}">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5>{{ puzzle.question }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">x</span>
+                                            </button>
+                                        </div> <!-- End modal-header-->
+                                        <div class="modal-body">
+                                            <div class="workout-details-ctn">
+                                                <div class="workout-details">
+                                                    <p id="workout-details">As an unfortunate victim to collateral, Belle has been kidnapped. Luckily,
+                                                    the perpetrator accidentally dropped their cellphone in their haste to escape. Use the tools provided
+                                                    in the machine below to view the phone contents and hopefully track down where Belle might be!</p>
+                                                    <!-- TODO: Replace with workout description -->
+                                                </div>
+                                                <div>
+                                                    <a href="#" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
+                                                </div>
+                                            </div>
+                                            <div class="form-container">
+                                                <form id="puzzle-{{ loop.index }}-form" class="form-control puzzle-form form-inline">
+                                                    <div class="form-group">
+                                                        <input hidden name="build_id" value="{{ workout['id'] }}">
+                                                        <input hidden name="question_id" value="{{ puzzle['id'] }}">
+                                                    </div>
+                                                    <div class="form-group mx-sm-3 mb-2">
+                                                        <label for="puzzle-{{ loop.index }}-answer" class="sr-only">Answer: </label>
+                                                        <input id="puzzle-{{ loop.index }}-answer" class="form-control" type="text" name="response" placeholder="Answer">
+                                                    </div>
+                                                    <input type="button" class="btn-fa mb-2" value="Submit"
+                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-{{ loop.index }}-form', '{{ loop.index }}')"/>
+                                                </form>
+                                            </div> <!-- End form-container -->
+                                        </div> <!-- End modal-body div -->
+                                    </div> <!-- End modal-content div -->
+                                </div> <!-- End modal-dialog div -->
+                            </div> <!-- End modal div -->
+                        {% endfor %}
+                        {% if workout.escape_room.number_correct == workout.escape_room.puzzles | count %}
+                            <div id="finalPuzzle" class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('50')">
+                                <div class="card-body">
+                                    <h4 id="finalPuzzleTitle" class="card-title">{{ workout.escape_room.question }}</h4>
+                                    {% if workout.escape_room.escaped == True %}
+                                        <h6 class="card-subtitle final-puzzle">Complete!</h6>
+                                    {% else %}
+                                        <h6 class="card-subtitle final-puzzle">Incomplete</h6>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle50">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5>{{ workout.escape_room.question }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">x</span>
+                                            </button>
+                                        </div> <!-- End modal-header-->
+                                        <div class="modal-body">
+                                            <div class="form-container">
+                                                <form id="puzzle-50-form" class="form-control puzzle-form form-inline" onsubmit="checkEscapeRoom()">
+                                                    <div class="form-group">
+                                                        <input hidden name="build_id" value="{{ workout['id'] }}">
+                                                    </div>
+                                                    <div class="form-group mx-sm-3 mb-2">
+                                                        <label for="puzzle-50-answer" class="sr-only">Final Answer: </label>
+                                                        <input id="puzzle-50-answer" class="form-control" type="text" name="response" placeholder="Final Answer">
+                                                    </div>
+                                                    <input type="button" class="btn-fa mb-2" value="Submit"
+                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-50-form', '4534-9a9d')"/>
+                                                </form>
+                                            </div> <!-- End form-container -->
+                                        </div> <!-- End modal-body div -->
+                                    </div> <!-- End modal-content div -->
+                                </div> <!-- End modal-dialog div -->
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+     </div>
+{% endblock content %}

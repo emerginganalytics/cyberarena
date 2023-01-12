@@ -1,5 +1,6 @@
 {% extends "teacher_base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'teacher_macros.html' as macros %}
 {% block title %}Teacher Home{% endblock %}
 {% block nav_title %}Teacher Home{% endblock %}
 {% block styles %}
@@ -9,9 +10,6 @@
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
-            <li class="nav-item">
-                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
-            </li>
             <li class="nav-item">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
             </li>
@@ -25,14 +23,23 @@
             {% endif %}
         </ul>
     </div>
-    <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal" data-target="modalContactUs">Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -45,13 +52,21 @@
                // Set welcome banner
               const welcome_nav = document.getElementById('banner');
               welcome_nav.textContent = value['display_name'];
+
+              // Set workout form value
+              //document.getElementById('assignment-teacher-id').value = value['user_email'];
           });
+          $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+           });
           function build_unit(){
-              var build_unit_select = document.getElementById('build-unit-select');
-              selection = build_unit_select.options[build_unit_select.selectedIndex].value;
+              let build_unit_select = document.getElementById('build-unit-select');
+              let selection = build_unit_select.options[build_unit_select.selectedIndex].value;
               console.log(selection);
 
-              var build_unit_a = document.getElementById('build-unit-a');
+              let build_unit_a = document.getElementById('build-unit-a');
               build_unit_a.setAttribute("href", 'build/' + selection);
               return false;
           }
@@ -61,40 +76,146 @@
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="teacher-home-btn" data-toggle="pill"
-                            data-target="#home-container" type="button" role="tab"
-                            aria-controls="nav-home" aria-selected="true">Active Workouts</button>
+                    <button class="nav-link" id="build-workout-tab-btn" data-toggle="pill"
+                            data-target="#build-workout-tab" type="button" role="tab"
+                            aria-controls="build-workout-tab" aria-selected="false">Build Workout</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="teacher-home-btn" data-toggle="pill"
-                            data-target="#expired-workout-container" type="button" role="tab"
-                            aria-controls="nav-home" aria-selected="true">Expired Workouts</button>
+                    <button class="nav-link" id="assignments-tab" data-toggle="pill"
+                            data-target="#assignments-container" type="button" role="tab"
+                            aria-controls="assignments-container" aria-selected="false">Assigned Homework</button>
+                </li>
+                <!--<li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab-btn" data-toggle="pill"
+                            data-target="#teacher-home" type="button" role="tab"
+                            aria-controls="teacher-home" aria-selected="true">Active Workouts</button>
+                </li>-->
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="teacher-expired-workout-btn" data-toggle="pill"
+                            data-target="#expired-workout-tab" type="button" role="tab"
+                            aria-controls="expired-workout-tab" aria-selected="false">Expired Workouts</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="teacher-roster-btn" data-toggle="pill"
-                            data-target="#roster-container" type="button" role="tab"
-                            aria-controls="nav-home" aria-selected="true">Roster</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="build-workout-btn" data-toggle="pill"
-                            data-target="#build-workout-container" type="button" role="tab"
-                            aria-controls="nav-home" aria-selected="true">Build Workout</button>
+                    <button class="nav-link" id="roster-tab-btn" data-toggle="pill"
+                            data-target="#roster-tab" type="button" role="tab"
+                            aria-controls="roster-tab" aria-selected="false">Roster</button>
                 </li>
             </ul>
         </div> <!-- End sidebar-menu div -->
         <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
-            <div id="tab-conatiner" class="tab-content">
-                <div class="tab-pane fade active show" id="teacher-home" role="tabpanel" aria-labelledby="active-class-tab">
+            <div id="tab-container" class="tab-content">
+                <div class="tab-pane fade show" id="teacher-home" role="tabpanel" aria-labelledby="home-tab-btn">
+                    <!-- Tab TBD -->
+                    <div class="container">
+                        <div class="table-ctn">
+                            <table id="active-class-table" class="table text-nowrap table-small">
+                                <thead>
+                                    <tr id="active-table-headers">
+                                        <th class="text-center no-select">Name</th>
+                                        <th class="text-center no-select">Description</th>
+                                        <th class="text-center no-select">Created</th>
+                                        <th class="text-center no-select">Expires</th>
+                                    </tr>
+                                </thead>
+                                {% if teacher_info.active_units | length == 0 %}
+                                    <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Active Workouts Found!</td></tr>
+                                {% else %}
+                                    {% for unit in teacher_info.active_units %}
+                                        <tr>
+                                            <td>
+                                                <a href="/teacher/workout_list/{{ unit.unit_id }}" class="btn-fa d-inline-flex" target="_blank">
+                                                    <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                            </td>
+                                            <td>{{ unit.description }}</td>
+                                            <td>{{ unit.timestamp }}</td>
+                                            {% if 'expires' in unit %}
+                                                <td>{{ unit.expires }}</td>
+                                            {% else %}
+                                                <td>N/A</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div id="expired-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="expired-workout-tab-btn">
                     <!-- Tab TBD -->
                 </div>
-                <div id="expired-class-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
+                <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-workout-tab-btn">
                     <!-- Tab TBD -->
-                </div>
-                <div id="roster-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
-                    <!-- Tab TBD -->
-                </div>
-                <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="">
-                    <!-- Tab TBD -->
+                    <div id="build-assignment-div" class="container">
+                        <h2>Assignments</h2>
+                        <div id="build-unit-div" class="nav nav-pills form-group">
+                            <select id="build-unit-select" class='nav-item'>
+                                <option selected disabled hidden value="">Select Workout Type ...</option>
+                                {% for spec in workout_specs['assignments'] %}
+                                    <option class="dropdown-item build_unit_type" value="{{ spec }}">{{ spec }}</option>
+                                {% endfor %}
+                            </select>
+                            <a class="nav-link fa-btn" id="build-unit-a" type="button" href="#" onclick="build_unit();">Build Workout</a>
+                        </div>
+                    </div>
+                    <div id="build-live-div">
+                        <h2>Live</h2>
+                    </div>
+                    <div id="build-escape-room-div">
+                        <h2>Escape Rooms</h2>
+                    </div>
+                </div> <!-- End build workouts tab -->
+                <div id="assignments-container" class="tab-pane active fade" role="tabpanel" aria-labelledby="assignments-tab">
+                    <h2 class="text-center">Assigned Homework</h2>
+                    {% for name, items in teacher_info['active_units'] | groupby('name') %}
+                        <div class="card unit-card col-lg-4 col-sm-12" onclick="show_current_units('{{ loop.index }}')">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ name }}</h5>
+                            </div>
+                        </div>
+                        <div class="modal fade" tabindex="-1" role="dialog" id="current_unit_{{ loop.index }}">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5>{{ name }} Assignments</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">x</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                         <table class="table unit_table">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">ID</th>
+                                                    <th scope="col">Created</th>
+                                                    <th scope="col">Expires</th>
+                                                    <th scope="col">Build Count</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for assignment in items %}
+                                                    <tr>
+                                                        <td>
+                                                            <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/workout_list/{{ assignment.id }}">
+                                                                <i class="fa fa-book"></i> {{ assignment.id }}</a>
+                                                        </td>
+                                                        <td class="timestampField">
+                                                            {{ assignment.created }}
+                                                        </td>
+                                                        <td class="timestampField">
+                                                            {{ assignment.expires }}
+                                                        </td>
+                                                        <td>
+                                                            {{ assignment.build_count }}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
