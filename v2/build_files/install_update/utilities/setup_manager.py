@@ -48,6 +48,8 @@ class SetupManager:
             CyberArenaApp().deploy_main_app()
         elif self.selection == SetupOptions.BUILD_SPECS:
             BuildSpecification().run()
+        elif self.selection == SetupOptions.PREPARE_SPEC:
+            BuildSpecification().sync_single_spec()
         elif self.selection == SetupOptions.ENV:
             EnvironmentVariables(project=self.project).run()
         elif self.selection == SetupOptions.BULK_UPDATE:

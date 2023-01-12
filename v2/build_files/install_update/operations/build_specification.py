@@ -1,10 +1,22 @@
+"""
+Manage the build specification synchronization with the cloud.
+
+This module contains the following classes:
+    - BuildSpecification: Operations to sync local specifications with the cloud project.
+"""
+import datetime
 import os
 import yaml
 import subprocess
 from google.cloud import storage
 from googleapiclient import discovery
 from google.api_core.exceptions import NotFound, Forbidden
+from marshmallow import ValidationError
 
+
+from main_app_utilities.globals import BuildConstants
+from main_app_utilities.infrastructure_as_code.schema import FixedArenaSchema, FixedArenaClassSchema, UnitSchema
+from main_app_utilities.infrastructure_as_code.object_validators.unit_object_validator import UnitValidator
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from install_update.utilities.crypto_lock import CryptoLock
@@ -63,6 +75,47 @@ class BuildSpecification:
         self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
         self._sync_attacks_to_cloud()
 
+    def sync_single_spec(self):
+        """
+        Sync's a single specification file. This can be used by instructors after creating everything needed for the
+        specification file. This functions will open the file and serialize the contents to ensure it is a valid
+        specification. Then, it scans through the images. If the image does not exist, it will create new images based
+        on the server name or return an error.
+        Args:
+            None
+
+        Returns: None
+
+        """
+        spec_file = str(input(f"What is the directory and filename path to the spec file "
+                              f"(do not include the specs/plaintext path)? "))
+        filename = f"build_files/specs/plaintext/{spec_file}"
+        with open(filename) as f:
+            spec = yaml.safe_load(f)
+        # If the spec is not a valid schema. This next function will throw an error.
+        try:
+            self._validate_spec(spec)
+        except ValidationError as e:
+            print(f"\t...Validation Error in the file: {e.messages}")
+            return
+        print(f"\t...Specification passed validation testing.")
+        response = str(input(f"Do you have servers ready to image in this project for the specification? If not,  (y/N)"))
+        image_first = True if str.upper(response) == "Y" else False
+        source_project = None
+        if not image_first:
+            source_project = str(input(f"Enter the source project name you would like to use for copying over images "
+                                       f"(or press enter if you want to use the default project)"))
+        self._sync_computer_images(file=filename, image_first=image_first, source_project=source_project)
+        print(f"\t...Completed processing computing images.")
+        print(f"\t...Uploading the specification to the cloud.")
+        self._upload_file_to_cloud(file=filename, cloud_directory=self.SPEC_FOLDER)
+        print(f"\t...The specification {spec_file} has been successfully uploaded to the cloud project "
+              f"{self.env.project}.")
+        print(f"\t...Encrypting the spec to ensure the encrypted spec is available in the repo.")
+        self._sync_locked_folder(plaintext_dir=self.build_specs_plaintext, encrypted_dir=self.build_specs_encrypted,
+                                 extension="yaml")
+        print(f"\t...Encryption is complete.")
+
     def _sync_locked_folder(self, plaintext_dir, encrypted_dir, extension):
         spec_crypto_lock = CryptoLock(plaintext_dir=plaintext_dir, encrypted_dir=encrypted_dir,
                                       lock_extension=extension)
@@ -90,8 +143,8 @@ class BuildSpecification:
                     self._upload_file_to_cloud(item, cloud_directory)
 
     def _upload_file_to_cloud(self, file, cloud_directory):
-        new_blob = self.build_bucket.blob(f"{cloud_directory}{file.name}")
-        with open(file.path, 'rb') as f:
+        new_blob = self.build_bucket.blob(f"{cloud_directory}{file}")
+        with open(file, 'rb') as f:
             response = new_blob.upload_from_file(f, content_type='application/octet-stream')
 
     def _scan_for_computer_images(self):
@@ -116,8 +169,8 @@ class BuildSpecification:
                     specs_to_upload.append(item)
         return specs_to_upload
 
-    def _sync_computer_images(self, file):
-        print(f"Beginning to sync images from build specification {file.name}")
+    def _sync_computer_images(self, file, image_first=False, source_project=None):
+        print(f"\t...Beginning to sync images from build specification {file}")
         with open(file) as f:
             spec = yaml.safe_load(f)
         server_list = []
@@ -127,11 +180,13 @@ class BuildSpecification:
             server_list = spec['workspace_servers']
         for server_spec in server_list:
             if 'image' in server_spec:
-                if not self.computer_image_sync.sync(server_spec['image']):
-                    print(f"An error occurred when processing server images for {file.name}. Please correct the "
-                          f"error and resync. The specification will not be uploaded to the project until the error "
-                          f"is corrected.")
-                    return False
+                if image_first:
+                    print(f"\t...Beginning to IMAGE the server image {server_spec['image']}")
+                    self.computer_image_sync.image_server(server_spec['image'])
+                else:
+                    print(f"\t...Beginning to SYNC the server image {server_spec['image']}")
+                    self.computer_image_sync.sync(server_spec['image'], source_project)
+                print(f"\t...Finished processing {server_spec['image']}")
 
     def _sync_attacks_to_cloud(self):
         ds_manager = DataStoreManager()
@@ -157,3 +212,20 @@ class BuildSpecification:
         for directory in directories:
             if not os.path.exists(directory):
                 os.makedirs(directory)
+
+    @staticmethod
+    def _validate_spec(spec):
+        if 'build_type' not in spec:
+            raise ValidationError("Spec does not contain a build_type")
+        # Add the dynamic fields required for a spec to avoid throwing errors on these
+        spec['creation_timestamp'] = datetime.datetime.now().timestamp()
+        spec['instructor_id'] = 'instructor@example.com'
+        build_type = spec['build_type']
+        if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
+            spec = FixedArenaSchema().load(spec)
+        elif build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
+            spec = FixedArenaClassSchema().load(spec)
+        elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
+            spec = UnitSchema().load(spec)
+            spec = UnitValidator().load(spec)
+        return spec

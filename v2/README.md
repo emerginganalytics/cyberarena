@@ -44,6 +44,14 @@ gcp_projects:
     credential: 'C:\Users\jdoe\.gcp\sample-project.json'
 ```
 
+## Creating Your Own Specifications
+To create your own labs for students. You need the following:
+1. Clone this repo and make sure you have all the prerequisites from above to run setup.py on your laptop.
+2. Run setup.py and choose the option to _Synchronize and Encrypt/Decrypt Build Specifications, Instructions, and Compute Images_. This will sync the plaintext specifications under `v2/build_files/specs/plaintext`. Contact an administrator for the password. 
+3. Create new compute servers in the Google Project. Configure the server the way you want students to see it, and then stop the server.
+4. Create a new specification under the plaintext specs folder. The easiest way to do so is probably copying an existing one, but you can see the full specification here: `v2/main_app/main_app_utilities/infrastructure_as_code/schema.py`
+5. Run setup.py again and choose _Prepare a single specification for deployment_. This will automatically prepare servers in your project for use in the lab, and upload the specification to the cloud bucket for use in your application.
+
 ## Architecture
 The Cyber Arena includes two main application. First, the _main_app_ provides the web application for instructors and students
 to interact with the configured labs. This runs as a cloud run app with Firebase authentication and provides entry into
