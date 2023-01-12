@@ -89,6 +89,10 @@ class BuildConstants:
     class Servers:
         FIXED_ARENA_WORKSPACE_PROXY = "display-workspace-server"
 
+    class EscapeRoomEntryTypes(str, Enum):
+        SERVER = 'server'
+        WEB_APPLICATION = 'web_application'
+
     class FixedArenaStates(Enum):
         START = 0
         BUILDING_ASSESSMENT = 1

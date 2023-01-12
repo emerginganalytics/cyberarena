@@ -189,6 +189,13 @@ class AssessmentQuestionSchema(Schema):
 class EscapeRoomSchema(Schema):
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(description="Answer from the top level-question")
+    entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
+                            description="The type of entry to present to the user for solving the question "
+                                        "(e.g., server or web_application)")
+    entry_name = fields.Str(required=True, description="A name based on the entry_type to help build a URL for the "
+                                                       "student to click on. For example, a server will have it's "
+                                                       "human interaction guacamole link that they can click on to "
+                                                       "answer the question")
     responses = fields.List(fields.Str(), missing=[], description="Records the team's attempts to answer the question "
                                                                   "and escape")
     escaped = fields.Bool(missing=False, description="Whether or not the team has successfully escaped")
