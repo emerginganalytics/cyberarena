@@ -1,8 +1,8 @@
 class CountdownTimer {
-    constructor(build_id) {
+    constructor(build_id, url) {
         this.target_id = 'room-timer';
         this.build_id = build_id;
-        this.url = '/api/escape-room/team/' + this.build_id;
+        this.url = String(url); //'/api/escape-room/' + this.build_id;
     }
     updateTime(){
         return fetch(this.url, {method: "GET"})

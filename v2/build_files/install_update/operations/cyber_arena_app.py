@@ -19,7 +19,7 @@ class CyberArenaApp:
                                "--platform=managed --region={region} --allow-unauthenticated " \
                                "--service-account=cyberarena-service@{project}.iam.gserviceaccount.com"
     MAP_DNS_COMMAND = "gcloud beta run domain-mappings create --service cyberarena-v2 --domain={dns} --region={region}"
-    DEPLOY_COULD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
+    DEPLOY_CLOUD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
                                     "--region={region} --memory=1024Mi " \
                                     "--entry-point=cyber_arena_cloud_function " \
                                     "--runtime=python39 --source=\"./cloud_functions/\" " \

@@ -104,7 +104,7 @@
         </div> <!-- End sidebar-menu div -->
         <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
             <div id="tab-container" class="tab-content">
-                <div class="tab-pane fade show" id="teacher-home" role="tabpanel" aria-labelledby="home-tab-btn">
+                <div class="tab-pane fade active show" id="teacher-home" role="tabpanel" aria-labelledby="home-tab-btn">
                     <!-- Tab TBD -->
                     <div class="container">
                         <div class="table-ctn">
@@ -123,7 +123,7 @@
                                     {% for unit in teacher_info.active_units %}
                                         <tr>
                                             <td>
-                                                <a href="/teacher/workout_list/{{ unit.unit_id }}" class="btn-fa d-inline-flex" target="_blank">
+                                                <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
                                                     <i class="fa fa-book"></i> {{ unit.name }}</a>
                                             </td>
                                             <td>{{ unit.description }}</td>
@@ -151,17 +151,38 @@
                             <select id="build-unit-select" class='nav-item'>
                                 <option selected disabled hidden value="">Select Workout Type ...</option>
                                 {% for spec in workout_specs['assignments'] %}
-                                    <option class="dropdown-item build_unit_type" value="{{ spec }}">{{ spec }}</option>
+                                    <option class="dropdown-item build_unit_type" value="{{ spec["id"] }}">{{ spec['summary']['name'] }}</option>
                                 {% endfor %}
                             </select>
-                            <a class="nav-link fa-btn" id="build-unit-a" type="button" href="#" onclick="build_unit();">Build Workout</a>
+                            <a class="nav-link fa-btn" id="build-unit-a" type="button" href="#"
+                               onclick="build_unit('build-unit-select', this.id);">Build Assignment</a>
                         </div>
                     </div>
-                    <div id="build-live-div">
+                    <div id="build-live-div" class="container">
                         <h2>Live</h2>
+                        <div id="build-unit-div" class="nav nav-pills form-group">
+                            <select id="build-live-select" class='nav-item'>
+                                <option selected disabled hidden value="">Select Live Workout ...</option>
+                                {% for spec in workout_specs['live'] %}
+                                    <option class="dropdown-item build_unit_type" value="{{ spec["id"] }}">{{ spec['summary']['name'] }}</option>
+                                {% endfor %}
+                            </select>
+                            <a class="nav-link fa-btn" id="build-live-a" type="button" href="#"
+                               onclick="build_unit('build-live-select', this.id);">Build Live Workout</a>
+                        </div>
                     </div>
-                    <div id="build-escape-room-div">
+                    <div id="build-escape-room-div" class="container">
                         <h2>Escape Rooms</h2>
+                        <div id="build-unit-div" class="nav nav-pills form-group">
+                            <select id="build-escape-select" class='nav-item'>
+                                <option selected disabled hidden value="">Select Escape Room ...</option>
+                                {% for spec in workout_specs['escape_rooms'] %}
+                                    <option class="dropdown-item build_unit_type" value="{{ spec["id"] }}">{{ spec['summary']['name'] }}</option>
+                                {% endfor %}
+                            </select>
+                            <a class="nav-link fa-btn" id="build-escape-a"
+                               type="button" href="#" onclick="build_unit('build-escape-select', this.id);">Build Escape Room</a>
+                        </div>
                     </div>
                 </div> <!-- End build workouts tab -->
                 <div id="assignments-container" class="tab-pane active fade" role="tabpanel" aria-labelledby="assignments-tab">
@@ -195,7 +216,7 @@
                                                 {% for assignment in items %}
                                                     <tr>
                                                         <td>
-                                                            <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/workout_list/{{ assignment.id }}">
+                                                            <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/assignment/{{ assignment.id }}">
                                                                 <i class="fa fa-book"></i> {{ assignment.id }}</a>
                                                         </td>
                                                         <td class="timestampField">

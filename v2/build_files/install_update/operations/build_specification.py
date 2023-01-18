@@ -1,5 +1,5 @@
 """
-Manage the build specification synchronization with the cloud.
+Manage the build specification hronization with the cloud.
 
 This module contains the following classes:
     - BuildSpecification: Operations to sync local specifications with the cloud project.
@@ -66,6 +66,7 @@ class BuildSpecification:
                                  extension="yaml")
         upload_specs = self._scan_specs_for_image_sync()
         self._upload_files_to_cloud(upload_specs, self.SPEC_FOLDER)
+        self._sync_specs_to_datastore(upload_specs)
 
         self._sync_locked_folder(plaintext_dir=self.build_teacher_instructions_plaintext,
                                  encrypted_dir=self.build_teacher_instructions_encrypted, extension="pdf")
@@ -143,7 +144,7 @@ class BuildSpecification:
                     self._upload_file_to_cloud(item, cloud_directory)
 
     def _upload_file_to_cloud(self, file, cloud_directory):
-        new_blob = self.build_bucket.blob(f"{cloud_directory}{file}")
+        new_blob = self.build_bucket.blob(f"{cloud_directory}{file.name}")
         with open(file, 'rb') as f:
             response = new_blob.upload_from_file(f, content_type='application/octet-stream')
 
@@ -170,7 +171,7 @@ class BuildSpecification:
         return specs_to_upload
 
     def _sync_computer_images(self, file, image_first=False, source_project=None):
-        print(f"\t...Beginning to sync images from build specification {file}")
+        print(f"\t...Beginning to sync images from build specification {file.name}")
         with open(file) as f:
             spec = yaml.safe_load(f)
         server_list = []
@@ -182,11 +183,15 @@ class BuildSpecification:
             if 'image' in server_spec:
                 if image_first:
                     print(f"\t...Beginning to IMAGE the server image {server_spec['image']}")
-                    self.computer_image_sync.image_server(server_spec['image'])
+                    sync_image = self.computer_image_sync.image_server(server_spec['image'])
                 else:
                     print(f"\t...Beginning to SYNC the server image {server_spec['image']}")
-                    self.computer_image_sync.sync(server_spec['image'], source_project)
-                print(f"\t...Finished processing {server_spec['image']}")
+                    sync_image = self.computer_image_sync.sync(server_spec['image'], source_project)
+                if sync_image:
+                    print(f"\t...Finished processing {server_spec['image']}")
+                else:
+                    return False
+        return True
 
     def _sync_attacks_to_cloud(self):
         ds_manager = DataStoreManager()
@@ -198,6 +203,15 @@ class BuildSpecification:
             attack = yaml.safe_load(open(os.path.join(self.build_attacks_specs, filename)))
             ds_manager.set(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value, key_id=attack['id'])
             ds_manager.put(attack)
+
+    def _sync_specs_to_datastore(self, specs):
+        ds_manager = DataStoreManager()
+        for filename in specs:
+            print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
+            spec = yaml.safe_load(open(filename.path))
+            self._validate_spec(spec)
+            ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
+            ds_manager.put(spec)
 
     def _create_directories(self):
         directories = [
@@ -218,14 +232,16 @@ class BuildSpecification:
         if 'build_type' not in spec:
             raise ValidationError("Spec does not contain a build_type")
         # Add the dynamic fields required for a spec to avoid throwing errors on these
+        # spec['instructor_id'] = 'instructor@example.com' # TODO: Is this needed for FixedArena/Class builds?
         spec['creation_timestamp'] = datetime.datetime.now().timestamp()
-        spec['instructor_id'] = 'instructor@example.com'
         build_type = spec['build_type']
         if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             spec = FixedArenaSchema().load(spec)
         elif build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
+            spec['fixed_arena_servers'] = []
             spec = FixedArenaClassSchema().load(spec)
         elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
+            spec['instructor_id'] = 'instructor@example.com'
             spec = UnitSchema().load(spec)
             spec = UnitValidator().load(spec)
         return spec

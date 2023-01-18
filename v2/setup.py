@@ -35,7 +35,7 @@ def main():
         ret = subprocess.run(f"gcloud config set project {project}", capture_output=True, shell=True)
         ret_msg = ret.stderr.decode()
         if 'WARNING' in ret_msg.upper():
-            print(f"The following error occured when trying to set the project:\n{ret_msg}")
+            print(f"The following error occurred when trying to set the project:\n{ret_msg}")
         else:
             print(ret_msg)
             creds = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', None)
@@ -62,19 +62,16 @@ def main():
     operation_prompt += "\nSelection? "
 
     while True:
-        try:
-            response = int(input(operation_prompt))
-            if SetupOptions(response) == SetupOptions.EXIT:
+        response = int(input(operation_prompt))
+        if SetupOptions(response) == SetupOptions.EXIT:
+            break
+        elif response > len(SetupOptions):
+            print(f"Invalid selection. Select an option 0-{len(SetupOptions)}")
+        else:
+            SetupManager(selection=SetupOptions(response), project=project).run()
+            response = str(input("Would you like to perform additional setup tasks? (y/N) ")).upper()
+            if not response or response == "N":
                 break
-            elif response > len(SetupOptions):
-                print(f"Invalid selection. Select an option 0-{len(SetupOptions)}")
-            else:
-                SetupManager(selection=SetupOptions(response), project=project).run()
-                response = str(input("Would you like to perform additional setup tasks? (y/N) ")).upper()
-                if not response or response == "N":
-                    break
-        except ValueError:
-            print("Invalid selection")
 
 
 def test_gcp_credentials(project):

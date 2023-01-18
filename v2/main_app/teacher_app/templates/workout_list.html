@@ -1,7 +1,7 @@
-{% extends "teacher_base.html" %}
+{% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
-{% block title %}Unit {{ unit.key.name }}{% endblock %}
-{% block nav_title %}Unit {{ unit.key.name }}{% endblock %}
+{% block title %}{{ unit.summary.name }}{% endblock %}
+{% block nav_title %}{{ unit.summary.name }} Assignment{% endblock %}
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
@@ -10,24 +10,36 @@
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
-                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
-            </li>
-            <li class="nav-item">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
             </li>
             <li class="nav-item">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
-    <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
+                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -40,26 +52,6 @@
               // Set welcome banner
               const welcome_nav = document.getElementById('banner');
               welcome_nav.innerHTML = value['display_name'];
-              if (value['authorized'] === true){
-                  teacher_email = value['email'];
-                  var teacher_button = document.createElement('a');
-                  teacher_button.href = '/teacher/home/';
-                  teacher_button.className = 'nav-link';
-                  teacher_button.innerHTML = 'Teacher Home';
-                  if (value['admin'] === true){
-                      var admin_button = document.createElement("a");
-                      admin_button.href = "/admin/home";
-                      admin_button.className = "nav-link";
-                      admin_button.innerHTML = "Admin Home";
-                  }
-              } else {
-                  if(value['student'] === true){
-                      var student_home_link = document.createElement("a");
-                      student_home_link = '/student/home';
-                      student_home_link.className = "nav-link";
-                      student_home_link.innerHTML = "Your Student Page";
-                  }
-              }
           });
     </script>
     <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
@@ -69,28 +61,51 @@
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="fa-home-btn" data-toggle="pill"
-                            data-target="#boot-container" type="button" role="tab"
-                            aria-controls="nav-boot"
+                    <button class="nav-link" id="main-container-btn" data-toggle="pill"
+                            data-target="#main-container-tab" type="button" role="tab"
+                            aria-controls="main-container-tab"
                             aria-selected="true">Home</button>
                 </li>
-                <li class="nav-item">
-                    {% if unit['build_type'] == "compute" %}
-                        <!-- TODO: Add unit controls -->
-                    {% endif %}
-                </li>
-                <!-- Not sure if this is needed right now
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-config-btn" data-toggle="pill"
-                            data-target="#settings-container" type="button" role="tab"
-                            aria-controls="nav-settings"
-                            aria-selected="false">Manage</button>
-                </li>-->
+                {% if unit['servers'] %}
+                    <li class="nav-item">
+                        <button class="nav-link btn-fa">Start Assignment</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-fa">Stop Assignment</button>
+                    </li>
+                {% endif %}
             </ul>
         </div> <!--End sidebar-menu div -->
-        <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
-            <div id="home-content-ctn" class="d-inline-flex">
-
+        <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
+            <div id="tab-container" class="tab-content">
+                <div id="main-container-tab" class="tab-pane fade active show" role="tabpanel" aria-labelledby="main-container-btn">
+                    <div class="container">
+                        <div id="assignment-info" class="info-container">
+                            <h2>{{ unit.summary.name }}</h2>
+                            <p>{{ unit.summary.description }}</p>
+                            {% if unit.summary.teacher_instructions %}
+                                <a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
+                                   target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
+                            {% endif %}
+                        </div>
+                        <div id="workout-table-ctn" class="table-ctn">
+                            <table class="table text-nowrap table-small">
+                                <thead>
+                                    <tr id="active-table-headers">
+                                        <td>ID</td>
+                                        <td>Something</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for workout in workout_list %}
+                                        <td>{{ workout["id"] }}</td>
+                                        <td>Something</td>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div> <!-- End content-row -->

@@ -77,7 +77,7 @@ class Workout(MethodView):
         else:
             auth_level = session.get('user_groups', None)
             if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
-               # TODO: Write logic to support standard workout creation requests
+                # TODO: Write logic to support standard workout creation requests
                 return self.http_resp(code=200)
             # Invalid Request; Insufficient Permissions
             else:

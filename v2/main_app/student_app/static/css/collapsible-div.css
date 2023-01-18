@@ -1,0 +1,52 @@
+/* Collapsible Div Styles */
+.collapse-div-wrapper {
+    padding-bottom: 10px;
+    align-content: center;
+    width: 100%;
+    text-align: center;
+}
+.collapse-div {
+    display: none;
+    margin: 0 auto;
+    overflow: hidden;
+    background-color: whitesmoke;
+    border: 1px solid black;
+    border-top: 5px solid var(--python-yellow);
+    font-size: 2vh;
+    width: 80%;
+}
+.collapseBtn {
+    background-color: var(--main-color);
+    color: whitesmoke;
+    cursor: pointer;
+    padding: 18px;
+    margin: 0;
+    width: 80%;
+    border: 1px solid black;
+    border-radius: 2px;
+    text-align: left;
+    outline: none;
+    font-size: 20px;
+}
+.collapseBtn:hover {
+    background-color: var(--subcolor);
+    color: whitesmoke;
+}
+.collapseBtn:after {
+    content: '\02795';
+    font-size: 20px;
+    color: white;
+    float: right;
+    margin-left: 5px;
+}
+.collapse-active {
+    background-color: white;
+    color: black;
+    border-bottom: none;
+}
+.collapse-active:hover {
+    color: white;
+}
+.collapse-active:after {
+    content: "\2796"; /*Unicode character for "minus" sign (-) */
+}

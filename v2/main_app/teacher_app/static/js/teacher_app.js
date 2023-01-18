@@ -31,11 +31,11 @@ class TimestampToDate {
 function show_current_units(modal_num){
     $('#current_unit_' + modal_num).modal();
 }
-function build_unit(){
-    var build_unit_select = document.getElementById('build-unit-select');
-    selection = build_unit_select.options[build_unit_select.selectedIndex].value;
+function build_unit(select_id, a_id){
+    var build_select = document.getElementById(select_id);
+    selection = build_select.options[build_select.selectedIndex].value;
 
-    var build_unit_a = document.getElementById('build-unit-a');
+    var build_unit_a = document.getElementById(a_id);
     build_unit_a.setAttribute("href", 'build/' + selection);
     return false;
 }
