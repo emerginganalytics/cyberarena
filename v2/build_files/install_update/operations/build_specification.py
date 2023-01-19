@@ -99,7 +99,8 @@ class BuildSpecification:
             print(f"\t...Validation Error in the file: {e.messages}")
             return
         print(f"\t...Specification passed validation testing.")
-        response = str(input(f"Do you have servers ready to image in this project for the specification? If not,  (y/N)"))
+        response = str(input(f"Do you have servers ready to image in this project for the specification? "
+                             f"If 'N', the source project will be used to sync images (y/N)"))
         image_first = True if str.upper(response) == "Y" else False
         source_project = None
         if not image_first:
@@ -143,7 +144,11 @@ class BuildSpecification:
                     self._upload_file_to_cloud(item, cloud_directory)
 
     def _upload_file_to_cloud(self, file, cloud_directory):
-        new_blob = self.build_bucket.blob(f"{cloud_directory}{file}")
+        if type(file) == str:
+            file_name = file.split('/')[-1]
+        else:
+            file_name = file.name
+        new_blob = self.build_bucket.blob(f"{cloud_directory}{file_name}")
         with open(file, 'rb') as f:
             response = new_blob.upload_from_file(f, content_type='application/octet-stream')
 
@@ -162,11 +167,11 @@ class BuildSpecification:
         for item in os.scandir(self.build_specs_plaintext):
             if item.is_dir():
                 for file in os.scandir(item):
-                    if self._sync_computer_images(file):
-                        specs_to_upload.append(file)
+                    self._sync_computer_images(file)
+                    specs_to_upload.append(file)
             if item.is_file():
-                if self._sync_computer_images(item):
-                    specs_to_upload.append(item)
+                self._sync_computer_images(item)
+                specs_to_upload.append(item)
         return specs_to_upload
 
     def _sync_computer_images(self, file, image_first=False, source_project=None):

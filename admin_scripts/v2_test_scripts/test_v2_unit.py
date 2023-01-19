@@ -25,13 +25,15 @@ class TestUnit:
         self.build_id = build_id if build_id else None
 
     def build(self):
-        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}unit-sample.yaml")
+        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}csec2324-lab1.yaml")
         build_spec = yaml.safe_load(unit_yaml)
+        build_spec['instructor_id'] = 'philiphuff7@gmail.com'
+        build_spec['test'] = True
         build_spec['workspace_settings'] = {
             'count': 2,
             'registration_required': False,
             'student_emails': [],
-            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
+            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(days=2)).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()

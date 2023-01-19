@@ -59,12 +59,15 @@ class UnitValidator:
             for nic in server['nics']:
                 network_name = nic['network']
                 ip = nic['internal_ip']
+                last_quad = ip.split(".")[-1]
                 if network_name not in self.network_map:
                     raise ValidationError(f"{server['name']} is attempting to build in a network named {network_name} "
                                           f"which is not included in the specification")
                 if not IPAddress(ip) in IPNetwork(self.network_map[network_name]):
                     raise ValidationError(f"{server['name']} uses an IP address {ip} that does not match its build "
                                           f"network subnet {self.network_map[network_name]}")
+                if last_quad in ['0', '1', '254', '255']:
+                    raise ValidationError(f"{server['name']} uses a reserved IP address {ip} for the cloud.")
 
     def _add_firewall_rules(self):
         firewall_rules = []
