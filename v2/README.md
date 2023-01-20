@@ -2,7 +2,9 @@
 ## Prerequisites
 1. Create a new Google Cloud Project: https://console.cloud.google.com/
 2. Install the Google Cloud SDK: https://cloud.google.com/sdk/install
-3. Set up the Identity Platform service and obtain the API key as follows:
+3. Create a service account with owner access and download a local key here: https://console.cloud.google.com/iam-admin/serviceaccounts.
+    You will need to save this (e.g. C:\Users\<username>\.gcp\cyberarena.json). This key will be used for running the setup.
+4. Set up the Identity Platform service and obtain the API key as follows:
     1. Navigate to the Identify Platform at 
         https://console.cloud.google.com/marketplace/product/google-cloud-platform/customer-identity and enable the API.
     2. Click to create a new Identity Provider and select Email/Password. The defaults are fine to use. 
@@ -12,8 +14,8 @@
     4. Create API credentials to use in the main application by going to 
         https://console.cloud.google.com/apis/credentials and clicking on Create Credentials and selecting API key. 
         Copy this API key. You will need to use this when deploying the application.
-4. Enable the DNS service and create a new managed domain (e.g. mycyberarena.com). **The zone must be named cybergym-public.**
-5. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
+5. Enable the DNS service and create a new managed domain (e.g. mycyberarena.com). **The zone must be named cybergym-public.**
+6. Increase quotas according the following recommendations based on Max Concurrent Build (MCB)
     1. Compute Engine API (Subnetworks) - MCB * 2
     2. Compute Engine API (Networks) - MCB * 1
     3. Compute Engine API (Firewall Rules) - MCB * 3
@@ -21,7 +23,7 @@
     5. Compute Engine API (In-Use IP Addresses) - MCB * 1
     6. Compute Engine API (CPUs) - MCB * 3
     7. Cloud Build API (Concurrent Builds) - 50
-6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/ - You will use this to run setup.py as described in the deployment section below.
+7. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/ - You will use this to run setup.py as described in the deployment section below.
 
 ## Deployment
 Create a new project in PyCharm at the root of this directory, and then set `build_files`, `cloud_functions`, and `main_app` directories as _sources root_ in PyCharm (i.e., right click --> mark directory --> sources root). Open `setup.py` and create a new configuration to run `setup.py`. This will ensure the sources directories are easily recognized. Follow the instructions in the prompt. You can also use `setup.py` for synchronizing cloud

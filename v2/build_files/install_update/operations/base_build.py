@@ -52,3 +52,12 @@ class BaseBuild:
                 print(f"Running: {item.value}")
                 ret = subprocess.run(item.value, capture_output=True, shell=True)
                 print(ret.stderr.decode())
+
+        confirmation = str(input("Do you want to create the environmental variables at this time? (Y/n): ")).upper() \
+            if not self.suppress else "Y"
+        if confirmation != "N":
+            for item in ShellCommands.RuntimeConfig:
+                print(f"Running: {item.value}")
+                ret = subprocess.run(item.value, capture_output=True, shell=True)
+                print(ret.stderr.decode())
+

@@ -42,6 +42,7 @@ class WorkoutStateManager:
             if 'state' not in self.build:
                 self.build['state'] = self.s.START.value
                 self.build['state-timestamp'] = datetime.utcnow().isoformat()
+                self.ds.put(self.build)
             self.build_id = initial_build_id
         else:
             self.ds = None
@@ -54,6 +55,7 @@ class WorkoutStateManager:
         if 'state' not in self.build:
             self.build['state'] = self.s.START.value
             self.build['state-timestamp'] = datetime.utcnow().isoformat()
+            self.ds.put(self.build)
 
     def state_transition(self, new_state):
         """
@@ -62,6 +64,7 @@ class WorkoutStateManager:
         :param new_state: The new state for the server
         :return: Boolean on success. If the state transition is valid, then return True. Otherwise, return False
         """
+        self.build = self.ds.get()
         new_state = new_state.value if type(new_state) != int else new_state
         existing_state = self.build['state']
         if self._is_valid_transition(existing_state, new_state):

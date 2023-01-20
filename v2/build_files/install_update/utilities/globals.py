@@ -59,6 +59,10 @@ class ShellCommands:
         CYBER_ARENA = "gcloud pubsub topics create cyber-arena"
         BUDGET = "gcloud pubsub topics create budget"
 
+    class RuntimeConfig(str, Enum):
+        CREATE_RUNTIME_CONFIG = "gcloud beta runtime-config configs create \"cybergym\" " \
+                                "--description \"Project constants for cloud functions and main app\""
+
 
 class InstallSettings:
     BULK_SETTINGS_FILENAME = ".bulk_settings.yaml"
