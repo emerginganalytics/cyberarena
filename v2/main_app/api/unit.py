@@ -57,7 +57,7 @@ class Unit(MethodView):
         # Parse Form Data
         expire_datetime = recv_data.get('expires', None)
         registration_required = recv_data.get('registration_required', False)
-        build_file = recv_data.get('build_file', None)
+        build_type = recv_data.get('build_file', None)
         build_for_class = recv_data.get('build_for_class', None)
         if not build_for_class:
             build_count = recv_data.get('build_count', None)
@@ -68,9 +68,12 @@ class Unit(MethodView):
                 build_count = len(target_class['roster'])
             else:
                 return self.http_resp(code=404).prepare_response()
-        if build_count and expire_datetime and build_file:
-            unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
-            build_spec = yaml.safe_load(unit_yaml)
+        if build_count and expire_datetime and build_type:
+            # unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
+            # build_spec = yaml.safe_load(unit_yaml)
+            build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=build_type).get()
+            if not build_spec:
+                return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
             build_spec['instructor_id'] = user_email
             expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
             build_spec['workspace_settings'] = {

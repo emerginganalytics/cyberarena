@@ -15,7 +15,7 @@ __status__ = "Testing"
 
 class FixedArenaSchema(Schema):
     id = fields.Str(description='unique ID for the fixed arena', required=True)
-    creation_timestamp = fields.DateTime()
+    creation_timestamp = fields.Float()
     version = fields.Str(required=True)
     build_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.BuildType]))
     summary = fields.Nested('CyberArenaSummarySchema', required=True)
@@ -175,6 +175,7 @@ class AssessmentSchema(Schema):
 
 
 class AssessmentQuestionSchema(Schema):
+    id = fields.Str(required=False, description="An ID to use when referring to a specific question")
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
@@ -189,13 +190,6 @@ class AssessmentQuestionSchema(Schema):
 class EscapeRoomSchema(Schema):
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(description="Answer from the top level-question")
-    entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
-                            description="The type of entry to present to the user for solving the question "
-                                        "(e.g., server or web_application)")
-    entry_name = fields.Str(required=True, description="A name based on the entry_type to help build a URL for the "
-                                                       "student to click on. For example, a server will have it's "
-                                                       "human interaction guacamole link that they can click on to "
-                                                       "answer the question")
     responses = fields.List(fields.Str(), missing=[], description="Records the team's attempts to answer the question "
                                                                   "and escape")
     escaped = fields.Bool(missing=False, description="Whether or not the team has successfully escaped")
@@ -208,6 +202,13 @@ class EscapeRoomSchema(Schema):
 
 class PuzzleSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific puzzles")
+    entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
+                            description="The type of entry to present to the user for solving the question "
+                                        "(e.g., server or web_application)")
+    entry_name = fields.Str(required=True, description="A name based on the entry_type to help build a URL for the "
+                                                       "student to click on. For example, a server will have it's "
+                                                       "human interaction guacamole link that they can click on to "
+                                                       "answer the question")
     type = fields.Str(missing=BuildConstants.QuestionTypes.INPUT,
                       validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)

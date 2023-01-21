@@ -1,7 +1,7 @@
-{% extends "teacher_base.html" %}
+{% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
-{% block title %}Unit {{ unit.key.name }}{% endblock %}
-{% block nav_title %}Unit {{ unit.key.name }}{% endblock %}
+{% block title %}{{ unit.summary.name }}{% endblock %}
+{% block nav_title %}{{ unit.summary.name }} Assignment{% endblock %}
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
@@ -10,20 +10,31 @@
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
-                <a id="banner" href="#" class="nav-link text-center disabled no-select"></a>
-            </li>
-            <li class="nav-item">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
             </li>
             <li class="nav-item">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
         </ul>
     </div>
-    <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
+                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 {% block content %}
@@ -81,9 +92,9 @@
                     {% endif %}
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="fa-home-btn" data-toggle="pill"
-                            data-target="#boot-container" type="button" role="tab"
-                            aria-controls="nav-boot"
+                    <button class="nav-link" id="main-container-btn" data-toggle="pill"
+                            data-target="#main-container-tab" type="button" role="tab"
+                            aria-controls="main-container-tab"
                             aria-selected="true">Home</button>
                 </li>
                 {% if unit['servers'] %}

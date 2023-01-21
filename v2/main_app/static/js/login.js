@@ -2,11 +2,11 @@ function configureFirebaseLogin() {
     //Used in the initial login page 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        var name = user.displayName;
+        let name = user.displayName;
         
         /* If the provider gives a display name, use the name for the
         personal welcome message. Otherwise, use the user's email. */
-        var welcomeName = user.email;
+        let welcomeName = user.email;
 
         user.getIdToken().then(function(idToken) {
           userIdToken = idToken;
@@ -29,11 +29,11 @@ function configureFirebaseLogin() {
 }
 
 function configureFirebaseLoginWidget() {
-    var uiConfig = {
+    let uiConfig = {
         callbacks: {
           signInSuccessWithAuthResult: function(authResult, redirectUrl){
             console.log(authResult.user);
-            var data = {user_email: authResult.user.email};
+            let data = {user_email: authResult.user.email};
             $.ajax({
               type: "POST",
               url: "/login",
@@ -60,12 +60,12 @@ function configureFirebaseLoginWidget() {
         // Terms of service url
         // 'tosUrl': '<your-tos-url>',
     };
-    var ui = new firebaseui.auth.AuthUI(firebase.auth());
+    let ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);
 }
 function enable_signout(){
   //Enables signout button after successful login
-  var signOutBtn = $('#sign-out');
+  let signOutBtn = $('#sign-out');
   signOutBtn.prop('disabled', false);
   signOutBtn.prop('hidden', false);
   signOutBtn.click(function(event) {

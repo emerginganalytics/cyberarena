@@ -62,13 +62,16 @@
 
                // Start timer
                {% if workout.escape_room.remaining_time > 0 %}
-                   let countdownTimer = new Timer("{{ workout['id'] }}");
-                   let times = {
-                       'start_time': {{ workout.escape_room.start_time }},
-                       'time_limit': {{ workout.escape_room.time_limit }},
-                       'expired': {{ workout.escape_room.expired | lower }}
-                   }
-                   countdownTimer.start(times);
+                   {% if not workout.escape_room.escaped %}
+                       let countdownTimer = new Timer("{{ workout['id'] }}");
+                       let times = {
+                           'start_time': {{ workout.escape_room.start_time }},
+                           'time_limit': {{ workout.escape_room.time_limit }},
+                           'expired': {{ workout.escape_room.expired | lower }}
+                       }
+                       countdownTimer.start(times);
+                       getEscapeRoomState("{{ workout['id'] }}");
+                   {% endif %}
                {% endif %}
            });
     </script>
@@ -79,7 +82,7 @@
                 <!-- Not Sure if we need this sidebar here on this page -->
                 <li class="nav-item disabled">
                     {%  if workout.escape_room.escaped == True %}
-                        <div id="room-timer-div" class="nav-link">
+                        <div id="room-timer-div" class="nav-link room-complete">
                             <h5 class="nav-link room-complete">Room Escaped!</h5>
                         </div>
                     {% else %}
@@ -90,7 +93,7 @@
                                 </p>
                             </div>
                         {% else %}
-                            <div id="room-timer-div" class="nav-link disabled">
+                            <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
                                 <h5 class="text-center">Room Expired</h5>
                             </div>
                         {% endif %}
@@ -113,9 +116,9 @@
                                 <div class="card-body">
                                     <h4 class="card-title">{{ puzzle.question }}</h4>
                                     {% if puzzle.correct == True %}
-                                        <h6 class="card-subtitle">{{ puzzle.reveal }}</h6>
+                                        <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">{{ puzzle.reveal }}</h6>
                                     {% else %}
-                                        <h6 class="card-subtitle">Incomplete</h6>
+                                        <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">Incomplete</h6>
                                     {% endif %}
                                 </div>
                             </div>
@@ -141,7 +144,7 @@
                                                 </div>
                                             </div>
                                             <div class="form-container">
-                                                <form id="puzzle-{{ loop.index }}-form" class="form-control puzzle-form form-inline">
+                                                <form id="{{ puzzle['id'] }}" class="form-control puzzle-form form-inline">
                                                     <div class="form-group">
                                                         <input hidden name="build_id" value="{{ workout['id'] }}">
                                                         <input hidden name="question_id" value="{{ puzzle['id'] }}">
@@ -151,7 +154,7 @@
                                                         <input id="puzzle-{{ loop.index }}-answer" class="form-control" type="text" name="response" placeholder="Answer">
                                                     </div>
                                                     <input type="button" class="btn-fa mb-2" value="Submit"
-                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-{{ loop.index }}-form', '{{ loop.index }}')"/>
+                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', '{{ puzzle["id"] }}', '{{ loop.index }}')"/>
                                                 </form>
                                             </div> <!-- End form-container -->
                                         </div> <!-- End modal-body div -->
@@ -184,13 +187,14 @@
                                                 <form id="puzzle-50-form" class="form-control puzzle-form form-inline" onsubmit="checkEscapeRoom()">
                                                     <div class="form-group">
                                                         <input hidden name="build_id" value="{{ workout['id'] }}">
+                                                        <input hidden name="question_id" value="question_id">
                                                     </div>
                                                     <div class="form-group mx-sm-3 mb-2">
                                                         <label for="puzzle-50-answer" class="sr-only">Final Answer: </label>
                                                         <input id="puzzle-50-answer" class="form-control" type="text" name="response" placeholder="Final Answer">
                                                     </div>
                                                     <input type="button" class="btn-fa mb-2" value="Submit"
-                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-50-form', '4534-9a9d')"/>
+                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-50-form', 50, '4534-9a9d')"/>
                                                 </form>
                                             </div> <!-- End form-container -->
                                         </div> <!-- End modal-body div -->
