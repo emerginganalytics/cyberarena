@@ -4,7 +4,6 @@ import time
 
 import flask.app
 from flask import abort, Blueprint, redirect, render_template, request, session, url_for
-from forms.forms import CreateWorkoutForm
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
