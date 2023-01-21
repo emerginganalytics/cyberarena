@@ -36,7 +36,7 @@ function build_unit(select_id, a_id){
     var build_select = document.getElementById(select_id);
     selection = build_select.options[build_select.selectedIndex].value;
 
-    var build_unit_a = document.getElementById('build-unit-a');
+    var build_unit_a = document.getElementById(a_id);
     build_unit_a.setAttribute("href", 'build/' + selection);
     return false;
 }
@@ -56,7 +56,7 @@ function enable_object(obj_id, enable, hide=false, clear=false) {
             obj.prop('aria-disabled', true);
         }
         // Cases where we want to remove old form artifacts,
-        // i.e Template filter buttons
+        // i.e. Template filter buttons
         if (clear === true) {
             obj.innerHTML = "";
         }

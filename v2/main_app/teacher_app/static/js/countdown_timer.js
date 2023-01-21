@@ -1,16 +1,25 @@
 class CountdownTimer {
-    constructor(build_id) {
+    constructor(build_id, url, build_type) {
         this.target_id = 'room-timer';
         this.build_id = build_id;
-        this.url = '/api/escape-room/team/' + this.build_id;
+        this.url = String(url); //'/api/escape-room/' + this.build_id;
+        this.build_type = String(build_type);
     }
     updateTime(){
         return fetch(this.url, {method: "GET"})
             .then((response) => {
                 return response.json().then((data) => {
-                    return {
-                       'start_time': data['data']['workout']['escape_room']['start_time'],
-                       'time_limit': data['data']['workout']['escape_room']['time_limit']
+                    let return_data = {}
+                    if (this.build_type === 'unit'){
+                        return {
+                            'start_time': data['data']['unit']['workspace_settings']['start_time'],
+                            'time_limit': data['data']['unit']['workspace_settings']['time_limit'],
+                        }
+                    } else if (this.build_type === 'escape_room') {
+                       return {
+                           'start_time': data['data']['unit']['escape_room']['start_time'],
+                           'time_limit': data['data']['unit']['escape_room']['time_limit']
+                        }
                     }
                 });
             });

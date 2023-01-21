@@ -66,6 +66,7 @@ class BuildSpecification:
                                  extension="yaml")
         upload_specs = self._scan_specs_for_image_sync()
         self._upload_files_to_cloud(upload_specs, self.SPEC_FOLDER)
+        self._sync_specs_to_datastore(upload_specs)
 
         self._sync_locked_folder(plaintext_dir=self.build_teacher_instructions_plaintext,
                                  encrypted_dir=self.build_teacher_instructions_encrypted, extension="pdf")
@@ -204,6 +205,15 @@ class BuildSpecification:
             ds_manager.set(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC.value, key_id=attack['id'])
             ds_manager.put(attack)
 
+    def _sync_specs_to_datastore(self, specs):
+        ds_manager = DataStoreManager()
+        for filename in specs:
+            print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
+            spec = yaml.safe_load(open(filename.path))
+            self._validate_spec(spec)
+            ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
+            ds_manager.put(spec)
+
     def _create_directories(self):
         directories = [
             self.build_attacks_specs,
@@ -229,6 +239,7 @@ class BuildSpecification:
         if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             spec = FixedArenaSchema().load(spec)
         elif build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
+            spec['fixed_arena_servers'] = []
             spec = FixedArenaClassSchema().load(spec)
         elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
             spec = UnitSchema().load(spec)

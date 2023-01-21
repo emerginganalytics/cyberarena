@@ -8,6 +8,7 @@ class DatastoreKeyTypes(str, Enum):
     FIXED_ARENA = 'fixed-arena'
     FIXED_ARENA_CLASS = 'fixed-arena-class'
     FIXED_ARENA_WORKSPACE = 'fixed-arena-workspace'
+    CATALOG = 'v2-catalog'
     UNIT = 'v2-unit'
     WORKOUT = 'v2-workout'
     SERVER = 'cybergym-server'

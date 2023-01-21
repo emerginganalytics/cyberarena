@@ -1,0 +1,165 @@
+{% extends "v2-base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% import 'student_app_macros.html' as student_macros %}
+{% block title %}{{ workout.summary.name }} Workout{% endblock %}
+{% block nav_title %}{{ workout.summary.name }} Workout{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student_app.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/collapsible-div.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+     <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
+                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            {% if workout.registration_required %}
+                <li class="nav-item">
+                    <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+                </li>
+            {% elif auth_config and not workout.registration_required %}
+                <li class="nav-item">
+                    <a id="sign-in" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign In</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
+          });
+           $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+
+               // Start timer
+               {% if workout.remaining_time > 0 %}
+                   let countdownTimer = new Timer("{{ workout['id'] }}");
+                   let times = {
+                       'start_time': {{ workout.start_time }},
+                       'time_limit': {{ workout.time_limit }},
+                       'expired': {{ workout.expired | lower }},
+                   }
+                   countdownTimer.start(times);
+               {% endif %}
+               collapseDiv();
+           });
+    </script>
+     <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <!-- Not Sure if we need this sidebar here on this page -->
+                <li class="nav-item disabled">
+                    {% if workout.expired == False %}
+                        <div id="room-timer-div" class="countdown-timer">
+                            <p class="text-center no-select">
+                                <span id="room-timer"></span>
+                            </p>
+                        </div>
+                    {% else %}
+                        <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                            <h5 class="text-center">Workout Expired</h5>
+                        </div>
+                    {% endif %}
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-toggle="pill"
+                            data-target="#home-container" type="button" role="tab"
+                            aria-controls="home-container" aria-selected="true"><i class="fa fa-book fa-lg"></i>Workout</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="assessment-tab" data-toggle="pill"
+                            data-target="#assessment-container" type="button" role="tab"
+                            aria-controls="assessment-container"
+                            aria-selected="false"><i class="fa fa-tasks fa-lg"></i>Assessment</button>
+                </li>
+            </ul>
+        </div><!-- End sidebar-menu div -->
+         <div id="content-div" class="col main mt-3 h-100 pr-3 overflow-auto" style="overflow-y: scroll;">
+            <div id="tab-container" class="tab-content">
+                <div class="tab-pane fade active show" id="home-container" role="tabpanel" aria-labelledby="home-tab">
+                    <div id='workout-summary-div' class="info-container">
+                        <div id="class-summary">
+                            <h2>{{ workout.summary.name }}</h2>
+                            <p>{{ workout.summary.description }}</p>
+                            {% if workout.summary.student_instructions_url %}
+                                <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
+                                       target="_blank" rel="noopener noreferrer">Workout Instructions</a>
+                            {% endif %}
+                        </div>
+                    </div> <!-- End workout-summary-div -->
+                    <div id="workout-servers-div" class="info-container">
+                        <p>{{ workout.servers }}</p>
+                        <p>{{ server_list }}</p>
+                        {% if workout.entry_server.url %}
+                            <a class="btn-fa" id="workout-link"
+                               href="{{ workout.entry_point.url }}"
+                               target="_blank"><i class="fa fa-external-link" style="padding-right: 2px;"></i>ENTER WORKOUT!</a>
+                        {% endif %}
+                    </div> <!-- End workout-servers -->
+                </div> <!-- End home-container -->
+                {% if workout.assessment %}
+                    <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
+                        <div class="info-container">
+                            <h1 class="text-center">Assessment Questions</h1>
+                            <br />
+                            <!-- TODO: Build checkQuestion() JS function -->
+                            {% for question in workout.assessment.questions %}
+                                <div class="collapse-div-wrapper">
+                                    <button type="button" class="collapseBtn">{{ question.question }}</button>
+                                    <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
+                                        <form id="assessment-form{{loop.index }}" class="form-control">
+                                            <div class="form-group">
+                                                <label for="question_{{ loop.index }}"></label>
+                                                <input id="question_{{ loop.index }}" type="text" placeholder="Answer">
+                                            </div>
+                                            <input id="submit_{{ loop.index }}" type="button"
+                                                   onclick="checkQuestion('question_id', {{ workout['id'] }} );"
+                                                   class="btn-fa" value="Check Answer">
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div> <!--End info-container -->
+                    </div> <!-- End assessment-tab -->
+                {% endif %}
+            </div> <!-- End tab-container-->
+        </div> <!-- End content-div -->
+     </div> <!-- End content-row -->
+{% endblock %}

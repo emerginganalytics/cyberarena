@@ -62,9 +62,6 @@ class EscapeRoomUnit(MethodView):
     def post(self, data=None):
         """
         Creates a new unit of escape rooms
-        Args:
-            data (str): dictionary of build parameters
-
         Returns: HTTP Response
 
         """
@@ -76,7 +73,6 @@ class EscapeRoomUnit(MethodView):
         expires = data.get('expires', 2)
         build_file = data.get('build_file', None)
         build_count = data.get('build_count', 1)
-
         try:
             unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
         except FileNotFoundError:
@@ -88,7 +84,7 @@ class EscapeRoomUnit(MethodView):
             'count': build_count,
             'registration_required': False,
             'student_emails': [],
-            'expires': (datetime.now() + timedelta(days=expires)).timestamp()
+            'expires': datetime.strptime(expires, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=self.debug)
         build_spec_to_cloud.commit()
@@ -161,6 +157,7 @@ class EscapeRoomWorkout(MethodView):
         Returns: HTTP Response
 
         """
+        query_string = request.args
         if build_id:
             workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
             if workout:
@@ -168,7 +165,16 @@ class EscapeRoomWorkout(MethodView):
                 time_limit = workout['escape_room']['time_limit']
                 start_time = workout['escape_room']['start_time']
                 workout['escape_room']['remaining_time'] = time_limit - (current_time - start_time)
-                return self.http_resp(code=200, data=workout).prepare_response()
+                if query_string:
+                    if 'status' in query_string:
+                        workout['escape_room']['number_correct'] = workout['escape_room']['puzzle_count'] = 0
+                        for puzzle in workout['escape_room']['puzzles']:
+                            workout['escape_room']['puzzle_count'] += 1
+                            puzzle['answer'] = ''
+                            if puzzle['correct']:
+                                workout['escape_room']['number_correct'] += 1
+                        workout['escape_room']['answer'] = ''
+                    return self.http_resp(code=200, data=workout).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -205,10 +211,18 @@ class EscapeRoomWorkout(MethodView):
                     else:
                         self._evaluate_puzzle_question(question_id, response)
                     ds_workout.put(self.workout)
+
+                    # Clean up return object
+                    self.workout['escape_room']['number_correct'] = self.workout['escape_room']['puzzle_count'] = 0
+                    for puzzle in self.workout['escape_room']['puzzles']:
+                        self.workout['escape_room']['puzzle_count'] += 1
+                        puzzle['answer'] = ''
+                        if puzzle['correct']:
+                            self.workout['escape_room']['number_correct'] += 1
+                    self.workout['escape_room']['answer'] = ''
                     return self.http_resp(code=200, data=self.workout).prepare_response()
                 else:
                     return self.http_resp(code=404, msg="The escape room has no time remaining.").prepare_response()
-
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -227,7 +241,6 @@ class EscapeRoomWorkout(MethodView):
         self.workout['escape_room']['responses'].append(response)
         if str.upper(response) == str.upper(self.workout['escape_room']['answer']):
             self.workout['escape_room']['escaped'] = True
-
 
     def _evaluate_puzzle_question(self, question_id: int, response: str):
         """

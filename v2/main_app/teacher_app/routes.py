@@ -1,7 +1,9 @@
 import logging as logger
 import json
 import time
-from flask import abort, Blueprint, redirect, render_template, request, session
+
+import flask.app
+from flask import abort, Blueprint, redirect, render_template, request, session, url_for
 from forms.forms import CreateWorkoutForm
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.bucket_manager import BucketManager
@@ -82,9 +84,9 @@ def teacher_home():
         # Get list of workouts from datastore catalog
         specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG.value).query().fetch())
         workout_specs = {
-            'assignments': BucketManager().get_workouts(),
+            'assignments': [],
             'live': [],
-            'escape_rooms': []
+            'escape_rooms': [],
         }
         for spec in specs:
             build_type = spec['build_type']
@@ -172,7 +174,7 @@ def teacher_class(class_id):
                             expired_units.append(unit_info)
                 teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['timestamp']), reverse=True)
                 teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
-            workout_specs = BucketManager().get_workouts()
+            workout_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG).query())
             return render_template('teacher_classroom.html', auth_config=auth_config, teacher_info=teacher_info,
                                    workout_specs=workout_specs)
     abort(404)
@@ -180,9 +182,17 @@ def teacher_class(class_id):
 
 @teacher_app.route('/build/<workout_type>', methods=['GET'])
 def build(workout_type):
-    logger.info('Request for workout type %s' % workout_type)
-    form = CreateWorkoutForm()
-    return render_template('build_workout.html', workout_type=workout_type, auth_config=auth_config)
+    urls = {
+        'unit': url_for('unit'),
+        'escape_room': url_for('escape-room'),
+        'fixed_arena': url_for('fixed-arena'),
+        'fixed_arena_class': url_for('class'),
+    }
+    spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=workout_type).get()
+    if spec:
+        spec['api'] = urls[spec['build_type']]
+        return render_template('build_workout.html', spec=spec, workout_type=workout_type, auth_config=auth_config)
+    abort(404)
 
 
 # Instructor unit page. Displays information and links for a unit of workouts
@@ -217,32 +227,6 @@ def workout_list(unit_id):
                                    workout_list=workout_list, unit=unit, main_app_url=CloudEnv().main_app_url,
                                    attack_specs=attack_specs)
         return redirect('/no-workout')
+    return redirect('/login')
 
-
-@teacher_app.route('/arena_list/<unit_id>', methods=['GET', 'POST'])
-def arena_list(unit_id):
-    # Get Arena Datastore objects
-    unit_query = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT, key_id=str(unit_id))
-    unit = unit_query.get()
-    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
-    teacher_instructions_url = None
-    if 'teacher_instructions_url' in unit:
-        teacher_instructions_url = unit['teacher_instructions_url']
-    student_instructions_url = None
-    if 'student_instructions_url' in unit:
-        student_instructions_url = unit['student_instructions_url']
-
-    start_time = None
-    if'start_time' in unit:
-        start_time = unit['start_time']
-        # start_time = time.gmtime(start_time)
-    unit_teams = None
-    if 'teams' in unit:
-        unit_teams = unit['teams']
-
-    if request.method == "POST":
-        return json.dumps(unit)
-    if unit:
-        return render_template('arena_list.html', unit_teams=unit_teams, teacher_instructions=teacher_instructions_url,
-                               workout_list=workout_list, student_instructions=student_instructions_url,
-                               description=unit['description'], unit_id=unit_id, start_time=start_time)
+# [ eof ]
