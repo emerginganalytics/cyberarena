@@ -24,16 +24,17 @@ class TimestampToDate {
         let hour = a.getHours();
         let min = a.getMinutes();
         let sec = a.getSeconds();
-        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+        return month + ' ' + date + ', ' + year + ' ' + hour + ':' + min + ':' + sec ;
     }
 }
 
-function show_current_units(modal_num){
-    $('#current_unit_' + modal_num).modal();
+function show_modal_card(modal_id){
+    $('#' + modal_id).modal();
 }
-function build_unit(){
-    var build_unit_select = document.getElementById('build-unit-select');
-    selection = build_unit_select.options[build_unit_select.selectedIndex].value;
+
+function build_unit(select_id, a_id){
+    var build_select = document.getElementById(select_id);
+    selection = build_select.options[build_select.selectedIndex].value;
 
     var build_unit_a = document.getElementById('build-unit-a');
     build_unit_a.setAttribute("href", 'build/' + selection);

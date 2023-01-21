@@ -349,23 +349,28 @@ input:checked + .slider:before {
 .unit-card{
     max-width: 300px;
     transition: background-color 0.4s ease;
-    background-color: var(--main_color, #6e2639);
+    background-color: var(--maroon, #6e2639);
     animation-name: card-fade-in;
     animation-duration: 0.5s;
+    margin-bottom: 2vh;
+    margin-bottom: 12px;
 }
 .unit-card:hover {
     background-color: #FFF;
     cursor: pointer;
 }
-.unit-card:hover .card-title{
-    color: var(--main_color, #6e2639);
+.unit-card:hover .card-title .card-text{
+    color: var(--maroon, #6e2639);
 }
 .card-title {
     color: #FFF;
     text-align:center;
     font-variant: small-caps;
+    border-bottom: 1px solid white;
 }
-
+.card-text {
+    color: whitesmoke;
+}
 /* Table Toolbar Styles */
 .table-manage-wrapper {
     width: 90%;

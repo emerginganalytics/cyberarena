@@ -28,70 +28,120 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/control.js") }}'></script>
     <script>
-          var teacher_email = null;
-          var auth_config = {
-              apiKey: '{{ auth_config["api_key"] }}',
-              authDomain: '{{ auth_config["auth_domain"] }}',
-              projectId: '{{ auth_config["project_id"] }}'
-          };
-          initApp(auth_config).then(value => {
-              enable_signout();
-              // Set welcome banner
-              const welcome_nav = document.getElementById('banner');
-              welcome_nav.innerHTML = value['display_name'];
-              if (value['authorized'] === true){
-                  teacher_email = value['email'];
-                  var teacher_button = document.createElement('a');
-                  teacher_button.href = '/teacher/home/';
-                  teacher_button.className = 'nav-link';
-                  teacher_button.innerHTML = 'Teacher Home';
-                  if (value['admin'] === true){
-                      var admin_button = document.createElement("a");
-                      admin_button.href = "/admin/home";
-                      admin_button.className = "nav-link";
-                      admin_button.innerHTML = "Admin Home";
-                  }
-              } else {
-                  if(value['student'] === true){
-                      var student_home_link = document.createElement("a");
-                      student_home_link = '/student/home';
-                      student_home_link.className = "nav-link";
-                      student_home_link.innerHTML = "Your Student Page";
-                  }
-              }
-          });
+        var teacher_email = null;
+        var auth_config = {
+          apiKey: '{{ auth_config["api_key"] }}',
+          authDomain: '{{ auth_config["auth_domain"] }}',
+          projectId: '{{ auth_config["project_id"] }}'
+        };
+        initApp(auth_config).then(value => {
+            enable_signout();
+            // Set welcome banner
+            const welcome_nav = document.getElementById('banner');
+            welcome_nav.innerHTML = value['display_name'];
+        });
+        $(document).ready(function (){
+            let tsToDate = new TimestampToDate();
+            tsToDate.convert_timestamps();
+            // Start Timer if Needed
+            {% if unit.servers | count > 0 %}
+                {% if not unit.worksapce_settings.expired %}
+                    {% if unit.workspace_settings.start_time %}
+                        let countdownTimer = new Timer("{{ unit['id'] }}", '{{ unit.api }}', "{{ unit.build_type }}");
+                        let times = {
+                            'start_time': {{ unit.workspace_settings.start_time }},
+                            'time_limit': {{ unit.workspace_settings.time_limit }},
+                            'expired': {{ unit.workspace_settings.expired | lower }}
+                        }
+                        countdownTimer.start(times);
+                    {% endif %}
+                    getUnitState("{{ unit['id'] }}");
+                {% endif %}
+            {% endif %}
+        }); // end document.ready
+        let unitControl = new Control('{{ unit.id }}', '{{ unit.api }}');
     </script>
     <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
         <!--TODO: Create toggle sidebar button in top navbar -->
-        <!--<div id="sidebar-div" class="col-sm-3 col-md-2 sticky-top nav-sidebar">-->
         <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
+                <li>
+                    {% if not unit.expired %}
+                        <div class="nav-link disabled" style="pointer-events: none">
+                            <h5>EXPIRES: <span class="timestampField">{{ unit.workspace_settings.expires }}</span></h5>
+                        </div>
+                    {% else %}
+                        <div class="nav-link disabled" style="pointer-events: none">
+                            <h5>UNIT EXPIRED</h5>
+                        </div>
+                    {% endif %}
+                </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="fa-home-btn" data-toggle="pill"
                             data-target="#boot-container" type="button" role="tab"
                             aria-controls="nav-boot"
                             aria-selected="true">Home</button>
                 </li>
-                <li class="nav-item">
-                    {% if unit['build_type'] == "compute" %}
-                        <!-- TODO: Add unit controls -->
-                    {% endif %}
-                </li>
-                <!-- Not sure if this is needed right now
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="fa-config-btn" data-toggle="pill"
-                            data-target="#settings-container" type="button" role="tab"
-                            aria-controls="nav-settings"
-                            aria-selected="false">Manage</button>
-                </li>-->
+                {% if unit['servers'] %}
+                    <li class="nav-item">
+                        <button class="nav-link btn-fa" onclick="unitControl.start();">Start Assignment</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link btn-fa" onclick="unitControl.stop();">Stop Assignment</button>
+                    </li>
+                {% endif %}
             </ul>
         </div> <!--End sidebar-menu div -->
-        <div id="content-div" class="col main pt-5 mt-3 h-100 pr-3 overflow-auto">
-            <div id="home-content-ctn" class="d-inline-flex">
-
+        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+            <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div id="main-container-tab" class="tab-pane fade active show" role="tabpanel" aria-labelledby="main-container-btn">
+                        <div class="container">
+                            <div id="assignment-info" class="info-container">
+                                <h2 class="text-center">{{ unit.summary.name }}</h2>
+                                <h5>Author: {{ unit.summary.author }}</h5>
+                                <p>{{ unit.summary.description }}</p>
+                                {% if unit.summary.teacher_instructions %}
+                                    <a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
+                                       target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
+                                {% endif %}
+                            </div>
+                            <div id="workout-table-ctn" class="table-ctn">
+                                <table class="table text-nowrap table-small">
+                                    <thead>
+                                        <tr id="active-table-headers">
+                                            <td>State</td>
+                                            <td>ID</td>
+                                            <td>TBD</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for workout in workout_list %}
+                                            <td>
+                                                {% if workout['state'] == 50 %}
+                                                    <span id="workout-state-{{ workout['id'] }}" class="running"></span>
+                                                {% elif workout['state'] == 53 %}
+                                                    <span id="workout-state-{{ workout['id'] }}" class="stopped"></span>
+                                                {% elif worout['state'] == 72 %}
+                                                    <span id="workout-state-{{ workout['id'] }}" class="deleted"></span>
+                                                {% else %}
+                                                    <span id="workout-state-{{ workout['id'] }}" class="transition"></span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ workout["id"] }}</td>
+                                            <td>TBD</td>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        </main>
     </div> <!-- End content-row -->
 {% endblock content %}

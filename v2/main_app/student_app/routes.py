@@ -143,6 +143,68 @@ def unit_signup(unit_id):
     return render_template('unit_signup.html')
 
 
+# TODO: Will replace student_app.landing_page route
+@student_app.route('/assignment/workout/<build_id>', methods=['GET'])
+def workout(build_id):
+    auth_config = CloudEnv().auth_config
+    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+    parent_id = workout_info.get('parent_id', None)
+    if workout_info and parent_id:
+        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
+        if unit:
+            workout_info['summary'] = unit['summary']
+            workout_info['assessment'] = unit.get('assessment', None)
+            workout_info['expires'] = unit['workspace_settings']['expires']
+            current_ts = get_current_timestamp_utc()
+            is_expired = True
+            if current_ts <= workout_info['expires']:
+                is_expired = False
+
+            # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
+            if not is_expired:
+                workout_info['remaining_time'] = workout_info['expires'] - current_ts
+            else:
+                workout_info['remaining_time'] = 0
+        # Get the entry point server information
+        for server in workout_info['servers']:
+            entry_point = server.get('human_interaction', None)[0]
+            if entry_point:
+                workout_info['entry_server'] = {
+                    'entry_point': entry_point,
+                    'ip': server.get('nics', None)[0],
+                    'name': server.get('name', None)[0]
+                }
+                break
+        server_list = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=',
+                                                                                    value=build_id)
+        workout_info['entry_server']['url'] = _generate_connection_url(workout_info)
+        return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
+                               server_list=server_list)
+    return redirect('/no-workout')
+
+
+@student_app.route('/escape-room/team/<build_id>', methods=['GET', 'POST'])
+def escape_room(build_id):
+    auth_config = CloudEnv().auth_config
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
+    if workout:
+        expired = False
+        if workout['escape_room'].get('start_time', None):
+            start_time = workout['escape_room']['start_time']
+            time_limit = workout['escape_room']['time_limit']
+            current_time = get_current_timestamp_utc()
+            time_remaining = time_limit - (current_time - start_time)
+            if time_remaining > 0:
+                workout['escape_room']['expired'] = False
+                workout['escape_room']['remaining_time'] = time_remaining
+            else:
+                workout['escape_room']['expired'] = True
+
+        workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
+        return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
+    abort(404)
+
+
 @student_app.route('/fixed-arena/class/<build_id>/signup', methods=['GET', 'POST'])
 def fixed_arena_signup(build_id):
     if request.method == 'POST':
@@ -221,23 +283,11 @@ def fixed_arena_student(build_id):
         return redirect('/no-workout')
 
 
-@student_app.route('/escape-room/team/<build_id>', methods=['GET', 'POST'])
-def escape_room(build_id):
-    auth_config = CloudEnv().auth_config
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
-    if workout:
-        expired = False
-        if workout['escape_room'].get('start_time', None):
-            start_time = workout['escape_room']['start_time']
-            time_limit = workout['escape_room']['time_limit']
-            current_time = get_current_timestamp_utc()
-            time_remaining = time_limit - (current_time - start_time)
-            if time_remaining > 0:
-                workout['escape_room']['expired'] = False
-                workout['escape_room']['remaining_time'] = time_remaining
-            else:
-                workout['escape_room']['expired'] = True
-
-        workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'] == True)
-        return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
-    abort(404)
+def _generate_connection_url(workout_info):
+    dns_suffix = CloudEnv().dns_suffix
+    build_id = workout_info['id']
+    if workout_info.get('proxy_connections', None):
+        username = workout_info['proxy_connections'][0]['username']
+        password = workout_info['proxy_connections'][0]['password']
+        return f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
+    return False

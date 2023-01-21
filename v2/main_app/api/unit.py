@@ -37,6 +37,13 @@ class Unit(MethodView):
 
     def get(self, build_id=None):
         if build_id:
+            args = request.args
+            if args.get("state", None):
+                # Returns state for all workouts in unit
+                states = []
+                workouts = DataStoreManager().get_children(DatastoreKeyTypes.WORKOUT, build_id)
+                states = [{'id': workout['id'], 'state': workout['state']} for workout in workouts]
+                return self.http_resp(code=200, data={'states': states}).prepare_response()
             unit = DataStoreManager(key_type=self.key_type, key_id=build_id).get()
             if unit:
                 return self.http_resp(code=200, data=unit).prepare_response()

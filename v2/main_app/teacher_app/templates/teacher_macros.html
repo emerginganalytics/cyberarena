@@ -1,3 +1,4 @@
+{# Not currently in use #}
 {% macro deleteStudent(class_id, student_name) -%}
 <button type="button" class="btn-fa d-inline-flex col-5 btn-delete" data-toggle="modal" data-target="#modal_{{ class_id }}">
     <i class="fa fa-trash fa-lg icon-light"></i> Delete Student
@@ -19,4 +20,48 @@
         </div>
     </div>
 </div>
+{%- endmacro %}
+
+{# Cards are used as part of the Build Workout tab in teacher_classroom.html #}
+{% macro buildWorkoutCards(specs, build_type, class_list, url) %}
+    {% for spec in specs %}
+        <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_{{ build_type }}_{{ loop.index }}')">
+            <div class="card-body">
+                <h5 class="card-title">{{ spec.summary.name }}</h5>
+                <p class="card-text">{{ spec.summary.description }}</p>
+            </div>
+        </div>
+        <div class="modal fade" tabindex="-1" role="dialog" id="current_{{ build_type }}_{{ loop.index }}">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5>{{ spec.summary.name }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">x</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="{{ build_type }}_{{ loop.index }}_form" action="{{ url }}" method="post">
+                            <div class="form-group">
+                                <input type="hidden" name="email" id="email" />
+                                <input type="hidden" name="build_file" id="build_file" value="{{ spec['id'] }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="class-expire-date-{{ loop.index }}">Expires: </label>
+                                <input id="class-expire-date-{{ loop.index }}" class="form-control" name="expires"
+                                       type="datetime-local">
+                            </div>
+                            <div id="{{ build_type }}-build-count-{{ loop.index }}-div" class="form-group">
+                                <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" />
+                                <label for="build-count-{{ loop.index }}">Select number of students (typically less than 20)</label>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center">Build Workout!</button>
+                            </div>
+                        </form>
+                    </div> <!-- End modal-body -->
+                </div> <!--End modal-content -->
+            </div> <!-- End modal-dialog -->
+        </div> <!-- End modal-->
+    {% endfor %}
 {%- endmacro %}

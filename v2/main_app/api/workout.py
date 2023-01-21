@@ -28,27 +28,19 @@ class Workout(MethodView):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
         can return the full build object"""
         if build_id:
-            user_email = session.get('user_email', None)
-            user_group = session.get('user_group', None)
-            workout = DataStoreManager(key_type=self.topic, key_id=build_id).get()
+            workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
             if workout:
-                if user_email and workout['registration_required']:
-                    if user_email == workout['student_email'] or ArenaAuthorizer.UserGroups.AUTHORIZED in user_group:
-                        return json.dumps(workout)
-                    # Bad Request; Unauthorized User
+                args = request.args
+                if not args:
+                    return self.http_resp(code=200, data=workout).prepare_response()
+                elif args.get('state', False):
+                    state = workout.get('state', None)
+                    if state:
+                        return self.http_resp(code=200, data={'state': WorkoutStates(state).name}).prepare_response()
                     else:
-                        return self.http_resp(code=403)
-                else:
-                    # Anonymous user, return only workout state
-                    workout_state = workout.get('state', None)
-                    if workout_state:
-                        return self.http_resp(code=200, msg=workout_state)
-                    else:
-                        return self.http_resp(code=200, msg=WorkoutStates.RUNNING.name)
-            # Bad Request; Workout not found
-            return self.http_resp(code=404)
-        # Bad Request; No build_id given
-        return self.http_resp(code=400)
+                        return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()
+            return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     @auth_required
     def post(self, build_id):
@@ -60,6 +52,7 @@ class Workout(MethodView):
         Returns: str
 
         """
+        # TODO: Update this method to match current v2 directive
         if build_id:
             workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
             if workout.get('state', None) == WorkoutStates.READY:
@@ -70,22 +63,17 @@ class Workout(MethodView):
                     abort(404)
                 message = f"Student initiated cloud build for workout {workout_id}"
                 self.pubsub_manager.msg(workout_id=workout_id, message=message)
-                return 'Workout Built'
+                return self.http_resp(code=200, msg='Workout Built').prepare_response()
             # Bad Request; Already Built
             else:
                 return self.http_resp(code=400)
         else:
             auth_level = session.get('user_groups', None)
             if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
-               # TODO: Write logic to support standard workout creation requests
-                return self.http_resp(code=200)
-            # Invalid Request; Insufficient Permissions
-            else:
-                return self.http_resp(code=403)
-
-    @admin_required
-    def delete(self):
-        return self.http_resp(code=405)
+                # TODO: Write logic to support standard workout creation requests
+                return self.http_resp(code=200).prepare_response()
+            else:  # Invalid Request; Insufficient Permissions
+                return self.http_resp(code=403).prepare_response()
 
     def put(self, build_id=None):
         """

@@ -7,7 +7,7 @@ from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
-from main_app_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants, get_current_timestamp_utc
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
@@ -28,7 +28,7 @@ def teacher_home():
             # TODO: Add instructor to entity
 
         teacher_info = {}
-        """teacher_classes = []
+        teacher_classes = []
         class_list = DataStoreManager(key_id=str(teacher_email)).get_classrooms()
         for class_instance in class_list:
             if 'class_name' in class_instance:
@@ -39,7 +39,7 @@ def teacher_home():
                     'roster_size': len(class_instance.get('roster', []))
                 }
                 teacher_classes.append(class_info)
-        teacher_info['classes'] = teacher_classes"""
+        teacher_info['classes'] = teacher_classes
 
         # Get all the units for this instructor
         unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
@@ -58,6 +58,7 @@ def teacher_home():
                         unit_info = {
                             'id': unit.key.name,
                             'name': unit['summary']['name'],
+                            'description': unit['summary']['description'],
                             'created': creation_ts,
                             'expires': expire_ts,
                             'build_count': unit['workspace_settings']['count']
@@ -77,15 +78,31 @@ def teacher_home():
                         expired_units.append(unit_info)
             teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['created']), reverse=True)
             teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
-        # Get list of workouts from cloud bucket
-        # TODO: Consider preloading all specs into a cyberarena-catalog entity
+
+        # Get list of workouts from datastore catalog
+        specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG.value).query().fetch())
         workout_specs = {
             'assignments': BucketManager().get_workouts(),
             'live': [],
             'escape_rooms': []
         }
+        for spec in specs:
+            build_type = spec['build_type']
+            if build_type == BuildConstants.BuildType.UNIT.value:
+                workout_specs['assignments'].append(spec)
+            elif build_type in BuildConstants.BuildType.FIXED_ARENA.value:
+                workout_specs['live'].append(spec)
+            elif build_type == BuildConstants.BuildType.ESCAPE_ROOM.value:
+                workout_specs['escape_rooms'].append(spec)
+        # Get api urls
+        urls = {
+            'unit': url_for('unit'),
+            'escape_room': url_for('escape-room'),
+            'fixed_arena': url_for('fixed-arena'),
+            'fixed_arena_class': url_for('class'),
+        }
         return render_template('teacher_classroom.html', auth_config=auth_config, auth_list=auth_list,
-                               teacher_info=teacher_info, workout_specs=workout_specs)
+                               teacher_info=teacher_info, workout_specs=workout_specs, urls=urls)
     else:
         return redirect('/login')
 
@@ -168,34 +185,37 @@ def build(workout_type):
     return render_template('build_workout.html', workout_type=workout_type, auth_config=auth_config)
 
 
-# Instructor landing page. Displays information and links for a unit of workouts
-@teacher_app.route('/workout_list/<unit_id>', methods=['GET', 'POST'])
+# Instructor unit page. Displays information and links for a unit of workouts
+@teacher_app.route('/assignment/<unit_id>', methods=['GET'])
 def workout_list(unit_id):
-    ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id))
-    unit = ds_manager.get()
-    build_type = unit['build_type']
-    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
-    registration_required = unit.get('registration_required', False)
-    if not registration_required:
-        workout_list = sorted(workout_list, key=lambda i: (i['student_name']))
-    else:
-        workout_list = sorted(workout_list, key=lambda i: (i['student_name']['student_name']))
-    teacher_instructions_url = None
-    if 'teacher_instructions_url' in unit:
-        teacher_instructions_url = unit['teacher_instructions_url']
+    auth = ArenaAuthorizer()
+    if session.get('user_email', None):
+        teacher_email = session['user_email']
+        auth_list = auth.get_user_groups(teacher_email)
 
-    attack_yaml = DataStoreManager().get_attack_specs()
-    # For updating individual workout ready state
-    if request.method=="POST":
-        if build_type == 'arena':
-            return json.dumps(unit)
-        return json.dumps(workout_list)
+        # Get assignment data
+        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id)).get()
+        workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
+        if unit and len(str(workout_list)) > 0:
+            attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
+            registration_required = unit.get('registration_required', False)
+            urls = {
+                'unit': url_for('unit'),
+                'escape_room': url_for('escape-room'),
+                'fixed_arena': url_for('fixed-arena'),
+                'fixed_arena_class': url_for('class'),
+            }
+            unit['api'] = urls[unit['build_type']]
 
-    if unit and len(str(workout_list)) > 0:
-        return render_template('workout_list.html', workout_list=workout_list, unit=unit,
-                               teacher_instructions=teacher_instructions_url, main_app_url=CloudEnv().main_app_url,
-                               attack_spec=attack_yaml, auth_config=auth_config)
-    else:
+            # Check if Unit is expired
+            current_ts = get_current_timestamp_utc()
+            is_expired = True
+            if current_ts <= unit['workspace_settings']['expires']:
+                is_expired = False
+            unit['expired'] = is_expired
+            return render_template('workout_list.html', auth_config=auth_config, auth_list=auth_list,
+                                   workout_list=workout_list, unit=unit, main_app_url=CloudEnv().main_app_url,
+                                   attack_specs=attack_specs)
         return redirect('/no-workout')
 
 
