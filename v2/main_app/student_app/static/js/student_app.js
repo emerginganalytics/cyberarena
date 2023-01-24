@@ -10,10 +10,10 @@ class TimestampToDate {
     convert_timestamps(){
         let timestamp_list = document.getElementsByClassName(this.target_class);
         for (let i = 0; i < timestamp_list.length; i++){
-            timestamp_list[i].innerHTML = this.timeConverter(timestamp_list[i].innerHTML);
+            timestamp_list[i].innerHTML = this.timeConverter(timestamp_list[i].innerHTML, false);
         }
     }
-    timeConverter(UNIX_timestamp){
+    timeConverter(UNIX_timestamp, full=true){
         let a = new Date(UNIX_timestamp * 1000);
         let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         let year = a.getFullYear();
@@ -22,7 +22,10 @@ class TimestampToDate {
         let hour = a.getHours();
         let min = a.getMinutes();
         let sec = a.getSeconds();
-        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec ;
+        if (!full){
+            return month + ' ' + date + ' ' + hour + ':' + min;
+        }
+        return month + ' ' + date + ', ' + year + ' ' + hour + ':' + min + ':' + sec ;
     }
 }
 function getEscapeRoomState (build_id){

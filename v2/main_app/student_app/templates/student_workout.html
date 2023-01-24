@@ -1,6 +1,5 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
-{% import 'student_app_macros.html' as student_macros %}
 {% block title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block nav_title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block styles %}
@@ -49,6 +48,7 @@
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/control.js") }}'></script>
     <script>
           var teacher_email = null;
           var auth_config = {
@@ -75,22 +75,32 @@
                        'time_limit': {{ workout.time_limit }},
                        'expired': {{ workout.expired | lower }},
                    }
-                   countdownTimer.start(times);
+                   // countdownTimer.start(times);
                {% endif %}
                collapseDiv();
+               {% if not workout.expired %}
+                    new Control('{{ build_id }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+               {% endif %}
            });
+           let control = new Control('{{ build_id }}', 'workoutStateObj', '{{ workout.api.workout }}');
+
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
         <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
-                <!-- Not Sure if we need this sidebar here on this page -->
                 <li class="nav-item disabled">
                     {% if workout.expired == False %}
                         <div id="room-timer-div" class="countdown-timer">
-                            <p class="text-center no-select">
-                                <span id="room-timer"></span>
-                            </p>
+                            {% if workout.state == 53 %}
+                                <p class="text-center no-center">EXPIRES:
+                                    <span id="room-timer" class="timestampField">{{ workout.expires }}</span>
+                                </p>
+                            {% else %}
+                                <p class="text-center no-select">
+                                    <span id="room-timer"></span>
+                                </p>
+                           {% endif %}
                         </div>
                     {% else %}
                         <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
@@ -101,13 +111,20 @@
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="home-tab" data-toggle="pill"
                             data-target="#home-container" type="button" role="tab"
-                            aria-controls="home-container" aria-selected="true"><i class="fa fa-book fa-lg"></i>Workout</button>
+                            aria-controls="home-container" aria-selected="true"><i class="fa fa-book fa-lg fa-pr-5"></i>Workout</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link" id="assessment-tab" data-toggle="pill"
                             data-target="#assessment-container" type="button" role="tab"
                             aria-controls="assessment-container"
-                            aria-selected="false"><i class="fa fa-tasks fa-lg"></i>Assessment</button>
+                            aria-selected="false"><i class="fa fa-tasks fa-lg fa-pr-5"></i>Assessment</button>
+                </li>
+                <li class="nav-item">
+                    {% if workout.entry_server.url %}
+                        <a class="nav-link" id="workout-link"
+                           href="{{ workout.entry_server.entry_point.url }}"
+                           target="_blank"><i class="fa fa-external-link fa-pr-5"></i><span id="workoutStateObj"></span></a>
+                    {% endif %}
                 </li>
             </ul>
         </div><!-- End sidebar-menu div -->
@@ -125,13 +142,13 @@
                         </div>
                     </div> <!-- End workout-summary-div -->
                     <div id="workout-servers-div" class="info-container">
+                        <div id="workout-controls-div">
+                            <ul class="workout-controls">
+                                <li><button onclick="control.start();">Start Workout</button></li>
+                                <li><button onclick="control.stop();">Stop Workout</button></li>
+                            </ul>
+                        </div>
                         <p>{{ workout.servers }}</p>
-                        <p>{{ server_list }}</p>
-                        {% if workout.entry_server.url %}
-                            <a class="btn-fa" id="workout-link"
-                               href="{{ workout.entry_point.url }}"
-                               target="_blank"><i class="fa fa-external-link" style="padding-right: 2px;"></i>ENTER WORKOUT!</a>
-                        {% endif %}
                     </div> <!-- End workout-servers -->
                 </div> <!-- End home-container -->
                 {% if workout.assessment %}

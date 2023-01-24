@@ -1,7 +1,7 @@
 import json
 import time
 from datetime import datetime, timezone
-from flask import abort, Blueprint, jsonify, redirect, render_template, request, session
+from flask import abort, Blueprint, jsonify, redirect, render_template, request, session, url_for
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.compute_manager import ComputeManager
@@ -158,11 +158,19 @@ def workout(build_id):
             current_ts = get_current_timestamp_utc()
             is_expired = True
             if current_ts <= workout_info['expires']:
-                is_expired = False
+                workout_info['expired'] = is_expired = False
 
             # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
             if not is_expired:
                 workout_info['remaining_time'] = workout_info['expires'] - current_ts
+                """ TODO: Need to establish a method to handle start times; i.e. what is the default run time for a workout?
+                    Will we allow students to set an arbitrary run time when starting the workout? Or do  we want to have a default
+                    runtime that will be used
+                """
+                if not workout_info.get('start_time', None):
+                    workout_info['start_time'] = 0
+                if not workout_info.get('time_limit', 0):
+                    workout_info['time_limit'] = 0
             else:
                 workout_info['remaining_time'] = 0
         # Get the entry point server information
@@ -177,7 +185,9 @@ def workout(build_id):
                 break
         server_list = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=',
                                                                                     value=build_id)
+        # TODO: Need to generate connection urls for each server with human_interaction available in the server object
         workout_info['entry_server']['url'] = _generate_connection_url(workout_info)
+        workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)
     return redirect('/no-workout')
@@ -188,7 +198,6 @@ def escape_room(build_id):
     auth_config = CloudEnv().auth_config
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
-        expired = False
         if workout['escape_room'].get('start_time', None):
             start_time = workout['escape_room']['start_time']
             time_limit = workout['escape_room']['time_limit']
@@ -290,4 +299,6 @@ def _generate_connection_url(workout_info):
         username = workout_info['proxy_connections'][0]['username']
         password = workout_info['proxy_connections'][0]['password']
         return f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
+    elif workout.info.get('container_url', None):
+        return f'http://{workout.get("container_url")}/home/{build_id}'
     return False
