@@ -151,6 +151,8 @@ def workout(build_id):
     parent_id = workout_info.get('parent_id', None)
     if workout_info and parent_id:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
+        server_list = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=',
+                                                                                    value=build_id)
         if unit:
             workout_info['summary'] = unit['summary']
             workout_info['assessment'] = unit.get('assessment', None)
@@ -173,20 +175,12 @@ def workout(build_id):
                     workout_info['time_limit'] = 0
             else:
                 workout_info['remaining_time'] = 0
+
         # Get the entry point server information
         for server in workout_info['servers']:
-            entry_point = server.get('human_interaction', None)[0]
+            entry_point = server.get('human_interaction', None)
             if entry_point:
-                workout_info['entry_server'] = {
-                    'entry_point': entry_point,
-                    'ip': server.get('nics', None)[0],
-                    'name': server.get('name', None)[0]
-                }
-                break
-        server_list = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=',
-                                                                                    value=build_id)
-        # TODO: Need to generate connection urls for each server with human_interaction available in the server object
-        workout_info['entry_server']['url'] = _generate_connection_url(workout_info)
+                server['url'] = _generate_connection_url(workout_info)
         workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)

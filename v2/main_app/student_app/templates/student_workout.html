@@ -25,10 +25,10 @@
     </div>
      <div class="navbar-nav navbar-right">
         <ul class="nav nav-pills top-navbar-pill">
-            <li class="nav-item">
+            <!--<li class="nav-item">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
                    data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
-            </li>
+            </li>-->
             <li class="nav-item disabled">
                 <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
             </li>
@@ -46,6 +46,7 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/control.js") }}'></script>
@@ -79,10 +80,10 @@
                {% endif %}
                collapseDiv();
                {% if not workout.expired %}
-                    new Control('{{ build_id }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+                    new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
                {% endif %}
            });
-           let control = new Control('{{ build_id }}', 'workoutStateObj', '{{ workout.api.workout }}');
+           let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
 
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
@@ -91,22 +92,29 @@
                 <li>{{ logo.logo_div() }}</li>
                 <li class="nav-item disabled">
                     {% if workout.expired == False %}
-                        <div id="room-timer-div" class="countdown-timer">
-                            {% if workout.state == 53 %}
-                                <p class="text-center no-center">EXPIRES:
-                                    <span id="room-timer" class="timestampField">{{ workout.expires }}</span>
-                                </p>
-                            {% else %}
+                        <!-- If the workout isn't expired, show the expiration date. If the workout has a start-time and
+                        run duration set, display a countdown timer until shutoff -->
+                        {% if workout.state != 72 %}
+                            <h5><i id="workoutState" class="fa fa-circle buildState running fa-pr-5"></i><span id="workoutStateObj" style="color: white;"></span></h5>
+                            <p style="color: white;">Expires: <span class="timestampField">{{ workout.expires }}</span> </p>
+                        {% else %}
+                            <div id="room-timer-div" class="countdown-timer">
                                 <p class="text-center no-select">
                                     <span id="room-timer"></span>
                                 </p>
-                           {% endif %}
-                        </div>
+                            </div>
+                        {% endif %}
                     {% else %}
                         <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
                             <h5 class="text-center">Workout Expired</h5>
                         </div>
                     {% endif %}
+                </li>
+                <li class="nav-item">
+                    <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
+                </li>
+                <li class="nav-item">
+                    <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
                 </li>
                 <li class="nav-item" role="presentation">
                     <button class="nav-link active" id="home-tab" data-toggle="pill"
@@ -119,64 +127,79 @@
                             aria-controls="assessment-container"
                             aria-selected="false"><i class="fa fa-tasks fa-lg fa-pr-5"></i>Assessment</button>
                 </li>
-                <li class="nav-item">
-                    {% if workout.entry_server.url %}
-                        <a class="nav-link" id="workout-link"
-                           href="{{ workout.entry_server.entry_point.url }}"
-                           target="_blank"><i class="fa fa-external-link fa-pr-5"></i><span id="workoutStateObj"></span></a>
-                    {% endif %}
-                </li>
             </ul>
         </div><!-- End sidebar-menu div -->
-         <div id="content-div" class="col main mt-3 h-100 pr-3 overflow-auto" style="overflow-y: scroll;">
-            <div id="tab-container" class="tab-content">
-                <div class="tab-pane fade active show" id="home-container" role="tabpanel" aria-labelledby="home-tab">
-                    <div id='workout-summary-div' class="info-container">
-                        <div id="class-summary">
-                            <h2>{{ workout.summary.name }}</h2>
-                            <p>{{ workout.summary.description }}</p>
-                            {% if workout.summary.student_instructions_url %}
-                                <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
-                                       target="_blank" rel="noopener noreferrer">Workout Instructions</a>
-                            {% endif %}
-                        </div>
-                    </div> <!-- End workout-summary-div -->
-                    <div id="workout-servers-div" class="info-container">
-                        <div id="workout-controls-div">
-                            <ul class="workout-controls">
-                                <li><button onclick="control.start();">Start Workout</button></li>
-                                <li><button onclick="control.stop();">Stop Workout</button></li>
-                            </ul>
-                        </div>
-                        <p>{{ workout.servers }}</p>
-                    </div> <!-- End workout-servers -->
-                </div> <!-- End home-container -->
-                {% if workout.assessment %}
-                    <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
-                        <div class="info-container">
-                            <h1 class="text-center">Assessment Questions</h1>
-                            <br />
-                            <!-- TODO: Build checkQuestion() JS function -->
-                            {% for question in workout.assessment.questions %}
-                                <div class="collapse-div-wrapper">
-                                    <button type="button" class="collapseBtn">{{ question.question }}</button>
-                                    <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
-                                        <form id="assessment-form{{loop.index }}" class="form-control">
-                                            <div class="form-group">
-                                                <label for="question_{{ loop.index }}"></label>
-                                                <input id="question_{{ loop.index }}" type="text" placeholder="Answer">
-                                            </div>
-                                            <input id="submit_{{ loop.index }}" type="button"
-                                                   onclick="checkQuestion('question_id', {{ workout['id'] }} );"
-                                                   class="btn-fa" value="Check Answer">
-                                        </form>
-                                    </div>
+        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+             <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div class="tab-pane fade active show" id="home-container" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="container">
+                            <div id='workout-summary-div' class="info-container">
+                                <div id="class-summary">
+                                    <h2>{{ workout.summary.name }}</h2>
+                                    <p>{{ workout.summary.description }}</p>
+                                    <p>Details for what the workout covers will be in this section. This will also include links to any instruction sets.</p>
+                                    {% if workout.summary.student_instructions_url %}
+                                        <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
+                                               target="_blank" rel="noopener noreferrer">Workout Instructions</a>
+                                    {% endif %}
                                 </div>
-                            {% endfor %}
-                        </div> <!--End info-container -->
-                    </div> <!-- End assessment-tab -->
-                {% endif %}
-            </div> <!-- End tab-container-->
-        </div> <!-- End content-div -->
+                            </div> <!-- End workout-summary-div -->
+                        </div>
+                        <div class="container">
+                            <div class="row-card info-container">
+                                <table class="table table-small">
+                                    <thead>
+                                        <tr>
+                                            <td>Connection</td>
+                                            <td>Server Name</td>
+                                            <td>IP</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for server in workout.servers %}
+                                        <tr>
+                                            {% if server.url %}
+                                                <td><a href="{{ server.url }}" class="btn-fa" target="_blank">Connect to Server</a></td>
+                                            {% else %}
+                                                <td>No Interface</td>
+                                            {% endif %}
+                                            <td>{{ server.name }}</td>
+                                            <td>{{ server.nics[0].internal_ip }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> <!-- End servers container -->
+                    </div> <!-- End home-container -->
+                    {% if workout.assessment %}
+                        <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
+                            <div class="info-container">
+                                <h1 class="text-center">Assessment Questions</h1>
+                                <br />
+                                <!-- TODO: Build checkQuestion() JS function -->
+                                {% for question in workout.assessment.questions %}
+                                    <div class="collapse-div-wrapper">
+                                        <button type="button" class="collapseBtn">{{ question.question }}</button>
+                                        <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
+                                            <form id="assessment-form{{loop.index }}" class="form-control">
+                                                <div class="form-group">
+                                                    <label for="question_{{ loop.index }}"></label>
+                                                    <input id="question_{{ loop.index }}" type="text" placeholder="Answer">
+                                                </div>
+                                                <input id="submit_{{ loop.index }}" type="button"
+                                                       onclick="checkQuestion('question_id', {{ workout['id'] }} );"
+                                                       class="btn-fa" value="Check Answer">
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div> <!--End info-container -->
+                        </div> <!-- End assessment-tab -->
+                    {% endif %}
+                </div> <!-- End tab-container-->
+            </div> <!-- End content-div -->
+        </main>
      </div> <!-- End content-row -->
 {% endblock %}

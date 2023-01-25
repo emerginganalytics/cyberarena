@@ -5,29 +5,6 @@ var json_headers = {
 }
 
 // Utility Methods
-class TimestampToDate {
-    constructor() {
-        this.target_class = 'timestampField';
-    }
-    convert_timestamps(){
-        let timestamp_list = document.getElementsByClassName(this.target_class);
-        for (let i = 0; i < timestamp_list.length; i++){
-            timestamp_list[i].innerHTML = this.timeConverter(timestamp_list[i].innerHTML);
-        }
-    }
-    timeConverter(UNIX_timestamp){
-        let a = new Date(UNIX_timestamp * 1000);
-        let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        let year = a.getFullYear();
-        let month = months[a.getMonth()];
-        let date = a.getDate();
-        let hour = a.getHours();
-        let min = a.getMinutes();
-        let sec = a.getSeconds();
-        return month + ' ' + date + ', ' + year + ' ' + hour + ':' + min + ':' + sec ;
-    }
-}
-
 function show_modal_card(modal_id){
     $('#' + modal_id).modal();
 }
@@ -201,4 +178,19 @@ function deleteStudent(class_id, student_name){
 
 function sleep(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function checkState(build_id, url){
+    setInterval(function (){
+        fetch(url, {
+            method: 'GET',
+        }).then(response => response.json()).then((data) => {
+            if (data['status'] === 200){
+                let states = data['data']['states'];
+                for (let i=0; i<states.length; i++) {
+                    let icon = document.getElementById('workoutState' + String(i));
+                }
+            }
+        })
+    }, 60000);
 }

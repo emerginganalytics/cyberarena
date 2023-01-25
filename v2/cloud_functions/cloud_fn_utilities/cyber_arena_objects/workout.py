@@ -86,7 +86,7 @@ class Workout:
             self.logger.info(f"Finished building Workout {self.workout_id}!")
 
     def start(self):
-        self.state_manager.state_transition(self.s.START)
+        self.state_manager.state_transition(self.s.STARTING)
         servers_to_start = self.ds.get_servers()
 
         for server in servers_to_start:
@@ -122,8 +122,8 @@ class Workout:
             self.state_manager.state_transition(self.s.BROKEN)
             self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to complete!")
         else:
-            self.state_manager.state_transition(self.s.STOPPING)
-            self.logger.info(f"Finished starting the Workout: {self.workout_id}!")
+            self.state_manager.state_transition(self.s.READY)
+            self.logger.info(f"Finished Stopping the Workout: {self.workout_id}!")
 
     def delete(self):
         self.state_manager.state_transition(self.s.DELETING_SERVERS)

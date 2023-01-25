@@ -39,6 +39,7 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/control.js") }}'></script>
     <script>
@@ -69,7 +70,7 @@
                         }
                         countdownTimer.start(times);
                     {% endif %}
-                    getUnitState("{{ unit['id'] }}");
+                    // getUnitState("{{ unit['id'] }}");
                 {% endif %}
             {% endif %}
         }); // end document.ready
@@ -95,6 +96,12 @@
                             data-target="#main-container-tab" type="button" role="tab"
                             aria-controls="main-container-tab"
                             aria-selected="true">Home</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="build-attack-btn" data-toggle="pill"
+                            data-target="#build-attack-tab" type="button" role="tab"
+                            aria-controls="build-attack-tab"
+                            aria-selected="true"></button>
                 </li>
             </ul>
         </div> <!--End sidebar-menu div -->
@@ -128,17 +135,18 @@
                                             <tr>
                                                 <td>
                                                     {% if workout['state'] == 50 %}
-                                                        <span id="workout-state-{{ workout['id'] }}" class="running"></span>
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState running"></i>
+                                                        <!--<span id="workout-state-{{ workout['id'] }}" class="buildState running"></span>-->
                                                     {% elif workout['state'] == 53 %}
-                                                        <span id="workout-state-{{ workout['id'] }}" class="stopped"></span>
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState stopped"></i>
                                                     {% elif worout['state'] == 72 %}
-                                                        <span id="workout-state-{{ workout['id'] }}" class="deleted"></span>
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState deleted"></i>
                                                     {% else %}
-                                                        <span id="workout-state-{{ workout['id'] }}" class="transition"></span>
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a href="{{ url_for('student_app.workout', build_id=workout['id'])}}" target="_blank">
+                                                    <a class="connection-link" href="{{ url_for('student_app.workout', build_id=workout['id'])}}" target="_blank">
                                                         <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
                                                 </td>
                                                 <td>Assessment</td>

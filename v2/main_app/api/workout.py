@@ -88,9 +88,12 @@ class Workout(MethodView):
         if build_id:
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
-            if action and action in valid_actions:
-                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                        build_id=str(build_id),
-                                        cyber_arena_object=PubSub.CyberArenaObjects.WORKOUT.value)
-                return self.http_resp(code=200).prepare_response()
-        return self.http_resp(code=400)
+            if action and int(action) in valid_actions:
+                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+                if workout:
+                    self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                            build_id=str(build_id),
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                    return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
+                return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()

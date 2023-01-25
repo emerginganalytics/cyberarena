@@ -34,6 +34,12 @@ class BuildConstants:
         RDP = "rdp"
         VNC = "vnc"
 
+    class SecurityModes(str, Enum):
+        RDP = 'rdp'
+        NLA = 'nla'
+        ANY = 'any'
+        TLS = 'tls'
+
     class Firewalls(str, Enum):
         FORTINET = "fortinet"
         VYOS = "vyos"

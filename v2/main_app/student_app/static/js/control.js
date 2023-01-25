@@ -8,13 +8,14 @@ class Control {
     constructor(build_id=null, elem_id=null, url=null) {
         this.build_id = build_id;
         this.elem_id = elem_id;
-        this.url = url + '/' + build_id;
+        this.url = url + build_id;
     }
     getState(nextState){
         let elem_id = this.elem_id;
         let stateObj = document.getElementById(elem_id);
         let url = this.url;
         function updateState(state){
+            console.log('Current State::' + state);
             if (state === nextState || state === '72'){
                 window.location.reload();
             } else {
@@ -22,7 +23,7 @@ class Control {
                 stateObj.classList.remove('running', 'stopped', 'deleted');
             }
         }
-        let x = setInterval(function (){
+        setInterval(function (){
             fetch(url, {
                 method: 'GET'
             }).then((response) =>
@@ -31,27 +32,58 @@ class Control {
                 let state = data['data']['state'];
                 updateState(state);
             });
-        }, 30000); // 5min => 300000
+        }, 15000); // 5min => 300000
     }
     toggle(state){
         let startButton = document.getElementById('startWorkoutBtn');
         let stopButton = document.getElementById('stopWorkoutBtn');
         let workoutStateObj = document.getElementById('workoutStateObj');
+        let workoutStateIcon = document.getElementById('workoutState');
+        let connectionBtns = document.getElementsByClassName('connection-link');
+
         if (state === 50){
-           workoutStateObj.innerHTML = 'ENTER WORKOUT';
-           workoutStateObj.disabled = false;
-           stopButton.disabled = false;
-           startButton.disabled = true;
+           workoutStateObj.innerHTML = 'RUNNING';
+           workoutStateIcon.classList.remove('transition');
+           workoutStateIcon.classList.add('running');
+           this.disableElement(workoutStateObj, false);
+           this.disableElement(stopButton, false);
+           this.disableElement(startButton);
+           // this.disableElements(connectionBtns, false);
         } else if (state === 53){
            workoutStateObj.innerHTML = 'STOPPED';
-           workoutStateObj.disabled = true;
-           stopButton.disabled = true;
-           startButton.disabled = false;
+           workoutStateIcon.classList.remove('transition');
+           workoutStateIcon.classList.add('stopped');
+           this.disableElement(workoutStateObj);
+           this.disableElement(stopButton);
+           this.disableElement(startButton, false);
+           // this.disableElements(connectionBtns);
         } else {
-            workoutStateObj.innerHTML = 'WAITING';
-            workoutStateObj.disabled = true;
-            stopButton.disabled = true;
-            startButton.disabled = true;
+            workoutStateObj.innerHTML = 'WORKING';
+            workoutStateIcon.classList.remove('stopped', 'running');
+            workoutStateIcon.classList.add('transition');
+            this.disableElement(workoutStateObj);
+            this.disableElement(stopButton);
+            // this.disableElements(connectionBtns);
+        }
+    }
+    disableElement(elem, disable=true){
+        if (disable) {
+            elem.classList.add('disabled', 'no-select');
+            elem.disabled = true;
+        } else {
+            elem.classList.remove('disabled', 'no-select');
+            elem.disabled = false;
+        }
+    }
+    disableElements(elems, disable=true){
+        if (disable){
+            for (let btn in elems){
+               this.disableElement(btn);
+           }
+        } else {
+            for (let btn in elems){
+               this.disableElement(btn, false);
+           }
         }
     }
     start(){
@@ -61,6 +93,8 @@ class Control {
             response.json()
         ).then((data) => {
             if (data['status'] === 200){
+                let current_state = data['data']['status'];
+                this.toggle(current_state);
                 this.getState(50);
             }
         });
@@ -72,6 +106,8 @@ class Control {
             response.json()
         ).then((data) => {
             if (data['status'] === 200) {
+                let current_state = data['data']['status'];
+                this.toggle(current_state);
                 this.getState(53);
             }
         });

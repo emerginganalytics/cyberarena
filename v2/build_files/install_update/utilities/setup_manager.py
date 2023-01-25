@@ -50,6 +50,8 @@ class SetupManager:
             BuildSpecification().run()
         elif self.selection == SetupOptions.PREPARE_SPEC:
             BuildSpecification().sync_single_spec()
+        elif self.selection == SetupOptions.DECRYPT_SPECS:
+            BuildSpecification(sync=False).decrypt_locked_folders()
         elif self.selection == SetupOptions.ENV:
             EnvironmentVariables(project=self.project).run()
         elif self.selection == SetupOptions.BULK_UPDATE:
