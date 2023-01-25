@@ -28,18 +28,24 @@ class Workout(MethodView):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
         can return the full build object"""
         if build_id:
-            workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
-            if workout:
-                args = request.args
-                if not args:
-                    return self.http_resp(code=200, data=workout).prepare_response()
-                elif args.get('state', False):
-                    state = workout.get('state', None)
-                    if state:
-                        return self.http_resp(code=200, data={'state': WorkoutStates(state).name}).prepare_response()
-                    else:
-                        return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()
-            return self.http_resp(code=404).prepare_response()
+            args = request.args
+            if args.get('all', False):
+                workouts = DataStoreManager().get_children(DatastoreKeyTypes.WORKOUT, parent_id=build_id)
+                if workouts:
+                    return self.http_resp(code=200, data=workouts).prepare_response()
+                return self.http_resp(code=404).prepare_response()
+            else:
+                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+                if workout:
+                    if not args:
+                        return self.http_resp(code=200, data=workout).prepare_response()
+                    elif args.get('state', False):
+                        state = workout.get('state', None)
+                        if state:
+                            return self.http_resp(code=200, data={'state': WorkoutStates(state).name}).prepare_response()
+                        else:
+                            return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()
+                return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @auth_required
@@ -52,7 +58,6 @@ class Workout(MethodView):
         Returns: str
 
         """
-        # TODO: Update this method to match current v2 directive
         if build_id:
             workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
             if workout.get('state', None) == WorkoutStates.READY:
@@ -66,7 +71,7 @@ class Workout(MethodView):
                 return self.http_resp(code=200, msg='Workout Built').prepare_response()
             # Bad Request; Already Built
             else:
-                return self.http_resp(code=400)
+                return self.http_resp(code=400).prepare_response()
         else:
             auth_level = session.get('user_groups', None)
             if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
@@ -83,9 +88,12 @@ class Workout(MethodView):
         if build_id:
             action = args.get('action', None)
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
-            if action and action in valid_actions:
-                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                        build_id=str(build_id),
-                                        cyber_arena_object=PubSub.CyberArenaObjects.WORKOUT.value)
-                return self.http_resp(code=200).prepare_response()
-        return self.http_resp(code=400)
+            if action and int(action) in valid_actions:
+                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+                if workout:
+                    self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                            build_id=str(build_id),
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                    return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
+                return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()

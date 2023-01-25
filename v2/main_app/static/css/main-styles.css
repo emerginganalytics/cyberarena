@@ -423,3 +423,5 @@ button.btn-delete:hover, button.btn-delete:active{
 .buildState.stopped {color: var(--stopped, #838683);}
 .buildState.deleted {color: var(--deleted, #000000);}
 .buildState.transition {color: var(--transition, #b3be27);}
+.fa-pr-5 { padding-right: 5px; }
+.fa-pl-5 { padding-left: 5px; }

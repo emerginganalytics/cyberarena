@@ -138,7 +138,8 @@ class HumanInteractionSchema(Schema):
     username = fields.Str()
     password = fields.Str()
     domain = fields.Str()
-    security_mode = fields.Str()
+    security_mode = fields.Str(default=BuildConstants.SecurityModes.NLA,
+                               validate=validate.OneOf([x for x in BuildConstants.SecurityModes]))
 
 
 class WebApplicationSchema(Schema):

@@ -52,8 +52,8 @@
                                        type="datetime-local">
                             </div>
                             <div id="{{ build_type }}-build-count-{{ loop.index }}-div" class="form-group">
-                                <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" />
-                                <label for="build-count-{{ loop.index }}">Select number of students (typically less than 20)</label>
+                                <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
+                                <label for="build-count-{{ loop.index }}">Enter max number of students</label>
                             </div>
                             <div class="d-flex justify-content-center">
                                 <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center">Build Workout!</button>

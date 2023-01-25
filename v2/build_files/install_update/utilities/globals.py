@@ -24,9 +24,10 @@ class SetupOptions(bytes, Enum):
     MAIN_APP = (3, "Update Main Application Only")
     BUILD_SPECS = (4, "Synchronize and Encrypt/Decrypt Build Specifications, Instructions, and Compute Images.")
     PREPARE_SPEC = (5, "Prepare a single specification for deployment")
-    ENV = (6, "Synchronize Environment Variables")
-    BULK_UPDATE = (7, "Update multiple cloud projects at once")
-    EXIT = (8, "Exit")
+    DECRYPT_SPECS = (6, "Decrypt Build Specifications")
+    ENV = (7, "Synchronize Environment Variables")
+    BULK_UPDATE = (8, "Update multiple cloud projects at once")
+    EXIT = (9, "Exit")
 
 
 class ShellCommands:   

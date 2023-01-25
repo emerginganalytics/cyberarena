@@ -22,11 +22,17 @@ class WorkoutStateManager:
                          WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.COMPLETED_ROUTES.value,
                          WorkoutStates.COMPLETED_SERVERS.value, WorkoutStates.COMPLETED_STUDENT_ENTRY.value]
     OTHER_VALID_TRANSITIONS = [
+        (WorkoutStates.READY.value, WorkoutStates.START.value),
+        (WorkoutStates.READY.value, WorkoutStates.STARTING.value),
         (WorkoutStates.START.value, WorkoutStates.DELETING_SERVERS.value),
         (WorkoutStates.START.value, WorkoutStates.BUILDING_NETWORKS.value),
+        (WorkoutStates.START.value, WorkoutStates.STARTING.value),
+        (WorkoutStates.STARTING.value, WorkoutStates.RUNNING.value),
         (WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.BUILDING_SERVERS.value),
         (WorkoutStates.BUILDING_SERVERS.value, WorkoutStates.BUILDING_FIREWALL_RULES.value),
-        (WorkoutStates.BUILDING_FIREWALL_RULES.value, WorkoutStates.COMPLETED_FIREWALL_RULES.value)
+        (WorkoutStates.BUILDING_FIREWALL_RULES.value, WorkoutStates.COMPLETED_FIREWALL_RULES.value),
+        (WorkoutStates.RUNNING.value, WorkoutStates.STOPPING.value),
+        (WorkoutStates.STOPPING.value, WorkoutStates.READY.value),
     ]
 
     MAX_WAIT_TIME = 300
@@ -67,9 +73,9 @@ class WorkoutStateManager:
         self.build = self.ds.get()
         new_state = new_state.value if type(new_state) != int else new_state
         existing_state = self.build['state']
+        self.build['state'] = new_state
+        self.build['state-timestamp'] = datetime.utcnow().isoformat()
         if self._is_valid_transition(existing_state, new_state):
-            self.build['state'] = new_state
-            self.build['state-timestamp'] = datetime.utcnow().isoformat()
             if new_state == WorkoutStates.DELETED:
                 self.build['active'] = False
             elif new_state == WorkoutStates.READY:
@@ -79,6 +85,8 @@ class WorkoutStateManager:
             self.ds.put(self.build)
             return True
         else:
+            # TODO: Evaluate state transition errors
+            self.ds.put(self.build)
             return False
 
     def get_state(self):
@@ -136,7 +144,7 @@ class WorkoutStateManager:
         return DataStoreManager(key_type=DatastoreKeyTypes.SERVER).get_running()
 
     def _is_valid_transition(self, existing_state, new_state):
-        if new_state == self.s.START.value and not existing_state or new_state == existing_state:
+        if new_state == self.s.START.value:
             return True
         elif new_state == self.s.BUILDING_NETWORKS.value and existing_state in \
                 [self.s.START.value, self.s.BROKEN.value, self.s.BUILDING_NETWORKS.value]:

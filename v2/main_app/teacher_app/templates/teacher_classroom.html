@@ -39,6 +39,7 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
     <script>
           var teacher_email = null;
@@ -90,11 +91,11 @@
                             data-target="#assignments-container" type="button" role="tab"
                             aria-controls="assignments-container" aria-selected="false">Assigned Homework</button>
                 </li>
-                <li class="nav-item" role="presentation">
+                <!--<li class="nav-item" role="presentation">
                     <button class="nav-link" id="roster-tab-btn" data-toggle="pill"
                             data-target="#roster-tab" type="button" role="tab"
                             aria-controls="roster-tab" aria-selected="false">Roster</button>
-                </li>
+                </li>-->
             </ul>
         </div> <!-- End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
@@ -174,6 +175,7 @@
                                                         <th scope="col">ID</th>
                                                         <th scope="col">Created</th>
                                                         <th scope="col">Expires</th>
+                                                        <th scope="col">Build Count</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>

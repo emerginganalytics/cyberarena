@@ -40,7 +40,7 @@ class BuildSpecification:
     TEACHER_FOLDER = "teacher_instructions/"
     STUDENT_FOLDER = "student_instructions/"
 
-    def __init__(self, suppress=True):
+    def __init__(self, sync=True, suppress=True):
         self.suppress = suppress
         self.env = CloudEnv()
         self.build_attacks_specs = os.path.join("build_files", "specs", "attacks")
@@ -58,7 +58,8 @@ class BuildSpecification:
             self.build_bucket = self.storage_client.get_bucket(f"{self.env.project}_{self.BUILD_SPEC_BUCKET_SUFFIX}")
         except NotFound as err:
             self.build_bucket = self.storage_client.create_bucket(f"{self.env.project}_{self.BUILD_SPEC_BUCKET_SUFFIX}")
-        self.computer_image_sync = ComputerImageSync(suppress=self.suppress)
+        if sync:
+            self.computer_image_sync = ComputerImageSync(suppress=self.suppress)
         self.specs_to_upload = []
 
     def run(self):
@@ -118,6 +119,13 @@ class BuildSpecification:
                                  extension="yaml")
         print(f"\t...Encryption is complete.")
 
+    def decrypt_locked_folders(self):
+        print(f'\t...Beginning decryption process')
+        spec_crypto_lock = CryptoLock(plaintext_dir=self.build_specs_plaintext,
+                                      encrypted_dir=self.build_specs_encrypted, lock_extension='yaml')
+        spec_crypto_lock.decrypt_dir()
+        print(f'\t...Decryption complete.')
+
     def _sync_locked_folder(self, plaintext_dir, encrypted_dir, extension):
         spec_crypto_lock = CryptoLock(plaintext_dir=plaintext_dir, encrypted_dir=encrypted_dir,
                                       lock_extension=extension)
@@ -176,7 +184,7 @@ class BuildSpecification:
         return specs_to_upload
 
     def _sync_computer_images(self, file, image_first=False, source_project=None):
-        print(f"\t...Beginning to sync images from build specification {file}")
+        print(f"\t...Beginning to sync images from build specification {file.name}")
         with open(file) as f:
             spec = yaml.safe_load(f)
         server_list = []
@@ -234,7 +242,6 @@ class BuildSpecification:
             raise ValidationError("Spec does not contain a build_type")
         # Add the dynamic fields required for a spec to avoid throwing errors on these
         spec['creation_timestamp'] = datetime.datetime.now().timestamp()
-        spec['instructor_id'] = 'instructor@example.com'
         build_type = spec['build_type']
         if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             spec = FixedArenaSchema().load(spec)
@@ -242,6 +249,7 @@ class BuildSpecification:
             spec['fixed_arena_servers'] = []
             spec = FixedArenaClassSchema().load(spec)
         elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
+            spec['instructor_id'] = 'instructor@example.com'
             spec = UnitSchema().load(spec)
             spec = UnitValidator().load(spec)
         return spec
