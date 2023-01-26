@@ -184,7 +184,7 @@ class BuildSpecification:
         return specs_to_upload
 
     def _sync_computer_images(self, file, image_first=False, source_project=None):
-        print(f"\t...Beginning to sync images from build specification {file.name}")
+        print(f"\t...Beginning to sync images from build specification {file}")
         with open(file) as f:
             spec = yaml.safe_load(f)
         server_list = []
