@@ -33,7 +33,7 @@ class TestUnit:
             'count': 2,
             'registration_required': False,
             'student_emails': [],
-            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(days=2)).timestamp()
+            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()

@@ -80,7 +80,14 @@ def test_gcp_credentials(project):
         service.instances().list(project=project, zone="us-central1-b").execute()
         return True
     except (DefaultCredentialsError, HttpError) as err:
-        return False
+        try:
+            if err.error_details[0]['reason'] == 'accessNotConfigured':
+                # Return true because the cyber arena is still being built.
+                return True
+        except AttributeError:
+            return False
+        else:
+            return False
 
 
 if __name__ == '__main__':

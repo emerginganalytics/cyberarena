@@ -34,7 +34,7 @@ class CloudEnv:
         self.main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
         self.guac_db_password = myconfig.get_variable('guac_password').value.decode("utf-8")
         self.spec_bucket = self.project + '_build-specs'
-        self.admin_email = myconfig.get_variable('admin_email')
+        self.admin_email = myconfig.get_variable('admin_email').value.decode("utf-8")
         self.auth_config = {
             'api_key': self.api_key,
             'auth_domain': str(self.project + ".firebaseapp.com"),

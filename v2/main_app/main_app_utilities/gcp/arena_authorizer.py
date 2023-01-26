@@ -32,9 +32,12 @@ class ArenaAuthorizer:
         self.log_client = logging_v2.Client()
         self.log_client.setup_logging()
         self.ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO.value, key_id='cybergym')
+        self.env = CloudEnv()
         self.admin_info = self.ds_manager.get()
+        if not self.admin_info:
+            self.admin_info = {}
         if self.UserGroups.ADMINS not in self.admin_info:
-            admin_email = CloudEnv().admin_email  # myconfig.get_variable.config('admin_email')
+            admin_email = self.env.admin_email  # myconfig.get_variable.config('admin_email')
             if not admin_email:
                 logging.error(msg='Error: Admin Email is not set up for this project!')
             else:

@@ -31,7 +31,7 @@ class CyberArenaApp:
     SCHEDULE = "*/15 * * * *"
     CLOUD_SCHEDULER_COMMAND = f"gcloud scheduler jobs create pubsub {CLOUD_SCHEDULER_NAME} " \
                               f"--schedule=\"{SCHEDULE}\" --topic=cyber-arena --message-body=Hello! " \
-                              f"--attributes=handler=MAINTENANCE"
+                              f"--attributes=handler=MAINTENANCE --location=us-central1"
 
     def __init__(self, suppress=True):
         self.suppress = suppress

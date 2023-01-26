@@ -55,6 +55,9 @@ class ShellCommands:
         ADD_ROLE_STORAGE = "gcloud projects add-iam-policy-binding {project} " \
                            "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
                            "--role=\"roles/storage.admin\""
+        ADD_ROLE_IMAGE_READER = "gcloud projects add-iam-policy-binding ualr-cybersecurity " \
+                                "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
+                                "--role=\"roles/compute.imageUser\""
 
     class PubSubTopics(str, Enum):
         CYBER_ARENA = "gcloud pubsub topics create cyber-arena"

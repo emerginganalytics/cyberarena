@@ -21,6 +21,9 @@ class ComputerImageSync:
     DELETE_IMAGE_COMMAND = "gcloud compute --project={project} images delete {image} --quiet"
     COPY_IMAGE_COMMAND = "gcloud compute --project={dst_project} images create {image} --source-image={image} " \
                          "--source-image-project={src_project}"
+    ADD_ROLE_IMAGE_READER = "gcloud projects add-iam-policy-binding {source_image_project} " \
+                            "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
+                            "--role=\"roles/compute.imageUser\""
 
     def __init__(self, suppress=True):
         self.suppress = suppress
@@ -31,7 +34,7 @@ class ComputerImageSync:
         reply = str(input(f"The source project for sync'ing compute images is {self.source_image_project}. Do you "
                           f"wish to continue with this project? [Y/n]")).upper()
         if reply == "N":
-            reply = str(input(f"Enter the project ID of the source project for sync'ing compute images"))
+            reply = str(input(f"Enter the project ID of the source project for sync'ing compute images."))
             self.source_image_project = reply
 
     def sync(self, image_name, source_project=None):
@@ -40,10 +43,20 @@ class ComputerImageSync:
             src_image = self.service.images().get(project=source_project, image=image_name).execute()
             src_creation_ts = datetime.fromisoformat(src_image['creationTimestamp'])
         except HttpError as err:
-            print(f"ERROR: The source image {image_name} does not exist or cannot connect to project. Make sure the "
-                  f"project service account has Compute Image User access to the project {self.source_image_project}"
-                  f"\n{err.error_details}")
-            return False
+            print(f"ERROR: The source image {image_name} does not exist or cannot connect to project. Trying to fix "
+                  f"permission error first")
+            command = self.ADD_ROLE_IMAGE_READER.format(source_image_project=self.source_image_project,
+                                                        project=self.env.project)
+            print(f"Running: {command}")
+            ret = subprocess.run(command, capture_output=True, shell=True)
+            print(ret.stderr.decode())
+            try:
+                src_image = self.service.images().get(project=source_project, image=image_name).execute()
+                src_creation_ts = datetime.fromisoformat(src_image['creationTimestamp'])
+            except HttpError as err:
+                print(f"ERROR: The source image {image_name} does not exist."
+                      f"\n{err.error_details}")
+                return False
 
         try:
             dst_image = self.service.images().get(project=self.env.project, image=image_name).execute()
