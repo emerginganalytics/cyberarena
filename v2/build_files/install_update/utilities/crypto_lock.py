@@ -46,7 +46,7 @@ class CryptoLock:
                 child_encrypted_dir = item.path
                 child_plaintext_dir = os.path.join(self.plaintext_dir, item.name)
                 if not os.path.isdir(child_plaintext_dir):
-                    os.mkdir(child_encrypted_dir)
+                    os.mkdir(child_plaintext_dir)
                 for file in os.scandir(child_encrypted_dir):
                     self._decrypt_file(file, child_plaintext_dir)
             if item.is_file():
