@@ -108,6 +108,7 @@ def teacher_home():
         return redirect('/login')
 
 
+# TODO: This route might be redundant at this point
 @teacher_app.route('/class/<class_id>', methods=['GET', 'POST'])
 def teacher_class(class_id):
     if session.get('user_email', None):
@@ -176,21 +177,6 @@ def teacher_class(class_id):
             workout_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG).query())
             return render_template('teacher_classroom.html', auth_config=auth_config, teacher_info=teacher_info,
                                    workout_specs=workout_specs)
-    abort(404)
-
-
-@teacher_app.route('/build/<workout_type>', methods=['GET'])
-def build(workout_type):
-    urls = {
-        'unit': url_for('unit'),
-        'escape_room': url_for('escape-room'),
-        'fixed_arena': url_for('fixed-arena'),
-        'fixed_arena_class': url_for('class'),
-    }
-    spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=workout_type).get()
-    if spec:
-        spec['api'] = urls[spec['build_type']]
-        return render_template('build_workout.html', spec=spec, workout_type=workout_type, auth_config=auth_config)
     abort(404)
 
 

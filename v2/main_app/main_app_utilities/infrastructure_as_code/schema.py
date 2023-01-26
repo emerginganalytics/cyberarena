@@ -176,7 +176,7 @@ class AssessmentSchema(Schema):
 
 
 class AssessmentQuestionSchema(Schema):
-    id = fields.Str(required=False, description="An ID to use when referring to a specific question")
+    id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")

@@ -377,10 +377,28 @@ button.btn-delete:hover, button.btn-delete:active{
 .btn-fa.btn-delete:hover > .icon-light {
     color: whitesmoke;
 }
-
+a.btn-fa.connection-link.disabled.no-select {
+    pointer-events: none;
+    user-select: none;
+    background-color: #cccccc;
+    color: #666666;
+}
 .server-control-btn:disabled {
     pointer-events: none;
     opacity: 0.3;
+}
+/* Workout Controls Sidebar Container */
+.control-container {
+    border: 1px solid white;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding: 0 1px;
+}
+ul.control-container-list {
+  padding: 0 4px
+}
+li.control-container-list {
+    margin: 10px 0;
 }
 
 /* Load animation styles*/

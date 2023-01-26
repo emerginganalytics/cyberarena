@@ -102,6 +102,10 @@ class Workout:
             self.state_manager.state_transition(self.s.BROKEN)
             self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to complete!")
         else:
+            # TODO: Determine if we want to set start and run duration timestamps for the workout
+            # self.workout = self.ds.get()
+            # self.workout['<runtime_dict>'] = { 'start_time': ts, 'duration': ts, 'total_time': ts }
+            # self.ds.put(self.workout)
             self.state_manager.state_transition(self.s.RUNNING)
             self.logger.info(f"Finished starting the Workout: {self.workout_id}!")
 

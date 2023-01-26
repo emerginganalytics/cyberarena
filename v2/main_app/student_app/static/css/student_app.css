@@ -288,6 +288,10 @@ li button {
 .workout-details {}
 .workout-details p {}
 
+/* Assessment Styles */
+.complete {}
+.incomplete {}
+
 /* Escape Room Styles */
 .room-complete {
     cursor: default;

@@ -19,10 +19,11 @@ __status__ = "Testing"
 
 class Workout(MethodView):
     def __init__(self):
-        self.topic = DatastoreKeyTypes.WORKOUT.value
+        self.key_type = DatastoreKeyTypes.WORKOUT.value
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
+        self.workout: dict = {}
 
     def get(self, build_id=None):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
@@ -42,7 +43,7 @@ class Workout(MethodView):
                     elif args.get('state', False):
                         state = workout.get('state', None)
                         if state:
-                            return self.http_resp(code=200, data={'state': WorkoutStates(state).name}).prepare_response()
+                            return self.http_resp(code=200, data={'state': state}).prepare_response()
                         else:
                             return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()
                 return self.http_resp(code=404).prepare_response()
@@ -84,16 +85,51 @@ class Workout(MethodView):
         """
         Change build state based on action (START, STOP, NUKE, etc)
         """
-        args = request.args
         if build_id:
-            action = args.get('action', None)
-            valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
-            if action and int(action) in valid_actions:
-                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
-                if workout:
-                    self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                            build_id=str(build_id),
-                                            cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
-                    return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
-                return self.http_resp(code=404).prepare_response()
+            args = request.args
+            if args:  # Check what action is being requested for current workout
+                action = args.get('action', None)
+                valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
+                if action and int(action) in valid_actions:
+                    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+                    if workout:
+                        self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                                build_id=str(build_id),
+                                                cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                        return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
+                    return self.http_resp(code=404).prepare_response()
+            elif request.json:  # Check if question response is submitted
+                recv_data = request.json
+                question_id = recv_data.get('question_id', None)
+                response = recv_data.get('response', None)
+                if question_id and response:
+                    ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
+                    self.workout = ds_workout.get()
+                    if self.workout:
+                        self._evaluate_question(question_id, response)
+                        ds_workout.put(self.workout)
+                        # Clean up sensitive data from return object
+                        for question in self.workout['questions']:
+                            question['answer'] = ''
+                        return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
+                    return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
+
+    def _evaluate_question(self, question_id: int, response: str):
+        """
+        Loop through the class questions object for the correct question and determine if the response is correct.
+        Args:
+            question_id (int):
+            response (str):
+
+        Returns: None
+
+        """
+        # TODO: Need to determine the best way to handle assessments with types other than auto
+        #       (i.e. upload, manual...)
+        for question in self.workout['assessment']['questions']:
+            if question['type'] == 'auto':
+                if question['id'] == question_id and not question['correct']:
+                    question['responses'].append(response)
+                    if question['answer'] == response:
+                        question['complete'] = True
