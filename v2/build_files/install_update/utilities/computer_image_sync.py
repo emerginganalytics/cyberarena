@@ -1,5 +1,6 @@
 from datetime import datetime
 import subprocess
+import google.auth
 from googleapiclient import discovery
 from googleapiclient.errors import HttpError
 
@@ -22,7 +23,7 @@ class ComputerImageSync:
     COPY_IMAGE_COMMAND = "gcloud compute --project={dst_project} images create {image} --source-image={image} " \
                          "--source-image-project={src_project}"
     ADD_ROLE_IMAGE_READER = "gcloud projects add-iam-policy-binding {source_image_project} " \
-                            "--member=serviceAccount:cyberarena-service@{project}.iam.gserviceaccount.com " \
+                            "--member=serviceAccount:{service_account} " \
                             "--role=\"roles/compute.imageUser\""
 
     def __init__(self, suppress=True):
@@ -31,6 +32,8 @@ class ComputerImageSync:
         self.service = discovery.build('compute', 'v1')
         self.cloud_ops_mgr = CloudOperationsManager()
         self.source_image_project = self.SOURCE_IMAGE_PROJECT
+        credentials, project_id = google.auth.default()
+        self.service_account = credentials.service_account_email
         reply = str(input(f"The source project for sync'ing compute images is {self.source_image_project}. Do you "
                           f"wish to continue with this project? [Y/n]")).upper()
         if reply == "N":
@@ -46,7 +49,7 @@ class ComputerImageSync:
             print(f"ERROR: The source image {image_name} does not exist or cannot connect to project. Trying to fix "
                   f"permission error first")
             command = self.ADD_ROLE_IMAGE_READER.format(source_image_project=self.source_image_project,
-                                                        project=self.env.project)
+                                                        service_account=self.service_account)
             print(f"Running: {command}")
             ret = subprocess.run(command, capture_output=True, shell=True)
             print(ret.stderr.decode())
