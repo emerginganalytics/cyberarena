@@ -1,9 +1,11 @@
+import time
+
 from google.cloud import datastore
 from datetime import datetime, timedelta
-import logging
-from google.cloud import logging_v2
+from googleapiclient.errors import HttpError
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates, FixedArenaClassStates
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,11 +19,15 @@ __status__ = "Testing"
 
 class DataStoreManager:
     def __init__(self, key_type=None, key_id=None):
-        log_client = logging_v2.Client()
-        log_client.setup_logging()
+        self.logger = Logger("cloud_functions.compute_manager").logger
         self.key_type = key_type
         self.key_id = key_id
-        self.ds_client = datastore.Client()
+        try:
+            self.ds_client = datastore.Client()
+        except HttpError as e:
+            self.logger.warning(f"Error getting datastore client connection. Backing off 5 seconds and trying again")
+            time.sleep(5)
+            self.ds_client = datastore.Client()
         if self.key_type and self.key_id:
             self.key = self.ds_client.key(self.key_type, self.key_id)
         else:

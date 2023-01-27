@@ -9,6 +9,8 @@ from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
+from cloud_fn_utilities.cyber_arena_objects.unit import Unit
+from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 
@@ -58,6 +60,12 @@ class BuildHandler:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
             FixedArenaClass(build_id=build_id).build()
+        elif action == str(PubSub.BuildActions.UNIT.value):
+            build_id = self.event_attributes.get('build_id', None)
+            if not build_id:
+                logging.error(f"No build id provided for build handler with action {action}")
+                raise ValueError
+            Unit(build_id=build_id).build()
         elif action == str(PubSub.BuildActions.SERVER.value):
             server_name = self.event_attributes.get('server_name', None)
             if not server_name:

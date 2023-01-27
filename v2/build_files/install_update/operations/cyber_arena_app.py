@@ -56,9 +56,9 @@ class CyberArenaApp:
                   f"Cloud Run App")
             return False
         confirmation = str(input(f"Do you want to map the main app to the DNS record "
-                                 f"{self.env.main_app_url}? (Y/n): ")).upper() \
-            if not self.suppress else "Y"
-        if confirmation == "Y":
+                                 f"{self.env.main_app_url}? (y/N): ")).upper() \
+            if not self.suppress else "N"
+        if confirmation == "N":
             command = self.MAP_DNS_COMMAND.format(dns=self.env.main_app_url, region=self.env.region)
             ret = subprocess.run(command, capture_output=True, shell=True)
             print(ret.stderr.decode())

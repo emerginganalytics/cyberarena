@@ -293,6 +293,6 @@ def _generate_connection_url(workout_info):
         username = workout_info['proxy_connections'][0]['username']
         password = workout_info['proxy_connections'][0]['password']
         return f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
-    elif workout.info.get('container_url', None):
-        return f'http://{workout.get("container_url")}/home/{build_id}'
+    elif workout_info.get('container_url', None):
+        return f'http://{workout_info.get("container_url")}/home/{build_id}'
     return False
