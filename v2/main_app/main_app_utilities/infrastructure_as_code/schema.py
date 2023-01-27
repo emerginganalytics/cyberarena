@@ -83,6 +83,14 @@ class CyberArenaSummarySchema(Schema):
     student_instructions_url = fields.URL(required=False, allow_none=True)
     hourly_cost = fields.Float(required=False, allow_none=True)
     author = fields.Str(required=False, allow_none=True)
+    standard_mappings = fields.Nested('StandardMappingsSchema', many=True, required=False,
+                                      description='Curriculum standard mappings for this lab')
+
+    class Meta:
+        strict = True
+
+class StandardMappingsSchema(Schema):
+    # TODO: To be filled out by Ryan
 
     class Meta:
         strict = True
