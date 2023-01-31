@@ -91,7 +91,7 @@ class CyberArenaSummarySchema(Schema):
 
 
 class StandardMappingsSchema(Schema):
-    framework = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.Frameworks]))
+    framework = fields.Str(required=True, validate=validate.OneOf([x.value for x in BuildConstants.Frameworks]))
     mapping = fields.Str(required=True)
 
     class Meta:

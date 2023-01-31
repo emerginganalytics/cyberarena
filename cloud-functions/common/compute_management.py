@@ -330,7 +330,7 @@ def server_delete(server_name):
         delete_dns(server['workout'], ip_address)
 
     # Delete any other DNS records for this server
-    try_delete_dns(server)
+    #try_delete_dns(server)
 
     state_transition(entity=server, new_state=SERVER_STATES.DELETED)
     g_logger.log_text(f"Finished deleting {server_name}")
