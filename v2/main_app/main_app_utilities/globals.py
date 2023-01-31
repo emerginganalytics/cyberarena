@@ -178,11 +178,27 @@ class WorkoutStates(Enum):
     DELETED = 72
 
 
+class ServerStates(Enum):
+    START = 0
+    BUILDING = 1
+    READY = 2
+    STARTING = 3
+    RUNNING = 4
+    STOPPING = 5
+    STOPPED = 6
+    EXPIRED = 7
+    MISFIT = 8
+    RESETTING = 9
+    RELOADING = 10
+    BROKEN = 11
+    DELETING = 12
+    DELETED = 13
+
+
 class PubSub:
     class Topics(str, Enum):
         CYBER_ARENA = "cyber-arena"
         AGENT_TELEMETRY = 'agency-telemetry'
-
 
     class Handlers(str, Enum):
         BUDGET = "BUDGET"

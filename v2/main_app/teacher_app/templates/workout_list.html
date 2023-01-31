@@ -1,5 +1,6 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'teacher_macros.html' as macros %}
 {% block title %}{{ unit.summary.name }}{% endblock %}
 {% block nav_title %}{{ unit.summary.name }} Assignment{% endblock %}
 {% block styles %}
@@ -41,7 +42,6 @@
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
-    <script type="text/javascript" src='{{ url_for(".static", filename="js/control.js") }}'></script>
     <script>
         var teacher_email = null;
         var auth_config = {
@@ -70,7 +70,7 @@
                         }
                         countdownTimer.start(times);
                     {% endif %}
-                    // getUnitState("{{ unit['id'] }}");
+                    checkState("{{ unit['id'] }}", "{{ unit.api }}");
                 {% endif %}
             {% endif %}
         }); // end document.ready
@@ -91,18 +91,23 @@
                         </div>
                     {% endif %}
                 </li>
-                <li class="nav-item" role="presentation">
+                {% if workout_list[0].servers %}
+                    <!-- Since attacks can only be sent to server based workouts, there is no need to have
+                    multiple tab buttons available for container only workouts. Removing both buttons and displaying
+                     the default will help eliminate potential confusion -->
+                    <li class="nav-item" role="presentation">
                     <button class="nav-link" id="main-container-btn" data-toggle="pill"
                             data-target="#main-container-tab" type="button" role="tab"
                             aria-controls="main-container-tab"
                             aria-selected="true">Home</button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="build-attack-btn" data-toggle="pill"
-                            data-target="#build-attack-tab" type="button" role="tab"
-                            aria-controls="build-attack-tab"
-                            aria-selected="true"></button>
-                </li>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="build-attack-btn" data-toggle="pill"
+                                data-target="#build-attack-tab" type="button" role="tab"
+                                aria-controls="build-attack-tab"
+                                aria-selected="true">Build Attack</button>
+                    </li>
+                {% endif %}
             </ul>
         </div> <!--End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
@@ -146,17 +151,34 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a class="connection-link" href="{{ url_for('student_app.workout', build_id=workout['id'])}}" target="_blank">
+                                                    <a class="btn-fa" href="{{ url_for('student_app.workout', build_id=workout['id'])}}" target="_blank">
                                                         <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
                                                 </td>
-                                                <td>Assessment</td>
+                                                {% if unit.assessment %}
+                                                    <td>
+                                                        <button class="btn-fa" data-toggle="modal"
+                                                                data-target="modal_{{ workout['id'] }}_assessment"
+                                                                onclick="show_modal_card('modal_{{ workout['id'] }}_assessment')">View Responses</button>
+                                                    </td>
+                                                {% endif %}
                                             </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                    </div>
+                        <div>
+                            {% if unit.assessment %}
+                                {% set unit_url = unit.api ~ unit['id'] %}
+                                {{ macros.workoutAssessmentModals(workout_list, unit_url) }}
+                            {% endif %}
+                        </div> <!-- End modal container divs -->
+                    </div><!--End main-container-tab -->
+                    {% if workout_list[0].servers %}
+                        <div id="build-attack-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-attack-btn">
+                            <div><p>IN PROGRESS ...</p></div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </main>

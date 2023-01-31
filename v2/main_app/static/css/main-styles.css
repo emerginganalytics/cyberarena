@@ -435,6 +435,17 @@ li.control-container-list {
     100% { transform: rotate(360deg); }
 }
 
+/* Coffee waiting animation */
+.floating-icon {
+    position: relative;
+    animation: cup-bounce 2s ease infinite;
+}
+@keyframes cup-bounce {
+	0%, 20%, 50%, 80%, 100% {transform: translateY(0); color: var(--python-blue); transition: var(--mint) 1000ms linear;}
+	40% {transform: translateY(-15px);}
+	60% {transform: translateY(-8px); color: var(--mint); transition: var(--python-blue) 1000ms linear;}
+}
+
 /* FontAwesome Icon Styles */
 .buildState {font-size: 30px;}
 .buildState.running {color: var(--running, #1d8037);}
@@ -443,3 +454,4 @@ li.control-container-list {
 .buildState.transition {color: var(--transition, #b3be27);}
 .fa-pr-5 { padding-right: 5px; }
 .fa-pl-5 { padding-left: 5px; }
+

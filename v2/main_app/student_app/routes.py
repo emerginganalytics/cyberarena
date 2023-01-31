@@ -151,8 +151,7 @@ def workout(build_id):
     parent_id = workout_info.get('parent_id', None)
     if workout_info and parent_id:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
-        server_list = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id', op='=',
-                                                                                    value=build_id)
+        server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value, parent_id=build_id)
         if unit:
             workout_info['summary'] = unit['summary']
             workout_info['assessment'] = unit.get('assessment', None)
@@ -287,6 +286,11 @@ def fixed_arena_student(build_id):
 
 
 def _generate_connection_url(workout_info):
+    """
+
+    :param workout_info: dictionary object holding all the workout information
+    :return: Str(connection_url) if exists else False
+    """
     dns_suffix = CloudEnv().dns_suffix
     build_id = workout_info['id']
     if workout_info.get('proxy_connections', None):

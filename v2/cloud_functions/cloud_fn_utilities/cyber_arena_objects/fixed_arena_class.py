@@ -254,8 +254,8 @@ class FixedArenaClass:
         return servers
 
     def _get_fixed_arena_workspace_ids(self):
-        workspaces = DataStoreManager().get_workspaces(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE,
-                                                       build_id=self.fixed_arena_class['id'])
+        workspaces = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE,
+                                                     parent_id=self.fixed_arena_class['id'])
         workspace_ids = []
         for workspace in workspaces:
             workspace_ids.append(workspace.key.name)

@@ -4,7 +4,7 @@ import logging
 from google.cloud import logging_v2
 from google.cloud import pubsub_v1
 from googleapiclient.errors import HttpError
-from google.api_core.exceptions import AlreadyExists
+from google.api_core.exceptions import AlreadyExists, NotFound
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
@@ -36,7 +36,12 @@ class PubSubManager:
 
     def delete_topic(self):
         logging.info(f'Deleting topic: {self.topic_path}')
-        self.publisher.delete_topic(request={'topic': self.topic_path})
+        try:
+            self.publisher.delete_topic(request={'topic': self.topic_path})
+            return True
+        except NotFound:
+            logging.info(f'Topic {self.topic_path} NOT FOUND ...')
+            return False
 
     def list_topics(self):
         project_path = f'projects/{self.env.project}'
@@ -52,7 +57,12 @@ class PubSubManager:
     def delete_subscription(self, subscription_id):
         subscription_path = self.subscriber.subscription_path(self.env.project, subscription_id)
         with self.subscriber:
-            self.subscriber.delete_subscription(request={'subscription': subscription_path})
+            try:
+                self.subscriber.delete_subscription(request={'subscription': subscription_path})
+                return True
+            except NotFound:
+                logging.info(f'Subscription {subscription_id} NOT FOUND ...')
+                return False
 
     def msg(self, **args):
         self.publisher.publish(self.topic_path, data=b'Cyber Arena PubSub Message', **args)

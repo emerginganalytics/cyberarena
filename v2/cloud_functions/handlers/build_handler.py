@@ -25,23 +25,11 @@ __status__ = "Testing"
 
 
 class BuildHandler:
-    def __init__(self, event_attributes):         # orginal init def
+    def __init__(self, event_attributes):
         self.env = CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
-    # def __init__(self, event_attributes, debug=False):      #Bryce's init def
-    #     self.debug = debug
-    #     self.env = CloudEnv()
-    #     log_client = logging_v2.Client()
-    #     log_client.setup_logging()
-    #     self.event_attributes = event_attributes
-    #     self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
-    #     # self.action = self.event_attributes.get('action', None)
-    #     self.cyber_arena_object = self.event_attributes.get('cyber_arena_object', None)
-    #     # self.build_id = self.event_attributes.get('build_id', None)
-    #     # self.key_type = self.event_attributes.get('key_type', None)
-    #     # self.workspace_ids = self.event_attributes.get('workspace_ids', None)
 
     def route(self):
         action = self.event_attributes.get('action', None)
@@ -83,13 +71,12 @@ class BuildHandler:
                 logging.error(f"No build_id provided for the build handler with action "
                               f"BUILD_DISPLAY_PROXY")
                 raise ValueError
-            if key_type == DatastoreKeyTypes.FIXED_ARENA:
-                build_spec = DataStoreManager(key_type=key_type, key_id=build_id)
+            if key_type in [DatastoreKeyTypes.FIXED_ARENA, DatastoreKeyTypes.WORKOUT]:
+                build_spec = DataStoreManager(key_type=key_type, key_id=build_id).get()
             else:
-                logging.error(f"Unsupported key type supplied to build handler")
+                logging.error(f"Unsupported key type {key_type} supplied to build handler")
                 raise ValueError
-            DisplayProxy(build_id=build_id, build_spec=build_spec).build()
-
+            DisplayProxy(build_id=build_id, build_spec=build_spec, key_type=key_type).build()
         elif action == str(PubSub.BuildActions.FIXED_ARENA_WORKSPACE_PROXY.value):
             build_id = self.event_attributes.get('build_id', None)
             workspace_ids = self.event_attributes.get('workspace_ids', None)
@@ -99,6 +86,6 @@ class BuildHandler:
                 raise ValueError
             FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split()).build()
         else:
-            logging.error(f"Unsupported action supplied to build handler")
+            logging.error(f"Unsupported action {action} supplied to build handler")
             raise ValueError
 

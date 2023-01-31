@@ -140,16 +140,39 @@
                     <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-workout-tab-btn">
                         <div class="card-container">
                             <h2 class="section-title">Assignments</h2>
-                            {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', teacher_info.classes, urls.unit) }}
+                            <div class="row">
+                                {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', teacher_info.classes, urls.unit) }}
+                            </div>
                         </div>
                         <div class="card-container">
                             <h2 class="section-title">Live</h2>
-                            {{ macros.buildWorkoutCards(workout_specs.live, 'live', teacher_info.classes, urls.fixed_arena) }}
+                            <div class="row">
+                                {{ macros.buildWorkoutCards(workout_specs.live, 'live', teacher_info.classes, urls.fixed_arena) }}
+                            </div>
                         </div>
                         <div class="card-container">
                             <h2 class="section-title">Escape Rooms</h2>
-                            {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', teacher_info.classes, urls.escape_room) }}
+                            <div class="row">
+                                {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', teacher_info.classes, urls.escape_room) }}
+                            </div>
                         </div>
+                        <div class="modal fade" tabindex="-1" role="dialog" id="waiting-message-modal">
+                            <div class="modal-dialog modal-lg" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <div class="modal-title w-100">
+                                            <h5 class="text-center">Please wait while your workouts are created ...<span id='floating-coffee'><i class="fa fa-coffee floating-icon pl-2"></i></span></h5>
+                                        </div>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="text-center">
+                                            <p>This page will automatically redirect when the process is complete.</p>
+                                            <p>Go grab some coffee (or tea, if you prefer).</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div> <!-- End waiting-message-modal -->
                     </div> <!-- End build workouts tab -->
                     <div id="assignments-container" class="tab-pane active fade" role="tabpanel" aria-labelledby="assignments-tab">
                         <h2 class="text-center">Assigned Homework</h2>
@@ -207,5 +230,5 @@
                 </div> <!--End tab-container-->
             </div> <!--End content-div-->
         </main>
-     </div><!--End content-row
+     </div><!--End content-row -->
 {% endblock content %}

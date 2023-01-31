@@ -87,6 +87,8 @@ function checkQuestion(questionID, build_id, url){
         .then(data=>updateQuestions(data['status'], data['data']));
 }
 function updateQuestions(code, responseData){
+    // updates all question fields upon request
+    // TODO: Existing question states will be assigned during each successful window.reload() via templating
     if (code === 200){
         for (let i = 0; i < responseData['questions'].length; i++){
             let item = document.getElementById(i['id'] + 'Btn');

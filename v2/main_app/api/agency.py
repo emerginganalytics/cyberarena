@@ -42,9 +42,7 @@ class Agency(MethodView):
             # Retrieve inject data
             if args.get('list', None):
                 # for a list request, build_id refers to fixed-arena id (parent_id)
-                injects_query = DataStoreManager(key_id=self.kind).query()
-                injects_query.add_filter('parent_id', '=', build_id)
-                injects = list(injects_query.fetch())
+                injects = DataStoreManager().get_children(child_key_type=self.kind, parent_id=build_id)
                 if injects:
                     return self.http_resp(code=200, data={'data': injects}).prepare_response()
             else:

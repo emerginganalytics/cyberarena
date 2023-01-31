@@ -15,7 +15,6 @@ class Control {
         let stateObj = document.getElementById(elem_id);
         let url = this.url;
         function updateState(state){
-            console.log('Current State::' + state);
             if (state === nextState || state === '72'){
                 window.location.reload();
             } else {
@@ -74,6 +73,7 @@ class Control {
             workoutStateIcon.classList.add('transition');
             disableElement(workoutStateObj);
             disableElement(stopButton);
+            disableElement(startButton);
             disableElements(connectionBtns, true, disableElement);
         }
     }
@@ -139,7 +139,6 @@ class Control {
 
         // Start the poll
         setInterval(function (){
-            console.log('...Checking state');
             fetch(url, {
                 method: 'GET'
             }).then((response) =>

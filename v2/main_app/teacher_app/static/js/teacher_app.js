@@ -6,16 +6,7 @@ var json_headers = {
 
 // Utility Methods
 function show_modal_card(modal_id){
-    $('#' + modal_id).modal();
-}
-
-function build_unit(select_id, a_id){
-    var build_select = document.getElementById(select_id);
-    selection = build_select.options[build_select.selectedIndex].value;
-
-    var build_unit_a = document.getElementById(a_id);
-    build_unit_a.setAttribute("href", 'build/' + selection);
-    return false;
+    $('#' + modal_id).modal('toggle');
 }
 
 function enable_object(obj_id, enable, hide=false, clear=false) {
@@ -173,7 +164,7 @@ function deleteClass(class_id){
 
 function deleteStudent(class_id, student_name){
     $('#modal_' + class_id).modal('toggle');
-    // TODO: Send delete request for specific student
+    //TODO: Send delete request for specific student
 }
 
 function sleep(ms){
@@ -181,16 +172,52 @@ function sleep(ms){
 }
 
 function checkState(build_id, url){
-    setInterval(function (){
-        fetch(url, {
+    let new_url = url + build_id + '?state=true';
+    updateStates();
+    function updateStates(){
+        let state_classes = ['running', 'stopped', 'deleted', 'transition'];
+        fetch(new_url, {
             method: 'GET',
-        }).then(response => response.json()).then((data) => {
-            if (data['status'] === 200){
+        }).then(response => response.json()).then((data) =>{
+            if (data['status'] === 200) {
                 let states = data['data']['states'];
-                for (let i=0; i<states.length; i++) {
-                    let icon = document.getElementById('workoutState' + String(i));
+                for (let i = 0; i < states.length; i++) {
+                    let icon = document.getElementById('workoutState' + String(i['id']));
+                    icon.classList.remove(...state_classes);
+                    if (i['state'] in state_classes) {
+                        icon.classList.add(i['state']);
+                    } else if (i['state'] === 'ready') {
+                        icon.classList.add('stopped');
+                    } else {
+                        icon.classList.add('transition');
+                    }
                 }
             }
-        })
-    }, 60000);
+        });
+    }
+    // Initial States loaded; Start polling every 5 minutes
+    setInterval(function (){
+        updateStates();
+    }, 300000);
+}
+function displayWaitingMessage(modal_id){
+    // first hide form modal
+    show_modal_card(modal_id);
+    // display waiting message modal
+    show_modal_card('waiting-message-modal');
+}
+function markComplete(question_id, build_id, url){
+    let json_data = JSON.stringify({'question_id': question_id, 'build_id': build_id});
+    fetch(url, {
+        method: 'PUT',
+        headers: json_headers,
+        body: json_data
+    }).then(response => response.json()).then((data) =>{
+        if (data['status'] === 200){
+            let complete = document.get(question_id + '-complete');
+            complete.innerHTML = 'TRUE';
+            complete.classList.remove('incomplete');
+            complete.classList.add('complete');
+        }
+    });
 }

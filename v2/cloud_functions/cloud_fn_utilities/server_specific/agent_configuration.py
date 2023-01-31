@@ -3,6 +3,7 @@ from google.cloud import logging_v2
 from cloud_fn_utilities.globals import BuildConstants
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
+from google.api_core.exceptions import NotFound
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -57,9 +58,13 @@ class Agent(object):
         we only need to worry about cleaning up the topics
         """
         logging.info(f'Deleting Agency Subscription: {self.agent_subscription}')
-        PubSubManager(topic=self.agent_topic).delete_subscription(self.agent_subscription)
+        del_subscription = PubSubManager(topic=self.agent_topic).delete_subscription(self.agent_subscription)
+        if del_subscription:
+            logging.info(f'Subscription {self.agent_subscription} Deleted ...')
         logging.info(f'Deleting Agency Topic: {self.agent_topic}')
-        PubSubManager(topic=self.agent_topic).delete_topic()
+        del_topic = PubSubManager(topic=self.agent_topic).delete_topic()
+        if del_topic:
+            logging.info(f'Topic {self.agent_topic} Deleted ...')
 
     def config(self):
         """

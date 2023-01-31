@@ -9,7 +9,7 @@ from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
-from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
+from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets, WorkoutStates
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 
 __author__ = "Andrew Bomberger"
@@ -42,7 +42,7 @@ class Unit(MethodView):
                 # Returns state for all workouts in unit
                 states = []
                 workouts = DataStoreManager().get_children(DatastoreKeyTypes.WORKOUT, build_id)
-                states = [{'id': workout['id'], 'state': workout['state']} for workout in workouts]
+                states = [{'id': workout['id'], 'state': WorkoutStates(workout['state']).name.lower()} for workout in workouts]
                 return self.http_resp(code=200, data={'states': states}).prepare_response()
             unit = DataStoreManager(key_type=self.key_type, key_id=build_id).get()
             if unit:
@@ -53,7 +53,6 @@ class Unit(MethodView):
     def post(self):
         user_email = session.get('user_email', None)
         recv_data = request.form
-
         # Parse Form Data
         expire_datetime = recv_data.get('expires', None)
         registration_required = recv_data.get('registration_required', False)
@@ -84,7 +83,6 @@ class Unit(MethodView):
             }
             if build_for_class:
                 build_spec['class_id'] = class_id
-            build_spec['test'] = True  # TODO: Remove after testing
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
             build_spec_to_cloud.commit()
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
@@ -104,10 +102,23 @@ class Unit(MethodView):
         if build_id:
             args = request.json
             action = args.get('action', None)
+            question_id = args.get('question_id', None)
+            child_id = args.get('build_id', None)
+
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE]
             if action and action in valid_actions:
                 self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                     build_id=str(build_id),
                                     cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value))
                 return self.http_resp(code=200).prepare_response()
+            elif question_id and child_id:
+                """For cases where an assessment question needs manual grading"""
+                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=child_id).get()
+                if workout:
+                    for question in workout['assessment']:
+                        if question['id'] == question:
+                            question['complete'] = True
+                            break
+                    DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
+                return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()

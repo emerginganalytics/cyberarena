@@ -125,12 +125,14 @@
                             data-target="#home-container" type="button" role="tab"
                             aria-controls="home-container" aria-selected="true"><i class="fa fa-book fa-lg fa-pr-5"></i>Workout</button>
                 </li>
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="assessment-tab" data-toggle="pill"
-                            data-target="#assessment-container" type="button" role="tab"
-                            aria-controls="assessment-container"
-                            aria-selected="false"><i class="fa fa-tasks fa-lg fa-pr-5"></i>Assessment</button>
-                </li>
+                {% if workout.assessment %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="assessment-tab" data-toggle="pill"
+                                data-target="#assessment-container" type="button" role="tab"
+                                aria-controls="assessment-container"
+                                aria-selected="false"><i class="fa fa-tasks fa-lg fa-pr-5"></i>Assessment</button>
+                    </li>
+                {% endif %}
             </ul>
         </div><!-- End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">

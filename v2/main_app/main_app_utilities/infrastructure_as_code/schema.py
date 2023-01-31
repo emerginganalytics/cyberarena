@@ -89,6 +89,7 @@ class CyberArenaSummarySchema(Schema):
     class Meta:
         strict = True
 
+
 class StandardMappingsSchema(Schema):
     # TODO: To be filled out by Ryan
 
@@ -107,6 +108,7 @@ class NetworkSchema(Schema):
 class SubNetworkSchema(Schema):
     name = fields.Str(required=True)
     ip_subnet = fields.Str(required=True)
+
     class Meta:
         strict = True
 

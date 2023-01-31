@@ -297,7 +297,7 @@ input:checked + .slider:before {
     box-shadow: 0 1px 1px 0 gray;
 }
 
-/* Create Class Slideout modal */
+/* Slide-out modal */
 .modal-dialog-slideout {
     min-height: 100%;
     margin: 0 0 0 auto;
@@ -338,6 +338,7 @@ input:checked + .slider:before {
     float:left;
 }
 
+
 /* Assigned Homework Card Styles */
 @keyframes card-fade-in {
     0% {opacity: 0;}
@@ -352,8 +353,7 @@ input:checked + .slider:before {
     background-color: var(--maroon, #6e2639);
     animation-name: card-fade-in;
     animation-duration: 0.5s;
-    margin-bottom: 2vh;
-    margin-bottom: 12px;
+    margin: 10px;
 }
 .unit-card:hover {
     background-color: #FFF;
@@ -371,6 +371,7 @@ input:checked + .slider:before {
 .card-text {
     color: whitesmoke;
 }
+
 /* Table Toolbar Styles */
 .table-manage-wrapper {
     width: 90%;
