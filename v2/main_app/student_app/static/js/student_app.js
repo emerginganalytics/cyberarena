@@ -73,12 +73,11 @@ function collapseDiv(){
     }
 }
 function checkQuestion(questionID, build_id, url){
-    const URL = url + build_id;
     let question_form = document.getElementById(questionID + 'Form');
     let response = question_form.querySelector('input[name="response"]').value;
     let parent_id = question_form.querySelector('input[name="parent_id"]').value;
     let send_data = JSON.stringify({'build_id': build_id, 'response': response, 'question_id': questionID});
-    fetch(URL, {
+    fetch(url, {
         method: 'PUT',
         headers: json_headers,
         body: send_data
@@ -93,8 +92,7 @@ function updateQuestions(code, responseData){
         for (let i = 0; i < responseData['questions'].length; i++){
             let item = document.getElementById(i['id'] + 'Btn');
             if (i['complete'] === true){
-                item.classList.remove('incomplete');
-                item.classList.add('complete');
+                i.style.display = 'none';
             } else if (i['complete'] === false){
                 item.classList.add('incomplete');
             }

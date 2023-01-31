@@ -112,12 +112,14 @@
                                 </div>
                             {% endif %}
                         </li>
-                        <li class="nav-item control-container-list">
-                            <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
-                        </li>
-                        <li class="nav-item control-container-list">
-                            <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
-                        </li>
+                        {% if 'servers' in workout_info %}
+                            <li class="nav-item control-container-list">
+                                <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
+                            </li>
+                            <li class="nav-item control-container-list">
+                                <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
+                            </li>
+                        {% endif %}
                     </ul>
                 </li> <!-- End workout control container -->
                 <li class="nav-item" role="presentation">
@@ -153,29 +155,61 @@
                             </div> <!-- End workout-summary-div -->
                         </div>
                         <div class="container">
-                            <div class="row-card info-container">
-                                <table class="table table-small">
-                                    <thead>
-                                        <tr>
-                                            <td>Connection</td>
-                                            <td>Server Name</td>
-                                            <td>IP</td>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for server in workout.servers %}
-                                        <tr>
-                                            {% if server.url %}
-                                                <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
-                                            {% else %}
-                                                <td>No Interface</td>
-                                            {% endif %}
-                                            <td>{{ server.name }}</td>
-                                            <td>{{ server.nics[0].internal_ip }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                            <div class="row">
+                                <div class="col-4">
+                                    <div class="row-card info-container">
+                                        <table class="table text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <td>Connection</td>
+                                                    <td>Server Name</td>
+                                                    <td>IP</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if 'servers' in workout %}
+                                                    {% for server in workout.servers %}
+                                                        <tr>
+                                                            {% if server.url %}
+                                                                <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                            {% else %}
+                                                                <td>No Interface</td>
+                                                            {% endif %}
+                                                            <td>{{ server.name }}</td>
+                                                            <td>{{ server.nics[0].internal_ip }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Servers</td></tr>
+                                                {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="info-container">
+                                        <table class="table text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <td colspan="100%">Web App</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if 'web_applications' in workout %}
+                                                    {% for web_app in workout['web_applications'] %}
+                                                        <tr>
+                                                            <td>
+                                                                <a class='btn-fa' href="{{ web_app.url }}" target="_blank">{{ web_app.name }}</a>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Web App</td></tr>
+                                                {% endif %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div> <!-- End servers container -->
                     </div> <!-- End home-container -->
@@ -184,23 +218,40 @@
                             <div class="info-container">
                                 <h1 class="text-center">Assessment Questions</h1>
                                 <br />
+                                {% set completed = namespace(value=0) %}
                                 {% for question in workout.assessment.questions %}
-                                    <div class="collapse-div-wrapper">
-                                        <button id="{{ question.question_id }}Btn" type="button" class="collapseBtn">{{ question.question }}</button>
-                                        <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
-                                            <form id="{{ question['id']}}Form" class="form-control">
-                                                <div class="form-group">
-                                                    <label for="{{ question['id'] }}"></label>
-                                                    <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
-                                                    <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
-                                                </div>
-                                                <input id="submit_{{ loop.index }}" type="button"
-                                                       onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api }}' );"
-                                                       class="btn-fa" value="Check Answer">
-                                            </form>
+                                    {% if question.complete %}
+                                        {% set completed.value = completed.value + 1 %}
+                                    {% else %}
+                                        <div class="collapse-div-wrapper">
+                                            <button id="{{ question['id'] }}Btn" type="button" class="collapseBtn">{{ question.question }}</button>
+                                            <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
+                                                <form id="{{ question['id']}}Form" class="form-control">
+                                                    <div class="form-group">
+                                                        <label for="{{ question['id'] }}"></label>
+                                                        <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
+                                                        <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
+                                                    </div>
+                                                    <input id="submit_{{ loop.index }}" type="button"
+                                                           onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}' );"
+                                                           class="btn-fa" value="Check Answer">
+                                                </form>
+                                            </div>
                                         </div>
-                                    </div>
+                                    {% endif %}
                                 {% endfor %}
+                                {% if completed.value == workout.assessment.questions | count %}
+                                    <table class="table text-nowrap table-small">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center no-select">Question</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">Assessment Completed!</td></tr>
+                                        </tbody>
+                                    </table>
+                                {% endif %}
                             </div> <!--End info-container -->
                         </div> <!-- End assessment-tab -->
                     {% endif %}

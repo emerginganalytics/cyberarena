@@ -446,7 +446,7 @@ li.control-container-list {
 	60% {transform: translateY(-8px); color: var(--mint); transition: var(--python-blue) 1000ms linear;}
 }
 
-/* FontAwesome Icon Styles */
+/* FontA1wesome Icon Styles */
 .buildState {font-size: 30px;}
 .buildState.running {color: var(--running, #1d8037);}
 .buildState.stopped {color: var(--stopped, #838683);}
