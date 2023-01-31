@@ -106,10 +106,11 @@ class Workout(MethodView):
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     if self.workout:
-                        self._evaluate_question(question_id, response)
-                        ds_workout.put(self.workout)
+                        correct = self._evaluate_question(question_id, response)
+                        if correct:
+                            ds_workout.put(self.workout)
                         # Clean up sensitive data from return object
-                        for question in self.workout['questions']:
+                        for question in self.workout['assessment']['questions']:
                             question['answer'] = ''
                         return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
                     return self.http_resp(code=404).prepare_response()
@@ -129,7 +130,12 @@ class Workout(MethodView):
         #       (i.e. upload, manual...)
         for question in self.workout['assessment']['questions']:
             if question['type'] == 'auto':
-                if question['id'] == question_id and not question['correct']:
-                    question['responses'].append(response)
-                    if question['answer'] == response:
-                        question['complete'] = True
+                if question['id'] == question_id:
+                    if not question['complete']:
+                        responses = question.get('responses', [])
+                        responses.append(response)
+                        question['responses'] = responses
+                        if question['answer'] == response:
+                            question['complete'] = True
+                            return True
+                    return False

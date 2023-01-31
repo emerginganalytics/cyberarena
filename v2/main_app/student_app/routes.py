@@ -154,7 +154,6 @@ def workout(build_id):
         server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value, parent_id=build_id)
         if unit:
             workout_info['summary'] = unit['summary']
-            workout_info['assessment'] = unit.get('assessment', None)
             workout_info['expires'] = unit['workspace_settings']['expires']
             current_ts = get_current_timestamp_utc()
             is_expired = True
@@ -175,11 +174,12 @@ def workout(build_id):
             else:
                 workout_info['remaining_time'] = 0
 
-        # Get the entry point server information
-        for server in workout_info['servers']:
-            entry_point = server.get('human_interaction', None)
-            if entry_point:
-                server['url'] = _generate_connection_url(workout_info)
+        # If they exist, get the entry point information for each server
+        if workout_info.get('servers', None):
+            for server in workout_info['servers']:
+                entry_point = server.get('human_interaction', None)
+                if entry_point:
+                    server['url'] = _generate_connection_url(workout_info)
         workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)
