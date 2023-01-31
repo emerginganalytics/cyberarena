@@ -91,7 +91,8 @@ class CyberArenaSummarySchema(Schema):
 
 
 class StandardMappingsSchema(Schema):
-    # TODO: To be filled out by Ryan
+    framework = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.Frameworks]))
+    mapping = fields.Str(required=True)
 
     class Meta:
         strict = True

@@ -40,6 +40,9 @@ class BuildConstants:
         ANY = 'any'
         TLS = 'tls'
 
+    class Frameworks(Enum):
+        NICE = "NICE"
+
     class Firewalls(str, Enum):
         FORTINET = "fortinet"
         VYOS = "vyos"
