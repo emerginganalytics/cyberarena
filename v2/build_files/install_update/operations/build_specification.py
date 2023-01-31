@@ -223,7 +223,6 @@ class BuildSpecification:
             print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
             spec = yaml.safe_load(open(filename.path))
             self._validate_spec(spec)
-            spec['id'] = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
             ds_manager.put(spec)
 
