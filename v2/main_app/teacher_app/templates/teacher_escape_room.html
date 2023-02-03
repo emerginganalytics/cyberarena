@@ -102,9 +102,9 @@
                 {% if unit.escape_room.start_time == 0.0 %}
                     <li class="nav-item">
                         <button class='nav-link'
-                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Escape Room</button>
+                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Machines</button>
                         <button class='nav-link'
-                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Escape Room</button>
+                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Timer</button>
                     </li>
                 {% else %}
                     <li class="nav-item disabled">

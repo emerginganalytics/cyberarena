@@ -200,7 +200,6 @@ class AssessmentQuestionSchema(Schema):
 
 
 class EscapeRoomSchema(Schema):
-    instructions_url = fields.Str(required=False, allow_none=True)
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(description="Answer from the top level-question")
     responses = fields.List(fields.Str(), missing=[], description="Records the team's attempts to answer the question "
@@ -227,6 +226,7 @@ class PuzzleSchema(Schema):
                       validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     summary = fields.Str(required=False, description='Brief outline of what the puzzle is about')
     question = fields.Str(required=True)
+    name = fields.Str(requied=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     responses = fields.List(fields.Str(), missing=[],
                             description="Records the team's attempts to answer the question and escape")

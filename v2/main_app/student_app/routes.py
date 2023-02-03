@@ -175,12 +175,12 @@ def workout_view(build_id):
                 workout_info['remaining_time'] = 0
 
         # If they exist, get the entry point information for each server
-        connections = _generate_connection_url(workout_info)
+        connections = _generate_connection_urls(workout_info)
         if workout_info.get('servers', None):
             for server in workout_info['servers']:
                 entry_point = server.get('human_interaction', None)
                 if entry_point:
-                    server['url'] = connections[server['name']]
+                    server['url'] = connections['server'][server['name']]
         workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)
@@ -206,6 +206,7 @@ def escape_room(build_id):
                 workout['escape_room']['time_remaining'] = 0
             workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
             workout['links'] = _generate_connection_urls(workout)
+            workout['links']['instructions_url'] = unit['summary']['student_instructions_url']
             return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
         else:  # the escape room hasn't been started yet, return waiting room template
             workout['expires'] = unit['workspace_settings'].get('expires', None)
@@ -291,24 +292,6 @@ def fixed_arena_student(build_id):
                                servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601, entry_server=entry_server)
     else:
         return redirect('/no-workout')
-
-
-def _generate_connection_url(workout_info):
-    """
-    :param workout_info: dictionary object holding all the workout information
-    :return: Str(connection_url) if exists else False
-    """
-    dns_suffix = CloudEnv().dns_suffix
-    build_id = workout_info['id']
-    if workout_info.get('proxy_connections', None):
-        username = workout_info['proxy_connections'][0]['username']
-        password = workout_info['proxy_connections'][0]['password']
-        return f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
-    elif workout_info.get('container_url', None):
-        return f'http://{workout_info.get("container_url")}/home/{build_id}'
-    elif workout_info.get('web_applications', None):
-        return
-    return False
 
 
 def _generate_connection_urls(workout_info):

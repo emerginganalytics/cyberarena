@@ -104,6 +104,10 @@
                             data-target="#home-container" type="button" role="tab"
                             aria-controls="home-container" aria-selected="true"><i class="fa fa-puzzle-piece fa-lg"></i> Puzzles</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="room-instructions" href="{{ workout.student_instructions_url }}"
+                       target="_blank"><i class="fa fa-file fa-lg"></i>Instructions</a>
+                </li>
             </ul>
         </div> <!-- End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
@@ -127,7 +131,7 @@
                                 {% for puzzle in workout.escape_room.puzzles %}
                                     <div class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('{{ loop.index }}')">
                                         <div class="card-body">
-                                            <h4 class="card-title">{{ puzzle.question }}</h4>
+                                            <h4 class="card-title">{{ puzzle.name }}</h4>
                                             {% if puzzle.correct == True %}
                                                 <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">{{ puzzle.reveal }}</h6>
                                             {% else %}
@@ -139,7 +143,7 @@
                                         <div class="modal-dialog modal-lg" role="document">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5>{{ puzzle.question }}</h5>
+                                                    <h5>{{ puzzle.name  }}</h5>
                                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                         <span aria-hidden="true">x</span>
                                                     </button>
@@ -148,18 +152,23 @@
                                                     <div class="workout-details-ctn">
                                                         <div class="workout-details">
                                                             <p id="workout-details">{{ puzzle.summary }}</p>
-                                                            {% if puzzle.instructions %}
-                                                                <a href="{{ puzzle.instructions }}" target="_blank">Instructions</a>
-                                                            {% endif %}
+                                                            <p>Question: {{ puzzle.question }}</p>
+                                                            <ul class='list-inline' style="list-style-type: none">
+                                                                {% if puzzle.instructions_url %}
+                                                                    <li class="list-inline-item">
+                                                                        <a class="btn-fa" href="{{ puzzle.instructions_url }}" target="_blank">Instructions</a>
+                                                                    </li>
+                                                                {% endif %}
+                                                                <li class="list-inline-item">
+                                                                    {% if puzzle.entry_type == 'server' %}
+                                                                        <a href="{{ workout['links']['server'][puzzle['entry_name']] }}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
+                                                                    {% elif puzzle.entry_type == 'web_application' %}
+                                                                        <a href="{{ workout['links']['web_application'][puzzle['entry_name']]}}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Application</a>
+                                                                    {% endif %}
+                                                                </li>
+                                                            </ul>
                                                         </div>
                                                         <div>
-                                                            {% if puzzle.entry_type == 'server' %}
-                                                                {{ workout['links']['server'][puzzle['entry_name']] }}
-                                                                <a href="{{ workout['links']['server'][puzzle['entry_name']] }}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
-                                                            {% elif puzzle.entry_type == 'web_application' %}
-                                                                {{ workout['links']['web_application'][puzzle['entry_name']]}}
-                                                                <a href="{{ workout['links']['web_application'][puzzle['entry_name']]}}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Application</a>
-                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                     <div class="form-container">

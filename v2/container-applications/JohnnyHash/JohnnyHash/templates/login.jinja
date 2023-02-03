@@ -1,0 +1,42 @@
+{% extends 'index.jinja' %}
+{% block navblock %}
+    {% if workout_id %}
+        <hr>
+        <a href="{{ url_for('johnnyhash.hash_it_out', workout_id=workout_id) }}">
+            <i class="fa fa-laptop sidebar-icon"></i>
+            <p class="sidebar-txt">MD5</p>
+        </a>
+        <hr>
+        <a href="{{ url_for('johnnyhash.login', workout_id=workout_id) }}">
+            <i class="fa fa-user-circle-o sidebar-icon"></i>
+            <p class="sidebar-txt">LOGIN</p>
+        </a>
+        <hr>
+    {% endif %}
+{% endblock navblock %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='styles/johnnyhash-styles.css') }}">
+{% endblock styles_block %}
+{% block content %}
+    <div class="inner-content-wrapper login-group" id="loginMain">
+        <h1>Login</h1>
+        <div class="login-error">
+            {% if login_error %}
+                <p>**{{ login_error }}</p>
+            {% endif %}
+        </div>
+        <form method="POST" action="{{ request.path }}" class="login-form">
+            <div class="input-div">
+                <label class="login-label" for="username">Username:</label>
+                <input class="login-input" type="text" name="username" id="username" placeholder="eg. johndoe99"/>
+            </div>
+            <div class="input-div">
+                <label class="login-label" for="password">Password:</label>
+                <input class="login-input" type="password" name="password" id="password" placeholder="eg. password123" />
+            </div>
+            <div>
+                <input type="submit" value="Login" class="btn" />
+            </div>
+        </form>
+    </div>
+{% endblock content %}
