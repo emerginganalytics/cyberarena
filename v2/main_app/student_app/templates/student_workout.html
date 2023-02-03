@@ -79,12 +79,14 @@
                    // countdownTimer.start(times);
                {% endif %}
                collapseDiv();
-               {% if not workout.expired %}
+                {% if workout.expired == False %}
                     new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
                {% endif %}
            });
-           let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
-           control.poll();
+           {% if workout.expired == False %}
+               let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
+               control.poll();
+          {% endif %}
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
         <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
@@ -157,7 +159,7 @@
                         <div class="container">
                             <div class="row">
                                 <div class="col-4">
-                                    <div class="row-card info-container">
+                                    <div class="info-container">
                                         <table class="table text-nowrap">
                                             <thead>
                                                 <tr>
@@ -224,7 +226,8 @@
                                         {% set completed.value = completed.value + 1 %}
                                     {% else %}
                                         <div class="collapse-div-wrapper">
-                                            <button id="{{ question['id'] }}Btn" type="button" class="collapseBtn">{{ question.question }}</button>
+                                            <button id="{{ question['id'] }}Btn" type="button" class="collapseBtn">{{ question.question }}
+                                                <span class="collapseBtnIcon"><i class="fa fa-angle-down"></i></span></button>
                                             <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
                                                 <form id="{{ question['id']}}Form" class="form-control">
                                                     <div class="form-group">

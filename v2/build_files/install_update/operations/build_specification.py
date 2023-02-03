@@ -120,6 +120,7 @@ class BuildSpecification:
         self._sync_locked_folder(plaintext_dir=self.build_specs_plaintext, encrypted_dir=self.build_specs_encrypted,
                                  extension="yaml")
         print(f"\t...Encryption is complete.")
+        self._sync_specs_to_datastore(filename)
 
     def decrypt_locked_folders(self):
         print(f'\t...Beginning decryption process')
@@ -219,12 +220,18 @@ class BuildSpecification:
         ds_manager = DataStoreManager()
 
         # Load each spec in plaintext dir and generate the datastore entry to upload
-        for filename in specs:
-            print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
-            spec = yaml.safe_load(open(filename.path))
-            self._validate_spec(spec)
-            ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
-            ds_manager.put(spec)
+        if type(specs) == list:
+            for filename in specs:
+                print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
+                spec = yaml.safe_load(open(filename.path))
+                self._validate_spec(spec)
+                ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
+                ds_manager.put(spec)
+        else:
+            print(f"\t...Beginning to SYNC the specification {specs} to Datastore")
+            file = yaml.safe_load(open(specs))
+            ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=file['id'])
+            ds_manager.put(file)
 
     def _create_directories(self):
         directories = [

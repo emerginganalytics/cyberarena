@@ -145,7 +145,7 @@ def unit_signup(unit_id):
 
 # TODO: Will replace student_app.landing_page route
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
-def workout(build_id):
+def workout_view(build_id):
     auth_config = CloudEnv().auth_config
     workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     parent_id = workout_info.get('parent_id', None)
@@ -175,22 +175,24 @@ def workout(build_id):
                 workout_info['remaining_time'] = 0
 
         # If they exist, get the entry point information for each server
+        connections = _generate_connection_url(workout_info)
         if workout_info.get('servers', None):
             for server in workout_info['servers']:
                 entry_point = server.get('human_interaction', None)
                 if entry_point:
-                    server['url'] = _generate_connection_url(workout_info)
+                    server['url'] = connections[server['name']]
         workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)
     return redirect('/no-workout')
 
 
-@student_app.route('/escape-room/team/<build_id>', methods=['GET', 'POST'])
+@student_app.route('/escape-room/team/<build_id>', methods=['GET'])
 def escape_room(build_id):
     auth_config = CloudEnv().auth_config
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
+        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
         if workout['escape_room'].get('start_time', None):
             start_time = workout['escape_room']['start_time']
             time_limit = workout['escape_room']['time_limit']
@@ -198,12 +200,18 @@ def escape_room(build_id):
             time_remaining = time_limit - (current_time - start_time)
             if time_remaining > 0:
                 workout['escape_room']['expired'] = False
-                workout['escape_room']['remaining_time'] = time_remaining
+                workout['escape_room']['time_remaining'] = time_remaining
             else:
                 workout['escape_room']['expired'] = True
-
-        workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
-        return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
+                workout['escape_room']['time_remaining'] = 0
+            workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
+            workout['links'] = _generate_connection_urls(workout)
+            return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
+        else:  # the escape room hasn't been started yet, return waiting room template
+            workout['expires'] = unit['workspace_settings'].get('expires', None)
+            if workout['expires'] < get_current_timestamp_utc():
+                workout['expired'] = True
+            return render_template('student_escape_room_waiting.html', auth_config=auth_config, workout=workout)
     abort(404)
 
 
@@ -287,7 +295,6 @@ def fixed_arena_student(build_id):
 
 def _generate_connection_url(workout_info):
     """
-
     :param workout_info: dictionary object holding all the workout information
     :return: Str(connection_url) if exists else False
     """
@@ -299,4 +306,28 @@ def _generate_connection_url(workout_info):
         return f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
     elif workout_info.get('container_url', None):
         return f'http://{workout_info.get("container_url")}/home/{build_id}'
+    elif workout_info.get('web_applications', None):
+        return
     return False
+
+
+def _generate_connection_urls(workout_info):
+    """
+       :param workout_info: dictionary object holding all the workout information
+       :return: dict(server: dict(), web_applications: dict()) if exists
+       """
+    dns_suffix = CloudEnv().dns_suffix
+    build_id = workout_info['id']
+    links = {'server': dict(), 'web_application': dict()}
+    if workout_info.get('proxy_connections', None):
+        for conn in workout_info['proxy_connections']:
+            username = conn['username']
+            password = conn['password']
+            url = f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
+            links['server'][conn['server']] = url
+    if workout_info.get('web_applications', None):
+        for app in workout_info['web_applications']:
+            links['web_application'][app['name']] = app['url']
+    return links
+
+# [ eof ]

@@ -91,22 +91,24 @@
                         </div>
                     {% endif %}
                 </li>
-                {% if workout_list[0].servers %}
-                    <!-- Since attacks can only be sent to server based workouts, there is no need to have
-                    multiple tab buttons available for container only workouts. Removing both buttons and displaying
-                     the default will help eliminate potential confusion -->
-                    <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="main-container-btn" data-toggle="pill"
-                            data-target="#main-container-tab" type="button" role="tab"
-                            aria-controls="main-container-tab"
-                            aria-selected="true">Home</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="build-attack-btn" data-toggle="pill"
-                                data-target="#build-attack-tab" type="button" role="tab"
-                                aria-controls="build-attack-tab"
-                                aria-selected="true">Build Attack</button>
-                    </li>
+                {% if workout_list | count > 0 %}
+                    {% if workout_list[0].servers %}
+                        <!-- Since attacks can only be sent to server based workouts, there is no need to have
+                        multiple tab buttons available for container only workouts. Removing both buttons and displaying
+                         the default will help eliminate potential confusion -->
+                        <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="main-container-btn" data-toggle="pill"
+                                data-target="#main-container-tab" type="button" role="tab"
+                                aria-controls="main-container-tab"
+                                aria-selected="true">Home</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="build-attack-btn" data-toggle="pill"
+                                    data-target="#build-attack-tab" type="button" role="tab"
+                                    aria-controls="build-attack-tab"
+                                    aria-selected="true">Build Attack</button>
+                        </li>
+                    {% endif %}
                 {% endif %}
             </ul>
         </div> <!--End sidebar-menu div -->
@@ -151,7 +153,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td>
-                                                    <a class="btn-fa" href="{{ url_for('student_app.workout', build_id=workout['id'])}}" target="_blank">
+                                                    <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
                                                         <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
                                                 </td>
                                                 {% if unit.assessment %}

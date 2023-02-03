@@ -17,7 +17,6 @@
 /* General Styles */
 body, html {
     height: 100%;
-    overflow: hidden;
 }
 
 html {
@@ -26,6 +25,7 @@ html {
     background: whitesmoke;
     color: #000000;
     font-family: 'Montserrat', sans-serif;
+    margin: auto;
 }
 body {
     background-color: whitesmoke;
@@ -34,7 +34,7 @@ body {
     padding-top: 4rem;
 }
 main {
-    overflow: auto;
+    /* overflow: auto; */
 }
 .title-ctn {
     text-align: center;

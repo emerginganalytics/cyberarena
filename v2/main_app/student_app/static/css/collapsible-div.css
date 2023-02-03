@@ -32,13 +32,13 @@
     background-color: var(--subcolor);
     color: whitesmoke;
 }
-.collapseBtn:after {
+/*.collapseBtn:after {
     content: '\02795';
     font-size: 20px;
     color: white;
     float: right;
     margin-left: 5px;
-}
+}*/
 .collapse-active {
     background-color: white;
     color: black;
@@ -47,6 +47,9 @@
 .collapse-active:hover {
     color: white;
 }
-.collapse-active:after {
-    content: "\2796"; /*Unicode character for "minus" sign (-) */
+
+/*.collapse-active:after {content: "\2796";}*/
+.collapseBtnIcon {
+    position: relative;
+    float: right;
 }

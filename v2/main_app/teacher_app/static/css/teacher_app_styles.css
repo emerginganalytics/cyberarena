@@ -90,6 +90,10 @@ tr.opaque-loading td {
     opacity: .45;
     pointer-events: none;
 }
+.description {
+    overflow-y: auto;
+    max-width: 25vw;
+}
 .checkmark {
     display:inline-block;
     width: 20px;
@@ -439,4 +443,8 @@ li button {
 /* Class Container Styles */
 .class_container {
     padding-bottom: 3vh;
+}
+
+ul#instructions-list li {
+    display: inline;
 }

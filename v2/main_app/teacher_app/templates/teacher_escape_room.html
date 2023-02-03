@@ -1,0 +1,173 @@
+{% extends "v2-base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% block title %}Escape Room{% endblock %}
+{% block nav_title %}Escape Room{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student_app.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+     <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
+                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
+          });
+           $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+
+               // Start timer
+               {% if unit.escape_room.time_remaining > 0 %}
+                   {% set escaped = namespace(value=0) %}
+                   {% for workout in workout_list %}
+                       {% if workout.escape_room.escaped %}
+                           {% set escaped.value = escaped.value + 1 %}
+                       {% endif %}
+                   {% endfor %}
+                   {% if escaped != workout_list | count %}
+                       let countdownTimer = new Timer("{{ workout['id'] }}");
+                       let times = {
+                           'start_time': {{ unit.escape_room.start_time }},
+                           'time_limit': {{ unit.escape_room.time_limit }},
+                           'expired': {{ unit.escape_room.expired | lower }}
+                       }
+                       countdownTimer.start(times);
+                       getEscapeRoomState("{{ unit['escape_room']['id'] }}");
+                   {% endif %}
+               {% endif %}
+           });
+    </script>
+     <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <!-- Not Sure if we need this sidebar here on this page -->
+                <li class="nav-item disabled">
+                    {% if unit.escape_room.expired == False %}
+                        <div id="room-timer-div" class="countdown-timer">
+                            <p class="text-center no-select">
+                                <span id="room-timer"></span>
+                            </p>
+                        </div>
+                    {% else %}
+                        <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                            <h5 class="text-center">Room Expired</h5>
+                        </div>
+                    {% endif %}
+                </li>
+                {% if unit.escape_room.start_time == 0.0 %}
+                    <li class="nav-item">
+                        <button class='nav-link'
+                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Escape Room</button>
+                        <button class='nav-link'
+                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Escape Room</button>
+                    </li>
+                {% else %}
+                    <li class="nav-item disabled">
+                        <button class="nav-link">Start Escape Room</button>
+                        <button class="nav-link">Start Timer</button>
+                    </li>
+                {% endif  %}
+            </ul>
+        </div> <!-- End sidebar-menu div -->
+        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+            <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>
+                    <div id="home-container" class="tab-pane fade active show" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="info-container">
+                            <h3>{{ unit.summary.name }}</h3>
+                            <h5>Author: {{ unit.summary.author }}</h5>
+                            <p>{{ unit.summary.description }}</p>
+                            <ul id="instructions-list" style="list-style-type: none;">
+                                {% if unit.summary.student_instructions_url %}
+                                    <li><a class="btn-fa" href="{{ unit.summary.student_instructions_url }}"
+                                           target="_blank">Student Instructions</a></li>
+                                {% endif %}
+                                {% if unit.summary.teacher_instructions_url %}
+                                    <li><a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
+                                           target="_blank">Teacher Instructions</a></li>
+                                {% endif %}
+                            </ul>
+                        </div> <!-- End summary div -->
+                        <div class="table-ctn">
+                            <table class="table">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Workout Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for workout in workout_list %}
+                                        <tr>
+                                            <td>
+                                                {% if workout['state'] == 50 %}
+                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState running"></i>
+                                                {% elif workout['state'] == 53 %}
+                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState stopped"></i>
+                                                {% elif workout['state'] == 72 %}
+                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState deleted"></i>
+                                                {% else %}
+                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a class="btn-fa" href="/student/escape-room/team/{{ workout['id'] }}"
+                                                   target="_blank">Team {{ workout['id'] }}</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> <!-- End home-container div -->
+                </div> <!-- End tab-container -->
+            </div> <!-- End content-div -->
+        </main>
+     </div> <!--End content row -->
+{% endblock content %}

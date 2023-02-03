@@ -200,6 +200,7 @@ class AssessmentQuestionSchema(Schema):
 
 
 class EscapeRoomSchema(Schema):
+    instructions_url = fields.Str(required=False, allow_none=True)
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(description="Answer from the top level-question")
     responses = fields.List(fields.Str(), missing=[], description="Records the team's attempts to answer the question "
@@ -214,6 +215,7 @@ class EscapeRoomSchema(Schema):
 
 class PuzzleSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific puzzles")
+    instructions_url = fields.Str(required=False, allow_none=True)
     entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
                             description="The type of entry to present to the user for solving the question "
                                         "(e.g., server or web_application)")
@@ -223,9 +225,11 @@ class PuzzleSchema(Schema):
                                                        "answer the question")
     type = fields.Str(missing=BuildConstants.QuestionTypes.INPUT,
                       validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
+    summary = fields.Str(required=False, description='Brief outline of what the puzzle is about')
     question = fields.Str(required=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     responses = fields.List(fields.Str(), missing=[],
                             description="Records the team's attempts to answer the question and escape")
     correct = fields.Bool(missing=False, description="Whether the puzzle response is correct")
     reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")
+
