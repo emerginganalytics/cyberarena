@@ -98,7 +98,7 @@
                 </li>-->
             </ul>
         </div> <!-- End sidebar-menu div -->
-        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+        <main class="col main pt-3 mt-3 h-100 pr-3">
             <div id="content-div" class="overflow-auto">
                 <div id="tab-container" class="tab-content">
                     <div class="tab-pane fade active show" id="teacher-home-tab" role="tabpanel" aria-labelledby="teacher-home-btn">
@@ -108,10 +108,10 @@
                                 <table id="active-class-table" class="table text-nowrap table-small">
                                     <thead>
                                         <tr id="active-table-headers">
-                                            <th class="text-center no-select">Name</th>
-                                            <th class="text-center no-select">Description</th>
-                                            <th class="text-center no-select">Created</th>
-                                            <th class="text-center no-select">Expires</th>
+                                            <th scope="col" class="text-center no-select">Name</th>
+                                            <th scope="col" class="text-center no-select">Description</th>
+                                            <th scope="col" class="text-center no-select">Created</th>
+                                            <th scope="col" class="text-center no-select">Expires</th>
                                         </tr>
                                     </thead>
                                     {% if teacher_info.active_units | length == 0 %}
@@ -123,7 +123,7 @@
                                                     <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
                                                         <i class="fa fa-book"></i> {{ unit.name }}</a>
                                                 </td>
-                                                <td>{{ unit.description }}</td>
+                                                <td><div class="description">{{ unit.description }}</div></td>
                                                 <td class="timestampField">{{ unit.created }}</td>
                                                 {% if 'expires' in unit %}
                                                     <td class="timestampField">{{ unit.expires }}</td>

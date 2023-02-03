@@ -3,7 +3,7 @@ var json_headers = {
     'Accept': 'application/json',
     'Content-Type': 'application/json; charset=UTF-8'
 }
-function getEscapeRoomState (build_id){
+function getEscapeRoomState (build_id, ts=300000, started=true){
     // Checks current escape_room status every 5 minutes and updates
     // the page as needed
     const URL = '/api/escape-room/team/' + build_id + '?status=true';
@@ -14,10 +14,18 @@ function getEscapeRoomState (build_id){
             success: function (data){
                 let toJson = JSON.parse(data);
                 console.log(toJson);
-                checkPuzzles(toJson['status'], toJson['data']);
+                if (Number(toJson['data']['escape_room']['start_time']) > 0){
+                    if (started) {
+                        checkPuzzles(toJson['status'], toJson['data']);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    console.log('...Not started');
+                }
             }
         })
-    }, 300000);
+    }, ts);
 }
 function checkEscapeRoom(build_id, form_id, puzzle_idx, ea) {
     showCurrentPuzzle(puzzle_idx);
@@ -62,14 +70,23 @@ function collapseDiv(){
     for (let i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function() {
             this.classList.toggle("collapse-active");
+            addClass(this);
             let content = this.nextElementSibling;
-            console.log(content.id);
             if (content.style.display === "block") {
                 content.style.display = "none";
             } else {
                 content.style.display = "block";
             }
         });
+    }
+    function addClass(parent){
+        let iconSpan = parent.querySelectorAll(':scope > span')[0];
+        // Add the element based on parent element class
+        if (parent.classList.contains('collapse-active')){
+            iconSpan.innerHTML = '<i class="fa fa-minus" aria-hidden="true"></i>';
+        } else {
+            iconSpan.innerHTML = '<i class="fa fa-angle-down" aria-hidden="true"></i>';
+        }
     }
 }
 function checkQuestion(questionID, build_id, url){

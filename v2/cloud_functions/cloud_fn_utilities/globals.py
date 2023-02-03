@@ -70,6 +70,7 @@ class BuildConstants:
         AUTO = "auto"
         INPUT = "input"
         UPLOAD = "upload"
+        PERCENTAGE = 'percentage'
 
     class ServerBuildType:
         MACHINE_IMAGE = "machine-image"

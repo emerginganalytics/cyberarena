@@ -17,7 +17,7 @@ __status__ = "Testing"
 
 import yaml
 from datetime import datetime, timedelta, timezone
-from flask import request, session
+from flask import request, session, url_for, redirect
 from flask.views import MethodView
 
 from api.utilities.http_response import HttpResponse
@@ -89,7 +89,9 @@ class EscapeRoomUnit(MethodView):
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=self.debug)
         build_spec_to_cloud.commit()
         build_id = build_spec_to_cloud.get_build_id()
-        return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
+        return redirect(url_for('teacher_app.escape_room', unit_id=build_spec_to_cloud.get_build_id()))
+
+        # return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
 
     def put(self, build_id, data=None):
         """
@@ -109,11 +111,22 @@ class EscapeRoomUnit(MethodView):
                 args = data
             unit_action = args.get('unit_action', None)
             time_limit = args.get('time_limit', 3600)
+            if unit_action == PubSub.Actions.START.value:
+                ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id)
+                workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
+                for workout in workouts:
+                    self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=str(workout['id']),
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
+                                        action=str(PubSub.Actions.START.value))
+                return self.http_resp(code=200).prepare_response()
             if unit_action == PubSub.Actions.START_ESCAPE_ROOM_TIMER.value:
                 ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id)
                 workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
                 if workouts:
                     for workout in workouts:
+                        self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
+                                            action=str(PubSub.Actions.START.value))
                         workout['escape_room']['start_time'] = datetime.now().timestamp() + 60
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
@@ -170,9 +183,11 @@ class EscapeRoomWorkout(MethodView):
                         workout['escape_room']['number_correct'] = workout['escape_room']['puzzle_count'] = 0
                         for puzzle in workout['escape_room']['puzzles']:
                             workout['escape_room']['puzzle_count'] += 1
-                            puzzle['answer'] = ''
                             if puzzle['correct']:
                                 workout['escape_room']['number_correct'] += 1
+                            else:
+                                # If the question isn't solved, clear the return object
+                                puzzle['answer'] = puzzle['reveal'] = ''
                         workout['escape_room']['answer'] = ''
                     return self.http_resp(code=200, data=workout).prepare_response()
             return self.http_resp(code=404).prepare_response()

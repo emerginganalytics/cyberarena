@@ -52,7 +52,7 @@ class Control {
         }
 
         if (state === 50){
-           workoutStateObj.innerHTML = 'RUNNING';
+           workoutStateObj.innerText = 'RUNNING';
            workoutStateIcon.classList.remove('transition', 'stopped');
            workoutStateIcon.classList.add('running');
            disableElement(workoutStateObj, false);
@@ -60,7 +60,7 @@ class Control {
            disableElement(startButton);
            disableElements(connectionBtns, false, disableElement);
         } else if (state === 53){
-           workoutStateObj.innerHTML = 'STOPPED';
+           workoutStateObj.innerText = 'STOPPED';
            workoutStateIcon.classList.remove('transition', 'running');
            workoutStateIcon.classList.add('stopped');
            disableElement(workoutStateObj);
@@ -68,7 +68,7 @@ class Control {
            disableElement(startButton, false);
            disableElements(connectionBtns, true, disableElement);
         } else {
-            workoutStateObj.innerHTML = 'WORKING';
+            workoutStateObj.innerText = 'WORKING';
             workoutStateIcon.classList.remove('stopped', 'running');
             workoutStateIcon.classList.add('transition');
             disableElement(workoutStateObj);

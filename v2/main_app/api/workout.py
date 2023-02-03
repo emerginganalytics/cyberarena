@@ -1,5 +1,6 @@
 from api.utilities.decorators import auth_required, admin_required
 from api.utilities.http_response import HttpResponse
+from datetime import datetime, timedelta, timezone
 from flask import abort, request, json, session
 from flask.views import MethodView
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
@@ -93,8 +94,14 @@ class Workout(MethodView):
                 if action and int(action) in valid_actions:
                     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
                     if workout:
+                        duration_hours = args.get('duration', None)
+                        if args.get('duration', None):
+                            duration_hours = min(int(duration_hours), 10)
+                        else:
+                            duration_hours = 2
+                        duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
                         self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                build_id=str(build_id),
+                                                build_id=str(build_id), duration=duration,
                                                 cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()

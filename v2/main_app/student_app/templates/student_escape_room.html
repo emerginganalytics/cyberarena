@@ -1,6 +1,5 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
-{% import 'student_app_macros.html' as student_macros %}
 {% block title %}Escape Room{% endblock %}
 {% block nav_title %}Escape Room{% endblock %}
 {% block styles %}
@@ -18,7 +17,7 @@
             </li>
             {% if 'admins' in auth_list %}
                 <li class="nav-item">
-                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                    <a href='#' class="nav-link text-center">Admin Home</a>
                 </li>
             {% endif %}
         </ul>
@@ -40,6 +39,7 @@
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
     <script>
@@ -61,7 +61,7 @@
                tsToDate.convert_timestamps();
 
                // Start timer
-               {% if workout.escape_room.remaining_time > 0 %}
+               {% if workout.escape_room.time_remaining > 0 %}
                    {% if not workout.escape_room.escaped %}
                        let countdownTimer = new Timer("{{ workout['id'] }}");
                        let times = {
@@ -106,105 +106,126 @@
                 </li>
             </ul>
         </div> <!-- End sidebar-menu div -->
-        <div id="content-div" class="col main pt-5 mt-5 h-100 pr-3 overflow-auto">
-            <div id="tab-container" class="tab-content">
-                <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>
-                <div id="home-container" class="tab-pane fade active show" role="tabpanel" aria-labelledby="home-tab">
-                    <div id='puzzle-card-container' class="row card-columns">
-                        {% for puzzle in workout.escape_room.puzzles %}
-                            <div class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('{{ loop.index }}')">
-                                <div class="card-body">
-                                    <h4 class="card-title">{{ puzzle.question }}</h4>
-                                    {% if puzzle.correct == True %}
-                                        <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">{{ puzzle.reveal }}</h6>
-                                    {% else %}
-                                        <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">Incomplete</h6>
-                                    {% endif %}
-                                </div>
+        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+            <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>
+                    <div id="home-container" class="tab-pane fade active show" role="tabpanel" aria-labelledby="home-tab">
+                        {% if workout.escape_room.expired %}
+                            {% set total_solved = namespace(value=0) %}
+                            {% for puzzle in workout.escape_room.puzzles %}
+                                {% if puzzle.correct %}
+                                    {% set total_solved.value = total_solved.value + 1 %}
+                                {% endif %}
+                            {% endfor %}
+                            <div id="expired-card" class="text-center">
+                                <h1>Time is Up!</h1>
+                                <p>Final Puzzle Score: {{ total_solved.value }} / {{ workout.escape_room.puzzles | count }}!</p>
                             </div>
-                            <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle{{ loop.index }}">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5>{{ puzzle.question }}</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">x</span>
-                                            </button>
-                                        </div> <!-- End modal-header-->
-                                        <div class="modal-body">
-                                            <div class="workout-details-ctn">
-                                                <div class="workout-details">
-                                                    <p id="workout-details">As an unfortunate victim to collateral, Belle has been kidnapped. Luckily,
-                                                    the perpetrator accidentally dropped their cellphone in their haste to escape. Use the tools provided
-                                                    in the machine below to view the phone contents and hopefully track down where Belle might be!</p>
-                                                    <!-- TODO: Replace with workout description -->
-                                                </div>
-                                                <div>
-                                                    <a href="#" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
-                                                </div>
-                                            </div>
-                                            <div class="form-container">
-                                                <form id="{{ puzzle['id'] }}" class="form-control puzzle-form form-inline">
-                                                    <div class="form-group">
-                                                        <input hidden name="build_id" value="{{ workout['id'] }}">
-                                                        <input hidden name="question_id" value="{{ puzzle['id'] }}">
+                        {% else %}
+                            <div id='puzzle-card-container' class="row card-columns">
+                                {% for puzzle in workout.escape_room.puzzles %}
+                                    <div class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('{{ loop.index }}')">
+                                        <div class="card-body">
+                                            <h4 class="card-title">{{ puzzle.question }}</h4>
+                                            {% if puzzle.correct == True %}
+                                                <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">{{ puzzle.reveal }}</h6>
+                                            {% else %}
+                                                <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">Incomplete</h6>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle{{ loop.index }}">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5>{{ puzzle.question }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">x</span>
+                                                    </button>
+                                                </div> <!-- End modal-header-->
+                                                <div class="modal-body">
+                                                    <div class="workout-details-ctn">
+                                                        <div class="workout-details">
+                                                            <p id="workout-details">{{ puzzle.summary }}</p>
+                                                            {% if puzzle.instructions %}
+                                                                <a href="{{ puzzle.instructions }}" target="_blank">Instructions</a>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div>
+                                                            {% if puzzle.entry_type == 'server' %}
+                                                                {{ workout['links']['server'][puzzle['entry_name']] }}
+                                                                <a href="{{ workout['links']['server'][puzzle['entry_name']] }}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
+                                                            {% elif puzzle.entry_type == 'web_application' %}
+                                                                {{ workout['links']['web_application'][puzzle['entry_name']]}}
+                                                                <a href="{{ workout['links']['web_application'][puzzle['entry_name']]}}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Application</a>
+                                                            {% endif %}
+                                                        </div>
                                                     </div>
-                                                    <div class="form-group mx-sm-3 mb-2">
-                                                        <label for="puzzle-{{ loop.index }}-answer" class="sr-only">Answer: </label>
-                                                        <input id="puzzle-{{ loop.index }}-answer" class="form-control" type="text" name="response" placeholder="Answer">
-                                                    </div>
-                                                    <input type="button" class="btn-fa mb-2" value="Submit"
-                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', '{{ puzzle["id"] }}', '{{ loop.index }}')"/>
-                                                </form>
-                                            </div> <!-- End form-container -->
-                                        </div> <!-- End modal-body div -->
-                                    </div> <!-- End modal-content div -->
-                                </div> <!-- End modal-dialog div -->
-                            </div> <!-- End modal div -->
-                        {% endfor %}
-                        {% if workout.escape_room.number_correct == workout.escape_room.puzzles | count %}
-                            <div id="finalPuzzle" class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('50')">
-                                <div class="card-body">
-                                    <h4 id="finalPuzzleTitle" class="card-title">{{ workout.escape_room.question }}</h4>
-                                    {% if workout.escape_room.escaped == True %}
-                                        <h6 class="card-subtitle final-puzzle">Complete!</h6>
-                                    {% else %}
-                                        <h6 class="card-subtitle final-puzzle">Incomplete</h6>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle50">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5>{{ workout.escape_room.question }}</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">x</span>
-                                            </button>
-                                        </div> <!-- End modal-header-->
-                                        <div class="modal-body">
-                                            <div class="form-container">
-                                                <form id="puzzle-50-form" class="form-control puzzle-form form-inline" onsubmit="checkEscapeRoom()">
-                                                    <div class="form-group">
-                                                        <input hidden name="build_id" value="{{ workout['id'] }}">
-                                                        <input hidden name="question_id" value="question_id">
-                                                    </div>
-                                                    <div class="form-group mx-sm-3 mb-2">
-                                                        <label for="puzzle-50-answer" class="sr-only">Final Answer: </label>
-                                                        <input id="puzzle-50-answer" class="form-control" type="text" name="response" placeholder="Final Answer">
-                                                    </div>
-                                                    <input type="button" class="btn-fa mb-2" value="Submit"
-                                                               onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-50-form', 50, '4534-9a9d')"/>
-                                                </form>
-                                            </div> <!-- End form-container -->
-                                        </div> <!-- End modal-body div -->
-                                    </div> <!-- End modal-content div -->
-                                </div> <!-- End modal-dialog div -->
+                                                    <div class="form-container">
+                                                        <form id="{{ puzzle['id'] }}" class="form-control puzzle-form form-inline">
+                                                            <div class="form-group">
+                                                                <input hidden name="build_id" value="{{ workout['id'] }}">
+                                                                <input hidden name="question_id" value="{{ puzzle['id'] }}">
+                                                            </div>
+                                                            <div class="form-group mx-sm-3 mb-2">
+                                                                <label for="puzzle-{{ loop.index }}-answer" class="sr-only">Answer: </label>
+                                                                <input id="puzzle-{{ loop.index }}-answer" class="form-control" type="text" name="response" placeholder="Answer">
+                                                            </div>
+                                                            <input type="button" class="btn-fa mb-2" value="Submit"
+                                                                       onclick="checkEscapeRoom('{{ workout["id"] }}', '{{ puzzle["id"] }}', '{{ loop.index }}')"/>
+                                                        </form>
+                                                    </div> <!-- End form-container -->
+                                                </div> <!-- End modal-body div -->
+                                            </div> <!-- End modal-content div -->
+                                        </div> <!-- End modal-dialog div -->
+                                    </div> <!-- End modal div -->
+                                {% endfor %}
+                                {% if workout.escape_room.number_correct == workout.escape_room.puzzles | count %}
+                                    <div id="finalPuzzle" class="card puzzle-card col-lg-4 col-sm-12" onclick="showCurrentPuzzle('50')">
+                                        <div class="card-body">
+                                            <h4 id="finalPuzzleTitle" class="card-title">{{ workout.escape_room.question }}</h4>
+                                            {% if workout.escape_room.escaped == True %}
+                                                <h6 class="card-subtitle final-puzzle">Complete!</h6>
+                                            {% else %}
+                                                <h6 class="card-subtitle final-puzzle">Incomplete</h6>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="modal fade" tabindex="-1" role="dialog" id="currentPuzzle50">
+                                        <div class="modal-dialog modal-lg" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5>{{ workout.escape_room.question }}</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">x</span>
+                                                    </button>
+                                                </div> <!-- End modal-header-->
+                                                <div class="modal-body">
+                                                    <div class="form-container">
+                                                        <form id="puzzle-50-form" class="form-control puzzle-form form-inline" onsubmit="checkEscapeRoom()">
+                                                            <div class="form-group">
+                                                                <input hidden name="build_id" value="{{ workout['id'] }}">
+                                                                <input hidden name="question_id" value="question_id">
+                                                            </div>
+                                                            <div class="form-group mx-sm-3 mb-2">
+                                                                <label for="puzzle-50-answer" class="sr-only">Final Answer: </label>
+                                                                <input id="puzzle-50-answer" class="form-control" type="text" name="response" placeholder="Final Answer">
+                                                            </div>
+                                                            <input type="button" class="btn-fa mb-2" value="Submit"
+                                                                       onclick="checkEscapeRoom('{{ workout["id"] }}', 'puzzle-50-form', 50, '4534-9a9d')"/>
+                                                        </form>
+                                                    </div> <!-- End form-container -->
+                                                </div> <!-- End modal-body div -->
+                                            </div> <!-- End modal-content div -->
+                                        </div> <!-- End modal-dialog div -->
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
      </div>
 {% endblock content %}

@@ -20,8 +20,9 @@ __status__ = "Testing"
 
 
 class Workout:
-    def __init__(self, build_id, debug=False):
+    def __init__(self, build_id, duration=None, debug=False):
         self.workout_id = build_id
+        self.duration = duration
         self.debug = debug
         self.env = CloudEnv()
         self.logger = Logger("cloud_functions.workout").logger
@@ -38,7 +39,12 @@ class Workout:
 
     def build(self):
         if not self.workout.get('networks'):
-            self.logger.info(f"No compute assets to build for workout {self.workout_id}.")
+            if self.workout.get('web_application', None):
+                self.state_manager.state_transition(self.s.READY)
+                self.logger.info(f"No compute assets required for workout {self.workout_id}.")
+                self.logger.info(f"Finished building workout {self.workout_id}.")
+            else:
+                self.logger.info(f"No compute assets to build for workout {self.workout_id}.")
             return
 
         if not self.state_manager.get_state():

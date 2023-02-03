@@ -63,7 +63,7 @@ class ControlHandler:
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
-            Workout(build_id=self.build_id, debug=self.debug).start()
+            Workout(build_id=self.build_id, duration=2, debug=self.debug).start()
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError
