@@ -5,14 +5,13 @@ from flask.views import MethodView
 
 from api.utilities.http_response import HttpResponse
 from app_utilities.crypto_suite.hashes import Hashes, HashErrors
-from app_utilities.crypto_suite.ciphers import Ciphers
 from app_utilities.gcp.cloud_env import CloudEnv
 from app_utilities.gcp.datastore_manager import DataStoreManager
 from app_utilities.globals import DatastoreKeyTypes, BuildConstants
 
-__author__ = "Philip Huff"
+__author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Andrew Bomberger"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
