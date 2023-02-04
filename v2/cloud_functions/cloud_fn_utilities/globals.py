@@ -123,6 +123,10 @@ class BuildConstants:
     class Reports:
         ATTACK = 2
 
+    class ScriptOperatingSystems:
+        WINDOWS = 'windows'
+        LINUX = 'linux'
+
 
 class ServerStates(Enum):
     START = 0

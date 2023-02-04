@@ -228,6 +228,11 @@ class PuzzleSchema(Schema):
     question = fields.Str(required=True)
     name = fields.Str(requied=True)
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
+    script = fields.Str(required=False, description="script name (e.g. attack.py)")
+    script_language = fields.Str(required=False, description="e.g. python")
+    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
+                                                    "provided above")
+    operating_system = fields.Str(required=False, description="Target server operating system")
     responses = fields.List(fields.Str(), missing=[],
                             description="Records the team's attempts to answer the question and escape")
     correct = fields.Bool(missing=False, description="Whether the puzzle response is correct")

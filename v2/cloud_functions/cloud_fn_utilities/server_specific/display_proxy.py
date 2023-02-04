@@ -86,7 +86,7 @@ class DisplayProxy:
         ComputeManager(server_name=self.server_name).build()
 
     def _create_network_settings(self):
-        if self.build_type in [BuildConstants.BuildType.WORKOUT]:
+        if self.build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:
             self.network_name = BuildConstants.Networks.WORKOUT_EXTERNAL_NAME
             self.internal_ip = BuildConstants.Networks.Reservations.WORKOUT_PROXY_SERVER
         else:

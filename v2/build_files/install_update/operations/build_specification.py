@@ -97,10 +97,7 @@ class BuildSpecification:
         with open(filename) as f:
             spec = yaml.safe_load(f)
         # If the spec is not a valid schema. This next function will throw an error.
-        try:
-            self._validate_spec(spec)
-        except ValidationError as e:
-            print(f"\t...Validation Error in the file: {e.messages}")
+        if not self._validate_spec(spec):
             return
         print(f"\t...Specification passed validation testing.")
         response = str(input(f"Do you have servers ready to image in this project for the specification? "
@@ -254,13 +251,17 @@ class BuildSpecification:
         # Add the dynamic fields required for a spec to avoid throwing errors on these
         spec['creation_timestamp'] = datetime.datetime.now().timestamp()
         build_type = spec['build_type']
-        if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
-            spec = FixedArenaSchema().load(spec)
-        elif build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
-            spec['fixed_arena_servers'] = []
-            spec = FixedArenaClassSchema().load(spec)
-        elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
-            spec['instructor_id'] = 'instructor@example.com'
-            spec = UnitSchema().load(spec)
-            spec = UnitValidator().load(spec)
+        try:
+            if build_type == BuildConstants.BuildType.FIXED_ARENA.value:
+                spec = FixedArenaSchema().load(spec)
+            elif build_type == BuildConstants.BuildType.FIXED_ARENA_CLASS.value:
+                spec['fixed_arena_servers'] = []
+                spec = FixedArenaClassSchema().load(spec)
+            elif build_type in [BuildConstants.BuildType.UNIT.value, BuildConstants.BuildType.ESCAPE_ROOM.value]:
+                spec['instructor_id'] = 'instructor@example.com'
+                spec = UnitSchema().load(spec)
+                spec = UnitValidator().load(spec)
+        except ValidationError as e:
+            print(f"\t...Validation Error in the file: {e.messages}")
+            return False
         return spec
