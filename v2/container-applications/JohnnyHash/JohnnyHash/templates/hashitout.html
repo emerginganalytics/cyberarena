@@ -1,13 +1,13 @@
-{% extends 'index.jinja' %}
+{% extends 'johnnyhash_index.jinja' %}
 {% block navblock %}
-    {% if workout_id %}
+    {% if build_id %}
         <hr>
-        <a href="{{ url_for('johnnyhash.hash_it_out', workout_id=workout_id) }}">
+        <a href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
             <i class="fa fa-laptop sidebar-icon"></i>
             <p class="sidebar-txt">MD5</p>
         </a>
         <hr>
-        <a href="{{ url_for('johnnyhash.login', workout_id=workout_id) }}">
+        <a href="{{ url_for('johnnyhash.login', build_id=build_id) }}">
             <i class="fa fa-user-circle-o sidebar-icon"></i>
             <p class="sidebar-txt">LOGIN</p>
         </a>
@@ -32,7 +32,7 @@
         </div>
         <div class="inner-content-wrapper">
             <h2>Johnny's Desk: </h2>
-            <img src="{{ url_for('.static', filename='img/clue.jpg') }}" alt="clue" class="content-img inner-content-wrapper"/>
+            <img src="{{ url_for('johnnyhash.static', filename='img/clue.jpg') }}" alt="clue" class="content-img inner-content-wrapper"/>
         </div>
         <div class="inner-content-wrapper md5-wrapper">
             <div class="list-wrapper md5-policy-list" id="column1">
@@ -60,6 +60,7 @@
                                 <div class="btn" id="selectFile">
                                     <label for="password_file">Choose File...</label>
                                 </div>
+                                <input type="hidden" name="build_id" id="build_id" value="{{ build_id }}">
                                 <input type="file" name="password_file" id="password_file"/>
                                 <input type="submit" class="btn" value="Upload File" />
                             </div>
@@ -76,6 +77,7 @@
                                 <div class="btn" id="selectFile">
                                     <label for="password_file" >Choose File...</label>
                                 </div>
+                                <input type="hidden" name="build_id" id="build_id" value="{{ build_id }}">
                                 <input type="file" name="password_file" id="password_file"/>
                                 <input type="submit" class="btn" value="Upload File" />
                             </div>
@@ -121,7 +123,6 @@
         </div>
     </div>
 {% endblock content %}
-
 {% block js_block %}
     <script type="text/javascript">
         $(document).ready(function () {
