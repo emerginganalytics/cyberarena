@@ -1,40 +1,47 @@
-from flask import Flask, redirect
-
-from JohnnyHash.utils import gen_pass
-from JohnnyHash.routes import johnnyhash
 import os
+from flask import Flask, redirect, abort, jsonify, render_template, request, session
+from app_utilities.gcp.datastore_manager import DataStoreManager
+from app_utilities.globals import DatastoreKeyTypes
+from app_utilities.crypto_suite.hashes import Hashes
 
+# App Blueprints
+from JohnnyHash.routes import johnnyhash
+
+# API Views
+from api.johnnyhash_api import JohnnyHashAPI
+
+# --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
-
-# Register Blueprints
 app.register_blueprint(johnnyhash)
 
 
-# Loader Route; Used to determines which Blueprint to use
-@app.route('/<workout_id>')
-def loader(workout_id):
-    key = ds_client.key('cybergym-workout', workout_id)
-    workout = ds_client.get(key)
-
+# Loader Route; Used to determine which Blueprint to use
+@app.route('/<build_id>')
+def loader(build_id):
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if workout:
-        if workout['type'] == 'johnnycipher':
-            if workout['container_info']['cipher_one']['cipher'] == '':
-                CaesarCipherBuilder(workout_id=workout_id).set_ciphers()
-                SubstitutionCipherBuilder(workout_id=workout_id).set_sub_cipher()
-            return redirect(f'/johnnycipher/caesar/{workout_id}')
-        elif workout['type'] == 'johnnyhash':
-            if workout['container_info']['correct_password'] == '':
-                gen_pass(workout_id)
-            return redirect(f'/johnnyhash/hash_it_out/{workout_id}')
-        elif workout['type'] == 'Trojan Arena Level 2':
-            return redirect(f'/arena/cipher-warehouse/{workout_id}')
-        elif workout['type'] == 'GenCyber Arena Level 1':
-            # temp route used only for GenCyber Arena. Merge this with JohnnyArena for future arena builds
-            get_arena_sub_cipher()
-            return redirect(f'/johnnyGenCipher/substitution/{workout_id}')
-    else:
-        return redirect('/johnnyhash/invalid')
+        if workout.get('escape_room', None):
+            Hashes(build_id).set_md5_hash()
+            return redirect(f'/johnnyhash/HashItOut/{build_id}')
+    return redirect('/invalid')
+
+
+@app.route('/invalid', methods=['GET'])
+def invalid():
+    return render_template('invalid_workout.html')
+
+
+def register_api(view, endpoint, url, pk='id', pk_type='string'):
+    view_func = view.as_view(endpoint)
+    app.add_url_rule(url, view_func=view_func, methods=['GET'])
+    app.add_url_rule(url, view_func=view_func, methods=['POST'])
+    app.add_url_rule(f'{url}<{pk_type}:{pk}>', view_func=view_func,
+                     methods=['GET', 'PUT', 'DELETE'])
+
+
+# Register API Routes
+register_api(view=JohnnyHashAPI, endpoint='hashes', url='/api/hashes', pk='build_id')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get(port=5000)))
+    app.run(debug=True, host='0.0.0.0', port=8080, threaded=True)

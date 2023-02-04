@@ -1,13 +1,13 @@
-{% extends 'index.jinja' %}
+{% extends 'johnnyhash_index.jinja' %}
 {% block navblock %}
-    {% if workout_id %}
+    {% if build_id %}
         <hr>
-        <a href="{{ url_for('johnnyhash.hash_it_out', workout_id=workout_id) }}">
+        <a href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
             <i class="fa fa-laptop sidebar-icon"></i>
             <p class="sidebar-txt">MD5</p>
         </a>
         <hr>
-        <a href="{{ url_for('johnnyhash.login', workout_id=workout_id) }}">
+        <a href="{{ url_for('johnnyhash.login', build_id=build_id) }}">
             <i class="fa fa-user-circle-o sidebar-icon"></i>
             <p class="sidebar-txt">LOGIN</p>
         </a>
@@ -34,6 +34,7 @@
                 <label class="login-label" for="password">Password:</label>
                 <input class="login-input" type="password" name="password" id="password" placeholder="eg. password123" />
             </div>
+            <input type="hidden" name="question_id" id="question_id" value="{{ question_id }}">
             <div>
                 <input type="submit" value="Login" class="btn" />
             </div>
