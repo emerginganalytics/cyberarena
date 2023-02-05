@@ -195,8 +195,12 @@ class BuildSpecification:
         for server_spec in server_list:
             if 'image' in server_spec:
                 if image_first:
-                    print(f"\t...Beginning to IMAGE the server image {server_spec['image']}")
-                    self.computer_image_sync.image_server(server_spec['image'])
+                    response = input(f"\t...Are you sure you want to IMAGE the server {server_spec['image']}? [Y/n] ")
+                    if response.upper() != "N":
+                        print(f"\t...Beginning to IMAGE the server image {server_spec['image']}")
+                        self.computer_image_sync.image_server(server_spec['image'])
+                    else:
+                        print(f"\t...OK, Skipping {server_spec['image']}")
                 else:
                     print(f"\t...Beginning to SYNC the server image {server_spec['image']}")
                     self.computer_image_sync.sync(server_spec['image'], source_project)

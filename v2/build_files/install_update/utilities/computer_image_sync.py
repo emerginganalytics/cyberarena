@@ -149,7 +149,7 @@ class ComputerImageSync:
             }
             i = 0
             build_success = False
-            while not build_success and i < 5:
+            while not build_success and i < 8:
                 try:
                     response = self.service.images().insert(project=self.env.project, body=image_body).execute()
                     build_success = True

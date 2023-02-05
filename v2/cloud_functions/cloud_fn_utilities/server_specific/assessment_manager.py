@@ -6,7 +6,7 @@ This module contains the following classes:
 """
 
 import json
-from cloud_fn_utilities.globals import BuildConstants, DatastoreKeyTypes
+from cloud_fn_utilities.globals import BuildConstants, DatastoreKeyTypes, Buckets
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
@@ -34,6 +34,8 @@ class AssessmentManager:
         self.key_type = key_type
         self.logger = Logger("cloud_functions.assessment-manager").logger
         self.env = CloudEnv()
+        self.script_repository = f"gs://{self.env.project}_{Buckets.BUILD_SPEC_BUCKET_SUFFIX}" \
+                                 f"/{Buckets.Folders.STARTUP_SCRIPTS.value}"
         self.ds = DataStoreManager(key_type=self.key_type, key_id=self.build_id)
         self.build = self.ds.get()
         if not self.build:
@@ -84,7 +86,7 @@ class AssessmentManager:
                     assess_script = StartupScripts.windows_startup_script_task.format(
                         QUESTION_KEY=question['id'],
                         Q_NUMBER=i,
-                        SCRIPT_REPOSITORY=self.env.script_repository,
+                        SCRIPT_REPOSITORY=self.script_repository,
                         SCRIPT=question['script'],
                         SCRIPT_NAME='Assess' + str(i),
                         SCRIPT_COMMAND=script_command)
@@ -101,7 +103,7 @@ class AssessmentManager:
                     assess_script = StartupScripts.linux_startup_script_task.format(
                         QUESTION_KEY=question['id'],
                         Q_NUMBER=i,
-                        SCRIPT_REPOSITORY=self.env.script_repository,
+                        SCRIPT_REPOSITORY=self.script_repository,
                         SCRIPT=question['script'],
                         LOCAL_STORAGE="/usr/bin",
                         SCRIPT_COMMAND=script_command)
