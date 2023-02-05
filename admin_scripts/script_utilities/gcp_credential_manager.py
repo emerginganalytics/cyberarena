@@ -25,7 +25,7 @@ class GCPCredentialManager:
             ret = subprocess.run(f"gcloud config set project {project}", capture_output=True, shell=True)
             ret_msg = ret.stderr.decode()
             if 'WARNING' in ret_msg.upper():
-                print(f"The following error occured when trying to set the project:\n{ret_msg}")
+                print(f"The following error occurred when trying to set the project:\n{ret_msg}")
             else:
                 print(ret_msg)
                 creds = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', None)
