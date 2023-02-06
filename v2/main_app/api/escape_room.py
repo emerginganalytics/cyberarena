@@ -15,6 +15,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+import time
 import yaml
 from datetime import datetime, timedelta, timezone
 from flask import request, session, url_for, redirect
@@ -92,6 +93,7 @@ class EscapeRoomUnit(MethodView):
         if self.debug:
             return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
         else:
+            time.sleep(5)
             return redirect(url_for('teacher_app.escape_room', unit_id=build_spec_to_cloud.get_build_id()))
 
     def put(self, build_id, data=None):
@@ -126,9 +128,9 @@ class EscapeRoomUnit(MethodView):
                 if workouts:
                     for workout in workouts:
                         self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
-                                            cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                             action=str(PubSub.Actions.START.value))
-                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 60
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 300
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)

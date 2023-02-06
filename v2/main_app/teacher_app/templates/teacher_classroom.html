@@ -62,15 +62,6 @@
                let tsToDate = new TimestampToDate();
                tsToDate.convert_timestamps();
            });
-          function build_unit(){
-              let build_unit_select = document.getElementById('build-unit-select');
-              let selection = build_unit_select.options[build_unit_select.selectedIndex].value;
-              console.log(selection);
-
-              let build_unit_a = document.getElementById('build-unit-a');
-              build_unit_a.setAttribute("href", 'build/' + selection);
-              return false;
-          }
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
         <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
@@ -120,8 +111,13 @@
                                         {% for unit in teacher_info.active_units %}
                                             <tr>
                                                 <td>
-                                                    <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
-                                                        <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                    {% if unit.build_type == 'escape_room' %}
+                                                        <a href="/teacher/escape-room/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
+                                                            <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                    {% elif unit.build_type == 'unit' %}
+                                                        <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
+                                                            <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                    {% endif %}
                                                 </td>
                                                 <td><div class="description">{{ unit.description }}</div></td>
                                                 <td class="timestampField">{{ unit.created }}</td>
@@ -205,8 +201,13 @@
                                                     {% for assignment in items %}
                                                         <tr>
                                                             <td>
-                                                                <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/assignment/{{ assignment.id }}">
-                                                                    <i class="fa fa-book"></i> {{ assignment.id }}</a>
+                                                                {% if assignment.build_type == 'escape_room' %}
+                                                                    <a href="/teacher/escape-room/{{ assignment['id'] }}" class="btn-fa d-inline-flex" target="_blank">
+                                                                        <i class="fa fa-book"></i> {{ assignment.name }}</a>
+                                                                {% elif assignment.build_type == 'unit' %}
+                                                                    <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/assignment/{{ assignment.id }}">
+                                                                        <i class="fa fa-book"></i> {{ assignment.id }}</a>
+                                                                {% endif %}
                                                             </td>
                                                             <td class="timestampField">
                                                                 {{ assignment.created }}

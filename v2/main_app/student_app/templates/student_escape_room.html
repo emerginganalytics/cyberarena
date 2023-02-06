@@ -81,21 +81,24 @@
                 <li>{{ logo.logo_div() }}</li>
                 <!-- Not Sure if we need this sidebar here on this page -->
                 <li class="nav-item disabled">
-                    {%  if workout.escape_room.escaped == True %}
-                        <div id="room-timer-div" class="nav-link room-complete">
-                            <h5 class="nav-link room-complete">Room Escaped!</h5>
-                        </div>
-                    {% else %}
-                        {% if workout.escape_room.expired == False %}
-                            <div id="room-timer-div" class="countdown-timer">
-                                <p class="text-center no-select">
-                                    <span id="room-timer"></span>
-                                </p>
+                    {% if not workout.expired %}
+                        {%  if workout.escape_room.escaped == True %}
+                            <div id="room-timer-div" class="nav-link room-complete">
+                                <h5 class="nav-link room-complete">Room Escaped!</h5>
                             </div>
                         {% else %}
-                            <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
-                                <h5 class="text-center">Room Expired</h5>
-                            </div>
+                            {{ workout.escape_room.expired }}
+                            {% if workout.escape_room.expired == False %}
+                                <div id="room-timer-div" class="countdown-timer">
+                                    <p class="text-center no-select">
+                                        <span id="room-timer"></span>
+                                    </p>
+                                </div>
+                            {% else %}
+                                <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                                    <h5 class="text-center">Times up!</h5>
+                                </div>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </li>
@@ -105,9 +108,14 @@
                             aria-controls="home-container" aria-selected="true"><i class="fa fa-puzzle-piece fa-lg"></i> Puzzles</button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link" id="room-instructions" href="{{ workout.student_instructions_url }}"
-                       target="_blank"><i class="fa fa-file fa-lg"></i>Instructions</a>
+                    <button class="nav-link" id="home-tab" data-toggle="pill"
+                            data-target="#clue-container" type="button" role="tab"
+                            aria-controls="clue-container" aria-selected="true"><i class="fa fa-question"></i> Clues</button>
                 </li>
+                <!--<li class="nav-item" role="presentation">
+                    <a class="nav-link text-center" id="room-instructions" href="{{ workout.student_instructions_url }}"
+                       target="_blank"><i class="fa fa-file-pdf-o"></i> Instructions</a>
+                </li>-->
             </ul>
         </div> <!-- End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
@@ -133,9 +141,9 @@
                                         <div class="card-body">
                                             <h4 class="card-title">{{ puzzle.name }}</h4>
                                             {% if puzzle.correct == True %}
-                                                <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">{{ puzzle.reveal }}</h6>
+                                                <h6 class="card-subtitle">Complete!</h6>
                                             {% else %}
-                                                <h6 class="card-subtitle" id="{{ puzzle['id'] }}-reveal">Incomplete</h6>
+                                                <h6 class="card-subtitle">Incomplete</h6>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -155,9 +163,15 @@
                                                             <p>Question: {{ puzzle.question }}</p>
                                                             <ul class='list-inline' style="list-style-type: none">
                                                                 {% if puzzle.instructions_url %}
-                                                                    <li class="list-inline-item">
-                                                                        <a class="btn-fa" href="{{ puzzle.instructions_url }}" target="_blank">Instructions</a>
-                                                                    </li>
+                                                                    {% if puzzle.entry_name == 'Johnny Hash' %}
+                                                                        <li class="list-inline-item">
+                                                                            <p>{{ puzzle.instructions_url }}</p>
+                                                                        </li>
+                                                                    {% else %}
+                                                                        <li class="list-inline-item">
+                                                                            <a class="btn-fa" href="{{ puzzle.instructions_url }}" target="_blank"><i class="fa fa-file-pdf-o"></i> Instructions</a>
+                                                                        </li>
+                                                                    {% endif %}
                                                                 {% endif %}
                                                                 <li class="list-inline-item">
                                                                     {% if puzzle.entry_type == 'server' %}
@@ -232,6 +246,26 @@
                                 {% endif %}
                             </div>
                         {% endif %}
+                    </div>
+                    <div id="clue-container" class="tab-pane fade show" role="tabpanel" aria-labelledby="clue-tab">
+                        <div class="info-container">
+                            {% set puzzles_correct = namespace(value=0) %}
+                            {% for puzzle in workout.escape_room.puzzles %}
+                                {% if puzzle.correct %}
+                                    <div class="puzzle-clues">
+                                        <span class="puzzle-clues">{{ puzzle.reveal }}</span>
+                                        {% set puzzles_correct.value = puzzles_correct.value + 1 %}
+                                    </div>
+                                {% else %}
+                                    <div class="puzzle-clues">
+                                        <span class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                            {% if puzzles_correct.value == 0 %}
+                                <h3>Clues will be revealed as each puzzle is completed!</h3>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>

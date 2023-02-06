@@ -34,7 +34,6 @@ def teacher_home():
         for class_instance in class_list:
             if 'class_name' in class_instance:
                 class_info = {
-                    'id': class_instance['class_id'],
                     'name': class_instance['class_name'],
                     'student_auth': class_instance['student_auth'] if 'student_auth' in class_instance else 'anonymous',
                     'roster_size': len(class_instance.get('roster', []))
@@ -62,7 +61,8 @@ def teacher_home():
                             'description': unit['summary']['description'],
                             'created': creation_ts,
                             'expires': expire_ts,
-                            'build_count': unit['workspace_settings']['count']
+                            'build_count': unit['workspace_settings']['count'],
+                            'build_type': unit['build_type']
                         }
                         if (int(time.time()) - (int(creation_ts) + (int(expire_ts) * 60 * 60 * 24))) < 0:
                             active_units.append(unit_info)
@@ -74,7 +74,8 @@ def teacher_home():
                             'name': unit['summary']['name'],
                             'description': unit['summary']['description'],
                             'created':  unit['creation_timestamp'],
-                            'build_count': unit['workspace_settings']['count']
+                            'build_count': unit['workspace_settings']['count'],
+                            'build_type': unit['build_type']
                         }
                         expired_units.append(unit_info)
             teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['created']), reverse=True)
@@ -144,7 +145,6 @@ def workout_list(unit_id):
 @teacher_app.route('/escape-room/<unit_id>', methods=['GET'])
 def escape_room(unit_id):
     auth = ArenaAuthorizer()
-    auth = ArenaAuthorizer()
     if session.get('user_email', None):
         teacher_email = session['user_email']
         auth_list = auth.get_user_groups(teacher_email)
@@ -152,42 +152,43 @@ def escape_room(unit_id):
         if unit:
             workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
             if len(workouts_list) > 0:
-                workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
-                                                                parent_id=unit_id)
-                if len(workouts_list) > 0:
-                    registration_required = unit.get('registration_required', False)
-                    unit['api'] = _get_api_urls(build_type=unit['build_type'])
+                registration_required = unit.get('registration_required', False) # TODO: Might not need this line in the future
+                unit['api'] = _get_api_urls(build_type=unit['build_type'])
 
-                    # Check if Unit is expired
-                    current_ts = get_current_timestamp_utc()
-                    is_expired = True
-                    if current_ts <= unit['workspace_settings']['expires']:
-                        is_expired = False
-                    unit['expired'] = is_expired
-                    unit['human_interaction'] = {'servers': False, 'web_applications': False}
+                # Check if Unit is expired
+                current_ts = get_current_timestamp_utc()
+                is_expired = True
+                if current_ts <= unit['workspace_settings']['expires']:
+                    is_expired = False
+                unit['expired'] = is_expired
 
-                    for workout in workouts_list:
-                        if workout.get('servers', False):
-                            unit['human_interaction']['servers'] = True
-                        if workout.get('web_application', False):
-                            unit['human_interaction']['web_applications'] = True
-                        unit['escape_room']['expired'] = workout['escape_room'].get('expired', False)
-                        start_time = workout['escape_room']['start_time']
-                        time_limit = workout['escape_room']['time_limit']
-                        current_time = get_current_timestamp_utc()
-                        time_remaining = time_limit - (current_time - start_time)
-                        if time_remaining > 0 or start_time == 0:
-                            unit['escape_room']['expired'] = False
-                            unit['escape_room']['time_remaining'] = time_remaining
-                        else:
-                            unit['escape_room']['expired'] = True
+                # Check to see if the Escape Room has any servers or web_applications
+                # This is a way to bypass Jinja templating errors for keys
+                unit['human_interaction'] = {'servers': False, 'web_applications': False}
+                for workout in workouts_list:
+                    if workout.get('servers', False):
+                        unit['human_interaction']['servers'] = True
+                    if workout.get('web_application', False):
+                        unit['human_interaction']['web_applications'] = True
+                    # Check the Escape Room timer to see if it is still valid
+                    unit['escape_room']['expired'] = workout['escape_room'].get('expired', False)
+                    start_time = workout['escape_room']['start_time']
+                    time_limit = workout['escape_room']['time_limit']
+                    current_time = get_current_timestamp_utc()
+                    time_remaining = time_limit - (current_time - start_time)
+                    # We assume if start_time == 0, the escape room hasn't been started yet
+                    if time_remaining > 0 or start_time == 0:
+                        unit['escape_room']['expired'] = False
                         unit['escape_room']['time_remaining'] = time_remaining
-                        break
-                    return render_template('teacher_escape_room.html', auth_config=auth_config, auth_list=auth_list,
-                                           unit=dict(unit), workout_list=list(workouts_list),
-                                           main_app_url=CloudEnv().main_app_url)
-                logger.error(f'NO WORKOUT FOUND WITH PARENT_ID {unit_id}')
-                abort(404)
+                    else:  # Escape Room timer has expired
+                        unit['escape_room']['expired'] = True
+                    unit['escape_room']['time_remaining'] = time_remaining
+                    break
+                return render_template('teacher_escape_room.html', auth_config=auth_config, auth_list=auth_list,
+                                       unit=dict(unit), workout_list=list(workouts_list),
+                                       main_app_url=CloudEnv().main_app_url)
+            logger.error(f'NO WORKOUT FOUND WITH PARENT_ID {unit_id}')
+            abort(404)
         return redirect('/no-workout')
     return redirect('/login')
 

@@ -454,4 +454,7 @@ li.control-container-list {
 .buildState.transition {color: var(--transition, #b3be27);}
 .fa-pr-5 { padding-right: 5px; }
 .fa-pl-5 { padding-left: 5px; }
-
+p.complete {
+    color: green;
+    font-weight: bold;
+}

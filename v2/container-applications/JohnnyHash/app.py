@@ -1,6 +1,7 @@
 import os
 from flask import Flask, redirect, abort, jsonify, render_template, request, session
 from app_utilities.gcp.datastore_manager import DataStoreManager
+from app_utilities.gcp.cloud_env import CloudEnv
 from app_utilities.globals import DatastoreKeyTypes
 from app_utilities.crypto_suite.hashes import Hashes
 
@@ -13,6 +14,8 @@ from api.johnnyhash_api import JohnnyHashAPI
 # --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
 app.register_blueprint(johnnyhash)
+app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
+app.jinja_env.globals['project'] = CloudEnv().project
 
 
 # Loader Route; Used to determine which Blueprint to use
