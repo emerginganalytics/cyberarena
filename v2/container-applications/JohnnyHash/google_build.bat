@@ -1,1 +1,1 @@
-gcloud builds submit --tag gcr.io/ualr-cybersecurity/crypt-server-loader
+gcloud builds submit . --tag gcr.io/ualr-cybersecurity/johnnyhash-v2

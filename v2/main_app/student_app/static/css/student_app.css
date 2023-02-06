@@ -300,5 +300,13 @@ li button {
     color: whitesmoke;
     text-align: center;
 }
+div.puzzle-clues {
+    border: 1px solid black;
+    margin-bottom: 10px;
+}
+span.puzzle-clues {
+    white-space: pre-wrap;
+    padding: 5px;
+}
 
 /* [ eof ] */
