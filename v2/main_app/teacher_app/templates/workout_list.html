@@ -130,8 +130,10 @@
                                 <table class="table text-nowrap table-small">
                                     <thead>
                                         <tr id="active-table-headers">
+                                            <td>#</td>
                                             <td>State</td>
                                             <td>ID</td>
+                                            <td>Workout Links</td>
                                             {% if unit.assessment %}
                                                 <td>Assessment</td>
                                             {% endif %}
@@ -140,18 +142,20 @@
                                     <tbody>
                                         {% for workout in workout_list %}
                                             <tr>
+                                                <td>{{ loop.index }}</td>
                                                 <td>
                                                     {% if workout['state'] == 50 %}
-                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState running"></i>
+                                                        <i id="workoutState{{ workout['id'] }}" class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="top" title="RUNNING"></i>
                                                         <!--<span id="workout-state-{{ workout['id'] }}" class="buildState running"></span>-->
                                                     {% elif workout['state'] == 53 %}
-                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState stopped"></i>
+                                                        <i id="workoutState{{ workout['id'] }}" class="fa fa-circle buildState stopped" data-toggle="tooltip" data-placement="top" title="STOPPED"></i>
                                                     {% elif workout['state'] == 72 %}
-                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState deleted"></i>
+                                                        <i id="workoutState{{ workout['id'] }}" class="fa fa-circle buildState deleted" data-toggle="tooltip" data-placement="top" title="DELETED"></i>
                                                     {% else %}
-                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
+                                                        <i id="workoutState{{ workout['id'] }}" class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="top" title="WORKING"></i>
                                                     {% endif %}
                                                 </td>
+                                                <td>{{ workout['id'] }}</td>
                                                 <td>
                                                     <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
                                                         <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>

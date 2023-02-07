@@ -101,7 +101,7 @@ class Workout(MethodView):
                             duration_hours = 2
                         duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
                         self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                build_id=str(build_id), duration=duration,
+                                                build_id=str(build_id), duration=str(duration),
                                                 cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()

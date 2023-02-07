@@ -113,36 +113,6 @@ def landing_page(workout_id):
         return redirect('/no-workout')
 
 
-@student_app.route('/<unit_id>/signup', methods=['GET', 'POST'])
-def unit_signup(unit_id):
-    unit = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT.value, key_id=unit_id).get()
-    if request.method == 'POST':
-        workout_query = DataStoreManager(key_id=DatastoreKeyTypes.CYBERGYM_WORKOUT).query()
-        workout_query.add_filter('unit_id', '=', unit_id)
-        workout_list = list(workout_query.fetch())
-        claimed_workout = None
-        for workout in workout_list:
-            if 'student_name' in workout:
-                if workout['student_name'] == None or workout['student_name'] == "":
-                    claimed_workout = workout
-                    claimed_workout['student_name'] = request.form['student_name']
-                    DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).put(obj=claimed_workout)
-                    if unit['build_type'] == 'arena':
-                        return redirect('/student/arena_landing/%s' % claimed_workout.key.name)
-                    else:
-                        return redirect('/student/landing/%s' % claimed_workout.key.name)
-            else:
-                claimed_workout = workout
-                claimed_workout['student_name'] = request.form['student_name']
-                DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).put(obj=claimed_workout)
-                if unit['build_type'] == 'arena':
-                    return redirect('/student/arena_landing/%s' % claimed_workout.key.name)
-                else:
-                    return redirect('/student/landing/%s' % claimed_workout.key.name)
-        return render_template('unit_signup.html', unit_full=True)
-    return render_template('unit_signup.html')
-
-
 # TODO: Will replace student_app.landing_page route
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):

@@ -148,7 +148,11 @@
                                 <div id="class-summary">
                                     <h2>{{ workout.summary.name }}</h2>
                                     <p>{{ workout.summary.description }}</p>
-                                    <p>Details for what the workout covers will be in this section. This will also include links to any instruction sets.</p>
+                                    <p style="width: 60%;">
+                                        <span class="highlight-warning">
+                                            Once your machines are running, please allow about 2 minutes for the Guacamole service to become accessible.
+                                        </span>
+                                    </p>
                                     {% if workout.summary.student_instructions_url %}
                                         <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
                                                target="_blank" rel="noopener noreferrer">Workout Instructions</a>

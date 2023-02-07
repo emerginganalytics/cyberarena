@@ -446,7 +446,7 @@ li.control-container-list {
 	60% {transform: translateY(-8px); color: var(--mint); transition: var(--python-blue) 1000ms linear;}
 }
 
-/* FontA1wesome Icon Styles */
+/* FontAwesome Icon Styles */
 .buildState {font-size: 30px;}
 .buildState.running {color: var(--running, #1d8037);}
 .buildState.stopped {color: var(--stopped, #838683);}
@@ -457,4 +457,21 @@ li.control-container-list {
 p.complete {
     color: green;
     font-weight: bold;
+}
+
+/* Text Highlighting */
+.highlight-info {
+    background-color: #7ab7dc;
+    border-radius: 10px;
+    padding: 5px;
+}
+.highlight-warning {
+    background-color: #fbe9b1;
+    border-radius: 10px;
+    padding: 5px;
+}
+.highlight-error {
+    background-color: #b75f5f;
+    border-radius: 10px;
+    padding: 5px;
 }
