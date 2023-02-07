@@ -1,3 +1,5 @@
+import time
+
 from google.cloud import datastore
 from main_app_utilities.globals import DatastoreKeyTypes, ServerStates, get_current_timestamp_utc
 from google.cloud import logging_v2
@@ -13,6 +15,9 @@ __status__ = "Testing"
 
 
 class DataStoreManager:
+    MAX_ATTEMPTS = 5
+    WAIT_PERIOD = 3
+
     def __init__(self, key_type=None, key_id=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
@@ -26,10 +31,16 @@ class DataStoreManager:
 
     def get(self, key_type=None, key_id=None):
         if key_type:
-            temp_key = self.ds_client.key(key_type, key_id)
-            return self.ds_client.get(temp_key)
+            use_key = self.ds_client.key(key_type, key_id)
         else:
-            return self.ds_client.get(self.key)
+            use_key = self.key
+        obj = self.ds_client.get(use_key)
+        i = 0
+        while not obj and i < self.MAX_ATTEMPTS:
+            i += 1
+            time.sleep(self.WAIT_PERIOD)
+            obj = self.ds_client.get(use_key)
+        return obj
 
     def put(self, obj, key_type=None, key_id=None):
         if key_type:
@@ -66,7 +77,13 @@ class DataStoreManager:
     def get_children(self, child_key_type, parent_id):
         query_workspaces = self.ds_client.query(kind=child_key_type)
         query_workspaces.add_filter('parent_id', '=', parent_id)
-        return list(query_workspaces.fetch())
+        children = list(query_workspaces.fetch())
+        i = 0
+        while not children and i < self.MAX_ATTEMPTS:
+            i += 1
+            time.sleep(self.WAIT_PERIOD)
+            children = list(query_workspaces.fetch())
+        return children
 
     def get_expired(self):
         expired = []

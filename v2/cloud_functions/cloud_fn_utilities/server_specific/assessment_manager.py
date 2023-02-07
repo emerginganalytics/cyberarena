@@ -46,7 +46,7 @@ class AssessmentManager:
                 self.assessment_questions = self.build['escape_room']['puzzles']
                 self.url = f"https://{self.env.main_app_url}/api/escape-room/team/"
             else:
-                self.assessment_questions = self.build['assessment']
+                self.assessment_questions = self.build.get('assessment', None)
                 # TODO: Add a URL for the workout assessment.
         else:
             raise ValueError(f"The build object for the assessment has no build_type key")

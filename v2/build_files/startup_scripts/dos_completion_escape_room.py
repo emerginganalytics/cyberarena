@@ -15,11 +15,11 @@ def check_cpu_usage():
 
 def assess_publish():
     url = os.environ.get(f"URL")
-    q0_key = os.environ.get(f'Q0_KEY')
+    q_key = os.environ.get(f'Q0_KEY')
     build_id = os.environ.get('BUILD_ID')
 
     data = {
-        "question_id": q0_key,
+        "question_id": q_key,
     }
 
     requests.put(f"{url}{build_id}", json=data)
