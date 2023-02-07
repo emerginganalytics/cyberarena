@@ -115,5 +115,11 @@ class Unit:
             if self.debug:
                 workout_record['test'] = True
             workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=id)
-            workout = Workout(build_id=id, debug=self.debug)
-            workout.build()
+            if self.debug:
+                workout = Workout(build_id=id, debug=self.debug)
+                workout.build()
+            else:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                        action=str(PubSub.BuildActions.WORKOUT.value),
+                                        key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                        build_id=str(id))

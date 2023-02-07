@@ -1,4 +1,5 @@
 import os
+import subprocess
 import multiprocessing as mp
 from time import sleep
 import yaml
@@ -20,6 +21,10 @@ __status__ = "Testing"
 
 
 class BulkInstallUpdate:
+    DELEGATE_CMD = "gcloud iam service-accounts add-iam-policy-binding " \
+                   "cyberarena-service@{project}.iam.gserviceaccount.com " \
+                   "--member user:{email} --role roles/iam.serviceAccountUser"
+
     def __init__(self):
         print("Attempting to load the bulk settings file")
         try:
@@ -30,6 +35,16 @@ class BulkInstallUpdate:
             raise e
         self.deploy_functions = settings['deploy_functions']
         self.gcp_projects = settings['gcp_projects']
+        response = input("Do you want to set the delegation permissions for your account on all the cloud projects "
+                         "at this time? [y/N] ")
+        if response.upper() == "Y":
+            email = input("What email address are you using to run gcloud SDK?")
+            for project in self.gcp_projects:
+                ret = subprocess.run(f"gcloud config set project {project['name']}", capture_output=True, shell=True)
+                print(ret.stderr.decode())
+                command = self.DELEGATE_CMD.format(project=project['name'], email=email)
+                ret = subprocess.run(command, capture_output=True, shell=True)
+                print(ret.stderr.decode())
         print(f"Performing the functions {[x for x in self.deploy_functions]} for projects "
               f"{[x['name'] for x in self.gcp_projects]}.")
 

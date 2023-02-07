@@ -70,8 +70,8 @@ class CyberArenaApp:
         ret = subprocess.run(command, capture_output=True, shell=True)
         print(ret.stderr.decode())
         if ret.returncode != 0:
-            print(f"Error packaging the Cloud Run App! See messages above. Existing without deploying the "
-                  f"Cloud Run App")
+            print(f"Error deploying the cloud function! See messages above. Existing without deploying the "
+                  f"cloud function")
             return False
         self._set_scheduler()
 

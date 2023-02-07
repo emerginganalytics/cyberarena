@@ -54,6 +54,12 @@ class BuildHandler:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
             Unit(build_id=build_id).build()
+        elif action == str(PubSub.BuildActions.WORKOUT.value):
+            build_id = self.event_attributes.get('build_id', None)
+            if not build_id:
+                logging.error(f"No build id provided for build handler with action {action}")
+                raise ValueError
+            Workout(build_id=build_id).build()
         elif action == str(PubSub.BuildActions.SERVER.value):
             server_name = self.event_attributes.get('server_name', None)
             if not server_name:

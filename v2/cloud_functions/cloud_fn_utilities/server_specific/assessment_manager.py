@@ -63,6 +63,9 @@ class AssessmentManager:
         """
         startup_script = None
         i = 0
+        if not self.assessment_questions:
+            return None
+
         for question in self.assessment_questions:
             if question['type'] == BuildConstants.QuestionTypes.AUTO and 'server' in question \
                     and question['server'] == server_name:
