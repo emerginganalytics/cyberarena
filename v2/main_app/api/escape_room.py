@@ -15,6 +15,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+import time
 import yaml
 from datetime import datetime, timedelta, timezone
 from flask import request, session, url_for, redirect
@@ -89,9 +90,11 @@ class EscapeRoomUnit(MethodView):
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=self.debug)
         build_spec_to_cloud.commit()
         build_id = build_spec_to_cloud.get_build_id()
-        return redirect(url_for('teacher_app.escape_room', unit_id=build_spec_to_cloud.get_build_id()))
-
-        # return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
+        if self.debug:
+            return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
+        else:
+            time.sleep(5)
+            return redirect(url_for('teacher_app.escape_room', unit_id=build_spec_to_cloud.get_build_id()))
 
     def put(self, build_id, data=None):
         """
@@ -125,9 +128,9 @@ class EscapeRoomUnit(MethodView):
                 if workouts:
                     for workout in workouts:
                         self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
-                                            cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                             action=str(PubSub.Actions.START.value))
-                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 60
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 300
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)
@@ -210,35 +213,37 @@ class EscapeRoomWorkout(MethodView):
         escape_attempt = recv_data.get('ea', False)
         question_id = recv_data.get('question_id', None)
         response = recv_data.get('response', None)
-        if escape_attempt and escape_attempt == '4534-9a9d':
-            question_id = 1
-        if build_id and question_id and response:
-            ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id)
-            self.workout = ds_workout.get()
-            if self.workout:
-                current_time = datetime.now().timestamp()
-                time_limit = self.workout['escape_room']['time_limit']
-                start_time = self.workout['escape_room']['start_time']
-                self.workout['escape_room']['remaining_time'] = time_limit - (current_time - start_time)
-                if self.workout['escape_room']['remaining_time'] > 0:
-                    if escape_attempt:
-                        self._evaluate_escape_room_question(response)
-                    else:
-                        self._evaluate_puzzle_question(question_id, response)
-                    ds_workout.put(self.workout)
-
-                    # Clean up return object
-                    self.workout['escape_room']['number_correct'] = self.workout['escape_room']['puzzle_count'] = 0
-                    for puzzle in self.workout['escape_room']['puzzles']:
-                        self.workout['escape_room']['puzzle_count'] += 1
-                        puzzle['answer'] = ''
-                        if puzzle['correct']:
-                            self.workout['escape_room']['number_correct'] += 1
-                    self.workout['escape_room']['answer'] = ''
-                    return self.http_resp(code=200, data=self.workout).prepare_response()
+        if not build_id:
+            return self.http_resp(code=404, msg="No build ID provided").prepare_response()
+        ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id)
+        self.workout = ds_workout.get()
+        if not self.workout:
+            return self.http_resp(code=404, msg="Workout not found").prepare_response()
+        if question_id:
+            current_time = datetime.now().timestamp()
+            time_limit = self.workout['escape_room']['time_limit']
+            start_time = self.workout['escape_room']['start_time']
+            self.workout['escape_room']['remaining_time'] = time_limit - (current_time - start_time)
+            if self.workout['escape_room']['remaining_time'] > 0:
+                if escape_attempt:
+                    self._evaluate_escape_room_question(response)
+                elif response:
+                    self._evaluate_puzzle_question(question_id, response)
                 else:
-                    return self.http_resp(code=404, msg="The escape room has no time remaining.").prepare_response()
-            return self.http_resp(code=404).prepare_response()
+                    self._evaluate_auto_question(question_id)
+                ds_workout.put(self.workout)
+
+                # Clean up return object
+                self.workout['escape_room']['number_correct'] = self.workout['escape_room']['puzzle_count'] = 0
+                for puzzle in self.workout['escape_room']['puzzles']:
+                    self.workout['escape_room']['puzzle_count'] += 1
+                    puzzle['answer'] = ''
+                    if puzzle['correct']:
+                        self.workout['escape_room']['number_correct'] += 1
+                self.workout['escape_room']['answer'] = ''
+                return self.http_resp(code=200, data=self.workout).prepare_response()
+            else:
+                return self.http_resp(code=404, msg="The escape room has no time remaining.").prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     def _evaluate_escape_room_question(self, response: str):
@@ -273,3 +278,9 @@ class EscapeRoomWorkout(MethodView):
                 puzzle['responses'].append(response)
                 if puzzle['answer'] == response:
                     puzzle['correct'] = True
+
+    def _evaluate_auto_question(self, question_id: int):
+        puzzles = self.workout['escape_room']['puzzles']
+        for puzzle in puzzles:
+            if puzzle['id'] == question_id:
+                puzzle['correct'] = True

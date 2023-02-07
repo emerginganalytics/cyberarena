@@ -6,7 +6,7 @@ from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.compute_manager import ComputeManager
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
-from main_app_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc
+from main_app_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, WorkoutStates
 
 student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         static_folder="./static",
@@ -193,7 +193,7 @@ def escape_room(build_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
-        if workout['escape_room'].get('start_time', None):
+        if workout['escape_room'].get('start_time', None) and workout.get('state', None) == WorkoutStates.RUNNING.value:
             start_time = workout['escape_room']['start_time']
             time_limit = workout['escape_room']['time_limit']
             current_time = get_current_timestamp_utc()

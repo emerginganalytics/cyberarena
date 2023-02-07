@@ -13,6 +13,7 @@ from cloud_fn_utilities.gcp.dns_manager import DnsManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager, ServerStates
 from cloud_fn_utilities.state_managers.server_states import ServerStateManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
+from cloud_fn_utilities.server_specific.assessment_manager import AssessmentManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -45,15 +46,26 @@ class ComputeManager:
         self.server_name = server_name
         self.server_spec = DataStoreManager(key_type=DatastoreKeyTypes.SERVER.value, key_id=self.server_name).get()
         if not self.server_spec:
-            logging.error(f"No record exists for compute record {server_name}")
+            self.logger.error(f"No record exists for compute record {server_name}")
             raise LookupError
+        self.parent_build_id = self.server_spec.get('parent_id', None)
+        self.parent_build_type = self.server_spec.get('parent_build_type', None)
+        if self.parent_build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:
+            parent_key_type = DatastoreKeyTypes.WORKOUT
+        elif self.parent_build_type in [BuildConstants.BuildType.FIXED_ARENA]:
+            parent_key_type = DatastoreKeyTypes.FIXED_ARENA
+        elif self.parent_build_type in [BuildConstants.BuildType.FIXED_ARENA_CLASS,
+                                        BuildConstants.BuildType.FIXED_ARENA_WORKSPACE]:
+            parent_key_type = DatastoreKeyTypes.FIXED_ARENA_CLASS
+        else:
+            self.logger.error(f"Unsupported build type {self.parent_build_type}")
+            parent_key_type = DatastoreKeyTypes.WORKOUT
+        self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type)
         self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):
         """
         Builds an individual server based on the specification in the Datastore entity with name server_name.
-        :param server_spec: specification of the server to build
-        :param build_id: ID of the build used for the predicate
         :return: A boolean status on the success of the build
         """
 
@@ -86,7 +98,7 @@ class ComputeManager:
                                                            sourceMachineImage=source_machine_image).execute()
             except HttpError as err:
                 if err.resp.status in [409]:
-                    logging.warning(f"The server {self.server_name} already exists.")
+                    self.logger.warning(f"The server {self.server_name} already exists.")
                     return
         else:
             if "delayed_start" in self.server_spec and self.server_spec["delayed_start"]:
@@ -157,7 +169,7 @@ class ComputeManager:
                     self.logger.error(f"Server {self.server_name} does not exist! Exiting function.")
                     return
             except BrokenPipeError:
-                logging.info(f"Broken pipe error when trying to start {self.server_name} Trying again...")
+                self.logger.info(f"Broken pipe error when trying to start {self.server_name} Trying again...")
             if not start_success:
                 i += 1
             time.sleep(10)
@@ -277,6 +289,9 @@ class ComputeManager:
             metadata['items'].append({"key": "ssh-keys", "value": self.server_spec['sshkey']})
         if self.server_spec.get('guacamole_startup_script', None):
             metadata['items'].append({"key": "startup-script", "value": self.server_spec['guacamole_startup_script']})
+        assessment_startup_script = self.assessment.get_startup_scripts(server_name=self.server_spec['name'])
+        if assessment_startup_script:
+            metadata['items'].append(assessment_startup_script)
         self.server_spec['metadata'] = metadata
 
     def _add_nics(self):

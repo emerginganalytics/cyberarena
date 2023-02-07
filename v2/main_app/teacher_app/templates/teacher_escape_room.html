@@ -69,13 +69,6 @@
                        {% endif %}
                    {% endfor %}
                    {% if escaped != workout_list | count %}
-                       let countdownTimer = new Timer("{{ workout['id'] }}");
-                       let times = {
-                           'start_time': {{ unit.escape_room.start_time }},
-                           'time_limit': {{ unit.escape_room.time_limit }},
-                           'expired': {{ unit.escape_room.expired | lower }}
-                       }
-                       countdownTimer.start(times);
                        getEscapeRoomState("{{ unit['escape_room']['id'] }}");
                    {% endif %}
                {% endif %}
@@ -111,7 +104,7 @@
                         <button class="nav-link">Start Escape Room</button>
                         <button class="nav-link">Start Timer</button>
                     </li>
-                {% endif  %}
+                {% endif %}
             </ul>
         </div> <!-- End sidebar-menu div -->
         <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
@@ -140,6 +133,11 @@
                                     <tr class="text-center">
                                         <th scope="col">Status</th>
                                         <th scope="col">Workout Link</th>
+                                        {% if workout_list | count > 0 %}
+                                            {% for puzzle in workout_list[0]['escape_room']['puzzles'] %}
+                                                <th scope="col">{{ puzzle.name }}</th>
+                                            {% endfor %}
+                                        {% endif %}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -160,6 +158,15 @@
                                                 <a class="btn-fa" href="/student/escape-room/team/{{ workout['id'] }}"
                                                    target="_blank">Team {{ workout['id'] }}</a>
                                             </td>
+                                            {% for puzzle in workout['escape_room']['puzzles'] %}
+                                                <td>
+                                                    {% if puzzle.correct == True %}
+                                                        <p class="complete">Complete!</p>
+                                                    {% else %}
+                                                        <p>Incomplete!</p>
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
                                         </tr>
                                     {% endfor %}
                                 </tbody>

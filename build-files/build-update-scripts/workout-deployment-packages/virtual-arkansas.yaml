@@ -31,7 +31,7 @@ workouts:
       - crypto/johnnycipher.yaml
   - unit: "Level 2 - Module 5: Reversus"
     builds:
-      - digital-forensics/reversus.yaml
+      - digital-forensics/reversus.yaml.yaml
   - unit: "Level 2 - Module 6: Cyber Arena"
     builds:
       - cyber-arena-competitions/trojan-arena-level1.yaml
@@ -49,7 +49,7 @@ workouts:
       - access-control/password-policy.yaml
   - unit: "Level 3 - Module 5: Reversus Part 2"
     builds:
-      - digital-forensics/reversus.yaml
+      - digital-forensics/reversus.yaml.yaml
   - unit: "Level 3 - Module 6: Cyber Arena"
     builds:
       - cyber-arena-competitions/trojan-arena-level1.yaml

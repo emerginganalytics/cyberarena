@@ -37,9 +37,10 @@ class TestEscapeRoom:
         self.escape_room_workout = EscapeRoomWorkout(debug=True)
 
     def build(self):
+        expires = (datetime.now() + timedelta(hours=3)).strftime("%Y-%m-%dT%H:%M")
         build_data = {
-            'build_file': 'escape_room',
-            'expires': 1,
+            'build_file': 'tefference',
+            'expires': expires,
             'build_count': 1,
             'user_email': 'philiphuff7@gmail.com'
         }
@@ -47,7 +48,8 @@ class TestEscapeRoom:
         http_response = self.escape_room_unit.post(data=build_data)
         http_response = json.loads(http_response)
         self.build_id = http_response['data']['build_id']
-        Unit(build_id=self.build_id).build()
+        print(f"Beginning to build unit with ID {self.build_id}")
+        Unit(build_id=self.build_id, debug=True).build()
         print(f"Sent pubsub message to build unit with ID {self.build_id}")
 
     def start_escape_room_timer(self):

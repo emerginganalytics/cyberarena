@@ -123,6 +123,10 @@ class BuildConstants:
     class Reports:
         ATTACK = 2
 
+    class ScriptOperatingSystems:
+        WINDOWS = 'windows'
+        LINUX = 'linux'
+
 
 class ServerStates(Enum):
     START = 0
@@ -226,8 +230,14 @@ class WorkoutStates(Enum):
 
 
 class Buckets:
+    BUILD_SPEC_BUCKET_SUFFIX = "build-specs"
+
     class Folders(str, Enum):
         SPECS = "specs/"
+        ATTACKS = 'attacks/'
+        STARTUP_SCRIPTS = "startup_scripts/"
+        TEACHER_FOLDER = "teacher_instructions/"
+        STUDENT_FOLDER = "student_instructions/"
 
 
 class PubSub:

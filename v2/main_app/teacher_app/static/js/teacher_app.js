@@ -231,5 +231,7 @@ function startEscapeRoomTimer(build_id, url, action) {
     }).then(response => response.json()).then((data) =>{
         console.log(data);
     })
-
+}
+function localToUTC(element){
+    console.log(this);
 }

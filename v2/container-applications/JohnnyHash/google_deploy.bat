@@ -1,1 +1,1 @@
-gcloud beta run deploy --image gcr.io/ualr-cybersecurity/crypt-server-loader
+gcloud run deploy johnnyhash-v2 --image gcr.io/ualr-cybersecurity/johnnyhash-v2 --memory=1024Mi --platform=managed --region=us-central1 --allow-unauthenticated --service-account=cyberarena-service@ualr-cybersecurity.iam.gserviceaccount.com
