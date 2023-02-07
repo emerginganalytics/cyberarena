@@ -85,7 +85,7 @@ class Unit:
                 'id': id,
                 'parent_id': self.unit_id,
                 'parent_build_type': BuildConstants.BuildType.UNIT,
-                'build_type': self.unit['build_type'],
+                'build_type': BuildConstants.BuildType.WORKOUT,
                 'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
                 'registration_required': registration_required,
             }

@@ -49,7 +49,7 @@
                             <div class="form-group">
                                 <label for="class-expire-date-{{ loop.index }}">Expires: </label>
                                 <input id="class-expire-date-{{ loop.index }}" class="form-control" name="expires"
-                                       type="datetime-local">
+                                       type="datetime-local" onchange="localToUTC(this);">
                             </div>
                             <div id="{{ build_type }}-build-count-{{ loop.index }}-div" class="form-group">
                                 <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />

@@ -204,9 +204,11 @@ def escape_room(build_id):
             else:
                 workout['escape_room']['expired'] = True
                 workout['escape_room']['time_remaining'] = 0
+            # Calculate how many puzzles have been solved
             workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
+            # Get the connection urls for vms and web applications
             workout['links'] = _generate_connection_urls(workout)
-            workout['links']['instructions_url'] = unit['summary']['student_instructions_url']
+            workout['links']['student_instructions_url'] = unit['summary']['student_instructions_url']
             return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
         else:  # the escape room hasn't been started yet, return waiting room template
             workout['expires'] = unit['workspace_settings'].get('expires', None)
@@ -306,6 +308,7 @@ def _generate_connection_urls(workout_info):
         for conn in workout_info['proxy_connections']:
             username = conn['username']
             password = conn['password']
+            # Build the guacamole connection url with generated username and password
             url = f"http://{build_id}-display{dns_suffix}:8080/guacamole/#/?username={username}&password={password}"
             links['server'][conn['server']] = url
     if workout_info.get('web_applications', None):

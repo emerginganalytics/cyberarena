@@ -1,1 +1,1 @@
-gcloud run deploy johnnyhash-v2 --image gcr.io/ualr-cybersecurity/johnnyhash-v2 --memory=1024Mi --platform=managed --region=us-central1 --allow-unauthenticated --service-account=cyberarena-service@ualr-cybersecurity.iam.gserviceaccount.com
+gcloud run deploy johnnyhash-v2 image gcr.io/ualr-cybersecurity/johnnyhashv2 --memory=1024Mi --platform=managed --region=us-central1a --allow-unauthenticated --service-account=cyberarena-service@ualr-cybersecurity.iam.gserviceaccount.com

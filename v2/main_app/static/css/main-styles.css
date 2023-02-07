@@ -22,13 +22,13 @@ body, html {
 html {
     min-height: 100%;
     position: relative;
-    background: whitesmoke;
+    background: #fff;
     color: #000000;
     font-family: 'Montserrat', sans-serif;
     margin: auto;
 }
 body {
-    background-color: whitesmoke;
+    background-color: #fff;
     color: #a7a9ac;
     margin-bottom: 60px;
     padding-top: 4rem;

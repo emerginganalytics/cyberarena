@@ -150,7 +150,7 @@
                                     <p>{{ workout.summary.description }}</p>
                                     <p>Details for what the workout covers will be in this section. This will also include links to any instruction sets.</p>
                                     {% if workout.summary.student_instructions_url %}
-                                        <a class='btn-fa' href="{{ workout.links.instructions_url }}"
+                                        <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
                                                target="_blank" rel="noopener noreferrer">Workout Instructions</a>
                                     {% endif %}
                                 </div>
