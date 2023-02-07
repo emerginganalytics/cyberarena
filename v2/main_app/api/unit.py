@@ -68,8 +68,6 @@ class Unit(MethodView):
             else:
                 return self.http_resp(code=404).prepare_response()
         if build_count and expire_datetime and build_type:
-            # unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
-            # build_spec = yaml.safe_load(unit_yaml)
             build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=build_type).get()
             if not build_spec:
                 return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
