@@ -19,7 +19,8 @@ class EnvironmentVariables:
     COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
-    VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'admin_email', 'guac_password', 'project_number']
+    VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'admin_email', 'guac_password', 'project_number',
+                 'sql_password', 'sql_ip']
 
     def __init__(self, project):
         self.project = project
@@ -33,18 +34,18 @@ class EnvironmentVariables:
         if reply in ["S", "SPECIFIC"]:
             while True:
                 var = str(input(f"Which variable do you want to update?"))
-                self._set_variable(var)
+                self.set_variable(var)
                 response = str(input("Would you like to set another variable? (y/N)")).upper()
                 if not response or response == "N":
                     break
         else:
-            self._set_variable("project", self.project)
+            self.set_variable("project", self.project)
             self._set_region()
             self._set_zone()
             for var in self.VARIABLES:
-                self._set_variable(var)
+                self.set_variable(var)
 
-    def _set_variable(self, var, new_value=None):
+    def set_variable(self, var, new_value=None):
         current_val = self.myconfig.get_variable(var)
         current_val = current_val.value.decode("utf-8") if current_val else "EMPTY"
         if current_val == new_value:
@@ -73,7 +74,7 @@ class EnvironmentVariables:
         reply = input(f"Region options:\n{options_string}Enter the number beside the region in which you like to "
                       f"run the Cyber Arena? Default is {self.DEFAULT_REGION}")
         region = region_options[int(reply)] if reply.isnumeric() else self.DEFAULT_REGION
-        self._set_variable("region", region)
+        self.set_variable("region", region)
 
     def _set_zone(self):
         response = self.service.zones().list(project=self.project).execute()
@@ -86,10 +87,12 @@ class EnvironmentVariables:
         reply = input(f"Zone options:\n{options_string}Enter the number beside the zone in which you like to "
                       f"run the Cyber Arena? Default is {self.DEFAULT_ZONE}")
         zone = zone_options[int(reply)] if reply.isnumeric() else self.DEFAULT_ZONE
-        self._set_variable("zone", zone)
+        self.set_variable("zone", zone)
 
     class Variables(str, Enum):
         DNS_SUFFIX = "dns_suffix"
         API_KEY = "api_key"
         MAIN_APP_URL = "main_app_url"
         ADMIN_EMAIL = "admin_email"
+        SQL_IP = "sql_ip"
+        SQL_PASSWORD = "sql_password"

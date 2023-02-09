@@ -9,6 +9,7 @@ from install_update.operations.environment_variables import EnvironmentVariables
 from install_update.operations.cyber_arena_app import CyberArenaApp
 from install_update.operations.build_specification import BuildSpecification
 from install_update.operations.bulk_install_update import BulkInstallUpdate
+from install_update.operations.cloud_database import CloudDatabase
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -54,6 +55,8 @@ class SetupManager:
             BuildSpecification(sync=False).decrypt_locked_folders()
         elif self.selection == SetupOptions.ENV:
             EnvironmentVariables(project=self.project).run()
+        elif self.selection == SetupOptions.SQL:
+            CloudDatabase().deploy()
         elif self.selection == SetupOptions.BULK_UPDATE:
             BulkInstallUpdate().run()
         else:

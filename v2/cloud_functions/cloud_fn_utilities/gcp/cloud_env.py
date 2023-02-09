@@ -36,3 +36,7 @@ class CloudEnv:
         self.guac_db_password = myconfig.get_variable('guac_password').value.decode("utf-8")
         max_workspaces = myconfig.get_variable('max_workspaces')
         self.max_workspaces = int(max_workspaces.value.decode("utf-8")) if max_workspaces else 100
+        sql_ip = myconfig.get_variable('sql_ip')
+        self.sql_ip = sql_ip.value.decode("utf-8") if sql_ip else None
+        sql_password = myconfig.get_variable('sql_password')
+        self.sql_password = sql_password.value.decode("utf-8") if sql_password else None
