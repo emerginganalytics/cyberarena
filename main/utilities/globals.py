@@ -238,6 +238,7 @@ class BuildConstants:
     class Protocols(str, Enum):
         RDP = "rdp"
         VNC = "vnc"
+        SSH = "ssh"
 
     class Firewalls(str, Enum):
         FORTINET = "fortinet"

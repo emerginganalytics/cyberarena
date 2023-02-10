@@ -63,6 +63,11 @@ class GuacamoleConfiguration:
                 startup_script += GuacSQL.guac_startup_vnc.format(ip=connection['ip'],
                                                                   connection=connection_name,
                                                                   vnc_password=connection['connection_password'])
+            elif connection['protocol'] == 'ssh':
+                startup_script += GuacSQL.guac_startup_ssh.format(ip=connection['ip'],
+                                                                  connection=connection_name,
+                                                                  ssh_username=connection['connection_user'],
+                                                                  ssh_password=connection['connection_password'])
             else:
                 startup_script += GuacSQL.guac_startup_rdp.format(ip=connection['ip'],
                                                                   connection=connection_name,
@@ -101,6 +106,13 @@ class GuacSQL:
         'SELECT entity_id INTO @entity_id FROM guacamole_entity WHERE name = \'{user}\';\n' \
         'INSERT INTO guacamole_user (entity_id, password_salt, password_hash, password_date) ' \
         'VALUES (@entity_id, @salt, UNHEX(SHA2(CONCAT(\'{guac_password}\', HEX(@salt)), 256)), \'2020-06-12 00:00:00\');\n'
+    guac_startup_ssh = \
+        'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'ssh\');\n' \
+        'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'hostname\', \'{ip}\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'port\', \'22\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'username\', \'{ssh_username}\');\n' \
+        'INSERT INTO guacamole_connection_parameter VALUES (@connection_id, \'password\', \"{ssh_password}\");\n'
     guac_startup_vnc = \
         'INSERT INTO guacamole_connection (connection_name, protocol) VALUES (\'{connection}\', \'vnc\');\n' \
         'SELECT connection_id INTO @connection_id FROM guacamole_connection WHERE connection_name = \'{connection}\';\n' \
