@@ -33,6 +33,7 @@ class BuildConstants:
     class Protocols(str, Enum):
         RDP = "rdp"
         VNC = "vnc"
+        SSH = "ssh"
 
     class SecurityModes(str, Enum):
         RDP = 'rdp'
