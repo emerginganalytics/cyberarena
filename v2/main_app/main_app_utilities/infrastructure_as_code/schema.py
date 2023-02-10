@@ -85,6 +85,15 @@ class CyberArenaSummarySchema(Schema):
     author = fields.Str(required=False, allow_none=True)
     standard_mappings = fields.Nested('StandardMappingsSchema', many=True, required=False,
                                       description='Curriculum standard mappings for this lab')
+    tags = fields.Nested('TeachingConceptsSchema', many=True, required=False, default=[],
+                         description='Key concepts that this build is intended to teach')
+
+    class Meta:
+        strict = True
+
+
+class TeachingConceptsSchema(Schema):
+    name = fields.Str(required=True, validate=validate.OneOf([x.value for x in BuildConstants.TeachingConcepts]))
 
     class Meta:
         strict = True
