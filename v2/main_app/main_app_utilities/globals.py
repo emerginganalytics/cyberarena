@@ -43,6 +43,17 @@ class BuildConstants:
     class Frameworks(Enum):
         NICE = "NICE"
 
+    class TeachingConcepts(Enum):
+        ETHICS = 'ethics'
+        ESTABLISHING_TRUST = 'establishing-trust'
+        UBIQUITOUS_COMPUTING = 'ubiquitous-computing'
+        DATA_SECURITY = 'data-security'
+        SYSTEM_SECURITY = 'system-security'
+        ADVERSARIAL_THINKING = 'adversarial-thinking'
+        RISK = 'risk'
+        IMPLICATIONS = 'implications'
+        COURSES = 'courses'
+
     class Firewalls(str, Enum):
         FORTINET = "fortinet"
         VYOS = "vyos"

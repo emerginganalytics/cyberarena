@@ -184,7 +184,7 @@ class BuildSpecification:
         return specs_to_upload
 
     def _sync_computer_images(self, file, image_first=False, source_project=None):
-        print(f"\t...Beginning to sync images from build specification {file}")
+        print(f"\t...Beginning to SYNC images from build specification {file}")
         with open(file) as f:
             spec = yaml.safe_load(f)
         server_list = []
@@ -222,17 +222,19 @@ class BuildSpecification:
 
         # Load each spec in plaintext dir and generate the datastore entry to upload
         if type(specs) == list:
-            for filename in specs:
-                print(f"\t...Beginning to SYNC the specification {filename.name} to Datastore")
-                spec = yaml.safe_load(open(filename.path))
-                self._validate_spec(spec)
-                ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=spec['id'])
-                ds_manager.put(spec)
+            for file in specs:
+                _, ext = os.path.splitext(file)
+                if ext == ".yaml":
+                    self._sync_specs_to_datastore(file)
         else:
-            print(f"\t...Beginning to SYNC the specification {specs} to Datastore")
-            file = yaml.safe_load(open(specs))
-            ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=file['id'])
-            ds_manager.put(file)
+            filename = os.path.basename(specs)
+            _, ext = os.path.splitext(specs)
+            print(f"\t...Beginning to SYNC the specification {filename} to Datastore")
+            if ext == '.yaml':
+                file = yaml.safe_load(open(specs))
+                self._validate_spec(file)
+                ds_manager.set(key_type=DatastoreKeyTypes.CATALOG.value, key_id=file['id'])
+                ds_manager.put(file)
 
     def _create_directories(self):
         directories = [
