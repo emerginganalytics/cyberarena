@@ -24,13 +24,13 @@ class TestUnit:
         self.bm = BucketManager()
         self.build_id = build_id if build_id else None
 
-    def build(self):
-        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}csec2324-lab1.yaml")
+    def build(self, spec_name: str):
+        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
         build_spec = yaml.safe_load(unit_yaml)
         build_spec['instructor_id'] = 'philiphuff7@gmail.com'
         build_spec['test'] = True
         build_spec['workspace_settings'] = {
-            'count': 2,
+            'count': 1,
             'registration_required': False,
             'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
@@ -63,8 +63,9 @@ if __name__ == "__main__":
         print(f"Unit deletion was successful!")
     build_first = str(input(f"Do you want to build a test unit first? (Y/n)"))
     if not build_first or build_first.upper()[0] == "Y":
+        spec_name = str(input(f"What is the spec name of the unit you want to test?"))
         test_unit = TestUnit()
-        test_unit.build()
+        test_unit.build(spec_name)
     else:
         test_unit_id = str(input(f"Which unit do you want to test?"))
         test_unit = TestUnit(build_id=test_unit_id)

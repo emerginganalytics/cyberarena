@@ -77,10 +77,6 @@ class BuildConstants:
         FORTIMANAGER = "image-fortimanager"
         AGENT = 'image-cybergym-kali'
 
-    class AssessmentTypes(str, Enum):
-        PERCENTAGE = "percentage"
-        LEVEL = "level"
-
     class QuestionTypes(str, Enum):
         AUTO = "auto"
         INPUT = "input"

@@ -191,7 +191,6 @@ class FirewallRuleSchema(Schema):
 
 
 class AssessmentSchema(Schema):
-    type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.AssessmentTypes]))
     questions = fields.Nested('AssessmentQuestionSchema', many=True)
 
 

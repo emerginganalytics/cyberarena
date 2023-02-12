@@ -4,6 +4,7 @@ from google.cloud import logging_v2
 from netaddr import IPSet, IPNetwork, IPAddress, iter_iprange
 
 from main_app_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
+from main_app_utilities.gcp.bucket_manager import BucketManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -23,6 +24,7 @@ class UnitValidator:
     """
     def __init__(self):
         self.config = None
+        self.bucket_manager = BucketManager()
         self.network_map = {}
 
     def load(self, config):
@@ -30,6 +32,8 @@ class UnitValidator:
         if config.get('servers'):
             self._validate_network()
             self._add_firewall_rules()
+        if config.get('assessment'):
+            self._validate_assessment()
         return self.config
 
     def _validate_network(self):
@@ -91,6 +95,17 @@ class UnitValidator:
         }
         firewall_rules.append(display_proxy_rule)
         self.config['firewall_rules'] = firewall_rules
+
+    def _validate_assessment(self):
+        server_names = [server['name'] for server in self.config['servers']] if self.config.get('servers') else []
+        script_names = self.bucket_manager.get_scripts()
+        for question in self.config.get('assessment'):
+            if 'server' in question and question['server'] not in server_names:
+                raise ValidationError(f"Invalid Server: Assessment uses a script on the server {question['server']} "
+                                      f"that does not exist in the specification")
+            if 'script' in question and question['script'] not in script_names:
+                raise ValidationError(f"Invalid Script: Assessment uses the script {question['script']} that does "
+                                      f"not exist in the cloud bucket for startup scripts")
 
 
 class UnitBuildConstants:

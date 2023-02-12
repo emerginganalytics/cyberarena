@@ -118,6 +118,8 @@ def landing_page(workout_id):
 def workout_view(build_id):
     auth_config = CloudEnv().auth_config
     workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+    if not workout_info:
+        return redirect('/no-workout')
     parent_id = workout_info.get('parent_id', None)
     if workout_info and parent_id:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
