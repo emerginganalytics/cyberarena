@@ -1,0 +1,53 @@
+/* Wave Bar Loading Animation */
+.loading {
+ width:100%;
+ height:100px;
+ text-align:center;
+ font-size:10px;
+}
+.loading > div {
+ background-color: #ccc;
+ height: 40%;
+ width: 10px;
+ display: inline-block;
+ -webkit-animation: sa-stretchdelay 1.4s infinite ease-in-out;
+ animation: sa-stretchdelay 1.4s infinite ease-in-out;
+}
+.loading .rectangle_2,.loading .rectangle_9 {
+ -webkit-animation-delay: -1.1s;
+ animation-delay: -1.1s;
+}
+.loading .rectangle_3, .loading .rectangle_8 {
+ -webkit-animation-delay: -1.0s;
+ animation-delay: -1.0s;
+}
+.loading .rectangle_4, .loading .rectangle_7 {
+ -webkit-animation-delay: -0.9s;
+ animation-delay: -0.9s;
+}
+.loading .rectangle_5, .loading .rectangle_6 {
+ -webkit-animation-delay: -0.8s;
+ animation-delay: -0.8s;
+}
+
+/*.loading .rectangle_10, .loading .rectangle_1 {
+ -webkit-animation-delay: -0.9s;
+ animation-delay: -0.9s;
+}*/
+@keyframes sa-stretchdelay {
+ 0%, 40%, 100%{
+ transform: scaleY(0.4);
+ -webkit-transform: scaleY(0.4);
+ }
+ 20%
+ {
+ transform:scaleY(1.0);
+ -webkit-transform:scaleY(1.0);
+	 background-color: #ddd;
+ }
+}
+@-webkit-keyframes sa-stretchdelay {
+ 0%, 40%, 100% { -webkit-transform: scaleY(0.4); }
+ 20% { -webkit-transform: scaleY(1.0);
+	 background-color: #ddd; }
+}

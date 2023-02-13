@@ -13,6 +13,17 @@ student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         template_folder="./templates")
 
 
+@student_app.route('/<join_code>/', methods=['GET', 'POST'])
+def claim_workout(join_code):
+    workout_list = []
+    api_route = url_for('join')
+    unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
+        filter_key='join_code', op='=', value=join_code)
+    if unit:
+        return render_template('claim_workout.html', api=api_route, build_id=unit['id'], join_code=join_code)
+    return render_template('claim_workout.html', build_id=False, api=api_route, error='Invalid join code!')
+
+
 @student_app.route('/home', methods=['GET', 'POST'])
 def registered_student_home():
     if 'user_email' in session and 'user_groups' in session:
@@ -118,6 +129,8 @@ def landing_page(workout_id):
 def workout_view(build_id):
     auth_config = CloudEnv().auth_config
     workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+    if not workout_info:
+        return redirect('/no-workout')
     parent_id = workout_info.get('parent_id', None)
     if workout_info and parent_id:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()

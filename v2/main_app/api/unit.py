@@ -1,3 +1,5 @@
+import random
+
 import flask
 import yaml
 from datetime import datetime, timedelta, timezone
@@ -120,3 +122,36 @@ class Unit(MethodView):
                     DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
                 return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
+
+
+class JoinCodes(MethodView):
+    def __init__(self):
+        self.key_type = DatastoreKeyTypes.UNIT.value
+        self.pubsub_actions = PubSub.Actions
+        self.handler = PubSub.Handlers
+        self.http_resp = HttpResponse
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.bm = BucketManager()
+        self.env = CloudEnv()
+
+    def put(self, join_code=None):
+        if join_code:
+            form_data = request.form
+            student_email = form_data.get('input_email', None)
+            if student_email:
+                unit = DataStoreManager(key_id=self.key_type).query(filter_key='join_code', op='=', value=join_code)
+                if unit:
+                    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
+                                                                   parent_id=unit['id'])
+                    if workout_list:
+                        for workout in workout_list:
+                            claimed_by = workout.get('student_email', None)
+                            if claimed_by:
+                                if student_email == claimed_by:
+                                    return redirect(url_for('student_app.workout', build_id=workout['id']))
+
+                    else:
+                        error_msg = 'Invalid Join Code'
+                        return self.http_resp(code=404, msg=error_msg).prepare_response()
+                return self.http_resp(code=404).prepare_response()
+        return self.http_resp(code=400).prepare_response()

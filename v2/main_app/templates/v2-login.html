@@ -1,0 +1,90 @@
+{% import 'logo_macro.html' as logo %}
+<!DOCTYPE html>
+<html lang="en" style="background: var(--main-color);">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <meta name="description" content="UA Little Rock Cyber Arena"/>
+        <meta name="author" content="UA Little Rock"/>
+        <title>Cyber Arena - {% block title %}Login{% endblock %}</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script src="https://www.gstatic.com/firebasejs/7.16.0/firebase.js"></script>
+        <script src="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.js"></script>
+        <!--DataTables.js imports -->
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap4.min.css">
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap4.min.js"></script>
+        <!--CSS imports -->
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/main-styles.css')}}">
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/animations.css')}}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+        <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css">
+        <link type="text/css" rel="stylesheet" href="https://storage.googleapis.com/{{project}}_cloudbuild/color/{{project}}-base.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+        <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap&text=0123456789:AMP" rel="stylesheet">
+        <style>
+            #homePage {
+                display: table;
+                margin: 0 auto;
+                overflow: hidden;
+                background: var(--main-color);
+            }
+            #main {
+                background: whitesmoke;
+                border-radius: 4px;
+                padding: 5px;
+                box-shadow: 0 3px 10px black;
+            }
+            #login_container {
+                margin: auto;
+                text-align: center;
+                max-width: 500px;
+            }
+        </style>
+        {% block styles %}{% endblock %}
+    </head>
+    <body id="homePage">
+        <div id="main" class='container-fluid'>
+            {% block content %}
+                <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+                <div id="login_container">
+                    {{logo.logo_div()}}
+
+                    <h3>Sign in to access your assignments</h3>
+                    <div id="firebaseui-auth-container"></div>
+                    <div id="loader">
+                        <div class="loading">
+                            <div class="rectangle_1"></div>
+                            <div class="rectangle_2"></div>
+                            <div class="rectangle_3"></div>
+                            <div class="rectangle_4"></div>
+                            <div class="rectangle_5"></div>
+                            <div class="rectangle_6"></div>
+                            <div class="rectangle_7"></div>
+                            <div class="rectangle_8"></div>
+                            <div class="rectangle_9"></div>
+                            <div class="rectangle_10"></div>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                    var auth_config = {
+                        apiKey: '{{auth_config["api_key"]}}',
+                        authDomain: '{{auth_config["auth_domain"]}}',
+                        projectId: '{{auth_config["project_id"]}}'
+                      };
+                      firebase.initializeApp(auth_config);
+                      configureFirebaseLogin();
+                      configureFirebaseLoginWidget();
+                </script>
+            {% endblock %}
+        </div>
+    </body>
+</html>

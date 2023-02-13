@@ -170,7 +170,7 @@
                             </div>
                         </div> <!-- End waiting-message-modal -->
                     </div> <!-- End build workouts tab -->
-                    <div id="assignments-container" class="tab-pane active fade" role="tabpanel" aria-labelledby="assignments-tab">
+                    <div id="assignments-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assignments-tab">
                         <h2 class="text-center">Assigned Homework</h2>
                         {% for name, items in teacher_info['active_units'] | groupby('name') %}
                             <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_unit_{{ loop.index }}')">

@@ -63,10 +63,6 @@ class BuildConstants:
         FORTIMANAGER = "image-fortimanager"
         AGENT = 'redteam-network-ubuntu'  # 'redteam-network-kali'
 
-    class AssessmentTypes(str, Enum):
-        PERCENTAGE = "percentage"
-        LEVEL = "level"
-
     class QuestionTypes(str, Enum):
         AUTO = "auto"
         INPUT = "input"

@@ -109,7 +109,7 @@ class Workout(MethodView):
                 recv_data = request.json
                 question_id = recv_data.get('question_id', None)
                 response = recv_data.get('response', None)
-                if question_id and response:
+                if question_id:
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     if self.workout:
@@ -136,13 +136,15 @@ class Workout(MethodView):
         # TODO: Need to determine the best way to handle assessments with types other than auto
         #       (i.e. upload, manual...)
         for question in self.workout['assessment']['questions']:
-            if question['type'] == 'auto':
-                if question['id'] == question_id:
-                    if not question['complete']:
-                        responses = question.get('responses', [])
-                        responses.append(response)
-                        question['responses'] = responses
-                        if question['answer'] == response:
-                            question['complete'] = True
-                            return True
-                    return False
+            if question['id'] == question_id:
+                if question['type'] == 'auto':
+                    question['complete'] = True
+                    return True
+                elif response and not question['complete']:
+                    responses = question.get('responses', [])
+                    responses.append(response)
+                    question['responses'] = responses
+                    if question['answer'] == response:
+                        question['complete'] = True
+                        return True
+        return False

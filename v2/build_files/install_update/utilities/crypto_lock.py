@@ -5,7 +5,6 @@ import os
 import pyAesCrypt
 import pathlib
 import hashlib
-import sys
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

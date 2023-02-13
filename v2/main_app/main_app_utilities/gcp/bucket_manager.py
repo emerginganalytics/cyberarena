@@ -15,6 +15,13 @@ __status__ = "Testing"
 
 
 class BucketManager:
+    BUILD_SPEC_BUCKET_SUFFIX = "build-specs"
+    SPEC_FOLDER = 'specs/'
+    ATTACK_FOLDER = 'attacks/'
+    STARTUP_SCRIPT_FOLDER = "startup_scripts/"
+    TEACHER_FOLDER = "teacher_instructions/"
+    STUDENT_FOLDER = "student_instructions/"
+
     def __init__(self):
         self.env = CloudEnv()
         log_client = logging_v2.Client()
@@ -37,6 +44,18 @@ class BucketManager:
         with open(filename, 'rb') as temp:
             new_blob.upload_from_file(temp, content_type='application/octet-stream')
             temp.close()
+
+    def get_scripts(self):
+        """
+        Get the names of scripts in the spec folder.
+        Returns: List
+
+        """
+        bucket = self.bucket_manager.get_bucket(f"{self.env.project}_{self.BUILD_SPEC_BUCKET_SUFFIX}")
+        scripts = []
+        for blob in bucket.list_blobs(prefix=self.STARTUP_SCRIPT_FOLDER):
+            scripts.append(blob.name)
+        return scripts
 
     def get_workouts(self):
         """Retrieves list of standard Cyber Gym workout spec files"""

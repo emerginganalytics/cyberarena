@@ -22,18 +22,19 @@ body, html {
 html {
     min-height: 100%;
     position: relative;
-    background: #fff;
+    background: whitesmoke;
     color: #000000;
     font-family: 'Montserrat', sans-serif;
     margin: auto;
 }
 body {
-    background-color: #fff;
+    background-color: whitesmoke;
     color: #a7a9ac;
     margin-bottom: 60px;
     padding-top: 4rem;
 }
 main {
+    background: whitesmoke;
     /* overflow: auto; */
 }
 .title-ctn {
@@ -59,6 +60,9 @@ h3, h4, h5 {
     user-select: none;
 }
 /* Container styles */
+.tab-pane {
+    padding-bottom: 20px;
+}
 #content-container {
     background-color: white;
     border-left: none;
@@ -475,3 +479,4 @@ p.complete {
     border-radius: 10px;
     padding: 5px;
 }
+
