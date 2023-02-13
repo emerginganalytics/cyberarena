@@ -182,11 +182,11 @@ function checkState(build_id, url){
             if (data['status'] === 200) {
                 let states = data['data']['states'];
                 for (let i = 0; i < states.length; i++) {
-                    let icon = document.getElementById('workoutState' + String(i['id']));
+                    let icon = document.getElementById('workoutState-' + String(states[i]['id']));
                     icon.classList.remove(...state_classes);
-                    if (i['state'] in state_classes) {
-                        icon.classList.add(i['state']);
-                    } else if (i['state'] === 'ready') {
+                    if (states[i]['state'] in state_classes) {
+                        icon.classList.add(states[i]['state']);
+                    } else if (states[i]['state'] === 'ready') {
                         icon.classList.add('stopped');
                     } else {
                         icon.classList.add('transition');
@@ -201,6 +201,7 @@ function checkState(build_id, url){
     }, 300000);
 }
 function displayWaitingMessage(modal_id){
+
     // first hide form modal
     show_modal_card(modal_id);
     // display waiting message modal
@@ -232,6 +233,25 @@ function startEscapeRoomTimer(build_id, url, action) {
         console.log(data);
     })
 }
-function localToUTC(element){
-    console.log(this);
+function validateDateTime(element){
+    // Compares selected datetime-local object and if the obj is <= now + 2 hours, set
+    // value to min value
+    let selectedDate = new Date(element.value).getTime();
+    let min = new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
+    if (selectedDate < min.getTime()){
+        let year = min.getFullYear();
+        let month = formatDate(min.getMonth() + 1);
+        let day = formatDate(min.getDate());
+        let hours = formatDate(min.getHours());
+        let minutes = formatDate(min.getMinutes());
+        let formattedDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        console.log(formattedDateTime);
+        element.value = formattedDateTime;
+    }
+    function formatDate(dt_obj){
+        if (dt_obj < 10){
+            return '0' + dt_obj;
+        }
+        return dt_obj;
+    }
 }

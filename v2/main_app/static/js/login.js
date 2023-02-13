@@ -1,9 +1,8 @@
 function configureFirebaseLogin() {
-    //Used in the initial login page 
+    // Used in the initial login page
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
         let name = user.displayName;
-        
         /* If the provider gives a display name, use the name for the
         personal welcome message. Otherwise, use the user's email. */
         let welcomeName = user.email;
@@ -32,7 +31,7 @@ function configureFirebaseLoginWidget() {
     let uiConfig = {
         callbacks: {
           signInSuccessWithAuthResult: function(authResult, redirectUrl){
-            console.log(authResult.user);
+            document.getElementById('loader').style.display = 'block';
             let data = {user_email: authResult.user.email};
             $.ajax({
               type: "POST",
@@ -48,6 +47,9 @@ function configureFirebaseLoginWidget() {
               }
             })
             return false;
+          },
+          uiShown: function() {
+              document.getElementById('loader').style.display = 'none';
           }
         },
         'signInFlow': 'redirect',
@@ -55,10 +57,7 @@ function configureFirebaseLoginWidget() {
         'signInOptions': [
         // Leave the lines as is for the providers you want to offer your users.
           firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-          firebase.auth.EmailAuthProvider.PROVIDER_ID
         ],
-        // Terms of service url
-        // 'tosUrl': '<your-tos-url>',
     };
     let ui = new firebaseui.auth.AuthUI(firebase.auth());
     ui.start('#firebaseui-auth-container', uiConfig);

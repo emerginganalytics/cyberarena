@@ -1,0 +1,108 @@
+{% extends "v2-login.html" %}
+{% block title %}Join{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock styles %}
+{% block content %}
+    <style>
+        .slide-out-right {
+            overflow-y: hidden;
+            max-width: 500px;
+        }
+        .slide-out-right.hide {
+            transition: 1s;
+            right: 500px;
+            max-width: 0;
+            display: none;
+        }
+        .slide-in-right {
+            max-width: 500px;
+            transition: 1s;
+        }
+        .slide-in-right.hide {
+            display: none;
+            transition: 1s;
+        }
+        .slide-in-right.show {
+            display: block;
+            transition: 1s;
+        }
+        .btn-primary {
+            width: 50%;
+            font-variant-caps: petite-caps;
+            font-size: large;
+        }
+        #claim-workout {
+            padding: 10px;
+        }
+    </style>
+    <script>
+        function displayLoadingMessage() {
+            // Hide the form upon submission
+            let form_div = document.getElementById('claim-workout-div');
+            let loading_msg_div = document.getElementById('loading-msg-div');
+            form_div.classList.toggle('hide');
+            // Toggle the loading animation/message
+            loading_msg_div.classList.toggle('hide');
+            loading_msg_div.classList.toggle('show');
+
+            // Send the PUT request to claim a workout
+            let inputForm = document.getElementById('claim-workout');
+            let inputEmail = inputForm.querySelector('input[name="inputEmail"]').value;
+            let json_data = JSON.stringify({'inputEmail': inputEmail});
+            fetch('{{ api }}{{ join_code }}', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: json_data
+            })
+                .then((response) => response.json())
+                .then(data=>{
+                    if (data['status'] === 400){
+                        document.getElementById('error-msg').innerText = data['message'];
+                    }
+                });
+        }
+    </script>
+    <div class="container-fluid" style="max-width: 600px;">
+        {{ logo.logo_div() }}
+        {% if not error %}
+            <div id="claim-workout-div" class='slide-out-right'>
+                <h3 class="text-center pt-3">Claim Your Workout</h3>
+                <p class="text-center highlight-error" id="error-msg"></p>
+                <form id="claim-workout">
+                    <div class="form-group">
+                        <label for="inputEmail" hidden>Email address</label>
+                        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
+                               name='input_email' placeholder="Enter email">
+                        <small id="emailHelp" class="form-text text-muted text-center">We'll never share your email with anyone else.</small>
+                    </div>
+                    <div class="text-center">
+                        <button type="button" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <div id='loading-msg-div' class="slide-in-right hide">
+                <h4 class="text-center">Finding your workout ...</h4>
+                <div id="loader">
+                    <div class="loading">
+                        <div class="rectangle_1"></div>
+                        <div class="rectangle_2"></div>
+                        <div class="rectangle_3"></div>
+                        <div class="rectangle_4"></div>
+                        <div class="rectangle_5"></div>
+                        <div class="rectangle_6"></div>
+                        <div class="rectangle_7"></div>
+                        <div class="rectangle_8"></div>
+                        <div class="rectangle_9"></div>
+                        <div class="rectangle_10"></div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div style="padding: 20px;">
+                <h3 class="text-center pt-3 highlight-warning">{{ error }}</h3>
+                <p class="text-center pt-4">Make sure you copied the correct URL.</p>
+            </div>
+        {% endif %}
+     </div>
+{% endblock content %}
