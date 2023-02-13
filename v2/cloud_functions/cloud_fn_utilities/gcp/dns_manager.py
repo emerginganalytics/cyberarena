@@ -1,5 +1,6 @@
 import ast
 import logging
+import time
 
 import googleapiclient.discovery
 from google.cloud import logging_v2
@@ -156,11 +157,16 @@ class DnsManager:
         :param server_name: The server name in the cloud project
         :return: The IP address of the server or throws an error
         """
-        try:
-            new_instance = self.compute.instances().get(project=self.env.project, zone=self.env.zone,
-                                                        instance=server_name).execute()
-            ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-            return ip_address
-        except KeyError:
-            logging.error(f"Error: No IP address exists for {server_name}. The server may not be turned on.")
-            return False
+        i = 0
+        while i < 5:
+            try:
+                new_instance = self.compute.instances().get(project=self.env.project, zone=self.env.zone,
+                                                            instance=server_name).execute()
+                ip_address = new_instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+                return ip_address
+            except KeyError:
+                logging.info(f"Error: No IP address exists for {server_name}. The server may still be building."
+                             f"Trying again in 5 seconds.")
+                time.sleep(5)
+                i += 1
+        return False

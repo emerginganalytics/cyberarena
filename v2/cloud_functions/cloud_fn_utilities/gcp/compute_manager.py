@@ -329,6 +329,7 @@ class ComputeManager:
             except timeout:
                 i += 1
                 self.logger.warning(f'Response timeout for stopping server {self.server_name}. Trying again')
+                time.sleep(3)
                 pass
         if not success:
             self.logger.error(f'Timeout in operation on server {self.server_name}')

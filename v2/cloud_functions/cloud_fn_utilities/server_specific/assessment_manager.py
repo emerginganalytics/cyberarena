@@ -44,13 +44,13 @@ class AssessmentManager:
             self.build_type = self.build['build_type']
             if self.build_type == BuildConstants.BuildType.ESCAPE_ROOM:
                 self.assessment_questions = self.build['escape_room']['puzzles']
-                self.url = f"https://{self.env.main_app_url}/api/escape-room/team/"
+                self.url = f"{self.env.main_app_v2_url}/api/escape-room/team/"
             else:
                 if 'assessment' in self.build and 'questions' in self.build['assessment']:
                     self.assessment_questions = self.build['assessment']['questions']
                 else:
                     self.assessment_questions = None
-                self.url = f"https://{self.env.main_app_url}/api/unit/workout/"
+                self.url = f"{self.env.main_app_v2_url}/api/unit/workout/"
         else:
             raise ValueError(f"The build object for the assessment has no build_type key")
 

@@ -205,7 +205,7 @@ class AssessmentQuestionSchema(Schema):
     server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
                                                     "provided above")
     operating_system = fields.Str(required=False, description="Target server operating system")
-    complete = fields.Bool(default=False)
+    complete = fields.Bool(missing=False)
 
 
 class EscapeRoomSchema(Schema):
