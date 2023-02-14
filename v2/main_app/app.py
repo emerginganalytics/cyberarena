@@ -38,7 +38,7 @@ app.jinja_env.globals['project'] = CloudEnv().project
 # Default route
 @app.route('/')
 def default_route():
-    return render_template('login.html', auth_config=CloudEnv().auth_config)
+    return render_template('v2-login.html', auth_config=CloudEnv().auth_config)
 
 
 @app.route('/home/')
