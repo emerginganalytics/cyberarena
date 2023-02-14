@@ -73,7 +73,7 @@ class BuildConstants:
         ROUTER = 5
 
     class MachineImages:
-        GUACAMOLE = "image-cyberarena-labentry"
+        GUACAMOLE = "image-labentry"
         FORTIMANAGER = "image-fortimanager"
         AGENT = 'image-cybergym-kali'
 

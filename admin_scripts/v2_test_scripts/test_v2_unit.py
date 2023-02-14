@@ -24,7 +24,7 @@ class TestUnit:
         self.bm = BucketManager()
         self.build_id = build_id if build_id else None
 
-    def build(self, spec_name: str):
+    def build(self, spec_name: str, debug: bool = True):
         unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
         build_spec = yaml.safe_load(unit_yaml)
         build_spec['instructor_id'] = 'philiphuff7@gmail.com'
@@ -35,13 +35,14 @@ class TestUnit:
             'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
+        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=debug)
         build_spec_to_cloud.commit()
         build_id = build_spec_to_cloud.get_build_id()
-        unit = Unit(build_id=build_id, debug=True, force=True)
-        print(f"Beginning to build a new unit with ID {build_id}")
-        unit.build()
-        print(f"Finished building")
+        if debug:
+            unit = Unit(build_id=build_id, debug=debug, force=True)
+            print(f"Beginning to build a new unit with ID {build_id}")
+            unit.build()
+            print(f"Finished building")
         self.build_id = build_id
 
     def start(self):
@@ -63,7 +64,7 @@ if __name__ == "__main__":
         print(f"Unit deletion was successful!")
     build_first = str(input(f"Do you want to build a test unit first? (Y/n)"))
     if not build_first or build_first.upper()[0] == "Y":
-        spec_name = str(input(f"What is the spec name of the unit you want to test?"))
+        spec_name = str(input(f"What is the spec name (including .yaml) of the unit you want to test?"))
         test_unit = TestUnit()
         test_unit.build(spec_name)
     else:

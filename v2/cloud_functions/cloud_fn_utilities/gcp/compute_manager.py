@@ -243,10 +243,11 @@ class ComputeManager:
             try:
                 image_response = self.compute.images()\
                     .get(project=self.env.project, image=self.server_spec['image']).execute()
-            except errors.HttpError as err:
+            except errors.HttpError:
                 # Something went wrong, print out some information.
-                print('There was an error creating the model. Check the details:')
-                print(err._get_reason())
+                self.logger.error(f"Error when trying to build {self.server_name}. Cannot obtain the cloud disk "
+                                  f"for {self.server_spec['image']}")
+                raise
             image = image_response['selfLink']
             disks = [
                 {
