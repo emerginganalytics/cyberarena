@@ -24,16 +24,19 @@ def assess():
 
 
 def mark_complete():
-    url = os.environ.get('URL')
-    q_key = os.environ.get(f'Q{Assessment.QUESTION_NUMBER}_KEY')
-    build_id = os.environ.get('BUILD_ID')
+    complete_file = "signal_complete"
 
-    data = {
-        "question_id": q_key,
-    }
+    if not os.path.exists(complete_file):
+        url = os.environ.get('URL')
+        q_key = os.environ.get(f'Q{Assessment.QUESTION_NUMBER}_KEY')
+        build_id = os.environ.get('BUILD_ID')
 
-    requests.put(f"{url}{build_id}", json=data)
-
+        data = {
+            "question_id": q_key,
+        }
+        response = requests.put(f"{url}{build_id}", json=data)
+        if response and response.status_code == 200:
+            open(complete_file, 'a').close()
 
 if assess():
     mark_complete()

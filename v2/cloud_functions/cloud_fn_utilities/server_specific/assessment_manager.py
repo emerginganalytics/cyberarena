@@ -132,7 +132,7 @@ class StartupScripts:
                                'BUILD_ID={BUILD_ID}\n' \
                                'URL={URL}\n'
     linux_startup_script_task = 'cat >> /etc/environment << EOF\n' \
-                                'Q{Q_NUMBER}={QUESTION_KEY}\n' \
+                                'Q{Q_NUMBER}_KEY={QUESTION_KEY}\n' \
                                 'EOF\n' \
                                 'gsutil cp {SCRIPT_REPOSITORY}{SCRIPT} {LOCAL_STORAGE}\n'\
                                 '(crontab -l 2>/dev/null; echo "* * * * * {SCRIPT_COMMAND}") | crontab -'

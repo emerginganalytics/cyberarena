@@ -163,7 +163,7 @@ def workout_view(build_id):
             for server in workout_info['servers']:
                 entry_point = server.get('human_interaction', None)
                 if entry_point:
-                    server['url'] = connections['server'][server['name']]
+                    server['url'] = connections['server'].get(server['name'], None)
         workout_info['api'] = {'workout': url_for('workout'),}
         return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                server_list=server_list)

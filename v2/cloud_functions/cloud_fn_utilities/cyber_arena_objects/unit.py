@@ -10,7 +10,7 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 
 __author__ = "Philip Huff"
@@ -88,6 +88,7 @@ class Unit:
                 'build_type': BuildConstants.BuildType.WORKOUT,
                 'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
                 'registration_required': registration_required,
+                'state': WorkoutStates.START.value
             }
             if self.unit.get('networks'):
                 workout_record['networks'] = self.unit['networks']

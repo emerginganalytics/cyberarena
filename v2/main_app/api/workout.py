@@ -3,6 +3,8 @@ from api.utilities.http_response import HttpResponse
 from datetime import datetime, timedelta, timezone
 from flask import abort, request, json, session
 from flask.views import MethodView
+from main_app_utilities.gcp.cloud_logger import Logger
+
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
@@ -25,6 +27,7 @@ class Workout(MethodView):
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
+        self.logger = Logger("main_app.workout").logger
 
     def get(self, build_id=None):
         """Get Workout Object. This endpoint is accessible to all users. Only authenticated users
@@ -86,6 +89,7 @@ class Workout(MethodView):
         """
         Change build state based on action (START, STOP, NUKE, etc)
         """
+        self.logger.info(f"Passed info includes: {request.json.get('question_id', 'NO-QUESTION_ID')}")
         if build_id:
             args = request.args
             if args:  # Check what action is being requested for current workout
@@ -110,6 +114,7 @@ class Workout(MethodView):
                 question_id = recv_data.get('question_id', None)
                 response = recv_data.get('response', None)
                 if question_id:
+                    self.logger.info(f"PUT request question response for id {question_id}")
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     if self.workout:
