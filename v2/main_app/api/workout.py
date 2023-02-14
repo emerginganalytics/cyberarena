@@ -89,7 +89,6 @@ class Workout(MethodView):
         """
         Change build state based on action (START, STOP, NUKE, etc)
         """
-        self.logger.info(f"Passed info includes: {request.json.get('question_id', 'NO-QUESTION_ID')}")
         if build_id:
             args = request.args
             if args:  # Check what action is being requested for current workout
