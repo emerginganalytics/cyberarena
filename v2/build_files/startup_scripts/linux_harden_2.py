@@ -1,28 +1,3 @@
-########################################
-# Vulnerabilities
-########################################
-
-# Vuln 1: Delete Gigabyte User
-# -- Already done.
-
-# Vuln 2: Log4j
-# -- Already done.
-
-# Vuln 3: Over-priveleged User
-# useradd -m philip
-# echo "philip  ALL=(ALL:ALL) ALL" >> /etc/sudoers
-
-# Vuln 4: Banned File Type
-# mkdir -p dir{1..5}/dir{1..5}/dir{1..5}
-# touch ./dir3/dir2/dir5/video.mp4
-# echo "Delete me!" > ./dir3/dir2/dir5/video.mp4
-
-# Vuln 5: Crontab
-# crontab -e
-# 00 11 * * * echo "philip    ALL=(ALL:ALL) ALL" >> /etc/sudoers
-
-(crontab -l 2>/dev/null; echo "* * * * * echo 'philip    ALL=(ALL:ALL) ALL' >> /etc/sudoers") | crontab -
-
 #!/usr/bin/python3
 import os
 import time
