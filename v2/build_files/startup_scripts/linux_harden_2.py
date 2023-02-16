@@ -1,3 +1,28 @@
+########################################
+# Vulnerabilities
+########################################
+
+# Vuln 1: Delete Gigabyte User
+# -- Already done.
+
+# Vuln 2: Log4j
+# -- Already done.
+
+# Vuln 3: Over-priveleged User
+# useradd -m philip
+# echo "philip  ALL=(ALL:ALL) ALL" >> /etc/sudoers
+
+# Vuln 4: Banned File Type
+# mkdir -p dir{1..5}/dir{1..5}/dir{1..5}
+# touch ./dir3/dir2/dir5/video.mp4
+# echo "Delete me!" > ./dir3/dir2/dir5/video.mp4
+
+# Vuln 5: Crontab
+# crontab -e
+# 00 11 * * * echo "philip    ALL=(ALL:ALL) ALL" >> /etc/sudoers
+
+(crontab -l 2>/dev/null; echo "* * * * * echo 'philip    ALL=(ALL:ALL) ALL' >> /etc/sudoers") | crontab -
+
 #!/usr/bin/python3
 import os
 import time
@@ -29,18 +54,18 @@ def assess():
             return False
     
     # Vuln 3: Over-priveleged User
-    output = subprocess.run(["sudo", "-l", "-U", Assessment.ADMIN_CHECK], capture_output=True, text=True)
-    if Assessment.SUDOERS_STRING in output.stdout:
+    output = subprocess.run(["sudo", "-l", "-U", Assessment.ADMIN_CHECK], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    if Assessment.SUDOERS_STRING in output:
         return False
 
     # Vuln 4: Banned File Type
-    output = subprocess.run(["find", "/", "-type", "f", "-name", "*.mp4"], capture_output=True, text=True)
-    if Assessment.FILETYPE_CHECK in output.stdout:
+    output = subprocess.run(["find", "/", "-type", "f", "-name", "*.mp4"], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    if Assessment.FILETYPE_CHECK in output:
         return False
 
     # Vuln 5: Crontab
-    output = subprocess.run(["cat", "/var/spool/cron/crontabs/root"], capture_output=True, text=True)
-    if Assessment.CRONTAB_STRING in output.stdout:
+    output = subprocess.run(["cat", "/var/spool/cron/crontabs/root"], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    if Assessment.CRONTAB_STRING in output:
         return False
 
     return True
