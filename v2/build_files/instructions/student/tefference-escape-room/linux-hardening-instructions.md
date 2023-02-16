@@ -10,16 +10,16 @@ Linux is important for cybersecurity professionals for several reasons:
 Popularity
 Linux is one of the most widely used operating systems in the world, especially in the server and cloud environments. This means that cybersecurity professionals must be familiar with Linux to secure these critical systems and infrastructure.
 
-## Customizability
+### Customizability
 Linux is highly customizable, allowing users to configure it in ways that can enhance security. This can include configuring firewalls, installing intrusion detection systems, and hardening the system against attacks.
 
-## Open Source
+### Open Source
 Linux is open source, which means that the source code is freely available for anyone to review and audit. This makes it easier to identify and fix vulnerabilities and also allows cybersecurity professionals to develop custom security tools and solutions.
 
-## Command Line
+### Command Line
 The Linux command line provides powerful tools and utilities for managing the system, analyzing logs, and automating tasks. Many cybersecurity tools and scripts are designed to run on the Linux command line, so proficiency in this area is essential for cybersecurity professionals.
 
-## Linux-based Tools
+### Linux-based Tools
 Linux is also commonly used in the field of penetration testing, which involves testing the security of systems by attempting to exploit vulnerabilities. Many of the tools used in cybersecurity for tasks like penetration testing and network defense are designed only to run on Linux.
 
 # Navigating Linux
@@ -121,22 +121,21 @@ While the machine we logged into is on our organization’s network, it isn’t 
 Accept the ssh key warning and then type in the password: `Let’s workout!`
 
 # Gigabyte’s Indicators of Compromise
-## Initial Access: Log4J Vulnerability
+### Initial Access: Log4J Vulnerability
 The Gigabyte Group is known for using the Log4j vulnerability to gain a foothold on its target systems.  What can you do to remediate this vulnerability and prevent further compromise?
 
-## Persistence: New User Creation
+### Persistence: New User Creation
 After initial access, the Gigabyte Group will often create a new user account they can use to log back into and maintain access to the system using more conventional means.  Can you identify this account and remove it?
 
-## Privilege Escalation: Valid Admin Account
+### Privilege Escalation: Valid Admin Account
 Realizing that creating a new account may be an obvious red flag to system defenders, the Gigabyte Group will often attempt to compromise other legitimate accounts.  
 
 It looks like the Group wasn’t able to compromise the root user, but they were able to compromise one of the legitimate accounts on the system and escalate its privileges.  Only the root user should have user-level assigned sudo privileges.  Can you verify no other accounts have these privileges?
 
-## Persistence: Scheduled Task/Job
+### Persistence: Scheduled Task/Job
 Gigabyte, like many other APTs, won’t give up its footholds easily. The Gigabyte will often use scheduled tasks or startup scripts to maintain persistent access to its targets.  Gigabyte is particularly fond of using crontab.  
 
 Due to its complexity, defenders may overlook tasks meant to maintain persistence.  Can you identify the Gigabyte Group’s persistence mechanism on this machine?
 
-
-## Impact: Pirated Video Placement
+### Impact: Pirated Video Placement
 Finally, with its access secured, the Gigabyte Group likes to store pirated videos on target systems to blackmail its victims.  In our organization’s IT environment, video files, such as .wav and .mp4, are banned anyway.  Remove any of these from the system.
