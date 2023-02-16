@@ -91,23 +91,25 @@
                         </div>
                     {% endif %}
                 </li>
-                {% if workout_list | count > 0 %}
-                    {% if workout_list[0].servers %}
-                        <!-- Since attacks can only be sent to server based workouts, there is no need to have
-                        multiple tab buttons available for container only workouts. Removing both buttons and displaying
-                         the default will help eliminate potential confusion -->
-                        <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="main-container-btn" data-toggle="pill"
-                                data-target="#main-container-tab" type="button" role="tab"
-                                aria-controls="main-container-tab"
-                                aria-selected="true">Home</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="build-attack-btn" data-toggle="pill"
-                                    data-target="#build-attack-tab" type="button" role="tab"
-                                    aria-controls="build-attack-tab"
-                                    aria-selected="true">Build Attack</button>
-                        </li>
+                {% if workout_list %}
+                    {% if workout_list | count > 0 %}
+                        {% if workout_list[0].servers %}
+                            <!-- Since attacks can only be sent to server based workouts, there is no need to have
+                            multiple tab buttons available for container only workouts. Removing both buttons and displaying
+                             the default will help eliminate potential confusion -->
+                            <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="main-container-btn" data-toggle="pill"
+                                    data-target="#main-container-tab" type="button" role="tab"
+                                    aria-controls="main-container-tab"
+                                    aria-selected="true">Home</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="build-attack-btn" data-toggle="pill"
+                                        data-target="#build-attack-tab" type="button" role="tab"
+                                        aria-controls="build-attack-tab"
+                                        aria-selected="true">Build Attack</button>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </ul>
@@ -119,12 +121,21 @@
                         <div class="container">
                             <div id="assignment-info" class="info-container">
                                 <h2 class="text-center">{{ unit.summary.name }}</h2>
-                                <h5>Author: {{ unit.summary.author }}</h5>
+                                <p><span style="font-weight: bold">Author: </span>{{ unit.summary.author }}</p>
+                                <p><span style="font-weight: bold">Summary:</span></p>
                                 <p>{{ unit.summary.description }}</p>
                                 {% if unit.summary.teacher_instructions %}
                                     <a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
                                        target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
                                 {% endif %}
+                                <div id="distribution">
+                                    {% if unit.join_code %}
+                                        <h5 class="text-center">Students can join assignment by visiting the link below: </h5>
+                                        <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
+                                            <h6>{{ main_app_url }}{{ url_for('student_app.claim_workout', join_code=unit.join_code) }}</h6>
+                                        </div>
+                                    {% endif %}
+                                </div>
                             </div>
                             <div id="workout-table-ctn" class="table-ctn">
                                 <table class="table text-nowrap table-small">
@@ -140,50 +151,58 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for workout in workout_list %}
-                                            <tr>
-                                                <td>{{ loop.index }}</td>
-                                                <td>
-                                                    {% if workout['state'] == 50 %}
-                                                        <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="top" title="RUNNING"></i>
-                                                        <!--<span id="workout-state-{{ workout['id'] }}" class="buildState running"></span>-->
-                                                    {% elif workout['state'] == 53 %}
-                                                        <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState stopped" data-toggle="tooltip" data-placement="top" title="STOPPED"></i>
-                                                    {% elif workout['state'] == 72 %}
-                                                        <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState deleted" data-toggle="tooltip" data-placement="top" title="DELETED"></i>
-                                                    {% else %}
-                                                        <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="top" title="WORKING"></i>
-                                                    {% endif %}
-                                                </td>
-                                                <td>{{ workout['id'] }}</td>
-                                                <td>
-                                                    <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
-                                                        <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
-                                                </td>
-                                                {% if unit.assessment %}
+                                        {% if workout_list %}
+                                            {% for workout in workout_list %}
+                                                <tr>
+                                                    <td>{{ loop.index }}</td>
                                                     <td>
-                                                        <button class="btn-fa" data-toggle="modal"
-                                                                data-target="modal_{{ workout['id'] }}_assessment"
-                                                                onclick="show_modal_card('modal_{{ workout['id'] }}_assessment')">View Responses</button>
+                                                        {% if workout['state'] == 50 %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="top" title="RUNNING"></i>
+                                                            <!--<span id="workout-state-{{ workout['id'] }}" class="buildState running"></span>-->
+                                                        {% elif workout['state'] == 53 %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState stopped" data-toggle="tooltip" data-placement="top" title="STOPPED"></i>
+                                                        {% elif workout['state'] == 72 %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState deleted" data-toggle="tooltip" data-placement="top" title="DELETED"></i>
+                                                        {% else %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="top" title="WORKING"></i>
+                                                        {% endif %}
                                                     </td>
-                                                {% endif %}
-                                            </tr>
-                                        {% endfor %}
+                                                    <td>{{ workout['id'] }}</td>
+                                                    <td>
+                                                        <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
+                                                            <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
+                                                    </td>
+                                                    {% if unit.assessment %}
+                                                        <td>
+                                                            <button class="btn-fa" data-toggle="modal"
+                                                                    data-target="modal_{{ workout['id'] }}_assessment"
+                                                                    onclick="show_modal_card('modal_{{ workout['id'] }}_assessment')">View Responses</button>
+                                                        </td>
+                                                    {% endif %}
+                                                </tr>
+                                            {% endfor %}
+                                        {% else %}
+                                            <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No workouts built! Table will populate as each student joins.</td></tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
-                        <div>
-                            {% if unit.assessment %}
-                                {% set unit_url = unit.api ~ unit['id'] %}
-                                {{ macros.workoutAssessmentModals(workout_list, unit_url) }}
-                            {% endif %}
-                        </div> <!-- End modal container divs -->
+                        {% if workout_list %}
+                            <div>
+                                {% if unit.assessment %}
+                                    {% set unit_url = unit.api ~ unit['id'] %}
+                                    {{ macros.workoutAssessmentModals(workout_list, unit_url) }}
+                                {% endif %}
+                            </div> <!-- End modal container divs -->
+                        {% endif %}
                     </div><!--End main-container-tab -->
-                    {% if workout_list[0].servers %}
-                        <div id="build-attack-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-attack-btn">
-                            <div><p>IN PROGRESS ...</p></div>
-                        </div>
+                    {% if workout_list %}
+                        {% if workout_list[0].servers %}
+                            <div id="build-attack-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-attack-btn">
+                                <div><p>IN PROGRESS ...</p></div>
+                            </div>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

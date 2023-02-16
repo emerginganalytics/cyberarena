@@ -473,11 +473,11 @@ ul#instructions-list li {
     text-align: center;
 }
 .ethics { background-color: #b2d4ff; color: black; }
-.establishing-trust { background-color: #b3f5ff; color: black; }
-.ubiquitous-computing { background-color: #abf6d1; color: black; }
-.data-security { background-color: #febead; color: black; }
-.system-security { background-color: #bfb5f2; color: black; }
-.adversarial-thinking { background-color: #b3bac5; color: black; }
+.establishing_trust { background-color: #b3f5ff; color: black; }
+.ubiquitous_computing { background-color: #abf6d1; color: black; }
+.data_security { background-color: #febead; color: black; }
+.system_security { background-color: #bfb5f2; color: black; }
+.adversarial_thinking { background-color: #b3bac5; color: black; }
 .risk { background-color: #fef0b3; color: black; }
 .implications { background-color: #00bf78; color: black; }
 .courses { background-color: var(--maroon, #6e2639); color: white; }

@@ -64,7 +64,7 @@ class UnitSchema(Schema):
                                 description="Escape room units include additional specification of the escape room "
                                             "puzzles associated with each workout")
     test = fields.Bool(required=False, description="Whether the unit is a test. This helps in cleaning the datastore.")
-    join_code = fields.Int(required=False, description='Used to invite students to claim a unit workspace')
+    join_code = fields.Str(required=False, description='Used to invite students to claim a unit workspace')
 
 
 class WorkspaceSettingsSchema(Schema):
@@ -94,6 +94,7 @@ class CyberArenaSummarySchema(Schema):
 
 
 class TeachingConceptsSchema(Schema):
+    id = fields.Str(required=True, validate=validate.OneOf([x.name.lower() for x in BuildConstants.TeachingConcepts]))
     name = fields.Str(required=True, validate=validate.OneOf([x.value for x in BuildConstants.TeachingConcepts]))
 
     class Meta:

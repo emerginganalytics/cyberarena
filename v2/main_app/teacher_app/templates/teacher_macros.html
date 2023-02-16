@@ -28,11 +28,11 @@
         <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_{{ build_type }}_{{ loop.index }}')">
             <div class="card-body">
                 <h5 class="card-title">{{ spec.summary.name }}</h5>
-                <!-- TODO: Loop through assignment BigIdea tags -->
-                <div class="badge text-wrap ethics">Ethics</div>
-                <div class="badge text-wrap establishing_trust">Trust</div>
-                <div class="badge text-truncate adversarial_thinking">Adversarial Thinking</div>
-                <!--<p class="card-text">{{ spec.summary.description }}</p>-->
+                {% if spec.summary.tags %}
+                    {% for tag in spec.summary.tags %}
+                        <div class="badge text-truncate {{ tag['id'] | lower }}">{{ tag.name }}</div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
         <div class="modal fade" tabindex="-1" role="dialog" id="current_{{ build_type }}_{{ loop.index }}">
@@ -46,9 +46,11 @@
                     </div>
                     <div class="modal-body">
                         <div class="build-tags">
-                            <div class="badge text-truncate ethics">Ethics</div>
-                            <div class="badge text-truncate establishing_trust">Trust</div>
-                            <div class="badge text-truncate adversarial_thinking">Adversarial Thinking</div>
+                            {% if spec.summary.tags %}
+                                {% for tag in spec.summary.tags %}
+                                    <div class="badge {{ tag['id'] | lower }}" style="width: fit-content">{{ tag.name }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                         <div style="border-bottom: 1px solid #e6e6e6; padding: 3px;">
                             <p>{{ spec.summary.description }}</p>

@@ -116,8 +116,8 @@ def workout_list(unit_id):
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id)).get()
         if unit:
             workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
+            attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
             if len(workouts_list) > 0:
-                attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
                 registration_required = unit.get('registration_required', False)
                 unit['api'] = _get_api_urls(build_type=unit['build_type'])
 
@@ -136,8 +136,9 @@ def workout_list(unit_id):
                 return render_template('workout_list.html', auth_config=auth_config, auth_list=auth_list,
                                        workout_list=workouts_list, unit=unit, main_app_url=CloudEnv().main_app_url,
                                        attack_specs=attack_specs)
-            logger.error(f'NO WORKOUT FOUND WITH PARENT_ID {unit_id}')
-            abort(404)
+            return render_template('workout_list.html', auth_config=auth_config, auth_list=auth_list,
+                                   workout_list=False, unit=unit, main_app_url=CloudEnv().main_app_url,
+                                   attack_specs=attack_specs)
         return redirect('/no-workout')
     return redirect('/login')
 

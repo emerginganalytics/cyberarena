@@ -17,7 +17,7 @@ from api.classroom import Classroom
 from api.fixed_arena import FixedArena
 from api.fixed_arena_class import FixedArenaClass
 from api.fixed_arena_workspace import FixedArenaWorkspace
-from api.unit import Unit, JoinCodes
+from api.unit import Unit
 from api.workout import Workout
 from api.agency import Agency, AgencyTelemetry, AttackSpecs
 from api.iot_device import IoTDevice
@@ -271,7 +271,6 @@ def register_api(view, endpoint, url, pk='id', pk_type='string'):
 register_api(view=Classroom, endpoint='classroom', url='/api/classroom/', pk='class_name')
 register_api(view=Unit, endpoint='unit', url='/api/unit/', pk='build_id')
 register_api(view=Workout, endpoint='workout', url='/api/unit/workout/', pk='build_id')
-register_api(view=JoinCodes, endpoint='join', url='/api/unit/join/', pk='join_code')
 register_api(view=IoTDevice, endpoint='iot', url='/api/iot/', pk='device_id')
 register_api(view=FixedArena, endpoint='fixed-arena', url='/api/fixed-arena/', pk='build_id')
 register_api(view=FixedArenaClass, endpoint='class', url='/api/fixed-arena/class/', pk='build_id')
