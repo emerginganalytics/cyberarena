@@ -60,7 +60,7 @@
            });
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
-        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+        <div id="sidebar-div" class="position-fixed col-md-3 col-lg-2 order-0 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation" style="top: 50px;">
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
                 <!-- Not Sure if we need this sidebar here on this page -->
@@ -90,7 +90,7 @@
                 </li>
             </ul>
         </div> <!--End sidebar-menu div-->
-        <main class="col main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+        <main class="col offset-2 main pt-3 mt-3 h-100 pr-3">
             <div id="content-div" class="overflow-auto">
                 <div id="tab-container" class="tab-content">
                     <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>

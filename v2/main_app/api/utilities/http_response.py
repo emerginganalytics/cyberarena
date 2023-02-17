@@ -1,4 +1,4 @@
-import json
+from flask import Response, json
 from datetime import datetime
 
 
@@ -21,16 +21,19 @@ class HttpResponse:
         self.data = data
 
     def prepare_response(self):
-        response = {
+        resp_data = {
             'status': self.code,
             'message': self.http_codes[self.code],
             'data': []
         }
         if self.msg:
-            response['message'] = self.msg
+            resp_data['message'] = self.msg
         if self.data:
-            response['data'] = self.data
-        return json.dumps(response, cls=self.DateTimeEncoder)
+            resp_data['data'] = self.data
+        json_obj = json.dumps(resp_data, cls=self.DateTimeEncoder)
+        response = Response(json_obj, mimetype='application/json')
+        response.status_code = self.code
+        return response
 
     class DateTimeEncoder(json.JSONEncoder):
         def default(self, o):

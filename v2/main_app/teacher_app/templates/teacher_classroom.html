@@ -64,7 +64,7 @@
            });
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
-        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+        <div id="sidebar-div" class="position-fixed col-md-3 col-lg-2 order-0 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation" style="top: 50px;">
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
                 <li>{{ logo.logo_div() }}</li>
                 <li class="nav-item" role="presentation">
@@ -82,14 +82,9 @@
                             data-target="#assignments-container" type="button" role="tab"
                             aria-controls="assignments-container" aria-selected="false">Assigned Homework</button>
                 </li>
-                <!--<li class="nav-item" role="presentation">
-                    <button class="nav-link" id="roster-tab-btn" data-toggle="pill"
-                            data-target="#roster-tab" type="button" role="tab"
-                            aria-controls="roster-tab" aria-selected="false">Roster</button>
-                </li>-->
             </ul>
         </div> <!-- End sidebar-menu div -->
-        <main class="col main pt-3 mt-3 h-100 pr-3">
+        <main class="col offset-2 main pt-3 mt-3 h-100 pr-3">
             <div id="content-div" class="overflow-auto">
                 <div id="tab-container" class="tab-content">
                     <div class="tab-pane fade active show" id="teacher-home-tab" role="tabpanel" aria-labelledby="teacher-home-btn">
@@ -135,21 +130,51 @@
                     </div>
                     <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-workout-tab-btn">
                         <div class="card-container">
-                            <h2 class="section-title">Assignments</h2>
-                            <div class="row">
-                                {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', teacher_info.classes, urls.unit) }}
+                            <div class="row" style="margin-bottom: 3vh;">
+                                <div class="input-group justify-content-center">
+                                    <div class="input-group-prepend">
+                                        <select id='filter_group' name='filter_group' class="dropdown-toggle" onchange="hide_spec_groups()">
+                                            <option selected disabled hidden value="">Select Filter Group</option>
+                                            <option class="dropdown-item" value="buildAssignmentRow" selected>Assignments</option>
+                                            <option class="dropdown-item" value="buildLiveRow">Live</option>
+                                            <option class="dropdown-item" value="buildEscapeRoomRow">Escape Room</option>
+                                        </select>
+                                        <!--<select id="filter_type" name='filter_type' class="dropdown-toggle">
+                                            <option class="dropdown-item" value="cardTitle" selected>By Name</option>
+                                            <option class="dropdown-item" value="cardTag">By Tag</option>
+                                        </select>-->
+                                        <input type="text" id="buildWorkoutFilter" class="form-control card-search" onkeyup="filter_build_specs(this.id, 'buildAssignmentRow');"
+                                               placeholder="Search for workout ...">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="buildAssignmentRow">
+                                <div class="row justify-content-center">
+                                    <h2 class="section-title">Assignments</h2>
+                                </div>
+                                <div class="row justify-content-center">
+                                    {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', teacher_info.classes, urls.unit) }}
+                                </div>
                             </div>
                         </div>
                         <div class="card-container">
-                            <h2 class="section-title">Live</h2>
-                            <div class="row">
-                                {{ macros.buildWorkoutCards(workout_specs.live, 'live', teacher_info.classes, urls.fixed_arena) }}
+                            <div id="buildLiveRow">
+                                <div class="row justify-content-center">
+                                    <h2 class="section-title">Live</h2>
+                                </div>
+                                <div class="row justify-content-center">
+                                    {{ macros.buildWorkoutCards(workout_specs.live, 'live', teacher_info.classes, urls.fixed_arena) }}
+                                </div>
                             </div>
                         </div>
                         <div class="card-container">
-                            <h2 class="section-title">Escape Rooms</h2>
-                            <div class="row">
-                                {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', teacher_info.classes, urls.escape_room) }}
+                            <div id="buildEscapeRoomRow">
+                                <div class="row justify-content-center">
+                                    <h2 class="section-title">Escape Rooms</h2>
+                                </div>
+                                <div class="row justify-content-center">
+                                    {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', teacher_info.classes, urls.escape_room) }}
+                                </div>
                             </div>
                         </div>
                         <div class="modal fade" tabindex="-1" role="dialog" id="waiting-message-modal">
@@ -172,61 +197,63 @@
                     </div> <!-- End build workouts tab -->
                     <div id="assignments-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assignments-tab">
                         <h2 class="text-center">Assigned Homework</h2>
-                        {% for name, items in teacher_info['active_units'] | groupby('name') %}
-                            <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_unit_{{ loop.index }}')">
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ name }}</h5>
+                        <div class="row">
+                            {% for name, items in teacher_info['active_units'] | groupby('name') %}
+                                <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_unit_{{ loop.index }}')">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ name }}</h5>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="modal fade" tabindex="-1" role="dialog" id="current_unit_{{ loop.index }}">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5>{{ name }} Assignments</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">x</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                             <table class="table unit_table">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">ID</th>
-                                                        <th scope="col">Created</th>
-                                                        <th scope="col">Expires</th>
-                                                        <th scope="col">Build Count</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {% for assignment in items %}
+                                <div class="modal fade" tabindex="-1" role="dialog" id="current_unit_{{ loop.index }}">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header" style="overflow-y: initial !important;">
+                                                <h5>{{ name }} Assignments</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">x</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                                                 <table class="table unit_table">
+                                                    <thead>
                                                         <tr>
-                                                            <td>
-                                                                {% if assignment.build_type == 'escape_room' %}
-                                                                    <a href="/teacher/escape-room/{{ assignment['id'] }}" class="btn-fa d-inline-flex" target="_blank">
-                                                                        <i class="fa fa-book"></i> {{ assignment.name }}</a>
-                                                                {% elif assignment.build_type == 'unit' %}
-                                                                    <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/assignment/{{ assignment.id }}">
-                                                                        <i class="fa fa-book"></i> {{ assignment.id }}</a>
-                                                                {% endif %}
-                                                            </td>
-                                                            <td class="timestampField">
-                                                                {{ assignment.created }}
-                                                            </td>
-                                                            <td class="timestampField">
-                                                                {{ assignment.expires }}
-                                                            </td>
-                                                            <td>
-                                                                {{ assignment.build_count }}
-                                                            </td>
+                                                            <th scope="col">ID</th>
+                                                            <th scope="col">Created</th>
+                                                            <th scope="col">Expires</th>
+                                                            <th scope="col">Build Count</th>
                                                         </tr>
-                                                    {% endfor %}
-                                                </tbody>
-                                            </table> <!-- End unit table -->
-                                        </div> <!-- End assignment modal-body -->
-                                    </div> <!--End assignment modal-content-->
-                                </div> <!--End assignment modal-dialog-->
-                            </div> <!--End assignment card-->
-                        {% endfor %}
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for assignment in items %}
+                                                            <tr>
+                                                                <td>
+                                                                    {% if assignment.build_type == 'escape_room' %}
+                                                                        <a href="/teacher/escape-room/{{ assignment['id'] }}" class="btn-fa d-inline-flex" target="_blank">
+                                                                            <i class="fa fa-book"></i> {{ assignment.name }}</a>
+                                                                    {% elif assignment.build_type == 'unit' %}
+                                                                        <a class='btn-fa d-inline-flex' target="_blank" href="/teacher/assignment/{{ assignment.id }}">
+                                                                            <i class="fa fa-book"></i> {{ assignment.id }}</a>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="timestampField">
+                                                                    {{ assignment.created }}
+                                                                </td>
+                                                                <td class="timestampField">
+                                                                    {{ assignment.expires }}
+                                                                </td>
+                                                                <td>
+                                                                    {{ assignment.build_count }}
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table> <!-- End unit table -->
+                                            </div> <!-- End assignment modal-body -->
+                                        </div> <!--End assignment modal-content-->
+                                    </div> <!--End assignment modal-dialog-->
+                                </div> <!--End assignment card-->
+                            {% endfor %}
+                        </div>
                     </div> <!--End assignments-container-->
                 </div> <!--End tab-container-->
             </div> <!--End content-div-->

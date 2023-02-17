@@ -57,7 +57,10 @@
                 <div id="login_container">
                     {{logo.logo_div()}}
 
-                    <h3>Sign in to access your assignments</h3>
+                    <h3>Ready for a workout?</h3>
+                    {% if error_resp %}
+                        <p class="error-msg">{{ error_resp }}</p>
+                    {% endif %}
                     <div id="firebaseui-auth-container"></div>
                     <div id="loader">
                         <div class="loading">

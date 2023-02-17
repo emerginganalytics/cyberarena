@@ -146,8 +146,7 @@ class Workout(MethodView):
             question_id (int):
             response (str):
 
-        Returns: None
-
+        Returns: Correct (Bool), Update Obj(Bool)
         """
         for question in self.workout['assessment']['questions']:
             if question['id'] == question_id:

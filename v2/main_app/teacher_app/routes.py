@@ -12,8 +12,7 @@ from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants, get_cu
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
-
-auth_config = CloudEnv().auth_config
+cloud_env = CloudEnv()
 
 
 @teacher_app.route('/home', methods=['GET', 'POST'])
@@ -98,7 +97,7 @@ def teacher_home():
                 workout_specs['escape_rooms'].append(spec)
         # Get api urls
         urls = _get_api_urls(return_all=True)
-        return render_template('teacher_classroom.html', auth_config=auth_config, auth_list=auth_list,
+        return render_template('teacher_classroom.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
                                teacher_info=teacher_info, workout_specs=workout_specs, urls=urls)
     else:
         return redirect('/login')
@@ -133,11 +132,11 @@ def workout_list(unit_id):
                     unit['human_interaction']['servers'] = True
                 if workouts_list[0].get('web_applications', False):
                     unit['human_interaction']['web_applications'] = True
-                return render_template('workout_list.html', auth_config=auth_config, auth_list=auth_list,
-                                       workout_list=workouts_list, unit=unit, main_app_url=CloudEnv().main_app_url,
+                return render_template('workout_list.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
+                                       workout_list=workouts_list, unit=unit, main_app_url=cloud_env.main_app_url,
                                        attack_specs=attack_specs)
-            return render_template('workout_list.html', auth_config=auth_config, auth_list=auth_list,
-                                   workout_list=False, unit=unit, main_app_url=CloudEnv().main_app_url,
+            return render_template('workout_list.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
+                                   workout_list=False, unit=unit, main_app_url=cloud_env.main_app_url,
                                    attack_specs=attack_specs)
         return redirect('/no-workout')
     return redirect('/login')
@@ -185,9 +184,9 @@ def escape_room(unit_id):
                         unit['escape_room']['expired'] = True
                     unit['escape_room']['time_remaining'] = time_remaining
                     break
-                return render_template('teacher_escape_room.html', auth_config=auth_config, auth_list=auth_list,
+                return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
                                        unit=dict(unit), workout_list=list(workouts_list),
-                                       main_app_url=CloudEnv().main_app_url)
+                                       main_app_url=cloud_env.main_app_url)
             logger.error(f'NO WORKOUT FOUND WITH PARENT_ID {unit_id}')
             abort(404)
         return redirect('/no-workout')

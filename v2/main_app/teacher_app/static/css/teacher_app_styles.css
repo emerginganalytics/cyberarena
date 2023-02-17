@@ -378,7 +378,10 @@ input:checked + .slider:before {
 .card-text {
     color: whitesmoke;
 }
-
+.card-search {
+    width: 35vw;
+    margin-right: 30px;
+}
 /* Table Toolbar Styles */
 .table-manage-wrapper {
     width: 90%;

@@ -11,6 +11,7 @@ from main_app_utilities.globals import DatastoreKeyTypes, get_current_timestamp_
 student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         static_folder="./static",
                         template_folder="./templates")
+cloud_env = CloudEnv()
 
 
 @student_app.route('/join/<join_code>/', methods=['GET'])
@@ -46,7 +47,7 @@ def registered_student_home():
         student_workouts = sorted(student_workouts, key=lambda i: (i['timestamp']), reverse=True)
 
         student_info = {'workouts': student_workouts}
-        return render_template('student_home.html', auth_config=CloudEnv().auth_config, student_info=student_info)
+        return render_template('student_home.html', auth_config=cloud_env.auth_config, student_info=student_info)
     else:
         return redirect('/login')
 
@@ -54,7 +55,7 @@ def registered_student_home():
 # TODO: Will replace student_app.landing_page route
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
-    auth_config = CloudEnv().auth_config
+    auth_config = cloud_env.auth_config
     workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if not workout_info:
         return redirect('/no-workout')
@@ -99,7 +100,7 @@ def workout_view(build_id):
 
 @student_app.route('/escape-room/team/<build_id>', methods=['GET'])
 def escape_room(build_id):
-    auth_config = CloudEnv().auth_config
+    auth_config = cloud_env.auth_config
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
@@ -163,7 +164,7 @@ def fixed_arena_signup(build_id):
 
 @student_app.route('/fixed-arena/<build_id>', methods=['GET'])
 def fixed_arena_student(build_id):
-    auth_config = CloudEnv().auth_config
+    auth_config = cloud_env.auth_config
     fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id=build_id).get()
     parent_id = fixed_arena_workout.get('parent_id', None)
     fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
@@ -178,7 +179,7 @@ def fixed_arena_student(build_id):
         ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
         if ts <= expiration:
             is_expired = False
-        dns_suffix = CloudEnv().dns_suffix
+        dns_suffix = cloud_env.dns_suffix
 
         # Get entry point from fixed_arena_class
         entry_point = None
@@ -211,7 +212,7 @@ def _generate_connection_urls(workout_info):
        :param workout_info: dictionary object holding all the workout information
        :return: dict(server: dict(), web_applications: dict()) if exists
        """
-    dns_suffix = CloudEnv().dns_suffix
+    dns_suffix = cloud_env.dns_suffix
     build_id = workout_info['id']
     links = {'server': dict(), 'web_application': dict()}
     if workout_info.get('proxy_connections', None):

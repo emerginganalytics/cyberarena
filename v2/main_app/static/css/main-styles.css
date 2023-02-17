@@ -184,6 +184,7 @@ footer a:hover {
 }
 /* Sidebar styles */
 .nav-sidebar {
+    top: 50px;
     padding-top: 1.5rem;
     background-color: var(--subcolor,#161e2d);
 }
@@ -207,7 +208,7 @@ footer a:hover {
     transition: all 0.25s ease-out;
   }
 
-  .row-offcanvas-left
+  .row-offcanvas-left,
   .sidebar-offcanvas {
     left: -33%;
   }
@@ -228,7 +229,7 @@ footer a:hover {
 
 /* Off Canvas wider at sm breakpoint */
 @media screen and (max-width: 34em) {
-  .row-offcanvas-left
+  .row-offcanvas-left,
   .sidebar-offcanvas {
     left: -45%;
   }
