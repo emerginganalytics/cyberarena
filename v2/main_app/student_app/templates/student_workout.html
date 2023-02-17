@@ -146,16 +146,16 @@
                         <div class="container">
                             <div id='workout-summary-div' class="info-container">
                                 <div id="class-summary">
-                                    <h2>{{ workout.summary.name }}</h2>
-                                    <p>{{ workout.summary.description }}</p>
-                                    <p style="width: 60%;">
-                                        <span class="highlight-warning">
-                                            Once your machines are running, please allow about 2 minutes for the Guacamole service to become accessible.
-                                        </span>
-                                    </p>
+                                    <h2 class="text-center">{{ workout.summary.name }}</h2>
+                                    <p><span style="font-weight: bold">Summary: </span>{{ workout.summary.description }}</p>
+                                    <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
+                                        <p>Once your machines are running, please allow about 2 minutes for the Guacamole service to become accessible.</p>
+                                    </div>
                                     {% if workout.summary.student_instructions_url %}
-                                        <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
-                                               target="_blank" rel="noopener noreferrer">Workout Instructions</a>
+                                        <div style="margin: 2vh 0 2vh 0;">
+                                            <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
+                                                target="_blank" rel="noopener noreferrer">Workout Instructions</a>
+                                        </div>
                                     {% endif %}
                                 </div>
                             </div> <!-- End workout-summary-div -->
@@ -221,44 +221,67 @@
                     </div> <!-- End home-container -->
                     {% if workout.assessment %}
                         <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
-                            <div class="info-container">
+                            <div>
                                 <h1 class="text-center">Assessment Questions</h1>
                                 <br />
                                 {% set completed = namespace(value=0) %}
-                                {% for question in workout.assessment.questions %}
-                                    {% if question.complete %}
-                                        {% set completed.value = completed.value + 1 %}
-                                    {% else %}
-                                        <div class="collapse-div-wrapper">
-                                            <button id="{{ question['id'] }}Btn" type="button" class="collapseBtn">{{ question.question }}
-                                                <span class="collapseBtnIcon"><i class="fa fa-angle-down"></i></span></button>
-                                            <div id="assessment-collapse-div_{{ loop.index }}" class="collapse-div">
-                                                <form id="{{ question['id']}}Form" class="form-control">
-                                                    <div class="form-group">
-                                                        <label for="{{ question['id'] }}"></label>
-                                                        <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
-                                                        <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
-                                                    </div>
-                                                    <input id="submit_{{ loop.index }}" type="button"
-                                                           onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}' );"
-                                                           class="btn-fa" value="Check Answer">
-                                                </form>
+                                <div class="row card-columns">
+                                    {% for question in workout.assessment.questions %}
+                                        <div class="card puzzle-card col-lg-4 col-sm12" onclick="showCurrentQuestion('{{ loop.index }}')">
+                                            <div class="card-body">
+                                                <h4 class="card-title">{{ question.question }}</h4>
+                                                {% if question.complete == True %}
+                                                    {% set completed.value = completed.value + 1 %}
+                                                    <h5 class="card-subtitle" id="{{ question['id'] }}Status">Complete!</h5>
+                                                {% else %}
+                                                    <h5 class="card-subtitle" id="{{ question['id'] }}Status">Incomplete</h5>
+                                                {% endif %}
                                             </div>
                                         </div>
-                                    {% endif %}
-                                {% endfor %}
-                                {% if completed.value == workout.assessment.questions | count %}
-                                    <table class="table text-nowrap table-small">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center no-select">Question</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">Assessment Completed!</td></tr>
-                                        </tbody>
-                                    </table>
-                                {% endif %}
+                                        <div class="modal fade" tabindex="-1" role="dialog" id="currentQuestion{{ loop.index }}">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        {% if question.type == 'auto' %}
+                                                            <h5>Auto Complete Question</h5>
+                                                        {% else %}
+                                                            <h5>Assessment Question</h5>
+                                                        {% endif %}
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">x</span>
+                                                        </button>
+                                                    </div> <!-- End modal-header-->
+                                                    <div class="modal-body">
+                                                        <div class="workout-details">
+                                                            <p id="workout-details">{{ question.question }}</p>
+                                                        </div>
+                                                        <div class="form-container">
+                                                             <form id="{{ question['id']}}Form" class="form-control">
+                                                                 <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
+                                                                 {% if question.type != 'auto' %}
+                                                                     <div class="form-group mx-sm-3 mb-2">
+                                                                        <label for="{{ question['id'] }}" class="sr-only">Answer: </label>
+                                                                        <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
+                                                                    </div>
+                                                                     <input id="submit_{{ loop.index }}" type="button"
+                                                                            onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
+                                                                                    '{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                                            class="btn-fa mb-2" value="Check Answer">
+                                                                 {% else %}
+                                                                     <input name="response" id="{{ question['id'] }}" type="text" readonly value="check auto" hidden>
+                                                                     <input id="submit_{{ loop.index }}" type="button"
+                                                                       onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}',
+                                                                               '{{ loop.index }}', true);"
+                                                                       class="btn-fa mb-2" value="Check Auto Complete">
+                                                                 {% endif %}
+                                                            </form>
+                                                        </div> <!-- End question form div -->
+                                                    </div><!--End question modal-body-->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div> <!--End row, card-columns -->
                             </div> <!--End info-container -->
                         </div> <!-- End assessment-tab -->
                     {% endif %}

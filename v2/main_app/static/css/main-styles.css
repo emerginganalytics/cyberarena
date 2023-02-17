@@ -450,6 +450,22 @@ li.control-container-list {
 	60% {transform: translateY(-8px); color: var(--mint); transition: var(--python-blue) 1000ms linear;}
 }
 
+/* Divider Divs */
+.divider-5h {
+    height: 5px;
+    width: 80%;
+    margin: 0 auto 15px auto;
+    background: var(--subcolor);
+    border-radius: 10px;
+}
+.divider-3h {
+    height: 3px;
+    width: 80%;
+    margin: 0 auto 15px auto;
+    background: var(--subcolor);
+    border-radius: 10px;
+}
+
 /* FontAwesome Icon Styles */
 .buildState {font-size: 30px;}
 .buildState.running {color: var(--running, #1d8037);}
@@ -479,4 +495,3 @@ p.complete {
     border-radius: 10px;
     padding: 5px;
 }
-
