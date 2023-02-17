@@ -5,6 +5,7 @@ import requests
 import pwd
 import subprocess
 
+
 class Assessment:
     QUESTION_NUMBER = "0"
     USER_CHECK = 'gigabyte'
@@ -13,7 +14,6 @@ class Assessment:
     ADMIN_CHECK = 'philip'
     SUDOERS_STRING = "(ALL : ALL) ALL"
     CRONTAB_STRING = "philip    ALL=(ALL:ALL) ALL"
-
 
 
 def assess():

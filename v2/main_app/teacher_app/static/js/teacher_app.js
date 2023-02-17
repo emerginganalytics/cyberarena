@@ -198,7 +198,7 @@ function checkState(build_id, url){
     // Initial States loaded; Start polling every 5 minutes
     setInterval(function (){
         updateStates();
-    }, 300000);
+    }, 70000);
 }
 function displayWaitingMessage(modal_id){
 

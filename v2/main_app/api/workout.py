@@ -1,14 +1,18 @@
-from api.utilities.decorators import auth_required, admin_required
+import random
+import string
+import time
+
 from api.utilities.http_response import HttpResponse
 from datetime import datetime, timedelta, timezone
-from flask import abort, request, json, session
+from flask import abort, request, json, session, redirect, url_for
 from flask.views import MethodView
 from main_app_utilities.gcp.cloud_logger import Logger
 
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
-from main_app_utilities.globals import PubSub, WorkoutStates
+from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.globals import PubSub, WorkoutStates, BuildConstants
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -27,6 +31,7 @@ class Workout(MethodView):
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
+        self.env = CloudEnv()
         self.logger = Logger("main_app.workout").logger
 
     def get(self, build_id=None):
@@ -53,37 +58,41 @@ class Workout(MethodView):
                 return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    @auth_required
-    def post(self, build_id):
+    def post(self):
         """
         Used for student-initiated build. Otherwise, the workout is built as part of a unit
         Args:
-            build_id (str): The ID of the workout to build.
+            build_id (str): The ID of the unit to a build workout for.
 
         Returns: str
 
         """
-        if build_id:
-            workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
-            if workout.get('state', None) == WorkoutStates.READY:
-                data = request.json
-                workout_id = data.get('workout_id', None)
-                # No workout_id given
-                if not workout_id:
-                    abort(404)
-                message = f"Student initiated cloud build for workout {workout_id}"
-                self.pubsub_manager.msg(workout_id=workout_id, message=message)
-                return self.http_resp(code=200, msg='Workout Built').prepare_response()
-            # Bad Request; Already Built
-            else:
-                return self.http_resp(code=400).prepare_response()
-        else:
-            auth_level = session.get('user_groups', None)
-            if ArenaAuthorizer.UserGroups.AUTHORIZED in auth_level:
-                # TODO: Write logic to support standard workout creation requests
-                return self.http_resp(code=200).prepare_response()
-            else:  # Invalid Request; Insufficient Permissions
-                return self.http_resp(code=403).prepare_response()
+        form_data = request.form
+        email = form_data.get('input_email', None)
+        join_code = form_data.get('join_code', None)
+        build_id = form_data.get('build_id', None)
+
+        if join_code and build_id and email:
+            unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id).get()
+            if unit:
+                workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
+                                                               parent_id=build_id)
+                if workout_list:
+                    for workout in workout_list:
+                        if workout.get('student_email', None):
+                            if email.lower() == workout['student_email']:
+                                return redirect(url_for('student_app.workout', build_id=workout['id']))
+                # No workout found for given email; Send build request
+                claimed_by = json.dumps({'student_email': email.lower()})
+                workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                        action=str(PubSub.BuildActions.UNIT.value),
+                                        build_id=str(build_id), child_id=workout_id,
+                                        claimed_by=claimed_by)
+                time.sleep(3)
+                return redirect((url_for('student_app.workout_view', build_id=workout_id)))
+            return redirect(url_for('student_app.claim_workout', join_code=join_code, error=404))
+        return self.http_resp(code=400).prepare_response()
 
     def put(self, build_id=None):
         """
@@ -112,23 +121,25 @@ class Workout(MethodView):
                 recv_data = request.json
                 question_id = recv_data.get('question_id', None)
                 response = recv_data.get('response', None)
+                check_auto = recv_data.get('check_auto', False)
                 if question_id:
                     self.logger.info(f"PUT request question response for id {question_id}")
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     if self.workout:
-                        correct = self._evaluate_question(question_id, response)
-                        if correct:
+                        correct, update = self._evaluate_question(question_id, response, check_auto)
+                        if correct and update:
                             ds_workout.put(self.workout)
                         # Clean up sensitive data from return object
                         for question in self.workout['assessment']['questions']:
-                            question['answer'] = ''
+                            if question.get('answer', None):
+                                question['answer'] = ''
                         return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
                     return self.http_resp(code=404).prepare_response()
         self.logger.error(f"No build_id supplied.")
         return self.http_resp(code=400).prepare_response()
 
-    def _evaluate_question(self, question_id: int, response: str):
+    def _evaluate_question(self, question_id: int, response: str, check_auto=False):
         """
         Loop through the class questions object for the correct question and determine if the response is correct.
         Args:
@@ -138,18 +149,21 @@ class Workout(MethodView):
         Returns: None
 
         """
-        # TODO: Need to determine the best way to handle assessments with types other than auto
-        #       (i.e. upload, manual...)
         for question in self.workout['assessment']['questions']:
             if question['id'] == question_id:
                 if question['type'] == 'auto':
-                    question['complete'] = True
-                    return True
+                    if check_auto:
+                        return question['complete'], False
+                    else:
+                        question['complete'] = True
+                        return True, True
                 elif response and not question['complete']:
                     responses = question.get('responses', [])
                     responses.append(response)
                     question['responses'] = responses
                     if question['answer'] == response:
                         question['complete'] = True
-                        return True
-        return False
+                        return True, True
+        return False, True
+
+# [ eof ]

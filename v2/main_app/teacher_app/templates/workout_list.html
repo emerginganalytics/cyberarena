@@ -70,7 +70,7 @@
                         }
                         countdownTimer.start(times);
                     {% endif %}
-                    checkState("{{ unit['id'] }}", "{{ unit.api }}");
+                    checkState("{{ unit['id'] }}", "{{ unit.api }}",);
                 {% endif %}
             {% endif %}
         }); // end document.ready
@@ -122,20 +122,19 @@
                             <div id="assignment-info" class="info-container">
                                 <h2 class="text-center">{{ unit.summary.name }}</h2>
                                 <p><span style="font-weight: bold">Author: </span>{{ unit.summary.author }}</p>
-                                <p><span style="font-weight: bold">Summary:</span></p>
-                                <p>{{ unit.summary.description }}</p>
+                                <p><span style="font-weight: bold">Summary: </span> {{ unit.summary.description }}</p>
                                 {% if unit.summary.teacher_instructions %}
                                     <a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
                                        target="_blank" rel="noopener noreferrer">Teacher Instructions</a>
                                 {% endif %}
-                                <div id="distribution">
-                                    {% if unit.join_code %}
+                                {% if unit.join_code %}
+                                    <div id="distribution" style="margin-top: 12px;">
                                         <h5 class="text-center">Students can join assignment by visiting the link below: </h5>
                                         <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
                                             <h6>{{ main_app_url }}{{ url_for('student_app.claim_workout', join_code=unit.join_code) }}</h6>
                                         </div>
-                                    {% endif %}
-                                </div>
+                                    </div>
+                                {% endif %}
                             </div>
                             <div id="workout-table-ctn" class="table-ctn">
                                 <table class="table text-nowrap table-small">

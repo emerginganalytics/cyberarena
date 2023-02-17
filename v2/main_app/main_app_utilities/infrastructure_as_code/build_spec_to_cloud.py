@@ -70,11 +70,12 @@ class BuildSpecToCloud:
             self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.build_id)
             self.action = PubSub.BuildActions.UNIT.value
 
-    def commit(self):
+    def commit(self, publish=True):
         self.datastore_manager.put(self.cyber_arena_spec)
         if not self.debug:
-            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value), action=str(self.action),
-                                    build_id=str(self.build_id))
+            if publish:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value), action=str(self.action),
+                                        build_id=str(self.build_id))
 
     def get_build_id(self):
         return self.build_id

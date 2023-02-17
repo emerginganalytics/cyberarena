@@ -13,15 +13,17 @@ student_app = Blueprint('student_app', __name__, url_prefix="/student",
                         template_folder="./templates")
 
 
-@student_app.route('/<join_code>/', methods=['GET', 'POST'])
+@student_app.route('/join/<join_code>/', methods=['GET'])
 def claim_workout(join_code):
-    workout_list = []
-    api_route = url_for('join')
-    unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
-        filter_key='join_code', op='=', value=join_code)
-    if unit:
-        return render_template('claim_workout.html', api=api_route, build_id=unit['id'], join_code=join_code)
-    return render_template('claim_workout.html', build_id=False, api=api_route, error='Invalid join code!')
+    api_route = url_for('workout')
+    error = request.args.get('error', None)
+    if not error:
+        unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
+            filter_key='join_code', op='=', value=join_code)
+        if unit:
+            return render_template('claim_workout.html', api=api_route, build_id=unit[0]['id'], join_code=join_code)
+    error_msg = 'Invalid Join Code!'
+    return render_template('claim_workout.html', build_id=False, api=api_route, join_code=join_code, error=error_msg)
 
 
 @student_app.route('/home', methods=['GET', 'POST'])
@@ -47,81 +49,6 @@ def registered_student_home():
         return render_template('student_home.html', auth_config=CloudEnv().auth_config, student_info=student_info)
     else:
         return redirect('/login')
-
-
-@student_app.route('/landing/<workout_id>', methods=['GET', 'POST'])
-def landing_page(workout_id):
-    dns_suffix = CloudEnv().dns_suffix
-    auth_config = CloudEnv().auth_config
-    unit_list = DataStoreManager(key_id=DatastoreKeyTypes.CYBERGYM_UNIT).query()
-    workouts_list = list(unit_list.add_filter('workouts', '=', str(workout_id)).fetch())
-    if not workouts_list:
-        return redirect('/404')
-    else:
-        workout = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_WORKOUT.value, key_id=workout_id).get()
-        unit = DataStoreManager(key_type=DatastoreKeyTypes.CYBERGYM_UNIT.value, key_id=workout['unit_id']).get()
-        admin_info = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO.value, key_id='cybergym').get()
-
-    registration_required = workout.get('registration_required', False)
-    logged_in_user = session.get('user_email', None)
-    registered_user = workout.get('student_email', None)
-    instructor_user = unit.get('instructor_id', None)
-    allowed_users = admin_info['admins'].copy() + [instructor_user] + [registered_user]
-    workout_server_query = DataStoreManager(key_id=workout_id).get_servers()
-
-    server_list = []
-    for server in workout_server_query:
-        server_name = server['name'][11:]
-        server['name'] = server_name
-        snapshots_list = ComputeManager(key_id=server.key.name).get_snapshots()
-        snapshots = snapshots_list.get('snapshots', None)
-        if snapshots:
-            server['snapshots'] = []
-            for snapshot in snapshots['items']:
-                server['snapshots'].append({'snapshot_name': snapshot['name'], 'creation_date': snapshot['creationTimestamp']})
-        server_list.append(server)
-    if registration_required and logged_in_user not in allowed_users:
-        return render_template('login.html', auth_config=auth_config)
-
-    if workout:
-        # TODO: AssessmentManager Needs to be updated to match current direction
-        # assessment_manager = CyberArenaAssessment(workout_id)
-        expiration = None
-        is_expired = True
-        if 'expiration' in workout:
-            if (int(time.time()) - (int(workout['timestamp']) + ((int(workout['expiration'])) * 60 * 60 * 24))) < 0:
-                is_expired = False
-            expiration = time.strftime('%d %B %Y', (
-                time.localtime((int(workout['expiration']) * 60 * 60 * 24) + int(workout['timestamp']))))
-        shutoff = None
-        if 'run_hours' in workout:
-            run_hours = int(workout['run_hours'])
-            if run_hours == 0:
-                shutoff = "expired"
-            else:
-                shutoff = time.strftime('%d %B %Y at %I:%M %p',
-                                        (time.localtime((int(workout['run_hours']) * 60 * 60) + int(workout['start_time']))))
-        build_type = unit['build_type']
-        container_url = None
-        if build_type == 'container':
-            container_url = workout['container_url']
-
-        assessment = None
-        # TODO: AssessmentManager Needs to be updated to match current direction
-        # if 'assessment' in workout and workout['assessment']:
-        #    assessment = assessment_manager.get_assessment_questions()
-        build_now = unit.get('build_now', True)
-        # if request.method == "POST":
-        #    attempt = assessment_manager.submit()
-        #    return json.dumps(attempt)
-        return render_template('landing_page.html', build_type=build_type, workout=workout,
-                               description=unit['description'], container_url=container_url,
-                               dns_suffix=dns_suffix, expiration=expiration,
-                               shutoff=shutoff, assessment=assessment, is_expired=is_expired,
-                               build_now=build_now, auth_config=auth_config,
-                               servers=server_list)
-    else:
-        return redirect('/no-workout')
 
 
 # TODO: Will replace student_app.landing_page route

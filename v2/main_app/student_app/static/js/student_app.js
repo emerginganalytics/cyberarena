@@ -65,6 +65,9 @@ function checkPuzzles(code, responseData){
 function showCurrentPuzzle(puzzle_idx) {
      $('#currentPuzzle' + puzzle_idx).modal('toggle');
 }
+function showCurrentQuestion(question_idx){
+    $('#currentQuestion' + question_idx).modal('toggle');
+}
 function collapseDiv(){
     let coll = document.getElementsByClassName("collapseBtn");
     for (let i = 0; i < coll.length; i++) {
@@ -89,11 +92,12 @@ function collapseDiv(){
         }
     }
 }
-function checkQuestion(questionID, build_id, url){
+function checkQuestion(questionID, build_id, url, puzzle_idx, check_auto){
+    showCurrentQuestion(puzzle_idx);
     let question_form = document.getElementById(questionID + 'Form');
     let response = question_form.querySelector('input[name="response"]').value;
     let parent_id = question_form.querySelector('input[name="parent_id"]').value;
-    let send_data = JSON.stringify({'build_id': build_id, 'response': response, 'question_id': questionID});
+    let send_data = JSON.stringify({'build_id': build_id, 'response': response, 'question_id': questionID, 'check_auto': check_auto});
     fetch(url, {
         method: 'PUT',
         headers: json_headers,
@@ -104,14 +108,14 @@ function checkQuestion(questionID, build_id, url){
 }
 function updateQuestions(code, responseData){
     // updates all question fields upon request
-    // TODO: Existing question states will be assigned during each successful window.reload() via templating
     if (code === 200){
         for (let i = 0; i < responseData['questions'].length; i++){
-            let item = document.getElementById(i['id'] + 'Btn');
-            if (i['complete'] === true){
-                i.style.display = 'none';
-            } else if (i['complete'] === false){
-                item.classList.add('incomplete');
+            let question = responseData['questions'][i];
+            let item = document.getElementById(question['id'] + 'Status');
+            if (question['complete'] === true){
+                item.innerText = 'Complete!';
+            } else if (question['complete'] === false){
+                item.innerText = 'Incomplete';
             }
         }
     }

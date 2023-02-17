@@ -25,8 +25,10 @@ __status__ = "Testing"
 
 
 class Unit:
-    def __init__(self, build_id, debug=False, force=False):
+    def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False):
         self.unit_id = build_id
+        self.workout_id = child_id
+        self.form_data = form_data
         self.debug = debug
         self.force = force
         self.env = CloudEnv()
@@ -91,25 +93,26 @@ class Unit:
 
     def _create_and_build_workouts(self):
         workout_datastore = DataStoreManager()
-        registration_required = self.unit['workspace_settings'].get('registration_required', False)
-        if registration_required:
-            student_emails = self.unit['workspace_settings']['student_emails']
-            student_names = self.unit['workspace_settings']['student_names']
-            count = min(self.env.max_workspaces, len(student_names))
-        else:
-            count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
-
-        for i in range(count):
-            id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+        count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
+        workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        if workout_list:
+            if len(workout_list) >= count:
+                self.logger.error(f"Requested build for unit {self.unit_id} failed; Unit is at max capacity")
+                raise ValueError
+        student_email = self.form_data.get('student_email', None)
+        student_name = self.form_data.get('student_name', None)
+        if student_email and self.workout_id:
             workout_record = {
-                'id': id,
+                'id': self.workout_id,
                 'parent_id': self.unit_id,
                 'parent_build_type': BuildConstants.BuildType.UNIT,
                 'build_type': BuildConstants.BuildType.WORKOUT,
                 'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
-                'registration_required': registration_required,
-                'state': WorkoutStates.START.value
+                'state': WorkoutStates.START.value,
+                'student_email': student_email,
             }
+            if student_name:
+                workout_record['student_name'] = student_name
             if self.unit.get('networks'):
                 workout_record['networks'] = self.unit['networks']
                 workout_record['servers'] = self.unit['servers']
@@ -130,17 +133,14 @@ class Unit:
             else:
                 if self.unit.get('assessment', None):
                     workout_record['assessment'] = self.unit['assessment']
-            if registration_required:
-                workout_record['student_email'] = student_emails[i]
-                workout_record['student_name'] = student_names[i]
             if self.debug:
                 workout_record['test'] = True
-            workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=id)
+            workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
             if self.debug:
-                workout = Workout(build_id=id, debug=self.debug)
+                workout = Workout(build_id=self.workout_id, debug=self.debug)
                 workout.build()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                         action=str(PubSub.BuildActions.WORKOUT.value),
                                         key_type=str(DatastoreKeyTypes.WORKOUT.value),
-                                        build_id=str(id))
+                                        build_id=str(self.workout_id))

@@ -1,5 +1,4 @@
 import random
-
 import flask
 import yaml
 from datetime import datetime, timedelta, timezone
@@ -55,20 +54,14 @@ class Unit(MethodView):
     def post(self):
         user_email = session.get('user_email', None)
         recv_data = request.form
+
         # Parse Form Data
         expire_datetime = recv_data.get('expires', None)
         registration_required = recv_data.get('registration_required', False)
         build_type = recv_data.get('build_file', None)
-        build_for_class = recv_data.get('build_for_class', None)
-        if not build_for_class:
-            build_count = recv_data.get('build_count', None)
-        else:
-            class_id = recv_data.get('target_class', None)
-            target_class = DataStoreManager(key_type=DatastoreKeyTypes.CLASSROOM, key_id=class_id).get()
-            if target_class:
-                build_count = len(target_class['roster'])
-            else:
-                return self.http_resp(code=404).prepare_response()
+        build_count = recv_data.get('build_count', None)
+
+        # Send build request
         if build_count and expire_datetime and build_type:
             build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=build_type).get()
             if not build_spec:
@@ -81,10 +74,9 @@ class Unit(MethodView):
                 'student_emails': [],
                 'expires': expire_ts
             }
-            if build_for_class:
-                build_spec['class_id'] = class_id
+            build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 10))
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
-            build_spec_to_cloud.commit()
+            build_spec_to_cloud.commit(publish=False)
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
         return self.http_resp(code=400).prepare_response()
 
@@ -122,36 +114,3 @@ class Unit(MethodView):
                     DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
                 return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
-
-
-class JoinCodes(MethodView):
-    def __init__(self):
-        self.key_type = DatastoreKeyTypes.UNIT.value
-        self.pubsub_actions = PubSub.Actions
-        self.handler = PubSub.Handlers
-        self.http_resp = HttpResponse
-        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
-        self.bm = BucketManager()
-        self.env = CloudEnv()
-
-    def put(self, join_code=None):
-        if join_code:
-            form_data = request.form
-            student_email = form_data.get('input_email', None)
-            if student_email:
-                unit = DataStoreManager(key_id=self.key_type).query(filter_key='join_code', op='=', value=join_code)
-                if unit:
-                    workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
-                                                                   parent_id=unit['id'])
-                    if workout_list:
-                        for workout in workout_list:
-                            claimed_by = workout.get('student_email', None)
-                            if claimed_by:
-                                if student_email == claimed_by:
-                                    return redirect(url_for('student_app.workout', build_id=workout['id']))
-
-                    else:
-                        error_msg = 'Invalid Join Code'
-                        return self.http_resp(code=404, msg=error_msg).prepare_response()
-                return self.http_resp(code=404).prepare_response()
-        return self.http_resp(code=400).prepare_response()

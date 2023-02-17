@@ -6,6 +6,7 @@
 {% block content %}
     <style>
         .slide-out-right {
+            margin: auto;
             overflow-y: hidden;
             max-width: 500px;
         }
@@ -42,25 +43,10 @@
             let form_div = document.getElementById('claim-workout-div');
             let loading_msg_div = document.getElementById('loading-msg-div');
             form_div.classList.toggle('hide');
+
             // Toggle the loading animation/message
             loading_msg_div.classList.toggle('hide');
             loading_msg_div.classList.toggle('show');
-
-            // Send the PUT request to claim a workout
-            let inputForm = document.getElementById('claim-workout');
-            let inputEmail = inputForm.querySelector('input[name="inputEmail"]').value;
-            let json_data = JSON.stringify({'inputEmail': inputEmail});
-            fetch('{{ api }}{{ join_code }}', {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: json_data
-            })
-                .then((response) => response.json())
-                .then(data=>{
-                    if (data['status'] === 400){
-                        document.getElementById('error-msg').innerText = data['message'];
-                    }
-                });
         }
     </script>
     <div class="container-fluid" style="max-width: 600px;">
@@ -68,16 +54,17 @@
         {% if not error %}
             <div id="claim-workout-div" class='slide-out-right'>
                 <h3 class="text-center pt-3">Claim Your Workout</h3>
-                <p class="text-center highlight-error" id="error-msg"></p>
-                <form id="claim-workout">
+                <form id="claim-workout" method="POST" action="{{ api }}">
                     <div class="form-group">
+                        <input name="join_code" type="text" readonly hidden value="{{ join_code }}">
+                        <input name="build_id" type="text" readonly hidden value="{{ build_id }}">
                         <label for="inputEmail" hidden>Email address</label>
                         <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
                                name='input_email' placeholder="Enter email">
                         <small id="emailHelp" class="form-text text-muted text-center">We'll never share your email with anyone else.</small>
                     </div>
                     <div class="text-center">
-                        <button type="button" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
+                        <button type="submit" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
                     </div>
                 </form>
             </div>
