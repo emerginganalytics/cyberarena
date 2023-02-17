@@ -23,6 +23,7 @@ class TestUnit:
         self.env = CloudEnv()
         self.bm = BucketManager()
         self.build_id = build_id if build_id else None
+        self.debug = debug
 
     def build(self, spec_name: str, debug: bool = True):
         unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
@@ -46,13 +47,13 @@ class TestUnit:
         self.build_id = build_id
 
     def start(self):
-        Unit(build_id=self.build_id, debug=True).start()
+        Unit(build_id=self.build_id, debug=self.debug).start()
 
     def stop(self):
         Unit(build_id=self.build_id, debug=True).stop()
 
     def delete(self):
-        Unit(build_id=self.build_id, debug=True).delete()
+        Unit(build_id=self.build_id, debug=self.debug).delete()
 
 
 if __name__ == "__main__":
@@ -60,7 +61,7 @@ if __name__ == "__main__":
     delete_first = str(input(f"Do you want to delete a test unit first? (y/N)"))
     if delete_first and delete_first.upper()[0] == "Y":
         delete_unit = str(input(f"What is the unit ID that you want to delete?"))
-        TestUnit(build_id=delete_unit).delete()
+        TestUnit(build_id=delete_unit, debug=False).delete()
         print(f"Unit deletion was successful!")
     build_first = str(input(f"Do you want to build a test unit first? (Y/n)"))
     if not build_first or build_first.upper()[0] == "Y":
@@ -69,7 +70,7 @@ if __name__ == "__main__":
         test_unit.build(spec_name)
     else:
         test_unit_id = str(input(f"Which unit do you want to test?"))
-        test_unit = TestUnit(build_id=test_unit_id)
+        test_unit = TestUnit(build_id=test_unit_id, debug=False)
     while True:
         action = str(input(f"What action are you wanting to test [QUIT], {PubSub.Actions.START.name}, "
                            f"{PubSub.Actions.STOP.name}, or {PubSub.Actions.DELETE.name}?"))

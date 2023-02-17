@@ -68,5 +68,5 @@ class ArenaAuthorizer:
             self.admin_info[self.UserGroups.PENDING].append(user)
             self.ds_manager.put(self.admin_info)
 
-        logging.info(f'{user} logged in under groups {user_groups}')
+        logging.debug(f'{user} logged in under groups {user_groups}')
         return user_groups

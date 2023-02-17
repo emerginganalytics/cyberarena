@@ -345,3 +345,21 @@ class ComputeManager:
             if machine_type == mt.name:
                 return ComputeManager.GOOGLE_MACHINE_TYPES[mt.value]
         return machine_type
+
+
+class ProjectComputeManager:
+    """
+    Used to perform compute maintenance functions for the entire project.
+    """
+    def __init__(self):
+        self.env = CloudEnv()
+        self.compute = googleapiclient.discovery.build('compute', 'v1')
+        self.logger = Logger("cloud_functions.project_compute_manager").logger
+
+    def stop_everything(self):
+        result = self.compute.instances().list(project=self.env.project, zone=self.env.zone).execute()
+        if 'items' in result:
+            for vm_instance in result['items']:
+                self.compute.instances().stop(project=self.env.project, zone=self.env.zone,
+                                              instance=vm_instance["name"]).execute()
+            self.logger.info("All machines stopped (daily cleanup)")

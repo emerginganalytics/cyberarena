@@ -125,6 +125,7 @@ class Workout(MethodView):
                             question['answer'] = ''
                         return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
                     return self.http_resp(code=404).prepare_response()
+        self.logger.error(f"No build_id supplied.")
         return self.http_resp(code=400).prepare_response()
 
     def _evaluate_question(self, question_id: int, response: str):

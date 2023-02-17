@@ -1,8 +1,11 @@
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
-from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates, DatastoreKeyTypes, UnitStates
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
-
+from cloud_fn_utilities.state_managers.workout_states import WorkoutStates
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
+from cloud_fn_utilities.cyber_arena_objects.unit import Unit
+from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -19,23 +22,38 @@ class HourlyMaintenance:
         self.debug = debug
         self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.fa_state_manager = FixedArenaStateManager()
+        self.ds_units = DataStoreManager(key_type=DatastoreKeyTypes.UNIT)
+        self.ds_classes = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)
 
     def run(self):
-        self._delete_expired()
+        self._delete_expired_classes()
+        self._delete_expired_units()
 
-    def _delete_expired(self):
-        expired_classes = self.fa_state_manager.get_expired()
-        for fixed_arena_class in expired_classes:
-            fac_state = fixed_arena_class.get('state', None)
+    def _delete_expired_classes(self):
+        expired_classes = self.ds_classes.get_expired()
+        for build_id in expired_classes:
+            fac = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=build_id)
+            fac_state = fac.get('state', None)
             if not fac_state:
-                FixedArenaClass(build_id=fixed_arena_class.key.name).mark_broken()
+                FixedArenaClass(build_id=build_id).mark_broken()
                 continue
 
             if fac_state not in [FixedArenaClassStates.BROKEN.value, FixedArenaClassStates.DELETED.value]:
-                build_id = fixed_arena_class.key.name
                 if self.debug:
                     FixedArenaClass(build_id=build_id, debug=self.debug).delete()
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),
+                                         build_id=build_id, action=str(PubSub.Actions.DELETE.value))
+
+    def _delete_expired_units(self):
+        expired_units = self.ds_units.get_expired()
+        for build_id in expired_units:
+            unit_state_manager = UnitStateManager(build_id=build_id)
+            if unit_state_manager.get_state() not in [UnitStates.DELETED.value]:
+                if self.debug:
+                    Unit(build_id=build_id, debug=self.debug).delete()
+                else:
+                    self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
+                                         cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
                                          build_id=build_id, action=str(PubSub.Actions.DELETE.value))

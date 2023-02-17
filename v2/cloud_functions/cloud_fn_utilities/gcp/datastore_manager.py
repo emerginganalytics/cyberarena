@@ -92,14 +92,30 @@ class DataStoreManager:
     def get_expired(self):
         expired = []
         query_expired = self.ds_client.query(kind=self.key_type)
-        if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
+        if self.key_type in [DatastoreKeyTypes.FIXED_ARENA_CLASS, DatastoreKeyTypes.UNIT]:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
-            expired += list(query_expired.fetch())
+            for obj in query_expired.fetch():
+                if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
+                    expired.append(obj.key.name)
         elif self.key_type == DatastoreKeyTypes.SERVER:
-            query_expired.add_filter('state', '=', ServerStates.EXPIRED.value)
+            query_expired.add_filter('shutoff_timestamp', '<', get_current_timestamp_utc())
             expired += list(query_expired.fetch())
-
         return expired
+
+    def get_ready_for_shutoff(self):
+        ready_for_shutoff = []
+        query_shutoff = self.ds_client.query(kind=self.key_type)
+        if self.key_type in [DatastoreKeyTypes.WORKOUT, DatastoreKeyTypes.FIXED_ARENA_CLASS]:
+            query_shutoff.add_filter('shutoff_timestamp', '<', get_current_timestamp_utc())
+            for obj in query_shutoff.fetch():
+                if obj.get('shutoff_timestamp', None):
+                    ready_for_shutoff.append(obj.key.name)
+            return ready_for_shutoff
+        else:
+            self.logger.warning(f"Attempting to query labs ready for shutoff on an unsupported key type: "
+                                f"{self.key_type}.")
+            return []
+
 
     def get_running(self):
         """
@@ -112,7 +128,7 @@ class DataStoreManager:
             query_running.add_filter('state', '=', FixedArenaClassStates.RUNNING.value)
             running += list(query_running.fetch())
         elif self.key_type == DatastoreKeyTypes.SERVER:
-            query_running.add_filter('state', '=', ServerStates.EXPIRED.value)
+            query_running.add_filter('state', '=', ServerStates.RUNNING.value)
             running += list(query_running.fetch())
 
         return running

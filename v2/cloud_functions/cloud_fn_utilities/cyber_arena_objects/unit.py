@@ -12,6 +12,7 @@ from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
+from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -45,7 +46,14 @@ class Unit:
     def start(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
-            Workout(build_id=workout.key.name, debug=self.debug).start()
+            if self.debug:
+                workout = Workout(build_id=id, debug=self.debug)
+                workout.delete()
+            else:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
+                                        action=str(PubSub.Actions.START.value),
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
+                                        build_id=str(workout.key.name))
 
     def stop(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
@@ -55,7 +63,19 @@ class Unit:
     def delete(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
-            Workout(build_id=workout.key.name, debug=self.debug).delete()
+            if self.debug:
+                Workout(build_id=workout.key.name, debug=self.debug).delete()
+            else:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
+                                        action=str(PubSub.Actions.DELETE.value),
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
+                                        build_id=str(workout.key.name))
+        unit_state_manager = UnitStateManager(build_id=self.unit_id)
+        if unit_state_manager.are_workouts_deleted():
+            unit_state_manager.state_transition(new_state=UnitStates.DELETED)
+        else:
+            self.logger.error(f"Unit {self.unit_id} is not deleted!")
+
 
     def nuke(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)

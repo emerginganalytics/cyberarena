@@ -5,7 +5,8 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, WorkoutStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, WorkoutStates, \
+    get_current_timestamp_utc
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStateManager
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 
@@ -22,7 +23,7 @@ __status__ = "Testing"
 class Workout:
     def __init__(self, build_id, duration=None, debug=False):
         self.workout_id = build_id
-        self.duration = duration
+        self.duration_minutes = duration * 60 if duration else 120
         self.debug = debug
         self.env = CloudEnv()
         self.logger = Logger("cloud_functions.workout").logger
@@ -108,12 +109,11 @@ class Workout:
             self.state_manager.state_transition(self.s.BROKEN)
             self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to complete!")
         else:
-            # TODO: Determine if we want to set start and run duration timestamps for the workout
-            # self.workout = self.ds.get()
-            # self.workout['<runtime_dict>'] = { 'start_time': ts, 'duration': ts, 'total_time': ts }
-            # self.ds.put(self.workout)
             self.state_manager.state_transition(self.s.RUNNING)
             self.logger.info(f"Finished starting the Workout: {self.workout_id}!")
+        self.workout = self.ds.get()
+        self.workout['shutoff_timestamp'] = get_current_timestamp_utc(add_minutes=self.duration_minutes)
+        self.ds.put(self.workout)
 
     def stop(self):
         self.state_manager.state_transition(self.s.STOPPING)
@@ -130,10 +130,13 @@ class Workout:
 
         if not self.state_manager.are_servers_stopped():
             self.state_manager.state_transition(self.s.BROKEN)
-            self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to complete!")
+            self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to stop!")
         else:
             self.state_manager.state_transition(self.s.READY)
             self.logger.info(f"Finished Stopping the Workout: {self.workout_id}!")
+            self.workout = self.ds.get()
+            self.workout['shutoff_timestamp'] = None
+            self.ds.put(self.workout)
 
     def delete(self):
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
@@ -155,6 +158,7 @@ class Workout:
         if self.state_manager.are_servers_deleted():
             for network in self.workout['networks']:
                 self.vpc_manager.delete(network_spec=network)
+            self.state_manager.state_transition(self.s.DELETED)
             self.logger.info(f"Finished deleting the Workout: {self.workout_id}!")
         else:
             self.state_manager.state_transition(self.s.BROKEN)

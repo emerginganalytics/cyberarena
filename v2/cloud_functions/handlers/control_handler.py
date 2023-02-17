@@ -88,6 +88,8 @@ class ControlHandler:
             FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             FixedArena(build_id=self.build_id, debug=self.debug).delete_fixed_arena()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
+            Workout(build_id=self.build_id, debug=self.debug).delete()
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError
