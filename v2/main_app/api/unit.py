@@ -43,8 +43,13 @@ class Unit(MethodView):
                 # Returns state for all workouts in unit
                 states = []
                 workouts = DataStoreManager().get_children(DatastoreKeyTypes.WORKOUT, build_id)
-                states = [{'id': workout['id'], 'state': WorkoutStates(workout['state']).name.lower()} for workout in workouts]
-                return self.http_resp(code=200, data={'states': states}).prepare_response()
+                if workouts:
+                    exists = True
+                    states = [{'id': workout['id'], 'state': WorkoutStates(workout['state']).name.lower()} for workout in workouts]
+                else:
+                    exists = False
+                    states = []
+                return self.http_resp(code=200, data={'exists': exists, 'states': states}).prepare_response()
             unit = DataStoreManager(key_type=self.key_type, key_id=build_id).get()
             if unit:
                 return self.http_resp(code=200, data=unit).prepare_response()

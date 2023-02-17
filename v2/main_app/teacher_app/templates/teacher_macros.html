@@ -30,13 +30,13 @@
                 <h5 class="card-title">{{ spec.summary.name }}</h5>
                 {% if spec.summary.tags %}
                     {% for tag in spec.summary.tags %}
-                        <div class="badge text-truncate {{ tag['id'] | lower }}">{{ tag.name }}</div>
+                        <div class="badge filterTags text-truncate {{ tag['id'] | lower }}">{{ tag.name }}</div>
                     {% endfor %}
                 {% endif %}
             </div>
         </div>
         <div class="modal fade" tabindex="-1" role="dialog" id="current_{{ build_type }}_{{ loop.index }}">
-            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-dialog modal-lg" role="document" style="overflow-y: initial !important;">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5>{{ spec.summary.name }}</h5>
@@ -44,7 +44,7 @@
                             <span aria-hidden="true">x</span>
                         </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="overflow-y: auto; max-height: 80vh;">
                         <div class="build-tags">
                             {% if spec.summary.tags %}
                                 {% for tag in spec.summary.tags %}

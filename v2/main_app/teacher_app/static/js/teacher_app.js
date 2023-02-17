@@ -181,15 +181,17 @@ function checkState(build_id, url){
         }).then(response => response.json()).then((data) =>{
             if (data['status'] === 200) {
                 let states = data['data']['states'];
-                for (let i = 0; i < states.length; i++) {
-                    let icon = document.getElementById('workoutState-' + String(states[i]['id']));
-                    icon.classList.remove(...state_classes);
-                    if (states[i]['state'] in state_classes) {
-                        icon.classList.add(states[i]['state']);
-                    } else if (states[i]['state'] === 'ready') {
-                        icon.classList.add('stopped');
-                    } else {
-                        icon.classList.add('transition');
+                if (data['data']['exists'] === true){
+                    for (let i = 0; i < states.length; i++) {
+                        let icon = document.getElementById('workoutState-' + String(states[i]['id']));
+                        icon.classList.remove(...state_classes);
+                        if (states[i]['state'] in state_classes) {
+                            icon.classList.add(states[i]['state']);
+                        } else if (states[i]['state'] === 'ready') {
+                            icon.classList.add('stopped');
+                        } else {
+                            icon.classList.add('transition');
+                        }
                     }
                 }
             }
@@ -254,4 +256,56 @@ function validateDateTime(element){
         }
         return dt_obj;
     }
+}
+
+function filter_build_specs(filter_id) {
+    var input, filter, filter_group, filter_type, cards, cardContainer;
+    input = document.getElementById('buildWorkoutFilter');
+    filter_group = document.getElementById('filter_group').value;
+    //filter_type = document.getElementById('filter_type').value;
+    filter_type = 'cardTitle';
+
+    // Get all cards by group
+    cardContainer = document.getElementById(filter_group);
+    cards = cardContainer.getElementsByClassName('card');
+
+    // Filter Items based on select type
+    filter = input.value.toUpperCase();
+    if (filter_type === 'cardTitle'){
+        filter_titles(filter, cards);
+    } else if(filter_type === 'cardTag'){
+        filter_tags(filter, cards);
+    }
+
+    function filter_titles(filter, cards){
+        var title, h5, i;
+        for (i = 0; i < cards.length; i++){
+            title = cards[i].querySelector(".card-body h5.card-title");
+            if (title.innerText.toUpperCase().indexOf(filter) > -1){
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    }
+    function filter_tags(filter, cards){
+        var tags, h5, i;
+        for(i = 0; i < cards.length; i++){
+            tags = cards[i].querySelector(".card-body div.filterTags");
+            if (tags.innerText.toUpperCase().indexOf(filter) > -1) {
+                cards[i].style.display = "";
+            } else {
+                cards[i].style.display = 'none';
+            }
+        }
+    }
+}
+function hide_spec_groups(){
+    var filter_group = document.getElementById('filter_group').value;
+    console.log(filter_group);
+    let group_ids = ['buildAssignmentRow', 'buildLiveRow', 'buildEscapeRoomRow'];
+    // Hide all remaining groups
+    group_ids.forEach(group => document.getElementById(group).style.display = 'none');
+    // Display selected group
+    document.getElementById(filter_group).style.display = 'block';
 }
