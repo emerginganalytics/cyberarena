@@ -3,6 +3,7 @@ import time
 from socket import timeout
 import googleapiclient.discovery
 import logging
+import requests
 from google.cloud import logging_v2
 from googleapiclient.errors import HttpError
 from googleapiclient import errors
@@ -180,6 +181,7 @@ class ComputeManager:
         if dns_hostname:
             dns_record = dns_hostname + self.env.dns_suffix + "."
             self.dns_manager.add_dns_record(dns_record, self.server_name)
+            self._wait_for_guacamole(dns_record[:-1])
 
         self.state_manager.state_transition(self.s.RUNNING)
         self.logger.info(f"Finished starting {self.server_name}")
@@ -336,6 +338,23 @@ class ComputeManager:
             self.logger.error(f'Timeout in operation on server {self.server_name}')
             self.state_manager.state_transition(self.s.BROKEN)
             raise ConnectionError
+
+    def _wait_for_guacamole(self, dns):
+        max_attempts = 15
+        attempts = 0
+        success = False
+        while not success and attempts < max_attempts:
+            try:
+                response = requests.get(f"http://{dns}:8080/guacamole/#", timeout=40)
+                return True
+            except requests.exceptions.Timeout:
+                logging.info(f"Timeout {attempts} of {max_attempts} waiting for guacamole server "
+                                  f"connection {dns}.")
+                attempts += 1
+            except requests.exceptions.ConnectionError:
+                self.logger.info(f"HTTP Connection Error for Guacamole Server {dns}")
+                attempts += 1
+        return False
 
     @staticmethod
     def _lookup_machine_type(machine_type):
