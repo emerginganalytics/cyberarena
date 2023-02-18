@@ -65,7 +65,7 @@ def login():
                 logger.info(msg=f"User {user_data['user_email']} logged in")
                 return json.dumps({"redirect": "/home"})
         return json.dumps({'redirect': '/unauthorized'})
-    return render_template('v2-login.html', auth_config=CloudEnv().auth_config, error_resp='403: Forbidden')
+    return render_template('v2-login.html', auth_config=CloudEnv().auth_config, error_resp='')
 
 
 @app.route('/logout', methods=['POST'])

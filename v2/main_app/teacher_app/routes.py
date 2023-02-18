@@ -114,6 +114,9 @@ def workout_list(unit_id):
         # Get assignment data
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id)).get()
         if unit:
+            join_url = ''
+            if unit.get('join_code', None):
+                join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_workout', join_code=unit['join_code'])}"
             workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
             attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
             if len(workouts_list) > 0:
@@ -133,10 +136,10 @@ def workout_list(unit_id):
                 if workouts_list[0].get('web_applications', False):
                     unit['human_interaction']['web_applications'] = True
                 return render_template('workout_list.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
-                                       workout_list=workouts_list, unit=unit, main_app_url=cloud_env.main_app_url,
+                                       workout_list=workouts_list, unit=unit, join_url=join_url,
                                        attack_specs=attack_specs)
             return render_template('workout_list.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
-                                   workout_list=False, unit=unit, main_app_url=cloud_env.main_app_url,
+                                   workout_list=False, unit=unit, join_url=join_url,
                                    attack_specs=attack_specs)
         return redirect('/no-workout')
     return redirect('/login')
