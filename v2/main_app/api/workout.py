@@ -31,7 +31,7 @@ class Workout(MethodView):
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
-        self.env = CloudEnv()
+        # self.env = CloudEnv()
         self.logger = Logger("main_app.workout").logger
 
     def get(self, build_id=None):
@@ -70,28 +70,28 @@ class Workout(MethodView):
         form_data = request.form
         email = form_data.get('input_email', None)
         join_code = form_data.get('join_code', None)
-        build_id = form_data.get('build_id', None)
 
-        if join_code and build_id and email:
-            unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id).get()
+        if join_code and email:
+            unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
+                filter_key='join_code', op='=', value=join_code)
             if unit:
+                unit_id = unit[0]['id']
                 workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
-                                                               parent_id=build_id)
+                                                               parent_id=unit_id)
                 if workout_list:
                     for workout in workout_list:
                         if workout.get('student_email', None):
                             if email.lower() == workout['student_email']:
-                                return redirect(url_for('student_app.workout', build_id=workout['id']))
+                                return redirect(url_for('student_app.workout_view', build_id=workout['id']))
                 # No workout found for given email; Send build request
                 claimed_by = json.dumps({'student_email': email.lower()})
                 workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                         action=str(PubSub.BuildActions.UNIT.value),
-                                        build_id=str(build_id), child_id=workout_id,
+                                        build_id=str(unit_id), child_id=workout_id,
                                         claimed_by=claimed_by)
-                time.sleep(3)
-                return redirect((url_for('student_app.workout_view', build_id=workout_id)))
-            return redirect(url_for('student_app.claim_workout', join_code=join_code, error=404))
+                return redirect(url_for('student_app.workout_view', build_id=workout_id))
+            return redirect(url_for('student_app.claim_workout', error=404))
         return self.http_resp(code=400).prepare_response()
 
     def put(self, build_id=None):
