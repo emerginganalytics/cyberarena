@@ -1,8 +1,6 @@
 {% extends "v2-login.html" %}
 {% block title %}Join{% endblock %}
-{% block styles %}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-{% endblock styles %}
+{% block styles %}{% endblock styles %}
 {% block content %}
     <style>
         .slide-out-right {
@@ -57,8 +55,8 @@
                 <h3 class="text-center pt-3">Claim Your Workout</h3>
                 <form id="claim-workout" method="POST" action="{{ api }}">
                     <div class="form-group">
-                        <input name="join_code" type="text" readonly hidden value="{{ join_code }}">
-                        <input name="build_id" type="text" readonly hidden value="{{ build_id }}">
+                        <label for="joinCode" hidden>Join Code</label>
+                        <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
                         <label for="inputEmail" hidden>Email address</label>
                         <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
                                name='input_email' placeholder="Enter email">

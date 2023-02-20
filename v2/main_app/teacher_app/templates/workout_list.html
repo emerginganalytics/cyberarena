@@ -128,9 +128,9 @@
                                 {% endif %}
                                 {% if join_url %}
                                     <div id="distribution" style="margin-top: 12px;">
-                                        <h5 class="text-center">Students can join assignment by visiting the link below: </h5>
+                                        <h5 class="text-center">Students can join assignment by visiting {{ join_url }} and entering the code below: </h5>
                                         <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
-                                            <h6>{{ join_url }}</h6>
+                                            <h6>{{ unit['join_code'] }}</h6>
                                         </div>
                                     </div>
                                 {% endif %}

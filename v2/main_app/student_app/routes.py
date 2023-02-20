@@ -14,17 +14,14 @@ student_app = Blueprint('student_app', __name__, url_prefix="/student",
 cloud_env = CloudEnv()
 
 
-@student_app.route('/join/<join_code>/', methods=['GET'])
-def claim_workout(join_code):
+@student_app.route('/join/', methods=['GET'])
+def claim_workout():
     api_route = url_for('workout')
     error = request.args.get('error', None)
     if not error:
-        unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
-            filter_key='join_code', op='=', value=join_code)
-        if unit:
-            return render_template('claim_workout.html', api=api_route, build_id=unit[0]['id'], join_code=join_code)
-    error_msg = 'Invalid Join Code!'
-    return render_template('claim_workout.html', build_id=False, api=api_route, join_code=join_code, error=error_msg)
+        return render_template('claim_workout.html', api=api_route)
+    error_msg = 'Invalid Join Code'
+    return render_template('claim_workout.html', api=api_route, error=error_msg)
 
 
 @student_app.route('/home', methods=['GET', 'POST'])

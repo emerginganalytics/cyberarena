@@ -116,7 +116,7 @@ def workout_list(unit_id):
         if unit:
             join_url = ''
             if unit.get('join_code', None):
-                join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_workout', join_code=unit['join_code'])}"
+                join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_workout')}"
             workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
             attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
             if len(workouts_list) > 0:
