@@ -67,6 +67,11 @@ class BuildSpecification:
     def run(self):
         self._sync_locked_folder(plaintext_dir=self.build_specs_plaintext, encrypted_dir=self.build_specs_encrypted,
                                  extension="yaml")
+
+        response = input(f"\t...Do you want to update the global guacamole proxy image? [Y/n] ")
+        if response.upper() != "N":
+            print(f"\t...Beginning to SYNC the server image {BuildConstants.MachineImages.GUACAMOLE}")
+            self.computer_image_sync.image_server(BuildConstants.MachineImages.GUACAMOLE)
         upload_specs = self._scan_specs_for_image_sync()
         self._upload_files_to_cloud(upload_specs, self.SPEC_FOLDER)
         self._sync_specs_to_datastore(upload_specs)
