@@ -19,6 +19,9 @@ __status__ = "Testing"
 
 
 class DnsManager:
+    MAX_ITERATIONS = 20
+    SLEEP_TIME = 10
+
     def __init__(self):
         self.env = CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
@@ -158,7 +161,7 @@ class DnsManager:
         :return: The IP address of the server or throws an error
         """
         i = 0
-        while i < 5:
+        while i < self.MAX_ITERATIONS:
             try:
                 new_instance = self.compute.instances().get(project=self.env.project, zone=self.env.zone,
                                                             instance=server_name).execute()
@@ -166,7 +169,7 @@ class DnsManager:
                 return ip_address
             except KeyError:
                 logging.info(f"Error: No IP address exists for {server_name}. The server may still be building."
-                             f"Trying again in 5 seconds.")
-                time.sleep(5)
+                             f"Trying again in {self.SLEEP_TIME} seconds.")
+                time.sleep(self.SLEEP_TIME)
                 i += 1
         return False

@@ -8,6 +8,7 @@ from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena import FixedArena
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
+from cloud_fn_utilities.cyber_arena_objects.unit import Unit
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -90,8 +91,11 @@ class ControlHandler:
             FixedArena(build_id=self.build_id, debug=self.debug).delete_fixed_arena()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
             Workout(build_id=self.build_id, debug=self.debug).delete()
+        elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.UNIT.value):
+            Unit(build_id=self.build_id, debug=self.debug).delete()
         else:
-            logging.error(f"Unsupported object passed to the control handler for action {self.action}")
+            logging.error(f"Unsupported object {self.cyber_arena_object} passed to the control handler for "
+                          f"action {self.action}")
             raise ValueError
 
     def _nuke(self):
