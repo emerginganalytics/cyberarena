@@ -99,6 +99,7 @@ class GuacSQL:
     # The elusive Apache Guacamole documentation for the SQL commands are here: https://guacamole.apache.org/doc/gug/jdbc-auth.html
     guac_startup_begin = \
         '#!/bin/bash\n' \
+        'sleep 30\n' \
         'mysql -u guacamole_user -p{guacdb_password} -D guacamole_db <<MY_QUERY\n'
     guac_startup_user_add = \
         'SET @salt = UNHEX(SHA2(UUID(), 256));\n' \
