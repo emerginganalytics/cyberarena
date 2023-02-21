@@ -20,7 +20,13 @@ def claim_workout():
     error = request.args.get('error', None)
     if not error:
         return render_template('claim_workout.html', api=api_route)
-    error_msg = 'Invalid Join Code'
+    else:
+        if error == '404':
+            error_msg = 'Invalid Join Code'
+        elif error == '406':
+            error_msg = 'No workouts available! Contact your instructor for further direction'
+        else:
+            error_msg = 'Something went wrong ...'
     return render_template('claim_workout.html', api=api_route, error=error_msg)
 
 
@@ -49,50 +55,48 @@ def registered_student_home():
         return redirect('/login')
 
 
-# TODO: Will replace student_app.landing_page route
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config
     workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
-    if not workout_info:
-        return redirect('/no-workout')
-    parent_id = workout_info.get('parent_id', None)
-    if workout_info and parent_id:
-        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
-        server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value, parent_id=build_id)
-        if unit:
-            workout_info['summary'] = unit['summary']
-            workout_info['expires'] = unit['workspace_settings']['expires']
-            current_ts = get_current_timestamp_utc()
-            is_expired = True
-            if current_ts <= workout_info['expires']:
-                workout_info['expired'] = is_expired = False
+    if workout_info:
+        parent_id = workout_info.get('parent_id', None)
+        if workout_info and parent_id:
+            unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
+            server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value, parent_id=build_id)
+            if unit:
+                workout_info['summary'] = unit['summary']
+                workout_info['expires'] = unit['workspace_settings']['expires']
+                current_ts = get_current_timestamp_utc()
+                is_expired = True
+                if current_ts <= workout_info['expires']:
+                    workout_info['expired'] = is_expired = False
 
-            # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
-            if not is_expired:
-                workout_info['remaining_time'] = workout_info['expires'] - current_ts
-                """ TODO: Need to establish a method to handle start times; i.e. what is the default run time for a workout?
-                    Will we allow students to set an arbitrary run time when starting the workout? Or do  we want to have a default
-                    runtime that will be used
-                """
-                if not workout_info.get('start_time', None):
-                    workout_info['start_time'] = 0
-                if not workout_info.get('time_limit', 0):
-                    workout_info['time_limit'] = 0
-            else:
-                workout_info['remaining_time'] = 0
+                # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
+                if not is_expired:
+                    workout_info['remaining_time'] = workout_info['expires'] - current_ts
+                    """ TODO: Need to establish a method to handle start times; i.e. what is the default run time for a workout?
+                        Will we allow students to set an arbitrary run time when starting the workout? Or do  we want to have a default
+                        runtime that will be used
+                    """
+                    if not workout_info.get('start_time', None):
+                        workout_info['start_time'] = 0
+                    if not workout_info.get('time_limit', 0):
+                        workout_info['time_limit'] = 0
+                else:
+                    workout_info['remaining_time'] = 0
 
-        # If they exist, get the entry point information for each server
-        connections = _generate_connection_urls(workout_info)
-        if workout_info.get('servers', None):
-            for server in workout_info['servers']:
-                entry_point = server.get('human_interaction', None)
-                if entry_point:
-                    server['url'] = connections['server'].get(server['name'], None)
-        workout_info['api'] = {'workout': url_for('workout'),}
-        return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
-                               server_list=server_list)
-    return redirect('/no-workout')
+            # If they exist, get the entry point information for each server
+            connections = _generate_connection_urls(workout_info)
+            if workout_info.get('servers', None):
+                for server in workout_info['servers']:
+                    entry_point = server.get('human_interaction', None)
+                    if entry_point:
+                        server['url'] = connections['server'].get(server['name'], None)
+            workout_info['api'] = {'workout': url_for('workout'),}
+            return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
+                                   server_list=server_list)
+    return redirect(url_for('student_app.claim_workout', error=500))
 
 
 @student_app.route('/escape-room/team/<build_id>', methods=['GET'])

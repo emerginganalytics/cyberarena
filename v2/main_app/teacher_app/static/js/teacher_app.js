@@ -127,7 +127,11 @@ function createNewClass(){
                 headers: json_headers,
                 body: JSON.stringify(formData),
             })
-                .then((response) => response.json())
+                .then((response) => {
+                    if (response.status === 200){
+                        return response.json()
+                    }
+                })
                 .then((data) => {
                     if (data['status'] === 200) {
                         sleep(30).then( () => {window.location.reload()});
@@ -154,7 +158,11 @@ function deleteClass(class_id){
         method: 'DELETE',
         headers: json_headers
     })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 200){
+                return response.json()
+            }
+        })
         .then((data) => {
             if (data['status'] === 200){
                 window.location.reload();
@@ -178,19 +186,27 @@ function checkState(build_id, url){
         let state_classes = ['running', 'stopped', 'deleted', 'transition'];
         fetch(new_url, {
             method: 'GET',
-        }).then(response => response.json()).then((data) =>{
+        }).then(response => {
+            if (response.status === 200){
+                return response.json()
+            }
+        }).then((data) =>{
             if (data['status'] === 200) {
                 let states = data['data']['states'];
                 if (data['data']['exists'] === true){
                     for (let i = 0; i < states.length; i++) {
                         let icon = document.getElementById('workoutState-' + String(states[i]['id']));
-                        icon.classList.remove(...state_classes);
-                        if (states[i]['state'] in state_classes) {
-                            icon.classList.add(states[i]['state']);
-                        } else if (states[i]['state'] === 'ready') {
-                            icon.classList.add('stopped');
-                        } else {
-                            icon.classList.add('transition');
+                        if (icon){
+                            icon.classList.remove(...state_classes);
+                            if (states[i]['state'] in state_classes) {
+                                icon.classList.add(states[i]['state']);
+                            } else if (states[i]['state'] === 'ready') {
+                                icon.classList.add('stopped');
+                            } else {
+                                icon.classList.add('transition');
+                            }
+                        } else { // A workout is built that doesn't exist on current page; Reload
+                            window.location.reload();
                         }
                     }
                 }
@@ -215,7 +231,11 @@ function markComplete(question_id, build_id, url){
         method: 'PUT',
         headers: json_headers,
         body: json_data
-    }).then(response => response.json()).then((data) =>{
+    }).then(response => {
+        if (response.status === 200){
+            return response.json()
+        }
+    }).then((data) =>{
         if (data['status'] === 200){
             let complete = document.get(question_id + '-complete');
             complete.innerHTML = 'TRUE';
@@ -231,7 +251,11 @@ function startEscapeRoomTimer(build_id, url, action) {
         method: 'PUT',
         headers: json_headers,
         body: json_data
-    }).then(response => response.json()).then((data) =>{
+    }).then(response => {
+        if (response.status === 200){
+            return response.json()
+        }
+    }).then((data) =>{
         console.log(data);
     })
 }

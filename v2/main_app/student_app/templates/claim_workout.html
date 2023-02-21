@@ -50,45 +50,41 @@
     </script>
     <div class="container-fluid" style="max-width: 600px;">
         {{ logo.logo_div() }}
-        {% if not error %}
-            <div id="claim-workout-div" class='slide-out-right'>
-                <h3 class="text-center pt-3">Claim Your Workout</h3>
-                <form id="claim-workout" method="POST" action="{{ api }}">
-                    <div class="form-group">
-                        <label for="joinCode" hidden>Join Code</label>
-                        <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
-                        <label for="inputEmail" hidden>Email address</label>
-                        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
-                               name='input_email' placeholder="Enter email">
-                        <small id="emailHelp" class="form-text text-muted text-center">We'll never share your email with anyone else.</small>
-                    </div>
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
-                    </div>
-                </form>
-            </div>
-            <div id='loading-msg-div' class="slide-in-right hide">
-                <h4 class="text-center">Finding your workout ...</h4>
-                <div id="loader">
-                    <div class="loading">
-                        <div class="rectangle_1"></div>
-                        <div class="rectangle_2"></div>
-                        <div class="rectangle_3"></div>
-                        <div class="rectangle_4"></div>
-                        <div class="rectangle_5"></div>
-                        <div class="rectangle_6"></div>
-                        <div class="rectangle_7"></div>
-                        <div class="rectangle_8"></div>
-                        <div class="rectangle_9"></div>
-                        <div class="rectangle_10"></div>
-                    </div>
+        <div id="claim-workout-div" class='slide-out-right'>
+            {% if error %}
+                <h5 class="text-center p-3 highlight-warning">{{ error }}</h5>
+            {% endif %}
+            <h3 class="text-center pt-3">Claim Your Workout</h3>
+            <form id="claim-workout" method="POST" action="{{ api }}">
+                <div class="form-group">
+                    <label for="joinCode" hidden>Join Code</label>
+                    <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
+                    <label for="inputEmail" hidden>Email address</label>
+                    <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
+                           name='input_email' placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted text-center">We'll never share your email with anyone else.</small>
+                </div>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div id='loading-msg-div' class="slide-in-right hide">
+            <h4 class="text-center">Finding your workout ...</h4>
+            <div id="loader">
+                <div class="loading">
+                    <div class="rectangle_1"></div>
+                    <div class="rectangle_2"></div>
+                    <div class="rectangle_3"></div>
+                    <div class="rectangle_4"></div>
+                    <div class="rectangle_5"></div>
+                    <div class="rectangle_6"></div>
+                    <div class="rectangle_7"></div>
+                    <div class="rectangle_8"></div>
+                    <div class="rectangle_9"></div>
+                    <div class="rectangle_10"></div>
                 </div>
             </div>
-        {% else %}
-            <div style="padding: 20px;">
-                <h3 class="text-center pt-3 highlight-warning">{{ error }}</h3>
-                <p class="text-center pt-4">Make sure you copied the correct URL.</p>
-            </div>
-        {% endif %}
+        </div>
      </div>
 {% endblock content %}

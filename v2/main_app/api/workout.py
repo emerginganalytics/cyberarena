@@ -31,7 +31,7 @@ class Workout(MethodView):
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
-        # self.env = CloudEnv()
+        self.env = CloudEnv()
         self.logger = Logger("main_app.workout").logger
 
     def get(self, build_id=None):
@@ -76,6 +76,7 @@ class Workout(MethodView):
                 filter_key='join_code', op='=', value=join_code)
             if unit:
                 unit_id = unit[0]['id']
+                max_builds = min(self.env.max_workspaces, unit[0]['workspace_settings']['count'])
                 workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
                                                                parent_id=unit_id)
                 if workout_list:
@@ -83,6 +84,9 @@ class Workout(MethodView):
                         if workout.get('student_email', None):
                             if email.lower() == workout['student_email']:
                                 return redirect(url_for('student_app.workout_view', build_id=workout['id']))
+                    if len(workout_list) >= max_builds:
+                        # build count already meets max build count for unit
+                        return redirect(url_for('student_app.claim_workout', error=406))
                 # No workout found for given email; Send build request
                 claimed_by = json.dumps({'student_email': email.lower()})
                 workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
@@ -90,7 +94,9 @@ class Workout(MethodView):
                                         action=str(PubSub.BuildActions.UNIT.value),
                                         build_id=str(unit_id), child_id=workout_id,
                                         claimed_by=claimed_by)
+                time.sleep(5)
                 return redirect(url_for('student_app.workout_view', build_id=workout_id))
+            # Invalid join code
             return redirect(url_for('student_app.claim_workout', error=404))
         return self.http_resp(code=400).prepare_response()
 
@@ -102,15 +108,19 @@ class Workout(MethodView):
             args = request.args
             if args:  # Check what action is being requested for current workout
                 action = args.get('action', None)
-                valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]
+                valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value,
+                                 PubSub.Actions.EXTEND_RUNTIME.value]
                 if action and int(action) in valid_actions:
                     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
                     if workout:
-                        duration_hours = args.get('duration', None)
-                        if args.get('duration', None):
-                            duration_hours = min(int(duration_hours), 10)
+                        if action == PubSub.Actions.EXTEND_RUNTIME.value:
+                            duration_hours = 1
                         else:
-                            duration_hours = 2
+                            duration_hours = args.get('duration', None)
+                            if args.get('duration', None):
+                                duration_hours = min(int(duration_hours), 10)
+                            else:
+                                duration_hours = 2
                         duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
                         self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                                 build_id=str(build_id), duration=str(duration),

@@ -15,7 +15,7 @@ __status__ = "Testing"
 
 
 class DataStoreManager:
-    MAX_ATTEMPTS = 5
+    MAX_ATTEMPTS = 10
     WAIT_PERIOD = 3
 
     def __init__(self, key_type=None, key_id=None):

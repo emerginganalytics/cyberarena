@@ -243,6 +243,7 @@ class PubSub:
         RESTORE = 7
         NUKE = 8
         START_ESCAPE_ROOM_TIMER = 9
+        EXTEND_RUNTIME = 10
 
     class CyberArenaObjects(Enum):
         FIXED_ARENA = 1

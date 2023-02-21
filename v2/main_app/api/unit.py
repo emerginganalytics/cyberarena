@@ -79,7 +79,7 @@ class Unit(MethodView):
                 'student_emails': [],
                 'expires': expire_ts
             }
-            build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 10))
+            build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
             build_spec_to_cloud.commit(publish=False)
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))

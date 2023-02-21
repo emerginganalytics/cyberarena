@@ -24,6 +24,8 @@ from api.iot_device import IoTDevice
 from api.user import Users
 from api.escape_room import EscapeRoomUnit, EscapeRoomWorkout
 
+cloud_env = CloudEnv()
+
 # --------------------------- FLASK APP --------------------------
 app = Flask(__name__)
 app.register_blueprint(admin_app)
@@ -32,13 +34,13 @@ app.register_blueprint(teacher_app)
 app.register_blueprint(faqs_app)
 app.register_blueprint(fixed_arena_app)
 app.config['SECRET_KEY'] = 'XqLx4yk8ZW9uukSCXIGBm0RFFJKKyDDm'
-app.jinja_env.globals['project'] = CloudEnv().project
+app.jinja_env.globals['project'] = cloud_env.project
 
 
 # Default route
 @app.route('/')
 def default_route():
-    return render_template('v2-login.html', auth_config=CloudEnv().auth_config)
+    return render_template('v2-login.html', auth_config=cloud_env.auth_config)
 
 
 @app.route('/home/')
@@ -65,7 +67,7 @@ def login():
                 logger.info(msg=f"User {user_data['user_email']} logged in")
                 return json.dumps({"redirect": "/home"})
         return json.dumps({'redirect': '/unauthorized'})
-    return render_template('v2-login.html', auth_config=CloudEnv().auth_config, error_resp='')
+    return render_template('v2-login.html', auth_config=cloud_env.auth_config, error_resp='')
 
 
 @app.route('/logout', methods=['POST'])
