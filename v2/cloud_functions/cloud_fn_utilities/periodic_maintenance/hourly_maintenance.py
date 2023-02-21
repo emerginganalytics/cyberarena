@@ -1,3 +1,5 @@
+import time
+
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates, DatastoreKeyTypes, UnitStates
@@ -32,7 +34,9 @@ class HourlyMaintenance:
     def _delete_expired_classes(self):
         expired_classes = self.ds_classes.get_expired()
         for build_id in expired_classes:
-            fac = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=build_id)
+            fac = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=build_id).get()
+            if not fac:
+                continue
             fac_state = fac.get('state', None)
             if not fac_state:
                 FixedArenaClass(build_id=build_id).mark_broken()
@@ -57,3 +61,4 @@ class HourlyMaintenance:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
                                          build_id=build_id, action=str(PubSub.Actions.DELETE.value))
+                    time.sleep(20)

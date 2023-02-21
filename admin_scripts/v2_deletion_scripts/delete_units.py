@@ -6,6 +6,7 @@ from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
+from cloud_fn_utilities.periodic_maintenance.hourly_maintenance import HourlyMaintenance
 
 
 __author__ = "Philip Huff"
@@ -24,11 +25,15 @@ class DeleteTestManager:
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
 
     def run(self):
-        while True:
-            build_first = str(input(f"Do you want to delete all tests for the project {self.env.project}? (Y/n) "))
-            if not build_first or build_first.upper()[0] == "Y":
-                for build_id in self.ds.query(filter_key="test", op="=", value="true"):
-                    self.delete(build_id=build_id)
+        delete_tests = str(input(f"Do you want to delete all tests for the project {self.env.project}? (Y/n) "))
+        if not delete_tests or delete_tests.upper()[0] == "Y":
+            for build_id in self.ds.query(filter_key="test", op="=", value="true"):
+                self.delete(build_id=build_id)
+        delete_expired = str(input(f"Do you want to run the deletion routine for expired units for the "
+                                   f"project {self.env.project}? (Y/n) "))
+        if not delete_expired or delete_expired.upper()[0] == "Y":
+            HourlyMaintenance().run()
+
 
     def delete(self, build_id):
         Unit(build_id=build_id).delete()
@@ -36,4 +41,4 @@ class DeleteTestManager:
 
 if __name__ == "__main__":
     print(f"An automated script to delete entire units.")
-    DeleteTestManager()
+    DeleteTestManager().run()
