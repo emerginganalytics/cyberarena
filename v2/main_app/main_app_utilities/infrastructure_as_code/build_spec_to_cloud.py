@@ -30,14 +30,14 @@ __status__ = "Testing"
 
 
 class BuildSpecToCloud:
-    def __init__(self, cyber_arena_spec, debug=False):
+    def __init__(self, cyber_arena_spec, env_dict=None, debug=False):
         """
         Prepares the build of workouts based on a YAML specification by storing the information in the
         cloud datastore.
         :@param cyber_arena_spec: The specification for building the Cyber Arena
         :@param debug: Whether to publish to cloud functions or debug the build operations.
         """
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.debug = debug
         log_client = logging_v2.Client()
         log_client.setup_logging()
@@ -47,7 +47,7 @@ class BuildSpecToCloud:
         if self.debug:
             cyber_arena_spec['test'] = True
         cyber_arena_spec['creation_timestamp'] = get_current_timestamp_utc()
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             self.build_id = cyber_arena_spec['id']

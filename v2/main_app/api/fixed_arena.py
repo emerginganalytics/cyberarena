@@ -24,15 +24,16 @@ __status__ = "Testing"
 
 class FixedArena(MethodView):
     def __init__(self):
-        self.authorizer = ArenaAuthorizer()
+        self.env = CloudEnv()
+        self.env_dict = self.env.get_env()
+        self.authorizer = ArenaAuthorizer(env_dict=self.env_dict)
         self.http_resp = HttpResponse
         self.actions = PubSub.Actions
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.cyber_arena_objects = PubSub.CyberArenaObjects
         self.handler = PubSub.Handlers
         self.states = BuildConstants.FixedArenaStates
-        self.bm = BucketManager()
-        self.env = CloudEnv()
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.bm = BucketManager(env_dict=self.env_dict)
 
     @instructor_required
     def get(self, build_id=None):
@@ -66,7 +67,7 @@ class FixedArena(MethodView):
             fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
                                            file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
             build_spec = yaml.safe_load(fixed_arena_yaml)
-            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
             build_spec_to_cloud.commit()
             return self.http_resp(code=200).prepare_response()
         # Bad request; Either no build_id was found or received an invalid build action

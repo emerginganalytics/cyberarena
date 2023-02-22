@@ -27,9 +27,9 @@ class CloudOperationsManager:
         REGION = 1
         GLOBAL = 2
 
-    def __init__(self):
+    def __init__(self, env_dict=None):
         self.logger = Logger("cloud_functions.unit").logger
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.service = discovery.build('compute', 'v1')
 
     def wait_for_completion(self, operation_id, wait_type=WaitTypes.ZONE, wait_seconds=150):

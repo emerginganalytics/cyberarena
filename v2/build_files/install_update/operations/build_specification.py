@@ -61,7 +61,7 @@ class BuildSpecification:
         except NotFound as err:
             self.build_bucket = self.storage_client.create_bucket(f"{self.env.project}_{self.BUILD_SPEC_BUCKET_SUFFIX}")
         if sync:
-            self.computer_image_sync = ComputerImageSync(suppress=self.suppress)
+            self.computer_image_sync = ComputerImageSync(suppress=self.suppress, env_dict=self.env.get_env())
         self.specs_to_upload = []
 
     def run(self):

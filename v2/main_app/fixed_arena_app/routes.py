@@ -10,6 +10,7 @@ from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants
 
 fixed_arena_app = Blueprint('fixed_arena', __name__, url_prefix="/fixed-arena",
                         static_folder="./static", template_folder="./templates")
+cloud_env = CloudEnv()
 
 
 @fixed_arena_app.route('/', methods=['GET'])
@@ -24,7 +25,7 @@ def home():
     Workspaces are denoted by fixed-arena-workout.workspace_servers
     :return:
     """
-    auth_config = CloudEnv().auth_config
+    auth_config = cloud_env.auth_config
     # Get built fixed-arenas for project
     fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
     fixed_arenas = list(fixed_arenas_query.fetch())
@@ -32,7 +33,7 @@ def home():
     # Get fixed-arena workspaces
     workspaces = []
     # Get fixed-arena and fixed-arena class spec names
-    bm = BucketManager()
+    bm = BucketManager(env_dict=cloud_env.get_env())
     class_specs = bm.get_class_list()
     fixed_arena_specs = bm.get_fixed_arena_list()
 
@@ -43,13 +44,13 @@ def home():
 
 @fixed_arena_app.route('/class/<build_id>', methods=['GET'])
 def class_landing(build_id):
-    auth_config = CloudEnv().auth_config
+    auth_config = cloud_env.auth_config
     attack_yaml = DataStoreManager().get_attack_specs()
     fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
     if fa_class:
         workspaces = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
                                                      parent_id=fa_class.key.name)
         return render_template('fixed_arena_class.html', auth_config=auth_config, fixed_arena_class=fa_class,
-                               workspaces=workspaces, attack_spec=attack_yaml, main_app_url=CloudEnv().main_app_url)
+                               workspaces=workspaces, attack_spec=attack_yaml, main_app_url=cloud_env.main_app_url)
     abort(404)
 

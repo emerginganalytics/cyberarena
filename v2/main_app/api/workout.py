@@ -8,7 +8,6 @@ from flask import abort, request, json, session, redirect, url_for
 from flask.views import MethodView
 from main_app_utilities.gcp.cloud_logger import Logger
 
-from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
@@ -27,11 +26,11 @@ __status__ = "Testing"
 class Workout(MethodView):
     def __init__(self):
         self.key_type = DatastoreKeyTypes.WORKOUT.value
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
+        self.env = CloudEnv()
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
-        self.env = CloudEnv()
         self.logger = Logger("main_app.workout").logger
 
     def get(self, build_id=None):

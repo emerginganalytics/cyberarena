@@ -28,11 +28,11 @@ class ArenaAuthorizer:
         PENDING = "pending"
         ALL_GROUPS = [AUTHORIZED, ADMINS, STUDENTS]
 
-    def __init__(self):
+    def __init__(self, env_dict=None):
         self.log_client = logging_v2.Client()
         self.log_client.setup_logging()
         self.ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO.value, key_id='cybergym')
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.admin_info = self.ds_manager.get()
         if not self.admin_info:
             self.admin_info = {}

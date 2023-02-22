@@ -22,8 +22,8 @@ class DnsManager:
     MAX_ITERATIONS = 20
     SLEEP_TIME = 10
 
-    def __init__(self):
-        self.env = CloudEnv()
+    def __init__(self, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.dns = googleapiclient.discovery.build('dns', 'v1')
         log_client = logging_v2.Client()

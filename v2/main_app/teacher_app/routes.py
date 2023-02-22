@@ -1,11 +1,9 @@
 import logging as logger
 import json
 import time
-
-import flask.app
 from flask import abort, Blueprint, redirect, render_template, request, session, url_for
+
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
-from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants, get_current_timestamp_utc
@@ -19,26 +17,16 @@ cloud_env = CloudEnv()
 def teacher_home():
     if session.get('user_email', None):
         teacher_email = session['user_email']
-        auth = ArenaAuthorizer()
+        auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
         auth_list = auth.get_user_groups(user=teacher_email)  # Get user auth levels
+
         # Check if teacher is added to datastore
-        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email)).get()
+        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR,
+                                        key_id=str(teacher_email)).get()
         if not teacher_info:
             teacher_info = DataStoreManager().set(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email))
             # TODO: Add instructor to entity
-
         teacher_info = {}
-        teacher_classes = []
-        class_list = DataStoreManager(key_id=str(teacher_email)).get_classrooms()
-        for class_instance in class_list:
-            if 'class_name' in class_instance:
-                class_info = {
-                    'name': class_instance['class_name'],
-                    'student_auth': class_instance['student_auth'] if 'student_auth' in class_instance else 'anonymous',
-                    'roster_size': len(class_instance.get('roster', []))
-                }
-                teacher_classes.append(class_info)
-        teacher_info['classes'] = teacher_classes
 
         # Get all the units for this instructor
         unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
@@ -47,7 +35,6 @@ def teacher_home():
         # Sort queried units into active and expired
         active_units = []
         expired_units = []
-        teacher_classes = []
         if unit_list:
             for unit in unit_list:
                 if 'name' in unit['summary']:
@@ -106,7 +93,7 @@ def teacher_home():
 # Instructor unit page. Displays information and links for a unit of workouts
 @teacher_app.route('/assignment/<unit_id>', methods=['GET'])
 def workout_list(unit_id):
-    auth = ArenaAuthorizer()
+    auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
     if session.get('user_email', None):
         teacher_email = session['user_email']
         auth_list = auth.get_user_groups(teacher_email)
@@ -147,7 +134,7 @@ def workout_list(unit_id):
 
 @teacher_app.route('/escape-room/<unit_id>', methods=['GET'])
 def escape_room(unit_id):
-    auth = ArenaAuthorizer()
+    auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
     if session.get('user_email', None):
         teacher_email = session['user_email']
         auth_list = auth.get_user_groups(teacher_email)

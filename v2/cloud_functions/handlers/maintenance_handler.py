@@ -23,9 +23,10 @@ __status__ = "Testing"
 
 
 class MaintenanceHandler:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, env_dict=None):
         self.debug = debug
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         now = datetime.now()
@@ -43,12 +44,12 @@ class MaintenanceHandler:
     def route(self):
         if self.quarter_hourly:
             logging.info(f"Running quarter hourly maintenance tasks")
-            QuarterHourlyMaintenance().run()
+            QuarterHourlyMaintenance(env_dict=self.env_dict).run()
 
         if self.hourly:
             logging.info(f"Running hourly maintenance tasks")
-            HourlyMaintenance().run()
+            HourlyMaintenance(env_dict=self.env_dict).run()
 
         if self.daily:
             logging.info(f"Running daily maintenance tasks")
-            DailyMaintenance().run()
+            DailyMaintenance(env_dict=self.env_dict).run()

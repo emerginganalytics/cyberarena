@@ -38,10 +38,11 @@ class ComputeManager:
         ]
     }]
 
-    def __init__(self, server_name):
-        self.env = CloudEnv()
+    def __init__(self, server_name, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
-        self.dns_manager = DnsManager()
+        self.dns_manager = DnsManager(env_dict=self.env_dict)
         self.s = ServerStates
         self.logger = Logger("cloud_functions.compute_manager").logger
         self.server_name = server_name
@@ -61,7 +62,8 @@ class ComputeManager:
         else:
             self.logger.error(f"Unsupported build type {self.parent_build_type}")
             parent_key_type = DatastoreKeyTypes.WORKOUT
-        self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type)
+        self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type,
+                                            env_dict=self.env_dict)
         self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):
@@ -370,8 +372,8 @@ class ProjectComputeManager:
     """
     Used to perform compute maintenance functions for the entire project.
     """
-    def __init__(self):
-        self.env = CloudEnv()
+    def __init__(self, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.logger = Logger("cloud_functions.project_compute_manager").logger
 

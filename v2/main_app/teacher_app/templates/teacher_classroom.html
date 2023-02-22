@@ -153,7 +153,7 @@
                                     <h2 class="section-title">Assignments</h2>
                                 </div>
                                 <div class="row justify-content-center">
-                                    {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', teacher_info.classes, urls.unit) }}
+                                    {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', urls.unit) }}
                                 </div>
                             </div>
                         </div>
@@ -163,7 +163,7 @@
                                     <h2 class="section-title">Live</h2>
                                 </div>
                                 <div class="row justify-content-center">
-                                    {{ macros.buildWorkoutCards(workout_specs.live, 'live', teacher_info.classes, urls.fixed_arena) }}
+                                    {{ macros.buildWorkoutCards(workout_specs.live, 'live', urls.fixed_arena) }}
                                 </div>
                             </div>
                         </div>
@@ -173,7 +173,7 @@
                                     <h2 class="section-title">Escape Rooms</h2>
                                 </div>
                                 <div class="row justify-content-center">
-                                    {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', teacher_info.classes, urls.escape_room) }}
+                                    {{ macros.buildWorkoutCards(workout_specs.escape_rooms, 'escape-room', urls.escape_room) }}
                                 </div>
                             </div>
                         </div>

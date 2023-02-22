@@ -23,7 +23,7 @@
 {%- endmacro %}
 
 {# Cards are used as part of the Build Workout tab in teacher_classroom.html #}
-{% macro buildWorkoutCards(specs, build_type, class_list, url) %}
+{% macro buildWorkoutCards(specs, build_type, url) %}
     {% for spec in specs %}
         <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_{{ build_type }}_{{ loop.index }}')">
             <div class="card-body">

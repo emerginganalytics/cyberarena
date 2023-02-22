@@ -24,7 +24,7 @@ __status__ = "Testing"
 
 
 class FixedArenaWorkspaceProxy:
-    def __init__(self, build_id, workspace_ids):
+    def __init__(self, build_id, workspace_ids, env_dict=None):
         """
         Creates a guacamole server with the configured connections for proxying servers used for displays
         @param build_id: The build ID used mainly for naming objects in the cloud
@@ -32,7 +32,8 @@ class FixedArenaWorkspaceProxy:
         @param workspace_ids: The auto-generated workspace IDs for the build. Used for storing the proxy connection info
         @type build_spec: List
         """
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.server_name = f"{build_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         log_client = logging_v2.Client()
         log_client.setup_logging()
@@ -42,7 +43,7 @@ class FixedArenaWorkspaceProxy:
         self.guac_connections = []
         self.ds = DataStoreManager()
         self.build_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.build_id)
-        self.guac = GuacamoleConfiguration(self.build_id)
+        self.guac = GuacamoleConfiguration(self.build_id, env_dict=self.env_dict)
 
     def build(self):
         proxy_configs = []
@@ -89,4 +90,4 @@ class FixedArenaWorkspaceProxy:
             'guacamole_startup_script': guac_startup_script
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
-        ComputeManager(server_name=self.server_name).build()
+        ComputeManager(server_name=self.server_name, env_dict=self.env_dict).build()

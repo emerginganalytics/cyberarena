@@ -11,11 +11,12 @@ admin_app = Blueprint('admin', __name__, url_prefix="/admin",
                       static_folder="./static", template_folder="./templates")
 # TODO: Move each API call to its respective API file:
 #           admin_app.register_blueprint(admin_api)
-
+cloud_env = CloudEnv()
 
 @admin_app.route('/home', methods=['GET', 'POST'])
 def admin_page():
-    admin_info = ArenaAuthorizer().admin_info
+    env_dict = cloud_env.get_env()
+    admin_info = ArenaAuthorizer(env_dict=env_dict).admin_info
     comment_query = DataStoreManager(key_id='cybergym-comments').query()
     comment_query.order = ['date']
     comment_list = comment_query.fetch()
@@ -23,7 +24,7 @@ def admin_page():
     active_workouts = []
     for comment in comment_list:
         comments.append(comment)
-    instance_list = ComputeManager().get_instances()
+    instance_list = ComputeManager(env_dict=env_dict).get_instances()
 
     if request.method == "POST":
         response = {
@@ -91,31 +92,4 @@ def iot_device(device_id):
     else:
         abort(404)
 
-
-'''
-@admin_app.route('/update_base', methods=['POST'])
-def update_base():
-    """
-    def store_background_color(color_code):
-        css_string = ':root{--main_color: %s}' % (color_code)
-        temp_css = open('temp.css', 'w')
-        temp_css.write(css_string)
-        temp_css.close()
-
-        bucket = storage_client.get_bucket(workout_globals.yaml_bucket)
-        new_blob = bucket.blob('color/{}-base.css'.format(project))
-
-        # Prevent GCP from serving a cached version of this file
-        new_blob.cache_control = 'private'
-        new_blob.upload_from_string(css_string, content_type='text/css')
-
-        remove('temp.css')
-    """
-    if request.method == "POST":
-        if 'custom_color' in request.form:
-            store_background_color(request.form['custom_color'])
-            message = "Updated background color to {}".format(request.form['custom_color'])
-            logger.info(msg=message)
-    return redirect('/admin/home')
-'''
 

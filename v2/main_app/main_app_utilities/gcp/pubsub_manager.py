@@ -14,8 +14,8 @@ __status__ = "Testing"
 
 
 class PubSubManager:
-    def __init__(self, topic):
-        self.env = CloudEnv()
+    def __init__(self, topic, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.publisher = pubsub_v1.PublisherClient()

@@ -29,11 +29,12 @@ class Agent(object):
     }
     """
 
-    def __init__(self, build_id=None, parent_id=None, debug=False):
+    def __init__(self, build_id=None, parent_id=None, debug=False, env_dict=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.build_id = build_id
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.debug = debug
 
         # parent_id refers to either the fixed_arena_class or cyberarena_unit
@@ -45,8 +46,8 @@ class Agent(object):
 
     def create_topics(self):
         logging.info(f'Creating topic/subscription for agent with ID: {self.agent_topic}')
-        PubSubManager(topic=self.agent_topic).create_topic()
-        PubSubManager(topic=self.agent_topic).create_subscription(self.agent_subscription)
+        PubSubManager(topic=self.agent_topic, env_dict=self.env_dict).create_topic()
+        PubSubManager(topic=self.agent_topic, env_dict=self.env_dict).create_subscription(self.agent_subscription)
         # PubSubManager(topic=self.agent_telemetry).create_topic()
 
     def delete(self):
@@ -58,11 +59,11 @@ class Agent(object):
         we only need to worry about cleaning up the topics
         """
         logging.info(f'Deleting Agency Subscription: {self.agent_subscription}')
-        del_subscription = PubSubManager(topic=self.agent_topic).delete_subscription(self.agent_subscription)
+        del_subscription = PubSubManager(topic=self.agent_topic, env_dict=self.env_dict).delete_subscription(self.agent_subscription)
         if del_subscription:
             logging.info(f'Subscription {self.agent_subscription} Deleted ...')
         logging.info(f'Deleting Agency Topic: {self.agent_topic}')
-        del_topic = PubSubManager(topic=self.agent_topic).delete_topic()
+        del_topic = PubSubManager(topic=self.agent_topic, env_dict=self.env_dict).delete_topic()
         if del_topic:
             logging.info(f'Topic {self.agent_topic} Deleted ...')
 

@@ -29,17 +29,18 @@ __status__ = "Testing"
 
 
 class FixedArenaClass:
-    def __init__(self, build_id, debug=False, force=False):
+    def __init__(self, build_id, debug=False, force=False, env_dict=None):
         self.fixed_arena_class_id = build_id
         self.debug = debug
         self.force = force
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.s = FixedArenaClassStates
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.state_manager = FixedArenaClassStateManager(initial_build_id=self.fixed_arena_class_id)
-        self.firewall_manager = FirewallManager()
+        self.firewall_manager = FirewallManager(env_dict=self.env_dict)
 
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.fixed_arena_class_id)
         self.fixed_arena_class = self.ds.get()
@@ -67,7 +68,7 @@ class FixedArenaClass:
 
         # Build attack Pubsub topics if needed
         if self.fixed_arena_class['add_attacker']:
-            Agent(parent_id=self.fixed_arena_class_id).create_topics()
+            Agent(parent_id=self.fixed_arena_class_id, env_dict=self.env_dict).create_topics()
 
         # Build workspace servers
         if self.state_manager.get_state() <= self.s.BUILDING_SERVERS.value:
@@ -85,7 +86,7 @@ class FixedArenaClass:
                         server['nics'] = self._get_workspace_network_config()
                     self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
                     if self.debug:
-                        ComputeManager(server_name=server_name).build()
+                        ComputeManager(server_name=server_name, env_dict=self.env_dict).build()
                     else:
                         self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
                                                 action=str(PubSub.BuildActions.SERVER.value),
@@ -96,7 +97,7 @@ class FixedArenaClass:
 
                 # Build workspace attack machine if needed
                 if self.fixed_arena_class['add_attacker']:
-                    agent = Agent(build_id=ws_id, parent_id=self.fixed_arena_class_id).config()
+                    agent = Agent(build_id=ws_id, parent_id=self.fixed_arena_class_id, env_dict=self.env_dict).config()
                     agent['parent_build_type'] = BuildConstants.BuildType.FIXED_ARENA_WORKSPACE
                     agent['fixed_arena_class_id'] = self.fixed_arena_class_id
                     agent['fixed_arena_id'] = self.fixed_arena_class['parent_id']
@@ -105,7 +106,7 @@ class FixedArenaClass:
                     agent_name = f'{ws_id}-{agent["name"]}'
                     self.ds.put(agent, key_type=DatastoreKeyTypes.SERVER, key_id=agent_name)
                     if self.debug:
-                        ComputeManager(server_name=agent_name).build()
+                        ComputeManager(server_name=agent_name, env_dict=self.env_dict).build()
                     else:
                         self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
                                                 action=str(PubSub.BuildActions.SERVER.value),
@@ -124,7 +125,8 @@ class FixedArenaClass:
                 self.state_manager.state_transition(self.s.BUILDING_STUDENT_ENTRY)
                 if self.debug:
                     FixedArenaWorkspaceProxy(build_id=self.fixed_arena_class_id,
-                                             workspace_ids=self.fixed_arena_workspace_ids).build()
+                                             workspace_ids=self.fixed_arena_workspace_ids,
+                                             env_dict=self.env_dict).build()
                 else:
                     self.pubsub_manager.msg(handler=PubSub.Handlers.BUILD,
                                             action=str(PubSub.BuildActions.FIXED_ARENA_WORKSPACE_PROXY.value),
@@ -145,7 +147,7 @@ class FixedArenaClass:
 
         for server in servers_to_start:
             if self.debug:
-                ComputeManager(server).start()
+                ComputeManager(server, env_dict=self.env_dict).start()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START.value),
                                         build_id=server,
@@ -165,7 +167,7 @@ class FixedArenaClass:
 
         for server in servers_to_stop:
             if self.debug:
-                ComputeManager(server).stop()
+                ComputeManager(server, env_dict=self.env_dict).stop()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP.value),
                                         build_id=server,
@@ -187,12 +189,12 @@ class FixedArenaClass:
 
         # Delete Agent PubSub subscription/topic
         if self.fixed_arena_class.get('add_attacker'):
-            Agent(parent_id=self.fixed_arena_class_id).delete()
+            Agent(parent_id=self.fixed_arena_class_id, env_dict=self.env_dict).delete()
 
         for server in servers_to_delete:
             if self.debug:
                 try:
-                    ComputeManager(server).delete()
+                    ComputeManager(server, env_dict=self.env_dict).delete()
                 except LookupError:
                     logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Could not find server record "
                                   f"for {server}. Marking Fixed Arena Classroom record as broken.")
@@ -218,7 +220,7 @@ class FixedArenaClass:
         for server in servers_to_nuke:
             if self.debug:
                 try:
-                    ComputeManager(server).nuke()
+                    ComputeManager(server, env_dict=self.env_dict).nuke()
                 except LookupError:
                     continue
             else:
@@ -304,7 +306,7 @@ class FixedArenaClass:
         active_class = self.fixed_arena.get('active_class', None)
         if active_class:
             if self.force:
-                FixedArenaClass(build_id=active_class, debug=True).delete()
+                FixedArenaClass(build_id=active_class, debug=True, env_dict=self.env_dict).delete()
             else:
                 logging.error(
                     f"Fixed Arena Class {self.fixed_arena_class_id}: Cannot build fixed arena! The active class "

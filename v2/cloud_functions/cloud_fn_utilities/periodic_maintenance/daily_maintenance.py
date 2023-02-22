@@ -2,7 +2,6 @@ from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.globals import PubSub
 from cloud_fn_utilities.gcp.compute_manager import ProjectComputeManager
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
-
 from cloud_fn_utilities.database.vulnerabilities import Vulnerabilities
 
 
@@ -17,11 +16,11 @@ __status__ = "Production"
 
 
 class DailyMaintenance:
-    def __init__(self, debug=False):
-        self.compute_manager = ProjectComputeManager()
+    def __init__(self, debug=False, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.compute_manager = ProjectComputeManager(env_dict=self.env.get_env())
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
         self.debug = debug
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
-        self.env = CloudEnv()
 
     def run(self):
         self._stop_all()

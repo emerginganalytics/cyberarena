@@ -2,6 +2,7 @@ import time
 
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.globals import PubSub, FixedArenaClassStates, DatastoreKeyTypes, UnitStates
 from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaStateManager
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStates
@@ -20,9 +21,11 @@ __status__ = "Testing"
 
 
 class HourlyMaintenance:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, env_dict=None):
         self.debug = debug
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.fa_state_manager = FixedArenaStateManager()
         self.ds_units = DataStoreManager(key_type=DatastoreKeyTypes.UNIT)
         self.ds_classes = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)
@@ -39,12 +42,12 @@ class HourlyMaintenance:
                 continue
             fac_state = fac.get('state', None)
             if not fac_state:
-                FixedArenaClass(build_id=build_id).mark_broken()
+                FixedArenaClass(build_id=build_id, env_dict=self.env_dict).mark_broken()
                 continue
 
             if fac_state not in [FixedArenaClassStates.BROKEN.value, FixedArenaClassStates.DELETED.value]:
                 if self.debug:
-                    FixedArenaClass(build_id=build_id, debug=self.debug).delete()
+                    FixedArenaClass(build_id=build_id, debug=self.debug, env_dict=self.env_dict).delete()
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),
@@ -56,7 +59,7 @@ class HourlyMaintenance:
             unit_state_manager = UnitStateManager(build_id=build_id)
             if unit_state_manager.get_state() not in [UnitStates.DELETED.value]:
                 if self.debug:
-                    Unit(build_id=build_id, debug=self.debug).delete()
+                    Unit(build_id=build_id, debug=self.debug, env_dict=self.env_dict).delete()
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),

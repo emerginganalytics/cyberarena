@@ -2,7 +2,6 @@ import logging
 from google.cloud import logging_v2
 
 from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes
-from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import PubSub
 
@@ -20,7 +19,6 @@ __status__ = "Testing"
 
 class AttackReport:
     def __init__(self, event_attributes):
-        self.env = CloudEnv()
         # log_client = logging_v2.Client()
         # log_client.setup_logging()
         self.event_attributes = event_attributes
