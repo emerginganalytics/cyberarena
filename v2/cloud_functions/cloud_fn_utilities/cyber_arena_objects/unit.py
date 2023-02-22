@@ -31,10 +31,11 @@ class Unit:
         self.form_data = form_data
         self.debug = debug
         self.force = force
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.logger = Logger("cloud_functions.unit").logger
         self.s = UnitStates
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.unit_id)
         self.unit = self.ds.get()
         if not self.unit:
@@ -49,7 +50,7 @@ class Unit:
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             if self.debug:
-                workout = Workout(build_id=id, debug=self.debug)
+                workout = Workout(build_id=id, debug=self.debug, env_dict=self.env_dict)
                 workout.delete()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
@@ -60,13 +61,13 @@ class Unit:
     def stop(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
-            Workout(build_id=workout.key.name, debug=self.debug).stop()
+            Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).stop()
 
     def delete(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             if self.debug:
-                Workout(build_id=workout.key.name, debug=self.debug).delete()
+                Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).delete()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
                                         action=str(PubSub.Actions.DELETE.value),
@@ -82,7 +83,7 @@ class Unit:
     def nuke(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
-            Workout(build_id=workout.key.name, debug=self.debug).nuke()
+            Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).nuke()
 
     def mark_broken(self):
         self.unit['state'] = self.s.BROKEN
@@ -137,7 +138,7 @@ class Unit:
                 workout_record['test'] = True
             workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
             if self.debug:
-                workout = Workout(build_id=self.workout_id, debug=self.debug)
+                workout = Workout(build_id=self.workout_id, debug=self.debug, env_dict=self.env_dict)
                 workout.build()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),

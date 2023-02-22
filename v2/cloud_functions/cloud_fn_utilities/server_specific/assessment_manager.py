@@ -33,7 +33,7 @@ class AssessmentManager:
         self.build_id = build_id
         self.key_type = key_type
         self.logger = Logger("cloud_functions.assessment-manager").logger
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.script_repository = f"gs://{self.env.project}_{Buckets.BUILD_SPEC_BUCKET_SUFFIX}" \
                                  f"/{Buckets.Folders.STARTUP_SCRIPTS.value}"
         self.ds = DataStoreManager(key_type=self.key_type, key_id=self.build_id)

@@ -17,18 +17,19 @@ class ComputeManager:
     Provides ability to pull data on existing compute resources.
     Not intended to manage resource states (start, stop, delete, etc)
     """
-    def __init__(self, key_id=None):
+    def __init__(self, key_id=None, env_dict=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.key_id = key_id
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
 
     def get_snapshots(self):
         response = {'snapshots': [], 'error': ''}
         item_filter = f"name = {self.key_id}*"
         try:
-            response['snapshots'] = self.compute.snapshots().list(project=self.env.project, filter=item_filter).execute()
+            response['snapshots'] = self.compute.snapshots().list(project=self.env.project,
+                                                                  filter=item_filter).execute()
             return response
         except Exception as e:
             response['error'] = e

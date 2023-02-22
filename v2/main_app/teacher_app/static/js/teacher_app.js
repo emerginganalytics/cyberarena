@@ -128,8 +128,8 @@ function createNewClass(){
                 body: JSON.stringify(formData),
             })
                 .then((response) => {
-                    if (response.status === 200){
-                        return response.json()
+                    if (response.statusText === 'OK'){
+                        return response.json();
                     }
                 })
                 .then((data) => {
@@ -159,8 +159,8 @@ function deleteClass(class_id){
         headers: json_headers
     })
         .then(response => {
-            if (response.status === 200){
-                return response.json()
+            if (response.statusText === 'OK'){
+                return response.json();
             }
         })
         .then((data) => {
@@ -187,8 +187,8 @@ function checkState(build_id, url){
         fetch(new_url, {
             method: 'GET',
         }).then(response => {
-            if (response.status === 200){
-                return response.json()
+            if (response.statusText === 'OK'){
+                return response.json();
             }
         }).then((data) =>{
             if (data['status'] === 200) {
@@ -232,8 +232,8 @@ function markComplete(question_id, build_id, url){
         headers: json_headers,
         body: json_data
     }).then(response => {
-        if (response.status === 200){
-            return response.json()
+        if (response.statusText === 'OK'){
+            return response.json();
         }
     }).then((data) =>{
         if (data['status'] === 200){
@@ -252,8 +252,8 @@ function startEscapeRoomTimer(build_id, url, action) {
         headers: json_headers,
         body: json_data
     }).then(response => {
-        if (response.status === 200){
-            return response.json()
+        if (response.statusText === 'OK'){
+            return response.json();
         }
     }).then((data) =>{
         console.log(data);

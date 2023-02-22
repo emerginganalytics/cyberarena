@@ -6,7 +6,6 @@ import string
 
 from main_app_utilities.command_and_control.attack_schema import AttackSchema
 from main_app_utilities.gcp.cloud_env import CloudEnv
-from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.globals import BuildConstants, DatastoreKeyTypes, PubSub, get_current_timestamp_utc
@@ -28,8 +27,8 @@ class AttackSpecToCloud:
     :@param attack_spec: The specification for building the Inject or Weakness
     :@param debug: Whether to publish to cloud functions or debug the build operations.
     """
-    def __init__(self, cyber_arena_attack, debug=False):
-        self.env = CloudEnv()
+    def __init__(self, cyber_arena_attack, env_dict=None, debug=False):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.cyber_arena_attack = cyber_arena_attack
@@ -41,7 +40,7 @@ class AttackSpecToCloud:
         if 'mode' not in self.cyber_arena_attack:
             raise ValidationError(f'No value for mode given in AttackSpecToCloud')
         self.cyber_arena_attack['creation_timestamp'] = str(datetime.fromtimestamp(get_current_timestamp_utc()))
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value)
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value, env_dict=self.env.get_env())
         self.mode = self.cyber_arena_attack['mode']
 
         if self.mode == BuildConstants.BuildType.FIXED_ARENA_ATTACK.value:

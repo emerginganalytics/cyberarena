@@ -2,7 +2,6 @@ import logging
 from google.cloud import logging_v2
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes
-from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 
 __author__ = "Philip Huff"
@@ -22,8 +21,7 @@ class BudgetManager:
     """
     BUDGET_EXCEEDED = "budget_exceeded"
 
-    def __init__(self, env_dict=None):
-        self.env = CloudEnv(env_dict=env_dict)
+    def __init__(self):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')

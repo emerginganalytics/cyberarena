@@ -1,3 +1,5 @@
+import time
+
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.vpc_manager import VpcManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
@@ -9,6 +11,8 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants
     get_current_timestamp_utc
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStateManager
 from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
+
+from datetime import datetime, timedelta, timezone
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -25,13 +29,14 @@ class Workout:
         self.workout_id = build_id
         self.duration_minutes = duration * 60 if duration else 120
         self.debug = debug
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.logger = Logger("cloud_functions.workout").logger
         self.s = WorkoutStates
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.state_manager = WorkoutStateManager(initial_build_id=self.workout_id)
-        self.vpc_manager = VpcManager(build_id=self.workout_id, env_dict=self.env.get_env())
-        self.firewall_manager = FirewallManager()
+        self.vpc_manager = VpcManager(build_id=self.workout_id, env_dict=self.env_dict)
+        self.firewall_manager = FirewallManager(env_dict=self.env_dict)
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
         self.workout = self.ds.get()
         if not self.workout:
@@ -66,14 +71,14 @@ class Workout:
                 server['parent_build_type'] = self.workout['build_type']
                 self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
                 if self.debug:
-                    ComputeManager(server_name=server_name, env_dict=self.env.get_env()).build()
+                    ComputeManager(server_name=server_name, env_dict=self.env_dict).build()
                 else:
                     self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                             action=str(PubSub.BuildActions.SERVER.value), server_name=str(server_name))
             # Don't forget to build the Display Proxy Server!
             if self.debug:
                 DisplayProxy(build_id=self.workout_id, build_spec=self.workout,
-                             key_type=str(DatastoreKeyTypes.WORKOUT.value, ), env_dict=self.env.get_env()).build()
+                             key_type=str(DatastoreKeyTypes.WORKOUT.value), env_dict=self.env_dict).build()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                         action=str(PubSub.BuildActions.DISPLAY_PROXY.value),
@@ -99,7 +104,7 @@ class Workout:
         for server in servers_to_start:
             server_name = server.key.name
             if self.debug:
-                ComputeManager(server_name, env_dict=self.env.get_env()).start()
+                ComputeManager(server_name, env_dict=self.env_dict).start()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.START.value),
                                         build_id=server_name,
@@ -122,7 +127,7 @@ class Workout:
         for server in servers_to_stop:
             server_name = server.key.name
             if self.debug:
-                ComputeManager(server_name, env_dict=self.env.get_env()).stop()
+                ComputeManager(server_name, env_dict=self.env_dict).stop()
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP.value),
                                         build_id=server_name,
@@ -146,7 +151,7 @@ class Workout:
             server_name = server.key.name
             if self.debug:
                 try:
-                    ComputeManager(server_name=server_name, env_dict=self.env.get_env()).delete()
+                    ComputeManager(server_name=server_name, env_dict=self.env_dict).delete()
                 except LookupError:
                     self.logger.error(f"Workout {self.workout_id}: Could not find server record for {server_name}. "
                                       f"Marking Workout record as broken.")
@@ -166,19 +171,15 @@ class Workout:
 
     def nuke(self):
         """
-
-        Todo:
-            This is copied over from fixed_arena_class and has not been touched
-
+        Todo: This is copied over from fixed_arena_class and has not been touched
         Returns:
-
         """
         servers_to_nuke = self._get_servers(for_deletion=True)
 
         for server in servers_to_nuke:
             if self.debug:
                 try:
-                    ComputeManager(server, env_dict=self.env.get_env()).nuke()
+                    ComputeManager(server, env_dict=self.env_dict).nuke()
                 except LookupError:
                     continue
             else:
@@ -193,3 +194,11 @@ class Workout:
         else:
             self.state_manager.state_transition(self.s.READY)
             self.logger.info(f"Finished nuking Fixed Arena {self.fixed_arena_class_id}!")
+
+    def extend_runtime(self):
+        shutoff_ts = self.workout.get('shutoff_timestamp', None)
+        if shutoff_ts:
+            self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(minutes=self.duration_minutes)
+            self.ds.put(self.workout)
+        else:
+            self.start()

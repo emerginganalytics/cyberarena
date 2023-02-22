@@ -23,13 +23,14 @@ from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 
 
 class ControlHandler:
-    def __init__(self, event_attributes, debug=False, env_dict=None):
+    def __init__(self, event_attributes, env_dict=None, debug=False):
         self.debug = debug
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.action = self.event_attributes.get('action', None)
         self.cyber_arena_object = self.event_attributes.get('cyber_arena_object', None)
         self.build_id = self.event_attributes.get('build_id', None)
@@ -52,47 +53,49 @@ class ControlHandler:
             self._delete()
         elif self.action == str(PubSub.Actions.NUKE.value):
             self._nuke()
+        elif self.action == str(PubSub.Actions.EXTEND_RUNTIME.value):
+            self._extend_runtime()
         else:
             logging.error(f"Unsupported action supplied to the control handler")
             raise ValueError
 
     def _start(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).start()
+            ComputeManager(server_name=self.build_id, env_dict=self.env_dict).start()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
-            FixedArenaClass(build_id=self.build_id, debug=self.debug).start()
+            FixedArenaClass(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).start()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
-            Workout(build_id=self.build_id, duration=2, debug=self.debug).start()
+            Workout(build_id=self.build_id, duration=2, debug=self.debug, env_dict=self.env_dict).start()
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError
 
     def _stop(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).stop()
+            ComputeManager(server_name=self.build_id, env_dict=self.env_dict).stop()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
-            FixedArenaClass(build_id=self.build_id, debug=self.debug).stop()
+            FixedArenaClass(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).stop()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
-            Workout(build_id=self.build_id, debug=self.debug).stop()
+            Workout(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).stop()
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
             raise ValueError
             
     def _delete(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).delete()
+            ComputeManager(server_name=self.build_id, env_dict=self.env_dict).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
-            FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
+            FixedArenaClass(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
-            FixedArena(build_id=self.build_id, debug=self.debug).delete_fixed_arena()
+            FixedArena(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).delete_fixed_arena()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
-            Workout(build_id=self.build_id, debug=self.debug).delete()
+            Workout(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.UNIT.value):
-            Unit(build_id=self.build_id, debug=self.debug).delete()
+            Unit(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).delete()
         else:
             logging.error(f"Unsupported object {self.cyber_arena_object} passed to the control handler for "
                           f"action {self.action}")
@@ -100,11 +103,19 @@ class ControlHandler:
 
     def _nuke(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).nuke()
+            ComputeManager(server_name=self.build_id, env_dict=self.env_dict).nuke()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
-            FixedArenaClass(build_id=self.build_id, debug=self.debug).nuke()
+            FixedArenaClass(build_id=self.build_id, debug=self.debug, env_dict=self.env_dict).nuke()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
             pass
         else:
             logging.error(f"Unsupported object passed to the control handler for action {self.action}")
+            raise ValueError
+
+    def _extend_runtime(self):
+        duration = self.event_attributes.get('duration', 1)
+        if self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
+            Workout(build_id=self.build_id, duration=duration, debug=self.debug, env_dict=self.env_dict).extend_runtime()
+        else:
+            logging.error(f'Unsupported object passed to the control handler for action {self.action}')
             raise ValueError

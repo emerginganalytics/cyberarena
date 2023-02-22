@@ -29,14 +29,15 @@ class FixedArena:
     def __init__(self, build_id, debug=False, env_dict=None):
         self.fixed_arena_id = build_id
         self.debug = debug
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.s = FixedArenaStateManager.States
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.state_manager = FixedArenaStateManager(initial_build_id=self.fixed_arena_id)
-        self.vpc_manager = VpcManager(build_id=self.fixed_arena_id, env_dict=self.env.get_env())
-        self.firewall_manager = FirewallManager()
+        self.vpc_manager = VpcManager(build_id=self.fixed_arena_id, env_dict=self.env_dict)
+        self.firewall_manager = FirewallManager(env_dict=self.env_dict)
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA, key_id=self.fixed_arena_id)
         self.fixed_arena = self.ds.get()
         if not self.fixed_arena:
@@ -63,14 +64,14 @@ class FixedArena:
                 server['parent_build_type'] = self.fixed_arena['build_type']
                 self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
                 if self.debug:
-                    ComputeManager(server_name=server_name, env_dict=self.env.get_env()).build()
+                    ComputeManager(server_name=server_name, env_dict=self.env_dict).build()
                 else:
                     self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                             action=str(PubSub.BuildActions.SERVER.value), server_name=str(server_name))
             # Don't forget to build the Display Proxy Server!
             if self.debug:
                 DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena,
-                             env_dict=self.env.get_env()).build()
+                             env_dict=self.env_dict).build()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                         action=str(PubSub.BuildActions.DISPLAY_PROXY.value),
@@ -85,7 +86,7 @@ class FixedArena:
         if self.fixed_arena.get('firewalls', None) and self.state_manager.get_state() < self.s.BUILDING_FIREWALL.value:
             self.state_manager.state_transition(self.s.BUILDING_FIREWALL)
             FirewallServer(initial_build_id=self.fixed_arena_id, full_build_spec=self.fixed_arena,
-                           env_dict=self.env.get_env()).build()
+                           env_dict=self.env_dict).build()
             self.state_manager.state_transition(self.s.COMPLETED_FIREWALL)
 
         if not self.state_manager.are_server_builds_finished():
@@ -99,12 +100,12 @@ class FixedArena:
         logging.info(f"Deleting workout {self.fixed_arena_id}")
         if self.fixed_arena.get('firewalls', None):
             FirewallServer(initial_build_id=self.fixed_arena_id, full_build_spec=self.fixed_arena,
-                           env_dict=self.env.get_env()).delete()
+                           env_dict=self.env_dict).delete()
         self.firewall_manager.delete(self.fixed_arena_id)
 
         if self.debug:
             DisplayProxy(build_id=self.fixed_arena_id, build_spec=self.fixed_arena,
-                         env_dict=self.env.get_env()).delete()
+                         env_dict=self.env_dict).delete()
         else:
             self.pubsub_manager.msg(handler=str(PubSub.Handlers.MAINTENANCE.value),
                                     action=str(PubSub.Actions.DELETE.value),
@@ -114,7 +115,7 @@ class FixedArena:
         active_class = self.fixed_arena.get('active_class', None)
         if active_class:
             if self.debug:
-                FixedArenaClass(build_id=active_class, debug=self.debug).delete()
+                FixedArenaClass(build_id=active_class, debug=self.debug, env_dict=self.env_dict).delete()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
                                         action=str(PubSub.Actions.DELETE.value),
@@ -123,7 +124,7 @@ class FixedArena:
         for server in self.fixed_arena['servers']:
             server_name = f'{self.fixed_arena_id}-{server["name"]}'
             if self.debug:
-                ComputeManager(server_name=server_name, env_dict=self.env.get_env()).delete()
+                ComputeManager(server_name=server_name, env_dict=self.env_dict).delete()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
                                         action=str(PubSub.Actions.DELETE.value),

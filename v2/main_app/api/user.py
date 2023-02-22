@@ -3,6 +3,7 @@ from flask.views import MethodView
 from api.utilities.decorators import admin_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+from main_app_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -16,7 +17,8 @@ __status__ = "Testing"
 
 class Users(MethodView):
     def __init__(self):
-        self.authorizer = ArenaAuthorizer()
+        self.env = CloudEnv()
+        self.authorizer = ArenaAuthorizer(env_dict=self.env.get_env())
         self.http_resp = HttpResponse
 
     def get(self, user_id=None):

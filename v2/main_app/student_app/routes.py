@@ -4,7 +4,6 @@ from datetime import datetime, timezone
 from flask import abort, Blueprint, jsonify, redirect, render_template, request, session, url_for
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
-from main_app_utilities.gcp.compute_manager import ComputeManager
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, WorkoutStates
 
@@ -58,7 +57,7 @@ def registered_student_home():
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config
-    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get(wait=True)
     if workout_info:
         parent_id = workout_info.get('parent_id', None)
         if workout_info and parent_id:
@@ -102,7 +101,7 @@ def workout_view(build_id):
 @student_app.route('/escape-room/team/<build_id>', methods=['GET'])
 def escape_room(build_id):
     auth_config = cloud_env.auth_config
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get(wait=True)
     if workout:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
         if workout['escape_room'].get('start_time', None) and workout.get('state', None) == WorkoutStates.RUNNING.value:
@@ -166,7 +165,8 @@ def fixed_arena_signup(build_id):
 @student_app.route('/fixed-arena/<build_id>', methods=['GET'])
 def fixed_arena_student(build_id):
     auth_config = cloud_env.auth_config
-    fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value, key_id=build_id).get()
+    fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
+                                           key_id=build_id).get(wait=True)
     parent_id = fixed_arena_workout.get('parent_id', None)
     fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)

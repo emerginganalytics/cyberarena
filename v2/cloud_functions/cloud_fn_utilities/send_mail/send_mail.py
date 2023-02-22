@@ -18,7 +18,7 @@ __status__ = "Testing"
 
 class SendMail:
 
-    def __init__(self, env_dict=None):
+    def __init__(self):
         self.env = runtimeconfig.Client().config("cybergym")
         self.sendgrid_api_key = self.env.get_variable("SENDGRID_API_KEY").value.decode("utf-8")
         self.sg = SendGridAPIClient(api_key=self.sendgrid_api_key)

@@ -30,9 +30,10 @@ class CyberArenaAgent:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.build_id = build_id
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.ds_manager = DataStoreManager()
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
         self.debug = debug
 
     def send_command(self, event_attributes):
@@ -48,7 +49,7 @@ class CyberArenaAgent:
                     for workspace in workspaces:
                         w_id = workspace.key.name
                         if not self.debug:
-                            PubSubManager(topic=str(PubSub.Topics.CYBER_ARENA.value), env_dict=self.env.get_env()).msg(
+                            PubSubManager(topic=str(PubSub.Topics.CYBER_ARENA.value), env_dict=self.env_dict).msg(
                                 handler=str(PubSub.Handlers.AGENCY.value), action=str(action),
                                 attack_id=attack_id, build_id=str(w_id),
                                 build_type=str(BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value)
@@ -56,7 +57,7 @@ class CyberArenaAgent:
                         else:
                             event_attr_copy = event_attributes.copy()
                             event_attr_copy['build_type'] = str(BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value)
-                            CyberArenaAgent(build_id=w_id, debug=self.debug).send_command(event_attr_copy)
+                            CyberArenaAgent(build_id=w_id, debug=self.debug, env_dict=self.env_dict).send_command(event_attr_copy)
             if build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
                 attack_obj = self.ds_manager.get(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK, key_id=attack_id)
                 agent_topic = attack_obj['topics']['commands']
@@ -65,7 +66,7 @@ class CyberArenaAgent:
                 # Send attack msg to the Agent topic
                 logging.info(f'Sending command ({attack_obj["id"]}: {attack_obj["module"]} to Agent {self.build_id}')
                 if not self.debug:
-                    command = PubSubManager(topic=agent_topic, env_dict=self.env.get_env())\
+                    command = PubSubManager(topic=agent_topic, env_dict=self.env_dict)\
                         .msg(build_id=str(self.build_id), attack_id=str(attack_obj['id']),
                                                                    args=str(json.dumps(attack_obj['args'])),
                                                                    module=str(attack_obj['module']))
@@ -90,11 +91,11 @@ class CyberArenaAgent:
 
     def _check_agency_topics(self):
         topic_names = [
-            PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env.get_env()).topic_path,
-            PubSubManager(topic=f'{self.build_id}-agency', env_dict=self.env.get_env()).topic_path  # Ideally we don't hard code this value
+            PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env_dict).topic_path,
+            PubSubManager(topic=f'{self.build_id}-agency', env_dict=self.env_dict).topic_path  # Ideally we don't hard code this value
         ]
         found = []
-        topic_list = PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env.get_env()).list_topics()
+        topic_list = PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env_dict).list_topics()
         found = []
         for topic in topic_list:
             if topic.name in topic_names:

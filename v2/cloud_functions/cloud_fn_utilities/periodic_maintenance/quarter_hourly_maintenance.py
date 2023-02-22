@@ -1,4 +1,5 @@
 from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes
+from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
@@ -7,7 +8,7 @@ from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaC
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff, Ryan Ebsen"]
+__credits__ = ["Philip Huff", "Ryan Ebsen"]
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -16,11 +17,13 @@ __status__ = "Testing"
 
 
 class QuarterHourlyMaintenance:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, env_dict=None):
         self.debug = debug
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.ds_workouts = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
         self.ds_fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
 
     def run(self):
         self._stop_lapsed()
@@ -31,14 +34,14 @@ class QuarterHourlyMaintenance:
 
         for workout_id in workouts_to_stop:
             if self.debug:
-                Workout(build_id=workout_id).stop()
+                Workout(build_id=workout_id, env_dict=self.env_dict).stop()
             else:
                 self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                      cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                      build_id=workout_id, action=str(PubSub.Actions.STOP.value))
         for class_id in classes_to_stop:
             if self.debug:
-                FixedArenaClass(build_id=class_id).stop()
+                FixedArenaClass(build_id=class_id, env_dict=self.env_dict).stop()
             else:
                 self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                      cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),

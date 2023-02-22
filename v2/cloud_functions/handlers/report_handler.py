@@ -2,7 +2,6 @@ import logging
 from google.cloud import logging_v2
 
 from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes
-from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.reports.attack_report import AttackReport
@@ -19,8 +18,7 @@ __status__ = "Testing"
 
 
 class ReportHandler:
-    def __init__(self, event_attributes):
-        self.env = CloudEnv()
+    def __init__(self, event_attributes, env_dict=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
@@ -30,6 +28,6 @@ class ReportHandler:
 
     def route(self):
         if self.report_type == PubSub.Reports.ATTACK:
-            AttackReport(self.event_attributes, env_dict=self.env.get_env())
+            AttackReport(self.event_attributes)
 
 # [ eof ]

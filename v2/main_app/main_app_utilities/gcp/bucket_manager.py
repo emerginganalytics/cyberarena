@@ -22,8 +22,8 @@ class BucketManager:
     TEACHER_FOLDER = "teacher_instructions/"
     STUDENT_FOLDER = "student_instructions/"
 
-    def __init__(self):
-        self.env = CloudEnv()
+    def __init__(self, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.bucket_manager = storage.Client()

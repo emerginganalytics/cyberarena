@@ -27,7 +27,8 @@ __status__ = "Testing"
 
 class BuildHandler:
     def __init__(self, event_attributes, env_dict=None):
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
@@ -42,13 +43,13 @@ class BuildHandler:
             if not build_id:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
-            FixedArena(build_id=build_id).build_fixed_arena()
+            FixedArena(build_id=build_id, env_dict=self.env_dict).build_fixed_arena()
         elif action == str(PubSub.BuildActions.FIXED_ARENA_CLASS.value):
             build_id = self.event_attributes.get('build_id', None)
             if not build_id:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
-            FixedArenaClass(build_id=build_id).build()
+            FixedArenaClass(build_id=build_id, env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.UNIT.value):
             build_id = self.event_attributes.get('build_id', None)
             child_id = self.event_attributes.get('child_id', None)
@@ -59,19 +60,19 @@ class BuildHandler:
             if not form_data:
                 logging.error(f'Missing claimed_by data for build handler with action {action}')
                 raise ValueError
-            Unit(build_id=build_id, child_id=child_id, form_data=json.loads(form_data)).build()
+            Unit(build_id=build_id, child_id=child_id, form_data=json.loads(form_data), env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.WORKOUT.value):
             build_id = self.event_attributes.get('build_id', None)
             if not build_id:
                 logging.error(f"No build id provided for build handler with action {action}")
                 raise ValueError
-            workout = Workout(build_id=build_id).build()
+            workout = Workout(build_id=build_id, env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.SERVER.value):
             server_name = self.event_attributes.get('server_name', None)
             if not server_name:
                 logging.error(f"No server_name variable provided for the build handler with action {action}")
                 raise ValueError
-            ComputeManager(server_name=server_name, env_dict=self.env.get_env()).build()
+            ComputeManager(server_name=server_name, env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.DISPLAY_PROXY.value):
             key_type = self.event_attributes.get('key_type', None)
             build_id = self.event_attributes.get('build_id', None)
@@ -89,7 +90,7 @@ class BuildHandler:
                 logging.error(f"Unsupported key type {key_type} supplied to build handler")
                 raise ValueError
             DisplayProxy(build_id=build_id, build_spec=build_spec, key_type=key_type,
-                         env_dict=self.env.get_env()).build()
+                         env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.FIXED_ARENA_WORKSPACE_PROXY.value):
             build_id = self.event_attributes.get('build_id', None)
             workspace_ids = self.event_attributes.get('workspace_ids', None)
@@ -98,7 +99,7 @@ class BuildHandler:
                               f"BUILD_DISPLAY_PROXY")
                 raise ValueError
             FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split(),
-                                     env_dict=self.env.get_env()).build()
+                                     env_dict=self.env_dict).build()
         else:
             logging.error(f"Unsupported action {action} supplied to build handler")
             raise ValueError

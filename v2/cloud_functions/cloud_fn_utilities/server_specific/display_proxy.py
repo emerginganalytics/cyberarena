@@ -25,7 +25,8 @@ class DisplayProxy:
         @param build_spec: The full build spec
         @type build_spec: DatastoreEntity
         """
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         self.server_name = f"{build_id}-display-guacamole-server"
         self.s = ServerStateManager
         self.logger = Logger("cloud_functions.display_proxy").logger
@@ -37,7 +38,7 @@ class DisplayProxy:
         self.server_specs = build_spec['servers']
         self.guac_connections = []
         self.ds = DataStoreManager()
-        self.guac = GuacamoleConfiguration(self.build_id, env_dict=self.env.get_env())
+        self.guac = GuacamoleConfiguration(self.build_id, env_dict=self.env_dict)
         self._create_network_settings()
 
     def build(self):
@@ -84,7 +85,7 @@ class DisplayProxy:
             'guacamole_startup_script': guac_startup_script
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
-        ComputeManager(server_name=self.server_name, env_dict=self.env.get_env()).build()
+        ComputeManager(server_name=self.server_name, env_dict=self.env_dict).build()
 
     def _create_network_settings(self):
         if self.build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:

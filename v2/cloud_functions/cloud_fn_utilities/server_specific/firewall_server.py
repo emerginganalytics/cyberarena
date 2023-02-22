@@ -30,7 +30,8 @@ class FirewallServer:
         @param full_build_spec: The full build spec needed for identifying network configuration information
         @type full_build_spec: dict
         """
-        self.env = CloudEnv(env_dict=env_dict)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
+        self.env_dict = self.env.get_env()
         #  self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()
@@ -69,7 +70,7 @@ class FirewallServer:
                 raise
             ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=firewall_name)
             ds.put(self.firewall_server_spec)
-            ComputeManager(server_name=firewall_name, env_dict=self.env.get_env()).build()
+            ComputeManager(server_name=firewall_name, env_dict=self.env_dict).build()
             self._add_routes(fw)
 
     def delete(self):
@@ -79,7 +80,7 @@ class FirewallServer:
             if firewall_type == BuildConstants.Firewalls.FORTINET:
                 self._delete_fortinet_features()
             firewall_name = f"{self.build_id}-{fw['name']}"
-            ComputeManager(server_name=firewall_name, env_dict=self.env.get_env()).delete()
+            ComputeManager(server_name=firewall_name, env_dict=self.env_dict).delete()
 
     def _add_nics(self, firewall_spec):
         for network in firewall_spec['networks']:
@@ -136,11 +137,11 @@ class FirewallServer:
         fortinet_server_name = f"{self.build_id}-{fortinet_license_server['name']}"
         ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=fortinet_server_name)
         ds.put(fortinet_license_server)
-        ComputeManager(server_name=fortinet_server_name, env_dict=self.env.get_env()).build()
+        ComputeManager(server_name=fortinet_server_name, env_dict=self.env_dict).build()
 
     def _delete_fortinet_features(self):
         fortinet_server_name = f"{self.build_id}-fortimanager"
-        ComputeManager(server_name=fortinet_server_name, env_dict=self.env.get_env()).delete()
+        ComputeManager(server_name=fortinet_server_name, env_dict=self.env_dict).delete()
 
     def _add_routes(self, firewall_spec):
         routes = []
@@ -162,11 +163,11 @@ class FirewallServer:
                         'next_hop_instance': self.firewall_server_spec['name']
                     }
                     routes.append(new_route)
-        rm = RouteManager(self.build_id, env_dict=self.env.get_env())
+        rm = RouteManager(self.build_id, env_dict=self.env_dict)
         rm.build(routes)
 
     def _delete_routes(self):
-        rm = RouteManager(self.build_id, env_dict=self.env.get_env())
+        rm = RouteManager(self.build_id, env_dict=self.env_dict)
         rm.delete()
 
 class FirewallSettings:

@@ -59,7 +59,7 @@ def login():
     if request.method == 'POST':
         user_data = request.get_json(force=True)
         if 'user_email' in user_data:
-            arena_auth = ArenaAuthorizer()
+            arena_auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
             user_groups = arena_auth.get_user_groups(user_data['user_email'])
             if user_groups:
                 session['user_email'] = user_data['user_email']

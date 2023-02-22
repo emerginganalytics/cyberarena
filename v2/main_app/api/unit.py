@@ -32,9 +32,10 @@ class Unit(MethodView):
         self.pubsub_actions = PubSub.Actions
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
-        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
-        self.bm = BucketManager()
         self.env = CloudEnv()
+        self.env_dict = self.env.get_env()
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.bm = BucketManager(env_dict=self.env_dict)
 
     def get(self, build_id=None):
         if build_id:
@@ -80,7 +81,7 @@ class Unit(MethodView):
                 'expires': expire_ts
             }
             build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
-            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec)
+            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
             build_spec_to_cloud.commit(publish=False)
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
         return self.http_resp(code=400).prepare_response()
