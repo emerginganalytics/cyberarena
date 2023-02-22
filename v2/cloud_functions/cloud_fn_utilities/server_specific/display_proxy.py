@@ -17,7 +17,7 @@ __status__ = "Testing"
 
 
 class DisplayProxy:
-    def __init__(self, build_id, build_spec, key_type=DatastoreKeyTypes.FIXED_ARENA):
+    def __init__(self, build_id, build_spec, key_type=DatastoreKeyTypes.FIXED_ARENA, env_dict=None):
         """
         Creates a guacamole server with the configured connections for proxying servers used for displays
         @param build_id: The build ID used mainly for naming objects in the cloud
@@ -25,7 +25,7 @@ class DisplayProxy:
         @param build_spec: The full build spec
         @type build_spec: DatastoreEntity
         """
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.server_name = f"{build_id}-display-guacamole-server"
         self.s = ServerStateManager
         self.logger = Logger("cloud_functions.display_proxy").logger

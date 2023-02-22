@@ -26,8 +26,8 @@ __status__ = "Testing"
 
 
 class BuildHandler:
-    def __init__(self, event_attributes):
-        self.env = CloudEnv()
+    def __init__(self, event_attributes, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes

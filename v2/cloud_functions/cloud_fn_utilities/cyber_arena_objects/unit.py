@@ -25,13 +25,13 @@ __status__ = "Testing"
 
 
 class Unit:
-    def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False):
+    def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False, env_dict=None):
         self.unit_id = build_id
         self.workout_id = child_id
         self.form_data = form_data
         self.debug = debug
         self.force = force
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.logger = Logger("cloud_functions.unit").logger
         self.s = UnitStates
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)

@@ -24,7 +24,7 @@ __status__ = "Testing"
 
 
 class FixedArenaWorkspaceProxy:
-    def __init__(self, build_id, workspace_ids):
+    def __init__(self, build_id, workspace_ids, env_dict=None):
         """
         Creates a guacamole server with the configured connections for proxying servers used for displays
         @param build_id: The build ID used mainly for naming objects in the cloud
@@ -32,7 +32,7 @@ class FixedArenaWorkspaceProxy:
         @param workspace_ids: The auto-generated workspace IDs for the build. Used for storing the proxy connection info
         @type build_spec: List
         """
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.server_name = f"{build_id}-{BuildConstants.Servers.FIXED_ARENA_WORKSPACE_PROXY}"
         log_client = logging_v2.Client()
         log_client.setup_logging()

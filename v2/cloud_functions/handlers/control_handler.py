@@ -23,9 +23,9 @@ from cloud_fn_utilities.server_specific.display_proxy import DisplayProxy
 
 
 class ControlHandler:
-    def __init__(self, event_attributes, debug=False):
+    def __init__(self, event_attributes, debug=False, env_dict=None):
         self.debug = debug
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes

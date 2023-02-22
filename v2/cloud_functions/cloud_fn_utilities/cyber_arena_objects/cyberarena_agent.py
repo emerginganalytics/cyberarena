@@ -26,11 +26,11 @@ class CyberArenaAgent:
     Agent: Red team entry point (attacker machine)
 
     """
-    def __init__(self, build_id=None, debug=False):
+    def __init__(self, build_id=None, debug=False, env_dict=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.build_id = build_id
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.ds_manager = DataStoreManager()
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.debug = debug

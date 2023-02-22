@@ -17,8 +17,8 @@ __status__ = "Testing"
 
 
 class VpcManager:
-    def __init__(self, build_id):
-        self.env = CloudEnv()
+    def __init__(self, build_id, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict)
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.build_id = build_id
         log_client = logging_v2.Client()

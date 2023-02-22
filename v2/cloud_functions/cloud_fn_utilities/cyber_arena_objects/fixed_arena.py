@@ -26,10 +26,10 @@ __status__ = "Production"
 
 
 class FixedArena:
-    def __init__(self, build_id, debug=False):
+    def __init__(self, build_id, debug=False, env_dict=None):
         self.fixed_arena_id = build_id
         self.debug = debug
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.s = FixedArenaStateManager.States

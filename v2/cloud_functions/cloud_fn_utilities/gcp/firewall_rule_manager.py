@@ -18,7 +18,7 @@ __status__ = "Testing"
 
 
 class FirewallManager:
-    def __init__(self):
+    def __init__(self, ):
         self.env = CloudEnv()
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.cloud_log = Logger(log_name="cloud_fn_utilities.gcp.firewall_manager")

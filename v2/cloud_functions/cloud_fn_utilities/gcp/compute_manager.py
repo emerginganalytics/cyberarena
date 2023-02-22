@@ -38,8 +38,8 @@ class ComputeManager:
         ]
     }]
 
-    def __init__(self, server_name):
-        self.env = CloudEnv()
+    def __init__(self, server_name, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict)
         self.compute = googleapiclient.discovery.build('compute', 'v1')
         self.dns_manager = DnsManager()
         self.s = ServerStates

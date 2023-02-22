@@ -22,8 +22,8 @@ class BudgetManager:
     """
     BUDGET_EXCEEDED = "budget_exceeded"
 
-    def __init__(self):
-        self.env = CloudEnv()
+    def __init__(self, env_dict=None):
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.datastore_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')

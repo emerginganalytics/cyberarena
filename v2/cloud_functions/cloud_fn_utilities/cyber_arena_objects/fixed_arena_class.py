@@ -29,11 +29,11 @@ __status__ = "Testing"
 
 
 class FixedArenaClass:
-    def __init__(self, build_id, debug=False, force=False):
+    def __init__(self, build_id, debug=False, force=False, env_dict=None):
         self.fixed_arena_class_id = build_id
         self.debug = debug
         self.force = force
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.s = FixedArenaClassStates

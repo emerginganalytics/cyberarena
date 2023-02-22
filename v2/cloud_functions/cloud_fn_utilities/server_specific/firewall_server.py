@@ -22,7 +22,7 @@ __status__ = "Testing"
 
 
 class FirewallServer:
-    def __init__(self, initial_build_id, full_build_spec):
+    def __init__(self, initial_build_id, full_build_spec, env_dict=None):
         """
         Creates a firewall server for a given build.
         @param initial_build_id: The build ID used mainly for naming objects in the cloud
@@ -30,7 +30,7 @@ class FirewallServer:
         @param full_build_spec: The full build spec needed for identifying network configuration information
         @type full_build_spec: dict
         """
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         #  self.s = ServerStateManager.States
         log_client = logging_v2.Client()
         log_client.setup_logging()

@@ -23,9 +23,9 @@ __status__ = "Testing"
 
 
 class MaintenanceHandler:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, env_dict=None):
         self.debug = debug
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         now = datetime.now()

@@ -19,9 +19,9 @@ __status__ = "Testing"
 
 
 class GuacamoleConfiguration:
-    def __init__(self, build_id):
+    def __init__(self, build_id, env_dict=None):
         self.build_id = build_id
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.connection_ctr = 1

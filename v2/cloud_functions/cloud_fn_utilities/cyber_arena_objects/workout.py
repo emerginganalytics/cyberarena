@@ -21,11 +21,11 @@ __status__ = "Testing"
 
 
 class Workout:
-    def __init__(self, build_id, duration=None, debug=False):
+    def __init__(self, build_id, duration=None, debug=False, env_dict=None):
         self.workout_id = build_id
         self.duration_minutes = duration * 60 if duration else 120
         self.debug = debug
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.logger = Logger("cloud_functions.workout").logger
         self.s = WorkoutStates
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)

@@ -17,11 +17,11 @@ __status__ = "Production"
 
 
 class DailyMaintenance:
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, env_dict=None):
         self.compute_manager = ProjectComputeManager()
         self.debug = debug
         self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
 
     def run(self):
         self._stop_all()

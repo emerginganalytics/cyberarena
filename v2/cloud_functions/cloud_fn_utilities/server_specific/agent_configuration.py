@@ -29,11 +29,11 @@ class Agent(object):
     }
     """
 
-    def __init__(self, build_id=None, parent_id=None, debug=False):
+    def __init__(self, build_id=None, parent_id=None, debug=False, env_dict=None):
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.build_id = build_id
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict)
         self.debug = debug
 
         # parent_id refers to either the fixed_arena_class or cyberarena_unit
