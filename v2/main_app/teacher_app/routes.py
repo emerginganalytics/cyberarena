@@ -19,13 +19,6 @@ def teacher_home():
         teacher_email = session['user_email']
         auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
         auth_list = auth.get_user_groups(user=teacher_email)  # Get user auth levels
-
-        # Check if teacher is added to datastore
-        teacher_info = DataStoreManager(key_type=DatastoreKeyTypes.INSTRUCTOR,
-                                        key_id=str(teacher_email)).get()
-        if not teacher_info:
-            teacher_info = DataStoreManager().set(key_type=DatastoreKeyTypes.INSTRUCTOR, key_id=str(teacher_email))
-            # TODO: Add instructor to entity
         teacher_info = {}
 
         # Get all the units for this instructor

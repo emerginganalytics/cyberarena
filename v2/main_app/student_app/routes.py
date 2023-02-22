@@ -57,7 +57,7 @@ def registered_student_home():
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config
-    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get(wait=True)
+    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if workout_info:
         parent_id = workout_info.get('parent_id', None)
         if workout_info and parent_id:

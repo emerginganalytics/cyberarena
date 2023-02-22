@@ -93,7 +93,6 @@ class Workout(MethodView):
                                         action=str(PubSub.BuildActions.UNIT.value),
                                         build_id=str(unit_id), child_id=workout_id,
                                         claimed_by=claimed_by)
-                time.sleep(5)
                 return redirect(url_for('student_app.workout_view', build_id=workout_id))
             # Invalid join code
             return redirect(url_for('student_app.claim_workout', error=404))

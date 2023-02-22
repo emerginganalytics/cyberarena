@@ -29,18 +29,17 @@ class DataStoreManager:
         else:
             self.key = None
 
-    def get(self, key_type=None, key_id=None, wait=False):
+    def get(self, key_type=None, key_id=None):
         if key_type:
             use_key = self.ds_client.key(key_type, key_id)
         else:
             use_key = self.key
         obj = self.ds_client.get(use_key)
-        if wait:
-            i = 0
-            while not obj and i < self.MAX_ATTEMPTS:
-                i += 1
-                time.sleep(self.WAIT_PERIOD)
-                obj = self.ds_client.get(use_key)
+        i = 0
+        while not obj and i < self.MAX_ATTEMPTS:
+            i += 1
+            time.sleep(self.WAIT_PERIOD)
+            obj = self.ds_client.get(use_key)
         return obj
 
     def put(self, obj, key_type=None, key_id=None):

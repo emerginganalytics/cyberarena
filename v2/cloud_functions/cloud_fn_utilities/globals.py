@@ -11,7 +11,6 @@ class DatastoreKeyTypes(str, Enum):
     UNIT = 'v2-unit'
     WORKOUT = 'v2-workout'
     SERVER = 'cybergym-server'
-    INSTRUCTOR = 'cybergym-instructor'
     CYBERARENA_ATTACK = 'cyberarena-attack'
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
