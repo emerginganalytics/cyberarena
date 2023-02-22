@@ -30,6 +30,6 @@ class ReportHandler:
 
     def route(self):
         if self.report_type == PubSub.Reports.ATTACK:
-            AttackReport(self.event_attributes)
+            AttackReport(self.event_attributes, env_dict=self.env.get_env())
 
 # [ eof ]

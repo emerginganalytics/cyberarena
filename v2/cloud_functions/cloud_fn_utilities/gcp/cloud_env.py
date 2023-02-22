@@ -21,7 +21,6 @@ class CloudEnv:
         Pull all the environment variables. If an HTTP error occurs because of too many requests, then back off a few
         seconds each time.
         """
-
         if env_dict:
             self.project = env_dict['project']
             self.project_number = env_dict['project_number']
@@ -36,7 +35,7 @@ class CloudEnv:
             self.teacher_instructions_url = env_dict['teacher_instructions_url']
             self.main_app_url = env_dict['main_app_url']
             self.main_app_v2_url = env_dict['main_app_v2_url']
-            self.guac_db_password = env_dict['guac_password']
+            self.guac_db_password = env_dict['guac_db_password']
             self.max_workspaces = env_dict['max_workspaces']
             self.sql_ip = env_dict['sql_ip']
             self.sql_password = env_dict['sql_password']
@@ -86,7 +85,7 @@ class CloudEnv:
 
     def get_env(self):
         """
-        returns a dictinary of all the variables in the enviorment
+        returns a dictinary of the enviorment
         @return:
         """
         return vars(self)

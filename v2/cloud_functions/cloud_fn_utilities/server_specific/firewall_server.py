@@ -69,7 +69,7 @@ class FirewallServer:
                 raise
             ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=firewall_name)
             ds.put(self.firewall_server_spec)
-            ComputeManager(server_name=firewall_name).build()
+            ComputeManager(server_name=firewall_name, env_dict=self.env.get_env()).build()
             self._add_routes(fw)
 
     def delete(self):
@@ -79,7 +79,7 @@ class FirewallServer:
             if firewall_type == BuildConstants.Firewalls.FORTINET:
                 self._delete_fortinet_features()
             firewall_name = f"{self.build_id}-{fw['name']}"
-            ComputeManager(server_name=firewall_name).delete()
+            ComputeManager(server_name=firewall_name, env_dict=self.env.get_env()).delete()
 
     def _add_nics(self, firewall_spec):
         for network in firewall_spec['networks']:
@@ -136,11 +136,11 @@ class FirewallServer:
         fortinet_server_name = f"{self.build_id}-{fortinet_license_server['name']}"
         ds = DataStoreManager(key_type=DatastoreKeyTypes.SERVER, key_id=fortinet_server_name)
         ds.put(fortinet_license_server)
-        ComputeManager(server_name=fortinet_server_name).build()
+        ComputeManager(server_name=fortinet_server_name, env_dict=self.env.get_env()).build()
 
     def _delete_fortinet_features(self):
         fortinet_server_name = f"{self.build_id}-fortimanager"
-        ComputeManager(server_name=fortinet_server_name).delete()
+        ComputeManager(server_name=fortinet_server_name, env_dict=self.env.get_env()).delete()
 
     def _add_routes(self, firewall_spec):
         routes = []
@@ -162,11 +162,11 @@ class FirewallServer:
                         'next_hop_instance': self.firewall_server_spec['name']
                     }
                     routes.append(new_route)
-        rm = RouteManager(self.build_id)
+        rm = RouteManager(self.build_id, env_dict=self.env.get_env())
         rm.build(routes)
 
     def _delete_routes(self):
-        rm = RouteManager(self.build_id)
+        rm = RouteManager(self.build_id, env_dict=self.env.get_env())
         rm.delete()
 
 class FirewallSettings:

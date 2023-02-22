@@ -47,8 +47,8 @@ class EscapeRoomUnit(MethodView):
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.bm = BucketManager()
-        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.env = CloudEnv()
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA)
         self.debug = debug
 
     def get(self, build_id=None):

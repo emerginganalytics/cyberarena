@@ -42,7 +42,7 @@ class FixedArenaWorkspaceProxy:
         self.guac_connections = []
         self.ds = DataStoreManager()
         self.build_record = self.ds.get(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.build_id)
-        self.guac = GuacamoleConfiguration(self.build_id)
+        self.guac = GuacamoleConfiguration(self.build_id, env_dict=self.env.get_env())
 
     def build(self):
         proxy_configs = []
@@ -89,4 +89,4 @@ class FixedArenaWorkspaceProxy:
             'guacamole_startup_script': guac_startup_script
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
-        ComputeManager(server_name=self.server_name).build()
+        ComputeManager(server_name=self.server_name, env_dict=self.env.get_env()).build()

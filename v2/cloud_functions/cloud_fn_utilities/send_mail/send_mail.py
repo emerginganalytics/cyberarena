@@ -4,6 +4,7 @@ import logging
 from google.cloud import logging_v2
 from sendgrid.helpers.mail import *
 from templates import Templates
+from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,7 +18,7 @@ __status__ = "Testing"
 
 class SendMail:
 
-    def __init__(self):
+    def __init__(self, env_dict=None):
         self.env = runtimeconfig.Client().config("cybergym")
         self.sendgrid_api_key = self.env.get_variable("SENDGRID_API_KEY").value.decode("utf-8")
         self.sg = SendGridAPIClient(api_key=self.sendgrid_api_key)

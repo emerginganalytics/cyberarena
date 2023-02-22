@@ -51,4 +51,4 @@ class MaintenanceHandler:
 
         if self.daily:
             logging.info(f"Running daily maintenance tasks")
-            DailyMaintenance().run()
+            DailyMaintenance(env_dict=self.env.get_env()).run()

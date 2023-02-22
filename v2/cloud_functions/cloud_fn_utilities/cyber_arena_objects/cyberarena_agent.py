@@ -32,7 +32,7 @@ class CyberArenaAgent:
         self.build_id = build_id
         self.env = CloudEnv(env_dict=env_dict)
         self.ds_manager = DataStoreManager()
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
         self.debug = debug
 
     def send_command(self, event_attributes):
@@ -48,7 +48,7 @@ class CyberArenaAgent:
                     for workspace in workspaces:
                         w_id = workspace.key.name
                         if not self.debug:
-                            PubSubManager(topic=str(PubSub.Topics.CYBER_ARENA.value)).msg(
+                            PubSubManager(topic=str(PubSub.Topics.CYBER_ARENA.value), env_dict=self.env.get_env()).msg(
                                 handler=str(PubSub.Handlers.AGENCY.value), action=str(action),
                                 attack_id=attack_id, build_id=str(w_id),
                                 build_type=str(BuildConstants.BuildType.FIXED_ARENA_WORKSPACE.value)
@@ -65,7 +65,8 @@ class CyberArenaAgent:
                 # Send attack msg to the Agent topic
                 logging.info(f'Sending command ({attack_obj["id"]}: {attack_obj["module"]} to Agent {self.build_id}')
                 if not self.debug:
-                    command = PubSubManager(topic=agent_topic).msg(build_id=str(self.build_id), attack_id=str(attack_obj['id']),
+                    command = PubSubManager(topic=agent_topic, env_dict=self.env.get_env())\
+                        .msg(build_id=str(self.build_id), attack_id=str(attack_obj['id']),
                                                                    args=str(json.dumps(attack_obj['args'])),
                                                                    module=str(attack_obj['module']))
                 else:
@@ -89,11 +90,11 @@ class CyberArenaAgent:
 
     def _check_agency_topics(self):
         topic_names = [
-            PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value).topic_path,
-            PubSubManager(topic=f'{self.build_id}-agency').topic_path  # Ideally we don't hard code this value
+            PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env.get_env()).topic_path,
+            PubSubManager(topic=f'{self.build_id}-agency', env_dict=self.env.get_env()).topic_path  # Ideally we don't hard code this value
         ]
         found = []
-        topic_list = PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value).list_topics()
+        topic_list = PubSubManager(topic=PubSub.Topics.AGENT_TELEMETRY.value, env_dict=self.env.get_env()).list_topics()
         found = []
         for topic in topic_list:
             if topic.name in topic_names:

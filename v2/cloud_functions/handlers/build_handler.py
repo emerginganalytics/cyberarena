@@ -71,7 +71,7 @@ class BuildHandler:
             if not server_name:
                 logging.error(f"No server_name variable provided for the build handler with action {action}")
                 raise ValueError
-            ComputeManager(server_name=server_name).build()
+            ComputeManager(server_name=server_name, env_dict=self.env.get_env()).build()
         elif action == str(PubSub.BuildActions.DISPLAY_PROXY.value):
             key_type = self.event_attributes.get('key_type', None)
             build_id = self.event_attributes.get('build_id', None)
@@ -88,7 +88,8 @@ class BuildHandler:
             else:
                 logging.error(f"Unsupported key type {key_type} supplied to build handler")
                 raise ValueError
-            DisplayProxy(build_id=build_id, build_spec=build_spec, key_type=key_type).build()
+            DisplayProxy(build_id=build_id, build_spec=build_spec, key_type=key_type,
+                         env_dict=self.env.get_env()).build()
         elif action == str(PubSub.BuildActions.FIXED_ARENA_WORKSPACE_PROXY.value):
             build_id = self.event_attributes.get('build_id', None)
             workspace_ids = self.event_attributes.get('workspace_ids', None)
@@ -96,7 +97,8 @@ class BuildHandler:
                 logging.error(f"No build_id provided for the build handler with action "
                               f"BUILD_DISPLAY_PROXY")
                 raise ValueError
-            FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split()).build()
+            FixedArenaWorkspaceProxy(build_id=build_id, workspace_ids=workspace_ids.split(),
+                                     env_dict=self.env.get_env()).build()
         else:
             logging.error(f"Unsupported action {action} supplied to build handler")
             raise ValueError

@@ -30,7 +30,7 @@ class ComputerImageSync:
         self.suppress = suppress
         self.env = CloudEnv()
         self.service = discovery.build('compute', 'v1')
-        self.cloud_ops_mgr = CloudOperationsManager()
+        self.cloud_ops_mgr = CloudOperationsManager(env_dict=self.env.get_env())
         self.source_image_project = self.SOURCE_IMAGE_PROJECT
         credentials, project_id = google.auth.default()
         self.service_account = credentials.service_account_email

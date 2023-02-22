@@ -20,8 +20,8 @@ class DailyMaintenance:
     def __init__(self, debug=False, env_dict=None):
         self.compute_manager = ProjectComputeManager()
         self.debug = debug
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
         self.env = CloudEnv(env_dict=env_dict)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
 
     def run(self):
         self._stop_all()

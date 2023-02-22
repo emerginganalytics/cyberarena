@@ -45,8 +45,8 @@ class Agent(object):
 
     def create_topics(self):
         logging.info(f'Creating topic/subscription for agent with ID: {self.agent_topic}')
-        PubSubManager(topic=self.agent_topic).create_topic()
-        PubSubManager(topic=self.agent_topic).create_subscription(self.agent_subscription)
+        PubSubManager(topic=self.agent_topic, env_dict=self.env.get_env()).create_topic()
+        PubSubManager(topic=self.agent_topic, env_dict=self.env.get_env()).create_subscription(self.agent_subscription)
         # PubSubManager(topic=self.agent_telemetry).create_topic()
 
     def delete(self):
@@ -58,11 +58,11 @@ class Agent(object):
         we only need to worry about cleaning up the topics
         """
         logging.info(f'Deleting Agency Subscription: {self.agent_subscription}')
-        del_subscription = PubSubManager(topic=self.agent_topic).delete_subscription(self.agent_subscription)
+        del_subscription = PubSubManager(topic=self.agent_topic, env_dict=self.env.get_env()).delete_subscription(self.agent_subscription)
         if del_subscription:
             logging.info(f'Subscription {self.agent_subscription} Deleted ...')
         logging.info(f'Deleting Agency Topic: {self.agent_topic}')
-        del_topic = PubSubManager(topic=self.agent_topic).delete_topic()
+        del_topic = PubSubManager(topic=self.agent_topic, env_dict=self.env.get_env()).delete_topic()
         if del_topic:
             logging.info(f'Topic {self.agent_topic} Deleted ...')
 

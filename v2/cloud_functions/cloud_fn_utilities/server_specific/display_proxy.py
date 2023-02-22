@@ -37,7 +37,7 @@ class DisplayProxy:
         self.server_specs = build_spec['servers']
         self.guac_connections = []
         self.ds = DataStoreManager()
-        self.guac = GuacamoleConfiguration(self.build_id)
+        self.guac = GuacamoleConfiguration(self.build_id, env_dict=self.env.get_env())
         self._create_network_settings()
 
     def build(self):
@@ -84,7 +84,7 @@ class DisplayProxy:
             'guacamole_startup_script': guac_startup_script
         }
         self.ds.put(server_spec, key_type=DatastoreKeyTypes.SERVER, key_id=self.server_name)
-        ComputeManager(server_name=self.server_name).build()
+        ComputeManager(server_name=self.server_name, env_dict=self.env.get_env()).build()
 
     def _create_network_settings(self):
         if self.build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:

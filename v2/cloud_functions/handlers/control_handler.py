@@ -29,7 +29,7 @@ class ControlHandler:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
         self.action = self.event_attributes.get('action', None)
         self.cyber_arena_object = self.event_attributes.get('cyber_arena_object', None)
         self.build_id = self.event_attributes.get('build_id', None)
@@ -58,7 +58,7 @@ class ControlHandler:
 
     def _start(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id).start()
+            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).start()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).start()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
@@ -71,7 +71,7 @@ class ControlHandler:
 
     def _stop(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id).stop()
+            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).stop()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).stop()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
@@ -84,7 +84,7 @@ class ControlHandler:
             
     def _delete(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id).delete()
+            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).delete()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
@@ -100,7 +100,7 @@ class ControlHandler:
 
     def _nuke(self):
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.SERVER.value):
-            ComputeManager(server_name=self.build_id).nuke()
+            ComputeManager(server_name=self.build_id, env_dict=self.env.get_env()).nuke()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value):
             FixedArenaClass(build_id=self.build_id, debug=self.debug).nuke()
         elif self.cyber_arena_object == str(PubSub.CyberArenaObjects.FIXED_ARENA.value):
