@@ -26,9 +26,9 @@ class ComputerImageSync:
                             "--member=serviceAccount:{service_account} " \
                             "--role=\"roles/compute.imageUser\""
 
-    def __init__(self, suppress=True):
+    def __init__(self, suppress=True, env_dict=None):
         self.suppress = suppress
-        self.env = CloudEnv()
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.service = discovery.build('compute', 'v1')
         self.cloud_ops_mgr = CloudOperationsManager(env_dict=self.env.get_env())
         self.source_image_project = self.SOURCE_IMAGE_PROJECT
