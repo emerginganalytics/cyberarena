@@ -85,96 +85,6 @@ function toggleTableControl(){
     });
 }
 
-function change_student_auth(newValue){
-    /*  Used to change the authentication for new classes between email and anonymous
-        Email requires students to authenticate with either a gmail account or username/password
-        Anonymous allows any user with a landing page link to access a workout
-        This can only be set upon class creation
-    */
-    const studentCountInput = document.getElementById('student-count');
-    const studentCountDiv = document.getElementById('student-count-div');
-    if(newValue === 'email'){
-        studentCountInput.value = '';
-        studentCountInput.hidden = true;
-        studentCountDiv.style.display = "none";
-
-    } else{
-        studentCountInput.hidden = false;
-        studentCountDiv.style.display = "block";
-    }
-}
-
-function createNewClass(){
-    const createClassForm = document.querySelector('#create-class-form');
-    if (createClassForm) {
-        const submitCreateClass = document.getElementById('submitCreateClass');
-        submitCreateClass.addEventListener("click", function (e) {
-            e.stopImmediatePropagation();
-            e.preventDefault();
-            submitCreateClass.disabled = true;
-            $("#create-class-modal").modal('hide');
-
-            // Convert form to json object
-            const formData = {};
-            for (const pair of new FormData(createClassForm)) {
-                formData[pair[0]] = pair[1];
-            }
-            console.log(formData);
-
-            // Send POST request
-            fetch('/api/classroom/', {
-                method: 'POST',
-                headers: json_headers,
-                body: JSON.stringify(formData),
-            })
-                .then((response) => {
-                    if (response.statusText === 'OK'){
-                        return response.json();
-                    }
-                })
-                .then((data) => {
-                    if (data['status'] === 200) {
-                        sleep(30).then( () => {window.location.reload()});
-                    } else {
-                        const errorP = document.getElementById('error-msg-p');
-                        errorP.textContent = data['status'] + ': ' + data['message'];
-                    }
-                });
-        });
-    }
-}
-
-function confirmDeleteClass(){
-    let checked_classes = document.querySelectorAll('input[name="class_id"]:checked');
-    if (checked_classes.length === 1){
-        let class_id = checked_classes[0].id;
-        $('#modal_' + class_id).modal('toggle');
-    }
-}
-
-function deleteClass(class_id){
-    $("#modal_" + class_id).modal('toggle');
-    fetch('/api/classroom/' + class_id, {
-        method: 'DELETE',
-        headers: json_headers
-    })
-        .then(response => {
-            if (response.statusText === 'OK'){
-                return response.json();
-            }
-        })
-        .then((data) => {
-            if (data['status'] === 200){
-                window.location.reload();
-            }
-        });
-}
-
-function deleteStudent(class_id, student_name){
-    $('#modal_' + class_id).modal('toggle');
-    //TODO: Send delete request for specific student
-}
-
 function sleep(ms){
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -186,11 +96,9 @@ function checkState(build_id, url){
         let state_classes = ['running', 'stopped', 'deleted', 'transition'];
         fetch(new_url, {
             method: 'GET',
-        }).then(response => {
-            if (response.statusText === 'OK'){
-                return response.json();
-            }
-        }).then((data) =>{
+        }).then(response =>
+            response.json()
+        ).then((data) =>{
             if (data['status'] === 200) {
                 let states = data['data']['states'];
                 if (data['data']['exists'] === true){
@@ -216,10 +124,9 @@ function checkState(build_id, url){
     // Initial States loaded; Start polling every 5 minutes
     setInterval(function (){
         updateStates();
-    }, 70000);
+    }, 300000);
 }
 function displayWaitingMessage(modal_id){
-
     // first hide form modal
     show_modal_card(modal_id);
     // display waiting message modal
@@ -231,11 +138,9 @@ function markComplete(question_id, build_id, url){
         method: 'PUT',
         headers: json_headers,
         body: json_data
-    }).then(response => {
-        if (response.statusText === 'OK'){
-            return response.json();
-        }
-    }).then((data) =>{
+    }).then(response =>
+        response.json()
+    ).then((data) =>{
         if (data['status'] === 200){
             let complete = document.get(question_id + '-complete');
             complete.innerHTML = 'TRUE';
@@ -251,11 +156,9 @@ function startEscapeRoomTimer(build_id, url, action) {
         method: 'PUT',
         headers: json_headers,
         body: json_data
-    }).then(response => {
-        if (response.statusText === 'OK'){
-            return response.json();
-        }
-    }).then((data) =>{
+    }).then(response =>
+        response.json()
+    ).then((data) =>{
         console.log(data);
     })
 }

@@ -63,8 +63,9 @@
                // Start timer
                {% if workout.escape_room.time_remaining > 0 %}
                    {% if not workout.escape_room.escaped %}
-                       let countdownTimer = new Timer("{{ workout['id'] }}");
+                       let countdownTimer = new Timer("{{ workout['id'] }}", 'escape_room');
                        let times = {
+                           'build_type': 'escape_room',
                            'start_time': {{ workout.escape_room.start_time }},
                            'time_limit': {{ workout.escape_room.time_limit }},
                            'expired': {{ workout.escape_room.expired | lower }}

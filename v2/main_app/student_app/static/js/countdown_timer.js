@@ -1,19 +1,15 @@
 class CountdownTimer {
-    constructor(build_id) {
+    constructor(build_id, build_type) {
         this.target_id = 'room-timer';
         this.build_id = build_id;
-        this.url = '/api/escape-room/team/' + this.build_id;
+        this.url = this.getURL();
     }
-    updateTime(){
-        return fetch(this.url, {method: "GET"})
-            .then((response) => {
-                return response.json().then((data) => {
-                    return {
-                       'start_time': data['data']['workout']['escape_room']['start_time'],
-                       'time_limit': data['data']['workout']['escape_room']['time_limit']
-                    }
-                });
-            });
+    getURL(){
+        if (this.build_type === 'workout'){
+            return '/api/unit/workout/' + this.build_id;
+        } else if (this.build_type === 'escape_room') {
+            return '/api/escape-room/team/' + this.build_id;
+        }
     }
     getRemainder(data){
         /*
@@ -21,9 +17,14 @@ class CountdownTimer {
         * If the difference between the end date and the start date are <=0, return 0
         * Otherwise, returns difference
         */
-        let now = new Date().getTime();
-        let endDate = 1000 * (data['start_time'] + data['time_limit']);
-        let remainder = endDate - now;
+        let now, endDate, remainder;
+        now = new Date().getTime();
+        if (data['build_type'] === 'workout'){
+            remainder = (data['end_time'] * 1000) - now;
+        } else {
+            endDate = 1000 * (data['start_time'] + data['time_limit']);
+            remainder = endDate - now;
+        }
         if (remainder > 0){
             return remainder;
         } else {
@@ -32,9 +33,10 @@ class CountdownTimer {
     }
 }
 class Timer {
-    constructor(build_id) {
+    constructor(build_id, build_type) {
         this.build_id = build_id;
-        this.countdown = new CountdownTimer(build_id);
+        this.build_type = build_type;
+        this.countdown = new CountdownTimer(build_id, build_type);
         this.target_id = this.countdown.target_id;
     }
     isHours (remainingTime){

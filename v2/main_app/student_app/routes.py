@@ -73,17 +73,11 @@ def workout_view(build_id):
 
                 # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
                 if not is_expired:
-                    workout_info['remaining_time'] = workout_info['expires'] - current_ts
-                    """ TODO: Need to establish a method to handle start times; i.e. what is the default run time for a workout?
-                        Will we allow students to set an arbitrary run time when starting the workout? Or do  we want to have a default
-                        runtime that will be used
-                    """
-                    if not workout_info.get('start_time', None):
-                        workout_info['start_time'] = 0
-                    if not workout_info.get('time_limit', 0):
-                        workout_info['time_limit'] = 0
+                    # If shutoff_timestamp exists, then the workout is running
+                    if workout_info.get('shutoff_timestamp', None):
+                        workout_info['remaining_time'] = workout_info['shutoff_timestamp'] - current_ts
                 else:
-                    workout_info['remaining_time'] = 0
+                    workout_info['remaining_time'] = -9999
 
             # If they exist, get the entry point information for each server
             connections = _generate_connection_urls(workout_info)

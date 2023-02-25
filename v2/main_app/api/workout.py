@@ -109,20 +109,26 @@ class Workout(MethodView):
                 valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value,
                                  PubSub.Actions.EXTEND_RUNTIME.value]
                 if action and int(action) in valid_actions:
+                    action = int(action)
                     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
                     if workout:
-                        if action == PubSub.Actions.EXTEND_RUNTIME.value:
-                            duration_hours = 1
-                        else:
-                            duration_hours = args.get('duration', None)
-                            if args.get('duration', None):
-                                duration_hours = min(int(duration_hours), 10)
+                        if action != PubSub.Actions.STOP.value:
+                            if action == PubSub.Actions.EXTEND_RUNTIME.value:
+                                duration_hours = 1
                             else:
-                                duration_hours = 2
-                        duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
-                        self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                build_id=str(build_id), duration=str(duration),
-                                                cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                                duration_hours = request.json.get('duration', None)
+                                if duration_hours:
+                                    duration_hours = min(int(duration_hours), 10)
+                                else:
+                                    duration_hours = 2
+                            duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
+                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                                    build_id=str(build_id), duration=str(duration),
+                                                    cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                        else:
+                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                                    build_id=str(build_id),
+                                                    cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()
             elif request.json:  # Check if question response is submitted

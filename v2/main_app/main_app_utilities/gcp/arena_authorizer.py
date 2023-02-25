@@ -52,7 +52,7 @@ class ArenaAuthorizer:
 
     def get_user_groups(self, user):
         """
-        Get the groups this users is authorized under for this Arena
+        Get the groups this user is authorized under for this Arena
         @param user: Email address of authenticated user
         @type user: str
         @return: List of groups assigned to the user
@@ -70,3 +70,31 @@ class ArenaAuthorizer:
 
         logging.debug(f'{user} logged in under groups {user_groups}')
         return user_groups
+
+    def get_aggregated_list(self):
+        """
+        Get dict of each user with collection of authorized groups for that user
+        :return: Dict of users with list of groups assigned to the user
+        """
+        users = dict()
+
+        for user in self.admin_info['admins']:
+            uid = user.lower()
+            users[uid] = []
+            users[uid].append(self.UserGroups.ADMINS)
+        for user in self.admin_info['authorized_users']:
+            uid = user.lower()
+            if not users.get(uid, None):
+                users[uid] = []
+            users[uid].append(self.UserGroups.AUTHORIZED)
+        for user in self.admin_info['students']:
+            uid = user.lower()
+            if not users.get(uid, None):
+                users[uid] = []
+            users[uid].append(self.UserGroups.STUDENTS)
+        for user in self.admin_info['pending']:
+            uid = user.lower()
+            if not users.get(uid, None):
+                users[uid] = []
+                users[uid].append(self.UserGroups.PENDING)
+        return users

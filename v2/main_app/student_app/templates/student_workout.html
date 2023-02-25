@@ -69,23 +69,30 @@
                tsToDate.convert_timestamps();
 
                // Start timer
-               {% if workout.remaining_time > 0 %}
-                   let countdownTimer = new Timer("{{ workout['id'] }}");
-                   let times = {
-                       'start_time': {{ workout.start_time }},
-                       'time_limit': {{ workout.time_limit }},
-                       'expired': {{ workout.expired | lower }},
-                   }
-                   // countdownTimer.start(times);
+               {% if workout.remaining_time %}
+                   {% if workout.remaining_time > 0 %}
+                       let countdownTimer = new Timer("{{ workout['id'] }}", "{{ workout.build_type }}");
+                       let times = {
+                           'build_type': '{{ workout.build_type }}',
+                           'remaining_time': {{ workout.remaining_time }},
+                           'end_time': {{ workout.shutoff_timestamp }},
+                           'expired': {{ workout.expired | lower }},
+                       }
+                       countdownTimer.start(times);
+                   {% endif %}
                {% endif %}
                collapseDiv();
                 {% if workout.expired == False %}
-                    new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+                    {% if workout.state != 72 %}
+                        new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+                    {% endif %}
                {% endif %}
            });
            {% if workout.expired == False %}
-               let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
-               control.poll();
+               {% if workout.state != 72 %}
+                   let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
+                   control.poll();
+               {% endif %}
           {% endif %}
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
@@ -101,12 +108,25 @@
                                 {% if workout.state != 72 %}
                                     <h5><i id="workoutState" class="fa fa-circle buildState running fa-pr-5"></i><span id="workoutStateObj" style="color: white;"></span></h5>
                                     <p style="color: white;">Expires: <span class="timestampField">{{ workout.expires }}</span> </p>
-                                {% else %}
-                                    <div id="room-timer-div" class="countdown-timer">
-                                        <p class="text-center no-select">
-                                            <span id="room-timer"></span>
-                                        </p>
-                                    </div>
+                                    {% if workout.shutoff_timestamp %}
+                                        <div id="room-timer-div" class="countdown-timer">
+                                                <p class="text-center no-select">
+                                                    <span id="room-timer"></span>
+                                                </p>
+                                        </div>
+                                         <input type="number" max="10" min="1" name="duration" id="runtimeDuration"
+                                        style="width: 100%; display: none; border-radius: 4px;" placeholder="Duration (hours)"
+                                         class="text-center">
+                                    {% else %}
+                                        <div id="room-timer-div" class="countdown-timer" style="display: none;">
+                                                <p class="text-center no-select">
+                                                    <span id="room-timer"></span>
+                                                </p>
+                                        </div>
+                                        <input type="number" max="10" min="1" name="duration" id="runtimeDuration"
+                                        style="width: 100%; display: block; border-radius: 4px;" placeholder="Duration (hours)"
+                                        class="text-center">
+                                    {% endif %}
                                 {% endif %}
                             {% else %}
                                 <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
@@ -115,12 +135,44 @@
                             {% endif %}
                         </li>
                         {% if workout.servers %}
-                            <li class="nav-item control-container-list">
-                                <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
-                            </li>
-                            <li class="nav-item control-container-list">
-                                <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
-                            </li>
+                            {% if workout.expired == False %}
+                                {% if workout.state != 72 %}
+                                    {% if workout.state == 50 %}
+                                        <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: block;">
+                                            <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
+                                                    style="display: none">Add 1 Hour</button>
+                                        </li>
+                                        <li class="nav-item control-container-list" id="startWorkoutLi" style="display: none">
+                                            <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
+                                        </li>
+                                    {% else %}
+                                        <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: none;">
+                                            <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
+                                                    style="display: none">Add 1 Hour</button>
+                                        </li>
+                                        <li class="nav-item control-container-list" id="startWorkoutLi" style="display: block">
+                                            <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
+                                        </li>
+                                    {% endif %}
+                                    <li class="nav-item control-container-list">
+                                        <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
+                                    </li>
+                                {% else %}
+                                    <li class="nav-item control-container-list">
+                                        <button class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
+                                    </li>
+                                    <li class="nav-item control-container-list">
+                                        <button class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
+                                    </li>
+                                {% endif %}
+                            {% else %}
+                                <li class="nav-item control-container-list">
+                                    <button class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
+                                </li>
+                                <li class="nav-item control-container-list">
+                                    <button class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
+                                </li>
+                            {% endif %}
                         {% endif %}
                     </ul>
                 </li> <!-- End workout control container -->
@@ -147,16 +199,16 @@
                             <div id='workout-summary-div' class="info-container">
                                 <div id="class-summary">
                                     <h2 class="text-center">{{ workout.summary.name }}</h2>
-                                    <p><span style="font-weight: bold">Summary: </span>{{ workout.summary.description }}</p>
-                                    <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
-                                        <p>Once your machines are running, please allow about 2 minutes for the Guacamole service to become accessible.</p>
-                                    </div>
                                     {% if workout.summary.student_instructions_url %}
                                         <div style="margin: 2vh 0 2vh 0;">
                                             <a class='btn-fa' href="{{ workout.summary.student_instructions_url }}"
                                                 target="_blank" rel="noopener noreferrer">Workout Instructions</a>
                                         </div>
                                     {% endif %}
+                                    <p><span style="font-weight: bold">Summary: </span>{{ workout.summary.description }}</p>
+                                    <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
+                                        <p>Once your machines are running, please allow about 2 minutes for the Guacamole service to become accessible.</p>
+                                    </div>
                                 </div>
                             </div> <!-- End workout-summary-div -->
                         </div>
@@ -177,7 +229,9 @@
                                                     {% for server in workout.servers %}
                                                         <tr>
                                                             {% if server.url %}
-                                                                <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                {% if workout.expired == False %}
+                                                                    <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                {% endif %}
                                                             {% else %}
                                                                 <td>No Interface</td>
                                                             {% endif %}
@@ -204,9 +258,15 @@
                                                 {% if 'web_applications' in workout %}
                                                     {% for web_app in workout['web_applications'] %}
                                                         <tr>
-                                                            <td>
-                                                                <a class='btn-fa' href="{{ web_app.url }}" target="_blank">{{ web_app.name }}</a>
-                                                            </td>
+                                                            {% if workout.expired == False %}
+                                                                <td>
+                                                                    <a class='btn-fa' href="{{ web_app.url }}" target="_blank">{{ web_app.name }}</a>
+                                                                </td>
+                                                            {% else %}
+                                                                <td>
+                                                                    <a class="btn-fa" href="#">{{ web_app.name }}</a>
+                                                                </td>
+                                                            {% endif %}
                                                         </tr>
                                                     {% endfor %}
                                                 {% else %}
@@ -255,27 +315,37 @@
                                                         <div class="workout-details">
                                                             <p id="workout-details">{{ question.question }}</p>
                                                         </div>
-                                                        <div class="form-container">
-                                                             <form id="{{ question['id']}}Form" class="form-control">
-                                                                 <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
-                                                                 {% if question.type != 'auto' %}
-                                                                     <div class="form-group mx-sm-3 mb-2">
-                                                                        <label for="{{ question['id'] }}" class="sr-only">Answer: </label>
-                                                                        <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
-                                                                    </div>
-                                                                     <input id="submit_{{ loop.index }}" type="button"
-                                                                            onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
-                                                                                    '{{ workout.api.workout }}{{ workout['id'] }}', false);"
-                                                                            class="btn-fa mb-2" value="Check Answer">
-                                                                 {% else %}
-                                                                     <input name="response" id="{{ question['id'] }}" type="text" readonly value="check auto" hidden>
-                                                                     <input id="submit_{{ loop.index }}" type="button"
-                                                                       onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}',
-                                                                               '{{ loop.index }}', true);"
-                                                                       class="btn-fa mb-2" value="Check Auto Complete">
-                                                                 {% endif %}
-                                                            </form>
-                                                        </div> <!-- End question form div -->
+                                                        {% if workout.expired == False %}
+                                                            <div class="form-container">
+                                                                 <form id="{{ question['id']}}Form" class="form-control">
+                                                                     <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
+                                                                     {% if question.type == 'input' %}
+                                                                         <div class="form-group mx-sm-3 mb-2">
+                                                                            <label for="{{ question['id'] }}" class="sr-only">Answer: </label>
+                                                                            <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
+                                                                        </div>
+                                                                         <input id="submit_{{ loop.index }}" type="button"
+                                                                                onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
+                                                                                        '{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                                                class="btn-fa mb-2" value="Check Answer">
+                                                                     {% elif question.type == 'upload' %}
+                                                                         <div class="form-group mx-sm-3 mb-2">
+                                                                            <label for="{{ question['id'] }}" class="sr-only">Upload: </label>
+                                                                            <input name="response" id="{{ question['id'] }}" type="file" placeholder="Upload">
+                                                                         </div>
+                                                                         <input id="submit_{{ loop.index }}" type="button"
+                                                                                onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}','{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                                                class="btn-fa mb-2" value="Check Answer">
+                                                                     {% else %}
+                                                                         <input name="response" id="{{ question['id'] }}" type="text" readonly value="check auto" hidden>
+                                                                         <input id="submit_{{ loop.index }}" type="button"
+                                                                           onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}',
+                                                                                   '{{ loop.index }}', true);"
+                                                                           class="btn-fa mb-2" value="Check Auto Complete">
+                                                                     {% endif %}
+                                                                </form>
+                                                            </div> <!-- End question form div -->
+                                                        {% endif %}
                                                     </div><!--End question modal-body-->
                                                 </div>
                                             </div>
