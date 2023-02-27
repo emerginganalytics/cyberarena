@@ -14,8 +14,8 @@ admin_app = Blueprint('admin', __name__, url_prefix="/admin",
 cloud_env = CloudEnv()
 
 
-@admin_app.route('/home', methods=['GET'])
-def admin_home():
+@admin_app.route('/dashboard', methods=['GET'])
+def home():
     workout_list = []
     env_dict = cloud_env.get_env()
     admin_info = ArenaAuthorizer(env_dict=cloud_env.get_env()).get_aggregated_list()

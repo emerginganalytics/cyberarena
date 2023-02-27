@@ -1,9 +1,13 @@
-from flask import json, session
+import copy
+
+from flask import json, session, request
 from flask.views import MethodView
 from api.utilities.decorators import admin_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,6 +24,8 @@ class Users(MethodView):
         self.env = CloudEnv()
         self.authorizer = ArenaAuthorizer(env_dict=self.env.get_env())
         self.http_resp = HttpResponse
+        self.ds = DataStoreManager()
+        self.admin_info = self.ds.get(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
 
     def get(self, user_id=None):
         """
@@ -45,8 +51,17 @@ class Users(MethodView):
                 'student': False
             })
 
+    @admin_required
     def post(self):
-        """Method not needed for current model"""
+        form_data = request.form
+        if form_data:
+            user = form_data.get('user', None)
+            level = form_data.get('level', None)
+            approve = form_data.get('approve', False)
+            if user and level and approve:
+                user = str(user.lower())
+                admin_info = self._update_users(user, approve, level)
+                self.ds.put(admin_info, key_id=DatastoreKeyTypes.ADMIN_INFO)
         return self.http_resp(code=405).prepare_response()
 
     @admin_required
@@ -66,3 +81,35 @@ class Users(MethodView):
         """
         # Bad request
         return self.http_resp(code=405).prepare_response()
+
+    def _update_users(self, user, approve, level):
+        user_list = dict()
+        user_level = self.authorizer.UserGroups
+
+        # Get all project users
+        admin_info = copy.deepcopy(self.admin_info)
+
+        # Modify the user object
+        if level == user_level.PENDING.value:
+            if not approve:
+                admin_info['pending'].remove(user)
+            else:
+                if level == user_level.ADMINS.value:
+                    admin_info['admins'].append(user)
+                    admin_info['authorized'].append(user)
+                    admin_info['students'].append(user)
+                elif level == user_level.AUTHORIZED.value:
+                    admin_info['authorized'].append(user)
+                    admin_info['students'].append(user)
+                elif level == user_level.STUDENTS.value:
+                    admin_info['students'].append(user)
+        if level == user_level.AUTHORIZED.value:
+            admin_info['authorized'].append(user)
+            admin_info['students'].append(user)
+        elif level == user_level.ADMINS.value:
+            admin_info['admins'].append(user)
+            admin_info['authorized'].append(user)
+            admin_info['students'].append(user)
+
+        admin_info['pending'].remove(user)
+        return user_list

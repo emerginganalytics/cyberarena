@@ -402,6 +402,9 @@ ul.table-filter-ul {
     display: inline-block;
     margin: 3px;
 }
+ul.table-filter-ul > li {
+    margin: 4px;
+}
 .tableSearchDiv {
     display: inline-flex;
 }
@@ -413,4 +416,8 @@ ul.table-filter-ul {
 }
 #searchFilter {
     margin-left: auto;
+}
+#searchEmail {
+    padding-left: 10px;
+    margin-left: 10px;
 }

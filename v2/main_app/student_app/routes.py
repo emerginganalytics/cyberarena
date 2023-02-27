@@ -88,7 +88,7 @@ def workout_view(build_id):
                         server['url'] = connections['server'].get(server['name'], None)
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
-                                   server_list=server_list)
+                                   server_list=server_list, project_id=cloud_env.project)
     return redirect(url_for('student_app.claim_workout', error=500))
 
 

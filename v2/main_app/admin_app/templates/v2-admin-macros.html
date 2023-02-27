@@ -1,0 +1,35 @@
+{% macro user_manage(user, groups, uid) %}
+    {% if 'students' in groups %}
+        {% set main_group = 2 %}
+    {% elif 'authorized' in groups %}
+        {% set main_group = 1 %}
+    {% elif 'admins' in groups %}
+        {% set main_group = 0 %}
+    {% else %}
+        {% set main_group = 3 %}
+    {% endif %}
+
+    {% if main_group == 3 %}
+        <!--User isn't approved yet. Generate Buttons and approval modal-->
+        <div class="btn-group-vertical">
+            <button type="button" class="btn-fa" data-toggle="modal" data-target="#{{ uid }}Modal">Approve</button>
+            <button type="button" class="btn-delete" onclick="manage_user('{{ user }}', false, 4);">Deny</button>
+        </div>
+    {% else %}
+        <!--Valid user; Present user action dropdown and save button-->
+        <select name="user_manage">
+            {% if not 'admins' in user %}
+            {% endif %}
+            {% for group in user %}
+                {% if group == 'admins' %}
+                    <option value="demote_admin">Demote Admin</option>
+                {% elif group == 'authorized' %}
+                    <option value="demote_instructor">Demote Instructor</option>
+                {% elif group == 'students' %}
+                {% else %}
+                    <button></button>
+                {% endif %}
+            {% endfor %}
+        </select>
+    {% endif %}
+{% endmacro %}

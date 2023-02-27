@@ -43,3 +43,26 @@ function filterGroup(filter_group){
         }
     }
 }
+function manage_user(user, approve, level){
+    if (user && approve && level){
+        const levels = {0: 'admins', 1: 'authorized', 2: 'students', 3: 'pending'};
+        let payload = {
+            'level': levels[level],
+            'approve': approve,
+            'user': user,
+        }
+
+        fetch('/api/user', {
+            method: 'POST',
+            headers: json_headers,
+            body: JSON.stringify(payload);
+        }).then(response => response.json())
+            .then(data => {
+                if (data['status'] === 200){
+                    window.location.reload();
+                } else {
+                    console.log(data);
+                }
+            });
+    }
+}

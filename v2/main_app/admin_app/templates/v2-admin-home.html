@@ -1,5 +1,6 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'v2-admin-macros.html' as macros %}
 {% block title %}Admin Home{% endblock %}
 {% block nav_title %}Admin Home{% endblock %}
 {% block styles %}
@@ -93,6 +94,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col" class="text-center">#</th>
+                                        <th scope="col" class="text-center"><input type="checkbox" name="select_all" value="select_all"></th>
                                         <th scope="col" class="text-center">User</th>
                                         <th scope="col" class="text-center">Groups</th>
                                         <th scope="col" class="text-center">Actions</th>
@@ -100,8 +102,9 @@
                                 </thead>
                                 <tbody>
                                     {% for user, groups in admin_info.items() %}
-                                       <tr>
+                                       <tr id="{{ user }}">
                                            <td class="rowNumber"></td>
+                                           <td><input type="checkbox" class="selectUser" value=""></td>
                                            <td>{{ user }}</td>
                                            <td style="text-align: left;">
                                                {% for group in groups %}
@@ -117,7 +120,7 @@
                                                {% endfor %}
                                            </td>
                                            <td>
-                                               <div>USER MANAGEMENT CONTROLS</div>
+                                               {{ macros.user_manage(user, groups, 'user' + loop.index) }}
                                            </td>
                                        </tr>
                                     {% endfor %}
