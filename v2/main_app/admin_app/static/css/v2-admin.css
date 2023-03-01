@@ -130,71 +130,6 @@ tr.opaque-loading td {
     background: white !important;
 }
 
-/* Toggle Switch Styles */
-.power-toggle-div {
-    margin-left: 50px;
-    align-items: center;
-    padding: 0;
-}
-#power-toggle-label {
-    margin-right: 10px;
-}
-#power-toggle-form  {
-    padding-top: 12px;
-}
-.power-toggle {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 21px;
-    padding-top: 10px;
-}
-.power-toggle input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    box-shadow: 0 0 1px gray;
-    -webkit-transition: .3s;
-    transition: .3s;
-}
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 2px;
-    bottom: 1px;
-    background-color: white;
-    -webkit-transition: .3s;
-    transition: .3s;
-}
-input:focus + .slider {
-    box-shadow: 0 0 1px #2196F3;
-}
-input:checked + .slider {
-    background-color: #00ce81;
-}
-input:checked + .slider:before {
-    -webkit-transform: translateX(36px);
-    -ms-transform: translateX(36px);
-    transform: translateX(36px);
-}
-.slider.round {
-    border-radius: 34px;
-}
-.slider.round:before {
-    border-radius: 50%;
-}
-
 /* Slide-out modal */
 .modal-dialog-slideout {
     min-height: 100%;
@@ -420,4 +355,7 @@ ul.table-filter-ul > li {
 #searchEmail {
     padding-left: 10px;
     margin-left: 10px;
+}
+.form-check-label {
+    margin-left: 5px;
 }

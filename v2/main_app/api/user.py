@@ -36,8 +36,8 @@ class Users(MethodView):
         authorized = admin = False
         if user_groups:
             authorized = True
-            admin = True if ArenaAuthorizer.UserGroups.ADMINS in user_groups else False
-            student = True if ArenaAuthorizer.UserGroups.STUDENTS in user_groups else False
+            admin = True if ArenaAuthorizer.UserGroups.ADMINS.value in user_groups else False
+            student = True if ArenaAuthorizer.UserGroups.STUDENTS.value in user_groups else False
             response = {
                 'authorized': authorized,
                 'admin': admin,
@@ -53,63 +53,39 @@ class Users(MethodView):
 
     @admin_required
     def post(self):
-        form_data = request.form
+        form_data = request.json
         if form_data:
             user = form_data.get('user', None)
-            level = form_data.get('level', None)
-            approve = form_data.get('approve', False)
-            if user and level and approve:
+            groups = form_data.get('groups', None)
+            pending = form_data.get('pending', False)
+            approve = form_data.get('approve', True)
+            if user and groups and pending:
                 user = str(user.lower())
-                admin_info = self._update_users(user, approve, level)
-                self.ds.put(admin_info, key_id=DatastoreKeyTypes.ADMIN_INFO)
+                self._update_users(user, pending, groups, approve)
+                self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=405).prepare_response()
 
-    @admin_required
-    def delete(self, user_id=None):
-        """
-        Method not needed for current model.
+    def _update_users(self, user, pending, groups, approve):
+        user_groups = self.authorizer.UserGroups
 
-        Only admins should be allowed to delete users
-        """
-        return self.http_resp(code=405).prepare_response()
-
-    @admin_required
-    def put(self, user_id=None):
-        """
-        Method not needed for current model.
-        :parameter user_id: user to do action against: authorize or deauth users
-        """
-        # Bad request
-        return self.http_resp(code=405).prepare_response()
-
-    def _update_users(self, user, approve, level):
-        user_list = dict()
-        user_level = self.authorizer.UserGroups
-
-        # Get all project users
+        # Get all project users and add/remove input user from select groups
         admin_info = copy.deepcopy(self.admin_info)
-
-        # Modify the user object
-        if level == user_level.PENDING.value:
-            if not approve:
+        if approve:
+            for group, value in groups.items():
+                key = user_groups[group.upper()].value
+                if value:
+                    admin_info[key].append(user)
+                else:
+                    if user in admin_info[key]:
+                        admin_info[key].remove(user)
+            if pending:
+                if user in admin_info['pending']:
+                    admin_info['pending'].remove(user)
+        else:
+            if user in admin_info['pending']:
                 admin_info['pending'].remove(user)
-            else:
-                if level == user_level.ADMINS.value:
-                    admin_info['admins'].append(user)
-                    admin_info['authorized'].append(user)
-                    admin_info['students'].append(user)
-                elif level == user_level.AUTHORIZED.value:
-                    admin_info['authorized'].append(user)
-                    admin_info['students'].append(user)
-                elif level == user_level.STUDENTS.value:
-                    admin_info['students'].append(user)
-        if level == user_level.AUTHORIZED.value:
-            admin_info['authorized'].append(user)
-            admin_info['students'].append(user)
-        elif level == user_level.ADMINS.value:
-            admin_info['admins'].append(user)
-            admin_info['authorized'].append(user)
-            admin_info['students'].append(user)
-
-        admin_info['pending'].remove(user)
-        return user_list
+        # Clean up the new object and return
+        for group in user_groups.ALL_GROUPS.value:
+            self.admin_info[group] = list(set(admin_info[group]))
+        self.admin_info['pending'] = list(set(admin_info['pending']))

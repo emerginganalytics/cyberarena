@@ -120,7 +120,7 @@
                                                {% endfor %}
                                            </td>
                                            <td>
-                                               {{ macros.user_manage(user, groups, 'user' + loop.index) }}
+                                               {{ macros.user_manage(user, groups, 'user' ~ loop.index) }}
                                            </td>
                                        </tr>
                                     {% endfor %}

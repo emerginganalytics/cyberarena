@@ -21,7 +21,7 @@ def auth_required(f):
         user_email = session.get('user_email', None)
         if user_email:
             auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.PENDING not in auth_list:
+            if auth.UserGroups.PENDING.value not in auth_list:
                 return f(*args, **kwargs)
         else:
             abort(401)
@@ -36,7 +36,7 @@ def instructor_required(f):
         user_email = session.get('user_email', None)
         if user_email:
             auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.AUTHORIZED in auth_list:
+            if auth.UserGroups.AUTHORIZED.value in auth_list:
                 return f(*args, **kwargs)
             else:
                 abort(401)
@@ -53,7 +53,7 @@ def admin_required(f):
         user_email = session.get('user_email', None)
         if user_email:
             auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.ADMINS in auth_list:
+            if auth.UserGroups.ADMINS.value in auth_list:
                 return f(*args, **kwargs)
             abort(401)
         abort(401)

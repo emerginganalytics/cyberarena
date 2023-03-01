@@ -33,7 +33,7 @@ def claim_workout():
 def registered_student_home():
     if 'user_email' in session and 'user_groups' in session:
         student_email = session['user_email']
-        if ArenaAuthorizer.UserGroups.STUDENTS not in session['user_groups']:
+        if ArenaAuthorizer.UserGroups.STUDENTS.value not in session['user_groups']:
             return redirect('/403')
 
         workout_list = DataStoreManager().get_workouts(student_email=student_email)

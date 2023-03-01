@@ -1,4 +1,4 @@
-{% macro user_manage(user, groups, uid) %}
+{% macro user_manage(user, groups, uid, user_actions) %}
     {% if 'students' in groups %}
         {% set main_group = 2 %}
     {% elif 'authorized' in groups %}
@@ -9,27 +9,90 @@
         {% set main_group = 3 %}
     {% endif %}
 
-    {% if main_group == 3 %}
-        <!--User isn't approved yet. Generate Buttons and approval modal-->
-        <div class="btn-group-vertical">
-            <button type="button" class="btn-fa" data-toggle="modal" data-target="#{{ uid }}Modal">Approve</button>
-            <button type="button" class="btn-delete" onclick="manage_user('{{ user }}', false, 4);">Deny</button>
+    <button type="button" class="btn-fa" data-toggle="modal" data-target="#{{ uid }}Modal">Manage</button>
+    <div class="modal fade" id="{{ uid }}Modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Manage User: {{ user }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form enctype="multipart/form-data" id="{{ uid }}ManageForm">
+                        <input type="text" name="user" value="{{ user }}" readonly hidden />
+                        <div class="form-group">
+                            {% if main_group == 3 %}
+                                <input type="text" name="currentLevel"
+                                       id="currentUserLevel" value="pending" readonly hidden>
+                                <div class="form-check" style="width: 20px; margin-bottom: 1vh;">
+                                    <input type="checkbox" name="approve" id="approve-{{ uid }}"
+                                           onchange="enableGroups(this.checked, '{{ uid }}');"
+                                           class="form-check-input" style="width: 20px;"/>
+                                    <label for="approve-{{ uid }}" class="form-check-label">Approve</label>
+                                </div>
+                                <div class="form-control">
+                                    <h6>User Groups: </h6>
+                                    <div class="form-check form-check-inline">
+                                        <input class="checkbox" type="checkbox" name="admins"
+                                               id='checkAdmins-{{ uid }}' value="" disabled>
+                                        <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                               name="authorized" value="" disabled>
+                                        <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                               name="students" value="" disabled>
+                                        <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <input type="text" name="currentLevel"
+                                       id="currentUserLevel" value="other" readonly hidden>
+                                <div class="form-control">
+                                    <div class="form-check form-check-inline">
+                                        {% if 'admins' in groups %}
+                                            <input class="checkbox" type="checkbox" name="admins" id='checkAdmins-{{ uid }}'
+                                                   value="" checked>
+                                        {% else %}
+                                            <input class="checkbox" type="checkbox" name="admins" id='checkAdmins-{{ uid }}'
+                                                   value="">
+                                        {% endif %}
+                                        <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {% if 'authorized_users' in groups %}
+                                            <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                                   name="authorized" value="" checked>
+                                        {% else %}
+                                            <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                                   name="authorized" value="">
+                                        {% endif %}
+                                        <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {% if 'students' in groups %}
+                                            <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                                   name="students" value="" checked>
+                                        {% else %}
+                                            <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                                   name="students" value="">
+                                        {% endif %}
+                                        <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <button class="btn-fa" type="button" onclick="manage_user('{{ uid }}');">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-    {% else %}
-        <!--Valid user; Present user action dropdown and save button-->
-        <select name="user_manage">
-            {% if not 'admins' in user %}
-            {% endif %}
-            {% for group in user %}
-                {% if group == 'admins' %}
-                    <option value="demote_admin">Demote Admin</option>
-                {% elif group == 'authorized' %}
-                    <option value="demote_instructor">Demote Instructor</option>
-                {% elif group == 'students' %}
-                {% else %}
-                    <button></button>
-                {% endif %}
-            {% endfor %}
-        </select>
-    {% endif %}
+    </div>
 {% endmacro %}

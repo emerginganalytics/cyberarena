@@ -1,3 +1,7 @@
+var json_headers = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json; charset=UTF-8'
+}
 function filterEmails(){
     var input, filter, table, tr, td, i, tdValue;
     input = document.getElementById('searchEmail');
@@ -6,7 +10,7 @@ function filterEmails(){
     tr = table.getElementsByTagName('tr');
 
     for (i = 0; i < tr.length; i++){
-        td = tr[i].getElementsByTagName("td")[1];
+        td = tr[i].getElementsByTagName("td")[2];
         if (td) {
             tdValue = td.textContent || td.innerText;
             if (tdValue.toLowerCase().indexOf(filter) > -1){
@@ -26,14 +30,16 @@ function filterGroup(filter_group){
         if (filter === 'all'){
             tr[i].style.display = '';
         } else {
-            td = tr[i].getElementsByTagName('td')[2];
+            td = tr[i].getElementsByTagName('td')[3];
             if (td){
                 groupDivs = td.getElementsByTagName('div');
                 if (groupDivs){
                     for (j = 0; j < groupDivs.length; j++) {
                         group = groupDivs[j];
+                        console.log(group);
                         if (filter === group.textContent.toLowerCase()){
                             tr[i].style.display = "";
+                            break;
                         } else {
                             tr[i].style.display = 'none';
                         }
@@ -43,20 +49,52 @@ function filterGroup(filter_group){
         }
     }
 }
-function manage_user(user, approve, level){
-    if (user && approve && level){
-        const levels = {0: 'admins', 1: 'authorized', 2: 'students', 3: 'pending'};
-        let payload = {
-            'level': levels[level],
-            'approve': approve,
-            'user': user,
+function manage_user(uid){
+    let manageForm, user_modal, user, pending, groups, admin, authorized, student, approve;
+    user_modal = $('#' + uid + 'Modal').modal('toggle');
+    manageForm = document.getElementById(uid + 'ManageForm');
+    if (manageForm){
+        user = manageForm.elements['user'].value;
+        pending = manageForm.elements['currentLevel'].value;
+        approve = true;
+        if (pending === 'pending'){
+            approve = manageForm.elements['approve'].checked;
+            if (approve){
+                groups = {
+                    'admins': manageForm.elements['admins'].checked,
+                    'authorized': manageForm.elements['authorized'].checked,
+                    'students': manageForm.elements['students'].checked
+                }
+            } else {
+                groups = {
+                    'admins': false,
+                    'authorized': false,
+                    'students': false
+                }
+            }
+        } else {
+            admin = manageForm.elements['admins'].checked;
+            authorized = manageForm.elements['authorized'].checked;
+            student = manageForm.elements['students'].checked;
+            groups = {
+                'admins': admin,
+                'authorized': authorized,
+                'students': student
+            }
         }
-
+        let payload = {
+            'groups': groups,
+            'pending': pending,
+            'user': user,
+            'approve': approve
+        }
+        console.log(payload);
         fetch('/api/user', {
             method: 'POST',
             headers: json_headers,
-            body: JSON.stringify(payload);
-        }).then(response => response.json())
+            body: JSON.stringify(payload)
+        })
+            .then(response => response.json())
             .then(data => {
                 if (data['status'] === 200){
                     window.location.reload();
@@ -65,4 +103,17 @@ function manage_user(user, approve, level){
                 }
             });
     }
+}
+function enableGroups(enable, uid){
+    console.log('Toggling Groups ...');
+    let groups = ['checkAdmins', 'checkInstructor', 'checkStudents'];
+    groups.forEach((group) => {
+        let obj = document.getElementById(group + '-' + uid);
+        if (enable){
+            obj.removeAttribute('disabled');
+        } else {
+            obj.setAttribute('disabled', 'true');
+        }
+        console.log(obj);
+    });
 }
