@@ -1,0 +1,135 @@
+{% extends "v2-base.html" %}
+{% import 'logo_macro.html' as logo %}
+{% import 'v2-admin-macros.html' as macros %}
+{% block title %}Admin Home{% endblock %}
+{% block nav_title %}Admin Home{% endblock %}
+{% block styles %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('admin.static', filename='css/v2-admin.css') }}">
+{% endblock styles %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
+                <li class="nav-item">
+                    <a href='/admin/home' class="nav-link text-center">Admin Home</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal" data-target="modalContactUs">Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/v2-admin.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
+          });
+          $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+           });
+    </script>
+     <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="position-fixed col-md-3 col-lg-2 order-0 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation" style="top: 50px;">
+            <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
+                <li>{{ logo.logo_div() }}</li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="user-manage-btn" data-toggle="pill"
+                            data-target="#user-manage-tab" type="button" role="tab"
+                            aria-controls="user-manage-tab" aria-selected="true">User Management</button>
+                </li>
+            </ul>
+        </div> <!-- End sidebar-menu div -->
+        <main class="col offset-2 main pt-3 mt-3 h-100 pr-3">
+            <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div class="tab-pane fade active show" id="user-manage-tab" role="tabpanel" aria-labelledby="user-manage-btn">
+                        <div class="container">
+                            <div class="row table-ctn-header">
+                                <div class="col table-filter-ctn">
+                                    <ul class="table-filter-ul">
+                                        <li id="filterAll"><a href="#" onclick="filterGroup('all');" class="badge badge-secondary">All</a></li>
+                                        <li id="filterAdmin"><a href="#" onclick="filterGroup('admin');" class="badge badge-danger">Admin</a></li>
+                                        <li id="filterTeacher"><a href="#" onclick="filterGroup('teacher');" class="badge badge-success">Teacher</a></li>
+                                        <li id="filterStudent"><a href="#" onclick="filterGroup('student');" class="badge badge-primary">Student</a></li>
+                                        <li id="filterPending"><a href="#" onclick="filterGroup('pending');" class="badge badge-warning">Pending</a></li>
+                                        <li id="searchFilter"><input type="text" id="searchEmail" onkeyup="filterEmails()" placeholder="Search by Email" class="user-table-search"/></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col table-ctn">
+                            <table id="admin-users-table" class="table table-large table-hover">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" class="text-center">#</th>
+                                        <th scope="col" class="text-center"><input type="checkbox" name="select_all" value="select_all"></th>
+                                        <th scope="col" class="text-center">User</th>
+                                        <th scope="col" class="text-center">Groups</th>
+                                        <th scope="col" class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user, groups in admin_info.items() %}
+                                       <tr id="{{ user }}">
+                                           <td class="rowNumber"></td>
+                                           <td><input type="checkbox" class="selectUser" value=""></td>
+                                           <td>{{ user }}</td>
+                                           <td style="text-align: left;">
+                                               {% for group in groups %}
+                                                   {% if group == 'students' %}
+                                                       <div class="badge badge-primary">Student</div>
+                                                   {% elif group == 'admins' %}
+                                                       <div class="badge badge-danger">Admin</div>
+                                                   {% elif group == 'authorized_users' %}
+                                                       <div class="badge badge-success">Teacher</div>
+                                                   {% elif group == 'pending' %}
+                                                       <div class="badge badge-warning">Pending</div>
+                                                   {% endif %}
+                                               {% endfor %}
+                                           </td>
+                                           <td>
+                                               {{ macros.user_manage(user, groups, 'user' ~ loop.index) }}
+                                           </td>
+                                       </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div> <!--End tab-container-->
+            </div> <!--End content-div-->
+        </main>
+     </div><!--End content-row -->
+{% endblock content %}

@@ -1,9 +1,13 @@
-from flask import json, session
+import copy
+
+from flask import json, session, request
 from flask.views import MethodView
 from api.utilities.decorators import admin_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,6 +24,8 @@ class Users(MethodView):
         self.env = CloudEnv()
         self.authorizer = ArenaAuthorizer(env_dict=self.env.get_env())
         self.http_resp = HttpResponse
+        self.ds = DataStoreManager()
+        self.admin_info = self.ds.get(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
 
     def get(self, user_id=None):
         """
@@ -30,8 +36,8 @@ class Users(MethodView):
         authorized = admin = False
         if user_groups:
             authorized = True
-            admin = True if ArenaAuthorizer.UserGroups.ADMINS in user_groups else False
-            student = True if ArenaAuthorizer.UserGroups.STUDENTS in user_groups else False
+            admin = True if ArenaAuthorizer.UserGroups.ADMINS.value in user_groups else False
+            student = True if ArenaAuthorizer.UserGroups.STUDENTS.value in user_groups else False
             response = {
                 'authorized': authorized,
                 'admin': admin,
@@ -45,24 +51,41 @@ class Users(MethodView):
                 'student': False
             })
 
+    @admin_required
     def post(self):
-        """Method not needed for current model"""
+        form_data = request.json
+        if form_data:
+            user = form_data.get('user', None)
+            groups = form_data.get('groups', None)
+            pending = form_data.get('pending', False)
+            approve = form_data.get('approve', True)
+            if user and groups and pending:
+                user = str(user.lower())
+                self._update_users(user, pending, groups, approve)
+                self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=405).prepare_response()
 
-    @admin_required
-    def delete(self, user_id=None):
-        """
-        Method not needed for current model.
+    def _update_users(self, user, pending, groups, approve):
+        user_groups = self.authorizer.UserGroups
 
-        Only admins should be allowed to delete users
-        """
-        return self.http_resp(code=405).prepare_response()
-
-    @admin_required
-    def put(self, user_id=None):
-        """
-        Method not needed for current model.
-        :parameter user_id: user to do action against: authorize or deauth users
-        """
-        # Bad request
-        return self.http_resp(code=405).prepare_response()
+        # Get all project users and add/remove input user from select groups
+        admin_info = copy.deepcopy(self.admin_info)
+        if approve:
+            for group, value in groups.items():
+                key = user_groups[group.upper()].value
+                if value:
+                    admin_info[key].append(user)
+                else:
+                    if user in admin_info[key]:
+                        admin_info[key].remove(user)
+            if pending:
+                if user in admin_info['pending']:
+                    admin_info['pending'].remove(user)
+        else:
+            if user in admin_info['pending']:
+                admin_info['pending'].remove(user)
+        # Clean up the new object and return
+        for group in user_groups.ALL_GROUPS.value:
+            self.admin_info[group] = list(set(admin_info[group]))
+        self.admin_info['pending'] = list(set(admin_info['pending']))

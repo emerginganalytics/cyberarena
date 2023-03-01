@@ -13,7 +13,18 @@ admin_app = Blueprint('admin', __name__, url_prefix="/admin",
 #           admin_app.register_blueprint(admin_api)
 cloud_env = CloudEnv()
 
-@admin_app.route('/home', methods=['GET', 'POST'])
+
+@admin_app.route('/dashboard', methods=['GET'])
+def home():
+    workout_list = []
+    env_dict = cloud_env.get_env()
+    admin_info = ArenaAuthorizer(env_dict=cloud_env.get_env()).get_aggregated_list()
+
+    return render_template('v2-admin-home.html', auth_config=cloud_env.auth_config, workout_list=workout_list,
+                           admin_info=admin_info)
+
+
+@admin_app.route('/', methods=['GET', 'POST'])
 def admin_page():
     env_dict = cloud_env.get_env()
     admin_info = ArenaAuthorizer(env_dict=env_dict).admin_info

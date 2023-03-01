@@ -200,5 +200,3 @@ class Workout:
         if shutoff_ts:
             self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(minutes=self.duration_minutes)
             self.ds.put(self.workout)
-        else:
-            self.start()

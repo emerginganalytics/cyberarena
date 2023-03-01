@@ -79,7 +79,6 @@ class Unit:
         else:
             self.logger.error(f"Unit {self.unit_id} is not deleted!")
 
-
     def nuke(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
