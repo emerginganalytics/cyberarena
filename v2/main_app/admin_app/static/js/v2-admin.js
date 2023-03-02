@@ -36,7 +36,6 @@ function filterGroup(filter_group){
                 if (groupDivs){
                     for (j = 0; j < groupDivs.length; j++) {
                         group = groupDivs[j];
-                        console.log(group);
                         if (filter === group.textContent.toLowerCase()){
                             tr[i].style.display = "";
                             break;
@@ -88,7 +87,6 @@ function manage_user(uid){
             'user': user,
             'approve': approve
         }
-        console.log(payload);
         fetch('/api/user', {
             method: 'POST',
             headers: json_headers,
@@ -105,7 +103,6 @@ function manage_user(uid){
     }
 }
 function enableGroups(enable, uid){
-    console.log('Toggling Groups ...');
     let groups = ['checkAdmins', 'checkInstructor', 'checkStudents'];
     groups.forEach((group) => {
         let obj = document.getElementById(group + '-' + uid);
@@ -114,6 +111,5 @@ function enableGroups(enable, uid){
         } else {
             obj.setAttribute('disabled', 'true');
         }
-        console.log(obj);
     });
 }
