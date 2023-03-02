@@ -9,6 +9,7 @@
     --running: #1d8037;
     --stopped: #838683;
     --deleted: #000000;
+    --broken: #ce2b2b;
     --transition: #b3be27;
     --python-yellow: #ffd343;
     --python-blue: #2b5b84;
@@ -473,6 +474,7 @@ li.control-container-list {
 .buildState.stopped {color: var(--stopped, #838683);}
 .buildState.deleted {color: var(--deleted, #000000);}
 .buildState.transition {color: var(--transition, #b3be27);}
+.buildState.broken {color: var(--broken, #ce2b2b);}
 .fa-pr-5 { padding-right: 5px; }
 .fa-pl-5 { padding-left: 5px; }
 p.complete {

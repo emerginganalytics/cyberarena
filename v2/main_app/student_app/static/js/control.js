@@ -15,7 +15,7 @@ class Control {
         let stateObj = document.getElementById(elem_id);
         let url = this.url + '?state=true';
         function updateState(state){
-            if (state === nextState || state === '72'){
+            if (state === nextState || state === '72' || state === '62'){
                 window.location.reload();
             } else {
                 stateObj.classList.add('transition');
@@ -104,6 +104,21 @@ class Control {
             disableElement(roomTimerInput, true, 'none');
             disableElement(stopButton);
             disableElement(startButton, false);
+            // Hide Extend Workout Btn
+            disableElement(extendDurationBtn, true, 'none');
+            disableElement(extendWorkoutLi, true, 'none');
+            disableElements(connectionBtns, true, disableElement);
+        } else if (state === 62) {
+            // Add state text
+            workoutStateObj.innerText = 'BROKEN';
+            workoutStateIcon.classList.remove('transition', 'running', 'stopped');
+            workoutStateIcon.classList.add('broken');
+            disableElement(workoutStateObj);
+            // Disable All but Stop Button
+            disableElement(roomTimerDiv, true, 'none');
+            disableElement(roomTimerInput, true, 'none');
+            disableElement(stopButton, false);
+            disableElement(startButton);
             // Hide Extend Workout Btn
             disableElement(extendDurationBtn, true, 'none');
             disableElement(extendWorkoutLi, true, 'none');

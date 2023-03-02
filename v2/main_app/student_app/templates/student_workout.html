@@ -91,7 +91,9 @@
            {% if workout.expired == False %}
                {% if workout.state != 72 %}
                    let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
-                   control.poll();
+                   {% if workout.state != 62 %}
+                       control.poll();
+                   {% endif %}
                {% endif %}
           {% endif %}
     </script>
@@ -136,8 +138,8 @@
                         </li>
                         {% if workout.servers %}
                             {% if workout.expired == False %}
-                                {% if workout.state != 72 %}
-                                    {% if workout.state == 50 %}
+                                {% if workout.state != 72 %}{# workout is not deleted #}
+                                    {% if workout.state == 50 %}{# workout is running #}
                                         <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: block;">
                                             <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
                                                     style="display: none">Add 1 Hour</button>
@@ -145,7 +147,18 @@
                                         <li class="nav-item control-container-list" id="startWorkoutLi" style="display: none">
                                             <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
                                         </li>
-                                    {% else %}
+                                    {% elif workout.state == 62%}{# workout is broken #}
+                                        <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: none;">
+                                            <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
+                                                    style="display: none">Add 1 Hour</button>
+                                        </li>
+                                        <li class="nav-item control-container-list" id="startWorkoutLi" style="display: none">
+                                            <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
+                                        </li>
+                                        <li class="nav-item control-container-list">
+                                            <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
+                                        </li>
+                                    {% else %}{# workout is Stopped or in Transition to Running/Stopped  #}
                                         <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: none;">
                                             <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
                                                     style="display: none">Add 1 Hour</button>
@@ -157,7 +170,7 @@
                                     <li class="nav-item control-container-list">
                                         <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
                                     </li>
-                                {% else %}
+                                {% else %}{# workout is deleted #}
                                     <li class="nav-item control-container-list">
                                         <button class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
                                     </li>
@@ -165,7 +178,7 @@
                                         <button class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
                                     </li>
                                 {% endif %}
-                            {% else %}
+                            {% else %}{# workout is expired #}
                                 <li class="nav-item control-container-list">
                                     <button class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
                                 </li>
