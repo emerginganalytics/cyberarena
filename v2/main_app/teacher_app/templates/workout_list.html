@@ -142,6 +142,7 @@
                                             <td>#</td>
                                             <td>State</td>
                                             <td>ID</td>
+                                            <td>Claimed By</td>
                                             <td>Workout Links</td>
                                             {% if unit.assessment %}
                                                 <td>Assessment</td>
@@ -166,6 +167,7 @@
                                                         {% endif %}
                                                     </td>
                                                     <td>{{ workout['id'] }}</td>
+                                                    <td>{{ workout.student_email }}</td>
                                                     <td>
                                                         <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
                                                             <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
