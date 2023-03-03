@@ -34,7 +34,8 @@ class JohnnyHashAPI(MethodView):
     def post(self, build_id=None):
         if build_id:
             if 'password_file' not in request.files:
-                return self.http_resp(code=404, msg=HashErrors.NO_FILE_SUBMITTED).prepare_response()
+                return redirect(url_for('johnnyhash_bp.hashitout'))
+                # return self.http_resp(code=404, msg=HashErrors.NO_FILE_SUBMITTED).prepare_response()
             else:
                 input_file = request.files['password_file']
                 hashes = Hashes().validate_hashes_from_file(input_file)
@@ -54,3 +55,20 @@ class JohnnyHashAPI(MethodView):
                 except ValueError:
                     return self.http_resp(404).prepare_response()
         return self.http_resp(400).prepare_response()
+
+
+class JohnnyCipherAPI(MethodView):
+    def __init__(self, debug=False):
+        self.env = CloudEnv()
+        self.ds = DataStoreManager()
+        self.http_resp = HttpResponse
+        self.debug = debug
+
+    def get(self, build_id=None):
+        pass
+
+    def post(self, build_id=None):
+        pass
+
+    def put(self, build_id=None):
+        pass
