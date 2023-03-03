@@ -1,6 +1,6 @@
 import copy
 
-from flask import json, session, request
+from flask import json, session, request, redirect, url_for
 from flask.views import MethodView
 from api.utilities.decorators import admin_required
 from api.utilities.http_response import HttpResponse
@@ -53,18 +53,23 @@ class Users(MethodView):
 
     @admin_required
     def post(self):
-        form_data = request.json
-        if form_data:
-            user = form_data.get('user', None)
-            groups = form_data.get('groups', None)
-            pending = form_data.get('pending', False)
-            approve = form_data.get('approve', True)
+        json_data = request.json
+        if json_data:
+            new_user = json_data.get('new_user', None)
+            user = json_data.get('user', None)
+            groups = json_data.get('groups', None)
+            pending = json_data.get('pending', False)
             if user and groups and pending:
+                approve = json_data.get('approve', True)
                 user = str(user.lower())
                 self._update_users(user, pending, groups, approve)
                 self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
-                return self.http_resp(code=200).prepare_response()
-        return self.http_resp(code=405).prepare_response()
+            elif new_user and groups:
+                user = str(new_user.lower())
+                self._add_user(user, groups)
+            self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+            return self.http_resp(code=200).prepare_response()
+        return self.http_resp(code=400).prepare_response()
 
     def _update_users(self, user, pending, groups, approve):
         user_groups = self.authorizer.UserGroups
@@ -85,6 +90,20 @@ class Users(MethodView):
         else:
             if user in admin_info['pending']:
                 admin_info['pending'].remove(user)
+        # Clean up the new object and return
+        for group in user_groups.ALL_GROUPS.value:
+            self.admin_info[group] = list(set(admin_info[group]))
+        self.admin_info['pending'] = list(set(admin_info['pending']))
+
+    def _add_user(self, user, groups):
+        user_groups = self.authorizer.UserGroups
+        admin_info = copy.deepcopy(self.admin_info)
+        for group, value in groups.items():
+            key = user_groups[group.upper()].value
+            if value:
+                admin_info[key].append(user)
+        if user in admin_info['pending']:
+            admin_info['pending'].remove(user)
         # Clean up the new object and return
         for group in user_groups.ALL_GROUPS.value:
             self.admin_info[group] = list(set(admin_info[group]))

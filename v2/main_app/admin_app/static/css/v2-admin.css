@@ -289,6 +289,19 @@ ul#instructions-list li {
     box-shadow: 1px 1px 2px 0 grey;
     border-radius: 1.25rem;
 }
+.badge-btn {
+    background-color: var(--indigo, #6610f2);
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 2;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border: none;
+    margin-right: 0;
+}
 .textwrap {
     white-space: normal !important;
 }

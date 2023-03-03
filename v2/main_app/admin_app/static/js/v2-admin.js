@@ -102,6 +102,34 @@ function manage_user(uid){
             });
     }
 }
+function add_user(form_id, modal_id){
+    let userForm, user_modal, user, groups, admin, authorized, student, payload;
+    user_modal = $('#' + modal_id).modal('toggle');
+    userForm = document.getElementById(form_id);
+    groups = {
+        'admins': userForm.elements['admins'].checked,
+        'authorized': userForm.elements['authorized'].checked,
+        'students': userForm.elements['students'].checked
+    }
+    user = userForm.elements['new_user'].value;
+    payload = {
+        'groups': groups,
+        'new_user': user,
+    }
+    fetch('/api/user', {
+        method: 'POST',
+        headers: json_headers,
+        body: JSON.stringify(payload)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data['status'] === 200){
+                window.location.reload();
+            } else {
+                console.log(data);
+            }
+        });
+}
 function enableGroups(enable, uid){
     let groups = ['checkAdmins', 'checkInstructor', 'checkStudents'];
     groups.forEach((group) => {

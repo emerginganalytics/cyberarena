@@ -96,3 +96,48 @@
         </div>
     </div>
 {% endmacro %}
+
+{% macro add_user(modal_id) %}
+    <div class="modal fade" id="{{ modal_id }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form" id="newUserForm">
+                        <div class="form-group">
+                            <div class="input-group mb-3">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">User Email</span>
+                              </div>
+                              <input type="email" class="form-control" name="new_user" id="newUserInput" aria-describedby="basic-addon3">
+                            </div>
+                            <div class="form-control text-center">
+                                <h6>User Groups: </h6>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddAdmin" class="checkbox" type="checkbox" name="admins" value="">
+                                    <label for="checkAddAdmin" class="form-check-label">Admin</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddInstructor" class="checkbox" type="checkbox" name="authorized" value="">
+                                    <label for="checkAddInstructor" class="form-check-label">Instructor</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddStudent" class="checkbox" type="checkbox" name="students" value="">
+                                    <label for="checkAddStudent" class="form-check-label">Student</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn-fa" type="button" onclick="add_user('newUserForm' ,'{{ modal_id }}');">Submit</button>
+                        </div>
+                    </form>
+                </div> <!-- End modal-body -->
+            </div> <!-- End modal-content -->
+        </div> <!-- End modal-dialog -->
+    </div> <!-- End modal -->
+{% endmacro %}

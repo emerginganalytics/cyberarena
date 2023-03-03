@@ -79,13 +79,15 @@
                             <div class="row table-ctn-header">
                                 <div class="col table-filter-ctn">
                                     <ul class="table-filter-ul">
+                                        <li><button id="addNewUser" data-toggle="modal" data-target="#addUserModal" class="btn-fa badge-btn">Add User</button></li>
+                                        <li id="searchFilter"><input type="text" id="searchEmail" onkeyup="filterEmails()" placeholder="Search by Email" class="user-table-search"/></li>
                                         <li id="filterAll"><a href="#" onclick="filterGroup('all');" class="badge badge-secondary">All</a></li>
                                         <li id="filterAdmin"><a href="#" onclick="filterGroup('admin');" class="badge badge-danger">Admin</a></li>
                                         <li id="filterTeacher"><a href="#" onclick="filterGroup('teacher');" class="badge badge-success">Teacher</a></li>
                                         <li id="filterStudent"><a href="#" onclick="filterGroup('student');" class="badge badge-primary">Student</a></li>
                                         <li id="filterPending"><a href="#" onclick="filterGroup('pending');" class="badge badge-warning">Pending</a></li>
-                                        <li id="searchFilter"><input type="text" id="searchEmail" onkeyup="filterEmails()" placeholder="Search by Email" class="user-table-search"/></li>
                                     </ul>
+                                    {{ macros.add_user('addUserModal') }}
                                 </div>
                             </div>
                         </div>
