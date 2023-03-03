@@ -15,6 +15,7 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+import random
 import time
 import yaml
 from datetime import datetime, timedelta, timezone
@@ -29,6 +30,7 @@ from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from main_app_utilities.global_objects.name_generator import NameGenerator
 
 
 class EscapeRoomUnit(MethodView):
@@ -88,8 +90,10 @@ class EscapeRoomUnit(MethodView):
             'student_emails': [],
             'expires': datetime.strptime(expires, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc).timestamp()
         }
+        team_names = NameGenerator(build_count).generate()
+        build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict, debug=self.debug)
-        build_spec_to_cloud.commit()
+        build_spec_to_cloud.commit(publish=False)
         build_id = build_spec_to_cloud.get_build_id()
         if self.debug:
             return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
@@ -197,6 +201,9 @@ class EscapeRoomWorkout(MethodView):
                     return self.http_resp(code=200, data=workout).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
+
+    def post(self):
+        pass
 
     def put(self, build_id):
         """

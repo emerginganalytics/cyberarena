@@ -133,9 +133,12 @@ def escape_room(unit_id):
         auth_list = auth.get_user_groups(teacher_email)
         unit = dict(DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=str(unit_id)).get())
         if unit:
+            unit['escape_room']['time_remaining'] = 0
             workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
+            join_url = ''
+            if unit.get('join_code', None):
+                join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_escape_room')}"
             if len(workouts_list) > 0:
-                registration_required = unit.get('registration_required', False) # TODO: Might not need this line in the future
                 unit['api'] = _get_api_urls(build_type=unit['build_type'])
 
                 # Check if Unit is expired
@@ -168,10 +171,9 @@ def escape_room(unit_id):
                     unit['escape_room']['time_remaining'] = time_remaining
                     break
                 return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
-                                       unit=dict(unit), workout_list=list(workouts_list),
-                                       main_app_url=cloud_env.main_app_url)
-            logger.error(f'NO WORKOUT FOUND WITH PARENT_ID {unit_id}')
-            abort(404)
+                                       unit=dict(unit), workout_list=list(workouts_list), join_url=join_url)
+            return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config, auth_list=auth_list,
+                                   unit=dict(unit), workout_list=[], join_url=join_url)
         return redirect('/no-workout')
     return redirect('/login')
 
