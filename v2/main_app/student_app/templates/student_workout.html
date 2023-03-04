@@ -235,6 +235,7 @@
                                                     <th scope="col">Connection</th>
                                                     <th scope="col">Server Name</th>
                                                     <th scope="col">IP</th>
+                                                    <th scope="col">External IP</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -250,6 +251,7 @@
                                                             {% endif %}
                                                             <td>{{ server.name }}</td>
                                                             <td>{{ server.nics[0].internal_ip }}</td>
+                                                            <td>{{ response.natIP }}</td>
                                                         </tr>
                                                     {% endfor %}
                                                 {% else %}
