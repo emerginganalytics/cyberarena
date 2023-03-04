@@ -92,13 +92,6 @@ def workout_view(build_id):
     return redirect(url_for('student_app.claim_workout', error=500))
 
 
-# TODO: Check if this function works
-def get_nat_ip(self, instance):
-    response = self.compute.instances().get(project=self.env.project, zone=self.env.zone,
-                                            instance=instance).execute()
-    return response['networkInterfaces'][0]['accessConfigs'][0]['natIP']
-
-
 @student_app.route('/escape-room/team/<build_id>', methods=['GET'])
 def escape_room(build_id):
     auth_config = cloud_env.auth_config
