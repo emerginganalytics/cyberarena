@@ -70,7 +70,7 @@
                            {% endif %}
                        {% endfor %}
                    {% endif %}
-                   {% if workout_list | count > 0 %}
+                   {% if workout_list | count == unit['workspace_settings']['count'] %}
                        {% if escaped != workout_list | count %}
                            getEscapeRoomState("{{ unit['escape_room']['id'] }}");
                        {% endif %}
@@ -109,12 +109,14 @@
                             </li>
                         {% endif %}
                     {% else %}
+                        {# Escape Room is Running #}
                         <li class="nav-item disabled">
                             <button class="nav-link">Start Escape Room</button>
                             <button class="nav-link">Start Timer</button>
                         </li>
                     {% endif %}
                 {% else %}
+                    {# No workouts exist #}
                     <li class="nav-item disabled">
                         <button class="nav-link">Start Escape Room</button>
                         <button class="nav-link">Start Timer</button>
@@ -155,6 +157,7 @@
                                 <thead>
                                     <tr class="text-center">
                                         <th scope="col">Status</th>
+                                        <th scope="col">Team Name</th>
                                         <th scope="col">Workout Link</th>
                                         {% for puzzle in unit['escape_room']['puzzles'] %}
                                             <th scope="col">{{ puzzle.name }}</th>
@@ -176,6 +179,13 @@
                                                         <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
                                                     {% endif %}
                                                 </td>
+                                                {% if 'team_name' in workout %}
+                                                    <td>{{ workout['team_name'] }}</td>
+                                                {% else %}
+                                                    <td>
+                                                        <button onclick="addTeamNameToWorkout('{{ workout["id"] }}')">Add Team Name</button>
+                                                    </td>
+                                                {% endif %}
                                                 <td>
                                                     <a class="btn-fa" href="/student/escape-room/team/{{ workout['id'] }}"
                                                        target="_blank">Team {{ workout['id'] }}</a>

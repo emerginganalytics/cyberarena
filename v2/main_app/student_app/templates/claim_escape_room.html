@@ -3,6 +3,9 @@
 {% block styles %}{% endblock styles %}
 {% block content %}
     <style>
+        html {
+            overflow: auto;
+        }
         .slide-out-right {
             margin: auto;
             overflow-y: hidden;
@@ -35,6 +38,28 @@
         #claim-workout {
             padding: 10px;
         }
+        .team-card {
+            width: 45%;
+            margin: 5px;
+            background: var(--marine-blue);
+            color: whitesmoke;
+        }
+        .team-card:hover {
+            color: black;
+            background: whitesmoke;
+            cursor: pointer;
+        }
+        .btn-fa {
+            background: var(--maroon);
+            color: whitesmoke;
+            width: 50%;
+            border: none;
+        }
+        .btn-fa:hover {
+            color: var(--maroon);
+            background: whitesmoke;
+        }
+
     </style>
     <script>
         function displayLoadingMessage() {
@@ -50,28 +75,40 @@
     </script>
     <div class="container-fluid" style="max-width: 600px;">
         {{ logo.logo_div() }}
-        <div id="claim-workout-div" class='slide-out-right'>
+        <div id="claim-workout-div" class='slide-out-right' style="overflow: hidden;">
             {% if error %}
                 <h5 class="text-center p-3 highlight-warning">{{ error }}</h5>
             {% endif %}
-            <h3 class="text-center pt-3">Join an Escape Room</h3>
-            <form id="claim-workout" method="POST" action="{{ api }}">
-                <div class="form-group">
-                    <label for="joinCode" hidden>Join Code</label>
-                    <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
-                    <label for="teamName" hidden>Team Name</label>
-                    <input type="text" class="form-control" id="teamName" aria-describedby="teamNameHelp"
-                           name="team_name" placeholder="Enter team name">
-                    <small id="teamNameHelp" class="form-text text-muted text-center">Use something memorable i.e. FunkyChicken</small>
+            {% if escape_rooms %}
+                <h3 class="text-center pt-3" id="joinTitle">Choose a Team</h3>
+                <div id="teamNameSelectDiv" class="row">
+                    {% for room in escape_rooms %}
+                        <div class="card team-card mx-auto"
+                             onclick="window.open('{{ url_for('student_app.escape_room', build_id=room['id'])}}');">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ room.team_name }}</h5>
+                                <p style="color: var(--python-yellow);">Click to Join Team</p>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-                <div class="text-center">
-                    <button type="submit" class="btn btn-primary" onclick="displayLoadingMessage();">Submit</button>
-                </div>
-            </form>
+            {% else %}
+                <h3 class="text-center pt-3" id="joinTitle">Join an Escape Room</h3>
+                <form id="claim-workout" method="post" action="{{ api }}">
+                    <div class="form-group">
+                        <div id="joinCodeDiv">
+                            <label for="joinCode" hidden>Join Code</label>
+                            <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn-fa" onclick="displayLoadingMessage();">Submit</button>
+                    </div>
+                </form>
+            {% endif %}
         </div>
         <div id='loading-msg-div' class="slide-in-right hide">
             <h4 class="text-center">Finding your Escape Room ...</h4>
-            <p class="text-center">This could take a few minutes.</p>
             <div id="loader">
                 <div class="loading">
                     <div class="rectangle_1"></div>

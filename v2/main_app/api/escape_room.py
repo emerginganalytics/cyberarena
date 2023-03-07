@@ -16,10 +16,11 @@ __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
 import random
+import string
 import time
 import yaml
 from datetime import datetime, timedelta, timezone
-from flask import request, session, url_for, redirect
+from flask import request, session, url_for, redirect, json
 from flask.views import MethodView
 
 from api.utilities.http_response import HttpResponse
@@ -77,12 +78,19 @@ class EscapeRoomUnit(MethodView):
         expires = data.get('expires', 2)
         build_file = data.get('build_file', None)
         build_count = data.get('build_count', 1)
+
+        """
         try:
             unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
         except FileNotFoundError:
             return self.http_resp(code=404, msg=f"The specification for {build_file} does not exist in the cloud "
                                                 f"project.")
         build_spec = yaml.safe_load(unit_yaml)
+        """
+        build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=build_file).get()
+        if not build_spec:
+            return self.http_resp(code=404, msg=f'The specification for {build_file} does not exist in the cloud '
+                                                f'project.').prepare_response()
         build_spec['instructor_id'] = user_email
         build_spec['workspace_settings'] = {
             'count': build_count,
@@ -90,16 +98,24 @@ class EscapeRoomUnit(MethodView):
             'student_emails': [],
             'expires': datetime.strptime(expires, "%Y-%m-%dT%H:%M").replace(tzinfo=timezone.utc).timestamp()
         }
-        team_names = NameGenerator(build_count).generate()
         build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict, debug=self.debug)
+        # Commit build obj into datastore
         build_spec_to_cloud.commit(publish=False)
+
+        # For each generated team name, send workout build request
         build_id = build_spec_to_cloud.get_build_id()
+        team_names = NameGenerator(int(build_count)).generate()
+        for team in team_names:
+            workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            self.pubsub_mgr.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                action=str(PubSub.BuildActions.UNIT.value),
+                                build_id=str(build_id), child_id=workout_id,
+                                claimed_by=json.dumps({'team_name': team}))
         if self.debug:
             return self.http_resp(code=200, data={'build_id': build_id}).prepare_response()
         else:
-            time.sleep(5)
-            return redirect(url_for('teacher_app.escape_room', unit_id=build_spec_to_cloud.get_build_id()))
+            return redirect(url_for('teacher_app.escape_room', unit_id=build_id))
 
     def put(self, build_id, data=None):
         """
@@ -203,7 +219,19 @@ class EscapeRoomWorkout(MethodView):
         return self.http_resp(code=400).prepare_response()
 
     def post(self):
-        pass
+        """
+        Used to retrieve list of teams associated with a specific join code
+        :return: redirect to claim_escape_room route with target parent_id
+        """
+        form_data = request.form
+        join_code = form_data.get('join_code', None)
+        if not join_code:
+            return self.http_resp(400).prepare_response()
+        unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
+            filter_key='join_code', op='=', value=join_code)
+        if unit:
+            return redirect(url_for('student_app.claim_escape_room', parent=unit[0]['id']))
+        return self.http_resp(404).prepare_response()
 
     def put(self, build_id):
         """

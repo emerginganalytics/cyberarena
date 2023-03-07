@@ -162,6 +162,9 @@ function startEscapeRoomTimer(build_id, url, action) {
         console.log(data);
     })
 }
+function addTeamNameToWorkout(workout_id){
+    console.log(workout_id);
+}
 function validateDateTime(element){
     // Compares selected datetime-local object and if the obj is <= now + 2 hours, set
     // value to min value
