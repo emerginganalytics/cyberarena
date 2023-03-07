@@ -29,6 +29,33 @@ def claim_workout():
     return render_template('claim_workout.html', api=api_route, error=error_msg)
 
 
+@student_app.route('/escape-room/join/', methods=['GET'])
+def claim_escape_room():
+    api_route = url_for('team')
+    error = request.args.get('error', None)
+    parent = request.args.get('parent', None)
+    if parent:
+        # EscapeRoom team list view
+        workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
+                                                       parent_id=parent)
+        if workout_list:
+            escape_rooms = [{'id': i['id'], 'team_name': i['team_name']} for i in workout_list]
+            return render_template('claim_escape_room.html', api=api_route, escape_rooms=escape_rooms)
+        return render_template('claim_escape_room.html', api=api_route, error='Invalid Join Code')
+    elif error:
+        # Error View
+        if error == '404':
+            error_msg = 'Invalid Join Code'
+        elif error == '406':
+            error_msg = 'No Escape Room available! Contact your instructor for further direction'
+        else:
+            error_msg = 'Something went wrong ...'
+        return render_template('claim_escape_room.html', api=api_route, error=error_msg)
+    else:
+        # Base view
+        return render_template('claim_escape_room.html', api=api_route)
+
+
 @student_app.route('/home', methods=['GET', 'POST'])
 def registered_student_home():
     if 'user_email' in session and 'user_groups' in session:
@@ -95,7 +122,7 @@ def workout_view(build_id):
 @student_app.route('/escape-room/team/<build_id>', methods=['GET'])
 def escape_room(build_id):
     auth_config = cloud_env.auth_config
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get(wait=True)
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
         if workout['escape_room'].get('start_time', None) and workout.get('state', None) == WorkoutStates.RUNNING.value:

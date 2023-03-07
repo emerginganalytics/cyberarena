@@ -63,13 +63,19 @@
                // Start timer
                {% if unit.escape_room.time_remaining > 0 %}
                    {% set escaped = namespace(value=0) %}
-                   {% for workout in workout_list %}
-                       {% if workout.escape_room.escaped %}
-                           {% set escaped.value = escaped.value + 1 %}
+                   {% if workout_list | count > 0 %}
+                       {% for workout in workout_list %}
+                           {% if workout.escape_room.escaped %}
+                               {% set escaped.value = escaped.value + 1 %}
+                           {% endif %}
+                       {% endfor %}
+                   {% endif %}
+                   {% if workout_list | count == unit['workspace_settings']['count'] %}
+                       {% if escaped != workout_list | count %}
+                           getEscapeRoomState("{{ unit['escape_room']['id'] }}");
                        {% endif %}
-                   {% endfor %}
-                   {% if escaped != workout_list | count %}
-                       getEscapeRoomState("{{ unit['escape_room']['id'] }}");
+                   {% else %}
+                       checkState("{{ unit['id'] }}", "{{ url_for('unit') }}");
                    {% endif %}
                {% endif %}
            });
@@ -92,14 +98,25 @@
                         </div>
                     {% endif %}
                 </li>
-                {% if unit.escape_room.start_time == 0.0 %}
-                    <li class="nav-item">
-                        <button class='nav-link'
-                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Machines</button>
-                        <button class='nav-link'
-                                onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Timer</button>
-                    </li>
+                {% if 'start_time' in unit.escape_room %}
+                    {% if unit.escape_room.start_time == 0.0 %}
+                        {% if workout_list | count > 0 %}
+                            <li class="nav-item">
+                                <button class='nav-link'
+                                        onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Machines</button>
+                                <button class='nav-link'
+                                        onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Timer</button>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        {# Escape Room is Running #}
+                        <li class="nav-item disabled">
+                            <button class="nav-link">Start Escape Room</button>
+                            <button class="nav-link">Start Timer</button>
+                        </li>
+                    {% endif %}
                 {% else %}
+                    {# No workouts exist #}
                     <li class="nav-item disabled">
                         <button class="nav-link">Start Escape Room</button>
                         <button class="nav-link">Start Timer</button>
@@ -126,49 +143,69 @@
                                            target="_blank">Teacher Instructions</a></li>
                                 {% endif %}
                             </ul>
+                            {% if join_url %}
+                                <div id="distribution" style="margin-top: 12px;">
+                                    <h6 class="text-center">Students can join Escape Room by visiting <span style="color: var(--python-blue);"><em>{{ join_url }}</em></span> and entering the code below: </h6>
+                                    <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
+                                        <h4>{{ unit['join_code'] }}</h4>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div> <!-- End summary div -->
                         <div class="table-ctn">
                             <table class="table">
                                 <thead>
                                     <tr class="text-center">
                                         <th scope="col">Status</th>
+                                        <th scope="col">Team Name</th>
                                         <th scope="col">Workout Link</th>
-                                        {% if workout_list | count > 0 %}
-                                            {% for puzzle in workout_list[0]['escape_room']['puzzles'] %}
-                                                <th scope="col">{{ puzzle.name }}</th>
-                                            {% endfor %}
-                                        {% endif %}
+                                        {% for puzzle in unit['escape_room']['puzzles'] %}
+                                            <th scope="col">{{ puzzle.name }}</th>
+                                        {% endfor %}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for workout in workout_list %}
-                                        <tr>
-                                            <td>
-                                                {% if workout['state'] == 50 %}
-                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState running"></i>
-                                                {% elif workout['state'] == 53 %}
-                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState stopped"></i>
-                                                {% elif workout['state'] == 72 %}
-                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState deleted"></i>
-                                                {% else %}
-                                                    <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <a class="btn-fa" href="/student/escape-room/team/{{ workout['id'] }}"
-                                                   target="_blank">Team {{ workout['id'] }}</a>
-                                            </td>
-                                            {% for puzzle in workout['escape_room']['puzzles'] %}
+                                    {% if workout_list | count > 0 %}
+                                        {% for workout in workout_list %}
+                                            <tr>
                                                 <td>
-                                                    {% if puzzle.correct == True %}
-                                                        <p class="complete">Complete!</p>
+                                                    {% if workout['state'] == 50 %}
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState running"></i>
+                                                    {% elif workout['state'] == 53 %}
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState stopped"></i>
+                                                    {% elif workout['state'] == 72 %}
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState deleted"></i>
                                                     {% else %}
-                                                        <p>Incomplete!</p>
+                                                        <i id="workoutState{{ loop.index }}" class="fa fa-circle buildState transition"></i>
                                                     {% endif %}
                                                 </td>
-                                            {% endfor %}
+                                                {% if 'team_name' in workout %}
+                                                    <td>{{ workout['team_name'] }}</td>
+                                                {% else %}
+                                                    <td>
+                                                        <button onclick="addTeamNameToWorkout('{{ workout["id"] }}')">Add Team Name</button>
+                                                    </td>
+                                                {% endif %}
+                                                <td>
+                                                    <a class="btn-fa" href="/student/escape-room/team/{{ workout['id'] }}"
+                                                       target="_blank">Team {{ workout['id'] }}</a>
+                                                </td>
+                                                {% for puzzle in workout['escape_room']['puzzles'] %}
+                                                    <td>
+                                                        {% if puzzle.correct == True %}
+                                                            <p class="complete">Complete!</p>
+                                                        {% else %}
+                                                            <p>Incomplete!</p>
+                                                        {% endif %}
+                                                    </td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr class="opaque-loading">
+                                            <td class="opaque-loading text-center" colspan="100%">No workouts built! Table will populate as each student joins.</td>
                                         </tr>
-                                    {% endfor %}
+                                    {% endif %}
                                 </tbody>
                             </table>
                         </div>

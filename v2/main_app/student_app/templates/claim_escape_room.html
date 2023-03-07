@@ -1,0 +1,128 @@
+{% extends "v2-login.html" %}
+{% block title %}Join{% endblock %}
+{% block styles %}{% endblock styles %}
+{% block content %}
+    <style>
+        html {
+            overflow: auto;
+        }
+        .slide-out-right {
+            margin: auto;
+            overflow-y: hidden;
+            max-width: 500px;
+        }
+        .slide-out-right.hide {
+            transition: 1s;
+            right: 500px;
+            max-width: 0;
+            display: none;
+        }
+        .slide-in-right {
+            margin: 0 auto;
+            max-width: 500px;
+            transition: 1s;
+        }
+        .slide-in-right.hide {
+            display: none;
+            transition: 1s;
+        }
+        .slide-in-right.show {
+            display: block;
+            transition: 1s;
+        }
+        .btn-primary {
+            width: 50%;
+            font-variant-caps: petite-caps;
+            font-size: large;
+        }
+        #claim-workout {
+            padding: 10px;
+        }
+        .team-card {
+            width: 45%;
+            margin: 5px;
+            background: var(--marine-blue);
+            color: whitesmoke;
+        }
+        .team-card:hover {
+            color: black;
+            background: whitesmoke;
+            cursor: pointer;
+        }
+        .btn-fa {
+            background: var(--maroon);
+            color: whitesmoke;
+            width: 50%;
+            border: none;
+        }
+        .btn-fa:hover {
+            color: var(--maroon);
+            background: whitesmoke;
+        }
+
+    </style>
+    <script>
+        function displayLoadingMessage() {
+            // Hide the form upon submission
+            let form_div = document.getElementById('claim-workout-div');
+            let loading_msg_div = document.getElementById('loading-msg-div');
+            form_div.classList.toggle('hide');
+
+            // Toggle the loading animation/message
+            loading_msg_div.classList.toggle('hide');
+            loading_msg_div.classList.toggle('show');
+        }
+    </script>
+    <div class="container-fluid" style="max-width: 600px;">
+        {{ logo.logo_div() }}
+        <div id="claim-workout-div" class='slide-out-right' style="overflow: hidden;">
+            {% if error %}
+                <h5 class="text-center p-3 highlight-warning">{{ error }}</h5>
+            {% endif %}
+            {% if escape_rooms %}
+                <h3 class="text-center pt-3" id="joinTitle">Choose a Team</h3>
+                <div id="teamNameSelectDiv" class="row">
+                    {% for room in escape_rooms %}
+                        <div class="card team-card mx-auto"
+                             onclick="window.open('{{ url_for('student_app.escape_room', build_id=room['id'])}}');">
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ room.team_name }}</h5>
+                                <p style="color: var(--python-yellow);">Click to Join Team</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h3 class="text-center pt-3" id="joinTitle">Join an Escape Room</h3>
+                <form id="claim-workout" method="post" action="{{ api }}">
+                    <div class="form-group">
+                        <div id="joinCodeDiv">
+                            <label for="joinCode" hidden>Join Code</label>
+                            <input type="text" name="join_code" id="joinCode" class="form-control" placeholder="Enter join code">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn-fa" onclick="displayLoadingMessage();">Submit</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+        <div id='loading-msg-div' class="slide-in-right hide">
+            <h4 class="text-center">Finding your Escape Room ...</h4>
+            <div id="loader">
+                <div class="loading">
+                    <div class="rectangle_1"></div>
+                    <div class="rectangle_2"></div>
+                    <div class="rectangle_3"></div>
+                    <div class="rectangle_4"></div>
+                    <div class="rectangle_5"></div>
+                    <div class="rectangle_6"></div>
+                    <div class="rectangle_7"></div>
+                    <div class="rectangle_8"></div>
+                    <div class="rectangle_9"></div>
+                    <div class="rectangle_10"></div>
+                </div>
+            </div>
+        </div>
+     </div>
+{% endblock content %}

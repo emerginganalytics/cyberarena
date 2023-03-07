@@ -1,3 +1,4 @@
+import json
 import random
 import string
 from datetime import datetime, timezone
@@ -100,47 +101,58 @@ class Unit:
                 self.logger.error(f"Requested build for unit {self.unit_id} failed; Unit is at max capacity")
                 raise ValueError
         student_email = self.form_data.get('student_email', None)
-        student_name = self.form_data.get('student_name', None)
+        team_name = self.form_data.get('team_name', None)
         if student_email and self.workout_id:
-            workout_record = {
-                'id': self.workout_id,
-                'parent_id': self.unit_id,
-                'parent_build_type': BuildConstants.BuildType.UNIT,
-                'build_type': BuildConstants.BuildType.WORKOUT,
-                'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
-                'state': WorkoutStates.START.value,
-                'student_email': student_email,
-            }
+            workout_record = self._create_workout_record()
+            workout_record['student_email'] = student_email
+            student_name = self.form_data.get('student_name', None)
             if student_name:
                 workout_record['student_name'] = student_name
-            if self.unit.get('networks'):
-                workout_record['networks'] = self.unit['networks']
-                workout_record['servers'] = self.unit['servers']
-                workout_record['firewall_rules'] = self.unit.get('firewall_rules', None)
-            if self.unit.get('web_applications'):
-                processed_web_applications = []
-                for web_application in self.unit['web_applications']:
-                    processed_web_application = {
-                        'name': web_application['name'],
-                        'url': f"https://{web_application['host_name']}{self.env.dns_suffix}"
-                               f"{web_application['starting_directory']}/{id}"
-                    }
-                    processed_web_applications.append(processed_web_application)
-                workout_record['web_applications'] = processed_web_applications
-            escape_room_spec = self.unit.get('escape_room', None)
-            if escape_room_spec:
-                workout_record['escape_room'] = escape_room_spec
-            else:
-                if self.unit.get('assessment', None):
-                    workout_record['assessment'] = self.unit['assessment']
-            if self.debug:
-                workout_record['test'] = True
-            workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
-            if self.debug:
-                workout = Workout(build_id=self.workout_id, debug=self.debug, env_dict=self.env_dict)
-                workout.build()
-            else:
-                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
-                                        action=str(PubSub.BuildActions.WORKOUT.value),
-                                        key_type=str(DatastoreKeyTypes.WORKOUT.value),
-                                        build_id=str(self.workout_id))
+        elif team_name and self.workout_id:
+            workout_record = self._create_workout_record()
+            workout_record['team_name'] = team_name
+        else:
+            self.logger.error(f'Invalid or missing claimed_by values given for unit {self.unit_id}')
+            raise ValueError
+        workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
+        if self.debug:
+            workout = Workout(build_id=self.workout_id, debug=self.debug, env_dict=self.env_dict)
+            workout.build()
+        else:
+            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                    action=str(PubSub.BuildActions.WORKOUT.value),
+                                    key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                    build_id=str(self.workout_id))
+
+    def _create_workout_record(self):
+        workout_record = {
+            'id': self.workout_id,
+            'parent_id': self.unit_id,
+            'parent_build_type': BuildConstants.BuildType.UNIT,
+            'build_type': BuildConstants.BuildType.WORKOUT,
+            'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
+            'state': WorkoutStates.START.value,
+        }
+        if self.unit.get('networks'):
+            workout_record['networks'] = self.unit['networks']
+            workout_record['servers'] = self.unit['servers']
+            workout_record['firewall_rules'] = self.unit.get('firewall_rules', None)
+        if self.unit.get('web_applications'):
+            processed_web_applications = []
+            for web_application in self.unit['web_applications']:
+                processed_web_application = {
+                    'name': web_application['name'],
+                    'url': f"https://{web_application['host_name']}{self.env.dns_suffix}"
+                           f"{web_application['starting_directory']}/{id}"
+                }
+                processed_web_applications.append(processed_web_application)
+            workout_record['web_applications'] = processed_web_applications
+        escape_room_spec = self.unit.get('escape_room', None)
+        if escape_room_spec:
+            workout_record['escape_room'] = escape_room_spec
+        else:
+            if self.unit.get('assessment', None):
+                workout_record['assessment'] = self.unit['assessment']
+        if self.debug:
+            workout_record['test'] = True
+        return workout_record
