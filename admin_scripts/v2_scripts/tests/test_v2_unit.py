@@ -1,6 +1,9 @@
 from google.cloud import datastore
 from datetime import datetime, timedelta, timezone
 import yaml
+import random
+import string
+from main_app_utilities.global_objects.name_generator import NameGenerator
 from main_app_utilities.globals import Buckets, PubSub
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.bucket_manager import BucketManager
@@ -37,12 +40,23 @@ class TestUnit:
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=debug)
-        build_spec_to_cloud.commit()
+        build_spec_to_cloud.commit(publish=False)
         build_id = build_spec_to_cloud.get_build_id()
         if debug:
-            unit = Unit(build_id=build_id, debug=debug, force=True)
+            env_dict = self.env.get_env()
             print(f"Beginning to build a new unit with ID {build_id}")
-            unit.build()
+            if build_spec.get('escape_room', None):
+                team_names = NameGenerator(count=build_spec['workspace_settings']['count']).generate()
+            for i in range(build_spec['workspace_settings']['count']):
+                if build_spec.get('escape_room', None):
+                    claimed_by = {'team_name': team_names[i]}
+                else:
+                    claimed_by = {'student_email': f'example{i}@ualr.edu'}
+                workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+                print(f'\t...building workout with ID {workout_id}')
+                unit = Unit(build_id=build_id, child_id=workout_id, form_data=claimed_by, debug=debug, force=True,
+                            env_dict=env_dict)
+                unit.build()
             print(f"Finished building")
         self.build_id = build_id
 

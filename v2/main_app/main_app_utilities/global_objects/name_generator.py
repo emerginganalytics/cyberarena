@@ -3,7 +3,7 @@ import random
 
 class NameGenerator:
     def __init__(self, count):
-        self.count = count
+        self.count = int(count)
 
     def generate(self):
         name_list = []

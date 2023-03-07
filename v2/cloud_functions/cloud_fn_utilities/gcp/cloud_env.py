@@ -26,7 +26,7 @@ class CloudEnv:
             if not type(self.env_dict) == dict:
                 raise TypeError(f'Improper type {type(self.env_dict)} for cls arg')
             self.project = self.env_dict['project']
-            self.project_number = self.env_dict['project_number']
+            self.project_number = self.env_dict.get('project_number', None)
             self.region = self.env_dict['region']
             self.zone = self.env_dict['zone']
             self.dns_suffix = self.env_dict['dns_suffix']
@@ -40,8 +40,8 @@ class CloudEnv:
             self.main_app_v2_url = self.env_dict['main_app_v2_url']
             self.guac_db_password = self.env_dict['guac_db_password']
             self.max_workspaces = self.env_dict['max_workspaces']
-            self.sql_ip = self.env_dict['sql_ip']
-            self.sql_password = self.env_dict['sql_password']
+            self.sql_ip = self.env_dict.get('sql_ip', None)
+            self.sql_password = self.env_dict.get('sql_password', None)
         else:
             runtimeconfig_client = runtimeconfig.Client()
             myconfig = runtimeconfig_client.config('cybergym')
