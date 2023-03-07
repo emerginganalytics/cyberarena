@@ -8,3 +8,4 @@ google-cloud-runtimeconfig
 google-cloud-logging
 pyyaml
 pyAesCrypt
+canvasapi==3.0.0
