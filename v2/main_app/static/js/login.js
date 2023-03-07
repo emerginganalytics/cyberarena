@@ -55,8 +55,12 @@ function configureFirebaseLoginWidget() {
         'signInFlow': 'redirect',
         'signInSuccessUrl': '/home',
         'signInOptions': [
-        // Leave the lines as is for the providers you want to offer your users.
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            // Leave the lines as is for the providers you want to offer your users.
+            firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+            {
+              provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+              requireDisplayName: true,
+            },
         ],
     };
     let ui = new firebaseui.auth.AuthUI(firebase.auth());
