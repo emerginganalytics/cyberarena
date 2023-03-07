@@ -22,10 +22,10 @@ app.secret_key = os.urandom(12)
 bootstrap = Bootstrap(app)
 
 # db Config
-db = SQLAlchemy(app)
-lm = LoginManager(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+lm = LoginManager(app)
 
 
 class User(UserMixin, db.Model):
