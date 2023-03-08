@@ -160,6 +160,7 @@ class ComputeManager:
             try:
                 if "delayed_start" in self.server_spec and self.server_spec["delayed_start"]:
                     time.sleep(30)
+                self.logger.info(f'Sending job to start {self.server_name}, and waiting for response')
                 response = self.compute.instances().start(project=self.env.project, zone=self.env.zone,
                                                           instance=self.server_name).execute()
                 start_success = True
@@ -173,6 +174,9 @@ class ComputeManager:
                     return
             except BrokenPipeError:
                 self.logger.info(f"Broken pipe error when trying to start {self.server_name} Trying again...")
+            except Exception as e:
+                error_message = e.args[0] if len(e.args) > 0 else "NO ERROR MESSAGE PROVIDED"
+                self.logger.warning(f"Unknown error occurred: {error_message}. Continuing to try again.")
             if not start_success:
                 i += 1
             time.sleep(10)

@@ -19,7 +19,7 @@ $confirmation = Read-Host "Do you want to update cybergym-classified? (y/N)"
 if ($confirmation -eq 'y') {
     $sourcepath = Join-Path (Resolve-Path ..\..\).Path "\container-applications\classified"
     gcloud builds submit $sourcepath --tag gcr.io/$project/cybergym-classified
-    gcloud run deploy --image gcr.io/$project/cybergym-classified --memory=256 --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
+    gcloud run deploy --image gcr.io/$project/cybergym-classified --memory=512Mi --platform=managed --region=$region --allow-unauthenticated --service-account=cybergym-service@"$project".iam.gserviceaccount.com
 }
 
 # Update Shodan
