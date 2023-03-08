@@ -44,7 +44,7 @@ class Workout:
             raise LookupError
 
     def build(self):
-        if not self.workout.get('networks'):
+        if not self.workout.get('networks', None):
             if self.workout.get('web_application', None):
                 self.state_manager.state_transition(self.s.READY)
                 self.logger.info(f"No compute assets required for workout {self.workout_id}.")
