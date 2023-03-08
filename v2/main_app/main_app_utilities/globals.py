@@ -266,4 +266,8 @@ class Buckets:
 
 
 def get_current_timestamp_utc(add_minutes=0):
+    try:
+        add_minutes = add_minutes if isinstance(add_minutes, int) else int(add_minutes)
+    except ValueError:
+        add_minutes = 0
     return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()
