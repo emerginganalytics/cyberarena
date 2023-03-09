@@ -116,7 +116,6 @@ class DataStoreManager:
                                 f"{self.key_type}.")
             return []
 
-
     def get_running(self):
         """
         returns a list of running entities associated with the key_type
@@ -132,6 +131,11 @@ class DataStoreManager:
             running += list(query_running.fetch())
 
         return running
+
+    def get_admins(self):
+        query_admins = self.ds_client.query(kind=DatastoreKeyTypes.ADMIN_INFO)
+        admin_info = list(query_admins.fetch())[0]
+        return admin_info['admins']
 
     @staticmethod
     def _create_safe_entity(entity):

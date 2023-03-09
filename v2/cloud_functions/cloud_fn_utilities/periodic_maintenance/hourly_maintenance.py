@@ -45,7 +45,7 @@ class HourlyMaintenance:
                 FixedArenaClass(build_id=build_id, env_dict=self.env_dict).mark_broken()
                 continue
 
-            if fac_state not in [FixedArenaClassStates.BROKEN.value, FixedArenaClassStates.DELETED.value]:
+            if fac_state not in [FixedArenaClassStates.DELETED.value]: #FixedArenaClassStates.BROKEN.value,
                 if self.debug:
                     FixedArenaClass(build_id=build_id, debug=self.debug, env_dict=self.env_dict).delete()
                 else:
