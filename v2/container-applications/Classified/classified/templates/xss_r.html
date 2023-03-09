@@ -1,0 +1,23 @@
+{% extends "xss_dom.html" %}
+{% block page_content %}
+<body>
+<header>
+    <div>
+        <h1 style ="text-align:center; color:white;"> Reflected Cross-Site Scripting </h1>
+    </div>
+</header>
+    <div class="container-fluid">
+        <div class="text-box">
+            <div class="text-area">
+                <h1 id="stranger">Hello, {{ name | safe }}!</h1>
+                <form name="XSS" action="#" method="POST">
+                    <p> Not a stranger? What's your name?
+                        <input type="text" name="name" autocomplete="off">
+                        <input type="submit" value="Submit">
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
