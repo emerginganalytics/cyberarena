@@ -234,6 +234,7 @@
                                                 <tr>
                                                     <th scope="col">Connection</th>
                                                     <th scope="col">Server Name</th>
+                                                    <th scope="col">DNS</th>
                                                     <th scope="col">IP</th>
                                                 </tr>
                                             </thead>
@@ -249,6 +250,11 @@
                                                                 <td>No Interface</td>
                                                             {% endif %}
                                                             <td>{{ server.name }}</td>
+                                                            {% if server.dns_hostname %}
+                                                                <td>{{ server.dns_hostname }}</td>
+                                                            {% else %}
+                                                                <td>None</td>
+                                                            {% endif %}
                                                             <td>{{ server.nics[0].internal_ip }}</td>
                                                         </tr>
                                                     {% endfor %}
