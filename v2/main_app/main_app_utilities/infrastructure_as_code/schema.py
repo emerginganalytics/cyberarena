@@ -139,7 +139,6 @@ class ServerSchema(Schema):
     min_cpu_platform = fields.Str(default="")
     nics = fields.Nested('NicSchema', many=True)
     human_interaction = fields.Nested('HumanInteractionSchema', many=True)
-    dns_host_suffix = fields.Str(required=False)
 
     class Meta:
         strict = True
@@ -150,6 +149,7 @@ class NicSchema(Schema):
     internal_ip = fields.Str(required=True)
     subnet_name = fields.Str(required=True, default="default")
     external_nat = fields.Bool(default=False)
+    dns_host_suffix = fields.Str(required=False)
 
     class Meta:
         strict = True

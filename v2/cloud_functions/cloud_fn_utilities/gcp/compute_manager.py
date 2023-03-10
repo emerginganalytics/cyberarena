@@ -187,7 +187,8 @@ class ComputeManager:
         if dns_hostname:
             dns_record = dns_hostname + self.env.dns_suffix + "."
             self.dns_manager.add_dns_record(dns_record, self.server_name)
-            self._wait_for_guacamole(dns_record[:-1])
+            if self.server_name == f'{self.parent_build_id}-display':
+                self._wait_for_guacamole(dns_record[:-1])
 
         self.state_manager.state_transition(self.s.RUNNING)
         self.logger.info(f"Finished starting {self.server_name}")

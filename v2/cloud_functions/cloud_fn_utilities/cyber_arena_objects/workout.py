@@ -69,8 +69,11 @@ class Workout:
                 server_name = f"{self.workout_id}-{server['name']}"
                 server['parent_id'] = self.workout_id
                 server['parent_build_type'] = self.workout['build_type']
-                if server.get('dns_host_suffix', None):
-                    server['dns_hostname'] = f'{self.workout_id}-{server["dns_host_suffix"]}'
+
+                # Check for any custom DNS suffix
+                dns_host_suffix = server['nics'][0].get('dns_host_suffix', None)
+                if dns_host_suffix:
+                    server['dns_hostname'] = f'{self.workout_id}-{dns_host_suffix}'
                 self.ds.put(server, key_type=DatastoreKeyTypes.SERVER, key_id=server_name)
                 if self.debug:
                     ComputeManager(server_name=server_name, env_dict=self.env_dict).build()
