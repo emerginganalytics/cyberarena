@@ -121,9 +121,8 @@ class Workout(MethodView):
                                     duration_hours = min(int(duration_hours), 10)
                                 else:
                                     duration_hours = 2
-                            duration = datetime.now(timezone.utc) + timedelta(hours=duration_hours)
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                    build_id=str(build_id), duration=str(duration),
+                                                    build_id=str(build_id), duration=str(duration_hours),
                                                     cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
                         else:
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
