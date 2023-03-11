@@ -265,9 +265,9 @@ class Buckets:
         STUDENT_FOLDER = "student_instructions/"
 
 
-def get_current_timestamp_utc(add_minutes=0):
+def get_current_timestamp_utc(add_seconds=0):
     try:
-        add_minutes = add_minutes if isinstance(add_minutes, int) else int(add_minutes)
+        add_seconds = add_seconds if isinstance(add_seconds, int) else int(add_seconds)
     except ValueError:
-        add_minutes = 0
-    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_minutes)).timestamp()
+        add_seconds = 0
+    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_seconds)).timestamp()

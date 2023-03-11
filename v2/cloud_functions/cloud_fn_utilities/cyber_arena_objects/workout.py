@@ -27,7 +27,7 @@ __status__ = "Testing"
 class Workout:
     def __init__(self, build_id, duration=None, debug=False, env_dict=None):
         self.workout_id = build_id
-        self.duration_minutes = duration * 60 if duration else 120
+        self.duration_seconds = duration * 3600 if duration else 7200
         self.debug = debug
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.env_dict = self.env.get_env()
@@ -122,7 +122,7 @@ class Workout:
             self.state_manager.state_transition(self.s.RUNNING)
             self.logger.info(f"Finished starting the Workout: {self.workout_id}!")
         self.workout = self.ds.get()
-        self.workout['shutoff_timestamp'] = get_current_timestamp_utc(add_minutes=self.duration_minutes)
+        self.workout['shutoff_timestamp'] = get_current_timestamp_utc(add_seconds=self.duration_seconds)
         self.ds.put(self.workout)
 
     def stop(self):
@@ -203,5 +203,5 @@ class Workout:
     def extend_runtime(self):
         shutoff_ts = self.workout.get('shutoff_timestamp', None)
         if shutoff_ts:
-            self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(minutes=self.duration_minutes)
+            self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(seconds=self.duration_seconds)
             self.ds.put(self.workout)
