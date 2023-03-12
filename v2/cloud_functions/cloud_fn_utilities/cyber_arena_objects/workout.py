@@ -27,7 +27,10 @@ __status__ = "Testing"
 class Workout:
     def __init__(self, build_id, duration=None, debug=False, env_dict=None):
         self.workout_id = build_id
-        self.duration_seconds = duration * 3600 if duration else 7200
+        try:
+            self.duration_seconds = int(duration) * 3600 if duration else 7200
+        except ValueError:
+            self.duration_seconds = 7200
         self.debug = debug
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.env_dict = self.env.get_env()

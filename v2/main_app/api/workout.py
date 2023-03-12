@@ -117,9 +117,9 @@ class Workout(MethodView):
                                 duration_hours = 1
                             else:
                                 duration_hours = request.json.get('duration', None)
-                                if duration_hours:
+                                try:
                                     duration_hours = min(int(duration_hours), 10)
-                                else:
+                                except (TypeError, ValueError):
                                     duration_hours = 2
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                                     build_id=str(build_id), duration=str(duration_hours),
