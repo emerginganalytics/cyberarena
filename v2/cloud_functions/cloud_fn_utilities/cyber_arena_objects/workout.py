@@ -25,10 +25,10 @@ __status__ = "Testing"
 
 
 class Workout:
-    def __init__(self, build_id, duration=None, debug=False, env_dict=None):
+    def __init__(self, build_id, duration_hours=2, debug=False, env_dict=None):
         self.workout_id = build_id
         try:
-            self.duration_seconds = int(duration) * 3600 if duration else 7200
+            self.duration_seconds = min(int(duration_hours) * 3600, 36000) if duration_hours else 7200
         except ValueError:
             self.duration_seconds = 7200
         self.debug = debug

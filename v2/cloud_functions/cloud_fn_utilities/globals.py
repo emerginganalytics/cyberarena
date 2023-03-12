@@ -291,4 +291,4 @@ def get_current_timestamp_utc(add_seconds=0):
         add_seconds = add_seconds if isinstance(add_seconds, int) else int(add_seconds)
     except ValueError:
         add_seconds = 0
-    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(minutes=add_seconds)).timestamp()
+    return (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(seconds=add_seconds)).timestamp()
