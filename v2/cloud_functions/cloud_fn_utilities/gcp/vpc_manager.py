@@ -70,7 +70,7 @@ class VpcManager:
             try:
                 response = self.compute.subnetworks().delete(project=self.env.project, region=self.env.region,
                                                              subnetwork=subnet_name).execute()
-                self.compute.regionOperations().wait(project=self.env.project, region=self.env.region,
+                wait = self.compute.regionOperations().wait(project=self.env.project, region=self.env.region,
                                                      operation=response["id"]).execute()
             except HttpError as err:
                 logging.info(f"Error deleting subnetwork {subnet_name}")
@@ -82,7 +82,10 @@ class VpcManager:
         logging.info(f"Deleting network {network_name}")
         try:
             response = self.compute.networks().delete(project=self.env.project, network=network_name).execute()
-            self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
+            wait = self.compute.globalOperations().wait(project=self.env.project, operation=response["id"]).execute()
+            if 'error' in wait:
+                # error handling
+                pass
             time.sleep(3)
         except HttpError as err:
             logging.info(f"Error deleting network {network_name}")

@@ -169,6 +169,9 @@ class Workout:
                                         cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
 
         if self.state_manager.are_servers_deleted():
+
+            self.firewall_manager.delete(self.workout_id)
+
             for network in self.workout['networks']:
                 self.vpc_manager.delete(network_spec=network)
             self.state_manager.state_transition(self.s.DELETED)
