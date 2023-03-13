@@ -1,6 +1,5 @@
 import base64
 import sqlite3
-import onetimepass
 import os
 import hashlib
 import sqlite3

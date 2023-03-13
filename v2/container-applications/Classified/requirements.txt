@@ -5,14 +5,10 @@ dominate
 email-validator
 Flask
 Flask-Bootstrap
-Flask-Login
-Flask-SQLAlchemy
 Flask-WTF
 itsdangerous
 Jinja2
 MarkupSafe
-onetimepass
-PyQRCode
 six
 SQLAlchemy
 visitor
