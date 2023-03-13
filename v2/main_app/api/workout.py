@@ -112,7 +112,7 @@ class Workout(MethodView):
                     action = int(action)
                     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
                     if workout:
-                        if action != PubSub.Actions.STOP.value:
+                        if action in [PubSub.Actions.START.value, PubSub.Actions.EXTEND_RUNTIME.value]:
                             if action == PubSub.Actions.EXTEND_RUNTIME.value:
                                 duration_hours = 1
                             else:
@@ -124,7 +124,7 @@ class Workout(MethodView):
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                                     build_id=str(build_id), duration=str(duration_hours),
                                                     cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
-                        else:
+                        elif action in [PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]:
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                                     build_id=str(build_id),
                                                     cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
