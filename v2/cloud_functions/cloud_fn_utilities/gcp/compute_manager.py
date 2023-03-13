@@ -333,9 +333,15 @@ class ComputeManager:
         success = False
         while not success and i < 5:
             try:
-                self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
-                                                   operation=response_id).execute()
-                success = True
+                wait = self.compute.zoneOperations().wait(project=self.env.project, zone=self.env.zone,
+                                                          operation=response_id).execute()
+                if wait and 'error' in wait:
+                    if isinstance(wait['error'], list) and len(wait['error'] > 0):
+                        error_obj = wait['error'][0]
+                        self.logger.warning(f"Error {error_obj.code}: Error when waiting for operation: "
+                                            f"{error_obj.message}")
+                else:
+                    success = True
             except timeout:
                 i += 1
                 self.logger.warning(f'Response timeout for stopping server {self.server_name}. Trying again')

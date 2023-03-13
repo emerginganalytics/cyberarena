@@ -116,7 +116,7 @@ class ControlHandler:
     def _extend_runtime(self):
         duration = self.event_attributes.get('duration', 1)
         if self.cyber_arena_object == str(PubSub.CyberArenaObjects.WORKOUT.value):
-            Workout(build_id=self.build_id, duration=duration, debug=self.debug, env_dict=self.env_dict).extend_runtime()
+            Workout(build_id=self.build_id, duration_hours=duration, debug=self.debug, env_dict=self.env_dict).extend_runtime()
         else:
             logging.error(f'Unsupported object passed to the control handler for action {self.action}')
             raise ValueError
