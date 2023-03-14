@@ -26,7 +26,41 @@ classified_bp = Blueprint(
 )
 
 # Arena Snake Routes
+
+
 # Inspect Routes
+@classified_bp.route('/inspect/<workout_id>')
+def inspect(workout_id):
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
+    if workout:
+        return render_template('inspect.html', workout_id=workout_id)
+    return redirect(404)
+
+
+@classified_bp.route('/inspect/xsfiedSTRflag/<workout_id>', methods=['GET', 'POST'])
+def xsfiedSTRflag(workout_id):
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
+    if workout:
+        return render_template('inspect_index.html', workout_id=workout_id)
+    return redirect(404)
+
+
+@classified_bp.route('/inspect/login/<workout_id>', methods=['GET', 'POST'])
+def inspect_login(workout_id):
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
+    if workout:
+        if request.method == 'POST':
+            if request.form['password'] == 'TrojanSpirit!2021' and request.form['username'] == 'Maximus':
+                decrypt_key = workout['assessment']['questions'][0]['id']
+                classified_flag = 'gecJuFQuv1FhQAfLDvn9f6j6xu/GACm00wqyoWVKUJQ=*gXSP1UFZELV59Qz6yP0Y+w==*' \
+                                  'y6cg3ujMtm7eSklW2SX3JQ==*C4GDYpzjfozIsTQWVuUc4A=='
+                plaintext_flag = cryptocode.decrypt(classified_flag, decrypt_key)
+                return render_template('inspect.html', workout_id=workout_id, classified_flag=plaintext_flag)
+            else:
+                return redirect(url_for('classified_bp.xsfiedSTRflag', workout_id=workout_id))
+    return redirect(404)
+
+
 
 
 # SQL Injection Routes
