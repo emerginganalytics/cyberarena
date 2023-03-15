@@ -454,7 +454,44 @@ li button {
 ul#instructions-list li {
     display: inline;
 }
+/* Active + Expired Workouts Table */
+.active-workout {}
+.expired-workout {}
+.table-ctn-header {
+    width: 100%;
+    margin-bottom: 1em;
+    margin-left: 2em;
+}
+.table-filter-ctn {}
+.table-filter-ul {
+    list-style: none;
+}
+ul.table-filter-ul {
+    display: inline-flex;
+}
+.table-filter-ul ul > li {
+    display: inline-block;
+    margin: 3px;
+}
+ul.table-filter-ul > li {
+    margin: 4px;
+}
+.badge-btn {
+    width: 8rem !important;
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 2;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border: none;
+    margin-right: 0;
+}
+.active-filter {
 
+}
 /* Big Idea Formatting */
 .badge {
     width: 6rem;

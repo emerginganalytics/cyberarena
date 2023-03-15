@@ -76,8 +76,8 @@ class Workout(MethodView):
             if unit:
                 unit_id = unit[0]['id']
                 max_builds = min(self.env.max_workspaces, unit[0]['workspace_settings']['count'])
-                workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT,
-                                                               parent_id=unit_id)
+                workout_query = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query()
+                workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == unit_id]
                 if workout_list:
                     for workout in workout_list:
                         if workout.get('student_email', None):
@@ -93,6 +93,7 @@ class Workout(MethodView):
                                         action=str(PubSub.BuildActions.UNIT.value),
                                         build_id=str(unit_id), child_id=workout_id,
                                         claimed_by=claimed_by)
+                time.sleep(5)
                 return redirect(url_for('student_app.workout_view', build_id=workout_id))
             # Invalid join code
             return redirect(url_for('student_app.claim_workout', error=404))

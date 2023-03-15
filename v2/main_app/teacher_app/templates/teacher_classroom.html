@@ -88,45 +88,80 @@
             <div id="content-div" class="overflow-auto">
                 <div id="tab-container" class="tab-content">
                     <div class="tab-pane fade active show" id="teacher-home-tab" role="tabpanel" aria-labelledby="teacher-home-btn">
-                        <!-- Tab TBD -->
-                        <div class="container">
-                            <div class="table-ctn">
-                                <table id="active-class-table" class="table text-nowrap table-small">
-                                    <thead>
-                                        <tr id="active-table-headers">
-                                            <th scope="col" class="text-center no-select">Name</th>
-                                            <th scope="col" class="text-center no-select">Description</th>
-                                            <th scope="col" class="text-center no-select">Created</th>
-                                            <th scope="col" class="text-center no-select">Expires</th>
-                                        </tr>
-                                    </thead>
-                                    {% if teacher_info.active_units | length == 0 %}
-                                        <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Active Workouts Found!</td></tr>
-                                    {% else %}
-                                        {% for unit in teacher_info.active_units %}
-                                            <tr>
-                                                <td>
-                                                    {% if unit.build_type == 'escape_room' %}
-                                                        <a href="/teacher/escape-room/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
-                                                            <i class="fa fa-book"></i> {{ unit.name }}</a>
-                                                    {% elif unit.build_type == 'unit' %}
-                                                        <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa d-inline-flex" target="_blank">
-                                                            <i class="fa fa-book"></i> {{ unit.name }}</a>
-                                                    {% endif %}
-                                                </td>
-                                                <td><div class="description">{{ unit.description }}</div></td>
-                                                <td class="timestampField">{{ unit.created }}</td>
-                                                {% if 'expires' in unit %}
-                                                    <td class="timestampField">{{ unit.expires }}</td>
-                                                {% else %}
-                                                    <td>N/A</td>
-                                                {% endif %}
-                                            </tr>
-                                        {% endfor %}
-                                    {% endif %}
-                                </table>
+                        <div>
+                            <div class="row table-ctn-header">
+                                <div class="col table-filter-ctn">
+                                    <ul class="table-filter-ul float-left">
+                                        <li>
+                                            <a id="filterActiveWorkouts" href="#" onclick="filterWorkouts('active-workout');" class="badge badge-btn badge-primary active-filter">Active Workouts</a>
+                                        </li>
+                                        <li>
+                                            <a id="filterExpiredWorkouts" href="#" onclick="filterWorkouts('expired-workout');" class="badge badge-btn badge-light">Expired Workouts</a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
+                        <div class="col table-ctn">
+                            <table id="teacher-workout-table" class="table table-large table-hover">
+                                <thead>
+                                    <tr id="active-table-headers">
+                                        <th scope="col" class="text-center no-select">Name</th>
+                                        <th scope="col" class="text-center no-select">Description</th>
+                                        <th scope="col" class="text-center no-select">Created</th>
+                                        <th scope="col" class="text-center no-select">Expires</th>
+                                    </tr>
+                                </thead>
+                                {% if teacher_info.active_units | length == 0 %}
+                                    <tr class="opaque-loading active-workout"><td class="opaque-loading text-center" colspan="100%">No Active Workouts Found!</td></tr>
+                                {% else %}
+                                    {% for unit in teacher_info.active_units %}
+                                        <tr class="active-workout">
+                                            <td>
+                                                {% if unit.build_type == 'escape_room' %}
+                                                    <a href="/teacher/escape-room/{{ unit['id'] }}" class="btn-fa text-truncate" target="_blank" style="width: 250px; margin: auto; display: block;">
+                                                        <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                {% elif unit.build_type == 'unit' %}
+                                                    <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa text-truncate" target="_blank" style="width: 250px; margin: auto; display: block;">
+                                                        <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                {% endif %}
+                                            </td>
+                                            <td><div class="description">{{ unit.description }}</div></td>
+                                            <td class="timestampField">{{ unit.created }}</td>
+                                            {% if 'expires' in unit %}
+                                                <td class="timestampField">{{ unit.expires }}</td>
+                                            {% else %}
+                                                <td>N/A</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                                {% if teacher_info.expired_units | length == 0 %}
+                                    <tr class="opaque-loading expired-workout" style="display: none;"><td class="opaque-loading text-center">No Expired Workouts Found!</td></tr>
+                                {% else %}
+                                    {% for unit in teacher_info.expired_units %}
+                                        <tr class='expired-workout' style="display: none;">
+                                            <td>
+                                                {% if unit.build_type == 'escape_room' %}
+                                                    <a href="/teacher/escape-room/{{ unit['id'] }}" class="btn-fa text-truncate" target="_blank" style="width: 250px; margin: auto; display: block;">
+                                                        <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                {% elif unit.build_type == 'unit' %}
+                                                    <a href="/teacher/assignment/{{ unit['id'] }}" class="btn-fa text-truncate" target="_blank" style="width: 250px; margin: auto; display: block;">
+                                                        <i class="fa fa-book"></i> {{ unit.name }}</a>
+                                                {% endif %}
+                                            </td>
+                                            <td><div class="description">{{ unit.description }}</div></td>
+                                            <td class="timestampField">{{ unit.created }}</td>
+                                            {% if 'expires' in unit %}
+                                                <td class="timestampField">{{ unit.expires }}</td>
+                                            {% else %}
+                                                <td>N/A</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </table>
+                        </div> <!-- End Workout Table Container -->
                     </div>
                     <div id="build-workout-tab" class="tab-pane fade" role="tabpanel" aria-labelledby="build-workout-tab-btn">
                         <div class="card-container">

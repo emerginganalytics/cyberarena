@@ -43,7 +43,7 @@ def teacher_home():
                             'build_count': unit['workspace_settings']['count'],
                             'build_type': unit['build_type']
                         }
-                        if (int(time.time()) - (int(creation_ts) + (int(expire_ts) * 60 * 60 * 24))) < 0:
+                        if (int(get_current_timestamp_utc()) - int(expire_ts)) < 0:
                             active_units.append(unit_info)
                         else:
                             expired_units.append(unit_info)
@@ -58,7 +58,7 @@ def teacher_home():
                         }
                         expired_units.append(unit_info)
             teacher_info['active_units'] = sorted(active_units, key=lambda i: (i['created']), reverse=True)
-            teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['timestamp']), reverse=True)
+            teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['created']), reverse=True)
 
         # Get list of workouts from datastore catalog
         specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG.value).query().fetch())

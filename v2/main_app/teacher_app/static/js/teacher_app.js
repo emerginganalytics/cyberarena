@@ -239,3 +239,36 @@ function hide_spec_groups(){
     // Display selected group
     document.getElementById(filter_group).style.display = 'block';
 }
+
+function filterWorkouts(filter_group) {
+    var filter, table, tr, i, activeWorkoutBtn, expiredWorkoutBtn;
+    filter = filter_group.toLowerCase();
+    table = document.getElementById('teacher-workout-table');
+    tr = table.getElementsByTagName('tr');
+    activeWorkoutBtn = document.getElementById('filterActiveWorkouts');
+    expiredWorkoutBtn = document.getElementById('filterExpiredWorkouts');
+    if (filter_group === 'active-workout') {
+        activeWorkoutBtn.classList.add('active-filter', 'badge-primary');
+        activeWorkoutBtn.classList.remove('badge-light');
+        expiredWorkoutBtn.classList.remove('active-filter', 'badge-primary');
+        expiredWorkoutBtn.classList.add('badge-light');
+    } else if (filter_group === 'expired-workout'){
+        activeWorkoutBtn.classList.add('badge-light');
+        activeWorkoutBtn.classList.remove('active-filter', 'badge-primary');
+        expiredWorkoutBtn.classList.add('active-filter', 'badge-primary');
+        expiredWorkoutBtn.classList.remove('badge-light');
+    }
+    for (i = 0; i < tr.length; i++){
+        if (filter === 'all'){
+            tr[i].style.display = '';
+        } else {
+            if (tr[i].classList.contains(filter)) {
+                tr[i].style.display = '';
+            } else {
+                if (i !== 0){
+                    tr[i].style.display = 'none';
+                }
+            }
+        }
+    }
+}

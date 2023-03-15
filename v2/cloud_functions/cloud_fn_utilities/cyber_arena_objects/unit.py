@@ -95,7 +95,8 @@ class Unit:
     def _create_and_build_workouts(self):
         workout_datastore = DataStoreManager()
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
-        workout_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        workout_query = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query()
+        workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == self.unit_id]
         if workout_list:
             if len(workout_list) >= count:
                 self.logger.error(f"Requested build for unit {self.unit_id} failed; Unit is at max capacity")
