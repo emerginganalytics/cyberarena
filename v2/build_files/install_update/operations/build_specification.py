@@ -148,6 +148,7 @@ class BuildSpecification:
             self._upload_file_to_cloud(file, cloud_directory)
 
     def _upload_folder_to_cloud(self, local_directory, cloud_directory, extension=None):
+        print(f"Uploading local {local_directory} to cloud {cloud_directory}...")
         for item in os.scandir(local_directory):
             if item.is_dir():
                 for file in os.scandir(item.path):

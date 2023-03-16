@@ -145,8 +145,7 @@ class ComputeManager:
 
         # Now stop the server before completing
         self.logger.info(f'Stopping {self.server_name}')
-        self.compute.instances().stop(project=self.env.project, zone=self.env.zone, instance=self.server_name).execute()
-        self.state_manager.state_transition(self.s.STOPPED)
+        self.stop()
 
     def start(self):
         """
@@ -167,31 +166,43 @@ class ComputeManager:
                 self.logger.info(f'Sent job to start {self.server_name}, and waiting for response')
             except HttpError as e:
                 if e.resp.status == 400:
-                    self.logger.info(f"Server {self.server_name} is still building. Trying again...")
+                    self.logger.error(f"Server {self.server_name} is still building.")
+                    break
                 elif e.resp.status == 409:
                     self.state_manager.state_transition(self.s.BROKEN)
                     self.logger.error(f"Server {self.server_name} does not exist! Exiting function.")
-                    return
+                    break
             except BrokenPipeError:
                 self.logger.info(f"Broken pipe error when trying to start {self.server_name} Trying again...")
+                i += 1
+                continue
             except Exception as e:
                 error_message = e.args[0] if len(e.args) > 0 else "NO ERROR MESSAGE PROVIDED"
                 self.logger.warning(f"Unknown error occurred: {error_message}. Continuing to try again.")
-            if not start_success:
                 i += 1
-            time.sleep(10)
-        self._wait_to_finish(response['id'])
+                continue
+            try:
+                self._wait_to_finish(response['id'])
+                start_success = True
+            except timeout:
+                i += 1
+                self.logger.warning(f"Response timeout {i} of {self.MAX_TIMEOUT_ITERATIONS} for stopping server "
+                                    f"{self.server_name}.")
 
-        # If the server is an external proxy, then register its DNS name
-        dns_hostname = self.server_spec.get('dns_hostname', None)
-        if dns_hostname:
-            dns_record = dns_hostname + self.env.dns_suffix + "."
-            self.dns_manager.add_dns_record(dns_record, self.server_name)
-            if self.server_name == f'{self.parent_build_id}-display':
-                self._wait_for_guacamole(dns_record[:-1])
+        if start_success:
+            # If the server is an external proxy, then register its DNS name
+            dns_hostname = self.server_spec.get('dns_hostname', None)
+            if dns_hostname:
+                dns_record = dns_hostname + self.env.dns_suffix + "."
+                self.dns_manager.add_dns_record(dns_record, self.server_name)
+                if self.server_name == f'{self.parent_build_id}-display':
+                    self._wait_for_guacamole(dns_record[:-1])
 
-        self.state_manager.state_transition(self.s.RUNNING)
-        self.logger.info(f"Finished starting {self.server_name}")
+            self.state_manager.state_transition(self.s.RUNNING)
+            self.logger.info(f"Finished starting {self.server_name}")
+        else:
+            self.state_manager.state_transition(self.s.BROKEN)
+            self.logger.error(f"Timeout or other error trying to start {self.server_name}")
 
     def stop(self):
         """
@@ -210,13 +221,24 @@ class ComputeManager:
                 except HttpError as err:
                     self.logger.error(f"{err.content}")
                     self.state_manager.state_transition(self.s.BROKEN)
-                    return
+                    break
                 except BrokenPipeError:
                     i += 1
-            self._wait_to_finish(response['id'])
+                    continue
+                try:
+                    self._wait_to_finish(response['id'])
+                    stop_success = True
+                except timeout:
+                    i += 1
+                    self.logger.warning(f"Response timeout {i} of {self.MAX_TIMEOUT_ITERATIONS} for stopping server "
+                                        f"{self.server_name}.")
 
-            self.state_manager.state_transition(self.s.STOPPED)
-            self.logger.info(f"Finished stopping {self.server_name}")
+            if stop_success:
+                self.state_manager.state_transition(self.s.STOPPED)
+                self.logger.info(f"Finished stopping {self.server_name}")
+            else:
+                self.state_manager.state_transition(self.s.BROKEN)
+                self.logger.error(f"Timeout trying to stop {self.server_name}")
         else:
             self.logger.info(f"Server {self.server_name} is not running")
 
