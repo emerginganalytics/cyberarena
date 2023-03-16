@@ -210,6 +210,25 @@ class AssessmentQuestionSchema(Schema):
     complete = fields.Bool(missing=False)
 
 
+class LMSQuizObject(Schema):
+    name = fields.Str(required=True, description="The name of the quiz, should be the same as the workout")
+    type = fields.Str(required=False, description="Practice quiz or assignment")
+    points = fields.Float(required=False, description="Points given for assignment")
+    due_at = fields.DateTime(required=False, description="Due date for assignment")
+    description = fields.Str(required=False, description="Description of assignment")
+    time_limit = fields.Float(required=False, description="Time for assignment")
+    allowed_attempts = fields.Float(required=False, description="Attempts available for assignment, -1 is unlimited")
+    question = fields.Nested('LMSQuizQuestions', many=True)
+
+
+class LMSQuizQuestions(Schema):
+    name = fields.Str(required=False, description="Question name")
+    text = fields.Str(required=False, description="Question text")
+    type = fields.Str(required=False, description="Question type")
+    points = fields.Float(required=False, description="Points")
+    answer = fields.Str(required=False, description="Question answer")
+
+
 class EscapeRoomSchema(Schema):
     question = fields.Str(required=True, description="The door to open in the escape room")
     answer = fields.Str(description="Answer from the top level-question")
