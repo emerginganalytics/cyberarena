@@ -50,8 +50,8 @@ class ComputeManager:
         if not self.server_spec:
             self.logger.error(f"No record exists for compute record {server_name}")
             raise LookupError
-        self.parent_build_id = self.server_spec.get('parent_id', None)
         self.parent_build_type = self.server_spec.get('parent_build_type', None)
+        self.parent_build_id = self.server_spec.get('parent_id', None)
         if self.parent_build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:
             parent_key_type = DatastoreKeyTypes.WORKOUT
         elif self.parent_build_type in [BuildConstants.BuildType.FIXED_ARENA]:
@@ -62,8 +62,13 @@ class ComputeManager:
         else:
             self.logger.error(f"Unsupported build type {self.parent_build_type}")
             parent_key_type = DatastoreKeyTypes.WORKOUT
-        self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type,
-                                            env_dict=self.env_dict)
+        if self.parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
+            parent_build_id = self.server_spec.get('fixed_arena_class_id', None)
+            self.assessment = AssessmentManager(build_id=parent_build_id, key_type=parent_key_type,
+                                                env_dict=self.env_dict)
+        else:
+            self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type,
+                                                env_dict=self.env_dict)
         self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):

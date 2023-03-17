@@ -45,12 +45,13 @@ def home():
 @fixed_arena_app.route('/class/<build_id>', methods=['GET'])
 def class_landing(build_id):
     auth_config = cloud_env.auth_config
-    attack_yaml = DataStoreManager().get_attack_specs()
+    attack_spec_query = DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
+    attack_specs = list(attack_spec_query.fetch())
     fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
     if fa_class:
         workspaces = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
                                                      parent_id=fa_class.key.name)
         return render_template('fixed_arena_class.html', auth_config=auth_config, fixed_arena_class=fa_class,
-                               workspaces=workspaces, attack_spec=attack_yaml, main_app_url=cloud_env.main_app_url)
+                               workspaces=workspaces, attack_spec=attack_specs, main_app_url=cloud_env.main_app_url)
     abort(404)
 

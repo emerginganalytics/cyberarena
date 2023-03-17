@@ -64,12 +64,15 @@ class FixedArena(MethodView):
         action = recv_data.get('action', None)
         # Send build/rebuild request
         if build_id and action in [str(self.actions.BUILD.value), str(self.actions.REBUILD.value)]:
-            fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                           file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
-            build_spec = yaml.safe_load(fixed_arena_yaml)
-            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
-            build_spec_to_cloud.commit()
-            return self.http_resp(code=200).prepare_response()
+            build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=build_id).get()
+            if build_spec:
+                """
+                fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
+                build_spec = yaml.safe_load(fixed_arena_yaml)
+                """
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit()
+                return self.http_resp(code=200).prepare_response()
         # Bad request; Either no build_id was found or received an invalid build action
         return self.http_resp(code=400).prepare_response()
 

@@ -197,9 +197,8 @@ class FixedArenaClass:
                     ComputeManager(server, env_dict=self.env_dict).delete()
                 except LookupError:
                     logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Could not find server record "
-                                  f"for {server}. Marking Fixed Arena Classroom record as broken.")
-                    self.state_manager.state_transition(self.s.BROKEN)
-                    return
+                                  f"for {server}. Ignoring server ...")
+                    continue
             else:
                 self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.DELETE.value),
                                         build_id=server,
