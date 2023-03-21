@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Johnny Hash{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='css/johnnyhash.css')}}">
+{% endblock %}
+{% block nav_title %}Hash It Out{% endblock %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                 <a class='nav-link text-center' href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
+                    <i class="fa fa-laptop icon-light"></i>
+                    <span>MD5</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <a class="nav-item btn top-navbar-btn login" href="{{ url_for('johnnyhash.login', build_id=build_id) }}">
+                <i class="fa fa-user-circle-o icon-light"></i>
+                <span>Login</span>
+            </a>
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <main class="col main pt-3 mt-3 h-100">
+        <div class="overflow-auto">
+            <div class="tab-content">
+                <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                    <div class="summary-container">
+                        <h1>Hash It Out ...</h1>
+                        <hr>
+                        <p>
+                            Johnny from IT has been having too much fun at work today and the boss wants you to check his work.
+                            To avoid confrontation, after Johnny leaves, see if you can find out what's so funny. To help get in,
+                            you are given his <b>username, johnny</b>, the <b>MD5 hash</b>, <i>"{{ pass_hash }}"</i> and the company
+                            policy. You take a look at his desk and you are fairly certain you have enough information to guess what
+                            his password is.<br>
+                        </p>
+                    </div>
+                    <div class="image-container">
+                        <h2>Johnny's Desk: </h2>
+                        <img src="{{ url_for('johnnyhash.static', filename='imgs/clue.jpg') }}" alt="Desktop Clue"
+                             class="content-img" />
+                    </div>
+                    <div class="content-container">
+                        <table id="hash-results-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Password</th>
+                                    <th scope="col">MD5 Hash</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1Ornn1995Hacker</td>
+                                    <td>274ae23443e743a94e82eff99f4a68f8</td>
+                                </tr>
+                            </tbody>
+                        </table><!--end hash-results-table-->
+                    </div> <!-- End content-container-->
+                    <div id="create-hashes-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-hashes-modal"
+                         aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-slideout modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Get MD5 Hash</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">x</span>
+                                    </button>
+                                </div><!--End modal-header-->
+                                <div class="modal-body">
+                                    <form id="get-hash-form" action="">
+                                        <div class="form-group" id="input-hash-group">
+                                            <div class="input-group input-group-sm mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup0">Password</span>
+                                                </div>
+                                                <input type="text" class="form-control" aria-label="Password"
+                                                       aria-describedby="inputGroup0" required></input>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div><!--end modal-body-->
+                            </div><!--End modal-content-->
+                        </div><!--end modal-dialog-->
+                    </div><!--end create-hashes-modal-->
+                </div> <!--end home-tab -->
+            </div><!--end tab-content-->
+        </div><!--end overflow-auto-->
+    </main><!--end main-->
+{% endblock %}

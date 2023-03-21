@@ -27,8 +27,7 @@ def hash_it_out(build_id):
                     break
         elif workout.get('assessment', None):
             password_hash = workout['assessment']['questions'][0]['question']
-        return render_template('hashitout.html', pass_hash=password_hash, build_id=build_id, upload_error='',
-                               hashed_passwords=[])
+        return render_template('hashitout-v2.html', pass_hash=password_hash, build_id=build_id, hashed_passwords=[])
     # TODO: Return error
 
 
