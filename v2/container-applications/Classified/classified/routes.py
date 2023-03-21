@@ -68,8 +68,9 @@ def inspect_login(workout_id):
 def sql_injection(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
-        return render_template('sql_index.html', workout_id=workout_id)
-    return redirect(404)
+        pass
+    return render_template('sql_index.html', workout_id=workout_id)
+    # return redirect(404)
 
 
 @classified_bp.route('/sql-injection/login/<workout_id>', methods=['POST'])

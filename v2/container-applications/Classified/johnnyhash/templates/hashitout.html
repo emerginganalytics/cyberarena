@@ -1,0 +1,136 @@
+{% extends 'johnnyhash_index.jinja' %}
+{% block navblock %}
+    {% if build_id %}
+        <hr>
+        <a href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
+            <i class="fa fa-laptop sidebar-icon"></i>
+            <p class="sidebar-txt">MD5</p>
+        </a>
+        <hr>
+        <a href="{{ url_for('johnnyhash.login', build_id=build_id) }}">
+            <i class="fa fa-user-circle-o sidebar-icon"></i>
+            <p class="sidebar-txt">LOGIN</p>
+        </a>
+        <hr>
+    {% endif %}
+{% endblock navblock %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='styles/johnnyhash-styles.css') }}">
+{% endblock styles_block %}
+{% block content %}
+    <div class="inner-content-wrapper" id="main">
+        <div class="inner-content-wrapper">
+            <h1>Hash It Out...</h1>
+            <hr>
+            <p>
+                Johnny from IT has been having too much fun at work today and the boss wants you to check his work.
+                To avoid confrontation, after Johnny leaves, see if you can find out what's so funny. To help get in,
+                you are given his <b>username, johnny</b>, the <b>MD5 hash</b>, <i>"{{ pass_hash }}"</i> and the company
+                policy. You take a look at his desk and you are fairly certain you have enough information to guess what
+                his password is.<br>
+            </p>
+        </div>
+        <div class="inner-content-wrapper">
+            <h2>Johnny's Desk: </h2>
+            <img src="{{ url_for('johnnyhash.static', filename='img/clue.jpg') }}" alt="clue" class="content-img inner-content-wrapper"/>
+        </div>
+        <div class="inner-content-wrapper md5-wrapper">
+            <div class="list-wrapper md5-policy-list" id="column1">
+                <h2>Company Password Policy: </h2>
+                <ol id="policy-list">
+                    <li>Must contain whole words only</li>
+                    <li>Be a <i>minimum</i> of eight characters long</li>
+                    <li>Must contain at <i>least</i> one upper-case letter</li>
+                    <li>Must contain at least one digit</li>
+                </ol>
+            </div>
+            <div class="md5-form-div" id="column2">
+                <h2>MD5 Generator</h2>
+                <hr>
+                <div>
+                    {% if hashed_passwords %}
+                        <p>Upload another file:</p>
+                            {% if upload_error %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{upload_error}}
+                                </div>
+                            {% endif %}
+                        <form method="POST" action="{{ request.path }}" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <div class="btn" id="selectFile">
+                                    <label for="password_file">Choose File...</label>
+                                </div>
+                                <input type="hidden" name="build_id" id="build_id" value="{{ build_id }}">
+                                <input type="file" name="password_file" id="password_file"/>
+                                <input type="submit" class="btn" value="Upload File" />
+                            </div>
+                        </form>
+                    {% else %}
+                        <p>Choose the password_list.txt document on your computer and click upload:</p>
+                        {% if upload_error %}
+                            <div class="alert alert-danger" role="alert">
+                                {{upload_error}}
+                            </div>
+                        {% endif %}
+                        <form id="fileForm" method="POST" action="{{ request.path }}" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <div class="btn" id="selectFile">
+                                    <label for="password_file" >Choose File...</label>
+                                </div>
+                                <input type="hidden" name="build_id" id="build_id" value="{{ build_id }}">
+                                <input type="file" name="password_file" id="password_file"/>
+                                <input type="submit" class="btn" value="Upload File" />
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="hash-result-wrapper" id="column3">
+                <h2>Hash Results: </h2>
+                <hr>
+                    <table class="hash-result-wrapper">
+                        <thead>
+                            <tr>
+                                <th id="plaintext-th">Plaintext  </th>
+                                <th>MD5 Hash  </th>
+                            </tr>
+                        </thead>
+                        {% if hashed_passwords %}
+                        <tbody>
+                            {% for hashed_password in hashed_passwords %}
+                            <tr>
+                                <td>{{ hashed_password.plaintext }}:</td>
+                                <td>{{ hashed_password.hash }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% endif %}
+                    </table>
+            </div>
+        </div>
+    </div>
+    <div class="inner-content-wrapper">
+        <div class="inner-content-wrapper">
+            <hr>
+            <h2>How do I know I have the right password?</h2>
+            <p>
+                    List all possible password combination in a <i>.txt</i> file hitting enter between each entry.
+                    Upload the file using the form above to calculate the hash for each password. For sake of simplicity
+                    (and time), we will be using an unsalted, MD5 hashing hashing algorithm. If the given hash and the generated
+                    has are equivalent, you have found the password! Now if only there was a place to login with these
+                    credentials ...
+            </p>
+        </div>
+    </div>
+{% endblock content %}
+{% block js_block %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            document.getElementById("selectFile").onclick(function uploadFile() {
+                console.log("Opening File Dialog")
+                var getFile = document.getElementById("password_file");
+                getFile.click();
+            });
+        });
+    </script>
+{% endblock js_block %}
