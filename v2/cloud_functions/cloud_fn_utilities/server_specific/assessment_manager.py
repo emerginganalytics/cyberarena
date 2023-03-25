@@ -98,10 +98,11 @@ class AssessmentManager:
                         SCRIPT_COMMAND=script_command)
                 else:
                     script = StartupScripts.linux_startup_script_env.format(BUILD_ID=self.build_id, URL=self.url)
-                    startup_script = {
-                        'key': 'startup-script',
-                        'value': script
-                    }
+                    if not startup_script:
+                        startup_script = {
+                            'key': 'startup-script',
+                            'value': script
+                        }
                     if 'script_language' in question and question['script_language'] == 'python':
                         script_command = f"python3 /usr/bin/{question['script']}"
                     else:

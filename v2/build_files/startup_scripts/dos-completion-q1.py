@@ -8,8 +8,8 @@ import psutil
 class Assessment:
     QUESTION_NUMBER = '0'
     URL_PREFIX = os.environ.get('URL')
-    BUILD_ID = os.environ.get('build_id')
-    URL = f'{URL_PREFIX}{BUILD_ID}'
+    BUILD_ID = os.environ.get('BUILD_ID')
+    URL = f'http://{URL_PREFIX}{BUILD_ID}'
 
 
 def assess():
@@ -17,21 +17,20 @@ def assess():
     current_time = time.time()
     if current_time - last_reboot > 300:
         current_cpu_percent = psutil.cpu_percent(interval=1)
+        print(current_cpu_percent)
         if current_cpu_percent >= 40.0:
             return True
     return False
 
 
 def mark_complete():
-    complete_file = 'signal_complete'
-    url = os.environ.get(Assessment.URL)
     q_key = os.environ.get(f'Q{Assessment.QUESTION_NUMBER}_KEY')
     data = {
         'question_id': q_key,
     }
-    response = requests.put(url, json=data)
+    response = requests.put(Assessment.URL, json=data)
     if response and response.status_code == 200:
-        open(complete_file, 'a').close()
+        print(response.json())
 
 
 if __name__ == '__main__':
