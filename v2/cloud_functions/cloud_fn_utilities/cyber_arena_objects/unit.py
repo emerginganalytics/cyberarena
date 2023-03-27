@@ -36,7 +36,7 @@ class Unit:
         self.env_dict = self.env.get_env()
         self.logger = Logger("cloud_functions.unit").logger
         self.s = UnitStates
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.unit_id)
         self.unit = self.ds.get()
         if not self.unit:

@@ -1,3 +1,4 @@
+canvasapi==3.0.0
 google.cloud
 google-api-core
 google-cloud-storage
@@ -8,4 +9,3 @@ google-cloud-runtimeconfig
 google-cloud-logging
 pyyaml
 pyAesCrypt
-canvasapi==3.0.0

@@ -25,7 +25,7 @@ class HourlyMaintenance:
         self.debug = debug
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.env_dict = self.env.get_env()
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.fa_state_manager = FixedArenaStateManager()
         self.ds_units = DataStoreManager(key_type=DatastoreKeyTypes.UNIT)
         self.ds_classes = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)

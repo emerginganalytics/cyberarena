@@ -33,7 +33,7 @@ class CyberArenaAgent:
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.env_dict = self.env.get_env()
         self.ds_manager = DataStoreManager()
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.debug = debug
 
     def send_command(self, event_attributes):

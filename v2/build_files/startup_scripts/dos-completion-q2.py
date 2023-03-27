@@ -9,7 +9,7 @@ class Assessment:
     QUESTION_NUMBER = '1'
     URL_PREFIX = os.environ.get('URL')
     BUILD_ID = os.environ.get('BUILD_ID')
-    URL = f'http://{URL_PREFIX}{BUILD_ID}'
+    URL = f'{URL_PREFIX}{BUILD_ID}'
 
 
 def assess():
@@ -30,12 +30,11 @@ def mark_complete():
     }
     response = requests.put(Assessment.URL, json=data)
     if response and response.status_code == 200:
-        print(response.json())
+        print('Workout Complete!')
 
 
 if __name__ == '__main__':
     if assess():
         mark_complete()
-        print('Workout Complete')
     else:
         print("Incomplete")

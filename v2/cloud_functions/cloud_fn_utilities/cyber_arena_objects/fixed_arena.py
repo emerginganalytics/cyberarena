@@ -34,7 +34,7 @@ class FixedArena:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.s = FixedArenaStateManager.States
-        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.state_manager = FixedArenaStateManager(initial_build_id=self.fixed_arena_id)
         self.vpc_manager = VpcManager(build_id=self.fixed_arena_id, env_dict=self.env_dict)
         self.firewall_manager = FirewallManager(env_dict=self.env_dict)

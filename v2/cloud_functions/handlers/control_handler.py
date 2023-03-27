@@ -30,7 +30,7 @@ class ControlHandler:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         self.event_attributes = event_attributes
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.action = self.event_attributes.get('action', None)
         self.cyber_arena_object = self.event_attributes.get('cyber_arena_object', None)
         self.build_id = self.event_attributes.get('build_id', None)

@@ -23,7 +23,7 @@ class QuarterHourlyMaintenance:
         self.env_dict = self.env.get_env()
         self.ds_workouts = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
         self.ds_fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)
-        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
 
     def run(self):
         self._stop_lapsed()

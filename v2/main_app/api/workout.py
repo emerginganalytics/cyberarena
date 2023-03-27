@@ -27,7 +27,7 @@ class Workout(MethodView):
     def __init__(self):
         self.key_type = DatastoreKeyTypes.WORKOUT.value
         self.env = CloudEnv()
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value, env_dict=self.env.get_env())
         self.handler = PubSub.Handlers
         self.http_resp = HttpResponse
         self.workout: dict = {}
@@ -104,8 +104,7 @@ class Workout(MethodView):
         Change build state based on action (START, STOP, NUKE, etc)
         """
         if build_id:
-            args = request.args
-            if args:  # Check what action is being requested for current workout
+            if args := request.args:  # Check what action is being requested for current workout
                 action = args.get('action', None)
                 valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value,
                                  PubSub.Actions.EXTEND_RUNTIME.value]
@@ -131,17 +130,17 @@ class Workout(MethodView):
                                                     cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()
-            elif request.json:  # Check if question response is submitted
-                recv_data = request.json
-                question_id = recv_data.get('question_id', None)
-                response = recv_data.get('response', None)
-                check_auto = recv_data.get('check_auto', False)
-                if question_id:
+            elif recv_data := request.json:  # Check if question response is submitted
+                if question_id := recv_data.get('question_id', None):
                     self.logger.info(f"PUT request question response for id {question_id}")
+                    print(f'PUT request question response for id {question_id}')
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     if self.workout:
+                        response = recv_data.get('response', None)
+                        check_auto = recv_data.get('check_auto', False)
                         correct, update = self._evaluate_question(question_id, response, check_auto)
+                        print(f'Correct: {correct}; Update: {update}')
                         if correct and update:
                             ds_workout.put(self.workout)
                         # Clean up sensitive data from return object
