@@ -15,13 +15,18 @@ __status__ = "Testing"
 
 
 class LMS:
-    def __init__(self, url, api_key, course_code):
+    def __init__(self, url, api_key, course_code, build):
         self.url = url
         self.api_key = api_key
         self.course_code = course_code
+        self.build = build
         self.students = []
-        self.quiz = []
-        self.question = []
 
     def get_class_list(self):
         raise NotImplementedError("get_class_list not implemented for this object.")
+
+    def create_quiz(self):
+        raise NotImplementedError("create_quiz not implemented for this object.")
+
+    def grade_student_quiz(self):
+        raise NotImplementedError("create_quiz not implemented for this object.")

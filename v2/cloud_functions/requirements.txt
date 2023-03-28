@@ -1,3 +1,4 @@
+canvasapi==3.0.0
 google.cloud
 google-api-core==2.11.0
 google-cloud-storage

@@ -99,8 +99,12 @@ class BuildSpecification:
         spec_file = str(input(f"What is the directory and filename path to the spec file "
                               f"(do not include the specs/plaintext path)? "))
         filename = f"build_files/specs/plaintext/{spec_file}"
-        with open(filename) as f:
-            spec = yaml.safe_load(f)
+        try:
+            with open(filename) as f:
+                spec = yaml.safe_load(f)
+        except FileNotFoundError:
+            print(f"Error: the file {filename} was not found!")
+            return
         # If the spec is not a valid schema. This next function will throw an error.
         if not self._validate_spec(spec):
             return

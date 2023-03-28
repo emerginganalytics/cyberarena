@@ -159,6 +159,13 @@ class BuildConstants:
         COMPLETED_DELETING_SERVERS = 71
         DELETED = 72
 
+    class LMS(str, Enum):
+        CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+
+    CANVAS_QUESTION_TYPES = ['fill_in_multiple_blanks_question', 'multiple_answers_question',
+                             'multiple_choice_question', 'true_false_question']
+
 
 class WorkoutStates(Enum):
     START = 0
