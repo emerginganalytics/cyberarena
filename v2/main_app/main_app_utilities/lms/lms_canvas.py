@@ -25,3 +25,10 @@ class LMSCanvas(LMS):
     def get_class_list(self):
         self.students = self.course.get_users(enrollment_type=['student'])
         return self.students
+
+    def create_quiz(self):
+        self.quiz = self.course.create_quiz()
+        self.question =  self.quiz.create_question()
+
+    def grade_student_quiz(self):
+

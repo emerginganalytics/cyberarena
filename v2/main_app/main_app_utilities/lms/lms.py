@@ -20,6 +20,8 @@ class LMS:
         self.api_key = api_key
         self.course_code = course_code
         self.students = []
+        self.quiz = []
+        self.question = []
 
     def get_class_list(self):
         raise NotImplementedError("get_class_list not implemented for this object.")
