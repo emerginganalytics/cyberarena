@@ -31,7 +31,6 @@ class SetupManager:
     def run(self):
         if self.selection == SetupOptions.FULL:
             BaseBuild(project=self.project).run()
-            EnvironmentVariables(project=self.project).run()
             cyber_arena_app = CyberArenaApp()
             app_deployed = cyber_arena_app.deploy_main_app()
             function_deployed = cyber_arena_app.deploy_cloud_functions()

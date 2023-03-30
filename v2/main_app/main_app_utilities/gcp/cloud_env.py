@@ -29,7 +29,6 @@ class CloudEnv:
             self.region = self.env_dict['region']
             self.zone = self.env_dict['zone']
             self.dns_suffix = self.env_dict['dns_suffix']
-            self.script_repository = self.env_dict['script_repository']
             self.spec_bucket = self.env_dict['spec_bucket']
             self.api_key = self.env_dict['api_key']
             self.custom_dnszone = self.env_dict['custom_dnszone']
@@ -50,7 +49,6 @@ class CloudEnv:
                     self.region = myconfig.get_variable('region').value.decode("utf-8")
                     self.zone = myconfig.get_variable('zone').value.decode("utf-8")
                     self.dns_suffix = myconfig.get_variable('dns_suffix').value.decode("utf-8")
-                    self.script_repository = myconfig.get_variable('script_repository').value.decode("utf-8")
                     self.api_key = myconfig.get_variable('api_key').value.decode("utf-8")
                     self.custom_dnszone = myconfig.get_variable('dnszone')
                     if self.custom_dnszone is not None:

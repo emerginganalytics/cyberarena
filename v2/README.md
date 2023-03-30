@@ -15,6 +15,7 @@
     4. Get or create API credentials to use in the main application by going to 
         https://console.cloud.google.com/apis/credentials and selecting the default credential or clicking on 
         Create Credentials and selecting API key. Copy this API key. You will need to use this when deploying the application.
+    5. The URL you use for the main application will need to be added to the list of authorized domains in the Firebase Console: https://console.firebase.google.com/u/0/project/<PROJECT-NAME>/authentication/settings.
 6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/ - You will use this to run setup.py as described in the deployment section below.
 
 ## Deployment
