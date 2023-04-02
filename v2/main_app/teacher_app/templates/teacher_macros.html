@@ -70,6 +70,25 @@
                                 <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
                                 <label for="build-count-{{ loop.index }}">Enter max number of students</label>
                             </div>
+                            {% if spec.lms %}
+                            <div style="border-top: 1px solid #e6e6e6; padding: 3px;">
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
+                                <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="quiz-due-date"
+                                       type="datetime-local" onchange="validateDateTime(this)">
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz-points-{{ loop.index }}">How Many Points: </label>
+                                <input id="quiz-points-{{ loop.index }}" class="form-control" name="quiz-points"
+                                       type="number" >
+                            </div>
+                            <div class="form-group">
+                                <label for="quiz-attempts-{{ loop.index }}">Number of Attempts (-1 = unlimited): </label>
+                                <input id="quiz-attempts-{{ loop.index }}" class="form-control" name="quiz-attempts"
+                                       type="number" >
+                            </div>
+                            {% endif %}
                             <div class="d-flex justify-content-center">
                                 <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
                             </div>
