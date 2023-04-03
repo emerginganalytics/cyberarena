@@ -1,0 +1,34 @@
+{% extends "v2-base.html" %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            <li class="nav-item">
+                <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+  <form action='{{ url_for("leave_comment") }}' method="POST">
+      <label for="Email">Email</label><br>
+      <input type="text" id="email" name="email"><br><br>
+      <label for="Subject">Subject</label><br>
+      <input type="text" id="subject" name="subject"><br><br>
+      <label for="Comment">Comment</label><br>
+      <input type="text" id="comment" name="comment"><br><br>
+      <input type="submit" value="Submit">
+  </form>
+
+{% endblock %}

@@ -1,8 +1,9 @@
 import json
 import logging as logger
-from flask import abort, Flask, jsonify, redirect, render_template, request, session
+from flask import abort, Flask, jsonify, redirect, render_template, request, session, url_for
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from cloud_fn_utilities.send_mail.send_mail import SendMail
 from main_app_utilities.gcp.datastore_manager import *
 
 # App Blueprints
@@ -80,12 +81,15 @@ def logout():
 @app.route('/leave_comment', methods=['POST'])
 def leave_comment():
     if request.method == 'POST':
-        comment_email = request.form['comment_email']
-        comment_subject = request.form['comment_subject']
-        comment_text = request.form['comment_text']
-        # store_comment(comment_email, comment_subject, comment_text)
+        user_email = request.form['email']
+        comment_subject = request.form['subject']
+        comment_text = request.form['comment']
+        attachment = request.files['image']
 
-        return redirect('/')
+        SendMail().help_form(usr_email=user_email, usr_subject=comment_subject,
+                             usr_message=comment_text, usr_image=attachment)
+
+        return redirect(request.referrer)
 
 
 @app.route('/no-workout', methods=['GET', 'POST'])
