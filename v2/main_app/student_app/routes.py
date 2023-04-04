@@ -110,9 +110,12 @@ def workout_view(build_id):
             connections = _generate_connection_urls(workout_info)
             if workout_info.get('servers', None):
                 for server in workout_info['servers']:
-                    entry_point = server.get('human_interaction', None)
-                    if entry_point:
+                    if server.get('human_interaction', None):
                         server['url'] = connections['server'].get(server['name'], None)
+                    else:
+                        if dns_host_suffix := server['nics'][0].get('dns_host_suffix', None):
+                            server['nics'][0]['host_dns'] = f'{build_id}-{dns_host_suffix}{cloud_env.dns_suffix}'
+
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
                                    server_list=server_list, project_id=cloud_env.project)

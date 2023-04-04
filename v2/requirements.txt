@@ -2,9 +2,9 @@ canvasapi==3.0.0
 google.cloud
 google-api-core
 google-cloud-storage
-google-cloud-datastore==2.14.0
-google-api-python-client==2.80.0
-google-cloud-pubsub==2.15.0
+google-cloud-datastore==2.15.1
+google-api-python-client==2.83.0
+google-cloud-pubsub==2.15.2
 google-cloud-runtimeconfig
 google-cloud-logging
 pyyaml

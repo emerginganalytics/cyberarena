@@ -6,6 +6,7 @@ from sendgrid.helpers.mail import *
 from templates import Templates
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+import base64
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -28,14 +29,18 @@ class SendMail:
         self.sg = SendGridAPIClient(api_key=self.sendgrid_api_key)
         self.dns_suffix = self.config.get_variable('dns_suffix').value.decode("utf-8")
 
-    def send_email(self, eml_subject, eml_to, eml_content):
+    def send_email(self, eml_subject, eml_to, eml_content=None, eml_attachment=None):
         message = Mail()
         message.from_email = From(
             email=f"no-reply@trojan-cybergym.org" #{self.dns_suffix}"
         )
         message.subject = eml_subject
-        message.content = eml_content
         message.to = eml_to
+
+        if eml_content:
+            message.content = eml_content
+        if eml_attachment:
+            message.attachment = eml_attachment
 
         try:
             response = self.sg.send(message)
@@ -64,19 +69,27 @@ class SendMail:
         except Exception as e:
             print(e)
 
-    def help_form(self, user_msg, user_eml):
-
+    def help_form(self, usr_email, usr_subject, usr_message, usr_image=None):
         admins = self.ds.get_admins()
         eml_to = []
         for admin in admins:
             eml_to.append(To(email=admin))
 
+        eml_subject = Subject(usr_subject)
         eml_content = Content(
             mime_type="text",
-            content=f"{user_msg}\n"
-                    f"student: {user_eml}\n"
-                    f"workout: "  # included in the content will be the student unit and workout
+            content=f"Email from user {usr_email} \n"
+                    f"{usr_message}"
         )
 
-        eml_subject = Subject(f"Help request from {user_eml} on ")
-        self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content)
+        eml_attachment = None
+        if usr_image:
+            data = base64.b64encode(usr_image.read()).decode()
+            eml_attachment = Attachment(
+                file_content=FileContent(data),
+                file_name=FileName(usr_image.filename),
+                file_type=FileType(usr_image.content_type),
+                disposition=Disposition("attachment")
+            )
+
+        self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content, eml_attachment=eml_attachment)

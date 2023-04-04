@@ -42,7 +42,7 @@ class ArenaAuthorizer:
             if not admin_email:
                 logging.error(msg='Error: Admin Email is not set up for this project!')
             else:
-                self.admin_info[self.UserGroups.ADMINS] = [admin_email]
+                self.admin_info[self.UserGroups.ADMINS.value] = [admin_email]
         if self.UserGroups.AUTHORIZED.value not in self.admin_info:
             self.admin_info[self.UserGroups.AUTHORIZED.value] = []
         if self.UserGroups.STUDENTS.value not in self.admin_info:

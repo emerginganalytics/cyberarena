@@ -25,8 +25,8 @@
      <div class="navbar-nav navbar-right">
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
-                <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
-                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
+                   data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
             <li class="nav-item disabled">
                 <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
@@ -265,6 +265,34 @@
                         </div>
                     </div>
                 </div>
+                 <!-- Modal -->
+                <div id="modalContactUs" class="modal fade" role="dialog">
+                    <div class="modal-dialog">
+
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Help Form</h4>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id='contact_form' action='{{ url_for("leave_comment") }}' method="POST" enctype="multipart/form-data">
+                                    <label for="Email">Your Email</label><br>
+                                    <input type="text" id="email" name="email" required><br><br>
+                                    <label for="Subject">Subject</label><br>
+                                    <input type="text" id="subject" name="subject" required><br><br>
+                                    <label for="Comment">Comment</label><br>
+                                    <input type="text" id="comment" name="comment" required><br><br>
+                                    <label for="Image">Please include an image of any errors</label><br>
+                                    <input type="file" id="image" name="image"><br><br>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <input type="submit" form='contact_form' value="Submit">
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End Modal -->
             </div>
         </main>
      </div>

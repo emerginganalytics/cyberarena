@@ -36,7 +36,7 @@ class DataStoreManager:
             use_key = self.key
         obj = self.ds_client.get(use_key)
         i = 0
-        while not obj and i < self.MAX_ATTEMPTS:
+        while not obj and i < self.MAX_ATTEMPTS and key_type != DatastoreKeyTypes.ADMIN_INFO:
             i += 1
             time.sleep(self.WAIT_PERIOD)
             obj = self.ds_client.get(use_key)

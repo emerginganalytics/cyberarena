@@ -7,7 +7,7 @@ As a result of these weaknesses, SSH access should be restricted to only allow a
 From the landing page, connect to the server where indicated to access your lab desktop environment. From here, open a new terminal window, and verify you can login to the following server:
 ```
 ssh cyberarena@10.1.1.51
-password: Let's workout
+password: Let's workout!
 ```
 > :warning: **Blind password prompt**: The password will not be shown as you type.
 
