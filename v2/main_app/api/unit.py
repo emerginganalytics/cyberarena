@@ -12,6 +12,7 @@ from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets, WorkoutStates
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -81,6 +82,9 @@ class Unit(MethodView):
                 'expires': expire_ts
             }
             build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
+            if 'lms_quiz' in build_spec:
+                build_spec = LMSSpecDecorator(build_spec=build_spec).decorate()
+
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
             build_spec_to_cloud.commit(publish=False)
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
