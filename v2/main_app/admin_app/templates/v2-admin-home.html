@@ -16,7 +16,7 @@
             <li class="nav-item">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
-            {% if 'admins' in auth_list %}
+            {% if auth_list.admin %}
                 <li class="nav-item">
                     <a href='/admin/home' class="nav-link text-center">Admin Home</a>
                 </li>
@@ -103,26 +103,26 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {% for user, groups in admin_info.items() %}
-                                       <tr id="{{ user }}">
+                                    {% for user in admin_info %}
+                                       <tr id="{{ user.email }}">
                                            <td class="rowNumber"></td>
                                            <td><input type="checkbox" class="selectUser" value=""></td>
-                                           <td>{{ user }}</td>
+                                           <td>{{ user.email }}</td>
                                            <td style="text-align: left;">
-                                               {% for group in groups %}
-                                                   {% if group == 'students' %}
+                                               {% for group in user['permissions'] %}
+                                                   {% if group == 'student' and user['permissions']['student'] %}
                                                        <div class="badge badge-primary">Student</div>
-                                                   {% elif group == 'admins' %}
+                                                   {% elif group == 'admin' and user['permissions']['admin'] %}
                                                        <div class="badge badge-danger">Admin</div>
-                                                   {% elif group == 'authorized_users' %}
+                                                   {% elif group == 'instructor' and user['permissions']['instructor'] %}
                                                        <div class="badge badge-success">Teacher</div>
-                                                   {% elif group == 'pending' %}
+                                                   {% elif group == 'pending' and user['permissions']['pending'] %}
                                                        <div class="badge badge-warning">Pending</div>
                                                    {% endif %}
                                                {% endfor %}
                                            </td>
                                            <td>
-                                               {{ macros.user_manage(user, groups, 'user' ~ loop.index) }}
+                                               {{ macros.user_manage(user.email, user.permissions, 'user' ~ loop.index) }}
                                            </td>
                                        </tr>
                                     {% endfor %}

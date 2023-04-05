@@ -49,7 +49,7 @@ function filterGroup(filter_group){
     }
 }
 function manage_user(uid){
-    let manageForm, user_modal, user, pending, groups, admin, authorized, student, approve;
+    let manageForm, user_modal, user, pending, groups, admin, instructor, student, approve;
     user_modal = $('#' + uid + 'Modal').modal('toggle');
     manageForm = document.getElementById(uid + 'ManageForm');
     if (manageForm){
@@ -60,25 +60,25 @@ function manage_user(uid){
             approve = manageForm.elements['approve'].checked;
             if (approve){
                 groups = {
-                    'admins': manageForm.elements['admins'].checked,
-                    'authorized': manageForm.elements['authorized'].checked,
-                    'students': manageForm.elements['students'].checked
+                    'admin': manageForm.elements['admin'].checked,
+                    'instructor': manageForm.elements['instructor'].checked,
+                    'student': manageForm.elements['student'].checked,
                 }
             } else {
                 groups = {
-                    'admins': false,
-                    'authorized': false,
-                    'students': false
+                    'admin': false,
+                    'instructor': false,
+                    'student': false
                 }
             }
         } else {
-            admin = manageForm.elements['admins'].checked;
-            authorized = manageForm.elements['authorized'].checked;
-            student = manageForm.elements['students'].checked;
+            admin = manageForm.elements['admin'].checked;
+            instructor = manageForm.elements['instructor'].checked;
+            student = manageForm.elements['student'].checked;
             groups = {
-                'admins': admin,
-                'authorized': authorized,
-                'students': student
+                'admin': admin,
+                'instructor': instructor,
+                'student': student
             }
         }
         let payload = {
@@ -103,13 +103,13 @@ function manage_user(uid){
     }
 }
 function add_user(form_id, modal_id){
-    let userForm, user_modal, user, groups, admin, authorized, student, payload;
+    let userForm, user_modal, user, groups, admin, instructor, student, payload;
     user_modal = $('#' + modal_id).modal('toggle');
     userForm = document.getElementById(form_id);
     groups = {
-        'admins': userForm.elements['admins'].checked,
-        'authorized': userForm.elements['authorized'].checked,
-        'students': userForm.elements['students'].checked
+        'admin': userForm.elements['admin'].checked,
+        'instructor': userForm.elements['instructor'].checked,
+        'student': userForm.elements['student'].checked
     }
     user = userForm.elements['new_user'].value;
     payload = {

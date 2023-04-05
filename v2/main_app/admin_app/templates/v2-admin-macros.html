@@ -1,9 +1,9 @@
 {% macro user_manage(user, groups, uid, user_actions) %}
-    {% if 'students' in groups %}
+    {% if groups.student == True %}
         {% set main_group = 2 %}
-    {% elif 'authorized' in groups %}
+    {% elif groups.instructor == True %}
         {% set main_group = 1 %}
-    {% elif 'admins' in groups %}
+    {% elif groups.admin == True %}
         {% set main_group = 0 %}
     {% else %}
         {% set main_group = 3 %}
@@ -35,18 +35,18 @@
                                 <div class="form-control">
                                     <h6>User Groups: </h6>
                                     <div class="form-check form-check-inline">
-                                        <input class="checkbox" type="checkbox" name="admins"
+                                        <input class="checkbox" type="checkbox" name="admin"
                                                id='checkAdmins-{{ uid }}' value="" disabled>
                                         <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
-                                               name="authorized" value="" disabled>
+                                               name="instructor" value="" disabled>
                                         <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
                                     </div>
                                     <div class="form-check form-check-inline">
                                         <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
-                                               name="students" value="" disabled>
+                                               name="student" value="" disabled>
                                         <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
                                     </div>
                                 </div>
@@ -55,32 +55,32 @@
                                        id="currentUserLevel" value="other" readonly hidden>
                                 <div class="form-control">
                                     <div class="form-check form-check-inline">
-                                        {% if 'admins' in groups %}
-                                            <input class="checkbox" type="checkbox" name="admins" id='checkAdmins-{{ uid }}'
+                                        {% if groups['admin'] == True %}
+                                            <input class="checkbox" type="checkbox" name="admin" id='checkAdmins-{{ uid }}'
                                                    value="" checked>
                                         {% else %}
-                                            <input class="checkbox" type="checkbox" name="admins" id='checkAdmins-{{ uid }}'
+                                            <input class="checkbox" type="checkbox" name="admin" id='checkAdmins-{{ uid }}'
                                                    value="">
                                         {% endif %}
                                         <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        {% if 'authorized_users' in groups %}
+                                        {% if groups['instructor'] %}
                                             <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
-                                                   name="authorized" value="" checked>
+                                                   name="instructor" value="" checked>
                                         {% else %}
                                             <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
-                                                   name="authorized" value="">
+                                                   name="instructor" value="">
                                         {% endif %}
                                         <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        {% if 'students' in groups %}
+                                        {% if groups['student'] %}
                                             <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
-                                                   name="students" value="" checked>
+                                                   name="student" value="" checked>
                                         {% else %}
                                             <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
-                                                   name="students" value="">
+                                                   name="student" value="">
                                         {% endif %}
                                         <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
                                     </div>
@@ -119,15 +119,15 @@
                             <div class="form-control text-center">
                                 <h6>User Groups: </h6>
                                 <div class="form-check form-check-inline">
-                                    <input id="checkAddAdmin" class="checkbox" type="checkbox" name="admins" value="">
+                                    <input id="checkAddAdmin" class="checkbox" type="checkbox" name="admin" value="">
                                     <label for="checkAddAdmin" class="form-check-label">Admin</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input id="checkAddInstructor" class="checkbox" type="checkbox" name="authorized" value="">
+                                    <input id="checkAddInstructor" class="checkbox" type="checkbox" name="instructor" value="">
                                     <label for="checkAddInstructor" class="form-check-label">Instructor</label>
                                 </div>
                                 <div class="form-check form-check-inline">
-                                    <input id="checkAddStudent" class="checkbox" type="checkbox" name="students" value="">
+                                    <input id="checkAddStudent" class="checkbox" type="checkbox" name="student" value="">
                                     <label for="checkAddStudent" class="form-check-label">Student</label>
                                 </div>
                             </div>

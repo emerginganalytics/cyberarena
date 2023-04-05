@@ -4,7 +4,6 @@ from flask import abort, Flask, jsonify, redirect, render_template, request, ses
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.send_mail.send_mail import SendMail
-from main_app_utilities.gcp.datastore_manager import *
 
 # App Blueprints
 from admin_app.routes import admin_app
@@ -47,10 +46,11 @@ def default_route():
 @app.route('/home/')
 def home():
     if 'user_groups' in session:
-        if 'students' in session['user_groups']:
-            return redirect("/student/home")
+        if ArenaAuthorizer.UserGroups.INSTRUCTOR.value in session['user_groups'] \
+                or ArenaAuthorizer.UserGroups.ADMIN.value in session['user_groups']:
+            return redirect('/teacher/home')
         else:
-            return redirect("/teacher/home")
+            return redirect("/student/join/")
     else:
         return redirect('/unauthorized')
 
@@ -60,11 +60,10 @@ def login():
     if request.method == 'POST':
         user_data = request.get_json(force=True)
         if 'user_email' in user_data:
-            arena_auth = ArenaAuthorizer(env_dict=cloud_env.get_env())
-            user_groups = arena_auth.get_user_groups(user_data['user_email'])
-            if user_groups:
+            arena_auth = ArenaAuthorizer()
+            if user := arena_auth.get_user(email=user_data['user_email']):
                 session['user_email'] = user_data['user_email']
-                session['user_groups'] = user_groups
+                session['user_groups'] = user['permissions']
                 logger.info(msg=f"User {user_data['user_email']} logged in")
                 return json.dumps({"redirect": "/home"})
         return json.dumps({'redirect': '/unauthorized'})

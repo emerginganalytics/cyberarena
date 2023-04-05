@@ -182,15 +182,16 @@ class Workout:
 
     def nuke(self):
         """
-        Todo: This is copied over from fixed_arena_class and has not been touched
-        Returns:
+            Deletes all existing servers for current workout and rebuilds
+            using the specification already stored in the Datastore object
+        :return:
         """
-        servers_to_nuke = self._get_servers(for_deletion=True)
-
+        servers_to_nuke = self.ds.get_servers()
         for server in servers_to_nuke:
+            server_name = server.key.name
             if self.debug:
                 try:
-                    ComputeManager(server, env_dict=self.env_dict).nuke()
+                    ComputeManager(server_name=server_name, env_dict=self.env_dict).nuke()
                 except LookupError:
                     continue
             else:
@@ -200,11 +201,11 @@ class Workout:
 
         if not self.state_manager.are_server_builds_finished():
             self.state_manager.state_transition(self.s.BROKEN)
-            self.logger.error(f"Fixed Arena {self.fixed_arena_class_id}: Timed out waiting for server builds to "
+            self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to "
                               f"complete!")
         else:
             self.state_manager.state_transition(self.s.READY)
-            self.logger.info(f"Finished nuking Fixed Arena {self.fixed_arena_class_id}!")
+            self.logger.info(f"Finished nuking Workout {self.workout_id}!")
 
     def extend_runtime(self):
         shutoff_ts = self.workout.get('shutoff_timestamp', None)

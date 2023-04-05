@@ -1,5 +1,3 @@
-import copy
-
 from flask import json, session, request, redirect, url_for
 from flask.views import MethodView
 from api.utilities.decorators import admin_required
@@ -7,7 +5,6 @@ from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
-from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -21,32 +18,20 @@ __status__ = "Testing"
 
 class Users(MethodView):
     def __init__(self):
-        self.env = CloudEnv()
-        self.authorizer = ArenaAuthorizer(env_dict=self.env.get_env())
         self.http_resp = HttpResponse
         self.ds = DataStoreManager()
-        self.admin_info = self.ds.get(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+        self.user_mgr = ArenaAuthorizer()
 
     def get(self, user_id=None):
         """
             Returns auth level of current user
         """
         user_email = session.get('user_email', None)
-        user_groups = self.authorizer.get_user_groups(user_email)
-        authorized = admin = False
-        if user_groups:
-            authorized = True
-            admin = True if ArenaAuthorizer.UserGroups.ADMINS.value in user_groups else False
-            student = True if ArenaAuthorizer.UserGroups.STUDENTS.value in user_groups else False
-            response = {
-                'authorized': authorized,
-                'admin': admin,
-                'student': student
-            }
-            return json.dumps(response)
+        if user := self.user_mgr.get_user(user_email):
+            return json.dumps(user['permissions'])
         else:
             return json.dumps({
-                'authorized': False,
+                'instructor': False,
                 'admin': False,
                 'student': False
             })
@@ -59,52 +44,49 @@ class Users(MethodView):
             user = json_data.get('user', None)
             groups = json_data.get('groups', None)
             pending = json_data.get('pending', False)
+            settings = json_data.get('settings', None)
             if user and groups and pending:
                 approve = json_data.get('approve', True)
-                user = str(user.lower())
-                self._update_users(user, pending, groups, approve)
-                self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+                user_email = str(user.lower())
+                if not self._update_user(user_email, groups, settings, approve):
+                    return self.http_resp(code=404, msg='User not found').prepare_response()
             elif new_user and groups:
-                user = str(new_user.lower())
-                self._add_user(user, groups)
-            self.ds.put(self.admin_info, key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+                user_email = str(new_user.lower())
+                self._add_user(user_email, groups, settings=settings)
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    def _update_users(self, user, pending, groups, approve):
-        user_groups = self.authorizer.UserGroups
-
-        # Get all project users and add/remove input user from select groups
-        admin_info = copy.deepcopy(self.admin_info)
+    def _update_user(self, user_email, groups, settings, approve):
+        user_groups = self.user_mgr.UserGroups
         if approve:
+            permissions = dict()
             for group, value in groups.items():
                 key = user_groups[group.upper()].value
                 if value:
-                    admin_info[key].append(user)
+                    permissions[key] = True
                 else:
-                    if user in admin_info[key]:
-                        admin_info[key].remove(user)
-            if pending:
-                if user in admin_info['pending']:
-                    admin_info['pending'].remove(user)
+                    permissions[key] = False
+            return self.user_mgr.update_user(email=user_email, permissions=permissions,
+                                             settings=settings)
         else:
-            if user in admin_info['pending']:
-                admin_info['pending'].remove(user)
-        # Clean up the new object and return
-        for group in user_groups.ALL_GROUPS.value:
-            self.admin_info[group] = list(set(admin_info[group]))
-        self.admin_info['pending'] = list(set(admin_info['pending']))
+            self.user_mgr.remove_user(email=user_email)
+            return False
 
-    def _add_user(self, user, groups):
-        user_groups = self.authorizer.UserGroups
-        admin_info = copy.deepcopy(self.admin_info)
+    def _add_user(self, user_email, groups, settings):
+        user_groups = self.user_mgr.UserGroups
+        admin = instructor = student = False
         for group, value in groups.items():
-            key = user_groups[group.upper()].value
-            if value:
-                admin_info[key].append(user)
-        if user in admin_info['pending']:
-            admin_info['pending'].remove(user)
-        # Clean up the new object and return
-        for group in user_groups.ALL_GROUPS.value:
-            self.admin_info[group] = list(set(admin_info[group]))
-        self.admin_info['pending'] = list(set(admin_info['pending']))
+            if group == user_groups.ADMIN.value:
+                admin = value
+            elif group == user_groups.INSTRUCTOR.value:
+                instructor = value
+            elif group == user_groups.STUDENT.value:
+                student = value
+        # Check for any settings
+        if settings:
+            self.user_mgr.add_user(email=user_email, admin=admin,
+                                   instructor=instructor, student=student,
+                                   settings=settings)
+        else:
+            self.user_mgr.add_user(email=user_email, admin=admin,
+                                   instructor=instructor, student=student)
