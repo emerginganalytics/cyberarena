@@ -49,8 +49,7 @@ class Workout(MethodView):
                     if not args:
                         return self.http_resp(code=200, data=workout).prepare_response()
                     elif args.get('state', False):
-                        state = workout.get('state', None)
-                        if state:
+                        if state := workout.get('state', None):
                             return self.http_resp(code=200, data={'state': state}).prepare_response()
                         else:
                             return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()

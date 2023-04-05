@@ -15,6 +15,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
     CATALOG = 'v2-catalog'
+    USERS = 'cyberarena-user'
 
 
 class BuildConstants:

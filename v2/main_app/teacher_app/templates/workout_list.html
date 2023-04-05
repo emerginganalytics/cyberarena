@@ -16,7 +16,7 @@
             <li class="nav-item">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
-            {% if 'admins' in auth_list %}
+            {% if auth_list.admin %}
                 <li class="nav-item">
                     <a href='{{ url_for("admin.home") }}' class="nav-link text-center">Admin Home</a>
                 </li>
@@ -148,6 +148,9 @@
                                             {% if unit.assessment %}
                                                 <td>Assessment</td>
                                             {% endif %}
+                                            {% if unit.servers %}
+                                                <td>Nuke</td>
+                                            {% endif %}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -170,14 +173,22 @@
                                                     <td>{{ workout['id'] }}</td>
                                                     <td>{{ workout.student_email }}</td>
                                                     <td>
-                                                        <a class="btn-fa" href="{{ url_for('student_app.workout_view', build_id=workout['id'])}}" target="_blank">
-                                                            <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</a>
+                                                        <button class="btn-fa" onclick="window.open('{{ url_for('student_app.workout_view', build_id=workout['id'])}}')">
+                                                            <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</button>
                                                     </td>
                                                     {% if unit.assessment %}
                                                         <td>
                                                             <button class="btn-fa" data-toggle="modal"
                                                                     data-target="modal_{{ workout['id'] }}_assessment"
                                                                     onclick="show_modal_card('modal_{{ workout['id'] }}_assessment')">View Responses</button>
+                                                        </td>
+                                                    {% endif %}
+                                                    {% if unit.servers %}
+                                                        <td>
+                                                            <button class="btn-fa btn-delete" data-toggle="modal" data-target="modal_{{ workout['id'] }}_nuke"
+                                                                    onclick="show_modal_card('modal_{{ workout['id'] }}_nuke')"
+                                                                    style="min-width: 70px;"><i class="fa fa-rocket"></i>
+                                                            </button>
                                                         </td>
                                                     {% endif %}
                                                 </tr>
@@ -194,6 +205,10 @@
                                 {% if unit.assessment %}
                                     {% set unit_url = unit.api ~ unit['id'] %}
                                     {{ macros.workoutAssessmentModals(workout_list, unit_url) }}
+                                {% endif %}
+                                {% if unit.servers %}
+                                    {% set workout_url = unit.api ~ '/workout' %}
+                                    {{ macros.nuke_workout_modals(workout_list, workout_url) }}
                                 {% endif %}
                             </div> <!-- End modal container divs -->
                         {% endif %}

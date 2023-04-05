@@ -18,13 +18,10 @@ def auth_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         auth = ArenaAuthorizer()
-        user_email = session.get('user_email', None)
-        if user_email:
-            auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.PENDING.value not in auth_list:
+        if user_email := session.get('user_email', None):
+            if auth.authorized(email=user_email, base=auth.UserGroups.STUDENT):
                 return f(*args, **kwargs)
-        else:
-            abort(401)
+        abort(401)
     return decorator
 
 
@@ -33,15 +30,10 @@ def instructor_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         auth = ArenaAuthorizer()
-        user_email = session.get('user_email', None)
-        if user_email:
-            auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.AUTHORIZED.value in auth_list:
+        if user_email := session.get('user_email', None):
+            if auth.authorized(email=user_email, base=auth.UserGroups.INSTRUCTOR):
                 return f(*args, **kwargs)
-            else:
-                abort(401)
-        else:
-            abort(401)
+        abort(401)
     return decorator
 
 
@@ -50,11 +42,8 @@ def admin_required(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         auth = ArenaAuthorizer()
-        user_email = session.get('user_email', None)
-        if user_email:
-            auth_list = auth.get_user_groups(user=user_email)
-            if auth.UserGroups.ADMINS.value in auth_list:
+        if user_email := session.get('user_email', None):
+            if auth.authorized(email=user_email, base=auth.UserGroups.ADMIN):
                 return f(*args, **kwargs)
-            abort(401)
         abort(401)
     return decorator

@@ -2,8 +2,9 @@ from google.cloud import datastore
 from datetime import datetime, timedelta, timezone
 import yaml
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
-from main_app_utilities.globals import Buckets, PubSub
+from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
@@ -36,19 +37,16 @@ action = args.get('action', None)
 class TestFixedArenaWorkout:
     def __init__(self):
         self.env = CloudEnv()
-        self.bm = BucketManager()
 
     def build(self):
-        fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                       file=f"{Buckets.Folders.SPECS}linux-stoc-class.yaml")
-        build_spec = yaml.safe_load(fixed_arena_yaml)
+        build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id='linux-stoc-class').get()
         build_spec['workspace_settings'] = {
             'count': 2,
             'registration_required': False,
             'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
-        build_spec['add_attacker'] = True
+        build_spec['add_attacker'] = False
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
         build_spec_to_cloud.commit()
         fac = FixedArenaClass(build_id=build_spec['id'], debug=True, force=True)

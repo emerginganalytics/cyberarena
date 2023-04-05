@@ -34,13 +34,17 @@ class DataStoreManager:
             use_key = self.ds_client.key(key_type, key_id)
         else:
             use_key = self.key
-        obj = self.ds_client.get(use_key)
+        if obj := self.ds_client.get(use_key):
+            return obj
+        """ TODO: Might need to reconsider this for the front-end as
         i = 0
         while not obj and i < self.MAX_ATTEMPTS and key_type != DatastoreKeyTypes.ADMIN_INFO:
             i += 1
             time.sleep(self.WAIT_PERIOD)
             obj = self.ds_client.get(use_key)
-        return obj
+        return obj 
+        """
+        return False
 
     def put(self, obj, key_type=None, key_id=None):
         if key_type:
