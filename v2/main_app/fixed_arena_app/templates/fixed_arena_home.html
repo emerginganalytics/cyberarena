@@ -198,7 +198,7 @@
                                                     <label for="classType">Class Build:</label>
                                                     <select id="classType" name="build_id" required class="form-control">
                                                         {% for class_spec in class_spec_list %}
-                                                            <option value="{{ class_spec }}">{{ class_spec.upper() }}</option>
+                                                            <option value="{{ class_spec.key.name }}">{{ class_spec.key.name.upper() }}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -237,25 +237,16 @@
                                                 <div class="form-group">
                                                     <label for="stocType">STOC Build:</label>
                                                     <ul style="list-style: none; margin: 0; padding: 0;">
-                                                        <!--Instead of filtering over yaml files, it might be worth filtering over a datastore template instead-->
                                                         {%  for stoc_spec in fixed_arena_spec_list %}
                                                             <li>
-                                                                <input id="{{ stoc_spec }}_spec" type="radio" value="{{ stoc_spec }}" name="build_id" required/>
-                                                                <label for="{{ stoc_spec }}_spec">{{ stoc_spec.upper() }}</label>
+                                                                <input id="{{ stoc_spec.key.name }}_spec" type="radio" value="{{ stoc_spec.key.name }}" name="build_id" required/>
+                                                                <label for="{{ stoc_spec.key.name }}_spec">{{ stoc_spec.key.name.upper() }}</label>
                                                                 <div>
                                                                     <!--STOC description and machine summary (if needed) go here-->
                                                                     <p>A cybersecurity simulation network for CLN partners</p>
                                                                 </div>
                                                             </li>
                                                         {% endfor %}
-                                                        <li>
-                                                            <input id="forensics_spec" type="radio" value="forensics_spec" name="build_id" required/>
-                                                            <label for="forensics_spec">FORENSICS (Example Value)</label>
-                                                            <div>
-                                                                <!--STOC description and machine summary (if needed) go here-->
-                                                                <p>A cybersecurity forensics simulation network for CLN partners</p>
-                                                            </div>
-                                                        </li>
                                                     </ul>
                                                     <input type="number" value="1" hidden readonly name="action">
                                                 </div>

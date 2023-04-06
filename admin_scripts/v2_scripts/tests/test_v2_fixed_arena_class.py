@@ -35,8 +35,9 @@ action = args.get('action', None)
 
 
 class TestFixedArenaWorkout:
-    def __init__(self):
+    def __init__(self, debug=True):
         self.env = CloudEnv()
+        self.debug = debug
 
     def build(self):
         build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id='linux-stoc-class').get()
@@ -47,19 +48,19 @@ class TestFixedArenaWorkout:
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
         build_spec['add_attacker'] = False
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=True)
+        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=self.debug)
         build_spec_to_cloud.commit()
-        fac = FixedArenaClass(build_id=build_spec['id'], debug=True, force=True)
+        fac = FixedArenaClass(build_id=build_spec['id'], debug=self.debug, force=True)
         fac.build()
 
     def start(self):
-        FixedArenaClass(build_id=build_id, debug=True).start()
+        FixedArenaClass(build_id=build_id, debug=self.debug).start()
 
     def stop(self):
-        FixedArenaClass(build_id=build_id, debug=False).stop()
+        FixedArenaClass(build_id=build_id, debug=self.debug).stop()
 
     def delete(self):
-        FixedArenaClass(build_id=build_id, debug=True)
+        FixedArenaClass(build_id=build_id, debug=self.debug)
 
 
 if __name__ == "__main__":

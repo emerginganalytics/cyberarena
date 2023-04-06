@@ -170,11 +170,6 @@
                                 {% for workspace in workspaces %}
                                     {% set student_count = loop.index %}
                                     <tr>
-                                        <!--This is not needed at the moment as a class will either be in a total start or stop state;
-                                        <td><input id="{{ workspace.key.name }}" type="checkbox" value="" name="workspace_id" class="select-workspace"/></td>-->
-                                        <!--<td id="state-container-{{workspace.key.name}}" class="status-indicator-container" data-toggle="tooltip" title="{{workspace.state}}">
-                                            <span class="status-indicator" id="status-indicator-{{workspace.key.name}}" data-workout-state="{{workspace.state}}">
-                                            </span><i class="fa fa-stop-circle" style="color: #1d8037; font-size: 36px;"></i></td>-->
                                         <td>
                                             {% if fixed_arena_class.state == 50 %}
                                                 <i class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="bottom" title="RUNNING"></i>
