@@ -148,12 +148,8 @@ class DataStoreManager:
 
     def get_admins(self):
         """Returns list of emails for admin accounts"""
-        users = list(self.ds_client.query(kind=DatastoreKeyTypes.USERS).fetch())
-        admin_list = []
-        for user in users:
-            if user['permissions']['admin']:
-                admin_list.append(user['email'])
-        return admin_list
+        users = self.ds_client.query(kind=DatastoreKeyTypes.USERS).add_filter('permissions.admin', '=', True)
+        return list(users.fetch())
 
     @staticmethod
     def _create_safe_entity(entity):

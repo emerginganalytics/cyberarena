@@ -60,7 +60,7 @@ class TestFixedArenaWorkout:
         FixedArenaClass(build_id=build_id, debug=self.debug).stop()
 
     def delete(self):
-        FixedArenaClass(build_id=build_id, debug=self.debug)
+        FixedArenaClass(build_id=build_id, debug=self.debug).delete()
 
 
 if __name__ == "__main__":
@@ -71,3 +71,5 @@ if __name__ == "__main__":
         TestFixedArenaWorkout().start()
     elif action == PubSub.Actions.STOP.name:
         TestFixedArenaWorkout().stop()
+    elif action == PubSub.Actions.DELETE.name:
+        TestFixedArenaWorkout().delete()

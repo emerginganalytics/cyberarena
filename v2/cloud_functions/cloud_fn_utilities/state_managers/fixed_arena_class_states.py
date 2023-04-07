@@ -88,7 +88,7 @@ class FixedArenaClassStateManager:
         return self._server_state_check(server_states=[self.server_states.STOPPED.value])
 
     def are_servers_deleted(self):
-        return self._server_state_check(server_states=[self.server_states.DELETING.value])
+        return self._server_state_check(server_states=[self.server_states.DELETED.value])
 
     def _server_state_check(self, server_states):
         wait_time = 0

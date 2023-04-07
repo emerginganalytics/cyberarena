@@ -92,7 +92,7 @@ class SendMail:
         admins = self.ds.get_admins()
         eml_to = []
         for admin in admins:
-            eml_to.append(To(email=admin))
+            eml_to.append(To(email=admin['email']))
 
         eml_subject = Subject(usr_subject)
         eml_content = Content(

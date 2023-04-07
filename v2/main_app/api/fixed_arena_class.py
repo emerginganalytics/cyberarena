@@ -34,8 +34,7 @@ class FixedArenaClass(MethodView):
 
     def get(self, build_id=None):
         if build_id:
-            fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
-            if fa_class:
+            if fa_class := DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get():
                 return self.http_resp(code=200, data=fa_class).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
@@ -53,25 +52,24 @@ class FixedArenaClass(MethodView):
 
         # make sure that no running class already exists for fixed-arena
         if stoc_id and build_count and expire_datetime and build_id:
-            parent_stoc = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=stoc_id).get()
-            if parent_stoc:
+            if parent_stoc := DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=stoc_id).get():
                 if parent_stoc.get('active_class', None):
                     return self.http_resp(code=409, msg='CONFLICT: Class already exists for current class!').prepare_response()
                 # No active class found; Initiate class build
-                fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                               file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
-                build_spec = yaml.safe_load(fixed_arena_yaml)
-                expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
-                build_spec['workspace_settings'] = {
-                    'count': build_count,
-                    'registration_required': registration_required,
-                    'student_emails': [],
-                    'expires': expire_ts
-                }
-                build_spec['add_attacker'] = recv_data.get('add_attacker', False)
-                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
-                build_spec_to_cloud.commit()
-                return self.http_resp(code=200).prepare_response()
+                if build_spec := DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=build_id).get():
+                    expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
+                    build_spec['workspace_settings'] = {
+                        'count': build_count,
+                        'registration_required': registration_required,
+                        'student_emails': [],
+                        'expires': expire_ts
+                    }
+                    build_spec['add_attacker'] = recv_data.get('add_attacker', False)
+                    build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                    build_spec_to_cloud.commit()
+                    return self.http_resp(code=200).prepare_response()
+                else:
+                    return self.http_resp(code=404, msg=f'Invalid specification with id: {build_id}').prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required

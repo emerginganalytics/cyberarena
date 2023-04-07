@@ -41,7 +41,6 @@ class FixedArenaClass:
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.state_manager = FixedArenaClassStateManager(initial_build_id=self.fixed_arena_class_id)
         self.firewall_manager = FirewallManager(env_dict=self.env_dict)
-
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.fixed_arena_class_id)
         self.fixed_arena_class = self.ds.get()
         if not self.fixed_arena_class:

@@ -69,7 +69,7 @@ class DnsManager:
         """
         Deletes a DNS record based on the build_id host name and IP address.
         :param build_id: The Datastore entity build_id, which is also the record host name.
-        :param ip_address: The IP address of of the record to delete.
+        :param ip_address: The IP address of the record to delete.
         :return: None
         """
         dns_name = build_id + self.env.dns_suffix + "."
@@ -87,7 +87,9 @@ class DnsManager:
                 .execute()
         except HttpError as e:
             logging.error(f"Error when trying to delete DNS for {dns_name}: {e.error_details}")
-            raise e
+            # raise e
+            return False
+        return True
 
     def add_active_directory_dns(self, build_id, ip_address, network):
         """

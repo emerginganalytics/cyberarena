@@ -50,6 +50,7 @@ class ComputeManager:
         if not self.server_spec:
             self.logger.error(f"No record exists for compute record {server_name}")
             raise LookupError
+        self.build_type = self.server_spec.get('build_type', None)
         self.parent_build_type = self.server_spec.get('parent_build_type', None)
         self.parent_build_id = self.server_spec.get('parent_id', None)
         if self.parent_build_type in [BuildConstants.BuildType.WORKOUT, BuildConstants.BuildType.ESCAPE_ROOM]:
@@ -63,7 +64,11 @@ class ComputeManager:
             self.logger.error(f"Unsupported build type {self.parent_build_type}")
             parent_key_type = DatastoreKeyTypes.WORKOUT
         if self.parent_build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
-            parent_build_id = self.server_spec.get('fixed_arena_class_id', None)
+            if self.build_type == BuildConstants.BuildType.FIXED_ARENA_WORKSPACE:
+                # Fixed Arena Proxy servers have a build_type <=> parent_build_type
+                parent_build_id = self.server_spec.get('parent_id', None)
+            else:
+                parent_build_id = self.server_spec.get('fixed_arena_class_id', None)
             self.assessment = AssessmentManager(build_id=parent_build_id, key_type=parent_key_type,
                                                 env_dict=self.env_dict)
         else:
@@ -266,10 +271,15 @@ class ComputeManager:
             response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
                                                        instance=self.server_name).execute()
         except HttpError as err:
-            self.logger.error(f"{err.content}")
-            self.state_manager.state_transition(self.s.BROKEN)
-            return
-
+            if err.status_code == 404:
+                # If the resource can't be found, it was either already deleted or never created
+                self.logger.error(f'Deletion request returned status code 404. Marking {self.parent_build_id} server as deleted!')
+                self.state_manager.state_transition(self.s.DELETED)
+                return
+            else:
+                self.logger.error(f"{err.content}")
+                self.state_manager.state_transition(self.s.BROKEN)
+                return
         self._wait_to_finish(response['id'])
         self.state_manager.state_transition(self.s.DELETED)
 
