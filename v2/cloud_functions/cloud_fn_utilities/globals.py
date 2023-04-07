@@ -124,6 +124,10 @@ class BuildConstants:
         WINDOWS = 'windows'
         LINUX = 'linux'
 
+    class LMS:
+        CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+
 
 class ServerStates(Enum):
     START = 0

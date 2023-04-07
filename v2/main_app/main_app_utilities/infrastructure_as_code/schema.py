@@ -230,6 +230,7 @@ class LMSConnectionSchema(Schema):
     url = fields.Str(required=True, description="The LMS API URL")
     course_code = fields.Str(required=True, description="The course code to use for creating the quiz")
 
+
 class LMSQuizQuestionsSchema(Schema):
     name = fields.Str(required=False, description="Question name")
     question_text = fields.Str(required=True, description="Question text")
@@ -281,4 +282,3 @@ class PuzzleSchema(Schema):
                             description="Records the team's attempts to answer the question and escape")
     correct = fields.Bool(missing=False, description="Whether the puzzle response is correct")
     reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")
-
