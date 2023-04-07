@@ -33,7 +33,7 @@ class SendMail:
     def send_email(self, eml_subject, eml_to, eml_content=None, eml_attachment=None):
         message = Mail()
         message.from_email = From(
-            email=f"no-reply@trojan-cybergym.org" #{self.dns_suffix}"
+            email=f"no-reply@trojan-cybergym.org"  # {self.dns_suffix}"
         )
         message.subject = eml_subject
         message.to = eml_to
@@ -70,7 +70,25 @@ class SendMail:
         except Exception as e:
             print(e)
 
-    def help_form(self, usr_email, usr_subject, usr_message, usr_image=None):
+    def send_expiring_units(self, unit_id, instructor, hours_until_expires):
+        """
+        sends an email to the provided instructor's email that the unit is about to expire
+        @return:
+        """
+        project = self.env_dict['project']
+        eml_subject = Subject(f"Unit in {project} about to expire")
+        eml_to = To(instructor)
+        eml_content = Content(
+            mime_type="text",
+            content=f"Unit {unit_id} in project {project} expires in {hours_until_expires}hrs"
+        )
+        self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content)
+
+    def send_help_form(self, usr_email, usr_subject, usr_message, usr_image=None):
+        """
+        Used in the webapp's help form. Sends the users request to all the admins associated with the project.
+        @return:
+        """
         admins = self.ds.get_admins()
         eml_to = []
         for admin in admins:

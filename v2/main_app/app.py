@@ -85,8 +85,8 @@ def leave_comment():
         comment_text = request.form['comment']
         attachment = request.files['image']
 
-        SendMail().help_form(usr_email=user_email, usr_subject=comment_subject,
-                             usr_message=comment_text, usr_image=attachment)
+        SendMail().send_help_form(usr_email=user_email, usr_subject=comment_subject,
+                                  usr_message=comment_text, usr_image=attachment)
 
         return redirect(request.referrer)
 

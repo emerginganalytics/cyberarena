@@ -102,6 +102,20 @@ class DataStoreManager:
             expired += list(query_expired.fetch())
         return expired
 
+    def get_expiring_units(self):
+        """
+        returns a list of all the units that expire within 48 hours
+        @return:
+        """
+        query_expiring = self.ds_client.query(kind=DatastoreKeyTypes.UNIT)
+        two_days = 172800
+        query_expiring.add_filter('workspace_settings.expires', '<', (get_current_timestamp_utc() + two_days))
+        expiring = []
+        for obj in query_expiring.fetch():
+            if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
+                expiring.append(obj.key.name)
+        return expiring
+
     def get_ready_for_shutoff(self):
         ready_for_shutoff = []
         query_shutoff = self.ds_client.query(kind=self.key_type)
