@@ -15,7 +15,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
     CATALOG = 'v2-catalog'
-    USER = 'cyberarena-user'
+    USERS = 'cyberarena-user'
 
 
 class BuildConstants:
@@ -123,10 +123,6 @@ class BuildConstants:
     class ScriptOperatingSystems:
         WINDOWS = 'windows'
         LINUX = 'linux'
-
-    class LMS:
-        CANVAS = 'canvas'
-        BLACKBOARD = 'blackboard'
 
 
 class ServerStates(Enum):

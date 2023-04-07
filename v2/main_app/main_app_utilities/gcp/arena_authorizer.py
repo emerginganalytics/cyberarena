@@ -1,7 +1,7 @@
+import copy
 import logging
 from google.cloud import logging_v2
 from main_app_utilities.gcp.datastore_manager import DataStoreManager, DatastoreKeyTypes
-from main_app_utilities.gcp.cloud_env import CloudEnv
 from enum import Enum
 
 __author__ = "Philip Huff"
@@ -16,86 +16,129 @@ __status__ = "Testing"
 
 class ArenaAuthorizer:
     """
-    Used for authorizing and redirecting authenticated users in the application
-    Usage:
+        Used for authorizing and redirecting authenticated users in the application
+        Usage:
 
-    arena_auth = ArenaAuthorizer()
-    level = arena_auth.check_level(email_address)
-    """
+        arena_auth = ArenaAuthorizer()
+        level = arena_auth.check_level(email_address)
+        """
+
     class UserGroups(Enum):
-        AUTHORIZED = "authorized_users"
-        ADMINS = "admins"
-        STUDENTS = "students"
+        INSTRUCTOR = "instructor"
+        ADMIN = "admin"
+        STUDENT = "student"
         PENDING = "pending"
-        ALL_GROUPS = [AUTHORIZED, ADMINS, STUDENTS]
+        ALL_GROUPS = [INSTRUCTOR, ADMIN, STUDENT]
 
-    def __init__(self, env_dict=None):
+    class LMS(Enum):
+        CANVAS = 'canvas'
+
+    def __init__(self):
         self.log_client = logging_v2.Client()
         self.log_client.setup_logging()
-        self.ds_manager = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO.value, key_id='cybergym')
-        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
-        self.admin_info = self.ds_manager.get()
-        if not self.admin_info:
-            self.admin_info = {}
-        if self.UserGroups.ADMINS.value not in self.admin_info:
-            admin_email = self.env.admin_email  # myconfig.get_variable.config('admin_email')
-            if not admin_email:
-                logging.error(msg='Error: Admin Email is not set up for this project!')
+        self.key_type = DatastoreKeyTypes.USERS.value
+        self.ds_manager = DataStoreManager()
+
+    def get_all_users(self):
+        return list(DataStoreManager(key_id=self.key_type).query().fetch())
+
+    def get_user(self, email):
+        return self.ds_manager.get(key_type=self.key_type, key_id=str(email))
+
+    def authorized(self, email, base):
+        """
+        Checks if supplied user meets the minimum authorization levels.
+        args:
+            email: str() => email of user to check auth level on
+            base: UserGroup(Enum) => lowest level of permitted user authorization
+        returns: user obj iff True otherwise False
+        """
+        if user := self.get_user(email):
+            perm = user['permissions']
+            if base == self.UserGroups.ADMIN:
+                if perm[base.value]:
+                    return user
+            elif base == self.UserGroups.INSTRUCTOR:
+                if perm[self.UserGroups.ADMIN.value] or perm[base.value]:
+                    return user
+            elif base == self.UserGroups.STUDENT.value:
+                if not perm[self.UserGroups.PENDING.value]:
+                    return user
+        return False
+
+    def _get_admins(self):
+        users = self.get_all_users()
+        admin_list = []
+        for user in users:
+            if user['permissions']['admin']:
+                admin_list.append(user)
+        return admin_list
+
+    def _get_user_from_firebase(self, email):
+        pass
+
+    def add_user(self, email, **kwargs):
+        """
+        email: str(email) of user to add
+        kwargs:
+            admin, instructor, student, pending => optional permissions levels
+                if none are supplied, default value is False and pending is set
+                to True
+            settings: optional dict() e.g {'canvas': APIKEY}; Default value
+                is None
+        """
+        if not email:
+            raise ValueError('Missing required field, email, for _add_user method')
+        admin = kwargs.get(self.UserGroups.ADMIN.value, False)
+        instructor = kwargs.get(self.UserGroups.INSTRUCTOR.value, False)
+        student = kwargs.get(self.UserGroups.STUDENT.value, False)
+        settings = kwargs.get('settings', {'canvas': None})
+        user_obj = {
+            'email': str(email),
+            'permissions': {
+                'admin': admin,
+                'instructor': instructor,
+                'student': student,
+                'pending': False,
+            },
+            'settings': settings
+        }
+        if not any(x for x in [admin, instructor, student]):
+            user_obj['permissions']['pending'] = True
+        self.ds_manager.put(user_obj, key_type=self.key_type, key_id=str(email))
+        return True
+
+    def update_user(self, email, permissions=None, settings=None):
+        if user := self.get_user(email):
+            user_copy = copy.deepcopy(user)
+            # Update user permissions
+            if permissions:
+                for level in permissions:
+                    user_copy['permissions'][level] = permissions[level]
+            # Update user settings
+            if settings:
+                for setting in settings:
+                    user_copy['settings'][setting] = settings[setting]
+            # Make sure pending status is cleared if needed
+            perm = user_copy['permissions']
+            if perm['admin'] or perm['instructor'] or perm['student']:
+                user_copy['permissions']['pending'] = False
             else:
-                self.admin_info[self.UserGroups.ADMINS.value] = [admin_email]
-        if self.UserGroups.AUTHORIZED.value not in self.admin_info:
-            self.admin_info[self.UserGroups.AUTHORIZED.value] = []
-        if self.UserGroups.STUDENTS.value not in self.admin_info:
-            self.admin_info[self.UserGroups.STUDENTS.value] = []
-        if self.UserGroups.PENDING.value not in self.admin_info:
-            self.admin_info[self.UserGroups.PENDING.value] = []
-        self.ds_manager.put(self.admin_info)
+                # No permissions are set for current user; Assume safe to remove all access
+                self.remove_user(email=email)
+                return True
+            # Update user record
+            self.ds_manager.put(user_copy, key_type=self.key_type,
+                                key_id=str(email))
+            return True
+        raise ValueError
 
-    def get_user_groups(self, user):
-        """
-        Get the groups this user is authorized under for this Arena
-        @param user: Email address of authenticated user
-        @type user: str
-        @return: List of groups assigned to the user
-        @rtype: list
-        """
-        user_groups = []
-        for group in self.UserGroups.ALL_GROUPS.value:
-            if user in self.admin_info[group]:
-                user_groups.append(group)
-
-        if not user_groups and user not in self.admin_info[self.UserGroups.PENDING.value]:
-            logging.error(msg=f'Unauthorized user: {user}. Adding to pending authorization')
-            self.admin_info[self.UserGroups.PENDING.value].append(user)
-            self.ds_manager.put(self.admin_info)
-
-        logging.debug(f'{user} logged in under groups {user_groups}')
-        return user_groups
-
-    def get_aggregated_list(self):
-        """
-        Get dict of each user with collection of authorized groups for that user
-        :return: Dict of users with list of groups assigned to the user
-        """
-        users = dict()
-
-        for user in self.admin_info['admins']:
-            uid = user.lower()
-            users[uid] = []
-            users[uid].append(self.UserGroups.ADMINS.value)
-        for user in self.admin_info['authorized_users']:
-            uid = user.lower()
-            if not users.get(uid, None):
-                users[uid] = []
-            users[uid].append(self.UserGroups.AUTHORIZED.value)
-        for user in self.admin_info['students']:
-            uid = user.lower()
-            if not users.get(uid, None):
-                users[uid] = []
-            users[uid].append(self.UserGroups.STUDENTS.value)
-        for user in self.admin_info['pending']:
-            uid = user.lower()
-            if not users.get(uid, None):
-                users[uid] = []
-                users[uid].append(self.UserGroups.PENDING.value)
-        return users
+    def remove_user(self, email):
+        # Delete record from Datastore
+        self.ds_manager.set(key_type=self.key_type, key_id=str(email))
+        self.ds_manager.delete()
+        # TODO: Add functionality to search for and
+        #  remove user from Firestore db as well
+        self._get_user_from_firebase(str(email))
+        return True
+# [ eof ]

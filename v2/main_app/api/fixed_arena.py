@@ -6,10 +6,8 @@ from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
-from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
-from main_app_utilities.gcp.bucket_manager import BucketManager, Buckets
-from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 
 
 __author__ = "Andrew Bomberger"
@@ -26,14 +24,12 @@ class FixedArena(MethodView):
     def __init__(self):
         self.env = CloudEnv()
         self.env_dict = self.env.get_env()
-        self.authorizer = ArenaAuthorizer(env_dict=self.env_dict)
         self.http_resp = HttpResponse
         self.actions = PubSub.Actions
         self.cyber_arena_objects = PubSub.CyberArenaObjects
         self.handler = PubSub.Handlers
         self.states = BuildConstants.FixedArenaStates
         self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
-        self.bm = BucketManager(env_dict=self.env_dict)
 
     @instructor_required
     def get(self, build_id=None):

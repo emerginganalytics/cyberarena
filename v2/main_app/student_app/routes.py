@@ -56,31 +56,6 @@ def claim_escape_room():
         return render_template('claim_escape_room.html', api=api_route)
 
 
-@student_app.route('/home', methods=['GET', 'POST'])
-def registered_student_home():
-    if 'user_email' in session and 'user_groups' in session:
-        student_email = session['user_email']
-        if ArenaAuthorizer.UserGroups.STUDENTS.value not in session['user_groups']:
-            return redirect('/403')
-
-        workout_list = DataStoreManager().get_workouts(student_email=student_email)
-        student_workouts = []
-        for workout in workout_list:
-            if workout['state'] != 'DELETED':
-                workout_info = {
-                    'workout_id': workout.key.name,
-                    'workout_name': workout['type'],
-                    'timestamp': workout['timestamp']
-                }
-                student_workouts.append(workout_info)
-        student_workouts = sorted(student_workouts, key=lambda i: (i['timestamp']), reverse=True)
-
-        student_info = {'workouts': student_workouts}
-        return render_template('student_home.html', auth_config=cloud_env.auth_config, student_info=student_info)
-    else:
-        return redirect('/login')
-
-
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config

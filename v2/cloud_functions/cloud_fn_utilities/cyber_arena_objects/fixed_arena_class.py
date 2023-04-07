@@ -12,7 +12,7 @@ from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, FixedArenaClassStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, FixedArenaClassStates, get_current_timestamp_utc
 from cloud_fn_utilities.state_managers.fixed_arena_class_states import FixedArenaClassStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
@@ -281,7 +281,7 @@ class FixedArenaClass:
                 'parent_build_type': BuildConstants.BuildType.FIXED_ARENA_CLASS,
                 'fixed_arena_id': self.fixed_arena_class['parent_id'],
                 'build_type': BuildConstants.BuildType.FIXED_ARENA_WORKSPACE,
-                'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
+                'creation_timestamp': get_current_timestamp_utc(),
                 'registration_required': registration_required,
             }
             if registration_required:

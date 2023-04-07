@@ -9,7 +9,7 @@ from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets
-from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud, BuildConstants
+from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -55,25 +55,23 @@ class FixedArenaClass(MethodView):
         if stoc_id and build_count and expire_datetime and build_id:
             parent_stoc = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value, key_id=stoc_id).get()
             if parent_stoc:
-                check_class = parent_stoc.get('active_class', None)
-                if not check_class:
-                    # No active class found; Initiate class build
-                    fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
-                                                   file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
-                    build_spec = yaml.safe_load(fixed_arena_yaml)
-                    expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
-                    build_spec['workspace_settings'] = {
-                        'count': build_count,
-                        'registration_required': registration_required,
-                        'student_emails': [],
-                        'expires': expire_ts
-                    }
-                    build_spec['add_attacker'] = recv_data.get('add_attacker', False)
-                    build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
-                    build_spec_to_cloud.commit()
-                    return self.http_resp(code=200).prepare_response()
-                # Requested STOC already has an active class; Return 409 CONFLICT
-                return self.http_resp(code=409, msg="CONFLICT: Class already exists for requested STOC!").prepare_response()
+                if parent_stoc.get('active_class', None):
+                    return self.http_resp(code=409, msg='CONFLICT: Class already exists for current class!').prepare_response()
+                # No active class found; Initiate class build
+                fixed_arena_yaml = self.bm.get(bucket=self.env.spec_bucket,
+                                               file=f"{Buckets.Folders.SPECS}{build_id}.yaml")
+                build_spec = yaml.safe_load(fixed_arena_yaml)
+                expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
+                build_spec['workspace_settings'] = {
+                    'count': build_count,
+                    'registration_required': registration_required,
+                    'student_emails': [],
+                    'expires': expire_ts
+                }
+                build_spec['add_attacker'] = recv_data.get('add_attacker', False)
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit()
+                return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required

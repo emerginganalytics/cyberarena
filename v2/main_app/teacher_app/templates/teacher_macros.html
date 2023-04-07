@@ -157,3 +157,28 @@
     {% endfor %}
 {% endmacro -%}
 
+{% macro nuke_workout_modals(workout_list, url) %}
+    {% for workout in workout_list %}
+        <div class="modal fade" tabindex="-1" role="dialog" id="modal_{{ workout['id'] }}_nuke">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="text-center">Nuke {{ workout['id'] }} workout!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">x</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h5 class="text-center">WARNING: This action can't be undone!</h5>
+                        <p>Nuking the workout will destroy and rebuild all machines for the current workout. Any student progress on the machines
+                        will be lost!</p>
+                    </div>
+                     <div class="modal-footer" style="justify-content:space-around;">
+                        <button type="button" style="margin-right: 1em;" class="btn-fa popup_close" data-dismiss="modal">Cancel</button>
+                        <button class="btn-fa btn-delete" onclick="nuke('{{ url }}/{{ workout['id'] }}', 'modal_{{ workout['id'] }}_nuke');">Continue?</button>
+                     </div>
+                </div>
+            </div>
+         </div>
+    {% endfor %}
+{% endmacro -%}

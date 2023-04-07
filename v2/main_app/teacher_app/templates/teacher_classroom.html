@@ -16,7 +16,7 @@
             <li class="nav-item">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
-            {% if 'admins' in auth_list %}
+            {% if auth_list.admin %}
                 <li class="nav-item">
                     <a href='{{ url_for("admin.home") }}' class="nav-link text-center">Admin Home</a>
                 </li>

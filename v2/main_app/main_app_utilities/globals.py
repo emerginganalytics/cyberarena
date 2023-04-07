@@ -15,7 +15,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERARENA_ATTACK = 'cyberarena-attack'
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
-    USER = 'cyberarena-user'
+    USERS = 'cyberarena-user'
 
 
 class BuildConstants:
@@ -159,13 +159,6 @@ class BuildConstants:
         DELETING_SERVERS = 70
         COMPLETED_DELETING_SERVERS = 71
         DELETED = 72
-
-    class LMS(str, Enum):
-        CANVAS = 'canvas'
-        BLACKBOARD = 'blackboard'
-
-    CANVAS_QUESTION_TYPES = ['fill_in_multiple_blanks_question', 'multiple_answers_question',
-                             'multiple_choice_question', 'true_false_question']
 
 
 class WorkoutStates(Enum):

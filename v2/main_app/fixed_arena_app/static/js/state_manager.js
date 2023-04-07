@@ -66,7 +66,7 @@ class StateManager {
     }
     poll_create_stoc(table_id){
         /*
-        * When resources are during build state, there will be a brief period of time where the build_id
+        * When resources are during build state, there will be a brief period of time when the build_id
         * doesn't exist yet. This
         * */
         // Create table load animation

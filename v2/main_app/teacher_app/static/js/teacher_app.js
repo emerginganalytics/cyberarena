@@ -188,6 +188,27 @@ function validateDateTime(element){
     }
 }
 
+function nuke(endpoint, modal_id){
+    // Sends PUT request to rebuild a specific workout
+    show_modal_card(modal_id);
+    let url = endpoint + '?action=8'
+    fetch(url, {
+        method: 'PUT'
+    }).then((response) => {
+        if (response.ok){
+            return response.json();
+        }
+    }).then((data) => {
+        if (data['status'] === 200) {
+            let current_state = data['data']['status'];
+            if (!Number(data['data']['state']) in [53, 50]){
+                window.location.reload();
+            }
+        }
+    });
+}
+
+// Build spec filter fns
 function filter_build_specs(filter_id) {
     var input, filter, filter_group, filter_type, cards, cardContainer;
     input = document.getElementById('buildWorkoutFilter');

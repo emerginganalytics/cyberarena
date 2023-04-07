@@ -85,8 +85,8 @@
                 <div id="tab-container" class="tab-content">
                     <div class="tab-pane fade active show" id="fa-home" role="tabpanel" aria-labelledby="fa-home-tab">
                         <div id="error-msg-div"></div>
-                        <div id="home-content-ctn" class="d-inline-flex">
-                            <div id="stoc-table-div" class="table-responsive table-ctn col-10">
+                        <div id="home-content-ctn" class="d-inline-flex col">
+                            <div id="stoc-table-div" class="table-responsive table-ctn">
                                 <div class="loadAnimationWrapper"><div id="loadAnimation"></div></div>
                                 <div class="server-manage-wrapper">
                                     <div class="server-toolbar-div">
@@ -134,7 +134,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <table id="stoc-table" class="table table-hover text-nowrap table-large">
+                                <table id="stoc-table" class="table table-hover table-large">
                                     <thead>
                                         <tr id="stoc-table-headers">
                                             <th class="text-center"><input type="checkbox" class="select-all" id="stoc-select-all" value="" onclick="select_all(this, 'stocIdRow');"/></th>
@@ -154,14 +154,10 @@
                                             </td>
                                             <td>{{ stoc.key.name }}</td>
                                             <td id="{{ stoc.key.name }}StatusDiv">
-                                                {% if stoc.state == 50 %}
-                                                    <i class="fa fa-circle fa-lg buildState running" data-toggle="tooltip" data-placement="bottom" title="RUNNING"></i>
-                                                {% elif stoc.state == 53 %}
-                                                    <i class="fa fa-stop-circle fa-lg buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
-                                                {% elif stoc.state == 72 %}
-                                                    <i class="fa fa-stop-circle fa-lg buildState deleted" data-toggle="tooltip" data-placement="bottom" title="DELETED"></i>
+                                                {% if stoc.active_class %}
+                                                    <i class="fa fa-circle buildState" data-toggle='tooltip' data-placement="bottom" title="RUNNING"></i>
                                                 {% else %}
-                                                    <i class="fa fa-circle fa-lg buildState transition" data-toggle="tooltip" data-placement="bottom" title="WORKING"></i>
+                                                    <i class="fa fa-circle buildState deleted" data-toggle='tooltip' data-placement="bottom" title="NO CLASS EXISTS"></i>
                                                 {% endif %}
                                             </td>
                                             <td>
@@ -173,7 +169,7 @@
                                                        onclick="manage_class(3, '{{ stoc.active_class }}');"><i class="fa fa-trash fa-lg icon-light"></i> Delete Class</button>-->
                                                     {{ delete_class_macro.deleteClass(build_id=stoc.active_class, stoc_id=stoc.key.name ) }}
                                                 {% else %}
-                                                    <button type="button" class="btn-fa d-inline-flex col-6 newClassBtn"
+                                                    <button type="button" class="btn-fa d-inline-flex newClassBtn"
                                                             data-toggle="modal" value="{{ stoc.key.name }}"
                                                             data-target="#create-class-modal"><i class="fa fa-plus-circle icon-light"></i>New Class</button>
                                                 {% endif %}
@@ -182,32 +178,8 @@
                                         </tr>
                                         {% set ns.hourly_cost = ns.hourly_cost + stoc.summary.hourly_cost %}
                                     {% endfor %}
-                                    <tr>
-                                        <td><input id="untapped_stoc" class="stocIdRow" type="checkbox" value="" name="stoc_id"/></td>
-                                        <td>untapped</td>
-                                        <td>
-                                            <i class="fa fa-stop-circle buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
-                                        </td>
-                                        <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
-                                        <td>STOC object, description, or list of fixed servers for STOC</td>
-                                    </tr>
-                                    <tr>
-                                        <td><input class="stocIdRow" id="forensics_stoc" type="checkbox" value="" name="stoc_id"/></td>
-                                        <td>Forensics</td>
-                                        <td>
-                                            <i class="fa fa-stop-circle buildState stopped" data-toggle="tooltip" data-placement="bottom" title="STOPPED"></i>
-                                        </td>
-                                        <td><a href="#">Class</a>, <a href="#">New Class</a>, <a href="#">Delete Class</a></td>
-                                        <td>STOC object, description, or list of fixed servers for STOC</td>
-                                    </tr>
                                 </table>
                             </div><!--End stoc-table-div-->
-                            <div id="cost-summary" class="card bg-light mb-3 col-3 col-sm-2 mr-auto">
-                                <div class="card-header">Cost Summary</div>
-                                <div class="card-body">
-                                    <h5 class="card-title">${{ ns.hourly_cost }} / hour</h5>
-                                </div>
-                            </div><!-- End cost-summary div-->
                             <div id="create-class-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-class-modal" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-slideout modal-sm" role="document">
                                     <div class="modal-content">
@@ -226,7 +198,7 @@
                                                     <label for="classType">Class Build:</label>
                                                     <select id="classType" name="build_id" required class="form-control">
                                                         {% for class_spec in class_spec_list %}
-                                                            <option value="{{ class_spec }}">{{ class_spec.upper() }}</option>
+                                                            <option value="{{ class_spec.key.name }}">{{ class_spec.key.name.upper() }}</option>
                                                         {% endfor %}
                                                     </select>
                                                 </div>
@@ -265,25 +237,16 @@
                                                 <div class="form-group">
                                                     <label for="stocType">STOC Build:</label>
                                                     <ul style="list-style: none; margin: 0; padding: 0;">
-                                                        <!--Instead of filtering over yaml files, it might be worth filtering over a datastore template instead-->
                                                         {%  for stoc_spec in fixed_arena_spec_list %}
                                                             <li>
-                                                                <input id="{{ stoc_spec }}_spec" type="radio" value="{{ stoc_spec }}" name="build_id" required/>
-                                                                <label for="{{ stoc_spec }}_spec">{{ stoc_spec.upper() }}</label>
+                                                                <input id="{{ stoc_spec.key.name }}_spec" type="radio" value="{{ stoc_spec.key.name }}" name="build_id" required/>
+                                                                <label for="{{ stoc_spec.key.name }}_spec">{{ stoc_spec.key.name.upper() }}</label>
                                                                 <div>
                                                                     <!--STOC description and machine summary (if needed) go here-->
                                                                     <p>A cybersecurity simulation network for CLN partners</p>
                                                                 </div>
                                                             </li>
                                                         {% endfor %}
-                                                        <li>
-                                                            <input id="forensics_spec" type="radio" value="forensics_spec" name="build_id" required/>
-                                                            <label for="forensics_spec">FORENSICS (Example Value)</label>
-                                                            <div>
-                                                                <!--STOC description and machine summary (if needed) go here-->
-                                                                <p>A cybersecurity forensics simulation network for CLN partners</p>
-                                                            </div>
-                                                        </li>
                                                     </ul>
                                                     <input type="number" value="1" hidden readonly name="action">
                                                 </div>

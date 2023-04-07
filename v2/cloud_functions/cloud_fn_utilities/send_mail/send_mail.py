@@ -1,11 +1,9 @@
-from google.cloud import runtimeconfig
 from sendgrid import SendGridAPIClient
-import logging
-from google.cloud import logging_v2
 from sendgrid.helpers.mail import *
-from templates import Templates
+from v2.cloud_functions.cloud_fn_utilities.send_mail.email_templates.templates import Templates
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from google.cloud import runtimeconfig
 import base64
 
 __author__ = "Philip Huff"
@@ -17,9 +15,12 @@ __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
 
+# TODO: Add SendGrid API key to cloud_fn CloudEnv class,
+#   remove unused call to env: line 25 and 26
+#   reformat runtimeconfig calls ln 26 and 30 to pull from CloudEnv class instead
+
 
 class SendMail:
-
     def __init__(self, env_dict=None):
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.env_dict = self.env.get_env()

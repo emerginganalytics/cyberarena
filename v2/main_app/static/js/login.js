@@ -103,18 +103,18 @@ function initApp(authConfig){
               "email": "",
               "admin": "",
               "student": "",
+              "instructor": "",
               "display_name": user.displayName
             }
-            if (json['authorized'] == false){
-              location.href = "/unauthorized";
-            } else {
-              ret_data['email'] = user.email;
-              if (json['admin'] == true){
-                ret_data['admin'] = true;
-              }
-              if (json['student'] == true){
-                ret_data['student'] = true;
-              }
+            ret_data['email'] = user.email;
+            if (json['admin'] === true){
+              ret_data['admin'] = true;
+            }
+            if (json['student'] === true){
+              ret_data['student'] = true;
+            }
+            if (json['instructor'] === true){
+              ret_data['instructor'] = true;
             }
             resolve(ret_data);
           }
