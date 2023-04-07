@@ -6,7 +6,6 @@ from cloud_fn_utilities.database.vulnerabilities import Vulnerabilities
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.send_mail.send_mail import SendMail
 
-
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff, Ryan Ebsen, Bryce Ebsen"]
@@ -32,8 +31,9 @@ class DailyMaintenance:
 
     def _stop_all(self):
         self.compute_manager.stop_everything()
+        self._notify_expiring_units()
 
-    def notify_expiring_units(self):
+    def _notify_expiring_units(self):
         """
         sends an email to the owner of all units that expire within 48 hours
         @return:
