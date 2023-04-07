@@ -35,3 +35,4 @@ admin_scripts/reports/
 /v2/Bill/
 .env
 .gitignore
+v2/main_app/main_app_utilities/lms/testlms.py
