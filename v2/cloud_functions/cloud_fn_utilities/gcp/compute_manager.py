@@ -271,7 +271,7 @@ class ComputeManager:
             response = self.compute.instances().delete(project=self.env.project, zone=self.env.zone,
                                                        instance=self.server_name).execute()
         except HttpError as err:
-            if err.status_code == 404:
+            if err.resp.status == 404:
                 # If the resource can't be found, it was either already deleted or never created
                 self.logger.error(f'Deletion request returned status code 404. Marking {self.parent_build_id} server as deleted!')
                 self.state_manager.state_transition(self.s.DELETED)

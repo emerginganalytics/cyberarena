@@ -1,6 +1,6 @@
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import *
-from v2.cloud_functions.cloud_fn_utilities.send_mail.email_templates.templates import Templates
+from cloud_fn_utilities.send_mail.email_templates.templates import Templates
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from google.cloud import runtimeconfig

@@ -19,7 +19,7 @@ class CyberArenaApp:
                                "--platform=managed --region={region} --allow-unauthenticated " \
                                "--service-account=cyberarena-service@{project}.iam.gserviceaccount.com"
     MAP_DNS_COMMAND = "gcloud beta run domain-mappings create --service cyberarena-v2 --domain={dns} --region={region}"
-    DEPLOY_COULD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
+    DEPLOY_CLOUD_FUNCTION_COMMAND = "gcloud functions deploy --quiet cyber-arena-v2 " \
                                     "--region={region} --memory=1024Mi " \
                                     "--entry-point=cyber_arena_cloud_function " \
                                     "--runtime=python39 --source=\"./cloud_functions/\" " \
@@ -66,7 +66,7 @@ class CyberArenaApp:
 
     def deploy_cloud_functions(self):
         print(f"Beginning to deploy cloud function. This operation may take a few minutes...")
-        command = self.DEPLOY_COULD_FUNCTION_COMMAND.format(project=self.env.project, region=self.env.region)
+        command = self.DEPLOY_CLOUD_FUNCTION_COMMAND.format(project=self.env.project, region=self.env.region)
         ret = subprocess.run(command, capture_output=True, shell=True)
         print(ret.stderr.decode())
         if ret.returncode != 0:
