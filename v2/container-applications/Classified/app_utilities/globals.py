@@ -2,6 +2,22 @@ from enum import Enum
 from datetime import datetime, timezone, timedelta
 
 
+class Algorithms(Enum):
+    ATBASH = 0
+    CAESAR = 1
+    COL = 2
+    SUB = 3
+    RAIL = 4
+    KEYWORD = 5
+    BASE32 = 6
+    BASE64 = 7
+
+
+class CipherModes(Enum):
+    ENCRYPT = 0
+    DECRYPT = 1
+
+
 class DatastoreKeyTypes(str, Enum):
     ADMIN_INFO = 'cybergym-admin-info'
     CLASSROOM = 'cybergym-class'

@@ -1,4 +1,4 @@
-from flask import Flask, redirect, abort, jsonify, render_template, request, session
+from flask import Flask, redirect, abort, jsonify, render_template, request, session, url_for
 
 # App imports
 from app_utilities.gcp.datastore_manager import DataStoreManager
@@ -29,10 +29,8 @@ app.register_blueprint(classified_bp)
 def home(build_id):
     build = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if build:
-        web_app = build.get('web_applications', None)
-        if web_app:
-            directory = web_app[0].get('starting_directory', None)
-            if directory:
+        if web_app := build.get('web_applications', None):
+            if directory := web_app[0].get('starting_directory', None):
                 return redirect(f'{directory}/{build_id}')
     return redirect('/invalid')
 
@@ -48,7 +46,6 @@ def register_api(view, endpoint, url, pk='id', pk_type='string'):
     app.add_url_rule(url, view_func=view_func, methods=['POST'])
     app.add_url_rule(f'{url}<{pk_type}:{pk}>', view_func=view_func,
                      methods=['GET', 'PUT', 'DELETE'])
-
 
 # Register API Routes
 register_api(view=JohnnyHashAPI, endpoint='hashes', url='/api/hashes', pk='build_id')

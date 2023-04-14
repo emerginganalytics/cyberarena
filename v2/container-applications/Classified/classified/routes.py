@@ -10,7 +10,6 @@ Contains collection of web-based vulnerability workouts:
 import cryptocode
 from flask import abort, Blueprint, flash, g, jsonify, make_response, request, redirect, render_template, session, url_for
 from flask import current_app as app
-from flask_bootstrap import Bootstrap
 from io import BytesIO
 
 # app imports

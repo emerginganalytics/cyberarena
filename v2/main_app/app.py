@@ -3,7 +3,7 @@ import logging as logger
 from flask import abort, Flask, jsonify, redirect, render_template, request, session, url_for
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
-from cloud_fn_utilities.send_mail.send_mail import SendMail
+from main_app_utilities.send_mail.send_mail import SendMail
 
 # App Blueprints
 from admin_app.routes import admin_app
@@ -84,10 +84,8 @@ def leave_comment():
         comment_subject = request.form['subject']
         comment_text = request.form['comment']
         attachment = request.files['image']
-
         SendMail().send_help_form(usr_email=user_email, usr_subject=comment_subject,
                                   usr_message=comment_text, usr_image=attachment)
-
         return redirect(request.referrer)
 
 

@@ -3,7 +3,6 @@ import sqlite3
 import os
 import hashlib
 import sqlite3
-from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, SubmitField

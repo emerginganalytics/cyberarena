@@ -11,7 +11,12 @@
     min-width: 800px;
     box-shadow: 1px 2px 0 0 var(--dark-gray);
 }
-.content-container {}
+.content-container {
+    width: 80%;
+    margin: auto;
+    padding-top: 10px;
+    padding-bottom: 2vh;
+}
 .summary-container {
     display: block;
     background-color: white;
@@ -23,5 +28,34 @@
     margin-left: auto;
     margin-right: auto;
 }
-#hash-results-table {}
+#hash-results-table {
+    max-width: 70%;
+    overflow-x: auto;
+    border: 1px solid gray;
+    padding-bottom: 2vh;
+    margin: auto;
+}
 #create-hashes-modal {}
+.modal-body {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.hashBtn {
+    width: 100%;
+    background: var(--indigo);
+    color: white;
+}
+.hashBtn:hover {
+    background: var(--muted-indigo);
+    color: gray;
+}
+.hashBtn:active {
+    -webkit-box-shadow: inset 0px 0px 5px #c1c1c1;
+    -moz-box-shadow: inset 0px 0px 5px #c1c1c1;
+    box-shadow: inset 0px 0px 5px #c1c1c1c1;
+}
+.hash {
+    color: var(--python-yellow);
+    font-weight: bold;
+}
+.hash-value {}

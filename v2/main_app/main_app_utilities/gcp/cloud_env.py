@@ -39,6 +39,7 @@ class CloudEnv:
             self.main_app_v2_url = self.env_dict['main_app_v2_url']
             self.guac_db_password = self.env_dict['guac_db_password']
             self.max_workspaces = self.env_dict['max_workspaces']
+            self.sendgrid_api_key = self.env_dict.get('sendgrid_api_key', None)
         else:
             runtimeconfig_client = runtimeconfig.Client()
             myconfig = runtimeconfig_client.config('cybergym')
@@ -77,6 +78,9 @@ class CloudEnv:
                         'auth_domain': str(self.project + ".firebaseapp.com"),
                         'project_id': self.project
                     }
+                    sendgrid_api_key = myconfig.get_variable('SENDGRID_API_KEY', None)
+                    if sendgrid_api_key:
+                        self.sendgrid_api_key = sendgrid_api_key.value.decode('utf-8')
                     break
                 except:
                     time.sleep(random.randint(1, 10))

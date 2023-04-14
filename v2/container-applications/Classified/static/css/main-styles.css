@@ -2,7 +2,7 @@
     --main-color: #16213E;
     --subcolor: #0f3460;
     --tertiary: #533483;
-    --quadentiary: #e94560;
+    --quaternary: #e94560;
     --dark-gray: #212529;
     --cornwall-blue: #4285F4;
     --python-blue: #2b5b84;
@@ -188,6 +188,21 @@ li.control-container-list {
 .nav-item:hover .icon-light {
     color: black;
 }
+.btn-quaternary {
+    background: var(--quaternary);
+    color: white;
+    border: 1px solid black;
+}
+.btn-quaternary:hover {
+    opacity: 0.9;
+    background: whitesmoke;
+    color: black;
+}
+.btn-quaternary:active {
+    background-color: var(--quaternary);
+    opacity: .6;
+    box-shadow: 0 0 5px inset black;
+}
 
 /* FontAwesome Icon Styles */
 .buildState {font-size: 30px;}
@@ -269,4 +284,14 @@ p.complete {
 }
 .modal-dialog-slideout .modal-header h5 {
     float:left;
+}
+
+/* General Table Styles */
+tr.opaque-loading {
+    background-image: linear-gradient(to right, transparent 50%, rgba(0, 0, 0, 0.5));
+    background-size: 200% 100%;
+}
+tr.opaque-loading td {
+    opacity: .45;
+    pointer-events: none;
 }
