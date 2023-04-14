@@ -66,7 +66,7 @@ class ArenaAuthorizer:
                     return user
         return False
 
-    def _get_admins(self):
+    def get_admins(self):
         users = self.get_all_users()
         admin_list = []
         for user in users:

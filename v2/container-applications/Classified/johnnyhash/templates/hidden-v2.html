@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="description" content="UA Little Rock Cyber Arena"/>
     <meta name="author" content="UA Little Rock"/>
-    <title>Classified - {% block title %}{% endblock %}</title>
+    <title>Classified - Johnny Hash</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -22,18 +22,51 @@
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/3.4.1/firebaseui.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap&text=0123456789:AMP" rel="stylesheet">
-    <style>
-    </style>
-    {% block styles %}{% endblock %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='css/johnnyhash.css')}}">
     {% block js %}{% endblock %}
 </head>
-<body>
+<body style="background: var(--dark-gray); height: 100%;">
     <nav class="navbar fixed-top top-navbar navbar-expand-lg">
-        <a class="navbar-brand" style="padding-right: 10px; border-right: 1px solid white;">{% block nav_title %}Classified{% endblock %}</a>
-        {% block navbar %}{% endblock %}
+        <a class="navbar-brand" style="padding-right: 10px; border-right: 1px solid white;">Hash It Out</a>
+        <div class="navbar-nav mr-auto">
+            <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item pr-1">
+                     <a class='nav-link text-center' href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
+                        <i class="fa fa-laptop icon-light"></i>
+                        <span>MD5</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="navbar-nav navbar-right">
+            <ul class="nav nav-pills top-navbar-pill">
+                <button class="btn top-navbar-btn login" type="button"
+                        onclick="window.location.href='{{ url_for('johnnyhash.logout', build_id=build_id) }}'">
+                    <i class="fa fa-user-secret icon-light"></i>Logout</button>
+            </ul>
+        </div>
     </nav>
     <div id="main" class='container-fluid vh-100'>
-        {% block content %}{% endblock %}
+        <script type="text/javascript" src='{{ url_for("johnnyhash.static", filename="js/johnnyhash.js") }}'></script>
+        <main class="col main pt-3 mt-3 h-100">
+            <div class="overflow-auto">
+                <div class="tab-content">
+                    <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                        <div style="color: white;">
+                            <h2>Welcome, {{ user }}!</h2>
+                        </div>
+                        <div class="image-container">
+                            <img src="{{ url_for('johnnyhash.static', filename='imgs/flag.png') }}" id="flagImg"
+                                 class="content-img" style="max-width: 700px; width: 50%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 </body>
 </html>
+{% block navbar %}
+{% endblock %}
+{% block content %}
+{% endblock %}
