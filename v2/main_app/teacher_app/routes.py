@@ -176,6 +176,16 @@ def escape_room(unit_id):
     return redirect('/login')
 
 
+@teacher_app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if teacher_email := session.get('user_email', None):
+        auth = ArenaAuthorizer()
+        if user := auth.authorized(email=teacher_email, base=auth.UserGroups.INSTRUCTOR):
+            urls = _get_api_urls(return_all=True)
+            return render_template('settings.html', auth_config=cloud_env.auth_config, auth_list=user['permissions'], urls=urls)
+    return redirect('/login')
+
+
 def _get_api_urls(build_type=None, return_all=False):
     urls = {
         'unit': url_for('unit'),

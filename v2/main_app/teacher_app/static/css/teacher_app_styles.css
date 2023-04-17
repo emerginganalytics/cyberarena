@@ -11,12 +11,11 @@
     color: white;
 }
 #banner {
-    pointer-events: none;
     color: #6c757d;
 }
 #banner:hover {
     background: none;
-    color: #6c757d;
+    color: white;
 }
 .prevent-select {
     -webkit-touch-callout: none;
