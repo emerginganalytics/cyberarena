@@ -20,3 +20,4 @@ class Templates:
                 mime_type="text/plain"
             )
             return eml_content
+

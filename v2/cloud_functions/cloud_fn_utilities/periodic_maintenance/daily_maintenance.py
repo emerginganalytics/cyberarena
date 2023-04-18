@@ -26,12 +26,12 @@ class DailyMaintenance:
 
     def run(self):
         self._stop_all()
+        self._notify_expiring_units()
         if self.env.sql_ip:
             Vulnerabilities().nvd_update()
 
     def _stop_all(self):
         self.compute_manager.stop_everything()
-        self._notify_expiring_units()
 
     def _notify_expiring_units(self):
         """
@@ -43,6 +43,6 @@ class DailyMaintenance:
             unit = self.ds.get(key_type=DatastoreKeyTypes.UNIT, key_id=unit_id)
             instructor = unit['instructor_id']
             expires = unit['workspace_settings']['expires']
-            hours_until_expired = (expires - get_current_timestamp_utc()) / 3600
+            hours_until_expired = round((expires - get_current_timestamp_utc()) / 3600)
             SendMail().send_expiring_units(unit_id=unit_id, instructor=instructor,
                                            hours_until_expires=hours_until_expired)
