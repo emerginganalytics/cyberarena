@@ -12,7 +12,8 @@ from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, FixedArenaClassStates, get_current_timestamp_utc
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, FixedArenaClassStates, \
+    get_current_timestamp_utc
 from cloud_fn_utilities.state_managers.fixed_arena_class_states import FixedArenaClassStateManager
 from cloud_fn_utilities.server_specific.firewall_server import FirewallServer
 from cloud_fn_utilities.server_specific.fixed_arena_workspace_proxy import FixedArenaWorkspaceProxy
@@ -41,7 +42,6 @@ class FixedArenaClass:
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.state_manager = FixedArenaClassStateManager(initial_build_id=self.fixed_arena_class_id)
         self.firewall_manager = FirewallManager(env_dict=self.env_dict)
-
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS, key_id=self.fixed_arena_class_id)
         self.fixed_arena_class = self.ds.get()
         if not self.fixed_arena_class:

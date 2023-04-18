@@ -3,14 +3,12 @@ click
 cryptocode
 dominate
 email-validator
-Flask
-Flask-Bootstrap
+Flask=2.2.3
 Flask-WTF
 itsdangerous
 Jinja2
 MarkupSafe
 six
-SQLAlchemy
 visitor
 pymysql
 pycryptodome

@@ -102,6 +102,20 @@ class DataStoreManager:
             expired += list(query_expired.fetch())
         return expired
 
+    def get_expiring_units(self):
+        """
+        returns a list of all the units that expire within 48 hours
+        @return:
+        """
+        query_expiring = self.ds_client.query(kind=DatastoreKeyTypes.UNIT)
+        two_days = 172800
+        query_expiring.add_filter('workspace_settings.expires', '<', (get_current_timestamp_utc() + two_days))
+        expiring = []
+        for obj in query_expiring.fetch():
+            if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
+                expiring.append(obj.key.name)
+        return expiring
+
     def get_ready_for_shutoff(self):
         ready_for_shutoff = []
         query_shutoff = self.ds_client.query(kind=self.key_type)
@@ -134,12 +148,8 @@ class DataStoreManager:
 
     def get_admins(self):
         """Returns list of emails for admin accounts"""
-        users = list(self.ds_client.query(kind=DatastoreKeyTypes.USERS).fetch())
-        admin_list = []
-        for user in users:
-            if user['permissions']['admin']:
-                admin_list.append(user['email'])
-        return admin_list
+        users = self.ds_client.query(kind=DatastoreKeyTypes.USERS).add_filter('permissions.admin', '=', True)
+        return list(users.fetch())
 
     @staticmethod
     def _create_safe_entity(entity):

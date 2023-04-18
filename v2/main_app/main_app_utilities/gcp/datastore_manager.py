@@ -90,6 +90,7 @@ class DataStoreManager:
         return children
 
     def get_expired(self):
+        # TODO: This currently returns nothing if the workout is of type unit
         expired = []
         query_expired = self.ds_client.query(kind=self.key_type)
         if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
@@ -103,6 +104,7 @@ class DataStoreManager:
 
     def get_classrooms(self, class_name=None):
         """Queries for corresponding cybergym-class"""
+        # TODO: Possibly not needed in current direction of the application
         query_classroom = self.ds_client.query(kind=DatastoreKeyTypes.CLASSROOM.value)
         query_classroom.add_filter('teacher_email', '=', self.key_id)
         if class_name:
