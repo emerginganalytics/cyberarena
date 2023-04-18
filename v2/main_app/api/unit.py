@@ -67,6 +67,10 @@ class Unit(MethodView):
         registration_required = recv_data.get('registration_required', False)
         build_type = recv_data.get('build_file', None)
         build_count = recv_data.get('build_count', None)
+        lms_course_code = recv_data.get('lms_course_code', None)
+        lms_due_at = recv_data.get('lms_due_at', None)
+        lms_time_limit = recv_data.get('lms_time_limit', None)
+        lms_allowed_attempts = recv_data.get('lms_allowed_attempts', None)
 
         # Send build request
         if build_count and expire_datetime and build_type:
@@ -83,7 +87,10 @@ class Unit(MethodView):
             }
             build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
             if 'lms_quiz' in build_spec:
-                build_spec = LMSSpecDecorator(build_spec=build_spec).decorate()
+                lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=lms_course_code,
+                                                      due_at=lms_due_at, time_limit=lms_time_limit,
+                                                      allowed_attempts=lms_allowed_attempts)
+                build_spec = lms_spec_decorator.decorate()
 
             build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
             build_spec_to_cloud.commit(publish=False)

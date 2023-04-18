@@ -18,14 +18,20 @@ __status__ = "Testing"
 
 
 class LMSCanvas(LMS):
-    def __init__(self, url, api_key, course_code):
-        super().__init__(url, api_key, course_code)
+    def __init__(self, url, api_key, course_code, build):
+        super().__init__(url, api_key, course_code, build)
         self.canvas = Canvas(self.url, self.api_key)
         self.course = self.canvas.get_course(self.course_code)
+        self.class_list = self.course.get_users(enrollment_type=['student'])
 
     def get_class_list(self):
-        self.students = self.course.get_users(enrollment_type=['student'])
-        return self.students
+        students = []
+        for student in self.class_list:
+            students.append({
+                    'email': student.email,
+                    'name': student.name
+                })
+        return students
 
     def create_quiz(self):
         questions = self.build['lms_quiz']['questions']
@@ -38,13 +44,13 @@ class LMSCanvas(LMS):
             'points_possible': points_possible,
             'published': True,
             'grading_type': 'percent',
-            'shuffle_answers': True
+            'shuffle_answers': True,
+            'assignees': [{'id': x.id, 'type': 'user'} for x in self.class_list]
         }
         new_quiz = self.course.create_quiz(quiz_data)
         for question in questions:
             new_question = QuizQuestion()
             new_quiz.create_question(question)
+        return new_quiz
 
-    def grade_student_quiz(self):
-        pass
 

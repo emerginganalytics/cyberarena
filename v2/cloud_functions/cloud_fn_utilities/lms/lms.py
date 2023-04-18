@@ -27,6 +27,3 @@ class LMS:
 
     def create_quiz(self):
         raise NotImplementedError("create_quiz not implemented for this object.")
-
-    def grade_student_quiz(self):
-        raise NotImplementedError("create_quiz not implemented for this object.")

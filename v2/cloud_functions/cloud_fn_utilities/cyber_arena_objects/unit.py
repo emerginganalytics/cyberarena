@@ -1,4 +1,5 @@
 import json
+import logging
 import random
 import string
 from datetime import datetime, timezone
@@ -14,6 +15,7 @@ from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
+from cloud_fn_utilities.lms.lms_canvas import LMSCanvas
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -28,7 +30,8 @@ __status__ = "Testing"
 class Unit:
     def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False, env_dict=None):
         self.unit_id = build_id
-        self.workout_id = child_id
+        # TODO: Remove child_id. The workout ID needs to be created here if needed.
+        self.child_id = child_id
         self.form_data = form_data
         self.debug = debug
         self.force = force
@@ -42,10 +45,14 @@ class Unit:
         if not self.unit:
             self.logger.error(f"The datastore record for {self.unit_id} no longer exists!")
             raise LookupError
-        self.workout_ids = []
+        self.lms_class = self._is_lms_class()
+        self.ds = DataStoreManager()
 
     def build(self):
-        self._create_and_build_workouts()
+        if self.lms_class:
+            self._create_unit_for_lms()
+        else:
+            self._build_one_workout(workout_id=self.child_id)
 
     def start(self):
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
@@ -92,8 +99,32 @@ class Unit:
     def get_build_id(self):
         return self.unit_id
 
-    def _create_and_build_workouts(self):
-        workout_datastore = DataStoreManager()
+    def _is_lms_class(self):
+        if 'lms_quiz' in self.unit:
+            return True
+        else:
+            return False
+
+    def _create_unit_for_lms(self):
+        lms_quiz = self.unit['lms_quiz']
+        url = lms_quiz['lms_connection']['uri']
+        api_key = lms_quiz['lms_connection']['api_key']
+        course_code = lms_quiz['lms_connection']['course_code']
+        if lms_quiz.get('lms_type', None) == BuildConstants.LMS.CANVAS:
+            lms = LMSCanvas(url=url, api_key=api_key, course_code=course_code, build=self.unit)
+        else:
+            self.logger.error(f"Unsupported LMS object")
+            raise ValueError
+        lms.create_quiz()
+        students = lms.get_class_list()
+        for student in students:
+            workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            workout_record = self._create_workout_record(workout_id=workout_id)
+            workout_record['student_email'] = student.get('email')
+            workout_record['student_name'] = student.get('name')
+            self.ds.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
+
+    def _build_one_workout(self, workout_id):
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
         workout_query = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query()
         workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == self.unit_id]
@@ -103,31 +134,31 @@ class Unit:
                 raise ValueError
         student_email = self.form_data.get('student_email', None)
         team_name = self.form_data.get('team_name', None)
-        if student_email and self.workout_id:
+        if student_email:
             workout_record = self._create_workout_record()
             workout_record['student_email'] = student_email
             student_name = self.form_data.get('student_name', None)
             if student_name:
                 workout_record['student_name'] = student_name
-        elif team_name and self.workout_id:
+        elif team_name:
             workout_record = self._create_workout_record()
             workout_record['team_name'] = team_name
         else:
             self.logger.error(f'Invalid or missing claimed_by values given for unit {self.unit_id}')
             raise ValueError
-        workout_datastore.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
+        self.ds.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
         if self.debug:
-            workout = Workout(build_id=self.workout_id, debug=self.debug, env_dict=self.env_dict)
+            workout = Workout(build_id=workout_id, debug=self.debug, env_dict=self.env_dict)
             workout.build()
         else:
             self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                     action=str(PubSub.BuildActions.WORKOUT.value),
                                     key_type=str(DatastoreKeyTypes.WORKOUT.value),
-                                    build_id=str(self.workout_id))
+                                    build_id=str(workout_id))
 
-    def _create_workout_record(self):
+    def _create_workout_record(self, workout_id):
         workout_record = {
-            'id': self.workout_id,
+            'id': workout_id,
             'parent_id': self.unit_id,
             'parent_build_type': BuildConstants.BuildType.UNIT,
             'build_type': BuildConstants.BuildType.WORKOUT,
@@ -144,7 +175,7 @@ class Unit:
                 processed_web_application = {
                     'name': web_application['name'],
                     'url': f"https://{web_application['host_name']}{self.env.dns_suffix}"
-                           f"{web_application['starting_directory']}/{self.workout_id}"
+                           f"{web_application['starting_directory']}/{workout_id}"
                 }
                 processed_web_applications.append(processed_web_application)
             workout_record['web_applications'] = processed_web_applications

@@ -1,6 +1,7 @@
 """
 Decorates the build spec with the required dynamic elements of the schema based on user inputs.
 """
+from datetime import datetime, timedelta
 from canvasapi import Canvas
 
 from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants
@@ -17,10 +18,13 @@ __status__ = "Testing"
 
 
 class LMSSpecDecorator:
-    def __init__(self, build_spec, course_code):
+    def __init__(self, build_spec, course_code, due_at=None, time_limit=None, allowed_attempts=None):
         self.build_spec = build_spec
         self.course_code = course_code
         self.instructor_id = self.build_spec.get('instructor_id', None)
+        self.due_at = due_at if due_at else (datetime.utcnow() + timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%SZ')
+        self.time_limit = time_limit
+        self.allowed_attempts = allowed_attempts if allowed_attempts else -1
         self.ds = DataStoreManager()
         self.settings = None
         self.lms_type = None
@@ -38,7 +42,12 @@ class LMSSpecDecorator:
             raise LMSSpecLMSTypeNotSupported(f"LMS {self.lms_type} is not supported")
 
         self.build_spec['lms_quiz']['lms_connection'] = lms_connection
-        # TODO: Add due_at, description, time_limit, allowed_attempts to the lms_quiz dict.
+        self.build_spec['lms_quiz'].update({
+            'description': '',
+            'due_at': self.due_at,
+            'time_limit': self.time_limit,
+            'allowed_attempts': self.allowed_attempts
+        })
         return self.build_spec
 
     def _get_canvas_connection(self):
