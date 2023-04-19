@@ -10,14 +10,14 @@
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
-            <li class="nav-item">
+            <li class="nav-item m-l-r-3">
                 <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item m-l-r-3">
                 <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
             </li>
             {% if auth_list.admin %}
-                <li class="nav-item">
+                <li class="nav-item m-l-r-3">
                     <a href='{{ url_for("admin.home") }}' class="nav-link text-center">Admin Home</a>
                 </li>
             {% endif %}
@@ -25,14 +25,14 @@
     </div>
     <div class="navbar-nav navbar-right">
         <ul class="nav nav-pills top-navbar-pill">
-            <li class="nav-item">
+            <li class="nav-item m-l-r-3">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
                    data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
-            <li class="nav-item disabled">
-                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            <li class="nav-item m-l-r-3">
+                <button id="banner" class="nav-item btn top-navbar-btn"><span id="user"></span><i class="fa fa-caret-down"></i></button>
             </li>
-            <li class="nav-item">
+            <li class="nav-item m-l-r-3">
                 <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
             </li>
         </ul>
@@ -53,7 +53,7 @@
         initApp(auth_config).then(value => {
             enable_signout();
             // Set welcome banner
-            const welcome_nav = document.getElementById('banner');
+            const welcome_nav = document.getElementById('user');
             welcome_nav.innerHTML = value['display_name'];
         });
         $(document).ready(function (){

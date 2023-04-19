@@ -87,6 +87,9 @@ def logout(build_id):
 def basic_ciphers(build_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
-        pass
+        ciphers = Ciphers.options()
+        assessment = workout.get('assessment', None)
+        # TODO: Setup the assessment if it doesn't already exist
+        questions = [{'question': i['question'], 'correct': i['correct']} for i in assessment['questions']]
+        return render_template('johnnycipher.html', ciphers=ciphers, questions=questions)
     return redirect('/invalid')
-
