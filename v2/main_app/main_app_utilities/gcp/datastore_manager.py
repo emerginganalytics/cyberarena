@@ -36,14 +36,6 @@ class DataStoreManager:
             use_key = self.key
         if obj := self.ds_client.get(use_key):
             return obj
-        """ TODO: Might need to reconsider this for the front-end as
-        i = 0
-        while not obj and i < self.MAX_ATTEMPTS and key_type != DatastoreKeyTypes.ADMIN_INFO:
-            i += 1
-            time.sleep(self.WAIT_PERIOD)
-            obj = self.ds_client.get(use_key)
-        return obj 
-        """
         return False
 
     def put(self, obj, key_type=None, key_id=None):
@@ -110,6 +102,11 @@ class DataStoreManager:
         if class_name:
             query_classroom.add_filter('class_name', '=', str(class_name))
         return list(query_classroom.fetch())
+
+    def get_admins(self):
+        """Returns list of users with cyberarena-user admin permissions"""
+        users = self.ds_client.query(kind=DatastoreKeyTypes.USERS).add_filter('permissions.admin', '=', True)
+        return list(users.fetch())
 
     @staticmethod
     def _create_safe_entity(entity):

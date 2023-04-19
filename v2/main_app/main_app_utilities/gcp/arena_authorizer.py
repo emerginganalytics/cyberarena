@@ -66,13 +66,8 @@ class ArenaAuthorizer:
                     return user
         return False
 
-    def get_admins(self):
-        users = self.get_all_users()
-        admin_list = []
-        for user in users:
-            if user['permissions']['admin']:
-                admin_list.append(user)
-        return admin_list
+    def _get_admins(self):
+        return self.ds_manager.get_admins()
 
     def _get_user_from_firebase(self, email):
         pass
@@ -138,7 +133,7 @@ class ArenaAuthorizer:
         self.ds_manager.set(key_type=self.key_type, key_id=str(email))
         self.ds_manager.delete()
         # TODO: Add functionality to search for and
-        #  remove user from Firestore db as well
+        #  remove user from Firebase db as well
         self._get_user_from_firebase(str(email))
         return True
 # [ eof ]
