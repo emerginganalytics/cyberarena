@@ -172,8 +172,9 @@ class Workout:
 
             self.firewall_manager.delete(self.workout_id)
 
-            for network in self.workout['networks']:
-                self.vpc_manager.delete(network_spec=network)
+            if 'networks' in self.workout:
+                for network in self.workout['networks']:
+                    self.vpc_manager.delete(network_spec=network)
             self.state_manager.state_transition(self.s.DELETED)
             self.logger.info(f"Finished deleting the Workout: {self.workout_id}!")
         else:
