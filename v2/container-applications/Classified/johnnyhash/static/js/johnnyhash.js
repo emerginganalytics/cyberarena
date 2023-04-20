@@ -133,3 +133,48 @@ function element_exists(elem_id){
     // If it isn't "undefined" and it isn't "null", then it exists.
     return typeof (element) != 'undefined' && element != null;
 }
+
+function calculateCaesar(form_id, url){
+    let form, i, formData, results, resultDiv;
+    form = document.getElementById(form_id);
+    formData = new FormData(form);
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+    }).then(response => response.json()).then((json_data)=>{
+        resultDiv = document.getElementById('decryptedResults');
+        if (json_data['status'] === 200){
+            resultDiv.innerText = json_data['data']['plaintext'];
+        } else {
+            resultDiv.innerText = 'ERROR: ' + String(json_data['message']);
+        }
+    })
+}
+function checkCaesarCipher(form_id, url, idx){
+    let form, formData, inputDiv;
+    var object, jsonData;
+    object = {};
+    formData = new FormData(document.getElementById(form_id));
+    formData.forEach((value, key) => object[key] = value);
+    jsonData = JSON.stringify(object);
+    fetch(url, {
+        method: 'PUT',
+        body: jsonData,
+        headers: json_headers
+    }).then(response => response.json()).then((json_data)=>{
+        inputDiv = document.getElementById('caesarCipher' + idx);
+        if (json_data['status'] === 200){
+            if (json_data['data']['complete'] === true){
+                inputDiv.style.backgroundColor = 'var(--mint)';
+            } else {
+                inputDiv.style.backgroundColor = 'var(--quaternary)';
+                inputDiv.style.color = 'black';
+                inputDiv.innerText = json_data['data']['message'];
+            }
+        } else {
+            inputDiv.style.background = 'var(--quaternary)';
+        }
+        inputDiv.style.color = 'black';
+    });
+}
+// [ eof]

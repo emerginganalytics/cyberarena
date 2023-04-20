@@ -1,8 +1,8 @@
-import re
 """
     Thanks to JamesLyons (https://github.com/jameslyons/pycipher/blob/master/pycipher/columnartransposition.py#L45)
     for part of the logic used to encrypt and decrypt the column transposition cipher.
 """
+import re
 
 
 class ColTransposition(object):
@@ -73,7 +73,8 @@ class ColTransposition(object):
 
     @property
     def encrypt(self):
-        return self.encipher(keyword=self.keyword, plaintext=self.message)
+        ciphertext = self.encipher(keyword=self.keyword, plaintext=self.message)
+        return {'ciphertext': ciphertext, 'plaintext': self.message, 'key': self.keyword}
 
     def encipher(self, plaintext, keyword):
         """
@@ -92,7 +93,8 @@ class ColTransposition(object):
 
     @property
     def decrypt(self):
-        return self.decipher(ciphertext=self.message, keyword=self.keyword)
+        plaintext = self.decipher(ciphertext=self.message, keyword=self.keyword)
+        return {'plaintext': plaintext, 'ciphertext': self.message, 'key': self.keyword}
 
     def decipher(self, ciphertext, keyword):
         """

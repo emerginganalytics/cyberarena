@@ -1,5 +1,5 @@
 import base64
-from app_utilities.globals import CipherModes, Algorithms
+from app_utilities.globals import CipherModes
 
 
 class Encodings:
@@ -21,7 +21,7 @@ class Encodings:
 				self.plaintext = str(base64.b32decode(self.message).decode('UTF-8'))
 			except ValueError:
 				return "Invalid Chars: String is not a Base32 Decodable String ..."
-			return str(self.plaintext)
+			return {'plaintext': str(self.plaintext), 'key': None, 'ciphertext': self.message}
 
 	def base64(self):
 		if self.mode == CipherModes.ENCRYPT:
@@ -31,4 +31,4 @@ class Encodings:
 				self.plaintext = str(base64.b64decode(self.message).decode('UTF-8'))
 			except ValueError:
 				return "Invalid Chars: String is not a Base64 Decodable String..."
-			return str(self.plaintext)
+			return {'plaintext': str(self.plaintext), 'key': None, 'ciphertext': self.message}

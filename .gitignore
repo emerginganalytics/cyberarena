@@ -35,3 +35,4 @@ admin_scripts/reports/
 /v2/Bill/
 .env
 .gitignore
+v2/container-applications/Classified/test.py

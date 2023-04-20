@@ -141,8 +141,10 @@ class CaesarCipher(object):
                 logging.debug("Cipher value: {0}".format(cipher_value))
                 ciphered_message_list[i] = alphabet[cipher_value]
                 logging.debug("Ciphered letter: {0}".format(letter))
-        self.message = ''.join(ciphered_message_list)
-        return self.message
+        if self.encode:
+            return {'ciphertext': ''.join(ciphered_message_list), 'plaintext': self.message, 'key': self.offset}
+        elif self.decode:
+            return {'ciphertext': self.message, 'plaintext': ''.join(ciphered_message_list), 'key': self.offset}
 
     def calculate_entropy(self, entropy_string):
         """Calculates the entropy of a string based on known frequency of
@@ -197,18 +199,17 @@ class CaesarCipher(object):
 
         return cracked_text
 
-    @property
-    def encoded(self):
+    def encrypt(self):
         """Encodes message using Caesar shift cipher
 
         Returns:
             String encoded with cipher.
         """
         logging.info("Encoding message: {0}".format(self.message))
+        self.encode = True
         return self.cipher()
 
-    @property
-    def decoded(self):
+    def decrypt(self):
         """Decodes message using Caesar shift cipher
 
         Inverse operation of encoding, applies negative offset to Caesar shift
@@ -219,6 +220,7 @@ class CaesarCipher(object):
         """
         logging.info("Decoding message: {0}".format(self.message))
         self.offset = self.offset * -1
+        self.decode = True
         return self.cipher()
 
 

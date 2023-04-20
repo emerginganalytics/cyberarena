@@ -3,26 +3,32 @@ import string
 
 
 class SubstitutionCipher:
-    def __init__(self, message):
+    def __init__(self, message, key=None):
         self.message = message
+        self.key = self._gen_alpha_key() if not key else key
+        self.alpha = list(string.ascii_lowercase)
 
-    @staticmethod
-    def _gen_alpha_key():
-        standard_alpha = list(string.ascii_lowercase)
-        rand_key = standard_alpha.copy()
+    def _gen_alpha_key(self):
+        """Takes the standard alphabet and shuffles it to generate a randomized key"""
+        rand_key = self.alpha.copy()
         random.shuffle(rand_key)
 
-        return dict(zip(standard_alpha, rand_key))
+        return dict(zip(self.alpha, rand_key))
 
-    def substitution_encrypt(self):
+    def encrypt(self):
         ciphertext = []
-        cleartext = self.message
-        alpha = list(string.ascii_lowercase)
-        alpha_key = self._gen_alpha_key()
-
-        for letter in cleartext:
-            if letter not in alpha:
+        for letter in self.message:
+            if letter not in self.alpha:
                 ciphertext.append(letter)
                 continue
-            ciphertext.append(alpha_key.get(letter, letter))
-        return {'ciphertext': ''.join(ciphertext), 'cleartext': cleartext, 'key': alpha_key}
+            ciphertext.append(self.key.get(letter, letter))
+        return {'ciphertext': ''.join(ciphertext), 'plaintext': self.message, 'key': self.key}
+
+    def decrypt(self):
+        cleartext = []
+        for letter in self.message:
+            if letter not in self.alpha:
+                cleartext.append(letter)
+                continue
+            cleartext.append(self.key.get(letter, letter))
+        return {'ciphertext': self.message, 'plaintext': ''.join(cleartext), 'key': self.key}
