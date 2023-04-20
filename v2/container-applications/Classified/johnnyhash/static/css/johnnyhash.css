@@ -2,6 +2,12 @@
     margin: auto;
     width: 80%;
 }
+.image-container-flex {
+    display: flex;
+    margin: auto;
+    justify-content: center;
+    width: 80%;
+}
 .content-img {
     display: block;
     margin: auto;
@@ -25,6 +31,14 @@
     border: 1px solid black;
     box-shadow: 1px 2px 3px 0 black;
     padding: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.inline-form-container {
+    display: block;
+    width: 80%;
+    min-width: 800px;
+    padding: 20px 20px 10px 20px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -59,3 +73,10 @@
     font-weight: bold;
 }
 .hash-value {}
+
+#decryptedResults {}
+#decryptedResultsDiv {
+    width: 80%;
+    margin: 10px auto;
+    color: white;
+}

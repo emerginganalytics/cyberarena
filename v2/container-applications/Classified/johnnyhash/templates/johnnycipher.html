@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Johnny Cipher{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='css/johnnyhash.css')}}">
+    <style>
+        body {
+            background-color: var(--dark-gray);
+        }
+    </style>
+{% endblock %}
+{% block nav_title %}Basic Ciphers{% endblock %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item pr-1">
+                 <a class='nav-link text-center' href="{{ url_for('johnnyhash.ciphers', build_id=build_id) }}">
+                    <i class="fa fa-key icon-light"></i>
+                    <span>Caesar Ciphers</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("johnnyhash.static", filename="js/johnnyhash.js") }}'></script>
+    <main class="col main pt-3 mt-3 h-100">
+        <div class="overflow-auto">
+            <div class="tab-content" style="padding-bottom: 20px;">
+                <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                    <div class='image-container-flex'>
+                        <img id="cipherBanner" src="{{ url_for('johnnyhash.static', filename='imgs/sinister_alt_banner.jpg') }}"
+                             style="border: 1px solid white; border-radius: 4px;">
+                    </div>
+                    <div class="inline-form-container">
+                        <form id="calcCaesarForm" class="form-inline" style="justify-content: center;">
+                            <div class="input-group mb-2 mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputCalcCaesar">Ciphertext</span>
+                                </div>
+                                <input type="text" class="form-control" aria-label="Ciphertext"
+                                       aria-describedby="inputCalcCaesar" name="message" required size="80">
+                            </div>
+                            <div class="input-group mb-2 mr-sm-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text" id="inputCaesarKey">Key</span>
+                                </div>
+                                <input type="number" class="form-control" aria-label="Key"
+                                       aria-describedby="inputCaesarKey" name="key" required size='2' value="13"
+                                       min="1" max="25">
+                            </div>
+                            <button type="button" class="btn btn-primary mb-2" id="inputCalcCaesarBtn" onclick="calculateCaesar('calcCaesarForm', '/api/ciphers');">Submit</button>
+                        </form><!-- End Calculate Caesar form -->
+                        <div id="decryptedResultsDiv" class="text-center">
+                            <span id="decryptedResults">Decrypted messages will be displayed here</span>
+                        </div><!-- End decrypted results div -->
+                    </div><!-- End summary container -->
+                    {% for question in workout.assessment.questions %}
+                        <div class="summary-container" style="border-radius: 10px; margin-bottom: 15px; max-width: 1100px; width: 70%;">
+                            <p class="text-center" style="font-weight: bold;">{{ question.question }}</p>
+                            <form class="form form-inline" id="caesarCipher{{ loop.index }}Form" style="justify-content: center;">
+                                <div class="form-group">
+                                    <input type="text" readonly hidden name="question_id" value="{{ question['id'] }}">
+                                    <div class="input-group mb-2 mr-sm-2">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="inputCipher{{ loop.index }}">Cipher {{ loop.index }}</span>
+                                        </div>
+                                        {% if question.complete == True %}
+                                            <input type="text" size='80' name="submission" id="caesarCipher{{ loop.index }}"
+                                                   class="form-control" aria-label="Cipher {{ loop.index }}"
+                                                   aria-describedby="inputCipher{{ loop.index }}"
+                                                   style="background-color: var(--mint); color: black;"
+                                                   value="{{ question.answer }}"/>
+                                        {% else %}
+                                            <input type="text" size='80' name="submission" id="caesarCipher{{ loop.index }}"
+                                                   class="form-control" aria-label="Cipher {{ loop.index }}"
+                                                   aria-describedby="inputCipher{{ loop.index }}" />
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <button type='button' class="btn btn-quaternary mb-2" id="caesar{{ loop.index }}btn"
+                                        onclick="checkCaesarCipher('caesarCipher{{ loop.index }}Form',
+                                                '{{ url_for('ciphers', build_id=build_id) }}', '{{ loop.index }}')">Check Cipher
+                                </button>
+                            </form><!-- End Cipher Input form {{ loop.index }} -->
+                        </div>
+                    {% endfor %}
+                </div><!-- End home-tab -->
+            </div><!-- End end tab-content div -->
+        </div><!-- End overflow-auto div -->
+    </main><!-- End main -->
+{% endblock %}

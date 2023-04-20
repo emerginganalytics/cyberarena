@@ -8,6 +8,8 @@ from app_utilities.globals import DatastoreKeyTypes
 from app_utilities.crypto_suite.hashes import Hashes
 from app_utilities.crypto_suite.ciphers import Ciphers
 
+from johnnyhash.utilities import CaesarCipherWorkout
+
 johnnyhash_bp = Blueprint(
     'johnnyhash', __name__,
     url_prefix='/johnnyhash',
@@ -84,12 +86,30 @@ def logout(build_id):
 
 
 @johnnyhash_bp.route('/ciphers/<build_id>', methods=['GET'])
-def basic_ciphers(build_id):
+def ciphers(build_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
-        ciphers = Ciphers.options()
-        assessment = workout.get('assessment', None)
-        # TODO: Setup the assessment if it doesn't already exist
-        questions = [{'question': i['question'], 'correct': i['correct']} for i in assessment['questions']]
-        return render_template('johnnycipher.html', ciphers=ciphers, questions=questions)
+        ops = Ciphers.options()
+        if populated := CaesarCipherWorkout(build_id=build_id, build=workout).set():
+            assessment = populated.get('assessment', None)
+        else:
+            assessment = workout.get('assessment', None)
+        completed = 0
+        for question in assessment['questions']:
+            if question['complete']:
+                completed += 1
+        return render_template('johnnycipher.html', build_id=build_id, workout=workout, ciphers=ops,
+                               completed=completed)
     return redirect('/invalid')
+
+
+@johnnyhash_bp.route('/ciphers/cipher-info/<build_id>', methods=['GET'])
+def cipher_info(build_id):
+    return render_template('cipher_info.html', build_id=build_id)
+
+
+def _get_assessment(build):
+    if escape_room := build.get('escape_room', None):
+        return build['escape_room']['puzzles']
+    else:
+        return build['assessment']['questions']

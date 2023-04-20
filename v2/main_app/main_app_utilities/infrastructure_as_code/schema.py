@@ -196,12 +196,14 @@ class FirewallRuleSchema(Schema):
 
 class AssessmentSchema(Schema):
     questions = fields.Nested('AssessmentQuestionSchema', many=True)
+    key = fields.Str(required=False, description='Key used for decrypting workout secrets in container applications')
 
 
 class AssessmentQuestionSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
+    key = fields.Str(required=False, description='The value used for decrypting individual cryptographic questions')
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     script = fields.Str(required=False, description="script name (e.g. attack.py)")
     script_language = fields.Str(required=False, description="e.g. python")
