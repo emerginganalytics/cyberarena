@@ -1,0 +1,1 @@
+gcloud run deploy classified-v2 --image gcr.io/ualr-cybersecurity/classified-v2 --memory=1024Mi --platform=managed --region=us-central1 --allow-unauthenticated --service-account=cyberarena-service@ualr-cybersecurity.iam.gserviceaccount.com

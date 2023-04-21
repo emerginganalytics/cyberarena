@@ -28,6 +28,7 @@ class JohnnyHashAPI(MethodView):
 
     def post(self):
         if json_data := request.json:
+            build_id = json_data.get('build_id', None)
             passwords = json_data.get('passwords')
             hashes = Hashes().generate_hashes(passwords)
             return self.http_resp(code=200, data=hashes).prepare_response()

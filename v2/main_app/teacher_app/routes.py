@@ -153,17 +153,17 @@ def escape_room(unit_id):
                         if workout.get('web_application', False):
                             unit['human_interaction']['web_applications'] = True
                         # Check the Escape Room timer to see if it is still valid
-                        unit['escape_room']['expired'] = workout['escape_room'].get('expired', False)
+                        # unit['escape_room']['expired'] = workout['escape_room'].get('expired', False)
                         start_time = workout['escape_room']['start_time']
                         time_limit = workout['escape_room']['time_limit']
                         current_time = get_current_timestamp_utc()
                         time_remaining = time_limit - (current_time - start_time)
                         # We assume if start_time == 0, the escape room hasn't been started yet
                         if time_remaining > 0 or start_time == 0:
-                            unit['escape_room']['expired'] = False
+                            unit['escape_room']['closed'] = False
                             unit['escape_room']['time_remaining'] = time_remaining
                         else:  # Escape Room timer has expired
-                            unit['escape_room']['expired'] = True
+                            unit['escape_room']['closed'] = True
                         unit['escape_room']['time_remaining'] = time_remaining
                         break
                     return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config,

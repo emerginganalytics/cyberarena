@@ -1,5 +1,6 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'contact_us.html' as forms %}
 {% block title %}Escape Room{% endblock %}
 {% block nav_title %}Escape Room{% endblock %}
 {% block styles %}
@@ -68,7 +69,7 @@
                            'build_type': 'escape_room',
                            'start_time': {{ workout.escape_room.start_time }},
                            'time_limit': {{ workout.escape_room.time_limit }},
-                           'expired': {{ workout.escape_room.expired | lower }}
+                           'closed': {{ workout.escape_room.closed | lower }}
                        }
                        countdownTimer.start(times);
                        getEscapeRoomState("{{ workout['id'] }}");
@@ -88,8 +89,7 @@
                                 <h5 class="nav-link room-complete">Room Escaped!</h5>
                             </div>
                         {% else %}
-                            {{ workout.escape_room.expired }}
-                            {% if workout.escape_room.expired == False %}
+                            {% if workout.escape_room.closed == False %}
                                 <div id="room-timer-div" class="countdown-timer">
                                     <p class="text-center no-select">
                                         <span id="room-timer"></span>
@@ -120,7 +120,7 @@
                 <div id="tab-container" class="tab-content">
                     <div id="error-msg-div"><p id="error-msg-p" class="text-danger text-center"></p></div>
                     <div id="home-container" class="tab-pane fade active show" role="tabpanel" aria-labelledby="home-tab">
-                        {% if workout.escape_room.expired %}
+                        {% if workout.escape_room.closed %}
                             {% set total_solved = namespace(value=0) %}
                             {% for puzzle in workout.escape_room.puzzles %}
                                 {% if puzzle.correct %}
@@ -138,9 +138,9 @@
                                         <div class="card-body">
                                             <h4 class="card-title">{{ puzzle.name }}</h4>
                                             {% if puzzle.correct == True %}
-                                                <h6 class="card-subtitle">Complete!</h6>
+                                                <h6 class="card-subtitle" id="puzzle-{{ loop.index }}-status">Complete!</h6>
                                             {% else %}
-                                                <h6 class="card-subtitle">Incomplete</h6>
+                                                <h6 class="card-subtitle" id="puzzle-{{ loop.index }}-status">Incomplete</h6>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -171,15 +171,17 @@
                                                                     {% endif %}
                                                                 {% endif %}
                                                                 <li class="list-inline-item">
-                                                                    {% if puzzle.entry_type == 'server' %}
-                                                                        <a href="{{ workout['links']['server'][puzzle['entry_name']] }}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
-                                                                    {% elif puzzle.entry_type == 'web_application' %}
-                                                                        <a href="{{ workout['links']['web_application'][puzzle['entry_name']]}}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Application</a>
+                                                                    {% if 'entry_type' in puzzle %}
+                                                                        {% if puzzle.entry_type == 'server' %}
+                                                                            <a href="{{ workout['links']['server'][puzzle['entry_name']] }}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Machine</a>
+                                                                        {% elif puzzle.entry_type == 'web_application' %}
+                                                                            <a href="{{ workout['links']['web_application'][puzzle['entry_name']]}}" class="btn-fa" target="_blank"><i class="fa fa-laptop icon-light"></i>Connect to Application</a>
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        <p><em>See Puzzle instructions</em></p>
                                                                     {% endif %}
                                                                 </li>
                                                             </ul>
-                                                        </div>
-                                                        <div>
                                                         </div>
                                                     </div>
                                                     <div class="form-container">
@@ -245,54 +247,28 @@
                         {% endif %}
                     </div>
                     <div id="clue-container" class="tab-pane fade show" role="tabpanel" aria-labelledby="clue-tab">
-                        <div class="info-container">
+                        <div class="clues-container">
                             {% set puzzles_correct = namespace(value=0) %}
                             {% for puzzle in workout.escape_room.puzzles %}
                                 {% if puzzle.correct %}
                                     <div class="puzzle-clues">
-                                        <span class="puzzle-clues">{{ puzzle.reveal }}</span>
+                                        <p class="puzzle-clues">{{ puzzle.reveal }}</p>
                                         {% set puzzles_correct.value = puzzles_correct.value + 1 %}
-                                    </div>
-                                {% else %}
-                                    <div class="puzzle-clues">
-                                        <span class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</span>
                                     </div>
                                 {% endif %}
                             {% endfor %}
                             {% if puzzles_correct.value == 0 %}
                                 <h3>Clues will be revealed as each puzzle is completed!</h3>
+                                {% for puzzle in workout.escape_room.puzzles %}
+                                    <div class="puzzle-clues">
+                                        <p class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</p>
+                                    </div>
+                                {% endfor %}
                             {% endif %}
                         </div>
                     </div>
                 </div>
-                 <!-- Modal -->
-                <div id="modalContactUs" class="modal fade" role="dialog">
-                    <div class="modal-dialog">
-
-                        <!-- Modal content-->
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Help Form</h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <form id='contact_form' action='{{ url_for("leave_comment") }}' method="POST" enctype="multipart/form-data">
-                                    <label for="Email">Your Email</label><br>
-                                    <input type="text" id="email" name="email" required><br><br>
-                                    <label for="Subject">Subject</label><br>
-                                    <input type="text" id="subject" name="subject" required><br><br>
-                                    <label for="Comment">Comment</label><br>
-                                    <input type="text" id="comment" name="comment" required><br><br>
-                                    <label for="Image">Please include an image of any errors</label><br>
-                                    <input type="file" id="image" name="image"><br><br>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <input type="submit" form='contact_form' value="Submit">
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End Modal -->
+                {{ forms.contact_us() }}
             </div>
         </main>
      </div>

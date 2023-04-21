@@ -142,7 +142,7 @@ class EscapeRoomUnit(MethodView):
                         self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
                                             cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                             action=str(PubSub.Actions.START.value))
-                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 300
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 30
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)

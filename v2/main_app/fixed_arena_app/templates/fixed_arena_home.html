@@ -3,6 +3,7 @@
 {% import "controller_macros.html" as vuln_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
 {% import "delete_class_macro.html" as delete_class_macro %}
+{% import 'contact_us.html' as forms %}
 {% block title %}Secure Training and Operations Center{% endblock %}
 {% block nav_title %}Secure Training and Operations Center{% endblock %}
 {% block styles %}
@@ -261,6 +262,7 @@
                         </div><!-- End home-content-ctn-->
                     </div><!--End fa-home div-->
                     <div class="tab-pane fade" id="config-tab" aria-labelledby="fa-config-btn"></div><!-- End config-tab-->
+                    {{ forms.contact_us() }}
                 </div> <!--End tab-container div-->
                 <!-- TODO: Footer is not displaying for some reason. Need to eventually discover why -->
                 <footer class="footer text-center">

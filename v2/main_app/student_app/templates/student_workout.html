@@ -1,5 +1,6 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'contact_us.html' as forms %}
 {% block title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block nav_title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block styles %}
@@ -374,6 +375,7 @@
                             </div> <!--End info-container -->
                         </div> <!-- End assessment-tab -->
                     {% endif %}
+                {{ forms.contact_us() }}
                 </div> <!-- End tab-container-->
             </div> <!-- End content-div -->
         </main>

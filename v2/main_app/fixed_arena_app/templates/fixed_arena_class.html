@@ -2,6 +2,7 @@
 {% import 'logo_macro.html' as logo %}
 {% import "controller_macros.html" as ctrl_macros %}
 {% import "fixed_arena_macros.html" as fixed_arena_macros %}
+{% import 'contact_us.html' as forms %}
 {% block title %}{{ fixed_arena_class.summary.name }}{% endblock title %}
 {% block nav_title %}{{ fixed_arena_class.summary.name }}{% endblock nav_title %}
 {% block styles %}
@@ -290,4 +291,5 @@
         </main>
     </div>
     <div id="loading-msg"></div>
+    {{ forms.contact_us() }}
 {% endblock %}

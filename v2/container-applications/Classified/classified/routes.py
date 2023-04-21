@@ -60,8 +60,6 @@ def inspect_login(workout_id):
     return redirect(404)
 
 
-
-
 # SQL Injection Routes
 @classified_bp.route('/sql-injection/<workout_id>')
 def sql_injection(workout_id):

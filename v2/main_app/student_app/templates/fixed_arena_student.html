@@ -1,6 +1,7 @@
 {% extends "v2-base.html" %}
 {% block title%} Workspace {{ workspace_name }} {% endblock %}
 {% import 'cln_logo_macro.html' as logo %}
+{% import 'contact_us.html' as forms %}
 {% block styles %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed-arena-landing-styles.css') }}">
 {% endblock styles %}
@@ -252,6 +253,7 @@
                         <br>
                 </div>
             </div>
+        {{ forms.contact_us() }}
         </div> <!--Main Container-->
 </div>
 {% endblock %}

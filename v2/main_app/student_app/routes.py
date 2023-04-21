@@ -110,10 +110,10 @@ def escape_room(build_id):
             current_time = get_current_timestamp_utc()
             time_remaining = time_limit - (current_time - start_time)
             if time_remaining > 0:
-                workout['escape_room']['expired'] = False
+                workout['escape_room']['closed'] = False
                 workout['escape_room']['time_remaining'] = time_remaining
             else:
-                workout['escape_room']['expired'] = True
+                workout['escape_room']['closed'] = True
                 workout['escape_room']['time_remaining'] = 0
             # Calculate how many puzzles have been solved
             workout['escape_room']['number_correct'] = sum(1 for i in workout['escape_room']['puzzles'] if i['correct'])
