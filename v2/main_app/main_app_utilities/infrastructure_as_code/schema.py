@@ -248,10 +248,10 @@ class EscapeRoomSchema(Schema):
 class PuzzleSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific puzzles")
     instructions_url = fields.Str(required=False, allow_none=True)
-    entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
+    entry_type = fields.Str(required=False, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
                             description="The type of entry to present to the user for solving the question "
                                         "(e.g., server or web_application)")
-    entry_name = fields.Str(required=True, description="A name based on the entry_type to help build a URL for the "
+    entry_name = fields.Str(required=False, description="A name based on the entry_type to help build a URL for the "
                                                        "student to click on. For example, a server will have it's "
                                                        "human interaction guacamole link that they can click on to "
                                                        "answer the question")
