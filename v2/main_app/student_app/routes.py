@@ -166,7 +166,7 @@ def fixed_arena_signup(build_id):
 def fixed_arena_student(build_id):
     auth_config = cloud_env.auth_config
     fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
-                                           key_id=build_id).get(wait=True)
+                                           key_id=build_id).get()
     parent_id = fixed_arena_workout.get('parent_id', None)
     fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
     registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
