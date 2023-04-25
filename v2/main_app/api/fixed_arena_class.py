@@ -35,6 +35,9 @@ class FixedArenaClass(MethodView):
     def get(self, build_id=None):
         if build_id:
             if fa_class := DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get():
+                if args := request.args:
+                    if state := args.get('state', None):
+                        return self.http_resp(code=200, data={'state': fa_class['state']}).prepare_response()
                 return self.http_resp(code=200, data=fa_class).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()

@@ -104,7 +104,7 @@ def escape_room(build_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
     if workout:
         unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
-        if workout['escape_room'].get('start_time', None) and workout.get('state', None) == WorkoutStates.RUNNING.value:
+        if workout['escape_room'].get('start_time', None):
             start_time = workout['escape_room']['start_time']
             time_limit = workout['escape_room']['time_limit']
             current_time = get_current_timestamp_utc()
@@ -165,56 +165,46 @@ def fixed_arena_signup(build_id):
 @student_app.route('/fixed-arena/<build_id>', methods=['GET'])
 def fixed_arena_student(build_id):
     auth_config = cloud_env.auth_config
-    fixed_arena_workout = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
+    workspace = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,
                                            key_id=build_id).get()
-    parent_id = fixed_arena_workout.get('parent_id', None)
-    fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
-    registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
-    logged_in_user = session.get('user_email', None)
-    workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id',
-                                                                                      op='=', value=build_id)
-    server_list = []
-    if fixed_arena_class:
-        expiration = fixed_arena_class['workspace_settings'].get('expires', None)
-        is_expired = True
-        ts = datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp()
-        if ts <= expiration:
-            is_expired = False
-        dns_suffix = cloud_env.dns_suffix
+    if workspace:
+        if parent_id := workspace.get('parent_id', None):
+            # user_email = session.get('user_email', None)
+            fixed_arena_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=parent_id).get()
+            if fixed_arena_class:
+                # Workspaces do not maintain state - inherit state from parent object
+                workspace['state'] = fixed_arena_class['state']
+                workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id',
+                                                                                                  op='=', value=build_id)
+                registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
+                expiration = fixed_arena_class['workspace_settings'].get('expires', None)
+                is_expired = True
+                if get_current_timestamp_utc() <= expiration:
+                    workspace['expired'] = False
 
-        # Get entry point from fixed_arena_class
-        entry_point = None
-        expiration_iso8601 = datetime.fromtimestamp(expiration).replace(microsecond=0)
-        for server in fixed_arena_workout['servers']:
-            entry_point = server.get('human_interaction', None)[0]
-            server_ip = server.get('nics', None)[0]
-            server_name = server.get('name', None)
-            if entry_point:
-                entry_server = {
-                    'entry_point': entry_point,
-                    'ip': server_ip,
-                    'name': server_name
+                # Assign connections to servers
+                connections = _generate_connection_urls(workspace, parent_id)
+                if servers := workspace.get('servers', None):
+                    workspace['servers'] = _assign_urls_to_server(parent_id, servers, connections)
+
+                workspace['api'] = {
+                    'fixed_arena_class': url_for('class'),
+                    'workspace': url_for('workspace'),
                 }
-                break
-        """
-        TODO: Clean up objects above to return this instead:
-        return render_template('fixed_arena_student.html', fixed_arena_class=fixed_arena_class, 
-                               fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix, 
-                               expiration_iso8601=expiration_iso8601)"""
-        return render_template('fixed_arena_student.html', fixed_arena_class=fixed_arena_class, fixed_arena_workout=fixed_arena_workout, dns_suffix=dns_suffix,
-                               expiration=expiration, is_expired=is_expired, auth_config=auth_config, serverip=server_ip, servername=server_name,
-                               servers=workspace_servers, entry_point=entry_point, expiration_iso8601=expiration_iso8601, entry_server=entry_server)
-    else:
-        return redirect('/no-workout')
+                return render_template('fixed_arena_student.html', auth_config=auth_config,
+                                       fixed_arena_class=fixed_arena_class,
+                                       workspace=workspace, servers=workspace_servers,
+                                       dns_suffix=cloud_env.dns_suffix)
+    return redirect('/no-workout')
 
 
-def _generate_connection_urls(workout_info):
+def _generate_connection_urls(workout_info, build_id=None):
     """
        :param workout_info: dictionary object holding all the workout information
        :return: dict(server: dict(), web_applications: dict()) if exists
        """
     dns_suffix = cloud_env.dns_suffix
-    build_id = workout_info['id']
+    build_id = build_id if build_id else workout_info['id']
     links = {'server': dict(), 'web_application': dict()}
     if workout_info.get('proxy_connections', None):
         for conn in workout_info['proxy_connections']:
@@ -229,4 +219,12 @@ def _generate_connection_urls(workout_info):
     return links
 
 
+def _assign_urls_to_server(build_id, servers, connections):
+    for server in servers:
+        if server.get('human_interaction', None):
+            server['url'] = connections['server'].get(server['name'], None)
+        else:
+            if dns_host_suffix := server['nics'][0].get('dns_host_suffix', None):
+                server['nics'][0]['host_dns'] = f'{build_id}-{dns_host_suffix}{cloud_env.dns_suffix}'
+    return servers
 # [ eof ]
