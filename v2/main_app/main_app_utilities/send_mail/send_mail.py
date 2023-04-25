@@ -23,6 +23,27 @@ class SendMail:
         self.sg = SendGridAPIClient(api_key=self.sendgrid_api_key)
         self.dns_suffix = self.env.dns_suffix
 
+    def send_email(self, eml_subject, eml_to, eml_content=None, eml_attachment=None):
+        message = Mail()
+        message.from_email = From(
+            email=f"no-reply@trojan-cybergym.org"  # {self.dns_suffix}"
+        )
+        message.subject = eml_subject
+        message.to = eml_to
+
+        if eml_content:
+            message.content = eml_content
+        if eml_attachment:
+            message.attachment = eml_attachment
+
+        try:
+            response = self.sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+        except Exception as e:
+            print(e)
+
     def send_help_form(self, usr_email, usr_subject, usr_message, usr_image=None):
         """
         Used in the webapp's help form. Sends the users request to all the admins associated with the project.
@@ -50,4 +71,4 @@ class SendMail:
                 disposition=Disposition("attachment")
             )
 
-        # self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content, eml_attachment=eml_attachment)
+        self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content, eml_attachment=eml_attachment)

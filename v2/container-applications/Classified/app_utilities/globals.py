@@ -3,19 +3,20 @@ from datetime import datetime, timezone, timedelta
 
 
 class Algorithms(Enum):
-    ATBASH = 0
-    CAESAR = 1
-    COL = 2
-    SUB = 3
-    RAIL = 4
-    KEYWORD = 5
-    BASE32 = 6
-    BASE64 = 7
+    ATBASH = 1
+    AFFINE = 2
+    CAESAR = 3
+    COL = 4
+    SUB = 5
+    RAIL = 6
+    KEYWORD = 7
+    BASE32 = 8
+    BASE64 = 9
 
 
 class CipherModes(Enum):
-    ENCRYPT = 0
-    DECRYPT = 1
+    ENCRYPT = 1
+    DECRYPT = 2
 
 
 class DatastoreKeyTypes(str, Enum):

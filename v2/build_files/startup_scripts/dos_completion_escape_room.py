@@ -7,7 +7,7 @@ import psutil
 
 def check_cpu_usage():
     current_cpu_percent = psutil.cpu_percent(interval=1)
-    if current_cpu_percent >= 70.0:
+    if current_cpu_percent >= 50.0:
         return True
     else:
         return False

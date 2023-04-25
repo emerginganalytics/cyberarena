@@ -13,7 +13,6 @@ class Hashes:
         elif workout_info:
             self.build = workout_info
         self.passkey = dict()
-        self.assessment = self.get_assessment()
         self.update = False
 
     @staticmethod

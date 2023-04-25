@@ -54,6 +54,12 @@ h3, h4, h5 {
 .margin-r-5 {
     margin-right: 5px;
 }
+.m-l-r-2 {
+    margin: 0 2px;
+}
+.m-l-r-3 {
+    margin: 0 3px;
+}
 .no-select {
     -webkit-touch-callout: none;
     -webkit-user-select: none;

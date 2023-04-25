@@ -2,6 +2,7 @@ import subprocess
 from enum import Enum
 from google.cloud import runtimeconfig
 from googleapiclient import discovery
+import pytz
 
 from install_update.utilities.globals import ShellCommands
 
@@ -19,6 +20,7 @@ class EnvironmentVariables:
     COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
+    DEFAULT_TIMEZONE = "America/Chicago"
     VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'main_app_url_v2', 'admin_email', 'guac_password',
                  'project_number', 'sql_password', 'sql_ip']
 
@@ -42,6 +44,7 @@ class EnvironmentVariables:
             self.set_variable("project", self.project)
             self._set_region()
             self._set_zone()
+            self._set_timezone()
             for var in self.VARIABLES:
                 self.set_variable(var)
 
@@ -88,6 +91,17 @@ class EnvironmentVariables:
                       f"run the Cyber Arena? Default is {self.DEFAULT_ZONE}")
         zone = zone_options[int(reply)] if reply.isnumeric() else self.DEFAULT_ZONE
         self.set_variable("zone", zone)
+
+    def _set_timezone(self):
+        reply = input(f"What timezone do you want to set for the project? Use the IANA Timezone identifier. "
+                      f"The default is {self.DEFAULT_TIMEZONE}")
+        timezone = reply if reply else self.DEFAULT_TIMEZONE
+        try:
+            pytz.timezone(timezone)
+        except pytz.UnknownTimeZoneError:
+            print(f"Unknown timezone entered! Setting the timezone to {self.DEFAULT_TIMEZONE}")
+            timezone = self.DEFAULT_TIMEZONE
+        self.set_variable("timezone", timezone)
 
     class Variables(str, Enum):
         DNS_SUFFIX = "dns_suffix"

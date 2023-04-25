@@ -172,12 +172,6 @@ class BuildSpecification:
             response = new_blob.upload_from_file(f, content_type='application/octet-stream')
 
     def _scan_specs_for_image_sync(self):
-        response = input(f"\t...Do you want to update the global guacamole proxy image "
-                         f"{BuildConstants.MachineImages.GUACAMOLE} from the source project? [Y/n] ")
-        if response.upper() != "N":
-            print(f"\t...Beginning to SYNC the server image {BuildConstants.MachineImages.GUACAMOLE}")
-            self.computer_image_sync.sync(BuildConstants.MachineImages.GUACAMOLE)
-
         specs_to_upload = []
         for item in os.scandir(self.build_specs_plaintext):
             if item.is_dir():

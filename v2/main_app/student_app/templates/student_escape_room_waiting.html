@@ -1,10 +1,12 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'contact_us.html' as forms %}
 {% block title %}Escape Room{% endblock %}
 {% block nav_title %}Escape Room{% endblock %}
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student_app.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/animations.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -56,7 +58,7 @@
           });
            $(document).ready(function() {
                // Call functions that need to be run during initial page load here
-               getEscapeRoomState("{{ workout['id'] }}", 60000, false);
+               getEscapeRoomState("{{ workout['id'] }}", 30000, false);
            });
     </script>
      <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
@@ -70,7 +72,7 @@
                             <h5 class="nav-link room-complete">Room Escaped!</h5>
                         </div>
                     {% else %}
-                        {% if workout.escape_room.expired == False %}
+                        {% if workout.escape_room.closed == False %}
                             <div id="room-timer-div" class="countdown-timer">
                                 <p class="text-center no-select">
                                     <span id="room-timer"></span>
@@ -78,7 +80,7 @@
                             </div>
                         {% else %}
                             <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
-                                <h5 class="text-center">Room Expired</h5>
+                                <h5 class="text-center">Room Closed</h5>
                             </div>
                         {% endif %}
                     {% endif %}
@@ -99,41 +101,27 @@
                             {% if not workout.expired %}
                                 <h1 class="text-center">Escape Room Not Started</h1>
                                 <p class="text-center">Page will automatically redirect once the room is opened</p>
-                                <!-- TODO: Add bouncing vertical bar animation -->
+                                <div id="loader">
+                                    <div class="loading">
+                                        <div class="rectangle_1"></div>
+                                        <div class="rectangle_2"></div>
+                                        <div class="rectangle_3"></div>
+                                        <div class="rectangle_4"></div>
+                                        <div class="rectangle_5"></div>
+                                        <div class="rectangle_6"></div>
+                                        <div class="rectangle_7"></div>
+                                        <div class="rectangle_8"></div>
+                                        <div class="rectangle_9"></div>
+                                        <div class="rectangle_10"></div>
+                                    </div>
+                                </div>
                             {% else %}
                                 <h1 class="text-center">Escape Room Expired</h1>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-                 <!-- Modal -->
-                <div id="modalContactUs" class="modal fade" role="dialog">
-                    <div class="modal-dialog">
-
-                        <!-- Modal content-->
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Help Form</h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <form id='contact_form' action='{{ url_for("leave_comment") }}' method="POST" enctype="multipart/form-data">
-                                    <label for="Email">Your Email</label><br>
-                                    <input type="text" id="email" name="email" required><br><br>
-                                    <label for="Subject">Subject</label><br>
-                                    <input type="text" id="subject" name="subject" required><br><br>
-                                    <label for="Comment">Comment</label><br>
-                                    <input type="text" id="comment" name="comment" required><br><br>
-                                    <label for="Image">Please include an image of any errors</label><br>
-                                    <input type="file" id="image" name="image"><br><br>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <input type="submit" form='contact_form' value="Submit">
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End Modal -->
+                {{ forms.contact_us() }}
             </div>
         </main>
      </div>

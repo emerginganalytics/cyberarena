@@ -9,3 +9,4 @@ google-cloud-runtimeconfig
 google-cloud-logging
 pyyaml
 pyAesCrypt
+pytz~=2022.7.1

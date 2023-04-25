@@ -197,12 +197,14 @@ class FirewallRuleSchema(Schema):
 
 class AssessmentSchema(Schema):
     questions = fields.Nested('AssessmentQuestionSchema', many=True)
+    key = fields.Str(required=False, description='Key used for decrypting workout secrets in container applications')
 
 
 class AssessmentQuestionSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
     type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
     question = fields.Str(required=True)
+    key = fields.Str(required=False, description='The value used for decrypting individual cryptographic questions')
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     script = fields.Str(required=False, description="script name (e.g. attack.py)")
     script_language = fields.Str(required=False, description="e.g. python")
@@ -261,10 +263,10 @@ class EscapeRoomSchema(Schema):
 class PuzzleSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific puzzles")
     instructions_url = fields.Str(required=False, allow_none=True)
-    entry_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
+    entry_type = fields.Str(required=False, validate=validate.OneOf([x for x in BuildConstants.EscapeRoomEntryTypes]),
                             description="The type of entry to present to the user for solving the question "
                                         "(e.g., server or web_application)")
-    entry_name = fields.Str(required=True, description="A name based on the entry_type to help build a URL for the "
+    entry_name = fields.Str(required=False, description="A name based on the entry_type to help build a URL for the "
                                                        "student to click on. For example, a server will have it's "
                                                        "human interaction guacamole link that they can click on to "
                                                        "answer the question")

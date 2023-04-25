@@ -13,7 +13,6 @@ function getEscapeRoomState (build_id, ts=300000, started=true){
             type: 'get',
             success: function (data){
                 let toJson = JSON.parse(data);
-                console.log(toJson);
                 if (Number(toJson['data']['escape_room']['start_time']) > 0){
                     if (started) {
                         checkPuzzles(toJson['status'], toJson['data']);
@@ -40,9 +39,9 @@ function checkEscapeRoom(build_id, form_id, puzzle_idx, ea) {
         body: send_data
     })
         .then((response) => response.json())
-        .then(data=>checkPuzzles(data['status'], data['data']));
+        .then(data=>checkPuzzles(data['status'], data['data'], puzzle_idx));
 }
-function checkPuzzles(code, responseData){
+function checkPuzzles(code, responseData, puzzle_idx){
     if (code === 200){
         console.log('Updating Room Status ...');
         let room = responseData['escape_room'];
@@ -53,6 +52,7 @@ function checkPuzzles(code, responseData){
                 let puzzle = room['puzzles'][i];
                 console.log(puzzle);
                 if (puzzle['correct'] === true){
+                    let card = document.getElementById('puzzle-' + puzzle_idx + '-status').innerText = 'Complete!';
                     let reveal = document.getElementById(puzzle['id'] + '-reveal');
                     reveal.innerText = puzzle['reveal'];
                 }

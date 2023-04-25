@@ -52,7 +52,7 @@ class EscapeRoomUnit(MethodView):
         self.env = CloudEnv()
         self.env_dict = self.env.get_env()
         self.bm = BucketManager(env_dict=self.env_dict)
-        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.debug = debug
 
     def get(self, build_id=None):
@@ -78,15 +78,6 @@ class EscapeRoomUnit(MethodView):
         expires = data.get('expires', 2)
         build_file = data.get('build_file', None)
         build_count = data.get('build_count', 1)
-
-        """
-        try:
-            unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{build_file}.yaml")
-        except FileNotFoundError:
-            return self.http_resp(code=404, msg=f"The specification for {build_file} does not exist in the cloud "
-                                                f"project.")
-        build_spec = yaml.safe_load(unit_yaml)
-        """
         build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=build_file).get()
         if not build_spec:
             return self.http_resp(code=404, msg=f'The specification for {build_file} does not exist in the cloud '
@@ -151,7 +142,7 @@ class EscapeRoomUnit(MethodView):
                         self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
                                             cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                             action=str(PubSub.Actions.START.value))
-                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 300
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 30
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)

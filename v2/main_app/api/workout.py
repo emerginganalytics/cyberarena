@@ -79,8 +79,8 @@ class Workout(MethodView):
                 workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == unit_id]
                 if workout_list:
                     for workout in workout_list:
-                        if workout.get('student_email', None):
-                            if email.lower() == workout['student_email']:
+                        if student_email := workout.get('student_email', None):
+                            if email.lower() == student_email:
                                 return redirect(url_for('student_app.workout_view', build_id=workout['id']))
                     if len(workout_list) >= max_builds:
                         # build count already meets max build count for unit

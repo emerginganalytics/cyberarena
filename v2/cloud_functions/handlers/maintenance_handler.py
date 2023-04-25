@@ -1,4 +1,5 @@
 import logging
+import pytz
 from calendar import calendar
 from datetime import datetime
 from google import pubsub_v1
@@ -30,6 +31,8 @@ class MaintenanceHandler:
         log_client = logging_v2.Client()
         log_client.setup_logging()
         now = datetime.now()
+        timezone = pytz.timezone(self.env.timezone)
+        now = timezone.localize(now)
         self.daily = self.hourly = self.quarter_hourly = False
         if now.hour == 0 and now.minute <= 16:
             self.daily = True

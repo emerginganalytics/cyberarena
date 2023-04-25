@@ -1,6 +1,7 @@
 from google.cloud import runtimeconfig
 import time
 import random
+#import pytz
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -40,6 +41,7 @@ class CloudEnv:
             self.guac_db_password = self.env_dict['guac_db_password']
             self.max_workspaces = self.env_dict['max_workspaces']
             self.sendgrid_api_key = self.env_dict.get('sendgrid_api_key', None)
+            self.timezone = self.env_dict.get('timezone', 'America/Chicago')
         else:
             runtimeconfig_client = runtimeconfig.Client()
             myconfig = runtimeconfig_client.config('cybergym')
@@ -81,6 +83,9 @@ class CloudEnv:
                     sendgrid_api_key = myconfig.get_variable('SENDGRID_API_KEY', None)
                     if sendgrid_api_key:
                         self.sendgrid_api_key = sendgrid_api_key.value.decode('utf-8')
+                    timezone = myconfig.get_variable('timezone', None)
+                    if timezone:
+                        self.timezone = timezone.value.decode('utf-8')
                     break
                 except:
                     time.sleep(random.randint(1, 10))

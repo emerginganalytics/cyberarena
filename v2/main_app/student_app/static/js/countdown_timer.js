@@ -72,7 +72,7 @@ class Timer {
             },1000);
         }
         // Make sure the Escape Room isn't already expired before running the timer
-        if (data['expired'] === false){
+        if (data['closed'] === false){
             timer(data, timer_obj);
         }
     }

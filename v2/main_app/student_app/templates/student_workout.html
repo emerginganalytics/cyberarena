@@ -1,5 +1,6 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
+{% import 'contact_us.html' as forms %}
 {% block title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block nav_title %}{{ workout.summary.name }} Workout{% endblock %}
 {% block styles %}
@@ -27,7 +28,7 @@
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
-                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+                   data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
             <li class="nav-item disabled">
                 <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
@@ -71,12 +72,12 @@
                // Start timer
                {% if workout.remaining_time %}
                    {% if workout.remaining_time > 0 %}
-                       let countdownTimer = new Timer("{{ workout['id'] }}", "{{ workout.build_type }}");
+                       let countdownTimer = new Timer("{{ workspace['id'] }}", "{{ workspace.build_type }}");
                        let times = {
-                           'build_type': '{{ workout.build_type }}',
-                           'remaining_time': {{ workout.remaining_time }},
-                           'end_time': {{ workout.shutoff_timestamp }},
-                           'expired': {{ workout.expired | lower }},
+                           'build_type': '{{ workspace.build_type }}',
+                           'remaining_time': {{ workspace.remaining_time }},
+                           'end_time': {{ workspace.shutoff_timestamp }},
+                           'expired': {{ workspace.expired | lower }},
                        }
                        countdownTimer.start(times);
                    {% endif %}
@@ -247,7 +248,7 @@
                                                                     <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
                                                                 {% endif %}
                                                             {% else %}
-                                                                <td>No Interface</td>
+                                                                <td>No Public Interface</td>
                                                             {% endif %}
                                                             <td>{{ server.name }}</td>
                                                             {% if server.nics[0].host_dns %}
@@ -374,6 +375,7 @@
                             </div> <!--End info-container -->
                         </div> <!-- End assessment-tab -->
                     {% endif %}
+                {{ forms.contact_us() }}
                 </div> <!-- End tab-container-->
             </div> <!-- End content-div -->
         </main>
