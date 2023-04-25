@@ -1,7 +1,7 @@
 from google.cloud import runtimeconfig
 import time
 import random
-import pytz
+#import pytz
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

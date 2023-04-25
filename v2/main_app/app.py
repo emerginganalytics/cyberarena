@@ -23,6 +23,7 @@ from api.agency import Agency, AgencyTelemetry, AttackSpecs
 from api.iot_device import IoTDevice
 from api.user import Users
 from api.escape_room import EscapeRoomUnit, EscapeRoomWorkout
+from werkzeug.utils import secure_filename
 
 cloud_env = CloudEnv()
 
@@ -83,7 +84,13 @@ def leave_comment():
         user_email = request.form['email']
         comment_subject = request.form['subject']
         comment_text = request.form['comment']
-        attachment = request.files['image']
+        if request.files:
+            attachment = request.files['image']
+            if attachment.filename == '':
+                return redirect(request.referrer)
+            if attachment and allowed_file(attachment.filename):
+                attachment.filename = secure_filename(attachment.filename)
+
         SendMail().send_help_form(usr_email=user_email, usr_subject=comment_subject,
                                   usr_message=comment_text, usr_image=attachment)
         return redirect(request.referrer)
@@ -157,6 +164,12 @@ def handle_500(e):
 @app.route('/privacy', methods=['GET'])
 def privacy():
     return render_template('privacy.html')
+
+
+def allowed_file(filename):
+    allowed_extensions = {'pdf', 'png', 'jpg', 'jpeg'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 
 def register_api(view, endpoint, url, pk='id', pk_type='string'):
