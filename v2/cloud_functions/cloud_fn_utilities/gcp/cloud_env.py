@@ -41,6 +41,7 @@ class CloudEnv:
             self.max_workspaces = self.env_dict['max_workspaces']
             self.sql_ip = self.env_dict.get('sql_ip', None)
             self.sql_password = self.env_dict.get('sql_password', None)
+            self.timezone = self.env_dict.get('timezone', 'America/Chicago')
         else:
             runtimeconfig_client = runtimeconfig.Client()
             myconfig = runtimeconfig_client.config('cybergym')
@@ -77,6 +78,9 @@ class CloudEnv:
                     self.sql_ip = sql_ip.value.decode("utf-8") if sql_ip else None
                     sql_password = myconfig.get_variable('sql_password')
                     self.sql_password = sql_password.value.decode("utf-8") if sql_password else None
+                    timezone = myconfig.get_variable('timezone', None)
+                    if timezone:
+                        self.timezone = timezone.value.decode('utf-8')
                     break
                 except:
                     time.sleep(random.randint(1, 10))
