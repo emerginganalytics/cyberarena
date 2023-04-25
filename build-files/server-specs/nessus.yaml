@@ -1,0 +1,8 @@
+name: cybergym-nessus
+image:  image-cybergym-nessus
+machine_type: "n1-standard-2"
+nics:
+  - network: internal-network
+    internal_IP: 10.1.1.27
+    subnet: default
+    external_NAT: false
