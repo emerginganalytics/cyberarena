@@ -203,8 +203,6 @@ class AssessmentSchema(Schema):
 
 
 class AssessmentQuestionSchema(Schema):
-    # TODO: Move the question-level script elements to the AssessmentScriptSchema. This requires converting
-    #  existing schemas. The script_assessment boolean will remain.
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
     name = fields.Str(required=False, description="The name of the question, which is also used for the workout-level "
                                                   "assessment script.")
@@ -213,11 +211,6 @@ class AssessmentQuestionSchema(Schema):
     key = fields.Str(required=False, description='The value used for decrypting individual cryptographic questions')
     answer = fields.Str(required=False, description="The answer to the question for questions of type input")
     script_assessment = fields.Bool(missing=False)
-    script = fields.Str(required=False, description="script name (e.g. attack.py)")
-    script_language = fields.Str(required=False, description="e.g. python")
-    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
-                                                    "provided above")
-    operating_system = fields.Str(required=False, description="Target server operating system")
     complete = fields.Bool(missing=False)
 
 

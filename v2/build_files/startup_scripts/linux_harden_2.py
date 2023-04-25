@@ -6,9 +6,8 @@ import pwd
 import subprocess
 
 
-class Assessment:
-    QUESTION_NUMBER = "0"
-    USER_CHECK = 'gigabyte'
+class AssessmentArtifacts:
+    Q0_USER_CHECK = 'gigabyte'
     OLD_SOFTWARE = "liblog4j2-java/bionic,now 2.10.0-2"
     FILETYPE_CHECK = 'mp4'
     ADMIN_CHECK = 'philip'
@@ -16,53 +15,111 @@ class Assessment:
     CRONTAB_STRING = "philip    ALL=(ALL:ALL) ALL"
 
 
-def assess():
-    # Vuln 1: Delete Gigabyte User
-    for p in pwd.getpwall():
-        if p[0] == Assessment.USER_CHECK:
+class Question:
+    """
+    This is the parent class used for additional assessment questions.
+    """
+    def __init__(self, build_id, url, question_number):
+        self.build_id = build_id
+        self.url = url
+        self.question_key = os.environ.get(f'Q_{question_number}_KEY')
+        self.complete_file = f"signal_{question_number}_complete"
+
+    def assess(self):
+        if not os.path.exists(self.complete_file):
+            if self.unique_assessment():
+                self._mark_complete()
+
+    def unique_assessment(self):
+        pass
+
+    def _mark_complete(self):
+        if not os.path.exists(self.complete_file):
+            data = {
+                "question_id": self.question_key,
+            }
+            response = requests.put(f"{self.url}{self.build_id}", json=data)
+            if response and response.status_code == 200:
+                open(self.complete_file, 'a').close()
+
+class Question0(Question):
+    """
+    Assess whether the Gigabyte user is deleted
+    """
+    def __init__(self, build_id, url):
+        super().__init__(build_id, url, 0)
+
+    def unique_assessment(self):
+        for p in pwd.getpwall():
+            if p[0] == AssessmentArtifacts.Q0_USER_CHECK:
+                return False
+        return True
+
+class Question1(Question):
+    """
+    Assess whether the Log4j exists
+    """
+    def __init__(self, build_id, url):
+        super().__init__(build_id, url, 1)
+
+    def unique_assessment(self):
+        output = subprocess.run(['apt', 'list', '--installed'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        for line in output.split('\n'):
+            if line.startswith(AssessmentArtifacts.OLD_SOFTWARE):
+                return False
+        return True
+
+class Question2(Question):
+    """
+    Assess over-privileged user
+    """
+    def __init__(self, build_id, url):
+        super().__init__(build_id, url, 2)
+
+    def unique_assessment(self):
+        output = subprocess\
+            .run(["sudo", "-l", "-U", AssessmentArtifacts.ADMIN_CHECK], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        if AssessmentArtifacts.SUDOERS_STRING in output:
             return False
+        return True
 
-    # Vuln 2: Log4j
-    output = subprocess.run(['apt', 'list', '--installed'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    for line in output.split('\n'):
-        if line.startswith(Assessment.OLD_SOFTWARE):
+class Question3(Question):
+    """
+    Assess banned File Type
+    """
+    def __init__(self, build_id, url):
+        super().__init__(build_id, url, 3)
+
+    def unique_assessment(self):
+        output = subprocess.run(["find", "/", "-type", "f", "-name", "*.mp4"], stdout=subprocess.PIPE).stdout \
+            .decode('utf-8')
+        if AssessmentArtifacts.FILETYPE_CHECK in output:
             return False
-    
-    # Vuln 3: Over-priveleged User
-    output = subprocess.run(["sudo", "-l", "-U", Assessment.ADMIN_CHECK], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    if Assessment.SUDOERS_STRING in output:
-        return False
+        return True
 
-    # Vuln 4: Banned File Type
-    output = subprocess.run(["find", "/", "-type", "f", "-name", "*.mp4"], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    if Assessment.FILETYPE_CHECK in output:
-        return False
+class Question4(Question):
+    """
+    Assess crontab
+    """
+    def __init__(self, build_id, url):
+        super().__init__(build_id, url, 4)
 
-    # Vuln 5: Crontab
-    output = subprocess.run(["cat", "/var/spool/cron/crontabs/root"], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    if Assessment.CRONTAB_STRING in output:
-        return False
-
-    return True
+    def unique_assessment(self):
+        output = subprocess.run(["cat", "/var/spool/cron/crontabs/root"], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        if AssessmentArtifacts.CRONTAB_STRING in output:
+            return False
+        return True
 
 
-def mark_complete():
-    complete_file = "signal_complete"
+def main():
+    url = os.environ.get('URL')
+    build_id = os.environ.get('BUILD_ID')
+    Question0(build_id=build_id, url=url).assess()
+    Question1(build_id=build_id, url=url).assess()
+    Question2(build_id=build_id, url=url).assess()
+    Question3(build_id=build_id, url=url).assess()
+    Question4(build_id=build_id, url=url).assess()
 
-    if not os.path.exists(complete_file):
-        url = os.environ.get('URL')
-        q_key = os.environ.get(f'Q{Assessment.QUESTION_NUMBER}_KEY')
-        build_id = os.environ.get('BUILD_ID')
 
-        data = {
-            "question_id": q_key,
-        }
-        response = requests.put(f"{url}{build_id}", json=data)
-        if response and response.status_code == 200:
-            open(complete_file, 'a').close()
-
-if assess():
-    mark_complete()
-    print("Workout Complete")
-else:
-    print("Incomplete")
+if __name__ == "__main__":
+    main()
