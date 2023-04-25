@@ -107,7 +107,7 @@ class Unit:
 
     def _create_unit_for_lms(self):
         lms_quiz = self.unit['lms_quiz']
-        url = lms_quiz['lms_connection']['uri']
+        url = lms_quiz['lms_connection']['url']
         api_key = lms_quiz['lms_connection']['api_key']
         course_code = lms_quiz['lms_connection']['course_code']
         if lms_quiz.get('lms_type', None) == BuildConstants.LMS.CANVAS:
@@ -123,6 +123,14 @@ class Unit:
             workout_record['student_email'] = student.get('email')
             workout_record['student_name'] = student.get('name')
             self.ds.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
+            if self.debug:
+                workout = Workout(build_id=workout_id, debug=self.debug, env_dict=self.env_dict)
+                workout.build()
+            else:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                        action=str(PubSub.BuildActions.WORKOUT.value),
+                                        key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                        build_id=str(workout_id))
 
     def _build_one_workout(self, workout_id):
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])

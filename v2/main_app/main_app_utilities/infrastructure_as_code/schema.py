@@ -215,7 +215,8 @@ class AssessmentQuestionSchema(Schema):
 class LMSQuizSchema(Schema):
     lms_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.LMS]),
                           description="The type of LMS this should integrate with.")
-    lms_connection = fields.Nested('LMSConnectionSchema', required=True)
+    lms_connection = fields.Nested('LMSConnectionSchema', description="The information needed to connect a lab to a "
+                                                                      "course")
     type = fields.Str(required=False, description="Practice quiz or assignment")
     due_at = fields.DateTime(required=False, description="Due date for assignment")
     description = fields.Str(required=False, description="Description of assignment")
@@ -228,7 +229,7 @@ class LMSConnectionSchema(Schema):
     api_key = fields.Str(required=True, description="The API key from the user profile needed for connecting to "
                                                     "the LMS")
     url = fields.Str(required=True, description="The LMS API URL")
-    course_code = fields.Str(required=True, description="The course code to use for creating the quiz")
+    course_code = fields.Int(required=True, description="The course code to use for creating the quiz")
 
 
 class LMSQuizQuestionsSchema(Schema):
@@ -240,7 +241,7 @@ class LMSQuizQuestionsSchema(Schema):
 
 
 class LMSQuizAnswerSchema(Schema):
-    text = fields.Str(required=True, description="Question text")
+    answer_text = fields.Str(required=True, description="Question text")
     weight = fields.Float(missing=0.0)
 
 

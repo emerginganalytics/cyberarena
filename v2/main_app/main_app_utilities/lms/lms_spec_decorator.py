@@ -30,7 +30,7 @@ class LMSSpecDecorator:
         self.lms_type = None
 
     def decorate(self):
-        instructor = self.ds.get(key_type=DatastoreKeyTypes.USER, key_id=self.instructor_id)
+        instructor = self.ds.get(key_type=DatastoreKeyTypes.USERS, key_id=self.instructor_id)
         if not instructor or 'settings' not in instructor:
             raise LMSSpecNoInstructorSettingsError
         self.settings = instructor['settings']
@@ -44,7 +44,7 @@ class LMSSpecDecorator:
         self.build_spec['lms_quiz']['lms_connection'] = lms_connection
         self.build_spec['lms_quiz'].update({
             'description': '',
-            'due_at': self.due_at,
+            'due_at': str(self.due_at),
             'time_limit': self.time_limit,
             'allowed_attempts': self.allowed_attempts
         })
@@ -52,8 +52,8 @@ class LMSSpecDecorator:
 
     def _get_canvas_connection(self):
         try:
-            api_key = self.settings['canvas_api_key']
-            url = self.settings['url']
+            api_key = self.settings['canvas']['api']
+            url = self.settings['canvas']['url']
         except ValueError:
             raise LMSSpecIncompleteInstructorSettingsError(f"Missing instructor settings for the LMS {self.lms_type}")
 

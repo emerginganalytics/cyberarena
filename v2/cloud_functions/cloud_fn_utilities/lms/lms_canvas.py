@@ -1,7 +1,7 @@
 """
 Cloud function LMS class to create assignments
 """
-
+import json
 from canvasapi import Canvas
 from canvasapi.quiz import Quiz, QuizQuestion
 
@@ -15,6 +15,14 @@ __version__ = "0.0.1"
 __maintainer__ = "Philip Huff"
 __email__ = "pdhuff@ualr.edu"
 __status__ = "Testing"
+
+
+class CanvasConstants:
+    class Questions:
+        class Types:
+            SHORT_ANSWER = 'short_answer_question'
+            ESSAY_QUESTION = 'essay_question'
+            FILE_UPLOAD_QUESTION = 'file_upload_question'
 
 
 class LMSCanvas(LMS):
@@ -48,9 +56,13 @@ class LMSCanvas(LMS):
             'assignees': [{'id': x.id, 'type': 'user'} for x in self.class_list]
         }
         new_quiz = self.course.create_quiz(quiz_data)
-        for question in questions:
-            new_question = QuizQuestion()
-            new_quiz.create_question(question)
+        for question in json.loads(json.dumps(questions)):
+            question_data = {
+                'question_name': question.get('question_name', None),
+                'question_text': question.get('question_text', None),
+                'question_type': question.get('question_type', CanvasConstants.Questions.Types.SHORT_ANSWER),
+                'point_possible': question.get('points_possible', 1),
+                'answers': question.get('answers', None)
+            }
+            new_quiz.create_question(**question_data)
         return new_quiz
-
-
