@@ -165,6 +165,10 @@
                                     <li><a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
                                            target="_blank">Teacher Instructions</a></li>
                                 {% endif %}
+                                <li style="padding-top: 15px;">
+                                    <a id="answers-modal" class="btn btn-fa" href='#' data-toggle="modal"
+                                        data-target="#modalRoomAnswers"><i class="fa fa-key icon-light"></i>Answers</a>
+                                </li>
                             </ul>
                             {% if join_url %}
                                 <div id="distribution" style="margin-top: 12px;">
@@ -234,6 +238,47 @@
                         </div>
                     </div> <!-- End home-container div -->
                 </div> <!-- End tab-container -->
+                <div class="modal fade" tabindex="-1" role="dialog" id="modalRoomAnswers">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-center">Escape Room Answers</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">x</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="col" class="text-center">Puzzle</th>
+                                            <th colspan="col" class="text-center">Answer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for puzzle in unit.escape_room.puzzles %}
+                                            <tr>
+                                                <td>{{ puzzle['name'] }}</td>
+                                                {% if 'type' in puzzle %}
+                                                    {% if puzzle['type'] == 'auto' %}
+                                                        <td>Auto Assessment</td>
+                                                    {% else %}
+                                                        <td>{{ puzzle['answer'] }}</td>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <td>{{ puzzle['answer'] }}</td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                             <div class="modal-footer" style="justify-content:space-around;">
+                                <button type="button" style="margin-right: 1em;" class="btn-fa popup_close" data-dismiss="modal">Close</button>
+                             </div>
+                        </div>
+                    </div>
+                 </div>
                 {{ forms.contact_us() }}
             </div> <!-- End content-div -->
         </main>

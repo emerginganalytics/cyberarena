@@ -4,9 +4,10 @@ import yaml
 import random
 import string
 from main_app_utilities.global_objects.name_generator import NameGenerator
-from main_app_utilities.globals import Buckets, PubSub
+from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
 
@@ -29,8 +30,9 @@ class TestUnit:
         self.debug = debug
 
     def build(self, spec_name: str, debug: bool = True):
-        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
-        build_spec = yaml.safe_load(unit_yaml)
+        #unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
+        #build_spec = yaml.safe_load(unit_yaml)
+        build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG, key_id=spec_name).get()
         build_spec['instructor_id'] = 'philiphuff7@gmail.com'
         build_spec['test'] = True
         build_spec['workspace_settings'] = {

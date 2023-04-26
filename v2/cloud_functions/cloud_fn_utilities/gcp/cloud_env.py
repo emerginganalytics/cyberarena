@@ -66,7 +66,7 @@ class CloudEnv:
                     self.teacher_instructions_url = teacher_instructions_url.value.decode("utf-8") if teacher_instructions_url else \
                         'https://storage.googleapis.com/teacher_workout_instructions_ualr-cybersecurity/'
                     self.main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
-                    main_app_v2_url = myconfig.get_variable('main_app_v2_url')
+                    main_app_v2_url = myconfig.get_variable('main_app_url_v2')
                     if main_app_v2_url:
                         self.main_app_v2_url = main_app_v2_url.value.decode("utf-8")
                     else:
