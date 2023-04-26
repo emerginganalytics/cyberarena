@@ -83,13 +83,8 @@ def workout_view(build_id):
 
             # If they exist, get the entry point information for each server
             connections = _generate_connection_urls(workout_info)
-            if workout_info.get('servers', None):
-                for server in workout_info['servers']:
-                    if server.get('human_interaction', None):
-                        server['url'] = connections['server'].get(server['name'], None)
-                    else:
-                        if dns_host_suffix := server['nics'][0].get('dns_host_suffix', None):
-                            server['nics'][0]['host_dns'] = f'{build_id}-{dns_host_suffix}{cloud_env.dns_suffix}'
+            if servers := workout_info.get('servers', None):
+                workout_info['servers'] = _assign_urls_to_server(build_id, servers, connections)
 
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
@@ -120,10 +115,14 @@ def escape_room(build_id):
             # Get the connection urls for vms and web applications
             workout['links'] = _generate_connection_urls(workout)
             workout['links']['student_instructions_url'] = unit['summary']['student_instructions_url']
+            if workout['state'] == WorkoutStates.DELETED.value:
+                workout['escape_room']['closed'] = True
+                workout['expired'] = True
             return render_template('student_escape_room.html', workout=workout, auth_config=auth_config)
         else:  # the escape room hasn't been started yet, return waiting room template
             workout['expires'] = unit['workspace_settings'].get('expires', None)
-            if workout['expires'] < get_current_timestamp_utc():
+            if workout['expires'] < get_current_timestamp_utc() or workout['state'] == WorkoutStates.DELETED.value:
+                workout['escape_room']['closed'] = True
                 workout['expired'] = True
             return render_template('student_escape_room_waiting.html', auth_config=auth_config, workout=workout)
     abort(404)

@@ -64,15 +64,17 @@
                // Start timer
                {% if workout.escape_room.time_remaining > 0 %}
                    {% if not workout.escape_room.escaped %}
-                       let countdownTimer = new Timer("{{ workout['id'] }}", 'escape_room');
-                       let times = {
-                           'build_type': 'escape_room',
-                           'start_time': {{ workout.escape_room.start_time }},
-                           'time_limit': {{ workout.escape_room.time_limit }},
-                           'closed': {{ workout.escape_room.closed | lower }}
-                       }
-                       countdownTimer.start(times);
-                       getEscapeRoomState("{{ workout['id'] }}");
+                       {% if workout.state < 72 %}
+                           let countdownTimer = new Timer("{{ workout['id'] }}", 'escape_room');
+                           let times = {
+                               'build_type': 'escape_room',
+                               'start_time': {{ workout.escape_room.start_time }},
+                               'time_limit': {{ workout.escape_room.time_limit }},
+                               'closed': {{ workout.escape_room.closed | lower }}
+                           }
+                           countdownTimer.start(times);
+                           getEscapeRoomState("{{ workout['id'] }}");
+                       {% endif %}
                    {% endif %}
                {% endif %}
            });
@@ -101,6 +103,10 @@
                                 </div>
                             {% endif %}
                         {% endif %}
+                    {% else %}
+                        <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                            <h5 class="text-center">Room Expired!</h5>
+                        </div>
                     {% endif %}
                 </li>
                 <li class="nav-item" role="presentation">
