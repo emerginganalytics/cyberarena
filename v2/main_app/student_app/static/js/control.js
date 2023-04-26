@@ -180,7 +180,7 @@ class Control {
             }
         }).then((data) => {
             if (data['status'] === 200){
-                let current_state = data['data']['status'];
+                let current_state = data['data']['state'];
                 this.toggle(current_state);
                 this.getState(50);
             }
@@ -196,7 +196,7 @@ class Control {
             }
         }).then((data) => {
             if (data['status'] === 200) {
-                let current_state = data['data']['status'];
+                let current_state = data['data']['state'];
                 this.toggle(current_state);
                 this.getState(53);
             }

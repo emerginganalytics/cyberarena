@@ -302,6 +302,26 @@ td, th {
     box-shadow: none;
     pointer-events: none;
 }
+.nav-link.disabled {
+    pointer-events: none;
+    user-select: none;
+    color: #666666;
+}
+#startEscapeRoomBtn:focus, #startEscapeRoomTimer:focus {
+    opacity: 0.5;
+    background-color: var(--muted-marine-blue);
+    color: white;
+}
+.loading-icon {
+    visibility: hidden;
+    margin-left: 2px;
+}
+.loading-icon.animated {
+    visibility: visible;
+    color: white;
+    opacity: 0.6;
+    animation: spin 2s linear infinite;
+}
 
 .bg-1 {
     background: var(--maroon, #6e2639); /* #2d2d30 */

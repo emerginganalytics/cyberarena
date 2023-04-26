@@ -165,6 +165,7 @@ def escape_room(unit_id):
                         else:  # Escape Room timer has expired
                             unit['escape_room']['closed'] = True
                         unit['escape_room']['time_remaining'] = time_remaining
+                        unit['escape_room']['start_time'] = start_time
                         break
                     return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config,
                                            auth_list=user['permissions'],
