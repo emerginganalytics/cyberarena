@@ -160,8 +160,9 @@ class FixedArenaClassStates(Enum):
     GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
     RUNNING = 50
     STOPPING = 51
-    STARTING = 52
-    READY = 53
+    STOPPED = 52
+    STARTING = 53
+    READY = 54
     EXPIRED = 60
     MISFIT = 61
     BROKEN = 62
