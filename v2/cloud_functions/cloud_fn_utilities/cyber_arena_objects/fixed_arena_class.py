@@ -178,7 +178,7 @@ class FixedArenaClass:
             logging.error(f"Fixed Arena {self.fixed_arena_class_id}: Timed out waiting for server builds to "
                           f"complete!")
         else:
-            self.state_manager.state_transition(self.s.STOPPING)
+            self.state_manager.state_transition(self.s.STOPPED)
             logging.info(f"Finished starting the Fixed Arena Workout: {self.fixed_arena_class_id}!")
 
     def delete(self):
