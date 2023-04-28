@@ -11,6 +11,12 @@ You have 3 servers in your lab:
 ![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
 
 ## Sharing your Implants
-When you create your implants, move them to the `/src/sliver` folder on the Sliver server. Then, they can be accessed by other Windows servers in the lab. To have someone else run your implant, send them the IP address of the Sliver Server (e.g. 10.1.0.XX). Then, they can run your implant by going to their implant server, and opening explorer. From explorer, they can double click on the executable in the Sliver folder.
+When you create your implants, move them to the `/srv/sliver` folder on the Sliver server and change the permissions to allow execution.
+```
+cp ./TEST_IMPLANT.exe /srv/sliver/
+sudo chmod 777 /srv/sliver/TEST_IMPLANT.exe
+```
+
+Then, they can be accessed by other Windows servers in the lab. To have someone else run your implant, send them the IP address of the Sliver Server (e.g. 10.1.0.XX). Then, they can run your implant by going to their implant server, and opening explorer. From explorer, they can double click on the executable in the Sliver folder.
 
 ![image](https://user-images.githubusercontent.com/50633591/234988380-81fc9370-148b-4c2c-a816-7b1b14ba47de.png)
