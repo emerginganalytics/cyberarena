@@ -1,10 +1,14 @@
 # Sliver Botnet Instructions
 
 ## Accessing your Servers
-The Sliver controller server is called Sliver Server. Right now, it's best to open this in an incognito browser to avoid caching the credentials used to connect.
-![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
+You have 3 servers in your lab:
+* **sliver-server**: Ubuntu server with the role of command and control of the botnet.
+* **sliver-client**: Used to control the C2 server
+* **sliver-implant**: A test victim server used for installing implants.
 
-When you are ready to connect to your implant server, make sure to close your Sliver server first, and then you can connect incognito in the same way.
+>! **Warning:** When connecting to servers, it is best to open this in an incognito browser to avoid caching the credentials used to connect. Only connect to one of the servers at a time, and then, only in incognito mode.
+
+![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
 
 ## Sharing your Implants
 When you create your implants, move them to the `/src/sliver` folder on the Sliver server. Then, they can be accessed by other Windows servers in the lab. To have someone else run your implant, send them the IP address of the Sliver Server (e.g. 10.1.0.XX). Then, they can run your implant by going to their implant server, and opening explorer. From explorer, they can double click on the executable in the Sliver folder.
