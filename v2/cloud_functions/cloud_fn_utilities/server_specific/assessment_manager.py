@@ -42,13 +42,13 @@ class AssessmentManager:
             raise LookupError(f"The datastore record for {self.build_id} no longer exists!")
         if escape_room := self.build.get('escape_room', None):
             self.assessment_questions = escape_room['puzzles']
-            self.url = f"{self.env.main_app_v2_url}/api/escape-room/team/"
+            self.url = f"{self.env.main_app_url_v2}/api/escape-room/team/"
         else:
             if 'assessment' in self.build and 'questions' in self.build['assessment']:
                 self.assessment_questions = self.build['assessment']['questions']
             else:
                 self.assessment_questions = None
-            self.url = f"{self.env.main_app_v2_url}/api/unit/workout/"
+            self.url = f"{self.env.main_app_url_v2}/api/unit/workout/"
 
 
     def get_startup_scripts(self, server_name: str):
