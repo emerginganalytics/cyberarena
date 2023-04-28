@@ -112,36 +112,6 @@ def check_sql_flag(workout_id):
                 return render_template('sql_index.html', workout_id=workout_id)
 
 
-# Wireshark Routes
-@classified_bp.route('/wireshark/<workout_id>')    
-def wireshark_home(workout_id):
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
-    if workout:
-        if not session.get('logged_in'):
-            return render_template('wireshark_index.html', workout_id=workout_id)
-        else:
-            decrypt_key = workout['assessment']['questions'][0]['id']
-            encrypted_flag = 'w7w1HZQSOlQk7cxRjqICoIXkFbUsjnr9CHJkvZ51Iw==*9o+WrK5lFOZG70IARQ5HGA==*7bLeQoMR/IhXQjlvey' \
-                             '71KQ==*D+iRjmWUsHXkKTC+G6cF4g=='
-            wireshark_flag = cryptocode.decrypt(encrypted_flag, decrypt_key)
-            return render_template('wireshark_flag.html', wireshark_flag=wireshark_flag, workout_id=workout_id)
-
-
-@classified_bp.route('/wireshark/login/<workout_id>', methods=['GET', 'POST'])
-def do_admin_login(workout_id):
-    if request.form['psw'] == 'cyberSecret42' and request.form['username'] == 'admin':
-        session['logged_in'] = True
-    else:
-        flash('Incorrect Password')
-    return redirect(url_for('classified_bp.wireshark_home', workout_id=workout_id))
-
-
-@classified_bp.route('/wireshark/logout/<workout_id>', methods=['GET', 'POST'])
-def admin_logout(workout_id):
-    session['logged_in'] = False
-    return redirect(url_for('wireshark_bp.home', workout_id=workout_id))
-
-
 # XSS Routes
 @classified_bp.route('/xss/dom/<workout_id>', methods=['GET', 'POST'])
 def xss_d(workout_id):

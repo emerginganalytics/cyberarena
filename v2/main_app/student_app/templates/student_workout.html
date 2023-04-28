@@ -72,12 +72,12 @@
                // Start timer
                {% if workout.remaining_time %}
                    {% if workout.remaining_time > 0 %}
-                       let countdownTimer = new Timer("{{ workspace['id'] }}", "{{ workspace.build_type }}");
+                       let countdownTimer = new Timer("{{ workout['id'] }}", "{{ workout.build_type }}");
                        let times = {
-                           'build_type': '{{ workspace.build_type }}',
-                           'remaining_time': {{ workspace.remaining_time }},
-                           'end_time': {{ workspace.shutoff_timestamp }},
-                           'expired': {{ workspace.expired | lower }},
+                           'build_type': '{{ workout.build_type }}',
+                           'remaining_time': {{ workout.remaining_time }},
+                           'end_time': {{ workout.shutoff_timestamp }},
+                           'expired': {{ workout.expired | lower }},
                        }
                        countdownTimer.start(times);
                    {% endif %}
@@ -346,7 +346,7 @@
                                                                         </div>
                                                                          <input id="submit_{{ loop.index }}" type="button"
                                                                                 onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
-                                                                                        '{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                                                        '{{ workout.api.workout }}{{ workout['id'] }}','{{ loop.index }}', false);"
                                                                                 class="btn-fa mb-2" value="Check Answer">
                                                                      {% elif question.type == 'upload' %}
                                                                          <div class="form-group mx-sm-3 mb-2">
