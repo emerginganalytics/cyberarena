@@ -105,7 +105,7 @@ class BuildSpecification:
         if not self._validate_spec(spec):
             return
         print(f"\t...Specification passed validation testing.")
-        response = str(input(f"Do you want to image in this project for the specification at this time? "
+        response = str(input(f"Do you want to image the specified servers at this time? "
                              f"If 'N', the source project will be used to sync images (y/N)"))
         image_first = True if str.upper(response) == "Y" else False
         source_project = None
