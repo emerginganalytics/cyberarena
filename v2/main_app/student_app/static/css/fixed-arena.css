@@ -54,7 +54,7 @@ thead {
 }
 .selected td {
     color: black;
-    border-bottom: 4px solid var(--main_color, #6e2639);
+    border-bottom: 4px solid var(--main-color, #6e2639);
 }
 .table-small {
     table-layout: auto !important;
@@ -334,7 +334,7 @@ input:checked + .slider:before {
     }
 }
 .modal-dialog-slideout.modal-sm {
-    
+
 }
 .modal.fade .modal-dialog.modal-dialog-slideout {
     -webkit-transform: translate(100%,0)scale(1);

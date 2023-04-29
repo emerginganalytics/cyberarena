@@ -42,6 +42,7 @@
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
     <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/teacher_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/escape_room.js") }}'></script>
     <script type="text/javascript" src='{{ url_for(".static", filename="js/countdown_timer.js") }}'></script>
     <script>
           var teacher_email = null;
@@ -72,8 +73,12 @@
                        {% endfor %}
                    {% endif %}
                    {% if workout_list | count == unit['workspace_settings']['count'] %}
+                       let escape_room = new EscapeRoom()
+                       {% if unit.escape_room.start_time == 0.0 %}
+                           escape_room.toggle(53);
+                       {% endif %}
                        {% if escaped != workout_list | count %}
-                           getEscapeRoomState("{{ unit['escape_room']['id'] }}");
+                           escape_room.poll("{{ workout_list[0]['id'] }}");
                        {% endif %}
                    {% else %}
                        checkState("{{ unit['id'] }}", "{{ url_for('unit') }}");
@@ -105,25 +110,40 @@
                     {% if unit.escape_room.start_time == 0.0 %}
                         {% if workout_list | count > 0 %}
                             <li class="nav-item">
-                                <button class='nav-link'
-                                        onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 2);">Start Machines</button>
-                                <button class='nav-link'
-                                        onclick="startEscapeRoomTimer('{{ unit['id'] }}', '{{ unit['api'] }}', 9);">Start Timer</button>
+                                <div id="build-control-group">
+                                    {% if workout_list[0]['state'] == 50 %}
+                                        <button id="startEscapeRoomBtn" class='nav-link disabled'>
+                                            Start Machines<i class="fa fa-circle-o-notch loading-icon"></i></button>
+                                        <button class='nav-link' id="startEscapeRoomTimer"
+                                            onclick="new EscapeRoom('{{ unit["id"] }}', '{{ unit["api"] }}').startTimer();">
+                                            Start Timer<i class="fa fa-circle-o-notch loading-icon"></i></button>
+                                    {% else %}
+                                        <button id="startEscapeRoomBtn" class='nav-link'
+                                            onclick="new EscapeRoom('{{ unit["id"] }}', '{{ unit["api"] }}').startMachines()">
+                                            Start Machines<i class="fa fa-circle-o-notch loading-icon"></i></button>
+                                        <button class='nav-link disabled' id="startEscapeRoomTimer"
+                                            onclick="new EscapeRoom('{{ unit["id"] }}', '{{ unit["api"] }}').startTimer();">
+                                            Start Timer<i class="fa fa-circle-o-notch loading-icon"></i></button>
+                                    {% endif %}
+                                </div>
                             </li>
                         {% endif %}
                     {% else %}
                         {# Escape Room is Running #}
-                        <li class="nav-item disabled">
-                            <button class="nav-link">Start Escape Room</button>
-                            <button class="nav-link">Start Timer</button>
+                        <li class="nav-item" id="build-control-group">
+                           <button id="startEscapeRoomBtn" class='nav-link disabled'>Start Machines<i class="fa fa-circle-o-notch loading-icon"></i></button>
+                            <button id="startEscapeRoomTimer" class="nav-link disabled">Start Timer
+                                <i class="fa fa-circle-o-notch loading-icon"></i></button>
                         </li>
                     {% endif %}
                 {% else %}
                     {# No workouts exist #}
-                    <li class="nav-item disabled">
-                        <button class="nav-link">Start Escape Room</button>
-                        <button class="nav-link">Start Timer</button>
-                    </li>
+                   <li class="nav-item disabled" id="build-control-group">
+                        <button id="startEscapeRoomBtn" class="nav-link disabled">Start Escape Room
+                            <i class="fa fa-circle-o-notch loading-icon"></i></button>
+                        <button id="startEscapeRoomTimer" class="nav-link disabled">Start Timer
+                            <i class="fa fa-circle-o-notch loading-icon"></i></button>
+                   </li>
                 {% endif %}
             </ul>
         </div> <!-- End sidebar-menu div -->
@@ -145,6 +165,10 @@
                                     <li><a class="btn-fa" href="{{ unit.summary.teacher_instructions_url }}"
                                            target="_blank">Teacher Instructions</a></li>
                                 {% endif %}
+                                <li style="padding-top: 15px;">
+                                    <a id="answers-modal" class="btn btn-fa" href='#' data-toggle="modal"
+                                        data-target="#modalRoomAnswers"><i class="fa fa-key icon-light"></i>Answers</a>
+                                </li>
                             </ul>
                             {% if join_url %}
                                 <div id="distribution" style="margin-top: 12px;">
@@ -213,7 +237,50 @@
                             </table>
                         </div>
                     </div> <!-- End home-container div -->
+                    <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
+                    </div><!-- End assessment-tab div -->
                 </div> <!-- End tab-container -->
+                <div class="modal fade" tabindex="-1" role="dialog" id="modalRoomAnswers">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="text-center">Escape Room Answers</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">x</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="col" class="text-center">Puzzle</th>
+                                            <th colspan="col" class="text-center">Answer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for puzzle in unit.escape_room.puzzles %}
+                                            <tr>
+                                                <td>{{ puzzle['name'] }}</td>
+                                                {% if 'type' in puzzle %}
+                                                    {% if puzzle['type'] == 'auto' %}
+                                                        <td>Auto Assessment</td>
+                                                    {% else %}
+                                                        <td>{{ puzzle['answer'] }}</td>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <td>{{ puzzle['answer'] }}</td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                             <div class="modal-footer" style="justify-content:space-around;">
+                                <button type="button" style="margin-right: 1em;" class="btn-fa popup_close" data-dismiss="modal">Close</button>
+                             </div>
+                        </div>
+                    </div>
+                 </div>
                 {{ forms.contact_us() }}
             </div> <!-- End content-div -->
         </main>

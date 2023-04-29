@@ -8,6 +8,7 @@ from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
 

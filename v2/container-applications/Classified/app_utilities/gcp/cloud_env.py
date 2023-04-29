@@ -37,7 +37,7 @@ class CloudEnv:
             self.student_instructions_url = self.env_dict['student_instructions_url']
             self.teacher_instructions_url = self.env_dict['teacher_instructions_url']
             self.main_app_url = self.env_dict['main_app_url']
-            self.main_app_v2_url = self.env_dict['main_app_v2_url']
+            self.main_app_v2_url = self.env_dict['main_app_url_v2']
             self.guac_db_password = self.env_dict['guac_db_password']
             self.max_workspaces = self.env_dict['max_workspaces']
         else:
@@ -64,11 +64,11 @@ class CloudEnv:
                     self.teacher_instructions_url = teacher_instructions_url.value.decode("utf-8") if teacher_instructions_url else \
                         'https://storage.googleapis.com/teacher_workout_instructions_ualr-cybersecurity/'
                     self.main_app_url = myconfig.get_variable('main_app_url').value.decode("utf-8")
-                    main_app_v2_url = myconfig.get_variable('main_app_v2_url')
-                    if main_app_v2_url:
-                        self.main_app_v2_url = main_app_v2_url.value.decode("utf-8")
+                    main_app_url_v2 = myconfig.get_variable('main_app_url_v2')
+                    if main_app_url_v2:
+                        self.main_app_url_v2 = main_app_url_v2.value.decode("utf-8")
                     else:
-                        self.main_app_v2_url = self.main_app_url
+                        self.main_app_url_v2 = self.main_app_url
                     self.guac_db_password = myconfig.get_variable('guac_password').value.decode("utf-8")
                     self.spec_bucket = self.project + '_build-specs'
                     self.admin_email = myconfig.get_variable('admin_email').value.decode("utf-8")
