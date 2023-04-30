@@ -67,6 +67,10 @@ class UnitSchema(Schema):
                                             "puzzles associated with each workout")
     test = fields.Bool(required=False, description="Whether the unit is a test. This helps in cleaning the datastore.")
     join_code = fields.Str(required=False, description='Used to invite students to claim a unit workspace')
+    workout_duration_days = fields.Int(required=False,
+                                       description='For asynchronous workout builds, specify to add an expiration '
+                                                   'timestamp for the workout. This is used for long running units '
+                                                   'where students complete workouts asynchronously.')
 
 
 class WorkspaceSettingsSchema(Schema):

@@ -41,11 +41,14 @@ class LMSCanvas(LMS):
                 })
         return students
 
-    def create_quiz(self):
+    def create_quiz(self, delete_existing_quizzes=True):
         questions = self.build['lms_quiz']['questions']
         points_possible = sum([q['points_possible'] for q in questions])
+        quiz_name = f"Quiz for the Cyber Arena workout: {self.build['summary']['name']}"
+        if delete_existing_quizzes:
+            self.delete_quiz_by_name(quiz_name)
         quiz_data = {
-            'title': f"Quiz for the Cyber Arena workout: {self.build['summary']['name']}",
+            'title': quiz_name,
             'instructions': f"The instructions to complete this quiz are here: "
                             f"{self.build['summary']['student_instructions_url']}",
             'due_at': self.build['lms_quiz']['due_at'],
@@ -56,6 +59,7 @@ class LMSCanvas(LMS):
             'assignees': [{'id': x.id, 'type': 'user'} for x in self.class_list]
         }
         new_quiz = self.course.create_quiz(quiz_data)
+        question_ids = []
         for question in json.loads(json.dumps(questions)):
             question_data = {
                 'question_name': question.get('question_name', None),
@@ -64,5 +68,27 @@ class LMSCanvas(LMS):
                 'point_possible': question.get('points_possible', 1),
                 'answers': question.get('answers', None)
             }
-            new_quiz.create_question(**question_data)
+            question = new_quiz.create_question(question=question_data)
+            question_ids.append(question.id)
+        self._store_quiz_identifiers(quiz_id=new_quiz.id, question_ids=question_ids)
         return new_quiz
+
+    def get_updated_build(self):
+        """
+        It's dangerous to save a Datastore Entity inside a class. Otherwise, it could be overwritten by the calling
+        function.
+        Returns:
+
+        """
+        return self.build
+
+    def delete_quiz_by_name(self, quiz_name: str):
+        assigned_quizzes = self.course.get_assignments()
+        for quiz in assigned_quizzes:
+            if quiz.name == quiz_name:
+                quiz.delete()
+
+    def _store_quiz_identifiers(self, quiz_id: int, question_ids: list):
+        self.build['lms_quiz']['quiz_id'] = quiz_id
+        for i, question in enumerate(self.build['lms_quiz']['questions']):
+            question['question_id'] = question_ids[i]

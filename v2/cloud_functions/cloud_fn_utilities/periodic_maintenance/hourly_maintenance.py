@@ -8,7 +8,9 @@ from cloud_fn_utilities.state_managers.fixed_arena_states import FixedArenaState
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStates
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
+from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
+from cloud_fn_utilities.state_managers.workout_states import WorkoutStateManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -29,10 +31,12 @@ class HourlyMaintenance:
         self.fa_state_manager = FixedArenaStateManager()
         self.ds_units = DataStoreManager(key_type=DatastoreKeyTypes.UNIT)
         self.ds_classes = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS)
+        self.ds_workouts = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
 
     def run(self):
         self._delete_expired_classes()
         self._delete_expired_units()
+        self._delete_expired_workouts()
 
     def _delete_expired_classes(self):
         expired_classes = self.ds_classes.get_expired()
@@ -63,5 +67,22 @@ class HourlyMaintenance:
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
+                                         build_id=build_id, action=str(PubSub.Actions.DELETE.value))
+                    time.sleep(20)
+
+    def _delete_expired_workouts(self):
+        """
+        For long running units used in asynchronous classes, workouts may be deleted before the unit expires. This
+        keeps the project clear of stale workouts during the asynchronous class.
+        """
+        expired_workouts = self.ds_workouts.get_expired()
+        for build_id in expired_workouts:
+            workout_state_manager = WorkoutStateManager(initial_build_id=build_id)
+            if workout_state_manager.get_state() not in [WorkoutStates.DELETED.value]:
+                if self.debug:
+                    Workout(build_id=build_id, debug=self.debug, env_dict=self.env_dict).delete()
+                else:
+                    self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
+                                         cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                          build_id=build_id, action=str(PubSub.Actions.DELETE.value))
                     time.sleep(20)

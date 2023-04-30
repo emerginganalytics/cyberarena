@@ -170,6 +170,7 @@ class BuildConstants:
 
 
 class WorkoutStates(Enum):
+    NOT_BUILT = -1
     START = 0
     BUILDING_ASSESSMENT = 1
     BUILDING_NETWORKS = 2

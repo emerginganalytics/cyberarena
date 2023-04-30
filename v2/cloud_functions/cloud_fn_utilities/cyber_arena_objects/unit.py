@@ -12,7 +12,8 @@ from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
 from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
-from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates, \
+    get_current_timestamp_utc
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
 from cloud_fn_utilities.lms.lms_canvas import LMSCanvas
@@ -40,22 +41,23 @@ class Unit:
         self.logger = Logger("cloud_functions.unit").logger
         self.s = UnitStates
         self.pubsub_manager = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
-        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.unit_id)
-        self.unit = self.ds.get()
+        self.ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.unit_id)
+        self.ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
+        self.unit = self.ds_unit.get()
         if not self.unit:
             self.logger.error(f"The datastore record for {self.unit_id} no longer exists!")
             raise LookupError
         self.lms_class = self._is_lms_class()
-        self.ds = DataStoreManager()
 
     def build(self):
         if self.lms_class:
             self._create_unit_for_lms()
+            self.ds_unit.put(self.unit)
         else:
             self._build_one_workout(workout_id=self.child_id)
 
     def start(self):
-        workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        workouts = self.ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             if self.debug:
                 workout = Workout(build_id=id, debug=self.debug, env_dict=self.env_dict)
@@ -67,12 +69,12 @@ class Unit:
                                         build_id=str(workout.key.name))
 
     def stop(self):
-        workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        workouts = self.ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).stop()
 
     def delete(self):
-        workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        workouts = self.ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             if self.debug:
                 Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).delete()
@@ -88,13 +90,13 @@ class Unit:
             self.logger.error(f"Unit {self.unit_id} is not deleted!")
 
     def nuke(self):
-        workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
+        workouts = self.ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             Workout(build_id=workout.key.name, debug=self.debug, env_dict=self.env_dict).nuke()
 
     def mark_broken(self):
         self.unit['state'] = self.s.BROKEN
-        self.ds.put(self.unit)
+        self.ds_unit.put(self.unit)
 
     def get_build_id(self):
         return self.unit_id
@@ -116,21 +118,14 @@ class Unit:
             self.logger.error(f"Unsupported LMS object")
             raise ValueError
         lms.create_quiz()
+        self.unit = lms.get_updated_build()
         students = lms.get_class_list()
         for student in students:
             workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
             workout_record = self._create_workout_record(workout_id=workout_id)
             workout_record['student_email'] = student.get('email')
             workout_record['student_name'] = student.get('name')
-            self.ds.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
-            if self.debug:
-                workout = Workout(build_id=workout_id, debug=self.debug, env_dict=self.env_dict)
-                workout.build()
-            else:
-                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
-                                        action=str(PubSub.BuildActions.WORKOUT.value),
-                                        key_type=str(DatastoreKeyTypes.WORKOUT.value),
-                                        build_id=str(workout_id))
+            self.ds_workout.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
 
     def _build_one_workout(self, workout_id):
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
@@ -154,7 +149,7 @@ class Unit:
         else:
             self.logger.error(f'Invalid or missing claimed_by values given for unit {self.unit_id}')
             raise ValueError
-        self.ds.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
+        self.ds_workout.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
         if self.debug:
             workout = Workout(build_id=workout_id, debug=self.debug, env_dict=self.env_dict)
             workout.build()
@@ -171,8 +166,10 @@ class Unit:
             'parent_build_type': BuildConstants.BuildType.UNIT,
             'build_type': BuildConstants.BuildType.WORKOUT,
             'creation_timestamp': datetime.now(timezone.utc).replace(tzinfo=timezone.utc).timestamp(),
-            'state': WorkoutStates.START.value,
+            'state': WorkoutStates.NOT_BUILT.value,
         }
+        if workout_duration_days := self.unit.get('workout_duration_days', None):
+            workout_record['expiration'] = get_current_timestamp_utc(add_seconds=86400*workout_duration_days)
         if self.unit.get('networks'):
             workout_record['networks'] = self.unit['networks']
             workout_record['servers'] = self.unit['servers']
