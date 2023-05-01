@@ -74,6 +74,9 @@
                             <div style="border-top: 1px solid #e6e6e6; padding: 3px;">
                             </div>
                             <div class="form-group">
+                                <p>Make sure you have put in API key. This is in the settings, click on your name in the top right corner. Otherwise, LMS integration will not work</p>
+                            </div>
+                            <div class="form-group">
                                 <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
                                 <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="quiz-due-date"
                                        type="datetime-local" onchange="validateDateTime(this)">
@@ -85,8 +88,13 @@
                             </div>
                             <div class="form-group">
                                 <label for="quiz-attempts-{{ loop.index }}">Number of Attempts (-1 = unlimited): </label>
-                                <input id="quiz-attempts-{{ loop.index }}" class="form-control" name="quiz-attempts"
+                                <input id="quiz-attempts-{{ loop.index }}" class="form-control" name="allowed-attempts"
                                        type="number" >
+                            </div>
+                            <div class="form-group">
+                                <label for="course-code-{{ loop.index }}">Course Code: </label>
+                                <input id="course-code-{{ loop.index }}" class="form-control" name="course-code"
+                                       type="text" >
                             </div>
                             {% endif %}
                             <div class="d-flex justify-content-center">
