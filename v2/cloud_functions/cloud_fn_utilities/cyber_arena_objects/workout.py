@@ -48,7 +48,7 @@ class Workout:
 
     def build(self):
         if not self.workout.get('networks', None):
-            if self.workout.get('web_application', None):
+            if self.workout.get('web_applications', None):
                 self.state_manager.state_transition(self.s.READY)
                 self.logger.info(f"No compute assets required for workout {self.workout_id}.")
                 self.logger.info(f"Finished building workout {self.workout_id}.")

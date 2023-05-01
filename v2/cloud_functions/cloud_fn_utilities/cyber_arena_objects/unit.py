@@ -144,7 +144,8 @@ class Unit:
                 processed_web_application = {
                     'name': web_application['name'],
                     'url': f"https://{web_application['host_name']}{self.env.dns_suffix}"
-                           f"{web_application['starting_directory']}/{self.workout_id}"
+                           f"{web_application['starting_directory']}/{self.workout_id}",
+                    'starting_directory': web_application['starting_directory'],
                 }
                 processed_web_applications.append(processed_web_application)
             workout_record['web_applications'] = processed_web_applications

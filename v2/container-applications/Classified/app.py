@@ -12,6 +12,7 @@ from johnnyhash.routes import johnnyhash_bp
 
 # API Views
 from api.johnnyhash_api import JohnnyHashAPI, JohnnyCipherAPI
+from api.classified_api import ClassifiedAPI
 
 cloud_env = CloudEnv()
 
@@ -50,6 +51,7 @@ def register_api(view, endpoint, url, pk='id', pk_type='string'):
 # Register API Routes
 register_api(view=JohnnyHashAPI, endpoint='hashes', url='/api/hashes', pk='build_id')
 register_api(view=JohnnyCipherAPI, endpoint='ciphers', url='/api/ciphers', pk='build_id')
+register_api(view=ClassifiedAPI, endpoint='classified', url='/api/classified', pk='build_id')
 
 
 if __name__ == '__main__':

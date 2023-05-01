@@ -24,7 +24,11 @@ classified_bp = Blueprint(
     static_folder='./static',
 )
 
+
 # Arena Snake Routes
+@classified_bp.route('/snake/<workout_id>')
+def snake(workout_id):
+    pass
 
 
 # Inspect Routes
@@ -32,7 +36,12 @@ classified_bp = Blueprint(
 def inspect(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
-        return render_template('inspect.html', workout_id=workout_id)
+        completion = workout['assessment']['questions'][0].get('complete', False)
+        if completion:
+            flag = workout['assessment']['questions'][0].get('answer', None)
+            return render_template('inspect-v2.html', workout_id=workout_id, completion=completion,
+                                   classified_flag=flag)
+        return render_template('inspect-v2.html', workout_id=workout_id, completion=completion)
     return redirect(404)
 
 
