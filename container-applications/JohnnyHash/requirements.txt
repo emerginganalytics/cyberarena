@@ -1,7 +1,7 @@
 apache-libcloud
 pycryptodome
 jinja2
-Flask==1.0.3
+Flask==2.3.2
 itsdangerous
 Click==7.0
 google-cloud-datastore
