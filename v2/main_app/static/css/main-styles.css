@@ -189,6 +189,13 @@ footer a:hover {
     -webkit-filter: invert(1);
     transform: rotate(45deg);
 }
+ul.dropdown-menu-hover > li:hover {
+    background-color: var(--python-blue);
+    color: white;
+}
+#settings:hover {
+    color: white;
+}
 /* Sidebar styles */
 .nav-sidebar {
     top: 50px;

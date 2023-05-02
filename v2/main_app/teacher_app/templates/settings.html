@@ -1,6 +1,7 @@
 {% extends "v2-base.html" %}
 {% import 'logo_macro.html' as logo %}
 {% import 'teacher_macros.html' as macros %}
+{% import 'contact_us.html' as forms %}
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
@@ -23,22 +24,54 @@
     </div>
     <div class="navbar-nav navbar-right">
         <ul class="nav nav-pills top-navbar-pill">
-            <li class="nav-item">
+            <li class="nav-item m-l-r-3">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
                    data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
-            <li class="nav-item disabled">
-                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
-            </li>
-            <li class="nav-item">
-                <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
-            </li>
         </ul>
+        <div class="dropdown">
+            <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item m-l-r-3">
+                    <button id="banner" class="nav-item btn top-navbar-btn" data-toggle="dropdown">
+                        <span id="user"></span><i class="fa fa-caret-down ml-1"></i></button>
+                    <ul class="dropdown-menu m-l-r-3 dropdown-menu-hover">
+                        <li class="nav-item m-l-r-3 text-center">
+                            <a id="settings" class="nav-item btn" href="/teacher/settings" style="width: 100%;">Settings</a>
+                        </li>
+                        <li class="nav-item m-l-r-3 text-center">
+                            <a id="sign-out" class="nav-item btn" style="width: 100%;">Sign Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
-
 {% endblock %}
 {% block content %}
 <div class="col main pt-3 mt-3 pr-3 h-100">
+    <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script>
+          var teacher_email = null;
+          var auth_config = {
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
+          };
+          initApp(auth_config).then(value => {
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('user');
+              welcome_nav.textContent = value['display_name'];
+
+              // Set workout form value
+              //document.getElementById('assignment-teacher-id').value = value['user_email'];
+          });
+          $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+           });
+    </script>
     <div class="form-group">
         <label for="apiKeyCanvas">API Key (Canvas)</label>
         <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
@@ -50,32 +83,6 @@
     <div class="d-flex justify-content-right">
         <button type="submit" id="settings" class="waves-effect waves-light btn-fa text-center build-workout">Save Settings</button>
     </div>
+    {{ forms.contact_us() }}
 </div>
-                <div id="modalContactUs" class="modal fade" role="dialog">
-                    <div class="modal-dialog">
-
-                        <!-- Modal content-->
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h4 class="modal-title">Help Form</h4>
-                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                            </div>
-                            <div class="modal-body">
-                                <form id='contact_form' action='{{ url_for("leave_comment") }}' method="POST" enctype="multipart/form-data">
-                                    <label for="Email">Your Email</label><br>
-                                    <input type="text" id="email" name="email" required><br><br>
-                                    <label for="Subject">Subject</label><br>
-                                    <input type="text" id="subject" name="subject" required><br><br>
-                                    <label for="Comment">Comment</label><br>
-                                    <input type="text" id="comment" name="comment" required><br><br>
-                                    <label for="Image">Please include an image of any errors</label><br>
-                                    <input type="file" id="image" name="image"><br><br>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <input type="submit" form='contact_form' value="Submit">
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- End Modal -->
 {% endblock content %}

@@ -281,3 +281,7 @@ function filterWorkouts(filter_group) {
         }
     }
 }
+
+function updateLMSCourses(option, idx){
+    let courses = document.getElementById('course-code-' + idx)
+}

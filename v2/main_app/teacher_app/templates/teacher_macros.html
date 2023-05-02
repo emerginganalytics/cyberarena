@@ -23,7 +23,7 @@
 {%- endmacro %}
 
 {# Cards are used as part of the Build Workout tab in teacher_classroom.html #}
-{% macro buildWorkoutCards(specs, build_type, url) %}
+{% macro buildWorkoutCards(specs, build_type, url, courses=None) %}
     {% for spec in specs %}
         <div class="card unit-card col-lg-4 col-sm-12" onclick="show_modal_card('current_{{ build_type }}_{{ loop.index }}')">
             <div class="card-body">
@@ -67,33 +67,55 @@
                                        type="datetime-local" onchange="validateDateTime(this)">
                             </div>
                             <div id="{{ build_type }}-build-count-{{ loop.index }}-div" class="form-group">
+                                <label for="build-count-{{ loop.index }}">Enter max number of students:</label>
                                 <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
-                                <label for="build-count-{{ loop.index }}">Enter max number of students</label>
                             </div>
                             {% if spec.lms_quiz %}
-                            <div style="border-top: 1px solid #e6e6e6; padding: 3px;">
-                            </div>
-                            <div class="form-group">
-                                <p>Make sure you have put in the API key. This is in the settings, click on your name in the top right corner. Otherwise, LMS integration will not work</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
-                                <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="quiz-due-date"
-                                       type="datetime-local" onchange="validateDateTime(this)">
-                            </div>
-                            <div class="form-group">
-                                <label for="course-code-{{ loop.index }}">Course Code: </label>
-                                <select id="course-code-{{ loop.index }}" class="form-control" name="course-code"
-                                       type="text" >
-                                    {% for course_id, course_name in courses.items %}
-                                    <option value="{{ course_id }}"> {{ course_name }} </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                                {% if courses %}
+                                    <hr>
+                                    <div class="form-group">
+                                        <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
+                                        <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="quiz-due-date"
+                                               type="datetime-local" onchange="validateDateTime(this)">
+                                    </div>
+                                    <!-- TODO: Add Javascript to evaluate which LMS option was selected and enable courses field related to option
+                                    <div class='form-group'>
+                                        <lable for="lms-{{ loop.index }}">Learning Management System: </lable>
+                                        <select id="lms-{{ loop.index }}" class="form-control" name="lms_system" onchange="updateLMSCourses(this.value, '{{ loop.index }}')">
+                                            {% for lms, value in courses.items() %}
+                                                <option value="{{ lms }}">{{ lms | capitalize }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>-->
+                                    <div class="form-group">
+                                        <label for="course-code-{{ loop.index }}">Course Code: </label>
+                                        <select id="course-code-{{ loop.index }}" class="form-control" name="course-code"
+                                               type="text" >
+                                            {% for lms, value in courses.items() %}
+                                                {% for course_id, course_name in courses[lms].items() %}
+                                                    <option value="{{ course_id }}">{{ course_name }}</option>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="d-flex justify-content-center">
+                                        <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
+                                    </div>
+                                {% else %}
+                                    <div class="form-group text-center" style="background-color: lightgoldenrodyellow; border: 1px solid lightblue; border-radius: 4px;">
+                                        <p style="margin-top: 1rem;"><i class="fa fa-warning"></i>No LMS courses found. Make sure to add your LMS API key in user settings first!</p>
+                                    </div>
+                                    <div class="d-flex justify-content-center">
+                                        <p id="build-{{ build_type }}-{{ loop.index }}"
+                                           class="waves-effect waves-light btn-fa text-center build-workout disabled" disabled="true"
+                                        style="pointer-events: none; opacity: 70%;">Build Workout!</p>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="d-flex justify-content-center">
+                                    <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
+                                </div>
                             {% endif %}
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
-                            </div>
                         </form>
                     </div> <!-- End modal-body -->
                 </div> <!--End modal-content -->

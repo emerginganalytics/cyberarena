@@ -26,27 +26,28 @@
     </div>
     <div class="navbar-nav navbar-right">
         <ul class="nav nav-pills top-navbar-pill">
-            <div class="dropdown">
             <li class="nav-item m-l-r-3">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
                    data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
-            <li class="nav-item m-l-r-3">
-                <button id="banner" class="nav-item btn top-navbar-btn" data-toggle="dropdown">
-                    <span id="user"></span><i class="fa fa-caret-down"></i></button>
-                <ul class="dropdown-menu m-l-r-3">
-                    <li class="nav-item m-l-r-3">
-                        <a id="settings" class="nav-item btn top-navbar-btn" href="/teacher/settings">Settings</a>
-                    </li>
-                    <li class="nav-item m-l-r-3">
-                        <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
-                    </li>
-                </ul>
-            </li>
-            </div>
         </ul>
+        <div class="dropdown">
+            <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item m-l-r-3">
+                    <button id="banner" class="nav-item btn top-navbar-btn" data-toggle="dropdown">
+                        <span id="user"></span><i class="fa fa-caret-down ml-1"></i></button>
+                    <ul class="dropdown-menu m-l-r-3 dropdown-menu-hover">
+                        <li class="nav-item m-l-r-3 text-center">
+                            <a id="settings" class="nav-item btn" href="/teacher/settings" style="width: 100%;">Settings</a>
+                        </li>
+                        <li class="nav-item m-l-r-3 text-center">
+                            <a id="sign-out" class="nav-item btn" style="width: 100%;">Sign Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
-
 {% endblock %}
 {% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
@@ -199,7 +200,7 @@
                                     <h2 class="section-title">Assignments</h2>
                                 </div>
                                 <div class="row justify-content-center">
-                                    {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', urls.unit) }}
+                                    {{ macros.buildWorkoutCards(workout_specs.assignments, 'assignment', urls.unit, teacher_info.lms) }}
                                 </div>
                             </div>
                         </div>
