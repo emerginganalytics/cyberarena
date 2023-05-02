@@ -70,7 +70,7 @@
                                 <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
                                 <label for="build-count-{{ loop.index }}">Enter max number of students</label>
                             </div>
-                            {% if spec.lms %}
+                            {% if spec.lms_quiz %}
                             <div style="border-top: 1px solid #e6e6e6; padding: 3px;">
                             </div>
                             <div class="form-group">
@@ -82,19 +82,13 @@
                                        type="datetime-local" onchange="validateDateTime(this)">
                             </div>
                             <div class="form-group">
-                                <label for="quiz-points-{{ loop.index }}">How Many Points: </label>
-                                <input id="quiz-points-{{ loop.index }}" class="form-control" name="quiz-points"
-                                       type="number" >
-                            </div>
-                            <div class="form-group">
-                                <label for="quiz-attempts-{{ loop.index }}">Number of Attempts (-1 = unlimited): </label>
-                                <input id="quiz-attempts-{{ loop.index }}" class="form-control" name="allowed-attempts"
-                                       type="number" >
-                            </div>
-                            <div class="form-group">
                                 <label for="course-code-{{ loop.index }}">Course Code: </label>
-                                <input id="course-code-{{ loop.index }}" class="form-control" name="course-code"
+                                <select id="course-code-{{ loop.index }}" class="form-control" name="course-code"
                                        type="text" >
+                                    {% for x in courses %}
+                                    <option> {{ x }} </option>
+                                    {% endfor %}
+                                </select>
                             </div>
                             {% endif %}
                             <div class="d-flex justify-content-center">
