@@ -47,10 +47,11 @@ class Unit:
         if not self.unit:
             self.logger.error(f"The datastore record for {self.unit_id} no longer exists!")
             raise LookupError
-        self.lms_class = self._is_lms_class()
+        self.lms_integration = self.unit.get('lms_integration', False)
+        self.lms_quiz = True if self.unit.get('lms_quiz', None) else False
 
     def build(self):
-        if self.lms_class:
+        if self.lms_integration:
             self._create_unit_for_lms()
             self.ds_unit.put(self.unit)
         else:
@@ -101,24 +102,20 @@ class Unit:
     def get_build_id(self):
         return self.unit_id
 
-    def _is_lms_class(self):
-        if 'lms_quiz' in self.unit:
-            return True
-        else:
-            return False
-
     def _create_unit_for_lms(self):
-        lms_quiz = self.unit['lms_quiz']
-        url = lms_quiz['lms_connection']['url']
-        api_key = lms_quiz['lms_connection']['api_key']
-        course_code = lms_quiz['lms_connection']['course_code']
-        if lms_quiz.get('lms_type', None) == BuildConstants.LMS.CANVAS:
+        lms_type = self.unit['lms_connection']['lms_type']
+        url = self.unit['lms_connection']['url']
+        api_key = self.unit['lms_connection']['api_key']
+        course_code = self.unit['lms_connection']['course_code']
+        if lms_type == BuildConstants.LMS.CANVAS:
             lms = LMSCanvas(url=url, api_key=api_key, course_code=course_code, build=self.unit)
         else:
             self.logger.error(f"Unsupported LMS object")
             raise ValueError
-        lms.create_quiz()
-        self.unit = lms.get_updated_build()
+
+        if self.unit.get('lms_quiz', None):
+            lms.create_quiz()
+            self.unit = lms.get_updated_build()  # Prevents overwriting the unit after the quiz has been updated
         students = lms.get_class_list()
         for student in students:
             workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))

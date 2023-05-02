@@ -74,7 +74,7 @@
                             <div style="border-top: 1px solid #e6e6e6; padding: 3px;">
                             </div>
                             <div class="form-group">
-                                <p>Make sure you have put in API key. This is in the settings, click on your name in the top right corner. Otherwise, LMS integration will not work</p>
+                                <p>Make sure you have put in the API key. This is in the settings, click on your name in the top right corner. Otherwise, LMS integration will not work</p>
                             </div>
                             <div class="form-group">
                                 <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
@@ -85,8 +85,8 @@
                                 <label for="course-code-{{ loop.index }}">Course Code: </label>
                                 <select id="course-code-{{ loop.index }}" class="form-control" name="course-code"
                                        type="text" >
-                                    {% for x in courses %}
-                                    <option> {{ x }} </option>
+                                    {% for course_id, course_name in courses.items %}
+                                    <option value="{{ course_id }}"> {{ course_name }} </option>
                                     {% endfor %}
                                 </select>
                             </div>

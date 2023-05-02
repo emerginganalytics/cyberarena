@@ -61,6 +61,8 @@ class UnitSchema(Schema):
     firewall_rules = fields.Nested('FirewallRuleSchema', many=True, description="These are ONLY set by the program to "
                                                                                 "allow all internal traffic")
     assessment = fields.Nested('AssessmentSchema', required=False)
+    lms_connection = fields.Nested('LMSConnectionSchema', required=False,
+                                   description="The information needed to connect a lab to a course")
     lms_quiz = fields.Nested('LMSQuizSchema', required=False)
     escape_room = fields.Nested('EscapeRoomSchema', required=False,
                                 description="Escape room units include additional specification of the escape room "
@@ -219,10 +221,6 @@ class AssessmentQuestionSchema(Schema):
 
 
 class LMSQuizSchema(Schema):
-    lms_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.LMS]),
-                          description="The type of LMS this should integrate with.")
-    lms_connection = fields.Nested('LMSConnectionSchema', description="The information needed to connect a lab to a "
-                                                                      "course")
     type = fields.Str(required=False, description="Practice quiz or assignment")
     due_at = fields.DateTime(required=False, description="Due date for assignment")
     description = fields.Str(required=False, description="Description of assignment")
@@ -232,6 +230,8 @@ class LMSQuizSchema(Schema):
 
 
 class LMSConnectionSchema(Schema):
+    lms_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.LMS]),
+                          description="The type of LMS this should integrate with.")
     api_key = fields.Str(required=True, description="The API key from the user profile needed for connecting to "
                                                     "the LMS")
     url = fields.Str(required=True, description="The LMS API URL")

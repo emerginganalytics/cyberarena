@@ -18,7 +18,7 @@ __status__ = "Testing"
 
 
 class LMSSpecDecorator:
-    def __init__(self, build_spec, course_code, due_at=None, time_limit=None, allowed_attempts=None):
+    def __init__(self, build_spec, course_code, lms_type, due_at=None, time_limit=None, allowed_attempts=None):
         self.build_spec = build_spec
         self.course_code = course_code
         self.instructor_id = self.build_spec.get('instructor_id', None)
@@ -27,7 +27,7 @@ class LMSSpecDecorator:
         self.allowed_attempts = allowed_attempts if allowed_attempts else -1
         self.ds = DataStoreManager()
         self.settings = None
-        self.lms_type = None
+        self.lms_type = lms_type
 
     def decorate(self):
         instructor = self.ds.get(key_type=DatastoreKeyTypes.USERS, key_id=self.instructor_id)
@@ -35,13 +35,11 @@ class LMSSpecDecorator:
             raise LMSSpecNoInstructorSettingsError
         self.settings = instructor['settings']
 
-        self.lms_type = self.build_spec['lms_quiz']['lms_type']
         if self.lms_type == BuildConstants.LMS.CANVAS:
-            lms_connection = self._get_canvas_connection()
+            self.build_spec['lms_connection']  = self._get_canvas_connection()
         else:
             raise LMSSpecLMSTypeNotSupported(f"LMS {self.lms_type} is not supported")
 
-        self.build_spec['lms_quiz']['lms_connection'] = lms_connection
         self.build_spec['lms_quiz'].update({
             'description': '',
             'due_at': str(self.due_at),
@@ -52,14 +50,15 @@ class LMSSpecDecorator:
 
     def _get_canvas_connection(self):
         try:
-            api_key = self.settings['canvas']['api']
-            url = self.settings['canvas']['url']
+            api_key = self.settings[self.lms_type]['api']
+            url = self.settings[self.lms_type]['url']
         except ValueError:
             raise LMSSpecIncompleteInstructorSettingsError(f"Missing instructor settings for the LMS {self.lms_type}")
 
         canvas = Canvas(url, api_key)
         canvas.get_course(self.course_code)
         connection = {
+            'lms_type': self.lms_type,
             'api_key': api_key,
             'url': url,
             'course_code': self.course_code

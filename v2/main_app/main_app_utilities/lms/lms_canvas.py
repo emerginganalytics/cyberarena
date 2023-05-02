@@ -17,11 +17,15 @@ __status__ = "Testing"
 
 
 class LMSCanvas(LMS):
-    def __init__(self, url, api_key, course_code):
+    def __init__(self, url, api_key, course_code=None):
         super().__init__(url, api_key, course_code)
         self.canvas = Canvas(self.url, self.api_key)
-        self.course = self.canvas.get_course(self.course_code)
+        self.course = self.canvas.get_course(self.course_code) if course_code else None
 
     def get_class_list(self):
         self.students = self.course.get_users(enrollment_type=['student'])
         return self.students
+
+    def get_courses(self):
+        courses = self.canvas.get_courses()
+        return {x.id: x.name for x in courses}

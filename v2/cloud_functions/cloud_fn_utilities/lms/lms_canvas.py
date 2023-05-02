@@ -5,6 +5,7 @@ import json
 from canvasapi import Canvas
 from canvasapi.quiz import Quiz, QuizQuestion
 
+from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.lms.lms import LMS
 
 __author__ = "Philip Huff"
@@ -26,8 +27,9 @@ class CanvasConstants:
 
 
 class LMSCanvas(LMS):
-    def __init__(self, url, api_key, course_code, build):
+    def __init__(self, url, api_key, course_code, build, env_dict=None):
         super().__init__(url, api_key, course_code, build)
+        self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.canvas = Canvas(self.url, self.api_key)
         self.course = self.canvas.get_course(self.course_code)
         self.class_list = self.course.get_users(enrollment_type=['student'])
@@ -49,7 +51,9 @@ class LMSCanvas(LMS):
             self.delete_quiz_by_name(quiz_name)
         quiz_data = {
             'title': quiz_name,
-            'instructions': f"The instructions to complete this quiz are here: "
+            'instructions': f"Your lab is available at {self.env.main_app_url_v2}/student/join. Use the join code "
+                            f"{self.build.get('join_code', None)} and the email address used to login to this site. "
+                            f"The instructions to complete this quiz are here: "
                             f"{self.build['summary']['student_instructions_url']}",
             'due_at': self.build['lms_quiz']['due_at'],
             'points_possible': points_possible,
