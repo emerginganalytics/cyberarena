@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% autoescape false %}
+{% block title %}XSS{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
+{% endblock %}
+{% block nav_title %}Cross-Site Scripting{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                <div class='summary-container' style="margin-top: 10px;">
+                    <h1 style="text-align: center">DOM Cross-Site Scripting</h1>
+                    {% if 'bad_request' in attack %}
+                        <h3 class="text-center">Hello! I have a bad request for you!</h3>
+                         <div class="col">
+                            <p  class="pt-2 info-block">
+                                With the DOM model, Javascript is able ot create dynamic HTML.
+                                 This includes changing, creating, or removing HTML attributes, events, and elements.
+                                In a DOM-based XSS attack, the source and execution of the attack are in the DOM and never
+                                leaves the browser.
+                            </p>
+                        </div>
+                        {{ attack.bad_request | safe }}
+                        <pre><code class="code-block"><{{ '\script>' }}{{ attack.cleaned }} {{'<\/script'}}></code></pre>
+                    {% else %}
+                        <h3  class="text-center">I'm waiting for a bad request...</h3>
+                        <div class="col">
+                            <p  class="pt-2 info-block">
+                                With the DOM model, Javascript is able ot create dynamic HTML.
+                                 This includes changing, creating, or removing HTML attributes, events, and elements.
+                                In a DOM-based XSS attack, the source and execution of the attack are in the DOM and never
+                                leaves the browser.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="summary-container" style="margin-top: 10px;">
+                    <h1 style="text-align: center">Reflected Cross-Site Scripting</h1>
+                    {% if attack.type == 'reflected' %}
+                        <h1 id="stranger">Hello, {{ attack.name | safe }}!</h1>
+                        <pre><code class="code-block"><{{ '\script>' }}{{ attack.cleaned }} {{'<\/script'}}></code></pre>
+                    {% endif %}
+                     <form class='form' name="reflected" action="#" method="post">
+                         <label for="rName">Can I have a name?</label>
+                        <input class="form-control" type="text" name="name" autocomplete="off">
+                        <input class='btn btn-main' type="submit" value="Submit">
+                    </form>
+                </div>
+                <div class="summary-container" style="margin-top: 10px;">
+                    {% if attack.type == 'stored' %}{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+{% endautoescape %}

@@ -8,6 +8,7 @@ Contains collection of web-based vulnerability workouts:
 - wireshark : /wireshark/<wid>
 """
 import cryptocode
+import re
 from flask import abort, Blueprint, flash, g, jsonify, make_response, request, redirect, render_template, session, url_for
 from flask import current_app as app
 from io import BytesIO
@@ -122,6 +123,35 @@ def check_sql_flag(workout_id):
 
 
 # XSS Routes
+@classified_bp.route('/xss/<workout_id>', methods=['GET', 'POST'])
+def xss(workout_id):
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
+    if workout:
+        attack = {'type': None, 'formatted': None}
+        if request.method == 'GET':
+            name = 'Stranger'
+            if bad_request := request.args.get('bad_request', None):
+                attack['type'] = 'dom'
+                attack['name'] = name
+                attack['bad_request'] = bad_request
+                attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', bad_request))
+        elif request.method == 'POST':
+            form = request.form
+            if name := form.get('name', None):
+                attack['type'] = 'reflected'
+                attack['name'] = name
+                attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', attack['name']))
+            elif feedback := form.get('feedback', None):
+                attack_type = 'stored'
+                xss = XSS()
+                xss.add_feedback(request.form['feedback'], workout_id)
+                search_query = request.args.get('query')
+                feedbacks = xss.get_feedback(workout_id, search_query)
+                attack = {'feedbacks': feedbacks, 'search_query': search_query, 'type': attack_type}
+        return render_template('cross-site.html', attack=attack, workout=workout)
+    return abort(404)
+
+
 @classified_bp.route('/xss/dom/<workout_id>', methods=['GET', 'POST'])
 def xss_d(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
