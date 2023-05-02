@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Inspect{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
+{% endblock %}
+{% block nav_title %}Inspect{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    {% if completion == true %}
+        <script>
+            $(document).ready(function(){
+                $("#completion_modal").modal('show');
+            });
+        </script>
+    {% endif %}
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                <div class="image-container">
+                    <img src="{{ url_for('classified.static', filename='imgs/classified_boxes.png') }}" alt="Boxes"
+                         style="background-color: whitesmoke; border-radius: 4px; max-height: 650px; max-width: 800px;  "
+                         class='image-container-flex'>
+                </div>
+                <div class="content-container" style="margin-top: 10px;">
+                    {% if completed %}
+                        <h1 class="text-center" style="color: white;">{{ classified_flag }}</h1>
+                    {% endif %}
+                    <div class="col text-center">
+                        <button href="#assessmentModal" class="btn btn-quaternary text-uppercase" data-toggle="modal" style="width: 30%;">Check Flag</button>
+                    </div>
+                    <div><!--Oh there seems to be something in this box-->
+                        <div>
+                            <!--Wait a second...there's another box-->
+                            <div>
+                                <!--Nope this box just has figurines of the Trojan mascot-->
+                                <div> <!-- Oh dear Maximus there really is a lot --></div>
+                                <div> <!-- WHY ARE THERE SO MANY!!??? --></div>
+                                <div> <!-- export USERNAME Maximus --></div>
+                                <div>
+                                    <!--OH THIS IS THE...and no.  -->
+                                    <div>
+                                        <!--This is not the box, but it's got some things of interest included-->
+                                        <div> <!-- export IP_ADDRESS <host_name>/inspect/xsfiedSTRflag/<workout_id>  --></div>
+                                        <div>
+                                            <!--Just a bunch of cat pictures. Something about the Cats of Valhalla? -->
+                                            <div> <!-- Long ago in the land of Catrim a prophecy arose to tell the tale of an AwesomeItUser --></div>
+                                            <div> <!-- It was told that one day AwesomeITUser would rise to unleash the Cats of Valhalla --></div>
+                                            <div> <!-- With the Cats of Valhalla, AwesomeITUser would !! export USER_PASSWORD TrojanSpirit!2021 --></div>
+                                            <div>
+                                                <!--End of the boxes and no classified flag...Where is it?-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- Packing Boxes -->
+                </div><!-- End summary-container -->
+            </div><!-- End home-tab -->
+        </div><!-- End tab-content -->
+    </div><!-- End overflow-auto.div -->
+    <div id="assessmentModal" class="modal fade" role="dialog">
+        <div class='modal-dialog'>
+            <div class="modal-content">
+                <form action="{{ url_for('classified', workout_id=workout_id) }}" method="post">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Flag Checker</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Captured the classified flag?</label>
+                            <input class="form-control" type="text" id="classified-flag" name="submission" required>
+                            <input type="text" hidden readonly name="build_id" required value="{{ workout['id'] }}">
+                            <input type="text" hidden readonly name="question_id" required
+                                   value="{{ workout['assessment']['questions'][0]['id'] }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <input type="button" class="btn" data-dismiss="modal" value="Cancel">
+                        <input type="submit" class="btn btn-success" name="check_button" value="Check">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div><!-- End assessmentModal -->
+    {% if completion == true %}
+    <div id="completion_modal" class="modal" data-easein="tada" tabindex="-1" role="dialog" aria-labelledby="Completion Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">You found the flag!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Good thing Maximus was holding onto the flag for us. It would have been awful for this classified
+                    flag to fall into the hands of someone from a rival school. Thanks for getting this flag back to us.
+                        We will make sure not to lose it in some boxes again.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">
+                        Workout Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</main><!-- End main -->
+{% endblock %}

@@ -8,7 +8,7 @@ from cloud_fn_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff", 'Andrew Bomberger']
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"
@@ -51,6 +51,7 @@ class CloudEnv:
             # API Keys
             self.api_key = self.env_dict['api_key']
             self.sendgrid_api_key = self.env_dict.get('sendgrid_api_key', None)
+            self.shodan_api_key = self.env_dict.get('shodan_api_key', None)
         else:
             # Env dictionary wasn't passed in or obj doesn't exist in Datastore
             self.load_from_runtimeconfig()
@@ -99,6 +100,8 @@ class CloudEnv:
                 sendgrid_api_key = myconfig.get_variable('SENDGRID_API_KEY', None)
                 if sendgrid_api_key:
                     self.sendgrid_api_key = sendgrid_api_key.value.decode('utf-8')
+                if shodan_api_key := myconfig.get_variable('shodan_api_key', None):
+                    self.shodan_api_key = shodan_api_key.value.decode('utf-8')
                 timezone = myconfig.get_variable('timezone', None)
                 if timezone:
                     self.timezone = timezone.value.decode('utf-8')

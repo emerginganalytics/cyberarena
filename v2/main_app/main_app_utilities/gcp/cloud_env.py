@@ -51,6 +51,7 @@ class CloudEnv:
             # API Keys
             self.api_key = self.env_dict['api_key']
             self.sendgrid_api_key = self.env_dict.get('sendgrid_api_key', None)
+            self.shodan_api_key = self.env_dict.get('shodan_api_key', None)
             self.auth_config = {
                 'api_key': self.api_key,
                 'auth_domain': str(self.project + ".firebaseapp.com"),
@@ -104,6 +105,8 @@ class CloudEnv:
                 sendgrid_api_key = myconfig.get_variable('SENDGRID_API_KEY', None)
                 if sendgrid_api_key:
                     self.sendgrid_api_key = sendgrid_api_key.value.decode('utf-8')
+                if shodan_api_key := myconfig.get_variable('shodan_api_key', None):
+                    self.shodan_api_key = shodan_api_key.value.decode('utf-8')
                 timezone = myconfig.get_variable('timezone', None)
                 if timezone:
                     self.timezone = timezone.value.decode('utf-8')

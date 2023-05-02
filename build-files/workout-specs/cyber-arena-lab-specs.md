@@ -1,9 +1,15 @@
+# Cyber Arena Lab Specifications
 Specifications are encrypted in the repository. To view or modify them follow the instructions here:
 [Encrypting/Decrypting](docs/build-locker.md). Decrypting the files will place them in a local folder called 
 _needs-encrypted_ in this directory. You can then encrypt the files when you have finished modifying them.
 
-Workout Specification
----------------------
+## Cyber Arena Learning Experiences
+1. **Workout**: Instructors can create and assign labs to groups of students using a join code. Students only need this code, and their email address identifies them for future access. Workouts are designed within a unit specification, providing each student with a unique learning environment.
+2. **LMS Assignment**: Similar to workouts, LMS assignments integrate assessment questions with a Learning Management System (LMS). Instructors deploy labs by selecting a course, which generates workouts for each student. Students access labs using a join code and their LMS-associated email address. Additionally, a quiz is automatically created and assigned to each student. Labs are built when students first access them, allowing for asynchronous learning within a set time frame.
+3. **Escape Room**: A unique setup featuring multiple, independent team labs that include all resources needed for an escape room experience. These cloud-based components are woven into a narrative storyline. Instructors create the resources and initiate the escape room when teams are ready to participate.
+4. **Classroom**: Designed for engaging all students in a shared lab environment. Instructors can specify additional student servers to include within the central set of shared resources. Classrooms are built in a fixed arena, where multiple classrooms can be configured, but only one can exist at a time. However, several fixed arenas can coexist within a cloud project.
+
+## Authoring and Publishing New Labs
 Yaml files are used in the UA Little Rock Cyber Gym to specify automatic cloud builds of _workouts_ for students. 
 By using yaml files, one only needs to create the server images you want to replicate and then describe the build 
 according to this specification. Then you can build the same _workout_ for students millions of times.
@@ -11,6 +17,9 @@ according to this specification. Then you can build the same _workout_ for stude
 The files are uploaded to the Google Cloud bucket <project-name>_cloudbuild/yaml-build-files/, in which the web application looks. This way, workout builders do not 
 need to change the application. They only need to specify the YAML. We are currently beta testing an interface to build
  the YAML specifications. The following sections describe the YAML specification.
+ 
+## Schema
+Specifications are serialized according to a schema (include location...)
 
 ### Workout Section
 Specify attributes about your workout in the _workout_ section of the YAML file. Use the following fields to describe your workout:
