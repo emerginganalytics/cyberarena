@@ -36,37 +36,37 @@ def snake(workout_id):
 def inspect(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
-        completion = workout['assessment']['questions'][0].get('complete', False)
-        if completion:
+        completed = workout['assessment']['questions'][0].get('complete', False)
+        if completed:
             flag = workout['assessment']['questions'][0].get('answer', None)
-            return render_template('inspect-v2.html', workout_id=workout_id, completion=completion,
+            return render_template('inspect-v2.html', workout=workout, completed=completed,
                                    classified_flag=flag)
-        return render_template('inspect-v2.html', workout_id=workout_id, completion=completion)
-    return redirect(404)
+        return render_template('inspect-v2.html', workout=workout, completed=completed)
+    return abort(404)
 
 
-@classified_bp.route('/inspect/xsfiedSTRflag/<workout_id>', methods=['GET', 'POST'])
-def xsfiedSTRflag(workout_id):
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
-    if workout:
-        return render_template('inspect_index.html', workout_id=workout_id)
-    return redirect(404)
-
-
-@classified_bp.route('/inspect/login/<workout_id>', methods=['GET', 'POST'])
+@classified_bp.route('/inspect/login/<workout_id>', methods=['POST'])
 def inspect_login(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
         if request.method == 'POST':
-            if request.form['password'] == 'TrojanSpirit!2021' and request.form['username'] == 'Maximus':
-                decrypt_key = workout['assessment']['questions'][0]['id']
-                classified_flag = 'gecJuFQuv1FhQAfLDvn9f6j6xu/GACm00wqyoWVKUJQ=*gXSP1UFZELV59Qz6yP0Y+w==*' \
-                                  'y6cg3ujMtm7eSklW2SX3JQ==*C4GDYpzjfozIsTQWVuUc4A=='
-                plaintext_flag = cryptocode.decrypt(classified_flag, decrypt_key)
-                return render_template('inspect.html', workout_id=workout_id, classified_flag=plaintext_flag)
+            assessment = workout['assessment']['questions']
+            encrypted = 'e8OuZsMdvUAj167q1w+1j+w=*/+mCoSMHVdMmVDdyjoxR2Q==*9Jvf3hi2x4n29712s/Z3Dw==*tVukPNKaq9+Gr+dFRgldNQ=='
+            password = cryptocode.decrypt(encrypted, password=assessment['key'])
+            if request.form['password'] == password and request.form['username'] == 'Maximus':
+                completed = True
+                classified_flag = assessment[0]['answer']
+                assessment['complete'] = True
+                DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).put(workout)
+                resp = make_response(render_template('inspect-v2.html', workout=workout, completed=completed,
+                                                     classified_flag=classified_flag))
+                resp.set_cookie('AwesomeITUser', 'Maximus')
+                return resp
             else:
-                return redirect(url_for('classified_bp.xsfiedSTRflag', workout_id=workout_id))
-    return redirect(404)
+                completed = False
+                return render_template('inspect-v2.html', workout=workout, completed=completed)
+        return abort(400)
+    return abort(404)
 
 
 # SQL Injection Routes
@@ -131,7 +131,7 @@ def xss_d(workout_id):
         if request.args.get('bad_request'):
             bad_request = request.args.get('bad_request')
         return render_template('xss_dom.html', name=name, bad_request=bad_request, workout_id=workout_id)
-    return redirect(404)
+    return abort(404)
 
 
 @classified_bp.route('/xss/reflected/<workout_id>', methods=['GET', 'POST'])
@@ -142,7 +142,7 @@ def xss_r(workout_id):
         if request.method == 'POST':
             name = request.form['name']
         return render_template('xss_r.html', name=name, workout_id=workout_id)
-    return redirect(404)
+    return abort(404)
 
 
 @classified_bp.route('/xss/stored/<workout_id>', methods=['GET', 'POST'])
@@ -155,19 +155,4 @@ def xss_s(workout_id):
         search_query = request.args.get('query')
         feedbacks = xss.get_feedback(workout_id, search_query)
         return render_template('xss_s.html', feedbacks=feedbacks, search_query=search_query, workout_id=workout_id)
-    return redirect(404)
-
-
-# Error Handlers
-@classified_bp.errorhandler(404)
-def page_not_found_error(error):
-    page_template = 'invalid_workout.html'
-    return render_template(page_template, error=error)
-
-
-@classified_bp.errorhandler(500)
-def internal_server_error(error):
-    page_template = 'invalid_workout.html'
-    return render_template(page_template, error=error)
-
-
+    return abort(404)

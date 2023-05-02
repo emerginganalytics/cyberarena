@@ -35,7 +35,6 @@ class ClassifiedAPI(MethodView):
             if build_id and question_id and submission:
                 correct = AssessmentManager(build_id=build_id).evaluate(question_id=question_id, submission=submission)
 
-
     def put(self, build_id=None):
         if build_id:
             if build := self.ds.get(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id):
