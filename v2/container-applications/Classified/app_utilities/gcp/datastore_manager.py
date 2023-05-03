@@ -57,6 +57,10 @@ class DataStoreManager:
         query_workspaces.add_filter('parent_id', '=', parent_id)
         return list(query_workspaces.fetch())
 
+    def keys_only(self):
+        query = self.ds_client.query()
+        return query.keys_only()
+
     @staticmethod
     def _create_safe_entity(entity):
         exclude_from_indexes = []

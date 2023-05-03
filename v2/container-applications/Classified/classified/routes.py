@@ -123,66 +123,49 @@ def check_sql_flag(workout_id):
 
 
 # XSS Routes
-@classified_bp.route('/xss/<workout_id>', methods=['GET', 'POST'])
-def xss(workout_id):
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
-    if workout:
-        attack = {'type': None, 'formatted': None}
-        if request.method == 'GET':
-            name = 'Stranger'
-            if bad_request := request.args.get('bad_request', None):
-                attack['type'] = 'dom'
-                attack['name'] = name
-                attack['bad_request'] = bad_request
-                attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', bad_request))
-        elif request.method == 'POST':
-            form = request.form
-            if name := form.get('name', None):
-                attack['type'] = 'reflected'
-                attack['name'] = name
-                attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', attack['name']))
-            elif feedback := form.get('feedback', None):
-                attack_type = 'stored'
-                xss = XSS()
-                xss.add_feedback(request.form['feedback'], workout_id)
-                search_query = request.args.get('query')
-                feedbacks = xss.get_feedback(workout_id, search_query)
-                attack = {'feedbacks': feedbacks, 'search_query': search_query, 'type': attack_type}
-        return render_template('cross-site.html', attack=attack, workout=workout)
-    return abort(404)
-
-
 @classified_bp.route('/xss/dom/<workout_id>', methods=['GET', 'POST'])
-def xss_d(workout_id):
+def dom(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
+        attack = {}
         name = 'Stranger'
-        bad_request = 'bad request'
-        if request.args.get('bad_request'):
-            bad_request = request.args.get('bad_request')
-        return render_template('xss_dom.html', name=name, bad_request=bad_request, workout_id=workout_id)
+        if bad_request := request.args.get('bad_request', None):
+            attack['type'] = 'dom'
+            attack['name'] = name
+            attack['bad_request'] = bad_request
+            attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', bad_request))
+        return render_template('xss_dom.html', attack=attack, workout=workout)
     return abort(404)
 
 
 @classified_bp.route('/xss/reflected/<workout_id>', methods=['GET', 'POST'])
-def xss_r(workout_id):
+def reflected(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
+        attack = {}
         name = 'Stranger'
-        if request.method == 'POST':
-            name = request.form['name']
-        return render_template('xss_r.html', name=name, workout_id=workout_id)
+        form = request.form
+        if name := form.get('name', None):
+            attack['type'] = 'reflected'
+            attack['name'] = name
+            attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', attack['name']))
+        return render_template('xss_r.html', attack=attack, workout=workout)
     return abort(404)
 
 
 @classified_bp.route('/xss/stored/<workout_id>', methods=['GET', 'POST'])
-def xss_s(workout_id):
+def stored(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
         xss = XSS()
+        attack = {'type': 'stored', 'feedbacks': [], 'cleaned': [], 'search_query': ''}
         if request.method == 'POST':
-            xss.add_feedback(request.form['feedback'], workout_id)
-        search_query = request.args.get('query')
-        feedbacks = xss.get_feedback(workout_id, search_query)
-        return render_template('xss_s.html', feedbacks=feedbacks, search_query=search_query, workout_id=workout_id)
+            if feedback := request.form.get('feedback', None):
+                xss.add_feedback(feedback, workout_id)
+        if search_query := request.args.get('query', None):
+            feedbacks = xss.get_feedback(workout_id, search_query)
+            attack['feedbacks'] = feedbacks
+            attack['cleaned'] = [''.join(re.split('|<script>|, |</script>|', i)) for i in feedbacks]
+            attack['search_query'] = search_query
+        return render_template('xss_s.html', attack=attack, workout=workout)
     return abort(404)

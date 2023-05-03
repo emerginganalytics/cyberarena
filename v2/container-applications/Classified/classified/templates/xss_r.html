@@ -1,23 +1,64 @@
-{% extends "xss_dom.html" %}
-{% block page_content %}
-<body>
-<header>
-    <div>
-        <h1 style ="text-align:center; color:white;"> Reflected Cross-Site Scripting </h1>
+{% extends "base.html" %}
+{% block title %}XSS{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
+{% endblock %}
+{% block nav_title %}Cross-Site Scripting{% endblock %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.dom', workout_id=workout['id']) }}">DOM XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.reflected', workout_id=workout['id']) }}">Reflected XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.stored', workout_id=workout['id']) }}">Stored XSS</a>
+            </li>
+        </ul>
     </div>
-</header>
-    <div class="container-fluid">
-        <div class="text-box">
-            <div class="text-area">
-                <h1 id="stranger">Hello, {{ name | safe }}!</h1>
-                <form name="XSS" action="#" method="POST">
-                    <p> Not a stranger? What's your name?
-                        <input type="text" name="name" autocomplete="off">
-                        <input type="submit" value="Submit">
-                    </p>
-                </form>
+{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab content fade active show" id="reflected-tab" role="tabpanel" aria-labelledby="reflected-tab-btn">
+                <div class="summary-container" style="margin-top: 10px;">
+                    <h1 style="text-align: center">Reflected Cross-Site Scripting</h1>
+                    <hr>
+                    <div class="col">
+                        <p  class="pt-2 info-block">
+                            Reflected XSS occurs when an application receives data in an HTTP request and includes
+                            that data within the immediate response without any proper sanitization. This attack is different from
+                            stored XSS attacks as the data is immediately returned whereas the stored XSS attack stores
+                            the bad data for future calls by any user.
+                        </p>
+                    </div>
+                    <hr style="border: 1px solid white !important;">
+                    <div style="border: 1px solid lightblue; border-radius: 4px; padding: 20px;">
+                        {% autoescape false %}
+                        <h1 id="stranger">Hello, Stranger!</h1>
+                        {% if attack.type == 'reflected' %}
+                            {{ attack.name | safe }}
+                            <pre>
+                                <code class="code-block">
+                                    <{{ '\script>' }}{{ attack.cleaned }} {{'<\/script'}}>
+                                </code>
+                            </pre>
+                        {% endif %}
+                         <form class='form' name="reflected" action="#" method="post">
+                             <div class="form-group">
+                                 <label for="xss_name">Can I have a name?</label>
+                                 <input id="xss_name" class="form-control" type="text" name="name" autocomplete="off">
+                             </div>
+                             <input class='btn btn-main' type="submit" value="Submit">
+                        </form>
+                        {% endautoescape %}
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</body>
+</main>
 {% endblock %}
