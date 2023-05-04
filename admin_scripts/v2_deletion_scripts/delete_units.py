@@ -27,13 +27,12 @@ class DeleteTestManager:
     def run(self):
         delete_tests = str(input(f"Do you want to delete all tests for the project {self.env.project}? (Y/n) "))
         if not delete_tests or delete_tests.upper()[0] == "Y":
-            for build_id in self.ds.query(filter_key="test", op="=", value="true"):
+            for build_id in self.ds.query(filters=[('test', '=', True)]):
                 self.delete(build_id=build_id)
         delete_expired = str(input(f"Do you want to run the deletion routine for expired units for the "
                                    f"project {self.env.project}? (Y/n) "))
         if not delete_expired or delete_expired.upper()[0] == "Y":
             HourlyMaintenance().run()
-
 
     def delete(self, build_id):
         Unit(build_id=build_id).delete()

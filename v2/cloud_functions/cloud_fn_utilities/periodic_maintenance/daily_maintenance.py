@@ -3,6 +3,7 @@ from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes, get_current_ti
 from cloud_fn_utilities.gcp.compute_manager import ProjectComputeManager
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.database.vulnerabilities import Vulnerabilities
+from cloud_fn_utilities.cyber_arena_objects.vulnerabilities import Vulnerabilities
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.send_mail.send_mail import SendMail
 
@@ -27,8 +28,7 @@ class DailyMaintenance:
     def run(self):
         self._stop_all()
         self._notify_expiring_units()
-        if self.env.sql_ip:
-            Vulnerabilities().nvd_update()
+        Vulnerabilities().update()
 
     def _stop_all(self):
         self.compute_manager.stop_everything()
