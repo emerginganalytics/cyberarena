@@ -18,9 +18,9 @@ def teacher_home():
             teacher_info = {}
 
             # Get all the units for this instructor
-            unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
-            unit_query.add_filter('instructor_id', '=', teacher_email)
-            unit_list = list(unit_query.fetch())
+            unit_list = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(
+                filters=[('instructor_id', '=', teacher_email)]
+            )
             # Sort queried units into active and expired
             active_units = []
             expired_units = []
@@ -57,7 +57,7 @@ def teacher_home():
                 teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['created']), reverse=True)
 
             # Get list of workouts from datastore catalog
-            specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG.value).query().fetch())
+            specs = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value).query()
             workout_specs = {
                 'assignments': [],
                 'live': [],
@@ -93,7 +93,7 @@ def workout_list(unit_id):
                 if unit.get('join_code', None):
                     join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_workout')}"
                 workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
-                attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
+                attack_specs = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
                 if len(workouts_list) > 0:
                     registration_required = unit.get('registration_required', False)
                     unit['api'] = _get_api_urls(build_type=unit['build_type'])

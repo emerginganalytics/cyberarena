@@ -75,7 +75,17 @@ ul.control-container-list {
 li.control-container-list {
     margin: 10px 0;
 }
-
+.code-block {
+    background-color: lightblue;
+    line-height: 1em;
+    border: 1px solid gray;
+    border-radius: 6px;
+    padding: 10px;
+    display: block;
+    width: 80%;
+    min-width: 50%;
+    margin: auto;
+}
 /* Top Navbar styles */
 .top-navbar {
     background: var(--main-color);

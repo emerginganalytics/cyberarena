@@ -191,8 +191,7 @@ class AttackSpecs(MethodView):
                 return json.dumps({'data': attack_spec})
             return self.http_resp(code=404).prepare_response()
         else:
-            attack_specs_query = DataStoreManager(key_id=build_id).query()
-            attack_specs = list(attack_specs_query.fetch())
+            attack_specs = DataStoreManager(key_type=self.kind).query()
             if attack_specs:
                 return self.http_resp(code=200, data={'data': attack_specs}).prepare_response()
             return self.http_resp(code=404).prepare_response()
@@ -206,8 +205,7 @@ class AttackSpecs(MethodView):
             - mode
         """
         recv_data = request.json
-        attack_specs = DataStoreManager(key_id=self.kind).query()
-        attack_specs = list(attack_specs.fetch())
+        attack_specs = DataStoreManager(key_type=self.kind).query()
 
         filtered_specs = []
         if attack_specs:

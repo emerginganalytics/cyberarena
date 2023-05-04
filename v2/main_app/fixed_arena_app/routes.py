@@ -30,17 +30,15 @@ def home():
         if user := auth.authorized(email=user_email, base=auth.UserGroups.INSTRUCTOR):
             auth_config = cloud_env.auth_config
             # Get built fixed-arenas for project
-            fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
-            fixed_arenas = list(fixed_arenas_query.fetch())
+            fixed_arenas = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value).query()
 
             # Get fixed-arena workspaces
             workspaces = []
             # Get fixed-arena and fixed-arena class spec names
-            dm = DataStoreManager(key_id=DatastoreKeyTypes.CATALOG)
-            class_specs = list(dm.query(filter_key='build_type', op='=',
-                                        value=BuildConstants.BuildType.FIXED_ARENA_CLASS.value))
-            fixed_arena_specs = dm.query(filter_key='build_type', op='=',
-                                         value=BuildConstants.BuildType.FIXED_ARENA.value)
+            dm = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG)
+            class_specs = dm.query(filters=[('build_type', '=', BuildConstants.BuildType.FIXED_ARENA_CLASS.value)])
+            fixed_arena_specs = dm.query(filters=[('build_type', '=', BuildConstants.BuildType.FIXED_ARENA.value)])
+
             # Render template
             return render_template('fixed_arena_home.html', auth_config=auth_config, fixed_arenas=fixed_arenas,
                                    workspaces=workspaces, class_spec_list=class_specs,
@@ -54,8 +52,7 @@ def class_landing(build_id):
         auth = ArenaAuthorizer()
         if user := auth.authorized(email=user_email, base=auth.UserGroups.INSTRUCTOR):
             auth_config = cloud_env.auth_config
-            attack_spec_query = DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
-            attack_specs = list(attack_spec_query.fetch())
+            attack_specs = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
             fa_class = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_CLASS.value, key_id=build_id).get()
             if fa_class:
                 workspaces = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value,

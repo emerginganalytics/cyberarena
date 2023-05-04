@@ -40,7 +40,7 @@ class ArenaAuthorizer:
         self.ds_manager = DataStoreManager()
 
     def get_all_users(self):
-        return list(DataStoreManager(key_id=self.key_type).query().fetch())
+        return DataStoreManager(key_type=self.key_type).query()
 
     def get_user(self, email):
         return self.ds_manager.get(key_type=self.key_type, key_id=str(email))

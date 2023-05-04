@@ -46,8 +46,7 @@ class FixedArena(MethodView):
                 return self.http_resp(code=404).prepare_response()
         else:
             """Returns list of fixed-arenas in project"""
-            fixed_arenas_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA.value).query()
-            fixed_arenas = list(fixed_arenas_query.fetch())
+            fixed_arenas = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA.value).query()
             if fixed_arenas:
                 return self.http_resp(code=200, data={'fixed_arena': fixed_arenas}).prepare_response()
             return self.http_resp(code=404).prepare_response()

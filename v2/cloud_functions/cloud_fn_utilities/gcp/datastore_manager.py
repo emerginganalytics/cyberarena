@@ -61,17 +61,24 @@ class DataStoreManager:
             ds_entity.update(obj)
             self.ds_client.put(self._create_safe_entity(ds_entity))
 
-    def query(self, filter_key=None, op=None, value=None):
+    def put_multi(self, entities):
+        self.ds_client.put_multi(entities=entities)
+
+    def query(self, limit=None, **kwargs):
         """Returns query object"""
-        if filter_key and op and value:
-            query = self.ds_client.query(kind=self.key_id)
-            query.add_filter(filter_key, f"{op}", value)
-            return list(query.fetch())
-        return self.ds_client.query(kind=self.key_id)
+        if limit:
+            return list(self.ds_client.query(kind=self.key_type, **kwargs).fetch(limit=limit))
+        return list(self.ds_client.query(kind=self.key_type, **kwargs).fetch())
 
     def set(self, key_type, key_id):
         self.key_id = key_id
         self.key = self.ds_client.key(key_type, self.key_id)
+
+    def entity(self, obj):
+        """Returns Entity object"""
+        ds_entity = datastore.Entity(self.key)
+        ds_entity.update(obj)
+        return self._create_safe_entity(ds_entity)
 
     def get_servers(self):
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
