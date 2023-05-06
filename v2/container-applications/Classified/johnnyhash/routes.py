@@ -43,7 +43,7 @@ def hidden(build_id):
     else:
         workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
         if workout:
-                return render_template('hidden-v2.html', build_id=build_id, user='johnny')
+            return render_template('hidden-v2.html', build_id=build_id, user='johnny')
         else:
             return redirect('/invalid')
 

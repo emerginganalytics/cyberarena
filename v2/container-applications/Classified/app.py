@@ -9,6 +9,7 @@ from app_utilities.crypto_suite.hashes import Hashes
 # App Blueprint Imports
 from classified.routes import classified_bp
 from johnnyhash.routes import johnnyhash_bp
+from vulnerability_defender.routes import vulnerability_defender
 
 # API Views
 from api.johnnyhash_api import JohnnyHashAPI, JohnnyCipherAPI
@@ -24,6 +25,7 @@ app.jinja_env.globals['project'] = cloud_env.project
 # Register Blueprints
 app.register_blueprint(johnnyhash_bp)
 app.register_blueprint(classified_bp)
+app.register_blueprint(vulnerability_defender)
 
 
 @app.route('/<build_id>')

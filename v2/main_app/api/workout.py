@@ -75,8 +75,10 @@ class Workout(MethodView):
             if unit:
                 unit_id = unit[0]['id']
                 max_builds = min(self.env.max_workspaces, unit[0]['workspace_settings']['count'])
-                workout_query = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query()
-                workout_list = [i for i in workout_query if i['parent_id'] == unit_id]
+                """workout_query = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query()
+                workout_list = [i for i in workout_query if i['parent_id'] == unit_id]"""
+                workout_list = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query(
+                    filters=[('parent_id', '=', unit_id)])
                 if workout_list:
                     for workout in workout_list:
                         if student_email := workout.get('student_email', None):

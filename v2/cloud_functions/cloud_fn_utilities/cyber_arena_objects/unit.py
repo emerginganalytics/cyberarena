@@ -51,7 +51,7 @@ class Unit:
         workouts = self.ds.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.unit_id)
         for workout in workouts:
             if self.debug:
-                workout = Workout(build_id=id, debug=self.debug, env_dict=self.env_dict)
+                workout = Workout(build_id=str(workout.key.name), debug=self.debug, env_dict=self.env_dict)
                 workout.delete()
             else:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value),
@@ -95,8 +95,9 @@ class Unit:
     def _create_and_build_workouts(self):
         workout_datastore = DataStoreManager()
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
-        workout_query = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query()
-        workout_list = [i for i in workout_query if i['parent_id'] == self.unit_id]
+        workout_list = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query(
+            filters=[('parent_id', '=', self.unit_id)])
+        # workout_list = [i for i in workout_query if i['parent_id'] == self.unit_id]
         if workout_list:
             if len(workout_list) >= count:
                 self.logger.error(f"Requested build for unit {self.unit_id} failed; Unit is at max capacity")
