@@ -39,9 +39,8 @@ class Vulnerabilities:
         cve_list = []
         for cve in json_feed['CVE_Items']:
             try:
-                if len(cve['configurations']['nodes']) > 0:
-                    if len(cve['configurations']['nodes'][0]['cpe_match']) > 0:
-                        cpe = cve['configurations']['nodes'][0]['cpe_match'][0]
+                if config := next(iter(cve['configurations']['nodes']), None):
+                    if cpe := next(iter(config['cpe_match']), None):
                         cpe_parts = cpe['cpe23Uri'].split(':')
                         cvss = cve["impact"]["baseMetricV3"]["cvssV3"]
                         cve_dict = {
@@ -65,4 +64,5 @@ class Vulnerabilities:
 
         # Update the table with the new cve list
         ds.put_multi(cve_list)
+
 # [ eof ]
