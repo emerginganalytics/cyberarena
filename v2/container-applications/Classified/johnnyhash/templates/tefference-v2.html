@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}Johnny Hash{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('johnnyhash.static', filename='css/johnnyhash.css')}}">
+{% endblock %}
+{% block nav_title %}Hash It Out{% endblock %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item pr-1">
+                 <a class='nav-link text-center' href="{{ url_for('johnnyhash.hash_it_out', build_id=build_id) }}">
+                    <i class="fa fa-laptop icon-light"></i>
+                    <span>MD5</span>
+                </a>
+            </li>
+            <li class="nav-item pr-1">
+                <button class="btn btn-quaternary" type="button" data-toggle="modal"
+                        data-target="#create-hashes-modal">
+                    <i class="fa fa-hashtag fa-pr-5"></i>Generate Hashes</button>
+            </li>
+            <li class="nav-item pr-1">
+                <button class="btn btn-quaternary" type="button" data-toggle="modal"
+                        data-target="#password-policy-modal"><i class="fa fa-key fa-pr-5"></i>Password Policy</button>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill" style="flex-wrap: nowrap !important;">
+            {% if logged_in %}
+                <button class="btn top-navbar-btn" type="button"
+                        onclick="window.location.href='{{ url_for('johnnyhash.hidden', build_id=build_id) }}'">Johnny's Secrets</button>
+                <button class="btn top-navbar-btn login" type="button"
+                        onclick="window.location.href='{{ url_for('johnnyhash.logout', build_id=build_id) }}'">
+                    <i class="fa fa-user-secret icon-light"></i>Logout</button>
+            {% else %}
+                <button class="btn top-navbar-btn login" type="button" data-toggle="modal" data-target="#login-modal">
+                    <i class="fa fa-user-secret icon-light"></i>Login</button>
+            {% endif %}
+        </ul>
+    </div>
+{% endblock %}
+{% block content %}
+    <script type="text/javascript" src='{{ url_for("johnnyhash.static", filename="js/johnnyhash.js") }}'></script>
+    <main class="col main pt-3 mt-3 h-100">
+        <div class="overflow-auto">
+            <div class="tab-content">
+                <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                    <div class="summary-container">
+                        <h1>Hash It Out ...</h1>
+                        <hr>
+                        <p>
+                            Some suspicious activity has been discovered from Martin's computer recently and the Cameron wants
+                            you to check his machine. To avoid confrontation, after Martin leaves for the day, see if you can get
+                            access to his machine. IT is not willing to give you his credentials, but after some "research" you found
+                            his <b>username, mart1n56</b>, the current password <b>MD5 hash</b>, <i>"{{ pass_hash }}"</i> and the company password
+                            policy. You take a look at his desk, and you are fairly certain you have enough information to guess what
+                            his password is.<br>
+                        </p>
+                        <p>All the tools you need are on this page. Take a look at the picture below and combine that with the company
+                            password policy to help narrow down possible passwords.
+                            You can enter all potential passwords by clicking on the Generate Hashes button above.</p>
+                        <p><a href="#hash-results-table">Generated hashes will be displayed here</a></p>
+                    </div>
+                    <div class="image-container">
+                        <h2>Johnny's Desk: </h2>
+                        <img src="{{ url_for('johnnyhash.static', filename='imgs/clue.jpg') }}" alt="Desktop Clue"
+                             class="content-img" />
+                    </div>
+                    <div class="content-container">
+                        <table id="hash-results-table" class="table table-striped table-dark table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th scope="col">MD5 Hash</th>
+                                    <th scope="col">Password</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="nullRow" class="opaque-loading">
+                                    <td class="opaque-loading" colspan="100%">No password hashes generated</td>
+                                </tr>
+                            </tbody>
+                        </table><!--end hash-results-table-->
+                    </div> <!-- End content-container-->
+                    <div id="create-hashes-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="create-hashes-modal"
+                         aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Get MD5 Hash</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">x</span>
+                                    </button>
+                                </div><!--End modal-header-->
+                                <div class="modal-body">
+                                    <form id="get-hash-form" action="">
+                                        <div class="form-group" id="input-hash-group">
+                                            <div class="input-group input-group-sm mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="inputGroup0">Password</span>
+                                                </div>
+                                                <input type="text" class="form-control" aria-label="Password"
+                                                       aria-describedby="inputGroup0" name="hash0" required>
+                                            </div>
+                                            <div id="additional-fields"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <button class="btn hashBtn" type="button"
+                                                    onclick="add_field('get-hash-form');">Add New Entry</button>
+                                        </div>
+                                    </form>
+                                </div><!--end modal-body-->
+                                <div class="modal-footer text-right" style="width: 100%;">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            onclick="reset_form('get-hash-form')">Cancel</button>
+                                    <button type="button" class="btn btn-primary"
+                                            onclick="get_hashes('get-hash-form', '{{ hash_api }}',
+                                                    'create-hashes-modal')">Submit</button>
+                                </div><!-- End modal-footer-->
+                            </div><!--End modal-content-->
+                        </div><!--end modal-dialog-->
+                    </div><!--end create-hashes-modal-->
+                     <div id="password-policy-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="password-policy-modal"
+                         aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Company Password Policy</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">x</span>
+                                    </button>
+                                </div><!--End modal-header-->
+                                <div class="modal-body">
+                                    <ol id="policy-list">
+                                        <li>Must contain whole words only</li>
+                                        <li>Be a <i>minimum</i> of eight characters long</li>
+                                        <li>Must contain at <i>least</i> one upper-case letter</li>
+                                        <li>Must contain at least one digit</li>
+                                    </ol>
+                                    <p style="font-weight: bold;">Example password: <span style="color: var(--tertiary);">5Hacking7</span></p>
+                                </div><!--End modal-body-->
+                            </div><!--End modal-content-->
+                        </div><!--End modal-dialog-->
+                     </div><!--End password-policy-modal-->
+                    <div id="login-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="login-modal"
+                         aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">User Login</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">x</span>
+                                    </button>
+                                </div><!--End modal-header-->
+                                <div class="modal-body">
+                                    <div class="text-center mb-2">
+                                        <i class="fa fa-user-secret" style="font-size: 64px; font-weight: bold"></i>
+                                    </div>
+                                    <form id="login-modal-form">
+                                        <div class="text-center">
+                                            <p id="login-error" style="color: var(--broken);"></p>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="input-group input-group-sm mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="login-user">Username</span>
+                                                </div>
+                                                <input type="text" class="form-control" aria-label="Username"
+                                                       aria-describedby="login-user" name="username" required>
+                                            </div>
+                                            <div class="input-group input-group-sm mb-3">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" id="login-password">Password</span>
+                                                </div>
+                                                <input type="text" class="form-control" aria-label="Password"
+                                                       aria-describedby="login-password" name="password" required>
+                                             </div>
+                                        </div>
+                                    </form>
+                                </div> <!--End modal-body-->
+                                <div class="modal-footer text-right" style="width: 100%;">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                            onclick="reset_form('login-modal-form')">Cancel</button>
+                                    <button type="button" class="btn btn-primary"
+                                            onclick="login('login-modal-form', '{{ url_for('johnnyhash.login', build_id=build_id) }}', 'login-modal')">Login</button>
+                                </div><!-- End modal-footer-->
+                            </div><!--End modal-content-->
+                        </div><!--End modal-dialog-->
+                    </div><!--End login-modal-->
+                </div> <!--end home-tab -->
+            </div><!--end tab-content-->
+        </div><!--end overflow-auto-->
+    </main><!--end main-->
+{% endblock %}
