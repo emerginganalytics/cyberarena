@@ -225,7 +225,7 @@ class EscapeRoomWorkout(MethodView):
         if not join_code:
             return self.http_resp(400).prepare_response()
         filters = [('join_code', '=', join_code)]
-        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filter)
+        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filters)
         if unit:
             return redirect(url_for('student_app.claim_escape_room', parent=unit[0]['id']))
         return self.http_resp(404).prepare_response()
