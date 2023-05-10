@@ -75,7 +75,7 @@
                                     <hr>
                                     <div class="form-group">
                                         <label for="quiz-due-date-{{ loop.index }}">Quiz Due: </label>
-                                        <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="quiz-due-date"
+                                        <input id="quiz-due-date-{{ loop.index }}" class="form-control" name="lms_due_at"
                                                type="datetime-local" onchange="validateDateTime(this)">
                                     </div>
                                     <!-- TODO: Add Javascript to evaluate which LMS option was selected and enable courses field related to option
@@ -89,7 +89,7 @@
                                     </div>-->
                                     <div class="form-group">
                                         <label for="course-code-{{ loop.index }}">Course Code: </label>
-                                        <select id="course-code-{{ loop.index }}" class="form-control" name="course-code"
+                                        <select id="course-code-{{ loop.index }}" class="form-control" name="lms_course_code"
                                                type="text" >
                                             {% for lms, value in courses.items() %}
                                                 {% for course_id, course_name in courses[lms].items() %}

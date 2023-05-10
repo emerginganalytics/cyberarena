@@ -135,13 +135,13 @@ class Unit:
         student_email = self.form_data.get('student_email', None)
         team_name = self.form_data.get('team_name', None)
         if student_email:
-            workout_record = self._create_workout_record()
+            workout_record = self._create_workout_record(workout_id=workout_id)
             workout_record['student_email'] = student_email
             student_name = self.form_data.get('student_name', None)
             if student_name:
                 workout_record['student_name'] = student_name
         elif team_name:
-            workout_record = self._create_workout_record()
+            workout_record = self._create_workout_record(workout_id=workout_id)
             workout_record['team_name'] = team_name
         else:
             self.logger.error(f'Invalid or missing claimed_by values given for unit {self.unit_id}')
@@ -177,7 +177,7 @@ class Unit:
                 processed_web_application = {
                     'name': web_application['name'],
                     'url': f"https://{web_application['host_name']}{self.env.dns_suffix}"
-                           f"{web_application['starting_directory']}/{self.workout_id}",
+                           f"{web_application['starting_directory']}/{workout_id}",
                     'starting_directory': web_application['starting_directory'],
                 }
                 processed_web_applications.append(processed_web_application)

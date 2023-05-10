@@ -115,6 +115,12 @@ h3, h4, h5 {
 .input-field {
     margin-top: 5vh;
 }
+.form-input-group {
+    padding: 10px;
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    margin: 15px 0 15px 0;
+}
 .vm-ctn {
     margin-bottom: 10vh;
 }

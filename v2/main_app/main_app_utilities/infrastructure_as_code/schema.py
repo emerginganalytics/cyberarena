@@ -224,7 +224,6 @@ class LMSQuizSchema(Schema):
     type = fields.Str(required=False, description="Practice quiz or assignment")
     due_at = fields.DateTime(required=False, description="Due date for assignment")
     description = fields.Str(required=False, description="Description of assignment")
-    time_limit = fields.Float(required=False, description="Time for assignment")
     allowed_attempts = fields.Float(missing=-1.0, description="Attempts available for assignment, -1 is unlimited")
     questions = fields.Nested('LMSQuizQuestionsSchema', many=True)
 

@@ -2,9 +2,16 @@
 {% import 'logo_macro.html' as logo %}
 {% import 'teacher_macros.html' as macros %}
 {% import 'contact_us.html' as forms %}
+{% block title %}Settings{% endblock %}
+{% block nav_title %}Settings{% endblock %}
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
+    <style>
+        body {
+            background-color: whitesmoke;
+        }
+    </style>
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -72,21 +79,25 @@
                tsToDate.convert_timestamps();
            });
     </script>
-    <div class="form-group">
-        <label for="apiKeyCanvas">API Key (Canvas)</label>
-        <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
+    <div class="form-input-group">
+        <div class="form-group">
+            <label for="apiKeyCanvas">API Key (Canvas)</label>
+            <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
+        </div>
+        <div class="form-group">
+            <label for="urlCanvas">URL (Canvas)</label>
+            <input id="urlCanvas" class="form-control" name="urlCanvas" type="text">
+        </div>
     </div>
-    <div class="form-group">
-        <label for="urlCanvas">URL (Canvas)</label>
-        <input id="urlCanvas" class="form-control" name="urlCanvas" type="text">
-    </div>
-    <div class="form-group">
-        <label for="apiKeyBlackboard">API Key (Blackboard)</label>
-        <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text">
-    </div>
-    <div class="form-group">
-        <label for="urlBlackboard">URL (Blackboard)</label>
-        <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text">
+    <div class="form-input-group">
+        <div class="form-group">
+            <label for="apiKeyBlackboard">API Key (Blackboard)</label>
+            <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text">
+        </div>
+        <div class="form-group">
+            <label for="urlBlackboard">URL (Blackboard)</label>
+            <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text">
+        </div>
     </div>
     <div class="d-flex justify-content-right">
         <button type="submit" id="save-settings" class="waves-effect waves-light btn-fa text-center build-workout">Save Settings</button>

@@ -36,14 +36,13 @@ class LMSSpecDecorator:
         self.settings = instructor['settings']
 
         if self.lms_type == BuildConstants.LMS.CANVAS:
-            self.build_spec['lms_connection']  = self._get_canvas_connection()
+            self.build_spec['lms_connection'] = self._get_canvas_connection()
         else:
             raise LMSSpecLMSTypeNotSupported(f"LMS {self.lms_type} is not supported")
 
         self.build_spec['lms_quiz'].update({
             'description': '',
             'due_at': str(self.due_at),
-            'time_limit': self.time_limit,
             'allowed_attempts': self.allowed_attempts
         })
         return self.build_spec
