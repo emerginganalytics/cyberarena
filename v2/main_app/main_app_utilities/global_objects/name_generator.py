@@ -34,7 +34,7 @@ class NameGenerator:
                    "Dragon", "Echidna", "Eel", "Egret", "Elk", "Emu", "Ermine", "Falcon", "Ferret", "Finch", "Firefly",
                    "Fish", "Flamingo", "Flyingfish", "Gazelle", "Gecko", "Gerbil", "Gibbon", "Goldfish", "Goose", "Shark",
                    "Bear", "Grouse", "Gull", "Guppy", "Hamster", "Hare", "Harrier", "Hawk", "Hedgehog",
-                   "Heron", "Herring", "Hookworm", "Hornet", "Horse", "Hoverfly", "Hummingbird", "Hyena",
+                   "Heron", "Herring", "Hornet", "Horse", "Hoverfly", "Hummingbird", "Hyena",
                    "Iguana", "Impala", "Jackal", "Jaguar", "Jay", "Kangaroo", "Kingfisher", "Kite", "Kiwi",
                    "Koala", "Koi", "Krill", "Ladybug", "Lamprey", "Lark", "Leech", "Lemming", "Lemur", "Leopard", "Leopon",
                    "Limpet", "Lion", "Lizard", "Llama", "Lobster", "Locust", "Loon", "Louse", "Lynx", "Macaw", "Mackerel",
