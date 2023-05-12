@@ -81,26 +81,6 @@ class Hashes:
                 })
         return hash_list
 
-    def crack_hash(self, compare):
-        str_list = [
-            'Ornn', 'Hak5', 'Hacking',
-            'BlackHatPython', 'SpiesAmongUs', '9999',
-            '1994', '5', '7', '33', '19', '2020', '1234', '0000'
-        ]
-        attempts = 1
-        while True:
-            password = str(random.choice(str_list[0:5]))
-            password += str(random.choice(str_list[6: 14]))
-            if len(password) < 8:
-                password = str(random.choice(str_list[6:14])) + password
-            generated = md5(password.encode('utf-8')).hexdigest()
-            if str(generated) != compare:
-                attempts += 1
-                continue
-            else:
-                print(f'Cracked! Password is: {password}; Guessed {attempts}x')
-                return password
-
     def get_assessment(self):
         if escape_room := self.build.get('escape_room', None):
             for puzzle in escape_room['puzzles']:

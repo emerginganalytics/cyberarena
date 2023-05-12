@@ -60,9 +60,9 @@
                             password policy to help narrow down possible passwords.
                             You can enter all potential passwords by clicking on the Generate Hashes button above.</p>
                         <p><a href="#hash-results-table">Generated hashes will be displayed here</a></p>
+                        <p><b>Want a challenge? This workout can be solved with less than 20 lines of code using Python...</b></p>
                     </div>
                     <div class="image-container">
-                        <h2>Johnny's Desk: </h2>
                         <img src="{{ url_for('johnnyhash.static', filename='imgs/clue.jpg') }}" alt="Desktop Clue"
                              class="content-img" />
                     </div>
@@ -133,10 +133,11 @@
                                     <ol id="policy-list">
                                         <li>Must contain whole words only</li>
                                         <li>Be a <i>minimum</i> of eight characters long</li>
+                                        <li>Be a <i>less than</i> 20 characters long</li>
                                         <li>Must contain at <i>least</i> one upper-case letter</li>
                                         <li>Must contain at least one digit</li>
                                     </ol>
-                                    <p style="font-weight: bold;">Example password: <span style="color: var(--tertiary);">5Hacking7</span></p>
+                                    <p style="font-weight: bold;">Example passwords: <span style="color: var(--tertiary);">5Hacking7, SpiesAmongUs1994, 9999Ornn0000</span></p>
                                 </div><!--End modal-body-->
                             </div><!--End modal-content-->
                         </div><!--End modal-dialog-->
