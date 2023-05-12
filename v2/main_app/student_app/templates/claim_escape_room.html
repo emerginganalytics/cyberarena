@@ -82,11 +82,12 @@
             {% if escape_rooms %}
                 <h3 class="text-center pt-3" id="joinTitle">Choose a Team</h3>
                 <div id="teamNameSelectDiv" class="row">
+                {% set team_colors=[('#9CAF88', 'black'), ('#ff99cc','white'), ('#ffff00', 'black'), ('#808080', 'white'), ('#245C4E','white')] %}
                     {% for room in escape_rooms %}
                         <div class="card team-card mx-auto"
                              onclick="window.open('{{ url_for('student_app.escape_room', build_id=room['id'])}}');">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">{{ room.team_name }}</h5>
+                            <div class="card-body text-center" style="background-color: {{ team_colors[loop.index0][0] }}">
+                                <h5 class="card-title" style="color: {{ team_colors[loop.index0][1] }} !important;">{{ room.team_name }}</h5>
                                 <p style="color: var(--python-yellow);">Click to Join Team</p>
                             </div>
                         </div>

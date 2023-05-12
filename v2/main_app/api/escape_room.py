@@ -274,6 +274,8 @@ class EscapeRoomWorkout(MethodView):
                     puzzle['answer'] = ''
                     if puzzle['correct']:
                         self.workout['escape_room']['number_correct'] += 1
+                    else:
+                        puzzle['reveal'] = ''
                 self.workout['escape_room']['answer'] = ''
                 return self.http_resp(code=200, data=self.workout).prepare_response()
             else:

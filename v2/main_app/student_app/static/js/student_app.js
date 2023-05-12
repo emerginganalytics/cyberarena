@@ -39,9 +39,9 @@ function checkEscapeRoom(build_id, form_id, puzzle_idx, ea) {
         body: send_data
     })
         .then((response) => response.json())
-        .then(data=>checkPuzzles(data['status'], data['data'], puzzle_idx));
+        .then(data=>checkPuzzles(data['status'], data['data'], puzzle_idx, question_id));
 }
-function checkPuzzles(code, responseData, puzzle_idx){
+function checkPuzzles(code, responseData, puzzle_idx, question_id){
     if (code === 200){
         console.log('Updating Room Status ...');
         let room = responseData['escape_room'];
@@ -50,15 +50,20 @@ function checkPuzzles(code, responseData, puzzle_idx){
         if (number_correct !== puzzle_count){
             for (let i = 0; i < room['puzzles'].length; i++){
                 let puzzle = room['puzzles'][i];
-                console.log(puzzle);
-                if (puzzle['correct'] === true){
+                if (puzzle['correct'] === true && puzzle['id'] === question_id){
                     let card = document.getElementById('puzzle-' + puzzle_idx + '-status').innerText = 'Complete!';
                     let reveal = document.getElementById(puzzle['id'] + '-reveal');
                     reveal.innerText = puzzle['reveal'];
                 }
             }
         } else {
-            window.location.reload();
+            if (question_id !== room['id'])
+                window.location.reload();
+            else {
+                if (room['complete'] === true){
+                    window.location.reload();
+                }
+            }
         }
     }
 }

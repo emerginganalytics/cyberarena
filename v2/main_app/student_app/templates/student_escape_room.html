@@ -255,16 +255,20 @@
                     <div id="clue-container" class="tab-pane fade show" role="tabpanel" aria-labelledby="clue-tab">
                         <div class="clues-container">
                             {% set puzzles_correct = namespace(value=0) %}
+                            <h3>Clues will be revealed as each puzzle is completed!</h3>
                             {% for puzzle in workout.escape_room.puzzles %}
                                 {% if puzzle.correct %}
                                     <div class="puzzle-clues">
                                         <p class="puzzle-clues">{{ puzzle.reveal }}</p>
                                         {% set puzzles_correct.value = puzzles_correct.value + 1 %}
                                     </div>
+                                {% else %}
+                                     <div class="puzzle-clues">
+                                        <p class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</p>
+                                    </div>
                                 {% endif %}
                             {% endfor %}
                             {% if puzzles_correct.value == 0 %}
-                                <h3>Clues will be revealed as each puzzle is completed!</h3>
                                 {% for puzzle in workout.escape_room.puzzles %}
                                     <div class="puzzle-clues">
                                         <p class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</p>
