@@ -1,43 +1,66 @@
-<!DOCTYPE html>
-{% autoescape false %}
-<html>
-<head>
-    <title>Classified Cross-Site Scripting</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('.static', filename='css/base.css') }}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-</head>
-{% block navbar %}
-    <nav class="navbar navbar-inverse">
-        <div class="container-fluid" style="background-color:black;">
-            <ul class="nav navbar-nav">
-                <li><a id="len1" class="hoverable" href="{{ url_for('classified_bp.xss_d', workout_id=workout_id)}}">
-                    DOM-Based Cross-Site Scripting</a></li>
-                <li><a id="len2" class="hoverable" href="{{ url_for('classified_bp.xss_r', workout_id=workout_id)}}">
-                    Reflected Cross-Site Scripting</a></li>
-                <li><a id="len3" class="hoverable" href="{{ url_for('classified_bp.xss_s', workout_id=workout_id)}}">
-                    Stored Cross-Site Scripting</a></li>
-            </ul>
-        </div>
-    </nav>
+{% extends 'base.html' %}
+{% block title %}XSS{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
 {% endblock %}
-{% block page_content %}
-<body>
-<header>
-    <div>
-        <h1 style ="text-align:center; color:white;"> DOM-Based Cross-Site Scripting </h1>
+{% block nav_title %}Cross-Site Scripting{% endblock %}
+{% block navbar %}
+    <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.dom', workout_id=workout['id']) }}">DOM XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.reflected', workout_id=workout['id']) }}">Reflected XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.stored', workout_id=workout['id']) }}">Stored XSS</a>
+            </li>
+        </ul>
     </div>
-</header>
-    <div class="container-fluid">
-        <div class="text-box">
-            <div class="text-area">
-                <h1>Hello! I have a {{ bad_request | safe }} for you!</h1>
+{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab-content fade active show" id="dom-tab" role="tabpanel" aria-labelledby="dom-tab-btn">
+                <div class='summary-container' style="margin-top: 10px;">
+                    {% autoescape false %}
+                        <h1 style="text-align: center">DOM Cross-Site Scripting</h1>
+                        <hr>
+                        {% if 'bad_request' in attack %}
+                            <h3 class="text-center">Hello! I have a bad request for you!</h3>
+                             <div class="col">
+                                <p  class="pt-2 info-block">
+                                    With the DOM model, Javascript is able ot create dynamic HTML.
+                                     This includes changing, creating, or removing HTML attributes, events, and elements.
+                                    In a DOM-based XSS attack, the source and execution of the attack are in the DOM and never
+                                    leaves the browser.
+                                    <br>
+                                    <br>
+                                    Try sending a bad request through a query parameter.
+                                </p>
+                            </div>
+                            {{ attack.bad_request | safe }}
+                            <pre><code class="code-block"><{{ '\script>' }}{{ attack.cleaned }} {{'<\/script'}}></code></pre>
+                        {% else %}
+                            <h3  class="text-center">I'm waiting for a bad request...</h3>
+                            <div class="col">
+                                <p  class="pt-2 info-block">
+                                    With the DOM model, Javascript is able ot create dynamic HTML.
+                                     This includes changing, creating, or removing HTML attributes, events, and elements.
+                                    In a DOM-based XSS attack, the source and execution of the attack are in the DOM and never
+                                    leaves the browser.
+                                    <br>
+                                    <br>
+                                    Try sending a bad request through a query parameter.
+                                </p>
+                            </div>
+                        {% endif %}
+                    {% endautoescape %}
+                </div>
             </div>
         </div>
     </div>
-</body>
+</main>
 {% endblock %}
-</html>
-{% endautoescape %}

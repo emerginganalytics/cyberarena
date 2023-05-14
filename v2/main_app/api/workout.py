@@ -70,8 +70,8 @@ class Workout(MethodView):
         join_code = form_data.get('join_code', None)
 
         if join_code and email:
-            unit_results = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
-                filter_key='join_code', op='=', value=join_code)
+            filters = [('join_code', '=', join_code)]
+            unit_results = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filters)
             if not unit_results:
                 return redirect(url_for('student_app.claim_workout', error=404))
             else:

@@ -1,38 +1,75 @@
-{% extends "xss_dom.html" %}
-{% block page_content %}
-<body>
-<header>
-    <div>
-        <h1 style ="text-align:center; color:white;"> Stored Cross-Site Scripting </h1>
+{% extends "base.html" %}
+{% block title %}XSS{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
+{% endblock %}
+{% block nav_title %}Cross-Site Scripting{% endblock %}
+{% block navbar %}
+   <div class="navbar-nav mr-auto">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.dom', workout_id=workout['id']) }}">DOM XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.reflected', workout_id=workout['id']) }}">Reflected XSS</a>
+            </li>
+            <li class="nav-item pr-1" role="presentation">
+                <a class="nav-link text-center" href="{{ url_for('classified.stored', workout_id=workout['id']) }}">Stored XSS</a>
+            </li>
+        </ul>
     </div>
-</header>
-    <div class="container-fluid">
-        <div class="text-box">
-            <div class="text-area">
-                <h2>Would you trust UA Little Rock: Classified?<br><br>Submit your feedback
-                here!<br></h2>
-                <form style="display:inline-block;" action="{{ url_for('classified_bp.xss_s', workout_id=workout_id) }}" method="POST">
-                    <input type="text" name="feedback" placeholder="Feedback" autocomplete="off" />
-                    <input type="submit" value="Submit Feedback" />
-                </form>
-                <form style="display:inline-block;" method="GET">
-                    <input type="text" name="query" placeholder="Search Query" autocomplete="off" />
-                    <input type="submit" value="Filter Feedback" />
-                </form>
-                {% if not search_query %}
-                    <h3>Showing all feedback:</h3>
-                {% else %}
-                    <h3>Showing all feedback containing "{{ search_query | safe }}":</h3>
-                {% endif %}
-
-                {% for feedback in feedbacks %}
-                    <div>
-                        <p>{{ feedback | safe }}</p>
-                    </div>
-                {% endfor %}
-
+{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab-content fade active show" id="stored-tab" role="tabpanel" aria-labelledby="stored-tab-btn">
+                <div class="summary-container" style="margin-top: 10px;">
+                    {% autoescape false %}
+                        <div class="container-fluid">
+                            <div class="text-area">
+                                <h1 class="text-center">Would you trust Trojan: Classified?</h1>
+                                <hr>
+                                <div style="border: 1px solid lightblue; border-radius: 4px; padding: 20px;">
+                                    <h3 class="mb-3 ml-3">Submit your feedback here!</h3>
+                                    <form action="{{ url_for('classified.xss', workout_id=workout['id']) }}" method="POST"
+                                          class="form-inline m-auto">
+                                        <div class="form-group mx-lg-3 mb-2" style="width: 80%;">
+                                            <input class="form-control" type="text" name="feedback" placeholder="Feedback" autocomplete="off" style="width: 100%"/>
+                                        </div>
+                                        <input type="submit" value="Submit Feedback" class="btn btn-main" />
+                                    </form>
+                                    <form method="GET" class="form-inline m-auto">
+                                        <div class="form-group mx-sm-3 mb-2">
+                                            <input class="form-control" type="text" name="query" placeholder="Search Query" autocomplete="off" />
+                                        </div>
+                                        <input class='btn btn-main' type="submit" value="Filter Feedback" />
+                                    </form>
+                                </div>
+                                <hr style="border: 1px solid white !important;">
+                                {% if not 'search_query' in attack %}
+                                    <h3>Showing all feedback:</h3>
+                                {% else %}
+                                    <h3>Showing all feedback containing "{{ attack.search_query | safe }}":</h3>
+                                {% endif %}
+                                <div id="feedback-ctn">
+                                    {% for feedback in attack.feedbacks %}
+                                        {{ feedback | safe }}
+                                    {% endfor %}
+                                    <pre>
+                                        <code class="code-block">
+                                            {% for i in attack.cleaned %}
+                                                <p>{{ loop.index }}. {{ i | safe }}</p>
+                                            {% endfor %}
+                                        </code>
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                    {% endautoescape %}
+                </div>
             </div>
         </div>
     </div>
-</body>
+</main>
 {% endblock %}

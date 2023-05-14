@@ -62,26 +62,33 @@ class DataStoreManager:
             ds_entity.update(obj)
             self.ds_client.put(self._create_safe_entity(ds_entity))
 
-    def query(self, filter_key=None, op=None, value=None):
+    def put_multi(self, entities):
+        self.ds_client.put_multi(entities=entities)
+
+    def query(self, limit=None, **kwargs):
         """Returns query object"""
-        if filter_key and op and value:
-            query = self.ds_client.query(kind=self.key_id)
-            query.add_filter(filter_key, f"{op}", value)
-            return list(query.fetch())
-        return self.ds_client.query(kind=self.key_id)
+        if limit:
+            return list(self.ds_client.query(kind=self.key_type, **kwargs).fetch(limit=limit))
+        return list(self.ds_client.query(kind=self.key_type, **kwargs).fetch())
 
     def set(self, key_type, key_id):
         self.key_id = key_id
         self.key = self.ds_client.key(key_type, self.key_id)
 
+    def entity(self, obj):
+        """Returns Entity object"""
+        ds_entity = datastore.Entity(self.key)
+        ds_entity.update(obj)
+        return self._create_safe_entity(ds_entity)
+
     def get_servers(self):
-        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER)
-        query_servers.add_filter('parent_id', '=', self.key_id)
+        filters = [('parent_id', '=', self.key_id)]
+        query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER, filters=filters)
         return list(query_servers.fetch())
 
     def get_children(self, child_key_type, parent_id):
-        query_workspaces = self.ds_client.query(kind=child_key_type)
-        query_workspaces.add_filter('parent_id', '=', parent_id)
+        filters = [('parent_id', '=', parent_id)]
+        query_workspaces = self.ds_client.query(kind=child_key_type, filters=filters)
         children = list(query_workspaces.fetch())
         i = 0
         while not children and i < self.MAX_ATTEMPTS:
@@ -113,9 +120,9 @@ class DataStoreManager:
         returns a list of all the units that expire within 48 hours
         @return:
         """
-        query_expiring = self.ds_client.query(kind=DatastoreKeyTypes.UNIT)
         two_days = 172800
-        query_expiring.add_filter('workspace_settings.expires', '<', (get_current_timestamp_utc() + two_days))
+        filters = [('workspace_settings.expires', '<', (get_current_timestamp_utc() + two_days))]
+        query_expiring = self.ds_client.query(kind=DatastoreKeyTypes.UNIT, filters=filters)
         expiring = []
         for obj in query_expiring.fetch():
             if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
@@ -124,9 +131,9 @@ class DataStoreManager:
 
     def get_ready_for_shutoff(self):
         ready_for_shutoff = []
-        query_shutoff = self.ds_client.query(kind=self.key_type)
+        query_shutoff = self.ds_client.query(kind=self.key_type,
+                                             filters=[('shutoff_timestamp', '<', get_current_timestamp_utc())])
         if self.key_type in [DatastoreKeyTypes.WORKOUT, DatastoreKeyTypes.FIXED_ARENA_CLASS]:
-            query_shutoff.add_filter('shutoff_timestamp', '<', get_current_timestamp_utc())
             for obj in query_shutoff.fetch():
                 if obj.get('shutoff_timestamp', None):
                     ready_for_shutoff.append(obj.key.name)
@@ -142,19 +149,19 @@ class DataStoreManager:
         @return:
         """
         running = []
-        query_running = self.ds_client.query(kind=self.key_type)
+        query_filters = []
         if self.key_type == DatastoreKeyTypes.FIXED_ARENA_CLASS:
-            query_running.add_filter('state', '=', FixedArenaClassStates.RUNNING.value)
-            running += list(query_running.fetch())
+            query_filters = [('state', '=', FixedArenaClassStates.RUNNING.value)]
         elif self.key_type == DatastoreKeyTypes.SERVER:
-            query_running.add_filter('state', '=', ServerStates.RUNNING.value)
-            running += list(query_running.fetch())
-
+            query_filters = [('state', '=', ServerStates.RUNNING.value)]
+        query_running = self.ds_client.query(kind=self.key_type, filters=query_filters)
+        running += list(query_running.fetch())
         return running
 
     def get_admins(self):
         """Returns list of emails for admin accounts"""
-        users = self.ds_client.query(kind=DatastoreKeyTypes.USERS).add_filter('permissions.admin', '=', True)
+        users = self.ds_client.query(kind=DatastoreKeyTypes.USERS,
+                                     filters=[('permissions.admin', '=', True)])
         return list(users.fetch())
 
     @staticmethod

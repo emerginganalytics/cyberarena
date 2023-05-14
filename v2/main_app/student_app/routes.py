@@ -137,8 +137,8 @@ def fixed_arena_signup(build_id):
         if not student_name:
             abort(400)
         # Query the workspaces for the current class
-        workspace_query = DataStoreManager(key_id=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).query(
-            filter_key='parent_id', op='=', value=build_id)
+        filters = [('parent_id', '=', build_id)]
+        workspace_query = DataStoreManager(key_type=DatastoreKeyTypes.FIXED_ARENA_WORKSPACE.value).query(filters=filters)
 
         # Check for unclaimed workspace
         claimed_workspace = None
@@ -173,8 +173,8 @@ def fixed_arena_student(build_id):
             if fixed_arena_class:
                 # Workspaces do not maintain state - inherit state from parent object
                 workspace['state'] = fixed_arena_class['state']
-                workspace_servers = DataStoreManager(key_id=DatastoreKeyTypes.SERVER.value).query(filter_key='parent_id',
-                                                                                                  op='=', value=build_id)
+                filters = [('parent_id', '=', build_id)]
+                workspace_servers = DataStoreManager(key_type=DatastoreKeyTypes.SERVER.value).query(filters=filters)
                 registration_required = fixed_arena_class['workspace_settings'].get('registration_required', False)
                 expiration = fixed_arena_class['workspace_settings'].get('expires', None)
                 is_expired = True
