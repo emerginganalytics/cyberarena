@@ -31,9 +31,6 @@ __status__ = "Testing"
 class Unit:
     def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False, env_dict=None):
         self.unit_id = build_id
-        # TODO: Remove child_id. The workout ID needs to be created here if needed.
-        self.child_id = child_id
-        self.form_data = form_data
         self.debug = debug
         self.force = force
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
@@ -49,6 +46,15 @@ class Unit:
             raise LookupError
         self.lms_integration = self.unit.get('lms_integration', False)
         self.lms_quiz = True if self.unit.get('lms_quiz', None) else False
+        if not self.lms_integration:
+            if not child_id:
+                logging.error(f"No build id provided for build handler with action {self.unit['build_type']}")
+                raise ValueError
+            elif not form_data:
+                logging.error(f'Missing claimed_by data for build handler with action {self.unit["build_type"]}')
+                raise ValueError
+            self.child_id = child_id
+            self.form_data = json.loads(form_data)
 
     def build(self):
         if self.lms_integration:

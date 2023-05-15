@@ -54,13 +54,7 @@ class BuildHandler:
             build_id = self.event_attributes.get('build_id', None)
             child_id = self.event_attributes.get('child_id', None)
             form_data = self.event_attributes.get('claimed_by', None)
-            if not build_id and not child_id:
-                logging.error(f"No build id provided for build handler with action {action}")
-                raise ValueError
-            if not form_data:
-                logging.error(f'Missing claimed_by data for build handler with action {action}')
-                raise ValueError
-            Unit(build_id=build_id, child_id=child_id, form_data=json.loads(form_data), env_dict=self.env_dict).build()
+            Unit(build_id=build_id, child_id=child_id, form_data=form_data, env_dict=self.env_dict).build()
         elif action == str(PubSub.BuildActions.WORKOUT.value):
             build_id = self.event_attributes.get('build_id', None)
             if not build_id:

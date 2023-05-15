@@ -175,8 +175,9 @@ class Workout(MethodView):
         Returns: workout_id:str or None
 
         """
-        workout_query = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query()
-        workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == unit['id']]
+        workout_filters = [('parent_id', '=', unit['id'])]
+        workout_list = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query(filters=workout_filters)
+        # workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == unit['id']]
         for workout in workout_list:
             if workout.get('student_email', '').lower() == student_email:
                 workout_id = workout['id']

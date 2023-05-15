@@ -93,9 +93,11 @@ class Unit(MethodView):
                                                       allowed_attempts=lms_allowed_attempts,
                                                       lms_type=lms_type)
                 build_spec = lms_spec_decorator.decorate()
-
-            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
-            build_spec_to_cloud.commit(publish=False)
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit()
+            else:
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit(publish=False)
             return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
         return self.http_resp(code=400).prepare_response()
 
