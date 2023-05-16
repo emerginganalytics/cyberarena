@@ -24,7 +24,6 @@ def teacher_home():
                 # TODO: Add support for getting courses from Blackboard
                 blackboard_lms = {}
                 teacher_info['lms']['blackboard'] = {}
-
             # Get all the units for this instructor
             unit_list = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(
                 filters=[('instructor_id', '=', teacher_email)]

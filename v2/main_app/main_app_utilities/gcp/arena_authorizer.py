@@ -134,6 +134,6 @@ class ArenaAuthorizer:
         self.ds_manager.delete()
         # TODO: Add functionality to search for and
         #  remove user from Firebase db as well
-        self._get_user_from_firebase(str(email))
+        self._get_user_from_firebase(str(email).lower())
         return True
 # [ eof ]

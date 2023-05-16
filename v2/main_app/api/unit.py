@@ -83,9 +83,7 @@ class Unit(MethodView):
                 'expires': expire_ts
             }
             build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
-            # TODO: Pass in LMS Integration as part of the modal form.
-            # lms_integration = recv_data.get('lms_integration', None)
-            lms_integration = True if build_spec.get('lms_quiz') else False
+            lms_integration = recv_data.get('lms_integration', None)
             if lms_integration:
                 build_spec = self._lms_integrate(build_spec=build_spec, recv_data=recv_data)
                 build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)

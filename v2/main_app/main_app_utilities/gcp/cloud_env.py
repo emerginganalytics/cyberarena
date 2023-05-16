@@ -1,6 +1,5 @@
 import time
 import random
-#import pytz
 from google.cloud import runtimeconfig
 
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
@@ -8,7 +7,7 @@ from main_app_utilities.globals import DatastoreKeyTypes
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
-__credits__ = ["Philip Huff"]
+__credits__ = ["Philip Huff", 'Andrew Bomberger']
 __license__ = "MIT"
 __version__ = "1.0.0"
 __maintainer__ = "Philip Huff"

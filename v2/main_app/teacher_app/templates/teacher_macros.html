@@ -71,6 +71,7 @@
                                 <input id="build-count-{{ loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
                             </div>
                             {% if spec.lms_quiz %}
+                                <input name="lms_integration" value="1" type="hidden">
                                 {% if courses %}
                                     <hr>
                                     <div class="form-group">
@@ -87,7 +88,7 @@
                                             {% endfor %}
                                         </select>
                                     </div>-->
-                                    <div class="form-group">
+                                    <!--<div class="form-group">
                                         <label for="course-code-{{ loop.index }}">Course Code: </label>
                                         <select id="course-code-{{ loop.index }}" class="form-control" name="lms_course_code"
                                                type="text" >
@@ -97,7 +98,27 @@
                                                 {% endfor %}
                                             {% endfor %}
                                         </select>
+                                    </div>-->
+                                    <div class="form-group">
+                                        <label for="lms-type-{{ loop.index }}">Learning Management System: </label>
+                                        <select id="lms-type-{{ loop.index }}" class="form-control" name="lms_type"
+                                                onchange="updateLMSCourses(this.value, '{{ loop.index }}')">
+                                            {% for lms, value in courses.items() %}
+                                                <option value="{{ lms }}">{{ lms | capitalize }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </div>
+                                    {% for lms, value in courses.items() %}
+                                        <div id="{{ lms }}-course-select-div" class="form-group">
+                                            <label for="course-code-{{ loop.index }}">Course Code: </label>
+                                            <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code">
+                                                <option value="" type="hidden" hidden="hidden" selected disabled>-- Select a Course --</option>
+                                                {% for course_id, course_name in courses[lms].items() %}
+                                                    <option value="{{ course_id }}">{{ course_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    {% endfor %}{# End select lms course generation #}
                                     <div class="d-flex justify-content-center">
                                         <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
                                     </div>
@@ -108,7 +129,7 @@
                                     <div class="d-flex justify-content-center">
                                         <p id="build-{{ build_type }}-{{ loop.index }}"
                                            class="waves-effect waves-light btn-fa text-center build-workout disabled" disabled="true"
-                                        style="pointer-events: none; opacity: 70%;">Build Workout!</p>
+                                           style="pointer-events: none; opacity: 70%;">Build Workout!</p>
                                     </div>
                                 {% endif %}
                             {% else %}
