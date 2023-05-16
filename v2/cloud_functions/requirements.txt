@@ -15,6 +15,6 @@ pytz~=2022.7.1
 oauth2client
 netaddr
 functions-framework==3.3.0
-flask==2.2.3
+flask==2.2.5
 google-cloud-error-reporting==1.9.1
 sendgrid
