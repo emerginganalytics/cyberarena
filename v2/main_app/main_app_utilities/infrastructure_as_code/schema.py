@@ -246,7 +246,7 @@ class LMSQuizQuestionsSchema(Schema):
 
 
 class LMSQuizAnswerSchema(Schema):
-    answer_text = fields.Str(required=True, description="Question text")
+    answer_text = fields.Str(required=False, description="Question text")
     weight = fields.Float(missing=0.0)
 
 

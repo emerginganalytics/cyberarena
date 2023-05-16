@@ -44,7 +44,7 @@ class Unit:
         if not self.unit:
             self.logger.error(f"The datastore record for {self.unit_id} no longer exists!")
             raise LookupError
-        self.lms_integration = self.unit.get('lms_integration', False)
+        self.lms_integration = True if self.unit.get('lms_connection') else False
         self.lms_quiz = True if self.unit.get('lms_quiz', None) else False
         if not self.lms_integration:
             if not child_id:

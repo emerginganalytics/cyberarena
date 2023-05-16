@@ -49,11 +49,12 @@ class TestUnit:
         }
         build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
 
-        if 'lms_quiz' in build_spec:
+        if self.yaml.get('lms_integration', False):
             lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=self.yaml['lms_course_code'],
                                                   due_at=self.yaml['lms_due_at'],
                                                   time_limit=self.yaml['lms_time_limit'],
-                                                  allowed_attempts=self.yaml['lms_allowed_attempts'])
+                                                  allowed_attempts=self.yaml['lms_allowed_attempts'],
+                                                  lms_type=self.yaml['lms_type'])
             build_spec = lms_spec_decorator.decorate()
 
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)

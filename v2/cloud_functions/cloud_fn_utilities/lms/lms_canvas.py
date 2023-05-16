@@ -56,7 +56,7 @@ class LMSCanvas(LMS):
                             f"The instructions to complete this quiz are here: "
                             f"{self.build['summary']['student_instructions_url']}",
             'due_at': self.build['lms_quiz']['due_at'],
-            'points_possible': points_possible,
+            'points_possible': float(points_possible),
             'published': True,
             'grading_type': 'percent',
             'shuffle_answers': True,
@@ -69,7 +69,7 @@ class LMSCanvas(LMS):
                 'question_name': question.get('question_name', None),
                 'question_text': question.get('question_text', None),
                 'question_type': question.get('question_type', CanvasConstants.Questions.Types.SHORT_ANSWER),
-                'point_possible': question.get('points_possible', 1),
+                'points_possible': float(question.get('points_possible', 1)),
                 'answers': question.get('answers', None)
             }
             question = new_quiz.create_question(question=question_data)
