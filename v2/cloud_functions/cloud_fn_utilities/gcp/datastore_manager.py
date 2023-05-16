@@ -4,7 +4,8 @@ from google.cloud import datastore
 from datetime import datetime, timedelta
 from googleapiclient.errors import HttpError
 
-from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates, FixedArenaClassStates
+from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates, \
+    FixedArenaClassStates, WorkoutStates
 from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
@@ -103,6 +104,11 @@ class DataStoreManager:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
             for obj in query_expired.fetch():
                 if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
+                    expired.append(obj.key.name)
+        elif self.key_type == DatastoreKeyTypes.WORKOUT:
+            query_expired.add_filter('expiration', '<', get_current_timestamp_utc())
+            for obj in query_expired.fetch():
+                if obj.get('state', None) != WorkoutStates.DELETED.value:
                     expired.append(obj.key.name)
         elif self.key_type == DatastoreKeyTypes.SERVER:
             query_expired.add_filter('shutoff_timestamp', '<', get_current_timestamp_utc())

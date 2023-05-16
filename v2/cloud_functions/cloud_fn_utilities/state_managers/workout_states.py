@@ -147,7 +147,7 @@ class WorkoutStateManager:
         if new_state == self.s.START.value:
             return True
         elif new_state == self.s.BUILDING_NETWORKS.value and existing_state in \
-                [self.s.START.value, self.s.BROKEN.value, self.s.BUILDING_NETWORKS.value]:
+                [self.s.NOT_BUILT, self.s.START.value, self.s.BROKEN.value, self.s.BUILDING_NETWORKS.value]:
             return True
         elif new_state == self.s.BUILDING_SERVERS.value and existing_state in \
                 [self.s.COMPLETED_NETWORKS.value, self.s.BUILDING_SERVERS.value]:

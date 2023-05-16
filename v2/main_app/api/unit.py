@@ -12,6 +12,7 @@ from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets, WorkoutStates
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -82,9 +83,16 @@ class Unit(MethodView):
                 'expires': expire_ts
             }
             build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
-            build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
-            build_spec_to_cloud.commit(publish=False)
-            return redirect(url_for('teacher_app.workout_list', unit_id=build_spec_to_cloud.get_build_id()))
+            lms_integration = recv_data.get('lms_integration', None)
+            if lms_integration:
+                build_spec = self._lms_integrate(build_spec=build_spec, recv_data=recv_data)
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit()
+            else:
+                build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
+                build_spec_to_cloud.commit(publish=False)
+            unit_id = build_spec_to_cloud.get_build_id()
+            return redirect(url_for('teacher_app.workout_list', unit_id=unit_id))
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required
@@ -121,3 +129,15 @@ class Unit(MethodView):
                     DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
                 return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
+
+    def _lms_integrate(self, build_spec, recv_data):
+        lms_course_code = recv_data.get('lms_course_code', None)
+        lms_due_at = recv_data.get('lms_due_at', None)
+        lms_allowed_attempts = recv_data.get('lms_allowed_attempts', None)
+        lms_type = recv_data.get('lms_type', BuildConstants.LMS.CANVAS.value)
+        lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=lms_course_code,
+                                              due_at=lms_due_at,
+                                              allowed_attempts=lms_allowed_attempts,
+                                              lms_type=lms_type)
+        build_spec = lms_spec_decorator.decorate()
+        return build_spec

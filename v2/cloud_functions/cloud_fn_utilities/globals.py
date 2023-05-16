@@ -125,6 +125,10 @@ class BuildConstants:
         WINDOWS = 'windows'
         LINUX = 'linux'
 
+    class LMS:
+        CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+
 
 class ServerStates(Enum):
     START = 0
@@ -201,6 +205,7 @@ class UnitStates(Enum):
 
 
 class WorkoutStates(Enum):
+    NOT_BUILT = -1
     START = 0
     BUILDING_ASSESSMENT = 1
     BUILDING_NETWORKS = 2

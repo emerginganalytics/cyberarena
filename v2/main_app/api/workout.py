@@ -71,34 +71,19 @@ class Workout(MethodView):
 
         if join_code and email:
             filters = [('join_code', '=', join_code)]
-            unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filters)
-            if unit:
-                unit_id = unit[0]['id']
-                max_builds = min(self.env.max_workspaces, unit[0]['workspace_settings']['count'])
-                """workout_query = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query()
-                workout_list = [i for i in workout_query if i['parent_id'] == unit_id]"""
-                workout_list = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query(
-                    filters=[('parent_id', '=', unit_id)])
-                if workout_list:
-                    for workout in workout_list:
-                        if student_email := workout.get('student_email', None):
-                            if email.lower() == student_email:
-                                return redirect(url_for('student_app.workout_view', build_id=workout['id']))
-                    if len(workout_list) >= max_builds:
-                        # build count already meets max build count for unit
-                        return redirect(url_for('student_app.claim_workout', error=406))
-                # No workout found for given email; Send build request
-                claimed_by = json.dumps({'student_email': email.lower()})
-                workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
-                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
-                                        action=str(PubSub.BuildActions.UNIT.value),
-                                        build_id=str(unit_id), child_id=workout_id,
-                                        claimed_by=claimed_by)
-                time.sleep(5)
+            unit_results = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filters)
+            if not unit_results:
+                return redirect(url_for('student_app.claim_workout', error=404))
+            else:
+                unit = unit_results[0]
+
+            workout_id = self._find_existing_workout(unit, email)
+            if workout_id:
                 return redirect(url_for('student_app.workout_view', build_id=workout_id))
-            # Invalid join code
-            return redirect(url_for('student_app.claim_workout', error=404))
-        return self.http_resp(code=400).prepare_response()
+            else:
+                return redirect(url_for('student_app.claim_workout', error=406))
+        else:
+            return self.http_resp(code=400).prepare_response()
 
     def put(self, build_id=None):
         """
@@ -179,4 +164,40 @@ class Workout(MethodView):
                         return True, True
         return False, True
 
-# [ eof ]
+    def _find_existing_workout(self, unit, student_email):
+        """
+        Looks for an existing workout in the unit with the given student email address. If the workout has not been
+        built, then build at this time
+        Args:
+            unit (Datastore): The datastore record of the unit
+            student_email (str): email address to look for
+
+        Returns: workout_id:str or None
+
+        """
+        workout_filters = [('parent_id', '=', unit['id'])]
+        workout_list = DataStoreManager(key_id=DatastoreKeyTypes.WORKOUT).query(filters=workout_filters)
+        # workout_list = [i for i in list(workout_query.fetch()) if i['parent_id'] == unit['id']]
+        for workout in workout_list:
+            if workout.get('student_email', '').lower() == student_email:
+                workout_id = workout['id']
+                if workout.get('state', WorkoutStates.NOT_BUILT.value) == WorkoutStates.NOT_BUILT.value:
+                    self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                            action=str(PubSub.BuildActions.WORKOUT.value),
+                                            key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                            build_id=str(workout_id))
+                return workout_id
+
+        # No workout was found. Now determine if you need to build a new one. If not, return None.
+        max_builds = min(self.env.max_workspaces, unit['workspace_settings']['count'])
+        lms_build = True if 'lms_quiz' in unit else False
+        if len(workout_list) < max_builds and not lms_build:
+            claimed_by = json.dumps({'student_email': student_email.lower()})
+            workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                    action=str(PubSub.BuildActions.UNIT.value),
+                                    build_id=str(unit['id']), child_id=workout_id,
+                                    claimed_by=claimed_by)
+            return workout_id
+        else:
+            return None
