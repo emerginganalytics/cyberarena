@@ -40,7 +40,7 @@ class ArenaAuthorizer:
         self.ds_manager = DataStoreManager()
 
     def get_all_users(self):
-        return list(DataStoreManager(key_id=self.key_type).query().fetch())
+        return DataStoreManager(key_type=self.key_type).query()
 
     def get_user(self, email):
         return self.ds_manager.get(key_type=self.key_type, key_id=str(email))
@@ -134,6 +134,6 @@ class ArenaAuthorizer:
         self.ds_manager.delete()
         # TODO: Add functionality to search for and
         #  remove user from Firebase db as well
-        self._get_user_from_firebase(str(email))
+        self._get_user_from_firebase(str(email).lower())
         return True
 # [ eof ]

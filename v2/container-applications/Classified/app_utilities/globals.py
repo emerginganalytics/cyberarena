@@ -33,6 +33,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERARENA_ATTACK = 'cyberarena-attack'
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
+    NVD_DATA = 'nvd_data'
 
 
 class BuildConstants:

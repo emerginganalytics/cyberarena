@@ -95,7 +95,7 @@ class Hashes:
         str_list = [
             'Ornn', 'Hak5', 'Hacking',
             'BlackHatPython', 'SpiesAmongUs', '9999',
-            '1994', '5', '7', '33', '19', '2020', '1234','0000'
+            '1994', '5', '7', '33', '19', '2020', '1234', '0000'
         ]
         password['password'] = random.choice(str_list[0:5])
         password['password'] += random.choice(str_list[6:14])

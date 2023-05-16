@@ -8,6 +8,7 @@ Contains collection of web-based vulnerability workouts:
 - wireshark : /wireshark/<wid>
 """
 import cryptocode
+import re
 from flask import abort, Blueprint, flash, g, jsonify, make_response, request, redirect, render_template, session, url_for
 from flask import current_app as app
 from io import BytesIO
@@ -24,7 +25,11 @@ classified_bp = Blueprint(
     static_folder='./static',
 )
 
+
 # Arena Snake Routes
+@classified_bp.route('/snake/<workout_id>')
+def snake(workout_id):
+    pass
 
 
 # Inspect Routes
@@ -32,32 +37,37 @@ classified_bp = Blueprint(
 def inspect(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
-        return render_template('inspect.html', workout_id=workout_id)
-    return redirect(404)
+        completed = workout['assessment']['questions'][0].get('complete', False)
+        if completed:
+            flag = workout['assessment']['questions'][0].get('answer', None)
+            return render_template('inspect-v2.html', workout=workout, completed=completed,
+                                   classified_flag=flag)
+        return render_template('inspect-v2.html', workout=workout, completed=completed)
+    return abort(404)
 
 
-@classified_bp.route('/inspect/xsfiedSTRflag/<workout_id>', methods=['GET', 'POST'])
-def xsfiedSTRflag(workout_id):
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
-    if workout:
-        return render_template('inspect_index.html', workout_id=workout_id)
-    return redirect(404)
-
-
-@classified_bp.route('/inspect/login/<workout_id>', methods=['GET', 'POST'])
+@classified_bp.route('/inspect/login/<workout_id>', methods=['POST'])
 def inspect_login(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
         if request.method == 'POST':
-            if request.form['password'] == 'TrojanSpirit!2021' and request.form['username'] == 'Maximus':
-                decrypt_key = workout['assessment']['questions'][0]['id']
-                classified_flag = 'gecJuFQuv1FhQAfLDvn9f6j6xu/GACm00wqyoWVKUJQ=*gXSP1UFZELV59Qz6yP0Y+w==*' \
-                                  'y6cg3ujMtm7eSklW2SX3JQ==*C4GDYpzjfozIsTQWVuUc4A=='
-                plaintext_flag = cryptocode.decrypt(classified_flag, decrypt_key)
-                return render_template('inspect.html', workout_id=workout_id, classified_flag=plaintext_flag)
+            assessment = workout['assessment']['questions']
+            encrypted = 'e8OuZsMdvUAj167q1w+1j+w=*/+mCoSMHVdMmVDdyjoxR2Q==*9Jvf3hi2x4n29712s/Z3Dw==*tVukPNKaq9+Gr+dFRgldNQ=='
+            password = cryptocode.decrypt(encrypted, password=assessment['key'])
+            if request.form['password'] == password and request.form['username'] == 'Maximus':
+                completed = True
+                classified_flag = assessment[0]['answer']
+                assessment['complete'] = True
+                DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).put(workout)
+                resp = make_response(render_template('inspect-v2.html', workout=workout, completed=completed,
+                                                     classified_flag=classified_flag))
+                resp.set_cookie('AwesomeITUser', 'Maximus')
+                return resp
             else:
-                return redirect(url_for('classified_bp.xsfiedSTRflag', workout_id=workout_id))
-    return redirect(404)
+                completed = False
+                return render_template('inspect-v2.html', workout=workout, completed=completed)
+        return abort(400)
+    return abort(404)
 
 
 # SQL Injection Routes
@@ -112,83 +122,50 @@ def check_sql_flag(workout_id):
                 return render_template('sql_index.html', workout_id=workout_id)
 
 
-# Wireshark Routes
-@classified_bp.route('/wireshark/<workout_id>')    
-def wireshark_home(workout_id):
-    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
-    if workout:
-        if not session.get('logged_in'):
-            return render_template('wireshark_index.html', workout_id=workout_id)
-        else:
-            decrypt_key = workout['assessment']['questions'][0]['id']
-            encrypted_flag = 'w7w1HZQSOlQk7cxRjqICoIXkFbUsjnr9CHJkvZ51Iw==*9o+WrK5lFOZG70IARQ5HGA==*7bLeQoMR/IhXQjlvey' \
-                             '71KQ==*D+iRjmWUsHXkKTC+G6cF4g=='
-            wireshark_flag = cryptocode.decrypt(encrypted_flag, decrypt_key)
-            return render_template('wireshark_flag.html', wireshark_flag=wireshark_flag, workout_id=workout_id)
-
-
-@classified_bp.route('/wireshark/login/<workout_id>', methods=['GET', 'POST'])
-def do_admin_login(workout_id):
-    if request.form['psw'] == 'cyberSecret42' and request.form['username'] == 'admin':
-        session['logged_in'] = True
-    else:
-        flash('Incorrect Password')
-    return redirect(url_for('classified_bp.wireshark_home', workout_id=workout_id))
-
-
-@classified_bp.route('/wireshark/logout/<workout_id>', methods=['GET', 'POST'])
-def admin_logout(workout_id):
-    session['logged_in'] = False
-    return redirect(url_for('wireshark_bp.home', workout_id=workout_id))
-
-
 # XSS Routes
 @classified_bp.route('/xss/dom/<workout_id>', methods=['GET', 'POST'])
-def xss_d(workout_id):
+def dom(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
+        attack = {}
         name = 'Stranger'
-        bad_request = 'bad request'
-        if request.args.get('bad_request'):
-            bad_request = request.args.get('bad_request')
-        return render_template('xss_dom.html', name=name, bad_request=bad_request, workout_id=workout_id)
-    return redirect(404)
+        if bad_request := request.args.get('bad_request', None):
+            attack['type'] = 'dom'
+            attack['name'] = name
+            attack['bad_request'] = bad_request
+            attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', bad_request))
+        return render_template('xss_dom.html', attack=attack, workout=workout)
+    return abort(404)
 
 
 @classified_bp.route('/xss/reflected/<workout_id>', methods=['GET', 'POST'])
-def xss_r(workout_id):
+def reflected(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
+        attack = {}
         name = 'Stranger'
-        if request.method == 'POST':
-            name = request.form['name']
-        return render_template('xss_r.html', name=name, workout_id=workout_id)
-    return redirect(404)
+        form = request.form
+        if name := form.get('name', None):
+            attack['type'] = 'reflected'
+            attack['name'] = name
+            attack['cleaned'] = ''.join(re.split('|<script>|, |</script>|', attack['name']))
+        return render_template('xss_r.html', attack=attack, workout=workout)
+    return abort(404)
 
 
 @classified_bp.route('/xss/stored/<workout_id>', methods=['GET', 'POST'])
-def xss_s(workout_id):
+def stored(workout_id):
     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id).get()
     if workout:
         xss = XSS()
+        attack = {'type': 'stored', 'feedbacks': [], 'cleaned': [], 'search_query': ''}
         if request.method == 'POST':
-            xss.add_feedback(request.form['feedback'], workout_id)
-        search_query = request.args.get('query')
-        feedbacks = xss.get_feedback(workout_id, search_query)
-        return render_template('xss_s.html', feedbacks=feedbacks, search_query=search_query, workout_id=workout_id)
-    return redirect(404)
-
-
-# Error Handlers
-@classified_bp.errorhandler(404)
-def page_not_found_error(error):
-    page_template = 'invalid_workout.html'
-    return render_template(page_template, error=error)
-
-
-@classified_bp.errorhandler(500)
-def internal_server_error(error):
-    page_template = 'invalid_workout.html'
-    return render_template(page_template, error=error)
-
-
+            if feedback := request.form.get('feedback', None):
+                xss.add_feedback(feedback, workout_id)
+        if search_query := request.args.get('query', None):
+            feedbacks = xss.get_feedback(workout_id, search_query)
+            attack['feedbacks'] = feedbacks
+            attack['cleaned'] = [''.join(re.split('|<script>|, |</script>|', i)) for i in feedbacks]
+            attack['search_query'] = search_query
+        return render_template('xss_s.html', attack=attack, workout=workout)
+    return abort(404)

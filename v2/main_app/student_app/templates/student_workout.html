@@ -28,7 +28,7 @@
         <ul class="nav nav-pills top-navbar-pill">
             <li class="nav-item">
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
-                   data-target="modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+                   data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
             <li class="nav-item disabled">
                 <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
@@ -248,7 +248,7 @@
                                                                     <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
                                                                 {% endif %}
                                                             {% else %}
-                                                                <td>No Interface</td>
+                                                                <td>No Public Interface</td>
                                                             {% endif %}
                                                             <td>{{ server.name }}</td>
                                                             {% if server.nics[0].host_dns %}
@@ -346,7 +346,7 @@
                                                                         </div>
                                                                          <input id="submit_{{ loop.index }}" type="button"
                                                                                 onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
-                                                                                        '{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                                                        '{{ workout.api.workout }}{{ workout['id'] }}','{{ loop.index }}', false);"
                                                                                 class="btn-fa mb-2" value="Check Answer">
                                                                      {% elif question.type == 'upload' %}
                                                                          <div class="form-group mx-sm-3 mb-2">

@@ -61,11 +61,18 @@ class UnitSchema(Schema):
     firewall_rules = fields.Nested('FirewallRuleSchema', many=True, description="These are ONLY set by the program to "
                                                                                 "allow all internal traffic")
     assessment = fields.Nested('AssessmentSchema', required=False)
+    lms_connection = fields.Nested('LMSConnectionSchema', required=False,
+                                   description="The information needed to connect a lab to a course")
+    lms_quiz = fields.Nested('LMSQuizSchema', required=False)
     escape_room = fields.Nested('EscapeRoomSchema', required=False,
                                 description="Escape room units include additional specification of the escape room "
                                             "puzzles associated with each workout")
     test = fields.Bool(required=False, description="Whether the unit is a test. This helps in cleaning the datastore.")
     join_code = fields.Str(required=False, description='Used to invite students to claim a unit workspace')
+    workout_duration_days = fields.Int(required=False,
+                                       description='For asynchronous workout builds, specify to add an expiration '
+                                                   'timestamp for the workout. This is used for long running units '
+                                                   'where students complete workouts asynchronously.')
 
 
 class WorkspaceSettingsSchema(Schema):
@@ -222,23 +229,34 @@ class AssessmentScriptSchema(Schema):
     operating_system = fields.Str(required=False, description="Target server operating system")
 
 
-class LMSQuizObject(Schema):
-    name = fields.Str(required=True, description="The name of the quiz, should be the same as the workout")
+class LMSQuizSchema(Schema):
     type = fields.Str(required=False, description="Practice quiz or assignment")
-    points = fields.Float(required=False, description="Points given for assignment")
     due_at = fields.DateTime(required=False, description="Due date for assignment")
     description = fields.Str(required=False, description="Description of assignment")
-    time_limit = fields.Float(required=False, description="Time for assignment")
-    allowed_attempts = fields.Float(required=False, description="Attempts available for assignment, -1 is unlimited")
-    question = fields.Nested('LMSQuizQuestions', many=True)
+    allowed_attempts = fields.Float(missing=-1.0, description="Attempts available for assignment, -1 is unlimited")
+    questions = fields.Nested('LMSQuizQuestionsSchema', many=True)
 
 
-class LMSQuizQuestions(Schema):
+class LMSConnectionSchema(Schema):
+    lms_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.LMS]),
+                          description="The type of LMS this should integrate with.")
+    api_key = fields.Str(required=True, description="The API key from the user profile needed for connecting to "
+                                                    "the LMS")
+    url = fields.Str(required=True, description="The LMS API URL")
+    course_code = fields.Int(required=True, description="The course code to use for creating the quiz")
+
+
+class LMSQuizQuestionsSchema(Schema):
     name = fields.Str(required=False, description="Question name")
-    text = fields.Str(required=False, description="Question text")
-    type = fields.Str(required=False, description="Question type")
-    points = fields.Float(required=False, description="Points")
-    answer = fields.Str(required=False, description="Question answer")
+    question_text = fields.Str(required=True, description="Question text")
+    question_type = fields.Str(required=False, description="Question type")
+    points_possible = fields.Float(required=False, description="Points")
+    answers = fields.Nested('LMSQuizAnswerSchema', many=True, description="Question answers")
+
+
+class LMSQuizAnswerSchema(Schema):
+    answer_text = fields.Str(required=False, description="Question text")
+    weight = fields.Float(missing=0.0)
 
 
 class EscapeRoomSchema(Schema):
@@ -279,4 +297,3 @@ class PuzzleSchema(Schema):
                             description="Records the team's attempts to answer the question and escape")
     correct = fields.Bool(missing=False, description="Whether the puzzle response is correct")
     reveal = fields.Str(required=False, description="Information to reveal if they have the right answer")
-

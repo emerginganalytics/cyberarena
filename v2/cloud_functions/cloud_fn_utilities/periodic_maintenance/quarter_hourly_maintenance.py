@@ -5,6 +5,7 @@ from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.cyber_arena_objects.fixed_arena_class import FixedArenaClass
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -26,6 +27,7 @@ class QuarterHourlyMaintenance:
         self.pub_sub_mgr = PubSubManager(PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
 
     def run(self):
+        self._sync_environment_variables()
         self._stop_lapsed()
 
     def _stop_lapsed(self):
@@ -46,3 +48,8 @@ class QuarterHourlyMaintenance:
                 self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                      cyber_arena_object=str(PubSub.CyberArenaObjects.FIXED_ARENA_CLASS.value),
                                      build_id=class_id, action=str(PubSub.Actions.STOP.value))
+
+    def _sync_environment_variables(self):
+        if not self.env.sync_with_datastore():
+            logger = Logger("cloud_functions.compute_manager").logger
+            logger.info('No changes to environment variables. Ignoring Datastore sync request')

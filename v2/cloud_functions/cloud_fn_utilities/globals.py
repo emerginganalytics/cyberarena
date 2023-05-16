@@ -16,6 +16,7 @@ class DatastoreKeyTypes(str, Enum):
     IOT_DEVICE = 'cybergym-iot-device'
     CATALOG = 'v2-catalog'
     USERS = 'cyberarena-user'
+    NVD_DATA = 'nvd_data'
 
 
 class BuildConstants:
@@ -124,6 +125,10 @@ class BuildConstants:
         WINDOWS = 'windows'
         LINUX = 'linux'
 
+    class LMS:
+        CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+
 
 class ServerStates(Enum):
     START = 0
@@ -160,8 +165,9 @@ class FixedArenaClassStates(Enum):
     GUACAMOLE_SERVER_LOAD_TIMEOUT = 28
     RUNNING = 50
     STOPPING = 51
-    STARTING = 52
-    READY = 53
+    STOPPED = 52
+    STARTING = 53
+    READY = 54
     EXPIRED = 60
     MISFIT = 61
     BROKEN = 62
@@ -199,6 +205,7 @@ class UnitStates(Enum):
 
 
 class WorkoutStates(Enum):
+    NOT_BUILT = -1
     START = 0
     BUILDING_ASSESSMENT = 1
     BUILDING_NETWORKS = 2

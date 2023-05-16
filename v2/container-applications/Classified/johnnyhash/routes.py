@@ -35,6 +35,23 @@ def hash_it_out(build_id):
     return redirect('/invalid')
 
 
+@johnnyhash_bp.route('/tefference/<build_id>', methods=['GET'])
+def tefference(build_id):
+    logged_in = request.cookies.get('logged_in', None)
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+    if workout:
+        hashes = Hashes(workout_info=workout, build_id=build_id)
+        # Generate and set the hash if needed
+        hashes.set_md5_hash()
+        # Get the assessment object from the workout
+        assessment = hashes.get_assessment()
+        password_hash = assessment['question']
+        hash_api = url_for('hashes')
+        return render_template('tefference-v2.html', pass_hash=password_hash, build_id=build_id,
+                               hashed_passwords=[], hash_api=hash_api, logged_in=logged_in)
+    return redirect('/invalid')
+
+
 @johnnyhash_bp.route('/hidden/<build_id>', methods=['GET'])
 def hidden(build_id):
     logged_in = request.cookies.get('logged_in', None)
@@ -43,7 +60,11 @@ def hidden(build_id):
     else:
         workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
         if workout:
-                return render_template('hidden-v2.html', build_id=build_id, user='johnny')
+            if 'escape_room' in workout:
+                user = 'mart1n56'
+            else:
+                user = 'johnny'
+            return render_template('hidden-v2.html', build_id=build_id, user=user)
         else:
             return redirect('/invalid')
 
@@ -65,7 +86,7 @@ def login(build_id):
                 if question_id:
                     hashes = Hashes(workout_info=workout, build_id=build_id)
                     valid_password = hashes.get_password()
-                    if username == 'johnny' and password == valid_password:
+                    if (username == 'johnny' or username == 'mart1n56') and password == valid_password:
                         # These are the correct credentials, so the cookie for "logged_in" is set to true
                         hashes.complete(question_id=question_id)
                         resp = make_response(redirect(url_for('johnnyhash.hidden', build_id=build_id)))

@@ -16,6 +16,7 @@ class DatastoreKeyTypes(str, Enum):
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
     IOT_DEVICE = 'cybergym-iot-device'
     USERS = 'cyberarena-user'
+    NVD_DATA = 'nvd_data'
 
 
 class BuildConstants:
@@ -151,8 +152,9 @@ class BuildConstants:
         PROXY_SERVER_TIMEOUT = 28
         RUNNING = 50
         STOPPING = 51
-        STARTING = 52
-        READY = 53
+        STOPPED = 52
+        STARTING = 53
+        READY = 54
         EXPIRED = 60
         MISFIT = 61
         BROKEN = 62
@@ -160,8 +162,16 @@ class BuildConstants:
         COMPLETED_DELETING_SERVERS = 71
         DELETED = 72
 
+    class LMS(str, Enum):
+        CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+
+    CANVAS_QUESTION_TYPES = ['fill_in_multiple_blanks_question', 'multiple_answers_question',
+                             'multiple_choice_question', 'true_false_question']
+
 
 class WorkoutStates(Enum):
+    NOT_BUILT = -1
     START = 0
     BUILDING_ASSESSMENT = 1
     BUILDING_NETWORKS = 2

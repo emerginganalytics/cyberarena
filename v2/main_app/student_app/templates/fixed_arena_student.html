@@ -1,260 +1,181 @@
-{% extends "v2-base.html" %}
-{% block title%} Workspace {{ workspace_name }} {% endblock %}
-{% import 'cln_logo_macro.html' as logo %}
+{% extends 'v2-base.html' %}
+{% block title %}Workspace {{ workspace.name }}{% endblock %}
+{% import 'logo_macro.html' as logo %}
 {% import 'contact_us.html' as forms %}
 {% block styles %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed-arena-landing-styles.css') }}">
-{% endblock styles %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/fixed-arena.css') }}">
+{% endblock %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
         <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item">
+                <a href="{{ url_for('home') }}" class="nav-link text-center">Cyber Arena</a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for("fixed_arena.home") }}" class="nav-link text-center">STOC</a>
+            </li>
+            {% if 'admins' in auth_list %}
                 <li class="nav-item">
-                    <a href="{{ url_for('home') }}" class="nav-link text-center" style="min-width: 100px;">Home</a>
+                    <a href='{{ url_for("admin.home") }}' class="nav-link text-center">Admin Home</a>
                 </li>
+            {% endif %}
         </ul>
     </div>
-    <div class="navbar-nav ml-auto">
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+    <div class="navbar-nav navbar-right">
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item m-l-r-3">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
+                   data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item disabled">
+                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
+            </li>
+            {% if workspace.registration_required %}
+                <li class="nav-item">
+                    <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
+                </li>
+            {% elif auth_config and not workspace.registration_required %}
+                <li class="nav-item">
+                    <a id="sign-in" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign In</a>
+                </li>
+            {% endif %}
+        </ul>
     </div>
 {% endblock %}
-{% block content%}
+{% block content %}
     <script type="text/javascript" src='{{ url_for("static", filename="js/login.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for("static", filename="js/main_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/student_app.js") }}'></script>
+    <script type="text/javascript" src='{{ url_for(".static", filename="js/workspace.js") }}'></script>
     <script>
           var teacher_email = null;
           var auth_config = {
-            apiKey: '{{auth_config["api_key"]}}',
-            authDomain: '{{auth_config["auth_domain"]}}',
-            projectId: '{{auth_config["project_id"]}}'
+              apiKey: '{{ auth_config["api_key"] }}',
+              authDomain: '{{ auth_config["auth_domain"] }}',
+              projectId: '{{ auth_config["project_id"] }}'
           };
           initApp(auth_config).then(value => {
-            enable_signout();
-            if(value['admin'] === true){
-              var admin_button = document.createElement("a");
-              admin_button.href = "/admin/home";
-              admin_button.className = "nav-link";
-              admin_button.innerHTML = "Admin Page";
-            }
-            if(value['student'] === true){
-              var student_home_link = document.createElement("a");
-              student_home_link = '/student/home';
-              student_home_link.className = "nav-link";
-              student_home_link.innerHTML = "Your Student Page";
-            }
+              enable_signout();
+               // Set welcome banner
+              const welcome_nav = document.getElementById('banner');
+              welcome_nav.textContent = value['display_name'];
           });
+           $(document).ready(function() {
+               // Call functions that need to be run during initial page load here
+               let tsToDate = new TimestampToDate();
+               tsToDate.convert_timestamps();
+               collapseDiv();
+                {% if workspace.expired == False %}
+                    {% if workspace.state != 72 %}
+                        new WorkspaceControl('{{ fixed_arena_class["id"] }}', 'workoutStateObj', '{{ workspace.api.fixed_arena_class }}').toggle({{ workspace.state }});
+                    {% endif %}
+               {% endif %}
+           });
+           {% if workspace.expired == False %}
+               {% if workspace.state != 72 %}
+                   let control = new WorkspaceControl('{{ fixed_arena_class["id"] }}', 'workoutStateObj', '{{ workspace.api.fixed_arena_class }}');
+                   {% if workspace.state != 62 %}
+                       control.poll();
+                   {% endif %}
+               {% endif %}
+          {% endif %}
     </script>
-    <!-- Development guide:
-
-    - The state checking logic can be cleaned up to remove the functions and buttons that we don't need for
-    fixed-arena workouts. Considering the size of the branch, it might be easier to rewrite the update_state
-    function from scratch.
-
-    - We'll need to add a space to display a network diagram that Ryan is currently working on. This diagram can
-    either be passed in during the initial page load or via a GET request after the page is loaded. The latter
-    might allow for more dynamic diagram creation in the future
-
-    - For any resource that is needed after page load, use the API as much as possible. For the workspace landing page,
-    most of the traffic can be directed through the fixed_arena_workspace api.
-
-    -->
-    <!--suppress ALL -->
-
-    <script>
-        //Used if the workout involves VMs
-        //Regularly check the state, and update the current state indicator
-        //After a control button is clicked, disable the buttons until the VMs are able to respond to GCP API requests
-        function check_workspace_state(){
-            var resp = $.ajax({
-                type:"GET",
-                url: "/api/fixed-arena/class/{{ fixed_arena_workout.parent_id }}",
-                traditional: "true",
-            });
-            if (resp.status == '200') {
-                state = resp['workspace_settiings'][0]['state'];
-            }
-            else {
-                state = 'NOT BUILT'
-            }
-            return state;
-        }
-
-        function update_state(){
-            var state_display = document.getElementById("workspace_state_display");
-            var workspace_link = document.getElementById("workspace_link");
-            var build_workspace = document.getElementById("build_workspace");
-            check_workspace_state().then( new_state => {
-                if(new_state == "RUNNING"){
-                    workspace_link.style.visibility = "visible";
-                    state_display.style.color = "green";
-                    state_display.innerHTML = "RUNNING";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").removeAttr("disabled");
-                    $("#reset-vm").removeAttr("disabled");
-                    $(".nuke_btn").removeAttr("disabled");
-                    $(".loader").remove();
-                } else if(new_state == "READY"){
-                    workspace_link.style.visibility = "hidden";
-
-                    state_display.style.color = "red";
-                    state_display.innerHTML = "STOPPED";
-                    $("#start-vm").removeAttr("disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').removeAttr('disabled');
-                    $(".loader").remove();                    }
-                else if(new_state == "START"){
-                    workspace_link.style.visibility = "hidden";
-                    build_workspace.style.visibility = "visible";
-
-                    state_display.style.color = "red";
-                    state_display.innerHTML = "NOT BUILT";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();
-                } else if(new_state == "DELETED"){
-                    workspace_link.style.visibility = "hidden";
-
-                    state_display.style.color = "black";
-                    state_display.innerHTML = "NO LONGER AVAILABLE";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();
-                } else {
-                    workspace_link.style.visibility = "hidden";
-
-                    state_display.style.color = "orange";
-                    state_display.innerHTML = "WORKING";
-                    $("#start-vm").attr("disabled", "disabled");
-                    $("#stop-vm").attr("disabled", "disabled");
-                    $("#reset-vm").attr("disabled", "disabled");
-                    $('.nuke_btn').attr("disabled", "disabled");
-                    $(".loader").remove();
-                }
-            });
-        }
-        $(document).ready(function(){
-            update_state();
-            var state_checker = setInterval(update_state, 30000);
-
-            $(".control_form").submit(function(event){
-                event.preventDefault();
-                clearInterval(state_checker);
-                check_workspace_state().then(new_state => {
-
-                    var currentState = new_state;
-                    $('#start-vm').attr('disabled','disabled');
-                    $('#stop-vm').attr('disabled','disabled');
-                    $('#reset-vm').attr('disabled','disabled');
-                    $('.nuke_btn').attr('disabled', 'disabled');
-                    $("#loading-msg").html('Please wait while the process completes' +
-                        '</br><div class="loader"></div>');
-                    var route = "/" + event.target.id;
-                    var workspace_id = document.getElementById("workspace_id").value;
-                    var runtime = document.getElementById('time').value;
-
-                    $.ajax({
-                        type: "POST",
-                        url: route,
-                        data: JSON.stringify({
-                                "workspace_id": workspace_id,
-                                "time": runtime,
-                            }),
-                        contentType: "application/json;charset=utf-8",
-                        success: function(data){
-                            var temp_state = currentState.toString();
-                            var state_update = setInterval(function(){
-                                check_workout_state().then(test_state => {
-                                    if(test_state !== currentState){
-                                        clearInterval(state_update);
-                                        update_state();
-                                        state_checker = setInterval(update_state, 30000);
-                                    }
-                                });
-                            }, 5000);
-                        }
-                    })
-                })
-            });
-        });
-        $(document).ready(function (){
-            document.querySelector('#start-vm-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const data = Object.fromEntries(new FormData(e.target));
-                console.log(data);
-                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
-            });
-            document.querySelector('#stop-vm-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const data = Object.fromEntries(new FormData(e.target));
-                console.log(data);
-                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
-            });
-            document.querySelector('#reset-vm-form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const data = Object.fromEntries(new FormData(e.target));
-                console.log(data);
-                send_action(data, workspace_id='{{ fixed_arena_workout.id }}');
-            });
-        });
-    </script>
- <div id='content-row' class='row row-offcanvas row-offcanvas-left vh-100'>
-        <!--TODO: Create toggle sidebar button in top navbar -->
-        <!--<div id="sidebar-div" class="col-sm-3 col-md-2 sticky-top nav-sidebar">-->
-        <div id="sidebar-div" class="col-md-3 col-lg-2 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation">
+    <div id="content-row" class="row row-offcanvas row-offcanvas-left vh-100">
+        <div id="sidebar-div" class="position-fixed col-md-3 col-lg-2 order-0 sidebar-offcanvas h-100 overflow-auto nav-sidebar" role="navigation" style="top: 50px;">
             <ul id="sidebar-nav" class="nav nav-pills flex-column sticky-top pl-0 mt-3" role="tablist">
-                <li>{{ logo.logo_div() }}</li>
-                <li><h2 style="color:whitesmoke;">Workspace Control</h2></li>
-                <li><p><span style="color:whitesmoke;">Workspace Status:</span>
-                        {% if fixed_arena_class.state == 50 %}
-                        <!-- if fixed_arena_class.state == 4 -->
-                        <span id="workspace_state_display" style="color:limegreen;">RUNNING</span>
-                        {% elif fixed_arena_class.state == 53 %} <!-- workspace stopped == 6 -->
-                        <span id='workspace_state_display' style="color:lightcoral;">STOPPED</span>
-                        {% else %}
-                        <span id='workspace_state_display' style="color:#b3be27;">WORKING</span>
-                        {% endif %}
-                    </p>
+                <li>{{ logo.cln_logo_div() }}</li>
+                <li id="control-ctn" class="control-container">
+                    <ul class="flex-column control-container-list">
+                        <li class="nav-item disabled control-container-list">
+                            {% if workspace.expired == False %}
+                                <!-- If the workspace isn't expired, show the expiration date. If the workspace has a start-time and
+                                run duration set, display a countdown timer until shutoff -->
+                                {% if workspace.state != 72 %}
+                                    <h5><i id="workoutState" class="fa fa-circle buildState running fa-pr-5"></i><span id="workoutStateObj" style="color: white;"></span></h5>
+                                    <p style="color: white;">Expires: <span class="timestampField">{{ workspace.expires }}</span> </p>
+                                {% endif %}
+                            {% else %}
+                                <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                                    <h5 class="text-center">Workout Expired</h5>
+                                </div>
+                            {% endif %}
+                        </li>
+                    </ul><!-- End #control-ctn ul.control-container-list -->
+                </li> <!-- End workspace control container -->
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-toggle="pill"
+                            data-target="#home-container" type="button" role="tab"
+                            aria-controls="home-container" aria-selected="true"><i class="fa fa-book fa-lg fa-pr-5"></i>Workout</button>
                 </li>
-                <li><div id="loading-msg"></div></li>
-                <li><a style="width:100%; background-color: #1c2538; color: whitesmoke" class="btn" id="workspace_link" href="http://{{ fixed_arena_workout.parent_id }}-display{{ dns_suffix }}:8080/guacamole/#/?username={{ fixed_arena_workout.proxy_connections[0].username }}&password={{fixed_arena_workout.proxy_connections[0].password}}" target="_blank">ENTER WORKSPACE!</a></li>
-                <li><p style="color: whitesmoke;">Expiration date: {{ expiration_iso8601 }}</p></li>
-            </ul>
-        </div> <!--End sidebar-menu div
-        col-md-10 col-sm-10 col-10
-        -->
-        <div id="content-div" class="col main mt-3 h-100 pr-3 overflow-auto">
-            <div class='col-sm-9' style="padding-top:1em; margin-top:2%;">
-                <div id='workspace_info' class='container' style="margin:0;">
-                    <h2>Welcome to your {{ fixed_arena_class.summary.name }} workspace!</h2>
-                    <p>{{ fixed_arena_class.summary.description }}</p>
-                    {% if is_expired %}
-                        <p><b>*This workspace has expired. If you need to continue working please contact your instructor.</b></p>
-                    {% endif %}
-                    {% if fixed_arena_class.summary.student_instructions_url %}
-                        <a href="{{ fixed_arena_class.summary.student_instructions_url }}" target="_blank" rel="noopener noreferrer" class='landing_dropdown'>Workspace Instructions</a><br>
-                    {% endif %}
-                        <br>
-                        <h2>Workspace Servers</h2>
-                        <table id='workspace_server_table' style="position: relative; border-collapse: separate; border-spacing: 1em 0;">
-                            <tr>
-                                <th>Server Name</th>
-                                <th>IP</th>
-                                <th>Server State</th>
-                            </tr>
-                            <tr>
-                                <td>{{servername}}</td>
-                                <td>{{serverip.internal_ip }}</td>
-                                <td>{{fixed_arena_class.state}}</td>
-                            </tr>
-                        </table>
-                        <br>
-                </div>
-            </div>
-        {{ forms.contact_us() }}
-        </div> <!--Main Container-->
-</div>
+            </ul><!-- End #sidebar-nav -->
+        </div><!-- End #sidebar-div -->
+         <main class="col offset-2 main pt-3 mt-3 h-100 pr-3"  style="overflow: auto;">
+             <div id="content-div" class="overflow-auto">
+                <div id="tab-container" class="tab-content">
+                    <div class="tab-pane fade active show" id="home-container" role="tabpanel" aria-labelledby="home-tab">
+                        <div class="container">
+                            <div id="workspace-summary-div" class="info-container">
+                                <div id="class-summary">
+                                    <h2 class="text-center">{{ fixed_arena_class.summary.name }}</h2>
+                                    <p>{{ fixed_arena_class.summary.description }}</p>
+                                    {% if fixed_arena_class.summary.student_instructions_url %}
+                                        <div style="margin: 2vh 0 2vh 0;">
+                                                <a class='btn-fa' href="{{ fixed_arena_class.summary.student_instructions_url }}"
+                                                    target="_blank" rel="noopener noreferrer">Workout Instructions</a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div><!-- End container.workout-summary -->
+                        <div class="container">
+                            <div class="row">
+                                <div class="row">
+                                    <div class="info-container" style="min-width: 480px;">
+                                        <table class="table text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="text-center">Connection</th>
+                                                    <th scope="col" class="text-center">Server Name</th>
+                                                    <th scope="col" class="text-center">DNS</th>
+                                                    <th scope="col" class="text-center">IP</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for server in workspace['servers'] %}
+                                                    <tr>
+                                                        {% if server.url %}
+                                                            {% if workspace.expired == False %}
+                                                                {% if workspace.state == 50 %}
+                                                                    <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                {% else %}
+                                                                    <td><a href="#" class="btn-fa connection-link disabled" target="_blank">Connect to Server</a></td>
+                                                                {% endif %}
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <td>No Public Interface</td>
+                                                        {% endif %}
+                                                        <td>{{ server.name }}</td>
+                                                        {% if server.nics[0].host_dns %}
+                                                            <td>{{ server.nics[0].host_dns }}</td>
+                                                        {% else %}
+                                                            <td>None</td>
+                                                        {% endif %}
+                                                        <td>{{ server.nics[0].internal_ip }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table><!-- End server table -->
+                                    </div><!-- End server table info-container div -->
+                                </div>
+                            </div>
+                        </div><!-- End container.servers -->
+                        <div class="info-container">
+                            <!-- TODO: Add Image for Generate Network map -->
+                        </div>
+                    </div><!-- End #home-container.tab-pane -->
+                </div><!-- End #tab-container.tab-content -->
+             </div><!-- End #content-div.overflow-auto -->
+             {{ forms.contact_us() }}
+         </main><!-- End main -->
+    </div><!-- End #content-row -->
 {% endblock %}
-

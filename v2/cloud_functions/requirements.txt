@@ -1,3 +1,4 @@
+canvasapi==3.0.0
 google.cloud
 google-api-core==2.11.0
 google-cloud-storage==2.8.0
@@ -10,6 +11,7 @@ pyyaml
 pymysql==1.0.3
 cryptography==40.0.1
 python-jose[cryptography]==3.3.0
+pytz~=2022.7.1
 oauth2client
 netaddr
 functions-framework==3.3.0

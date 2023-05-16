@@ -1,3 +1,4 @@
+from handlers.maintenance_handler import MaintenanceHandler
 from cloud_fn_utilities.periodic_maintenance.daily_maintenance import DailyMaintenance
 from cloud_fn_utilities.periodic_maintenance.hourly_maintenance import HourlyMaintenance
 from cloud_fn_utilities.periodic_maintenance.quarter_hourly_maintenance import QuarterHourlyMaintenance
@@ -14,6 +15,10 @@ __status__ = "Production"
 
 
 if __name__ == "__main__":
+    response = str(input(f"Do you want to test the Maintenance Handler function itself? [Y/n] "))
+    if not response.upper().startswith("N"):
+        MaintenanceHandler().route()
+
     response = str(input(f"What type of Maintenance do you want to run? ([D]aily, [H]ourly, [Q]uarter-hourly) "))
     if str.upper(response).startswith("D"):
         DailyMaintenance(debug=True).run()

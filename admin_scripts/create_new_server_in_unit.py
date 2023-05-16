@@ -46,7 +46,7 @@ def create_new_server_in_unit(unit_id, server_spec_file):
     spec_folder = "temp"
 
     # Open and read YAML file
-    file_object = os.path.join(spec_folder, server_spec_file)
+    file_object = os.path.join('..', 'build-files', 'server-specs', server_spec_file)
     try:
         with open(file_object, "r") as f:
             server_spec = yaml.load(f, Loader=yaml.SafeLoader)

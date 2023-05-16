@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Inspect{% endblock %}
+{% block styles %}
+    <link type="text/css" rel="stylesheet" href="{{ url_for('classified.static', filename='css/classified-app.css')}}">
+{% endblock %}
+{% block nav_title %}Inspect{% endblock %}
+{% block navbar %}
+    <div class='text-center'>
+        <h3 id="current-user"></h3>
+    </div>
+{% endblock %}
+{% block content %}
+<main class="col main pt-3 mt-3 h-100">
+    {% if completed == true %}
+    <script>
+        function getCookie(cname) {
+              let name = cname + "=";
+              let decodedCookie = decodeURIComponent(document.cookie);
+              let ca = decodedCookie.split(';');
+              for(let i = 0; i <ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                  c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                  return c.substring(name.length, c.length);
+                }
+              }
+              return "";
+            }
+            $(document).ready(function(){
+                $("#completion_modal").modal('show');
+                document.getElementById('current-user').innerText = 'Welcome, ' + getCookie('AwesomeITUser') + '!';
+            });
+        </script>
+    {% endif %}
+    <div class="overflow-auto">
+        <div class="tab-content">
+            <div class="tab-content fade active show" id="home-tab" role="tabpanel" aria-labelledby="home-tab-btn">
+                <div class="image-container">
+                    <img src="{{ url_for('classified.static', filename='imgs/classified_boxes.png') }}" alt="Boxes"
+                         style="background-color: whitesmoke; border-radius: 4px; max-height: 650px; max-width: 800px;  "
+                         class='image-container-flex'>
+                </div>
+                <div class="content-container" style="margin-top: 10px;">
+                    {% if completed %}
+                        <h1 class="text-center" style="color: white;">{{ classified_flag }}</h1>
+                    {% endif %}
+                    <div><!--Oh there seems to be something in this box-->
+                        <div>
+                            <!--Wait a second...there's another box-->
+                            <div>
+                                <!--Nope this box just has figurines of the Trojan mascot-->
+                                <div> <!-- Oh dear Maximus there really is a lot --></div>
+                                <div> <!-- WHY ARE THERE SO MANY!!??? --></div>
+                                <div> <!-- export USERNAME Maximus --></div>
+                                <div>
+                                    <!--OH THIS IS THE...and no.  -->
+                                    <div>
+                                        <!--This is not the box, but it's got some things of interest included-->
+                                        <!-- data-target='#loginModal -->
+                                        <div class="col text-center">
+                                            <!-- This is not the data-target we are looking for ... -->
+                                            <button class="btn btn-quaternary text-uppercase" type="button"
+                                                    data-toggle="modal" data-target="#thisButtonIsPointless"
+                                                     style="width: 30%"><i class="fa fa-user"></i>Login
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <!--Just a bunch of cat pictures. Something about the Cats of Valhalla? -->
+                                            <div> <!-- Long ago in the land of Catrim a prophecy arose to tell the tale of an AwesomeItUser --></div>
+                                            <div> <!-- It was told that one day AwesomeITUser would rise to unleash the Cats of Valhalla --></div>
+                                            <div> <!-- With the Cats of Valhalla, AwesomeITUser would !! export USER_PASSWORD TrojanSpirit!2021 --></div>
+                                            <div>
+                                                <!--End of the boxes and no classified flag...Where is it?-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- Packing Boxes -->
+                </div><!-- End summary-container -->
+            </div><!-- End home-tab -->
+        </div><!-- End tab-content -->
+    </div><!-- End overflow-auto.div -->
+    {% if completed == true %}
+    <div id="completion_modal" class="modal" data-easein="tada" tabindex="-1" role="dialog" aria-labelledby="Completion Modal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">You found the flag!</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                </div>
+                <div class="modal-body">
+                    <p>Good thing Maximus was holding onto the flag for us. It would have been awful for this classified
+                    flag to fall into the hands of someone from a rival school. Thanks for getting this flag back to us.
+                        We will make sure not to lose it in some boxes again.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">
+                        Workout Complete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div id="loginModal" class="modal fade">
+        <div class="modal-dialog modal-login">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Member Login</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form action="{{ url_for('classified.inspect_login', workout_id=workout['id'])}}" method="post">
+                        <div class="form-group">
+                            <i class="fa fa-user"></i>
+                            <input type="text" class="form-control" name="username" placeholder="Username" required="required">
+                        </div>
+                        <div class="form-group">
+                            <i class="fa fa-lock"></i>
+                            <label for="password">Password </label>
+                            <input type="password" class="form-control" name="password" placeholder="Password" id="password" value="" autocomplete="off"/>
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-primary btn-block btn-lg" value="Login">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a href="#">Forgot Password? Sorry, should have remembered.</a>
+                </div>
+            </div>
+        </div>
+    </div><!-- End loginModal -->
+</main><!-- End main -->
+{% endblock %}

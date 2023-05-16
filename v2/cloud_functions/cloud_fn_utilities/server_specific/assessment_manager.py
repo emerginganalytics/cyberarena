@@ -40,19 +40,16 @@ class AssessmentManager:
         self.build = self.ds.get()
         if not self.build:
             raise LookupError(f"The datastore record for {self.build_id} no longer exists!")
-        if 'build_type' in self.build:
-            self.build_type = self.build['build_type']
-            if self.build_type == BuildConstants.BuildType.ESCAPE_ROOM:
-                self.assessment_questions = self.build['escape_room']['puzzles']
-                self.url = f"{self.env.main_app_v2_url}/api/escape-room/team/"
-            else:
-                if 'assessment' in self.build and 'questions' in self.build['assessment']:
-                    self.assessment_questions = self.build['assessment']['questions']
-                else:
-                    self.assessment_questions = None
-                self.url = f"{self.env.main_app_v2_url}/api/unit/workout/"
+        if escape_room := self.build.get('escape_room', None):
+            self.assessment_questions = escape_room['puzzles']
+            self.url = f"{self.env.main_app_url_v2}/api/escape-room/team/"
         else:
-            raise ValueError(f"The build object for the assessment has no build_type key")
+            if 'assessment' in self.build and 'questions' in self.build['assessment']:
+                self.assessment_questions = self.build['assessment']['questions']
+            else:
+                self.assessment_questions = None
+            self.url = f"{self.env.main_app_url_v2}/api/unit/workout/"
+
 
         self.assessment_script = None
         if 'assessment_script' in self.build:

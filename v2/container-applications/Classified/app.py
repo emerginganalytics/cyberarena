@@ -9,9 +9,11 @@ from app_utilities.crypto_suite.hashes import Hashes
 # App Blueprint Imports
 from classified.routes import classified_bp
 from johnnyhash.routes import johnnyhash_bp
+from vulnerability_defender.routes import vulnerability_defender
 
 # API Views
 from api.johnnyhash_api import JohnnyHashAPI, JohnnyCipherAPI
+from api.classified_api import ClassifiedAPI
 
 cloud_env = CloudEnv()
 
@@ -23,6 +25,7 @@ app.jinja_env.globals['project'] = cloud_env.project
 # Register Blueprints
 app.register_blueprint(johnnyhash_bp)
 app.register_blueprint(classified_bp)
+app.register_blueprint(vulnerability_defender)
 
 
 @app.route('/<build_id>')
@@ -50,6 +53,7 @@ def register_api(view, endpoint, url, pk='id', pk_type='string'):
 # Register API Routes
 register_api(view=JohnnyHashAPI, endpoint='hashes', url='/api/hashes', pk='build_id')
 register_api(view=JohnnyCipherAPI, endpoint='ciphers', url='/api/ciphers', pk='build_id')
+register_api(view=ClassifiedAPI, endpoint='classified', url='/api/classified', pk='build_id')
 
 
 if __name__ == '__main__':

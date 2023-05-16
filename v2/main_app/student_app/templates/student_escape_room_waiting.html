@@ -6,6 +6,7 @@
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('student_app.static', filename='css/student_app.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/animations.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -100,7 +101,20 @@
                             {% if not workout.expired %}
                                 <h1 class="text-center">Escape Room Not Started</h1>
                                 <p class="text-center">Page will automatically redirect once the room is opened</p>
-                                <!-- TODO: Add bouncing vertical bar animation -->
+                                <div id="loader">
+                                    <div class="loading">
+                                        <div class="rectangle_1"></div>
+                                        <div class="rectangle_2"></div>
+                                        <div class="rectangle_3"></div>
+                                        <div class="rectangle_4"></div>
+                                        <div class="rectangle_5"></div>
+                                        <div class="rectangle_6"></div>
+                                        <div class="rectangle_7"></div>
+                                        <div class="rectangle_8"></div>
+                                        <div class="rectangle_9"></div>
+                                        <div class="rectangle_10"></div>
+                                    </div>
+                                </div>
                             {% else %}
                                 <h1 class="text-center">Escape Room Expired</h1>
                             {% endif %}

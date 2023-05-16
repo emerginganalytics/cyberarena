@@ -149,19 +149,7 @@ function markComplete(question_id, build_id, url){
         }
     });
 }
-function startEscapeRoomTimer(build_id, url, action) {
-    let URL = url + build_id;
-    let json_data = JSON.stringify({'unit_action': action, 'build_id': build_id})
-    fetch(URL, {
-        method: 'PUT',
-        headers: json_headers,
-        body: json_data
-    }).then(response =>
-        response.json()
-    ).then((data) =>{
-        console.log(data);
-    })
-}
+
 function addTeamNameToWorkout(workout_id){
     console.log(workout_id);
 }
@@ -292,4 +280,8 @@ function filterWorkouts(filter_group) {
             }
         }
     }
+}
+
+function updateLMSCourses(option, idx){
+    let courses = document.getElementById('course-code-' + idx)
 }

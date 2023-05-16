@@ -60,6 +60,12 @@ class EscapeRoomUnit(MethodView):
             workouts = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=build_id) \
                 .get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
             if workouts:
+                if args := request.args:
+                    if state := args.get('state', None):
+                        workout_states = []
+                        for workout in workouts:
+                            workout_states.append(workout['state'])
+                        return self.http_resp(code=200, data={'states': workout_states}).prepare_response()
                 return self.http_resp(code=200, data=workouts).prepare_response()
             return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
@@ -142,7 +148,7 @@ class EscapeRoomUnit(MethodView):
                         self.pubsub_mgr.msg(handler=str(PubSub.Handlers.CONTROL.value), build_id=workout['id'],
                                             cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value),
                                             action=str(PubSub.Actions.START.value))
-                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 30
+                        workout['escape_room']['start_time'] = datetime.now().timestamp() + 10
                         workout['escape_room']['time_limit'] = time_limit
                         ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=workout['id'])
                         ds_workout.put(workout)
@@ -218,8 +224,8 @@ class EscapeRoomWorkout(MethodView):
         join_code = form_data.get('join_code', None)
         if not join_code:
             return self.http_resp(400).prepare_response()
-        unit = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query(
-            filter_key='join_code', op='=', value=join_code)
+        filters = [('join_code', '=', join_code)]
+        unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(filters=filters)
         if unit:
             return redirect(url_for('student_app.claim_escape_room', parent=unit[0]['id']))
         return self.http_resp(404).prepare_response()
@@ -268,6 +274,8 @@ class EscapeRoomWorkout(MethodView):
                     puzzle['answer'] = ''
                     if puzzle['correct']:
                         self.workout['escape_room']['number_correct'] += 1
+                    else:
+                        puzzle['reveal'] = ''
                 self.workout['escape_room']['answer'] = ''
                 return self.http_resp(code=200, data=self.workout).prepare_response()
             else:

@@ -133,7 +133,7 @@
                                 <div class="server-toolbar-div">
                                     <ul class="server-toolbar">
                                         <li class="server-control">
-                                             {% if fixed_arena_class.state == 53 %}
+                                             {% if fixed_arena_class.state in [52, 54] %}
                                                 <button type="button" onclick="manage_class(2, '{{ fixed_arena_class.key.name }}')"
                                                     class="server-control-btn no-select">
                                                     <i class="fa fa-play-circle fa-lg margin-r-5" style="color: blue;"></i>Start Class</button>
@@ -144,7 +144,7 @@
                                             {% endif %}
                                         </li>
                                         <li class="server-control">
-                                            {% if fixed_arena_class.state == 50 %}
+                                            {% if fixed_arena_class.state in [50] %}
                                                 <button type="button" onclick="manage_class(4, '{{ fixed_arena_class.key.name }}')"
                                                     class="server-control-btn no-select">
                                                     <i class="fa fa-stop-circle fa-lg margin-r-5" style="color: blue;"></i>Stop Class</button>

@@ -4,6 +4,7 @@ from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.globals import DatastoreKeyTypes, BuildConstants, get_current_timestamp_utc
+from main_app_utilities.lms.lms_canvas import LMSCanvas
 
 teacher_app = Blueprint('teacher_app', __name__, url_prefix="/teacher",
                         static_folder="./static", template_folder="./templates")
@@ -15,12 +16,18 @@ def teacher_home():
     if teacher_email := session.get('user_email', None):
         auth = ArenaAuthorizer()
         if user := auth.authorized(email=teacher_email, base=auth.UserGroups.INSTRUCTOR):
-            teacher_info = {}
-
+            teacher_info = {'lms': {}}
+            if canvas := user['settings'].get('canvas', None):
+                canvas_lms = LMSCanvas(url=canvas['url'], api_key=canvas['api'])
+                teacher_info['lms']['canvas'] = canvas_lms.get_courses()
+            if blackboard := user['settings'].get('blackboard', None):
+                # TODO: Add support for getting courses from Blackboard
+                blackboard_lms = {}
+                teacher_info['lms']['blackboard'] = {}
             # Get all the units for this instructor
-            unit_query = DataStoreManager(key_id=DatastoreKeyTypes.UNIT.value).query()
-            unit_query.add_filter('instructor_id', '=', teacher_email)
-            unit_list = list(unit_query.fetch())
+            unit_list = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(
+                filters=[('instructor_id', '=', teacher_email)]
+            )
             # Sort queried units into active and expired
             active_units = []
             expired_units = []
@@ -57,7 +64,7 @@ def teacher_home():
                 teacher_info['expired_units'] = sorted(expired_units, key=lambda i: (i['created']), reverse=True)
 
             # Get list of workouts from datastore catalog
-            specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CATALOG.value).query().fetch())
+            specs = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value).query()
             workout_specs = {
                 'assignments': [],
                 'live': [],
@@ -93,7 +100,7 @@ def workout_list(unit_id):
                 if unit.get('join_code', None):
                     join_url = f"{request.host_url.rstrip('/')}{url_for('student_app.claim_workout')}"
                 workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
-                attack_specs = list(DataStoreManager(key_id=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query().fetch())
+                attack_specs = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
                 if len(workouts_list) > 0:
                     registration_required = unit.get('registration_required', False)
                     unit['api'] = _get_api_urls(build_type=unit['build_type'])
@@ -165,6 +172,7 @@ def escape_room(unit_id):
                         else:  # Escape Room timer has expired
                             unit['escape_room']['closed'] = True
                         unit['escape_room']['time_remaining'] = time_remaining
+                        unit['escape_room']['start_time'] = start_time
                         break
                     return render_template('teacher_escape_room.html', auth_config=cloud_env.auth_config,
                                            auth_list=user['permissions'],
@@ -173,6 +181,16 @@ def escape_room(unit_id):
                                        auth_list=user['permissions'],
                                        unit=dict(unit), workout_list=[], join_url=join_url)
             return redirect('/no-workout')
+    return redirect('/login')
+
+
+@teacher_app.route('/settings', methods=['GET', 'POST'])
+def settings():
+    if teacher_email := session.get('user_email', None):
+        auth = ArenaAuthorizer()
+        if user := auth.authorized(email=teacher_email, base=auth.UserGroups.INSTRUCTOR):
+            urls = _get_api_urls(return_all=True)
+            return render_template('settings.html', auth_config=cloud_env.auth_config, auth_list=user['permissions'], urls=urls)
     return redirect('/login')
 
 

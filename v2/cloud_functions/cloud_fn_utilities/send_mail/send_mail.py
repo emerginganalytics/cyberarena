@@ -70,7 +70,7 @@ class SendMail:
         except Exception as e:
             print(e)
 
-    def send_expiring_units(self, unit_id, instructor, hours_until_expires):
+    def send_expiring_units(self, unit_id, workout_name, instructor, num_workouts, hours_until_expires):
         """
         sends an email to the provided instructor's email that the unit is about to expire
         @return:
@@ -80,7 +80,11 @@ class SendMail:
         eml_to = To(instructor)
         eml_content = Content(
             mime_type="text",
-            content=f"Unit {unit_id} in project {project} expires in {hours_until_expires}hrs"
+            content=f"Unit id {unit_id}"
+                    f"Name: {workout_name}"
+                    f"Project: {project}"
+                    f"Number of Workouts: {num_workouts}"
+                    f"Expires in {hours_until_expires}hrs"
         )
         self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content)
 

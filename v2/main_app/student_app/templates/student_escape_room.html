@@ -64,15 +64,17 @@
                // Start timer
                {% if workout.escape_room.time_remaining > 0 %}
                    {% if not workout.escape_room.escaped %}
-                       let countdownTimer = new Timer("{{ workout['id'] }}", 'escape_room');
-                       let times = {
-                           'build_type': 'escape_room',
-                           'start_time': {{ workout.escape_room.start_time }},
-                           'time_limit': {{ workout.escape_room.time_limit }},
-                           'closed': {{ workout.escape_room.closed | lower }}
-                       }
-                       countdownTimer.start(times);
-                       getEscapeRoomState("{{ workout['id'] }}");
+                       {% if workout.state < 72 %}
+                           let countdownTimer = new Timer("{{ workout['id'] }}", 'escape_room');
+                           let times = {
+                               'build_type': 'escape_room',
+                               'start_time': {{ workout.escape_room.start_time }},
+                               'time_limit': {{ workout.escape_room.time_limit }},
+                               'closed': {{ workout.escape_room.closed | lower }}
+                           }
+                           countdownTimer.start(times);
+                           getEscapeRoomState("{{ workout['id'] }}");
+                       {% endif %}
                    {% endif %}
                {% endif %}
            });
@@ -101,6 +103,10 @@
                                 </div>
                             {% endif %}
                         {% endif %}
+                    {% else %}
+                        <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
+                            <h5 class="text-center">Room Expired!</h5>
+                        </div>
                     {% endif %}
                 </li>
                 <li class="nav-item" role="presentation">
@@ -249,16 +255,20 @@
                     <div id="clue-container" class="tab-pane fade show" role="tabpanel" aria-labelledby="clue-tab">
                         <div class="clues-container">
                             {% set puzzles_correct = namespace(value=0) %}
+                            <h3>Clues will be revealed as each puzzle is completed!</h3>
                             {% for puzzle in workout.escape_room.puzzles %}
                                 {% if puzzle.correct %}
                                     <div class="puzzle-clues">
                                         <p class="puzzle-clues">{{ puzzle.reveal }}</p>
                                         {% set puzzles_correct.value = puzzles_correct.value + 1 %}
                                     </div>
+                                {% else %}
+                                     <div class="puzzle-clues">
+                                        <p class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</p>
+                                    </div>
                                 {% endif %}
                             {% endfor %}
                             {% if puzzles_correct.value == 0 %}
-                                <h3>Clues will be revealed as each puzzle is completed!</h3>
                                 {% for puzzle in workout.escape_room.puzzles %}
                                     <div class="puzzle-clues">
                                         <p class="puzzle-clues" id="{{ puzzle['id'] }}-reveal">Solve {{ puzzle.name }} puzzle to reveal</p>

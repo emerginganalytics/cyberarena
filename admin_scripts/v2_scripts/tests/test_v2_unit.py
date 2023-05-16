@@ -4,10 +4,14 @@ import yaml
 import random
 import string
 from main_app_utilities.global_objects.name_generator import NameGenerator
-from main_app_utilities.globals import Buckets, PubSub
+from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
+from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
+from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
+
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
 
 
@@ -24,14 +28,18 @@ __status__ = "Production"
 class TestUnit:
     def __init__(self, build_id=None, debug=True):
         self.env = CloudEnv()
+        self.env_dict = self.env.get_env()
         self.bm = BucketManager()
         self.build_id = build_id if build_id else None
         self.debug = debug
+        self.yaml = yaml.safe_load(open('test_v2_unit.yaml'))
 
-    def build(self, spec_name: str, debug: bool = True):
-        unit_yaml = self.bm.get(bucket=self.env.spec_bucket, file=f"{Buckets.Folders.SPECS}{spec_name}")
-        build_spec = yaml.safe_load(unit_yaml)
-        build_spec['instructor_id'] = 'philiphuff7@gmail.com'
+    def build(self, debug: bool = True):
+        build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=self.yaml['unit_name']).get()
+        if not build_spec:
+            print(f"Invalid build spec name passed")
+            return
+        build_spec['instructor_id'] = self.yaml.get('instructor_id', 'philiphuff7@gmail.com')
         build_spec['test'] = True
         build_spec['workspace_settings'] = {
             'count': 1,
@@ -39,24 +47,38 @@ class TestUnit:
             'student_emails': [],
             'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
         }
-        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, debug=debug)
+        build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
+
+        if self.yaml.get('lms_integration', False):
+            lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=self.yaml['lms_course_code'],
+                                                  due_at=self.yaml['lms_due_at'],
+                                                  time_limit=self.yaml['lms_time_limit'],
+                                                  allowed_attempts=self.yaml['lms_allowed_attempts'],
+                                                  lms_type=self.yaml['lms_type'])
+            build_spec = lms_spec_decorator.decorate()
+
+        build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
         build_spec_to_cloud.commit(publish=False)
-        build_id = build_spec_to_cloud.get_build_id()
+        build_id = build_spec_to_cloud.build_id
+
         if debug:
-            env_dict = self.env.get_env()
             print(f"Beginning to build a new unit with ID {build_id}")
             if build_spec.get('escape_room', None):
                 team_names = NameGenerator(count=build_spec['workspace_settings']['count']).generate()
-            for i in range(build_spec['workspace_settings']['count']):
-                if build_spec.get('escape_room', None):
-                    claimed_by = {'team_name': team_names[i]}
-                else:
-                    claimed_by = {'student_email': f'example{i}@ualr.edu'}
-                workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
-                print(f'\t...building workout with ID {workout_id}')
-                unit = Unit(build_id=build_id, child_id=workout_id, form_data=claimed_by, debug=debug, force=True,
-                            env_dict=env_dict)
+                for i in range(build_spec['workspace_settings']['count']):
+                    if build_spec.get('escape_room', None):
+                        claimed_by = {'team_name': team_names[i]}
+                    else:
+                        claimed_by = {'student_email': f'example{i}@ualr.edu'}
+                    workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+                    print(f'\t...building workout with ID {workout_id}')
+                    unit = Unit(build_id=build_id, child_id=workout_id, form_data=claimed_by, debug=debug, force=True,
+                                env_dict=self.env_dict)
+                    unit.build()
+            else:
+                unit = Unit(build_id=build_id, debug=True, env_dict=self.env_dict)
                 unit.build()
+
             print(f"Finished building")
         self.build_id = build_id
 
@@ -77,13 +99,12 @@ if __name__ == "__main__":
         delete_unit = str(input(f"What is the unit ID that you want to delete?"))
         TestUnit(build_id=delete_unit, debug=False).delete()
         print(f"Unit deletion was successful!")
-    build_first = str(input(f"Do you want to build a test unit first? (Y/n)"))
+    build_first = str(input(f"Build the test unit described in test_v2_unit.yaml? (Y/n)"))
     if not build_first or build_first.upper()[0] == "Y":
-        spec_name = str(input(f"What is the spec name (including .yaml) of the unit you want to test?"))
         test_unit = TestUnit()
-        test_unit.build(spec_name)
+        test_unit.build()
     else:
-        test_unit_id = str(input(f"Which unit do you want to test?"))
+        test_unit_id = str(input(f"Which unit ID do you want to test?"))
         test_unit = TestUnit(build_id=test_unit_id, debug=False)
     while True:
         action = str(input(f"What action are you wanting to test [QUIT], {PubSub.Actions.START.name}, "

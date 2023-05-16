@@ -25,9 +25,19 @@
         </ul>
     </div>
     <div class="navbar-nav ml-auto">
-        <button id="contact-us" class="nav-item btn top-navbar-btn"
-                data-toggle="modal" data-target="#commentsModal">Contact Us</button>
-        <button id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</button>
+        <ul class="nav nav-pills top-navbar-pill">
+            <li class="nav-item m-l-r-3">
+                <a id="contact-us" class="nav-item btn top-navbar-btn" href='#' data-toggle="modal"
+                   data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
+            </li>
+            <li class="nav-item m-l-r-3">
+                <button id="banner" class="nav-item btn top-navbar-btn">
+                    <span id="user"></span><i class="fa fa-caret-down"></i></button>
+            </li>
+            <li class="nav-item m-l-r-3">
+                <a id="sign-out" class="nav-item btn top-navbar-btn">Sign Out</a>
+            </li>
+        </ul>
     </div> 
 {% endblock %}
 {% block content %}
@@ -45,12 +55,7 @@
             enable_signout();
             if (value['authorized'] === true){
                 teacher_email = value['email'];
-            }
-            if (value['admin'] === true){
-              var admin_button = document.createElement("a");
-              admin_button.href = "/admin/home";
-              admin_button.className = "nav-link";
-              admin_button.innerHTML = "Admin Page";
+                document.getElementById('user').innerText = teacher_email;
             }
             if(value['student'] === true){
               var student_home_link = document.createElement("a");

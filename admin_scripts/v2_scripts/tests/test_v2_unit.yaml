@@ -1,0 +1,9 @@
+# The name of the unit you are testing (without the .yaml)
+unit_name: cyberattack_lms
+instructor_id: philiphuff7@gmail.com
+lms_integration: true
+lms_due_at: 2023-04-28 00:00:00
+lms_time_limit: -1
+lms_allowed_attempts: -1
+lms_course_code: 37
+lms_type: canvas
