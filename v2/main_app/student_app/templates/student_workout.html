@@ -156,9 +156,6 @@
                                         <li class="nav-item control-container-list" id="startWorkoutLi" style="display: none">
                                             <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
                                         </li>
-                                        <li class="nav-item control-container-list">
-                                            <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
-                                        </li>
                                     {% else %}{# workout is Stopped or in Transition to Running/Stopped  #}
                                         <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: none;">
                                             <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"

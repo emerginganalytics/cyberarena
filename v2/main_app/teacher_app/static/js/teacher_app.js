@@ -93,7 +93,7 @@ function checkState(build_id, url){
     let new_url = url + build_id + '?state=true';
     updateStates();
     function updateStates(){
-        let state_classes = ['running', 'stopped', 'deleted', 'transition'];
+        let state_classes = ['running', 'stopped', 'deleted', 'transition', 'notbuilt'];
         fetch(new_url, {
             method: 'GET',
         }).then(response =>
@@ -110,6 +110,8 @@ function checkState(build_id, url){
                                 icon.classList.add(states[i]['state']);
                             } else if (states[i]['state'] === 'ready') {
                                 icon.classList.add('stopped');
+                            } else if (states[i]['state'] === 'not_built') {
+                                icon.classList.add('notbuilt');
                             } else {
                                 icon.classList.add('transition');
                             }
@@ -282,6 +284,12 @@ function filterWorkouts(filter_group) {
     }
 }
 
-function updateLMSCourses(option, idx){
-    let courses = document.getElementById('course-code-' + idx)
+function updateLMSCourses(option, element_id){
+    $('.lms-courses').each(function(){
+        if ($(this).is(':visible')){
+            $(this).hide();
+        }
+    })
+    let element = $('#' + option + element_id);
+    element.show();
 }
