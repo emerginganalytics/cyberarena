@@ -24,7 +24,7 @@ class CloudEnv:
         Pull all the environment variables. If an HTTP error occurs because of too many requests, then back off a few
         seconds each time.
         """
-        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cyberarena')
         self.env_dict = env_dict if env_dict else self.ds.get()
         if self.env_dict:
             self.admin_email = self.env_dict['admin_email']

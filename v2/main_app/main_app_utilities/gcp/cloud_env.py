@@ -23,10 +23,10 @@ class CloudEnv:
         Pull all the environment variables. If an HTTP error occurs because of too many requests, then back off a few
         seconds each time.
         """
-        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cybergym')
+        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cyberarena')
         self.env_dict = env_dict if env_dict else self.ds.get()
         if self.env_dict:
-            self.admin_email = self.env_dict['admin_email']
+            self.admin_email = self.env_dict.get('admin_email', None)
             # GCP Project Variables
             self.project = self.env_dict['project']
             self.project_number = self.env_dict.get('project_number', None)
