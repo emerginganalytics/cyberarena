@@ -7,6 +7,7 @@
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/animations.css') }}">
     <style>
         body {
             background-color: whitesmoke;
@@ -69,39 +70,104 @@
                // Set welcome banner
               const welcome_nav = document.getElementById('user');
               welcome_nav.textContent = value['display_name'];
-
-              // Set workout form value
-              //document.getElementById('assignment-teacher-id').value = value['user_email'];
+              teacher_email = value['email'];
           });
-          $(document).ready(function() {
-               // Call functions that need to be run during initial page load here
-               let tsToDate = new TimestampToDate();
-               tsToDate.convert_timestamps();
-           });
+          var json_headers = {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json; charset=UTF-8'
+          }
+
+          function updateSettings() {
+              let form, i, formData, settings, canvas, blackboard, URL, submitBtn, icon;
+              URL = '{{ url_for("user") }}';
+
+              // Clear any previous messages
+              let msgElement = document.getElementById('responseMessage');
+              msgElement.innerText = '';
+              msgElement.classList.remove('fade-out', 'highlight-warning', 'highlight-info');
+              msgElement.classList.add('hidden');
+
+              // Add animation to submit button
+              submitBtn = document.getElementById('save-settings');
+              icon = submitBtn.querySelector('.loading-icon');
+              icon.classList.add('animated');
+
+              // Grab form values and submit
+              let valid = false;
+              form = document.getElementById('settings-form');
+              canvas = {
+                  'api': form.querySelector('input[name="apiKeyCanvas"]').value,
+                  'url': form.querySelector('input[name="urlCanvas"]').value,
+              }
+              blackboard = {
+                  'api': form.querySelector('input[name="apiKeyBlackboard"]').value,
+                  'url': form.querySelector('input[name="urlBlackboard"]').value,
+              }
+              settings = {'canvas': {}, 'blackboard': {}}
+              if (canvas['api'] || canvas['url']) {
+                  settings['canvas'] = canvas;
+                  valid = true;
+              }
+              if (blackboard['api'] || blackboard['url']) {
+                  settings['blackboard'] = blackboard;
+                  valid = true;
+              }
+              if (valid){
+                   fetch(URL, {
+                      method: 'POST',
+                      headers: json_headers,
+                      body: JSON.stringify({'user': teacher_email, 'settings': settings})
+                  })
+                      .then((response) => response.json())
+                      .then(data=>{
+                          let msg, msgElement;
+                          icon.classList.remove('animated');
+                          msg = data['message'];
+                          msgElement = document.getElementById('responseMessage');
+                          msgElement.classList.remove('hidden', 'highlight-warning');
+                          msgElement.classList.add('highlight-info', 'fade-out');
+                          msgElement.innerText = msg;
+                      });
+              } else {
+                  let msg, msgElement;
+                  icon.classList.remove('animated');
+                  msgElement = document.getElementById('responseMessage');
+                  msgElement.classList.remove('hidden');
+                  msgElement.classList.add('highlight-warning');
+                  msgElement.innerText = 'Missing at least one of required fields: *Canvas API, *Canvas URL, *Blackboard API, *Blackboard URL';
+              }
+          }
     </script>
-    <div class="form-input-group">
-        <div class="form-group">
-            <label for="apiKeyCanvas">API Key (Canvas)</label>
-            <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
-        </div>
-        <div class="form-group">
-            <label for="urlCanvas">URL (Canvas)</label>
-            <input id="urlCanvas" class="form-control" name="urlCanvas" type="text">
-        </div>
+    <div class="container">
+        <p id="responseMessage" class="text-center hidden"></p>
     </div>
-    <div class="form-input-group">
-        <div class="form-group">
-            <label for="apiKeyBlackboard">API Key (Blackboard)</label>
-            <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text">
+    <form class="form" id="settings-form">
+        <div class="form-input-group">
+            <div class="form-group">
+                <label for="apiKeyCanvas">API Key (Canvas)</label>
+                <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
+            </div>
+            <div class="form-group">
+                <label for="urlCanvas">URL (Canvas)</label>
+                <input id="urlCanvas" class="form-control" name="urlCanvas" type="text">
+            </div>
         </div>
-        <div class="form-group">
-            <label for="urlBlackboard">URL (Blackboard)</label>
-            <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text">
+        <div class="form-input-group">
+            <div class="form-group">
+                <label for="apiKeyBlackboard">API Key (Blackboard)</label>
+                <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text">
+            </div>
+            <div class="form-group">
+                <label for="urlBlackboard">URL (Blackboard)</label>
+                <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text">
+            </div>
         </div>
-    </div>
-    <div class="d-flex justify-content-right">
-        <button type="submit" id="save-settings" class="waves-effect waves-light btn-fa text-center build-workout">Save Settings</button>
-    </div>
+        <div class="d-flex justify-content-right">
+            <button type="button" id="save-settings"
+                    class="btn-fa text-center nav-link m-auto w-50" style="border-radius: 4px; max-width: 450px;"
+                    onclick="updateSettings()">Save Settings<i class="fa fa-circle-o-notch loading-icon" style="display: none;"></i></button>
+        </div>
+    </form>
     {{ forms.contact_us() }}
 </div>
 {% endblock content %}

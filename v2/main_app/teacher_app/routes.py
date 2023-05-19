@@ -184,7 +184,7 @@ def escape_room(unit_id):
     return redirect('/login')
 
 
-@teacher_app.route('/settings', methods=['GET', 'POST'])
+@teacher_app.route('/settings', methods=['GET'])
 def settings():
     if teacher_email := session.get('user_email', None):
         auth = ArenaAuthorizer()

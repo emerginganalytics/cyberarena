@@ -1,6 +1,6 @@
 from flask import json, session, request, redirect, url_for
 from flask.views import MethodView
-from api.utilities.decorators import admin_required
+from api.utilities.decorators import admin_required, instructor_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 from main_app_utilities.gcp.cloud_env import CloudEnv
@@ -36,7 +36,7 @@ class Users(MethodView):
                 'student': False
             })
 
-    @admin_required
+    @instructor_required
     def post(self):
         json_data = request.json
         if json_data:
@@ -53,8 +53,12 @@ class Users(MethodView):
             elif new_user and groups:
                 user_email = str(new_user.lower())
                 self._add_user(user_email, groups, settings=settings)
+            elif user and settings:
+                if not self._update_settings(user_email=str(user.lower()), settings=settings):
+                    return self.http_resp(code=404, msg='No user found!').prepare_response()
+                return self.http_resp(code=200, msg='Settings Updated!').prepare_response()
             return self.http_resp(code=200).prepare_response()
-        return self.http_resp(code=400).prepare_response()
+        return self.http_resp(code=400, msg='Something went wrong!').prepare_response()
 
     def _update_user(self, user_email, groups, settings, approve):
         user_groups = self.user_mgr.UserGroups
@@ -71,6 +75,9 @@ class Users(MethodView):
         else:
             self.user_mgr.remove_user(email=user_email)
             return False
+
+    def _update_settings(self, user_email, settings):
+        return self.user_mgr.update_user(email=user_email, settings=settings)
 
     def _add_user(self, user_email, groups, settings):
         user_groups = self.user_mgr.UserGroups

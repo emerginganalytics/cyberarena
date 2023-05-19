@@ -59,7 +59,9 @@ def claim_escape_room():
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config
-    workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+
+    if not (workout_info := DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()):
+        workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if workout_info:
         parent_id = workout_info.get('parent_id', None)
         if parent_id:
@@ -69,11 +71,13 @@ def workout_view(build_id):
                 workout_info['summary'] = unit['summary']
                 workout_info['expires'] = unit['workspace_settings']['expires']
                 current_ts = get_current_timestamp_utc()
+
+                # Check if workout is expired
                 is_expired = True
                 if current_ts <= workout_info['expires']:
                     workout_info['expired'] = is_expired = False
 
-                # TODO: Need to check to see if workout is already running; If yes, get expected stop ts
+                # Check if workout is running
                 if not is_expired:
                     # If shutoff_timestamp exists, then the workout is running
                     if workout_info.get('shutoff_timestamp', None):

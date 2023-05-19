@@ -538,3 +538,8 @@ p.complete {
     border-radius: 10px;
     padding: 5px;
 }
+.hidden {
+    color: whitesmoke;
+    border-radius: 10px;
+    padding: 5px;
+}

@@ -239,22 +239,24 @@
                                             <tbody>
                                                 {% if 'servers' in workout %}
                                                     {% for server in workout.servers %}
-                                                        <tr>
-                                                            {% if server.url %}
-                                                                {% if workout.expired == False %}
-                                                                    <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                        {% if server.hidden == False %}
+                                                            <tr>
+                                                                {% if server.url %}
+                                                                    {% if workout.expired == False %}
+                                                                        <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <td>No Public Interface</td>
                                                                 {% endif %}
-                                                            {% else %}
-                                                                <td>No Public Interface</td>
-                                                            {% endif %}
-                                                            <td>{{ server.name }}</td>
-                                                            {% if server.nics[0].host_dns %}
-                                                                <td>{{ server.nics[0].host_dns }}</td>
-                                                            {% else %}
-                                                                <td>None</td>
-                                                            {% endif %}
-                                                            <td>{{ server.nics[0].internal_ip }}</td>
-                                                        </tr>
+                                                                <td>{{ server.name }}</td>
+                                                                {% if server.nics[0].host_dns %}
+                                                                    <td>{{ server.nics[0].host_dns }}</td>
+                                                                {% else %}
+                                                                    <td>None</td>
+                                                                {% endif %}
+                                                                <td>{{ server.nics[0].internal_ip }}</td>
+                                                            </tr>
+                                                        {% endif %}
                                                     {% endfor %}
                                                 {% else %}
                                                     <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Servers</td></tr>

@@ -1,27 +1,3 @@
-{# Not currently in use #}
-{% macro deleteStudent(class_id, student_name) -%}
-<button type="button" class="btn-fa d-inline-flex col-5 btn-delete" data-toggle="modal" data-target="#modal_{{ class_id }}">
-    <i class="fa fa-trash fa-lg icon-light"></i> Delete Student
-</button>
-<div class="modal fade" id="modal_{{ class_id }}" tabindex="-1" role="dialog" style="box-shadow:none;background-color:transparent;" aria-labelledby="ModalLabel_{{ class_id }}" aria-hidden="true">
-    <div class="modal-dialog" role="document" style="width: 50%;">
-        <div class="modal-content">
-            <div class="modal-header" style='justify-content:center;'>
-            <h2 style='text-align:center;' class="modal-title" id="ModalLabel_{{ class_id }}">CAUTION</h2>
-            </div>
-            <div class="modal-body" style="display: block; word-wrap: break-word; white-space: normal">
-                <p>You are about to remove the following student, <em>{{ student_name }}</em>.
-                    This action can't be undone!</p>
-            </div>
-            <div class="modal-footer" style="justify-content:space-around;">
-                <button type="button" style="margin-right: 1em;" class="btn-fa popup_close" data-dismiss="modal">Cancel</button>
-                <a onclick="deleteStudent('{{ class_id }}', '{{ student_name }}');" class="btn-fa btn-delete" style="color: white;">Continue!</a>
-            </div>
-        </div>
-    </div>
-</div>
-{%- endmacro %}
-
 {# Cards are used as part of the Build Workout tab in teacher_classroom.html #}
 {% macro buildWorkoutCards(specs, build_type, url, courses=None) %}
     {% for spec in specs %}

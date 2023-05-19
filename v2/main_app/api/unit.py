@@ -74,7 +74,6 @@ class Unit(MethodView):
             if not build_spec:
                 return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
             build_spec['instructor_id'] = user_email
-            # expires_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
             expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").astimezone(timezone.utc).timestamp())
             build_spec['workspace_settings'] = {
                 'count': build_count,
@@ -123,10 +122,10 @@ class Unit(MethodView):
                 workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=child_id).get()
                 if workout:
                     for question in workout['assessment']:
-                        if question['id'] == question:
+                        if question['id'] == question_id:
                             question['complete'] = True
-                            break
-                    DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
+                            DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
+                            return self.http_resp(code=200).prepare_response()
                 return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
 
