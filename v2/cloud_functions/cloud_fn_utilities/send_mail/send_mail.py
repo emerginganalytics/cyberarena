@@ -80,11 +80,11 @@ class SendMail:
         eml_to = To(instructor)
         eml_content = Content(
             mime_type="text",
-            content=f"Unit id {unit_id}"
-                    f"Name: {workout_name}"
-                    f"Project: {project}"
-                    f"Number of Workouts: {num_workouts}"
-                    f"Expires in {hours_until_expires}hrs"
+            content=f"Unit id {unit_id}\n"
+                    f"Name: {workout_name}\n"
+                    f"Project: {project}\n"
+                    f"Number of Workouts: {num_workouts}\n"
+                    f"Expires in {hours_until_expires}hrs\n"
         )
         self.send_email(eml_subject=eml_subject, eml_to=eml_to, eml_content=eml_content)
 
