@@ -1,0 +1,16 @@
+.landing_content .btn, table{
+    width:75%;
+}
+td, th{
+    padding:0;
+}
+
+.team_container{
+    border: 1px solid black;
+    border-right:0;
+    padding:1em;
+    margin-bottom:1em;
+}
+select{
+    display:block!important;
+}
