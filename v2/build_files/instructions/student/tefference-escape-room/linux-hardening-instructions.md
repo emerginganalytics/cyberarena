@@ -1,4 +1,44 @@
-# Introducing Linux
+# Gigabyte APT
+For this lab exercise, the cybersecurity response team has been notified that the **Advanced Persistent Threat (APT)** Gigabyte Group has infiltrated one of our machines.  This APT uses several known attack methods and vectors.  To successfully complete the lab, we’ll need to remove their access and properly harden the Linux system they compromised.
+
+While the Gigabyte Group isn’t a real APT, [MITRE ATT&CK](https://attack.mitre.org) is an excellent resource for learning about real-world APTs and the **tactics, tools, and procedures (TTPs)** they use to compromise their targets.
+
+For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.  Identify them and remediate any related vulnerabilities, footholds, and persistence mechanisms to complete the lab.
+
+## Navigating to the Vulnerable System
+While the machine we logged into is on our organization’s network, it isn’t the machine targeted by the Gigabyte Group.  We’ll need to ssh into the target machine to gain a shell on it and start executing commands there.  To do that, use this command:
+
+`ssh cyberarena@10.1.1.51`
+
+Accept the ssh key warning and then type in the password: `Let’s workout!`
+
+Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system.
+1. **Malicious User**: Delete the malicious user account
+2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
+3. **Malicious Files**: Delete the malicious files added by Gigabyte
+4. **Startup Scripts**: Delete the malicious startup scripts for Gigabyte that allow its persistence
+
+# Gigabyte’s Indicators of Compromise
+### Initial Access: Log4J Vulnerability
+The Gigabyte Group is known for using the Log4j vulnerability to gain a foothold on its target systems.  What can you do to remediate this vulnerability and prevent further compromise?
+
+### Persistence: New User Creation
+After initial access, the Gigabyte Group will often create a new user account they can use to log back into and maintain access to the system using more conventional means.  Can you identify this account and remove it?
+
+### Privilege Escalation: Valid Admin Account
+Realizing that creating a new account may be an obvious red flag to system defenders, the Gigabyte Group will often attempt to compromise other legitimate accounts.  
+
+It looks like the Group wasn’t able to compromise the root user, but they were able to compromise one of the legitimate accounts on the system and escalate its privileges.  Only the root user should have user-level assigned sudo privileges.  Can you verify no other accounts have these privileges?
+
+### Persistence: Scheduled Task/Job
+Gigabyte, like many other APTs, won’t give up its footholds easily. The Gigabyte will often use scheduled tasks or startup scripts to maintain persistent access to its targets.  Gigabyte is particularly fond of using crontab.  
+
+Due to its complexity, defenders may overlook tasks meant to maintain persistence.  Can you identify the Gigabyte Group’s persistence mechanism on this machine?
+
+### Impact: Pirated Video Placement
+Finally, with its access secured, the Gigabyte Group likes to store pirated videos on target systems to blackmail its victims.  In our organization’s IT environment, video files, such as .wav and .mp4, are banned anyway.  Remove any of these from the system.
+
+# Guide to the Linux Operating System {#linux-guide}
 Linux is a computer **operating system (OS)** that is similar to other operating systems like Windows and macOS, but it is **free** and **open source.** This means that anyone can download and use Linux without having to pay for it. The source code of the operating system is freely available for anyone to modify and improve upon.
 
 One of the most noticeable differences between Linux and other operating systems is the user interface. Linux offers a wide range of user interfaces, including desktop environments, that allow you to customize the look and feel of your system to your liking. Many Linux systems also operate without a desktop environment and instead rely on the **command line interface (CLI)**.
@@ -105,37 +145,3 @@ Runs a command with elevated (root) privileges.
 
 ### `apt [command]`
 Install, list, update, or remove software packages on Debian-based distributions.
-
-# Gigabyte APT
-For this lab exercise, the cybersecurity team has been notified that the **Advanced Persistent Threat (APT)** Gigabyte Group has infiltrated one of our machines.  This APT uses several known attack methods and vectors.  To successfully complete the lab, we’ll need to remove their access and properly harden the Linux system they compromised.
-
-While the Gigabyte Group isn’t a real APT, [MITRE ATT&CK](https://attack.mitre.org) is an excellent resource for learning about real-world APTs and the **tactics, tools, and procedures (TTPs)** they use to compromise their targets.
-
-For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.  Identify them and remediate any related vulnerabilities, footholds, and persistence mechanisms to complete the lab.
-
-Navigating to the Vulnerable System
-While the machine we logged into is on our organization’s network, it isn’t the machine targeted by the Gigabyte Group.  We’ll need to ssh into the target machine to gain a shell on it and start executing commands there.  To do that, use this command:
-
-`ssh cyberarena@10.1.1.51`
-
-Accept the ssh key warning and then type in the password: `Let’s workout!`
-
-# Gigabyte’s Indicators of Compromise
-### Initial Access: Log4J Vulnerability
-The Gigabyte Group is known for using the Log4j vulnerability to gain a foothold on its target systems.  What can you do to remediate this vulnerability and prevent further compromise?
-
-### Persistence: New User Creation
-After initial access, the Gigabyte Group will often create a new user account they can use to log back into and maintain access to the system using more conventional means.  Can you identify this account and remove it?
-
-### Privilege Escalation: Valid Admin Account
-Realizing that creating a new account may be an obvious red flag to system defenders, the Gigabyte Group will often attempt to compromise other legitimate accounts.  
-
-It looks like the Group wasn’t able to compromise the root user, but they were able to compromise one of the legitimate accounts on the system and escalate its privileges.  Only the root user should have user-level assigned sudo privileges.  Can you verify no other accounts have these privileges?
-
-### Persistence: Scheduled Task/Job
-Gigabyte, like many other APTs, won’t give up its footholds easily. The Gigabyte will often use scheduled tasks or startup scripts to maintain persistent access to its targets.  Gigabyte is particularly fond of using crontab.  
-
-Due to its complexity, defenders may overlook tasks meant to maintain persistence.  Can you identify the Gigabyte Group’s persistence mechanism on this machine?
-
-### Impact: Pirated Video Placement
-Finally, with its access secured, the Gigabyte Group likes to store pirated videos on target systems to blackmail its victims.  In our organization’s IT environment, video files, such as .wav and .mp4, are banned anyway.  Remove any of these from the system.
