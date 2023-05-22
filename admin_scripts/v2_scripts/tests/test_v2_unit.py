@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import yaml
 import random
 import string
+import requests
 from main_app_utilities.global_objects.name_generator import NameGenerator
 from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
@@ -10,7 +11,7 @@ from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
-from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
+from main_app_utilities.lms.lms_canvas import LMSSpecCanvas
 
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
 
@@ -50,11 +51,13 @@ class TestUnit:
         build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
 
         if self.yaml.get('lms_integration', False):
-            lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=self.yaml['lms_course_code'],
-                                                  due_at=self.yaml['lms_due_at'],
-                                                  time_limit=self.yaml['lms_time_limit'],
-                                                  allowed_attempts=self.yaml['lms_allowed_attempts'],
-                                                  lms_type=self.yaml['lms_type'])
+            if self.yaml['lms_type'] == 'canvas':
+                lms_spec_decorator = LMSSpecCanvas(build_spec=build_spec,
+                                                            course_code=self.yaml['lms_course_code'],
+                                                            due_at=self.yaml['lms_due_at'],
+                                                            time_limit=self.yaml['lms_time_limit'],
+                                                            allowed_attempts=self.yaml['lms_allowed_attempts'],
+                                                            lms_type=self.yaml['lms_type'])
             build_spec = lms_spec_decorator.decorate()
 
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
@@ -91,6 +94,19 @@ class TestUnit:
     def delete(self):
         Unit(build_id=self.build_id, debug=self.debug).delete()
 
+    def question_completion(self):
+        ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.build_id)
+        unit = ds_unit.get()
+        workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.build_id)
+        for workout in workouts:
+            workout_id = workout['id']
+            for question in unit['lms_quiz']['questions']:
+                if question_key := question.get('question_key', None):
+                    data = {
+                        "question_key": question_key,
+                    }
+                    response = requests.put(f"http://localhost:8080//api/unit/workout/{workout_id}", json=data)
+
 
 if __name__ == "__main__":
     print(f"Unit v2 Tester.")
@@ -108,7 +124,7 @@ if __name__ == "__main__":
         test_unit = TestUnit(build_id=test_unit_id, debug=False)
     while True:
         action = str(input(f"What action are you wanting to test [QUIT], {PubSub.Actions.START.name}, "
-                           f"{PubSub.Actions.STOP.name}, or {PubSub.Actions.DELETE.name}?"))
+                           f"{PubSub.Actions.STOP.name}, {PubSub.Actions.DELETE.name}, or ASSESS?"))
         if not action or action.upper()[0] == "Q":
             break
         if action == PubSub.Actions.START.name:
@@ -118,3 +134,5 @@ if __name__ == "__main__":
         elif action == PubSub.Actions.DELETE.name:
             test_unit.delete()
             break
+        elif action.upper()[0] == "A":
+            test_unit.question_completion()

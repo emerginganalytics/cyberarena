@@ -1,16 +1,16 @@
 """
+TODO: Linux_harden_2.py is in good shape. Need to create a template. Also, this class needs to coordinate with the
+    schema for the escape_room assessment.
 Provides the startup scripts for each server based on the assessment questions in the build.
 
 This module contains the following classes:
     - AssessmentManager: Supplies the build specification for dynamic assessment.
 """
 
-import json
 from cloud_fn_utilities.globals import BuildConstants, DatastoreKeyTypes, Buckets
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
-import time
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
@@ -46,91 +46,99 @@ class AssessmentManager:
         else:
             if 'assessment' in self.build and 'questions' in self.build['assessment']:
                 self.assessment_questions = self.build['assessment']['questions']
+            elif 'lms_quiz' in self.build and 'questions' in self.build['assessment']:
+                self.assessment_questions = self.build['lms_quiz']['assessment']
             else:
                 self.assessment_questions = None
             self.url = f"{self.env.main_app_url_v2}/api/unit/workout/"
 
 
+        self.assessment_script = None
+        if 'assessment_script' in self.build:
+            self.assessment_script = self._create_startup_script(self.build['assessment_script'])
+
     def get_startup_scripts(self, server_name: str):
         """
-        Parses through the unit and returns any startup scripts needed for auto assessment.
+        If this is the server running the assessment script, send it the script to include in meta data.
 
         Args:
             server_name (str): The name of the server to use for adding the script meta data.
 
         Returns: The startup script to include as meta-data
-
         """
-        startup_script = None
-        i = 0
-        if not self.assessment_questions:
+        if self.assessment_script and self.assessment_questions['server'] == server_name:
+            self.logger.info(f"AssessmentManager: Adding the following script to {server_name}: "
+                             f"{self.assessment_script}")
+            return self.assessment_script
+        else:
             return None
 
-        for question in self.assessment_questions:
-            if question['type'] == BuildConstants.QuestionTypes.AUTO and 'server' in question \
-                    and question['server'] == server_name:
-                if question['operating_system'] == BuildConstants.ScriptOperatingSystems.WINDOWS:
-                    script = StartupScripts.windows_startup_script_env.format(
-                        BUILD_ID=self.build_id,
-                        URL=self.url
-                    )
-                    startup_script = {
-                        'key': 'windows-startup-script-bat',
-                        'value': script
-                    }
-                    if 'script_language' in question and question['script_language'] == 'python':
-                        script_command = 'python {script}'.format(script=question['script'])
-                    elif 'script_language' in question and question['script_language'] == 'powershell':
-                        script_command = 'powershell.exe -File ./{script}'.format(script=question['script'])
-                        script_command = f'"{script_command}"'
-                    else:
-                        script_command = question['script']
+    def _create_startup_script(self, assessment_script_spec: dict):
+        """
+        Creates the initial assessment script structure that will be built with additional question_key environment
+        variables. The task string is also created at this point, and will be appended at the end of the script.
+        """
+        script_operating_system = assessment_script_spec['operating_system']
+        script_params = {
+            'SCRIPT_REPOSITORY': self.script_repository,
+            'SCRIPT': assessment_script_spec['script'],
+            'SCRIPT_NAME': f"cyber-arena-assessment",
+        }
+        # Create operating system specific script pieces.
+        if script_operating_system == BuildConstants.ScriptOperatingSystems.WINDOWS:
+            key = 'windows-startup-script-bat'
+            initial_script = StartupScripts.Windows.env.format(BUILD_ID=self.build_id, URL=self.url)
+            if assessment_script_spec['script_language'] == 'python':
+                script_params['REOCCURRING_SCRIPT'] = f"python {assessment_script_spec['script']}"
+            elif assessment_script_spec['script_language'] == 'powershell':
+                script_params['REOCCURRING_SCRIPT'] = f"\"powershell.exe -File ./{assessment_script_spec['script']}\""
+            else:
+                script_params['REOCCURRING_SCRIPT'] = assessment_script_spec['script']
+            task = StartupScripts.Windows.task.format_map(script_params)
+        else:
+            key = 'startup-script'
+            initial_script = StartupScripts.Linux.env.format(BUILD_ID=self.build_id, URL=self.url)
+            if assessment_script_spec['script_language'] == 'python':
+                script_params['REOCCURRING_SCRIPT'] = f"python3 /usr/bin/{assessment_script_spec['script']}"
+            else:
+                script_params['REOCCURRING_SCRIPT'] = f"/usr/bin/{assessment_script_spec['script']}"
+            task = StartupScripts.Linux.task.format_map(script_params)
+        assessment_script = {'key': key, 'value': initial_script}
+        # Add the question environment variables
+        assessment_script['value'] = self._add_question_env(assessment_script['value'], script_operating_system)
+        # Finally, add the reoccurring task at the end of the script.
+        assessment_script['value'] += task
+        return assessment_script
 
-                    assess_script = StartupScripts.windows_startup_script_task.format(
-                        QUESTION_KEY=question['id'],
-                        Q_NUMBER=i,
-                        SCRIPT_REPOSITORY=self.script_repository,
-                        SCRIPT=question['script'],
-                        SCRIPT_NAME='Assess' + str(i),
-                        SCRIPT_COMMAND=script_command)
+    def _add_question_env(self, assessment_script, script_operating_system):
+        for i, question in enumerate(self.assessment_questions):
+            if 'script_assessment' in question and question['script_assessment']:
+                question_key = question['question_key']
+                if script_operating_system == BuildConstants.ScriptOperatingSystems.WINDOWS:
+                    assessment_script += StartupScripts.Windows.question.format(NUMBER=i, QUESTION_KEY=question_key)
                 else:
-                    script = StartupScripts.linux_startup_script_env.format(BUILD_ID=self.build_id, URL=self.url)
-                    if not startup_script:
-                        startup_script = {
-                            'key': 'startup-script',
-                            'value': script
-                        }
-                    if 'script_language' in question and question['script_language'] == 'python':
-                        script_command = f"python3 /usr/bin/{question['script']}"
-                    else:
-                        script_command = f"/usr/bin/{question['script']}"
-                    assess_script = StartupScripts.linux_startup_script_task.format(
-                        QUESTION_KEY=question['id'],
-                        Q_NUMBER=i,
-                        SCRIPT_REPOSITORY=self.script_repository,
-                        SCRIPT=question['script'],
-                        LOCAL_STORAGE="/usr/bin",
-                        SCRIPT_COMMAND=script_command)
-                if i != 0:
-                    startup_script['value'] += "\n"
-                startup_script['value'] += assess_script
-                i += 1
-
-        return startup_script
+                    assessment_script += StartupScripts.Linux.question.format(NUMBER=i, QUESTION_KEY=question_key)
+        return assessment_script
 
 
 class StartupScripts:
-    windows_startup_script_env = 'setx /m BUILD_ID {BUILD_ID}\n' \
-                                 'setx /m URL {URL}\n'
-    windows_startup_script_task = 'setx /m Q{Q_NUMBER}_KEY {QUESTION_KEY}\n' \
-                                  'call gsutil cp {SCRIPT_REPOSITORY}{SCRIPT} .\n' \
-                                  'schtasks /Create /SC MINUTE /TN {SCRIPT_NAME} /RU System /TR {SCRIPT_COMMAND}'
-    linux_startup_script_env = '#! /bin/bash\n' \
-                               'cat >> /etc/environment << EOF\n' \
-                               'BUILD_ID={BUILD_ID}\n' \
-                               'URL={URL}\n'
-    linux_startup_script_task = 'cat >> /etc/environment << EOF\n' \
-                                'Q{Q_NUMBER}_KEY={QUESTION_KEY}\n' \
-                                'EOF\n' \
-                                'gsutil cp {SCRIPT_REPOSITORY}{SCRIPT} {LOCAL_STORAGE}\n'\
-                                '(crontab -l 2>/dev/null; echo "* * * * * {SCRIPT_COMMAND}") | crontab -'
+    """
+    The Startup Scripts are either Windows or Linux based. Windows runs individual command prompt commands, but
+    Linux has a single script file and builds the script file through concatenation.
+    """
+    class Windows:
+        env = 'setx /m BUILD_ID {BUILD_ID}\n' \
+              'setx /m URL {URL}\n'
+        question = 'setx /m Q_{NUMBER}_KEY {QUESTION_KEY}\n'
+        task = 'call gsutil cp {SCRIPT_REPOSITORY}{SCRIPT} .\n' \
+               'schtasks /Create /SC MINUTE /TN {SCRIPT_NAME} /RU System /TR {REOCCURRING_SCRIPT}'
+
+    class Linux:
+        env = '#! /bin/bash\n' \
+              'cat >> /etc/environment << EOF\n' \
+              'BUILD_ID={BUILD_ID}\n' \
+              'URL={URL}\n'
+        question = 'Q_{NUMBER}_KEY={QUESTION_KEY}\n'
+        task = 'EOF\n' \
+               'gsutil cp {SCRIPT_REPOSITORY}{SCRIPT} /usr/bin\n' \
+               '(crontab -l 2>/dev/null; echo "* * * * * {REOCCURRING_SCRIPT}") | crontab -'

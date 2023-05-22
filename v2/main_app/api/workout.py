@@ -12,6 +12,7 @@ from main_app_utilities.gcp.datastore_manager import DataStoreManager, Datastore
 from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.globals import PubSub, WorkoutStates, BuildConstants
+from main_app_utilities.lms.lms_canvas import LMSCanvas
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -117,38 +118,42 @@ class Workout(MethodView):
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()
             elif recv_data := request.json:  # Check if question response is submitted
-                if question_id := recv_data.get('question_id', None):
-                    self.logger.info(f"PUT request question response for id {question_id}")
-                    print(f'PUT request question response for id {question_id}')
+                if question_key := recv_data.get('question_key', None):
+                    self.logger.info(f"PUT request question response for id {question_key}")
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
-                    if self.workout:
+                    ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id'])
+                    unit = ds_unit.get()
+                    if unit and 'lms_quiz' in unit:
+                        unit = self._submit_lms_question(unit, question_key)
+                        ds_unit.put(unit)
+                        return self.http_resp(code=200).prepare_response()
+                    elif self.workout and 'assessment' in self.workout:
                         response = recv_data.get('response', None)
                         check_auto = recv_data.get('check_auto', False)
-                        correct, update = self._evaluate_question(question_id, response, check_auto)
-                        print(f'Correct: {correct}; Update: {update}')
+                        correct, update = self._evaluate_question(question_key, response, check_auto)
+                        self._evaluate_question(question_key, response, check_auto)
                         if correct and update:
                             ds_workout.put(self.workout)
-                        # Clean up sensitive data from return object
-                        for question in self.workout['assessment']['questions']:
-                            if question.get('answer', None):
-                                question['answer'] = ''
                         return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
-                    return self.http_resp(code=404).prepare_response()
+                    else:
+                        self.logger.error(f"Auto assessment error for workout {build_id}. Either the workout is "
+                                          f"invalid or the workout has no associated assessment")
+                        return self.http_resp(code=404).prepare_response()
         self.logger.error(f"No build_id supplied.")
         return self.http_resp(code=400).prepare_response()
 
-    def _evaluate_question(self, question_id: int, response: str, check_auto=False):
+    def _evaluate_question(self, question_key: int, response: str, check_auto=False):
         """
         Loop through the class questions object for the correct question and determine if the response is correct.
         Args:
-            question_id (int):
+            question_key (int):
             response (str):
 
         Returns: Correct (Bool), Update Obj(Bool)
         """
         for question in self.workout['assessment']['questions']:
-            if question['id'] == question_id:
+            if question['id'] == question_key:
                 if question['type'] == 'auto':
                     if check_auto:
                         return question['complete'], False
@@ -163,6 +168,49 @@ class Workout(MethodView):
                         question['complete'] = True
                         return True, True
         return False, True
+
+    def _submit_lms_question(self, unit, question_key):
+        """
+        Auto assess a question for the LMS based on the unit and question passed in. The workout is an object variable.
+        Args:
+            unit (Any): Datastore entity
+            question_key (str): A unique identifier of the question being auto assessed
+
+        Returns: None
+
+        """
+        lms_type = unit['lms_connection']['lms_type']
+        url = unit['lms_connection']['url']
+        api_key = unit['lms_connection']['api_key']
+        course_code = unit['lms_connection']['course_code']
+        student_email = self.workout.get('student_email', None)
+        if lms_type == BuildConstants.LMS.CANVAS:
+            lms = LMSCanvas(url=url, api_key=api_key, course_code=course_code)
+        else:
+            self.logger.error(f"Unsupported LMS found for unit {unit['id']} when attempting to auto grade "
+                              f"for {student_email}")
+            raise ValueError("Unsupported LMS unit")
+
+        quiz_key = unit['lms_quiz'].get('quiz_key', None)
+        questions = unit['lms_quiz'].get('questions', None)
+        answered = False
+        for question in questions:
+            if question['question_key'] == question_key and not question.get('complete', False):
+                added_points = question['points_possible']
+                question['complete'] = True
+                self.logger.info(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
+                                 f"Question {question['question_text']}\nStudent: {student_email}")
+                lms.mark_question_correct(quiz_id=quiz_key, student_email=student_email, added_points=added_points)
+                answered = True
+                break
+            elif question['question_key'] == question_key and question.get('complete', False):
+                answered = True
+                break
+
+        if not answered:
+            self.logger.warning(f"Auto assessment submitted for quiz: {unit['lms_quiz']['name']} and "
+                                f"student {student_email}, but the question could not be found in the quiz!")
+        return unit
 
     def _find_existing_workout(self, unit, student_email):
         """

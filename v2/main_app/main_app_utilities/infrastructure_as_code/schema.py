@@ -204,21 +204,10 @@ class FirewallRuleSchema(Schema):
 
 class AssessmentSchema(Schema):
     questions = fields.Nested('AssessmentQuestionSchema', many=True)
+    assessment_script = fields.Nested('AssessmentScriptSchema',
+                                      description="The assessment script for all indicated questions. The script must "
+                                                  "align with answering the given questions.")
     key = fields.Str(required=False, description='Key used for decrypting workout secrets in container applications')
-
-
-class AssessmentQuestionSchema(Schema):
-    id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
-    type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
-    question = fields.Str(required=True)
-    key = fields.Str(required=False, description='The value used for decrypting individual cryptographic questions')
-    answer = fields.Str(required=False, description="The answer to the question for questions of type input")
-    script = fields.Str(required=False, description="script name (e.g. attack.py)")
-    script_language = fields.Str(required=False, description="e.g. python")
-    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
-                                                    "provided above")
-    operating_system = fields.Str(required=False, description="Target server operating system")
-    complete = fields.Bool(missing=False)
 
 
 class LMSQuizSchema(Schema):
@@ -226,7 +215,30 @@ class LMSQuizSchema(Schema):
     due_at = fields.DateTime(required=False, description="Due date for assignment")
     description = fields.Str(required=False, description="Description of assignment")
     allowed_attempts = fields.Float(missing=-1.0, description="Attempts available for assignment, -1 is unlimited")
+    assessment_script = fields.Nested('AssessmentScriptSchema', required=False,
+                                      description="The assessment script for all indicated questions. The script must "
+                                                  "align with answering the given questions.")
     questions = fields.Nested('LMSQuizQuestionsSchema', many=True)
+
+
+class AssessmentQuestionSchema(Schema):
+    id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
+    name = fields.Str(required=False, description="The name of the question, which is also used for the workout-level "
+                                                  "assessment script.")
+    type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.QuestionTypes]))
+    question = fields.Str(required=True)
+    key = fields.Str(required=False, description='The value used for decrypting individual cryptographic questions')
+    answer = fields.Str(required=False, description="The answer to the question for questions of type input")
+    script_assessment = fields.Bool(missing=False)
+    complete = fields.Bool(missing=False)
+
+
+class AssessmentScriptSchema(Schema):
+    script = fields.Str(required=False, description="script name (e.g. attack.py)")
+    script_language = fields.Str(required=False, description="e.g. python")
+    server = fields.Str(required=False, description="Server that runs script. Takes server name from list of servers "
+                                                    "provided above")
+    operating_system = fields.Str(required=False, description="Target server operating system")
 
 
 class LMSConnectionSchema(Schema):
@@ -243,6 +255,7 @@ class LMSQuizQuestionsSchema(Schema):
     question_text = fields.Str(required=True, description="Question text")
     question_type = fields.Str(required=False, description="Question type")
     points_possible = fields.Float(required=False, description="Points")
+    script_assessment = fields.Bool(missing=False)
     answers = fields.Nested('LMSQuizAnswerSchema', many=True, description="Question answers")
 
 
