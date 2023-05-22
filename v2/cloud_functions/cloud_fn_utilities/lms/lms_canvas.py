@@ -56,7 +56,9 @@ class LMSCanvas(LMS):
                             f"The instructions to complete this quiz are here: "
                             f"{self.build['summary']['student_instructions_url']}",
             'due_at': self.build['lms_quiz']['due_at'],
-            'points_possible': float(points_possible),
+            'show_correct_answers': False,
+            # TODO: Fix this points possible
+            'points': 80,
             'published': True,
             'grading_type': 'percent',
             'shuffle_answers': True,
@@ -74,7 +76,7 @@ class LMSCanvas(LMS):
             }
             question = new_quiz.create_question(question=question_data)
             question_ids.append(question.id)
-        self._store_quiz_identifiers(quiz_id=new_quiz.id, question_ids=question_ids)
+        self._store_quiz_identifiers(quiz_key=new_quiz.id, question_ids=question_ids)
         return new_quiz
 
     def get_updated_build(self):
@@ -92,7 +94,7 @@ class LMSCanvas(LMS):
             if quiz.name == quiz_name:
                 quiz.delete()
 
-    def _store_quiz_identifiers(self, quiz_id: int, question_ids: list):
-        self.build['lms_quiz']['quiz_id'] = quiz_id
+    def _store_quiz_identifiers(self, quiz_key: int, question_ids: list):
+        self.build['lms_quiz']['quiz_key'] = quiz_key
         for i, question in enumerate(self.build['lms_quiz']['questions']):
-            question['question_id'] = question_ids[i]
+            question['question_key'] = question_ids[i]

@@ -12,7 +12,7 @@ from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
 from main_app_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants, Buckets, WorkoutStates
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
-from main_app_utilities.lms.lms_spec_decorator import LMSSpecDecorator
+from main_app_utilities.lms.lms_canvas import LMSSpecCanvas
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -109,8 +109,6 @@ class Unit(MethodView):
         if build_id:
             args = request.json
             action = args.get('action', None)
-            question_id = args.get('question_id', None)
-            child_id = args.get('build_id', None)
 
             valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE]
             if action and action in valid_actions:
@@ -118,16 +116,6 @@ class Unit(MethodView):
                                     build_id=str(build_id),
                                     cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value))
                 return self.http_resp(code=200).prepare_response()
-            elif question_id and child_id:
-                """For cases where an assessment question needs manual grading"""
-                workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=child_id).get()
-                if workout:
-                    for question in workout['assessment']:
-                        if question['id'] == question:
-                            question['complete'] = True
-                            break
-                    DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).put(workout)
-                return self.http_resp(code=404, msg="NO BUILD FOUND").prepare_response()
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
 
     def _lms_integrate(self, build_spec, recv_data):
@@ -135,9 +123,12 @@ class Unit(MethodView):
         lms_due_at = recv_data.get('lms_due_at', None)
         lms_allowed_attempts = recv_data.get('lms_allowed_attempts', None)
         lms_type = recv_data.get('lms_type', BuildConstants.LMS.CANVAS.value)
-        lms_spec_decorator = LMSSpecDecorator(build_spec=build_spec, course_code=lms_course_code,
-                                              due_at=lms_due_at,
-                                              allowed_attempts=lms_allowed_attempts,
-                                              lms_type=lms_type)
+        if lms_type == BuildConstants.LMS.CANVAS.value:
+            lms_spec_decorator = LMSSpecCanvas(build_spec=build_spec, course_code=lms_course_code,
+                                               due_at=lms_due_at, allowed_attempts=lms_allowed_attempts,
+                                               lms_type=lms_type)
+        else:
+            return self.http_resp(code=400, msg=f"Unsupported LMS {lms_type} when trying to add LMS settings to build "
+                                                f"specification.")
         build_spec = lms_spec_decorator.decorate()
         return build_spec

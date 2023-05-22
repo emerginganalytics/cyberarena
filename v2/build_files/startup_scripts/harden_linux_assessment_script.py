@@ -36,7 +36,7 @@ class Question:
     def _mark_complete(self):
         if not os.path.exists(self.complete_file):
             data = {
-                "question_id": self.question_key,
+                "question_key": self.question_key,
             }
             response = requests.put(f"{self.url}{self.build_id}", json=data)
             if response and response.status_code == 200:

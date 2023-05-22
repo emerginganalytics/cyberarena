@@ -209,6 +209,17 @@ class AssessmentSchema(Schema):
     key = fields.Str(required=False, description='Key used for decrypting workout secrets in container applications')
 
 
+class LMSQuizSchema(Schema):
+    type = fields.Str(required=False, description="Practice quiz or assignment")
+    due_at = fields.DateTime(required=False, description="Due date for assignment")
+    description = fields.Str(required=False, description="Description of assignment")
+    allowed_attempts = fields.Float(missing=-1.0, description="Attempts available for assignment, -1 is unlimited")
+    assessment_script = fields.Nested('AssessmentScriptSchema', required=False,
+                                      description="The assessment script for all indicated questions. The script must "
+                                                  "align with answering the given questions.")
+    questions = fields.Nested('LMSQuizQuestionsSchema', many=True)
+
+
 class AssessmentQuestionSchema(Schema):
     id = fields.Str(missing=lambda: str(uuid.uuid4()), description="An ID to use when referring to specific questions")
     name = fields.Str(required=False, description="The name of the question, which is also used for the workout-level "
@@ -229,14 +240,6 @@ class AssessmentScriptSchema(Schema):
     operating_system = fields.Str(required=False, description="Target server operating system")
 
 
-class LMSQuizSchema(Schema):
-    type = fields.Str(required=False, description="Practice quiz or assignment")
-    due_at = fields.DateTime(required=False, description="Due date for assignment")
-    description = fields.Str(required=False, description="Description of assignment")
-    allowed_attempts = fields.Float(missing=-1.0, description="Attempts available for assignment, -1 is unlimited")
-    questions = fields.Nested('LMSQuizQuestionsSchema', many=True)
-
-
 class LMSConnectionSchema(Schema):
     lms_type = fields.Str(required=True, validate=validate.OneOf([x for x in BuildConstants.LMS]),
                           description="The type of LMS this should integrate with.")
@@ -251,6 +254,7 @@ class LMSQuizQuestionsSchema(Schema):
     question_text = fields.Str(required=True, description="Question text")
     question_type = fields.Str(required=False, description="Question type")
     points_possible = fields.Float(required=False, description="Points")
+    script_assessment = fields.Bool(missing=False)
     answers = fields.Nested('LMSQuizAnswerSchema', many=True, description="Question answers")
 
 

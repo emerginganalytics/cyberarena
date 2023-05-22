@@ -46,6 +46,8 @@ class AssessmentManager:
         else:
             if 'assessment' in self.build and 'questions' in self.build['assessment']:
                 self.assessment_questions = self.build['assessment']['questions']
+            elif 'lms_quiz' in self.build and 'questions' in self.build['assessment']:
+                self.assessment_questions = self.build['lms_quiz']['assessment']
             else:
                 self.assessment_questions = None
             self.url = f"{self.env.main_app_url_v2}/api/unit/workout/"
@@ -102,19 +104,20 @@ class AssessmentManager:
                 script_params['REOCCURRING_SCRIPT'] = f"/usr/bin/{assessment_script_spec['script']}"
             task = StartupScripts.Linux.task.format_map(script_params)
         assessment_script = {'key': key, 'value': initial_script}
-
-        # Now add the question-level environment variables.
-        for i, question in enumerate(self.assessment_questions):
-            if 'script_assessment' in question and question['script_assessment']:
-                question_key = question['name']
-                if script_operating_system == BuildConstants.ScriptOperatingSystems.WINDOWS:
-                    assessment_script['value'] += StartupScripts.Windows.question \
-                        .format(NUMBER=i, QUESTION_KEY=question_key)
-                else:
-                    assessment_script['value'] += StartupScripts.Linux.question \
-                        .format(NUMBER=i, QUESTION_KEY=question_key)
+        # Add the question environment variables
+        assessment_script['value'] = self._add_question_env(assessment_script['value'], script_operating_system)
         # Finally, add the reoccurring task at the end of the script.
         assessment_script['value'] += task
+        return assessment_script
+
+    def _add_question_env(self, assessment_script, script_operating_system):
+        for i, question in enumerate(self.assessment_questions):
+            if 'script_assessment' in question and question['script_assessment']:
+                question_key = question['question_key']
+                if script_operating_system == BuildConstants.ScriptOperatingSystems.WINDOWS:
+                    assessment_script += StartupScripts.Windows.question.format(NUMBER=i, QUESTION_KEY=question_key)
+                else:
+                    assessment_script += StartupScripts.Linux.question.format(NUMBER=i, QUESTION_KEY=question_key)
         return assessment_script
 
 
