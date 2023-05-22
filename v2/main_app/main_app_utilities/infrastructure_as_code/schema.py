@@ -144,7 +144,7 @@ class ServerSchema(Schema):
     metadata = fields.Str(default=None)
     sshkey = fields.Str(default=None)
     can_ip_forward = fields.Bool(default=False)
-    alias_ip_addresses = fields.List(fields.Str)
+    alias_ip_ranges = fields.List(fields.Str)
     min_cpu_platform = fields.Str(default="")
     nics = fields.Nested('NicSchema', many=True)
     human_interaction = fields.Nested('HumanInteractionSchema', many=True)

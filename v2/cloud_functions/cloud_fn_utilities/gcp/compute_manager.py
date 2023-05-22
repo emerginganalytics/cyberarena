@@ -102,7 +102,7 @@ class ComputeManager:
             'serviceAccounts': service_account,
             'minCpuPlatform': self.server_spec.get('min_cpu_platform', None)
         }
-        if self.server_spec.get("alias_ip_addresses", False):
+        if self.server_spec.get("alias_ip_ranges", False):
             config['advancedMachineFeatures'] = {"enableNestedVirtualization": True}
 
         if self.server_spec.get('build_type', None) == BuildConstants.ServerBuildType.MACHINE_IMAGE:
