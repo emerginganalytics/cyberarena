@@ -11,6 +11,10 @@ from install_update.operations.build_specification import BuildSpecification
 from install_update.operations.bulk_install_update import BulkInstallUpdate
 from install_update.operations.cloud_database import CloudDatabase
 
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
+
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff"]
@@ -36,6 +40,7 @@ class SetupManager:
             function_deployed = cyber_arena_app.deploy_cloud_functions()
             if app_deployed and function_deployed:
                 self._create_update_record()
+                self._create_admin_user()
         elif self.selection == SetupOptions.UPDATE:
             cyber_arena_app = CyberArenaApp()
             app_deployed = cyber_arena_app.deploy_main_app()
@@ -73,3 +78,12 @@ class SetupManager:
         ds_entity = datastore.Entity(ds_client.key('cyberarena-updates', update_time))
         ds_entity.update(update_info)
         ds_client.put(ds_entity)
+
+    def _create_admin_user(self):
+        arena_auth = ArenaAuthorizer()
+        environment = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cyberarena').get()
+        email = environment.get('admin_email', None)
+        if not email:
+            email = str(input('Enter email for the admin user: '))
+            EnvironmentVariables(project=self.project).set_variable('admin_email', email)
+        arena_auth.add_user(email=email, admin=True, teacher=True, student=True)
