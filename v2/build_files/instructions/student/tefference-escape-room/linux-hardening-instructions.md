@@ -12,7 +12,8 @@ While the machine we logged into is on our organization’s network, it isn’t 
 
 Accept the ssh key warning and then type in the password: `Let’s workout!`
 
-Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system.
+## Assignment
+Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system. Your assignment will be automatically assessed after you complete each activity. It may take 1-2 minutes for the assessment to show up.
 1. **Malicious User**: Delete the malicious user account
 2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
 3. **Malicious Files**: Delete the malicious files added by Gigabyte
