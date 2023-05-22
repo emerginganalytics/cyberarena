@@ -4,6 +4,7 @@ import pytz
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -20,7 +21,7 @@ class EnvironmentVariables:
     DEFAULT_ZONE = "us-central1-a"
     DEFAULT_TIMEZONE = "America/Chicago"
     VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'main_app_url_v2', 'admin_email', 'guac_password',
-                 'project_number', 'sql_password', 'sql_ip']
+                 'project_number']
 
     def __init__(self, project):
         self.project = project
@@ -61,6 +62,11 @@ class EnvironmentVariables:
             if not new_value:
                 new_value = str(input(f"What value would you like to set for {var}?"))
             self.env[var] = new_value
+            if var == 'admin_email':
+                ArenaAuthorizer().add_user(
+                    email=new_value.lower(), admin=True,
+                    instructor=True, student=True
+                )
             self.ds.put(self.env)
 
     def remove_variable(self):
@@ -121,5 +127,3 @@ class EnvironmentVariables:
         MAIN_APP_URL = "main_app_url"
         MAIN_APP_URL_V2 = "main_app_url_v2"
         ADMIN_EMAIL = "admin_email"
-        SQL_IP = "sql_ip"
-        SQL_PASSWORD = "sql_password"
