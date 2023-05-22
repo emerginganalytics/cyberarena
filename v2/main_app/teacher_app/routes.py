@@ -23,7 +23,7 @@ def teacher_home():
             if blackboard := user['settings'].get('blackboard', None):
                 # TODO: Add support for getting courses from Blackboard
                 blackboard_lms = {}
-                teacher_info['lms']['blackboard'] = {}
+                teacher_info['lms']['blackboard'] = blackboard_lms
             # Get all the units for this instructor
             unit_list = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value).query(
                 filters=[('instructor_id', '=', teacher_email)]
@@ -184,13 +184,14 @@ def escape_room(unit_id):
     return redirect('/login')
 
 
-@teacher_app.route('/settings', methods=['GET', 'POST'])
+@teacher_app.route('/settings', methods=['GET'])
 def settings():
     if teacher_email := session.get('user_email', None):
         auth = ArenaAuthorizer()
         if user := auth.authorized(email=teacher_email, base=auth.UserGroups.INSTRUCTOR):
             urls = _get_api_urls(return_all=True)
-            return render_template('settings.html', auth_config=cloud_env.auth_config, auth_list=user['permissions'], urls=urls)
+            return render_template('settings.html', auth_config=cloud_env.auth_config,
+                                   auth_list=user['permissions'], urls=urls)
     return redirect('/login')
 
 

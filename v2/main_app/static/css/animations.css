@@ -38,3 +38,14 @@
  0%, 40%, 100% { -webkit-transform: scaleY(0.4); }
  20% { -webkit-transform: scaleY(1.0); background-color: #ddd; }
 }
+
+.fade-out {
+ font-weight: bolder;
+ animation-delay: 4s;
+ -webkit-animation: fade-out-animation 2s 2s normal forwards;
+ animation: fade-out-animation 2s 2s normal forwards;
+}
+@keyframes fade-out-animation {
+ 0% {opacity: 1;}
+ 100% {opacity: 0; display: none;}
+}

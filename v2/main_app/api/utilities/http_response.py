@@ -1,5 +1,6 @@
-from flask import json, make_response
+from flask import make_response
 from datetime import datetime
+import json
 
 
 class HttpResponse:

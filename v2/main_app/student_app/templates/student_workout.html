@@ -156,9 +156,6 @@
                                         <li class="nav-item control-container-list" id="startWorkoutLi" style="display: none">
                                             <button id="startWorkoutBtn" class="nav-link" onclick="control.start();">Start Workout</button>
                                         </li>
-                                        <li class="nav-item control-container-list">
-                                            <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
-                                        </li>
                                     {% else %}{# workout is Stopped or in Transition to Running/Stopped  #}
                                         <li class="nav-item control-container-list" id="extendWorkoutLi" style="display: none;">
                                             <button id="extendDurationBtn" class="nav-link" onclick="control.extend();"
@@ -242,22 +239,45 @@
                                             <tbody>
                                                 {% if 'servers' in workout %}
                                                     {% for server in workout.servers %}
-                                                        <tr>
-                                                            {% if server.url %}
-                                                                {% if workout.expired == False %}
-                                                                    <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                        {% if 'hidden' in server %}
+                                                            {% if server.hidden == False %}
+                                                                {# server.hidden exists, but is false; Display server details #}
+                                                                <tr>
+                                                                    {% if server.url %}
+                                                                        {% if workout.expired == False %}
+                                                                            <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        <td>No Public Interface</td>
+                                                                    {% endif %}
+                                                                    <td>{{ server.name }}</td>
+                                                                    {% if server.nics[0].host_dns %}
+                                                                        <td>{{ server.nics[0].host_dns }}</td>
+                                                                    {% else %}
+                                                                        <td>None</td>
+                                                                    {% endif %}
+                                                                    <td>{{ server.nics[0].internal_ip }}</td>
+                                                                </tr>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            {# server.hidden doesn't exist; Display server details #}
+                                                            <tr>
+                                                                {% if server.url %}
+                                                                    {% if workout.expired == False %}
+                                                                        <td><a href="{{ server.url }}" class="btn-fa connection-link" target="_blank">Connect to Server</a></td>
+                                                                    {% endif %}
+                                                                {% else %}
+                                                                    <td>No Public Interface</td>
                                                                 {% endif %}
-                                                            {% else %}
-                                                                <td>No Public Interface</td>
-                                                            {% endif %}
-                                                            <td>{{ server.name }}</td>
-                                                            {% if server.nics[0].host_dns %}
-                                                                <td>{{ server.nics[0].host_dns }}</td>
-                                                            {% else %}
-                                                                <td>None</td>
-                                                            {% endif %}
-                                                            <td>{{ server.nics[0].internal_ip }}</td>
-                                                        </tr>
+                                                                <td>{{ server.name }}</td>
+                                                                {% if server.nics[0].host_dns %}
+                                                                    <td>{{ server.nics[0].host_dns }}</td>
+                                                                {% else %}
+                                                                    <td>None</td>
+                                                                {% endif %}
+                                                                <td>{{ server.nics[0].internal_ip }}</td>
+                                                            </tr>
+                                                        {% endif %}
                                                     {% endfor %}
                                                 {% else %}
                                                     <tr class="opaque-loading"><td class="opaque-loading text-center" colspan="100%">No Servers</td></tr>

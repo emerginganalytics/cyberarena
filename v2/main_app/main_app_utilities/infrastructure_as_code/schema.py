@@ -136,6 +136,7 @@ class SubNetworkSchema(Schema):
 class ServerSchema(Schema):
     name = fields.Str(required=True)
     image = fields.Str(required=True)
+    hidden = fields.Bool(default=False, description="Whether to display this server to students or not.")
     machine_type = fields.Str(required=True, default="e1-standard1")
     add_disk = fields.Int(required=False, default=0)
     tags = fields.List(fields.Str)

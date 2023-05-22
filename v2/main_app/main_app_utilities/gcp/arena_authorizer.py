@@ -32,6 +32,8 @@ class ArenaAuthorizer:
 
     class LMS(Enum):
         CANVAS = 'canvas'
+        BLACKBOARD = 'blackboard'
+        ALL = [CANVAS, BLACKBOARD]
 
     def __init__(self):
         self.log_client = logging_v2.Client()
@@ -111,9 +113,14 @@ class ArenaAuthorizer:
                 for level in permissions:
                     user_copy['permissions'][level] = permissions[level]
             # Update user settings
-            if settings:
-                for setting in settings:
-                    user_copy['settings'][setting] = settings[setting]
+            if settings and type(settings) is dict:
+                for setting, val in settings.items():
+                    if setting in self.LMS.ALL.value:
+                        if not user_copy['settings'].get(setting, None):
+                            user_copy['settings'][setting] = {'api': None, 'url': None}
+                        for key, item in val.items():
+                            if item:
+                                user_copy['settings'][setting][key] = str(item)
             # Make sure pending status is cleared if needed
             perm = user_copy['permissions']
             if perm['admin'] or perm['instructor'] or perm['student']:
@@ -123,9 +130,9 @@ class ArenaAuthorizer:
                 self.remove_user(email=email)
                 return True
             # Update user record
-            self.ds_manager.put(user_copy, key_type=self.key_type,
-                                key_id=str(email))
+            self.ds_manager.put(user_copy, key_type=self.key_type, key_id=str(email))
             return True
+        logging.error('404: Update for user failed; Reason: Not Found')
         raise ValueError
 
     def remove_user(self, email):

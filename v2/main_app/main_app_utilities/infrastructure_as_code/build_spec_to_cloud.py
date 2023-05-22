@@ -47,7 +47,7 @@ class BuildSpecToCloud:
         if self.debug:
             cyber_arena_spec['test'] = True
         cyber_arena_spec['creation_timestamp'] = get_current_timestamp_utc()
-        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env.get_env())
+        self.pubsub_manager = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value, env_dict=self.env.get_env())
         self.build_type = cyber_arena_spec['build_type']
         if self.build_type == BuildConstants.BuildType.FIXED_ARENA.value:
             self.build_id = cyber_arena_spec['id']

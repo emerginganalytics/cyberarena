@@ -171,11 +171,14 @@
                                                     <td>
                                                         {% if workout['state'] == 50 %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState running" data-toggle="tooltip" data-placement="top" title="RUNNING"></i>
-                                                            <!--<span id="workout-state-{{ workout['id'] }}" class="buildState running"></span>-->
                                                         {% elif workout['state'] == 53 %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState stopped" data-toggle="tooltip" data-placement="top" title="STOPPED"></i>
                                                         {% elif workout['state'] == 72 %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState deleted" data-toggle="tooltip" data-placement="top" title="DELETED"></i>
+                                                        {% elif workout['state'] == -1 %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState notbuilt" data-toggle="tooltip" data-placement="top" title="NOT BUILT"></i>
+                                                        {% elif workout['state'] == 62 %}
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState broken" data-toggle="tooltip" data-placement="top" title="BROKEN"></i>
                                                         {% else %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState transition" data-toggle="tooltip" data-placement="top" title="WORKING"></i>
                                                         {% endif %}

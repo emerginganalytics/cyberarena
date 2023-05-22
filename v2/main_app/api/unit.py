@@ -74,7 +74,6 @@ class Unit(MethodView):
             if not build_spec:
                 return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
             build_spec['instructor_id'] = user_email
-            # expires_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").timestamp())
             expire_ts = int(datetime.strptime(expire_datetime.replace("T", " "), "%Y-%m-%d %H:%M").astimezone(timezone.utc).timestamp())
             build_spec['workspace_settings'] = {
                 'count': build_count,

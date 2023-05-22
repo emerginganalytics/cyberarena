@@ -508,14 +508,15 @@ li.control-container-list {
 }
 
 /* FontAwesome Icon Styles */
+.fa-pr-5 { padding-right: 5px; }
+.fa-pl-5 { padding-left: 5px; }
 .buildState {font-size: 30px;}
 .buildState.running {color: var(--running, #1d8037);}
 .buildState.stopped {color: var(--stopped, #838683);}
 .buildState.deleted {color: var(--deleted, #000000);}
 .buildState.transition {color: var(--transition, #b3be27);}
 .buildState.broken {color: var(--broken, #ce2b2b);}
-.fa-pr-5 { padding-right: 5px; }
-.fa-pl-5 { padding-left: 5px; }
+.buildState.notbuilt {color: var(--stopped, #838683);}
 p.complete {
     color: green;
     font-weight: bold;
@@ -534,6 +535,11 @@ p.complete {
 }
 .highlight-error {
     background-color: #b75f5f;
+    border-radius: 10px;
+    padding: 5px;
+}
+.hidden {
+    color: whitesmoke;
     border-radius: 10px;
     padding: 5px;
 }

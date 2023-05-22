@@ -19,7 +19,7 @@ class Control {
                 window.location.reload();
             } else {
                 stateObj.classList.add('transition');
-                stateObj.classList.remove('running', 'stopped', 'deleted');
+                stateObj.classList.remove('running', 'stopped', 'deleted', 'broken', 'notbuilt');
             }
         }
         setInterval(function (){
@@ -125,7 +125,7 @@ class Control {
             disableElements(connectionBtns, true, disableElement);
         } else {
             workoutStateObj.innerText = 'WORKING';
-            workoutStateIcon.classList.remove('stopped', 'running');
+            workoutStateIcon.classList.remove('stopped', 'running', 'broken', 'notbuilt');
             workoutStateIcon.classList.add('transition');
             disableElement(workoutStateObj);
             // Timer Div
