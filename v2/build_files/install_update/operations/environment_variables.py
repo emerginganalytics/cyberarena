@@ -1,10 +1,10 @@
-import subprocess
 from enum import Enum
-from google.cloud import runtimeconfig
 from googleapiclient import discovery
 import pytz
 
-from install_update.utilities.globals import ShellCommands
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -17,18 +17,17 @@ __status__ = "Testing"
 
 
 class EnvironmentVariables:
-    COMMAND = "gcloud beta runtime-config configs variables set \"{variable}\" \"{value}\" --config-name \"cybergym\""
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
     DEFAULT_TIMEZONE = "America/Chicago"
     VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'main_app_url_v2', 'admin_email', 'guac_password',
-                 'project_number', 'sql_password', 'sql_ip']
+                 'project_number']
 
     def __init__(self, project):
         self.project = project
         self.service = discovery.build('compute', 'v1')
-        runtimeconfig_client = runtimeconfig.Client()
-        self.myconfig = runtimeconfig_client.config('cybergym')
+        self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cyberarena')
+        self.env = self.ds.get()
 
     def run(self):
         reply = str(input(f"Do you want to update a specific environment variable or ALL environmental variables "
@@ -39,6 +38,7 @@ class EnvironmentVariables:
                 self.set_variable(var)
                 response = str(input("Would you like to set another variable? (y/N)")).upper()
                 if not response or response == "N":
+                    self.ds.put(self.env)
                     break
         else:
             self.set_variable("project", self.project)
@@ -49,9 +49,8 @@ class EnvironmentVariables:
                 self.set_variable(var)
 
     def set_variable(self, var, new_value=None):
-        current_val = self.myconfig.get_variable(var)
-        current_val = current_val.value.decode("utf-8") if current_val else "EMPTY"
-        if current_val == new_value:
+        current_val = self.env.get(var, None)
+        if current_val and current_val == new_value:
             print("Given value is the same as the set value. No change is needed.")
             return
         elif new_value:
@@ -62,9 +61,28 @@ class EnvironmentVariables:
         if not reply or reply == "Y":
             if not new_value:
                 new_value = str(input(f"What value would you like to set for {var}?"))
-            command = self.COMMAND.format(variable=var, value=new_value)
-            ret = subprocess.run(command, capture_output=True, shell=True)
-            print(ret.stderr.decode())
+            self.env[var] = new_value
+            if var == 'admin_email':
+                ArenaAuthorizer().add_user(
+                    email=new_value.lower(), admin=True,
+                    instructor=True, student=True
+                )
+            self.ds.put(self.env)
+
+    def remove_variable(self):
+        current_vars = list(self.env.items())
+        print('Environment Variables::')
+        for i in enumerate(current_vars):
+            print(f'\t[{i[0]}] {current_vars[i[0]][0]}')
+
+        idx = int(input('Which variable would you like to remove? '))
+        var = current_vars[idx]
+        if var[0] in self.env:
+            del self.env[var[0]]
+            print(f'Removed {var[0]} from environment')
+            self.ds.put(self.env)
+        else:
+            print(f'Could not find variable with name: {var[0]}')
 
     def _set_region(self):
         response = self.service.regions().list(project=self.project).execute()
@@ -109,5 +127,3 @@ class EnvironmentVariables:
         MAIN_APP_URL = "main_app_url"
         MAIN_APP_URL_V2 = "main_app_url_v2"
         ADMIN_EMAIL = "admin_email"
-        SQL_IP = "sql_ip"
-        SQL_PASSWORD = "sql_password"

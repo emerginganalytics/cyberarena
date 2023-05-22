@@ -45,8 +45,6 @@ class CloudEnv:
             self.teacher_instructions_url = self.env_dict['teacher_instructions_url']
             # Database Variables
             self.guac_db_password = self.env_dict['guac_db_password']
-            self.sql_ip = self.env_dict.get('sql_ip', None)
-            self.sql_password = self.env_dict.get('sql_password', None)
             # API Keys
             self.api_key = self.env_dict['api_key']
             self.sendgrid_api_key = self.env_dict.get('sendgrid_api_key', None)
@@ -111,10 +109,6 @@ class CloudEnv:
                     self.timezone = timezone.value.decode('utf-8')
                 else:
                     self.timezone = 'America/Chicago'
-                sql_ip = myconfig.get_variable('sql_ip')
-                self.sql_ip = sql_ip.value.decode("utf-8") if sql_ip else None
-                sql_password = myconfig.get_variable('sql_password')
-                self.sql_password = sql_password.value.decode("utf-8") if sql_password else None
                 break
             except:
                 time.sleep(random.randint(1, 10))

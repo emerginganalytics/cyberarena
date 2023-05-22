@@ -1,5 +1,4 @@
 from enum import Enum
-from collections import namedtuple
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -26,8 +25,7 @@ class SetupOptions(bytes, Enum):
     PREPARE_SPEC = (5, "Prepare a single specification for deployment")
     DECRYPT_SPECS = (6, "Decrypt Build Specifications")
     ENV = (7, "Synchronize Environment Variables")
-    SQL = (8, "Setup Cloud Database")
-    BULK_UPDATE = (9, "Update multiple cloud projects at once")
+    BULK_UPDATE = (8, "Update multiple cloud projects at once")
     EXIT = (10, "Exit")
 
 
@@ -41,7 +39,6 @@ class ShellCommands:
         CLOUD_RUN = "gcloud services enable run.googleapis.com"
         SCHEDULER = "gcloud services enable cloudscheduler.googleapis.com"
         APP_ENGINE = "gcloud services enable appengine.googleapis.com"
-        SQL_ADMIN = "gcloud services enable sqladmin.googleapis.com"
         IAM = "gcloud services enable iam.googleapis.com"
         
     class ServiceAccount(str, Enum):
