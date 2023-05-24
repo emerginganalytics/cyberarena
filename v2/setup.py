@@ -35,11 +35,8 @@ def main():
             print("ERROR: No associated projects found.")
             exit(1)
         project_idx = int(input(f"What is the GCP project ID you wish to update?: "))
-        while True:
-            if project_idx > len(projects):
-                project_idx = int(input(f"Invalid selection. Select an option 0-{len(projects)}: "))
-            else:
-                break
+        if project_idx > len(projects):
+            project_idx = int(input(f"Invalid selection. Select an option 0-{len(projects)}: "))
         project = projects[project_idx]
         ret = subprocess.run(f"gcloud config set project {project}", capture_output=True, shell=True)
         ret_msg = ret.stderr.decode()
