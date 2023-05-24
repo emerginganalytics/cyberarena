@@ -23,39 +23,24 @@ __status__ = "Testing"
 
 
 class AssessmentManager:
-    def __init__(self, build_id, key_type=DatastoreKeyTypes.WORKOUT, env_dict=None):
+    def __init__(self, build_id, env_dict=None):
         """
 
         Args:
             build_id (str): The build ID to query for and use for assessment.
-            key_type (str): Indicates the key store
         """
         self.build_id = build_id
-        self.key_type = key_type
         self.logger = Logger("cloud_functions.assessment-manager").logger
         self.env = CloudEnv(env_dict=env_dict) if env_dict else CloudEnv()
         self.script_repository = f"gs://{self.env.project}_{Buckets.BUILD_SPEC_BUCKET_SUFFIX}" \
                                  f"/{Buckets.Folders.STARTUP_SCRIPTS.value}"
-        self.ds = DataStoreManager(key_type=self.key_type, key_id=self.build_id)
-        self.build = self.ds.get()
+        workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=self.build_id).get()
+        self.build = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
         if not self.build:
             raise LookupError(f"The datastore record for {self.build_id} no longer exists!")
-        if escape_room := self.build.get('escape_room', None):
-            self.assessment_questions = escape_room['puzzles']
-            self.url = f"{self.env.main_app_url_v2}/api/escape-room/team/"
-        else:
-            if 'assessment' in self.build and 'questions' in self.build['assessment']:
-                self.assessment_questions = self.build['assessment']['questions']
-            elif 'lms_quiz' in self.build and 'questions' in self.build['assessment']:
-                self.assessment_questions = self.build['lms_quiz']['assessment']
-            else:
-                self.assessment_questions = None
-            self.url = f"{self.env.main_app_url_v2}/api/unit/workout/"
-
-
-        self.assessment_script = None
-        if 'assessment_script' in self.build:
-            self.assessment_script = self._create_startup_script(self.build['assessment_script'])
+        self.url = self._get_url()
+        self.assessment_questions = self._get_assessment_questions()
+        self.assessment_script_spec = self._get_assessment_script_spec()
 
     def get_startup_scripts(self, server_name: str):
         """
@@ -66,42 +51,66 @@ class AssessmentManager:
 
         Returns: The startup script to include as meta-data
         """
-        if self.assessment_script and self.assessment_questions['server'] == server_name:
+        if self.assessment_script_spec and self.assessment_script_spec['server'] == server_name:
             self.logger.info(f"AssessmentManager: Adding the following script to {server_name}: "
-                             f"{self.assessment_script}")
-            return self.assessment_script
+                             f"{self.assessment_script_spec}")
+            return self._create_startup_script()
         else:
             return None
 
-    def _create_startup_script(self, assessment_script_spec: dict):
+    def _get_url(self):
+        path = '/api/escape-room/team/' if 'escape_room' in self.build else '/api/unit/workout/'
+        return f"{self.env.main_app_url_v2}{path}"
+
+    def _get_assessment_questions(self):
+        if escape_room := self.build.get('escape_room', None):
+            return escape_room['puzzles']
+        else:
+            if 'assessment' in self.build and 'questions' in self.build['assessment']:
+                return self.build['assessment']['questions']
+            elif 'lms_quiz' in self.build and 'questions' in self.build['lms_quiz']:
+                return self.build['lms_quiz']['questions']
+            else:
+                return None
+
+    def _get_assessment_script_spec(self):
+        if 'lms_quiz' in self.build and 'assessment_script' in self.build['lms_quiz']:
+            return self.build['lms_quiz']['assessment_script']
+        elif 'assessment' in self.build and 'assessment_script' in self.build['assessment']:
+            return self.build['assessment']['assessment_script']
+        else:
+            return None
+
+    def _create_startup_script(self):
         """
         Creates the initial assessment script structure that will be built with additional question_key environment
         variables. The task string is also created at this point, and will be appended at the end of the script.
         """
-        script_operating_system = assessment_script_spec['operating_system']
+        script_operating_system = self.assessment_script_spec['operating_system']
         script_params = {
             'SCRIPT_REPOSITORY': self.script_repository,
-            'SCRIPT': assessment_script_spec['script'],
+            'SCRIPT': self.assessment_script_spec['script'],
             'SCRIPT_NAME': f"cyber-arena-assessment",
         }
         # Create operating system specific script pieces.
         if script_operating_system == BuildConstants.ScriptOperatingSystems.WINDOWS:
             key = 'windows-startup-script-bat'
             initial_script = StartupScripts.Windows.env.format(BUILD_ID=self.build_id, URL=self.url)
-            if assessment_script_spec['script_language'] == 'python':
-                script_params['REOCCURRING_SCRIPT'] = f"python {assessment_script_spec['script']}"
-            elif assessment_script_spec['script_language'] == 'powershell':
-                script_params['REOCCURRING_SCRIPT'] = f"\"powershell.exe -File ./{assessment_script_spec['script']}\""
+            if self.assessment_script_spec['script_language'] == 'python':
+                script_params['REOCCURRING_SCRIPT'] = f"python {self.assessment_script_spec['script']}"
+            elif self.assessment_script_spec['script_language'] == 'powershell':
+                script_params['REOCCURRING_SCRIPT'] = f"\"powershell.exe -File ./" \
+                                                      f"{self.assessment_script_spec['script']}\""
             else:
-                script_params['REOCCURRING_SCRIPT'] = assessment_script_spec['script']
+                script_params['REOCCURRING_SCRIPT'] = self.assessment_script_spec['script']
             task = StartupScripts.Windows.task.format_map(script_params)
         else:
             key = 'startup-script'
             initial_script = StartupScripts.Linux.env.format(BUILD_ID=self.build_id, URL=self.url)
-            if assessment_script_spec['script_language'] == 'python':
-                script_params['REOCCURRING_SCRIPT'] = f"python3 /usr/bin/{assessment_script_spec['script']}"
+            if self.assessment_script_spec['script_language'] == 'python':
+                script_params['REOCCURRING_SCRIPT'] = f"python3 /usr/bin/{self.assessment_script_spec['script']}"
             else:
-                script_params['REOCCURRING_SCRIPT'] = f"/usr/bin/{assessment_script_spec['script']}"
+                script_params['REOCCURRING_SCRIPT'] = f"/usr/bin/{self.assessment_script_spec['script']}"
             task = StartupScripts.Linux.task.format_map(script_params)
         assessment_script = {'key': key, 'value': initial_script}
         # Add the question environment variables

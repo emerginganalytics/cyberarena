@@ -7,13 +7,13 @@ import requests
 from main_app_utilities.global_objects.name_generator import NameGenerator
 from main_app_utilities.globals import Buckets, PubSub, DatastoreKeyTypes
 from main_app_utilities.gcp.cloud_env import CloudEnv
-from main_app_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.gcp.bucket_manager import BucketManager
-from main_app_utilities.gcp.datastore_manager import DataStoreManager
+from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from main_app_utilities.infrastructure_as_code.build_spec_to_cloud import BuildSpecToCloud
 from main_app_utilities.lms.lms_canvas import LMSSpecCanvas
 
 from cloud_fn_utilities.cyber_arena_objects.unit import Unit
+from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 
 
 __author__ = "Philip Huff"
@@ -62,10 +62,10 @@ class TestUnit:
 
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
         build_spec_to_cloud.commit(publish=False)
-        build_id = build_spec_to_cloud.build_id
+        self.build_id = build_spec_to_cloud.build_id
 
         if debug:
-            print(f"Beginning to build a new unit with ID {build_id}")
+            print(f"Beginning to build a new unit with ID {self.build_id}")
             if build_spec.get('escape_room', None):
                 team_names = NameGenerator(count=build_spec['workspace_settings']['count']).generate()
                 for i in range(build_spec['workspace_settings']['count']):
@@ -75,15 +75,16 @@ class TestUnit:
                         claimed_by = {'student_email': f'example{i}@ualr.edu'}
                     workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
                     print(f'\t...building workout with ID {workout_id}')
-                    unit = Unit(build_id=build_id, child_id=workout_id, form_data=claimed_by, debug=debug, force=True,
+                    unit = Unit(build_id=self.build_id, child_id=workout_id, form_data=claimed_by, debug=debug, force=True,
                                 env_dict=self.env_dict)
                     unit.build()
             else:
-                unit = Unit(build_id=build_id, debug=True, env_dict=self.env_dict)
+                unit = Unit(build_id=self.build_id, debug=True, env_dict=self.env_dict)
                 unit.build()
+                self._build_one_workout()
+
 
             print(f"Finished building")
-        self.build_id = build_id
 
     def start(self):
         Unit(build_id=self.build_id, debug=self.debug).start()
@@ -106,6 +107,17 @@ class TestUnit:
                         "question_key": question_key,
                     }
                     response = requests.put(f"http://localhost:8080//api/unit/workout/{workout_id}", json=data)
+
+    def _build_one_workout(self):
+        build_one = str(input(f"Would you like to test the workout build at this time? (y/N)"))
+        if build_one and build_one.upper()[0] == "Y":
+            ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=self.build_id)
+            workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=self.build_id)
+            workout_id = workouts[0]['id']
+            print(f"Beginning to build workout {workout_id}...")
+            workout = Workout(build_id=workout_id, debug=True)
+            print(f"Finished building workout {workout_id}")
+            workout.build()
 
 
 if __name__ == "__main__":
