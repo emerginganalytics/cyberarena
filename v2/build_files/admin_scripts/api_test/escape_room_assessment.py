@@ -1,6 +1,5 @@
-
-from v2.main_app.main_app_utilities.globals import DatastoreKeyTypes, PubSub
-from v2.main_app.main_app_utilities.gcp.datastore_manager import DataStoreManager
+from main_app.main_app_utilities.globals import DatastoreKeyTypes, PubSub
+from main_app.main_app_utilities.gcp.datastore_manager import DataStoreManager
 
 
 class TestEscapeRoom:

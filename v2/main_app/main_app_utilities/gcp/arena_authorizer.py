@@ -105,7 +105,7 @@ class ArenaAuthorizer:
         self.ds_manager.put(user_obj, key_type=self.key_type, key_id=str(email))
         return True
 
-    def update_user(self, email, permissions=None, settings=None):
+    def update_user(self, email, permissions=None, settings=None, clear=False):
         if user := self.get_user(email):
             user_copy = copy.deepcopy(user)
             # Update user permissions
@@ -119,8 +119,11 @@ class ArenaAuthorizer:
                         if not user_copy['settings'].get(setting, None):
                             user_copy['settings'][setting] = {'api': None, 'url': None}
                         for key, item in val.items():
-                            if item:
-                                user_copy['settings'][setting][key] = str(item)
+                            if not clear:
+                                if item:
+                                    user_copy['settings'][setting][key] = str(item)
+                            else:
+                                user_copy['settings'][setting][key] = None
             # Make sure pending status is cleared if needed
             perm = user_copy['permissions']
             if perm['admin'] or perm['instructor'] or perm['student']:

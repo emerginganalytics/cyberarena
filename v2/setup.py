@@ -31,7 +31,16 @@ def main():
         SetupManager(selection=SetupOptions.BULK_UPDATE, project=None).run()
         exit(0)
     while True:
-        project = str(input(f"What is the GCP project ID you wish to update?: "))
+        if not (projects := list_projects()):
+            print("ERROR: No associated projects found.")
+            exit(1)
+        project_idx = int(input(f"What is the GCP project ID you wish to update?: "))
+        while True:
+            if project_idx > len(projects):
+                project_idx = int(input(f"Invalid selection. Select an option 0-{len(projects)}: "))
+            else:
+                break
+        project = projects[project_idx]
         ret = subprocess.run(f"gcloud config set project {project}", capture_output=True, shell=True)
         ret_msg = ret.stderr.decode()
         if 'WARNING' in ret_msg.upper():
@@ -72,6 +81,27 @@ def main():
             response = str(input("Would you like to perform additional setup tasks? (y/N) ")).upper()
             if not response or response == "N":
                 break
+
+
+def list_projects():
+    project_list = []
+    ret = subprocess.run(f"gcloud projects list", capture_output=True, shell=True)
+    error = ret.stderr.decode()
+    if 'WARNING' in error.upper():
+        print(f'The following error occurred when listing projects: \n{error}')
+        exit(1)
+    ret_msg = ret.stdout.decode()
+    projects = ret_msg.split('\r\n')
+
+    for idx, item in enumerate(projects):
+        project = item.split(' ')[0]
+        if idx == 0:
+            print(f'OPTION  {project}')
+        else:
+            if project not in ['', ' ']:
+                print(f'[{idx - 1}] - {project}')
+                project_list.append(project)
+    return project_list
 
 
 def test_gcp_credentials(project):

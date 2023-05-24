@@ -1,5 +1,4 @@
 # reset for broken workouts
-
 from google.cloud import datastore
 
 __Author__ = 'Bill'

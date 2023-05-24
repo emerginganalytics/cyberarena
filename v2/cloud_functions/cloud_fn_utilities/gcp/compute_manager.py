@@ -103,9 +103,6 @@ class ComputeManager:
         if self.server_spec.get("alias_ip_ranges", False):
             config['advancedMachineFeatures'] = {"enableNestedVirtualization": True}
 
-        if self.server_spec.get('alias_ip_addresses', False):
-            config['advancedMachineFeatures'] = {'enableNestedVirtualization': True}
-
         if self.server_spec.get('build_type', None) == BuildConstants.ServerBuildType.MACHINE_IMAGE:
             source_machine_image = f"projects/{self.env.project}/global/machineImages/" \
                                    f"{self.server_spec['machine_image']}"

@@ -36,3 +36,4 @@ admin_scripts/reports/
 .env
 .gitignore
 v2/container-applications/Classified/test.py
+/v2/build_files/admin_scripts/local/
