@@ -69,11 +69,9 @@ class ComputeManager:
                 parent_build_id = self.server_spec.get('parent_id', None)
             else:
                 parent_build_id = self.server_spec.get('fixed_arena_class_id', None)
-            self.assessment = AssessmentManager(build_id=parent_build_id, key_type=parent_key_type,
-                                                env_dict=self.env_dict)
+            self.assessment = None
         else:
-            self.assessment = AssessmentManager(build_id=self.parent_build_id, key_type=parent_key_type,
-                                                env_dict=self.env_dict)
+            self.assessment = AssessmentManager(build_id=self.parent_build_id, env_dict=self.env_dict)
         self.state_manager = ServerStateManager(initial_build_id=self.server_name)
 
     def build(self):

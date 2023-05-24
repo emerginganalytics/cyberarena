@@ -45,20 +45,15 @@ class LMSCanvas(LMS):
 
     def create_quiz(self, delete_existing_quizzes=True):
         questions = self.build['lms_quiz']['questions']
-        points_possible = sum([q['points_possible'] for q in questions])
         quiz_name = f"Quiz for the Cyber Arena workout: {self.build['summary']['name']}"
         if delete_existing_quizzes:
             self.delete_quiz_by_name(quiz_name)
+        description = self._get_description()
         quiz_data = {
             'title': quiz_name,
-            'instructions': f"Your lab is available at {self.env.main_app_url_v2}/student/join. Use the join code "
-                            f"{self.build.get('join_code', None)} and the email address used to login to this site. "
-                            f"The instructions to complete this quiz are here: "
-                            f"{self.build['summary']['student_instructions_url']}",
+            'description': description,
             'due_at': self.build['lms_quiz']['due_at'],
             'show_correct_answers': False,
-            # TODO: Fix this points possible
-            'points': 80,
             'published': True,
             'grading_type': 'percent',
             'shuffle_answers': True,
@@ -66,17 +61,21 @@ class LMSCanvas(LMS):
         }
         new_quiz = self.course.create_quiz(quiz_data)
         question_ids = []
+        total_points = 0
         for question in json.loads(json.dumps(questions)):
+            points_possible = float(question.get('points_possible', 1))
             question_data = {
                 'question_name': question.get('question_name', None),
                 'question_text': question.get('question_text', None),
                 'question_type': question.get('question_type', CanvasConstants.Questions.Types.SHORT_ANSWER),
-                'points_possible': float(question.get('points_possible', 1)),
+                'points_possible': points_possible,
                 'answers': question.get('answers', None)
             }
             question = new_quiz.create_question(question=question_data)
             question_ids.append(question.id)
+            total_points += points_possible
         self._store_quiz_identifiers(quiz_key=new_quiz.id, question_ids=question_ids)
+        new_quiz.edit(quiz={'points_possible': total_points})
         return new_quiz
 
     def get_updated_build(self):
@@ -98,3 +97,14 @@ class LMSCanvas(LMS):
         self.build['lms_quiz']['quiz_key'] = quiz_key
         for i, question in enumerate(self.build['lms_quiz']['questions']):
             question['question_key'] = question_ids[i]
+
+    def _get_description(self):
+        description = f"Your lab is available at " \
+                      f"<a href=https://{self.env.main_app_url_v2}/student/join target=_blank>Cyber Arena</a>. " \
+                      f"Use the join code {self.build.get('join_code', None)} and the email address used to login " \
+                      f"to this site. "
+        if self.build['summary']['student_instructions_url']:
+            description = f"{description}The instructions to complete this quiz are here: " \
+                          f"<a href={self.build['summary']['student_instructions_url']} target=_blank>" \
+                          f"Lab Instructions</a>"
+        return f"<p>{description}</p>"

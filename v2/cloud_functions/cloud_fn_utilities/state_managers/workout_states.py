@@ -144,7 +144,7 @@ class WorkoutStateManager:
         return DataStoreManager(key_type=DatastoreKeyTypes.SERVER).get_running()
 
     def _is_valid_transition(self, existing_state, new_state):
-        if new_state == self.s.START.value:
+        if new_state == self.s.START.value or self.s.NOT_BUILT:
             return True
         elif new_state == self.s.BUILDING_NETWORKS.value and existing_state in \
                 [self.s.NOT_BUILT, self.s.START.value, self.s.BROKEN.value, self.s.BUILDING_NETWORKS.value]:

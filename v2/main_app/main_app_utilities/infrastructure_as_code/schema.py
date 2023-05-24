@@ -39,7 +39,6 @@ class FixedArenaClassSchema(Schema):
     workspace_servers = fields.Nested('ServerSchema', many=True, required=True)
     fixed_arena_servers = fields.List(fields.Str, description='A list of servers to turn on in the fixed arena.',
                                       default=[])
-    assessment = fields.Nested('AssessmentSchema', required=False)
     add_attacker = fields.Bool(description="Whether to add an attacker (agent) machine to the workspace networks",
                                default=False)
     test = fields.Bool(required=False, description="Whether the Fixed Arena Class is a test. This helps in cleaning the datastore.")
