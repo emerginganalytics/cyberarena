@@ -32,9 +32,12 @@ class CryptoLock:
         self.file_hashes = self._load_file_hashes()
         self.hash_dict = copy.deepcopy(self.file_hashes)
 
-    def encrypt_dir(self):
+    def encrypt_dir(self, **kwargs):
         for item in os.scandir(self.plaintext_dir):
             if item.is_dir():
+                if exclude := kwargs.get('exclude', None):
+                    if any(dir_name == item.name for dir_name in exclude):
+                        continue
                 child_plaintext_dir = item.path
                 child_encrypted_dir = os.path.join(self.encrypted_dir, item.name)
                 if not os.path.isdir(child_encrypted_dir):

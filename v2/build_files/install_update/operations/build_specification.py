@@ -147,7 +147,7 @@ class BuildSpecification:
                 reply = str(input(f"Do you want to first sync all plaintext files in {encrypted_dir}? [Y/n]")).upper()
                 sync_plaintext = True if reply == "Y" else False
             if sync_plaintext:
-                spec_crypto_lock.encrypt_dir()
+                spec_crypto_lock.encrypt_dir(exclude=self.EXCLUDE)
         spec_crypto_lock.decrypt_dir()
 
     def _upload_files_to_cloud(self, files, cloud_directory):
