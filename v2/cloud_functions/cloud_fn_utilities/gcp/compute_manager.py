@@ -100,7 +100,7 @@ class ComputeManager:
             'serviceAccounts': service_account,
             'minCpuPlatform': self.server_spec.get('min_cpu_platform', None)
         }
-        if self.server_spec.get("alias_ip_ranges", False):
+        if self.server_spec.get("ip_aliases", False):
             config['advancedMachineFeatures'] = {"enableNestedVirtualization": True}
 
         if self.server_spec.get('build_type', None) == BuildConstants.ServerBuildType.MACHINE_IMAGE:
@@ -360,8 +360,11 @@ class ComputeManager:
             if 'internal_ip' in network:
                 add_network_interface['networkIP'] = network["internal_ip"]
 
-            if 'alias_ip_ranges' in network:
-                add_network_interface['aliasIpRanges'] = network['alias_ip_ranges']
+            if ip_aliases := network.get('ip_aliases', None):
+                alias_ip_ranges = []
+                for ipaddr in ip_aliases:
+                    alias_ip_ranges.append({'ipCidrRange': ipaddr})
+                add_network_interface['aliasIpRanges'] = alias_ip_ranges
             network_interfaces.append(add_network_interface)
         self.server_spec['network_interfaces'] = network_interfaces
 

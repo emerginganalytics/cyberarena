@@ -42,6 +42,9 @@ class BuildSpecification:
     TEACHER_FOLDER = "teacher_instructions/"
     STUDENT_FOLDER = "student_instructions/"
 
+    # List of directory names to exclude from the cloud sync process
+    EXCLUDE = ['fipte', 'old']
+
     def __init__(self, sync=True, suppress=True):
         self.suppress = suppress
         self.env = CloudEnv()
@@ -175,9 +178,12 @@ class BuildSpecification:
         specs_to_upload = []
         for item in os.scandir(self.build_specs_plaintext):
             if item.is_dir():
-                for file in os.scandir(item):
-                    self._sync_computer_images(file)
-                    specs_to_upload.append(file)
+                if any(dir_name == item.name for dir_name in self.EXCLUDE):
+                    continue
+                else:
+                    for file in os.scandir(item):
+                        self._sync_computer_images(file)
+                        specs_to_upload.append(file)
             if item.is_file():
                 self._sync_computer_images(item)
                 specs_to_upload.append(item)

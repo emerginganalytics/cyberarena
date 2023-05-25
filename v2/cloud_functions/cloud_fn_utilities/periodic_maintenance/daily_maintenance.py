@@ -43,8 +43,9 @@ class DailyMaintenance:
             unit = self.ds.get(key_type=DatastoreKeyTypes.UNIT, key_id=unit_id)
             workout_name = unit['summary']['name']
             instructor = unit['instructor_id']
-            num_workouts = len(unit['servers'])
+            num_workouts = unit['workspace_settings']['count']
             expires = unit['workspace_settings']['expires']
             hours_until_expired = round((expires - get_current_timestamp_utc()) / 3600)
-            SendMail().send_expiring_units(unit_id=unit_id, workout_name=workout_name, instructor=instructor,
-                                           num_workouts=num_workouts, hours_until_expires=hours_until_expired)
+            if hours_until_expired >= 0:
+                SendMail().send_expiring_units(unit_id=unit_id, workout_name=workout_name, instructor=instructor,
+                                               num_workouts=num_workouts, hours_until_expires=hours_until_expired)

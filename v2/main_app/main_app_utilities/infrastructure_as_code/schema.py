@@ -142,7 +142,6 @@ class ServerSchema(Schema):
     build_type = fields.Str(default=None)
     metadata = fields.Str(default=None)
     sshkey = fields.Str(default=None)
-    alias_ip_ranges = fields.List(fields.Str)
     can_ip_forward = fields.Bool(default=False)
     min_cpu_platform = fields.Str(default="")
     nics = fields.Nested('NicSchema', many=True)
@@ -158,6 +157,7 @@ class NicSchema(Schema):
     subnet_name = fields.Str(required=True, default="default")
     external_nat = fields.Bool(default=False)
     dns_host_suffix = fields.Str(required=False)
+    ip_aliases = fields.List(fields.Str, required=False)
 
     class Meta:
         strict = True
