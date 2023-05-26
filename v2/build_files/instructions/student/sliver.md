@@ -38,9 +38,7 @@ sliver > mtls
 Sliver is now waiting for clients to communicate back with it.
 
 ### Open your Victim Machine
-Then, the malware can be accessed by your Windows server, sliver-victim, by opening a file explorer and navigating to `\\10.1.1.10\sliver
-
-![image](https://user-images.githubusercontent.com/50633591/234988380-81fc9370-148b-4c2c-a816-7b1b14ba47de
+Then, the malware can be accessed by your Windows server, sliver-victim, by opening a file explorer and navigating to `\\10.1.1.10\sliver`
 
 Double click to run the executable. Nothing will happen, but the C2 backchannel communication will be established.
 
