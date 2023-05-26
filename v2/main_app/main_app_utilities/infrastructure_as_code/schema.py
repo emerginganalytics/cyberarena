@@ -255,6 +255,7 @@ class LMSQuizQuestionsSchema(Schema):
     question_type = fields.Str(required=False, description="Question type")
     points_possible = fields.Float(required=False, description="Points")
     script_assessment = fields.Bool(missing=False)
+    bonus = fields.Bool(required=False, description="Whether to count this question as a bonus")
     answers = fields.Nested('LMSQuizAnswerSchema', many=True, description="Question answers")
 
 
