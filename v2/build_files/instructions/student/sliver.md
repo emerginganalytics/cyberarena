@@ -1,11 +1,22 @@
-# Sliver Botnet Instructions
+> **Disclaimer:** The purpose of the lab environment is solely for educational and research purposes within the context of authorized and supervised activities. This lab environment is established to facilitate learning, analysis, and understanding of malware and related cybersecurity concepts. The malware lab environment is equipped with security measures to prevent unauthorized access and the spread of malware. However, it is essential to exercise caution and follow established protocols to minimize the risk of accidental exposure, infection, or unintended distribution of malware.
+
+# Sliver C2 Botnet Instructions
+Sliver is an open-source command and control (C2) botnet framework designed for educational purposes. The framework consists of a main server component that allows the deployment and management of botnet infrastructure. The server facilitates communication with the botnets.
+
+C2 infrastructure operates by establishing a connection from the victim's machine back to the controller using outbound communication through well-known ports, such as HTTP. Typically, firewalls block incoming communication, but outbound communication through HTTP is commonly allowed. C2 botnet infrastructure exploits this by having the Sliver server listen for incoming communication from the botnet victims.
+
+When a victim's machine is compromised and becomes part of the botnet, it runs with user privileges. This allows the controller to issue various commands to the botnet, essentially giving the controller control over the actions the victim machine performs. Consequently, the controller can carry out malicious activities using the compromised machines.
+
+Please note that in your lab environment, all protection measures are disabled. However, in a real-world scenario, botnets can be thwarted by using up-to-date anti-malware software to prevent the initial implant from executing. If the initial infection occurs, it becomes more challenging to detect and stop the botnet's C2 communication, as the botnet attempts to camouflage itself as regular network traffic.
+
+It is crucial to conduct these experiments and study the botnet framework within a controlled and strictly educational environment. The knowledge gained can contribute to understanding botnet behaviors, detecting and mitigating potential threats, and reinforcing cybersecurity practices.
 
 ## Accessing your Servers
 You have 2 servers in your lab:
 * **sliver-server**: Ubuntu server with the role of command and control of the botnet.
 * **sliver-victim**: A test victim server used for installing implants.
 
->! **Warning:** When connecting to servers, it may be best to open this in an incognito browser to avoid caching the credentials used to connect. Only connect to one of the servers at a time, and then, only in incognito mode.
+> **Information:** When connecting to servers, it may be best to open this in an incognito browser to avoid caching the credentials used to connect. Only connect to one of the servers at a time, and then, only in incognito mode.
 
 ![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
 
@@ -76,4 +87,8 @@ sliver (RANDOM_NAME) > raw-keylogger 2    # Captures the keylogger output.
 ```
 > **Challenge:** There's a secret password on the victim. See if you can use mimikatz through the Armory to recover the password.
 
+### Sliver Network Communication Monitoring
+You can observe the network traffic used by Sliver through the Wireshark application on the Windows victim desktop. Double click on Wireshark and include the filter `host 10.1.1.20` similar to the screenshot below, but make sure to use the IP address 10.1.1.20.
+![image](https://github.com/emerginganalytics/cyberarena/assets/50633591/88443e75-ad85-402d-9bf3-19df26b92fe0)
 
+You will start to see traffic coming across periodically. Here, you can observe the protocol used by Sliver.
