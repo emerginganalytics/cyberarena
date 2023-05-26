@@ -257,6 +257,8 @@ class LMSQuizQuestionsSchema(Schema):
     script_assessment = fields.Bool(missing=False)
     bonus = fields.Bool(required=False, description="Whether to count this question as a bonus")
     answers = fields.Nested('LMSQuizAnswerSchema', many=True, description="Question answers")
+    complete = fields.Bool(required=False,
+                           description="Used to mark completion for multi-step auto assessment scripts")
 
 
 class LMSQuizAnswerSchema(Schema):

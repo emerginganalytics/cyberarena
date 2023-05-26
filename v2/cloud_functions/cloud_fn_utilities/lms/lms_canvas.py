@@ -24,6 +24,10 @@ class CanvasConstants:
             SHORT_ANSWER = 'short_answer_question'
             ESSAY_QUESTION = 'essay_question'
             FILE_UPLOAD_QUESTION = 'file_upload_question'
+            FILL_IN_MULTIPLE_BLANKS = 'fill_in_multiple_blanks_question'
+            MULTIPLE_ANSWERS = 'multiple_answers_question'
+            MULTIPLE_CHOICE = 'multiple_choice_question'
+            BOOLEAN = 'true_false_question'
 
 
 class LMSCanvas(LMS):
