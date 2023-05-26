@@ -71,9 +71,10 @@ class LMSCanvas(LMS):
                 'points_possible': points_possible,
                 'answers': question.get('answers', None)
             }
-            question = new_quiz.create_question(question=question_data)
-            question_ids.append(question.id)
-            total_points += points_possible
+            question_obj = new_quiz.create_question(question=question_data)
+            question_ids.append(question_obj.id)
+            if not question.get('bonus', None):
+                total_points += points_possible
         self._store_quiz_identifiers(quiz_key=new_quiz.id, question_ids=question_ids)
         new_quiz.edit(quiz={'points_possible': total_points})
         return new_quiz
@@ -82,7 +83,7 @@ class LMSCanvas(LMS):
         """
         It's dangerous to save a Datastore Entity inside a class. Otherwise, it could be overwritten by the calling
         function.
-        Returns:
+        Returns: None
 
         """
         return self.build
@@ -106,5 +107,5 @@ class LMSCanvas(LMS):
         if self.build['summary']['student_instructions_url']:
             description = f"{description}The instructions to complete this quiz are here: " \
                           f"<a href={self.build['summary']['student_instructions_url']} target=_blank>" \
-                          f"Lab Instructions</a>"
+                          f"Lab Instructions.</a>"
         return f"<p>{description}</p>"

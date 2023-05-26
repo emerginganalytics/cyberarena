@@ -1,5 +1,5 @@
 # The name of the unit you are testing (without the .yaml)
-unit_name: gigabyte-apt
+unit_name: sliver
 instructor_id: philiphuff7@gmail.com
 lms_integration: true
 lms_due_at: 2023-05-23 00:00:00

@@ -33,7 +33,7 @@ class TestUnit:
         self.bm = BucketManager()
         self.build_id = build_id if build_id else None
         self.debug = debug
-        self.yaml = yaml.safe_load(open('test_v2_unit.yaml'))
+        self.yaml = yaml.safe_load(open('test_unit.yaml'))
 
     def build(self, debug: bool = True):
         build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=self.yaml['unit_name']).get()
