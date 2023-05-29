@@ -6,16 +6,17 @@
     You will need to save this (e.g. C:\Users\<username>\.gcp\cyberarena.json). This key will be used for running the setup.
 4. Enable the [Clouds Domains API](https://console.cloud.google.com/net-services/domains/) and select a DNS to register for the project. Then enable the [DNS service](https://console.cloud.google.com/net-services/dns/) and create a new managed domain with the same name as you just registered. **The zone must be named cybergym-public.**
 5. Set up the Identity Platform service and obtain the API key as follows:
-    1. Navigate to the Identify Platform at 
-        https://console.cloud.google.com/marketplace/product/google-cloud-platform/customer-identity and enable the API.
+    1. Navigate to the [Identify Platform](
+        https://console.cloud.google.com/marketplace/product/google-cloud-platform/customer-identity) and enable the API.
     2. Click to create a new Identity Provider and select Email/Password. The defaults are fine to use. 
         You may also set up other providers as needed
-    3. Configure the OAuth consent screen at https://console.cloud.google.com/apis/credentials/consent. 
-        When setting this screen up, make sure to include the domain for this project in the authorized domains.
-    4. Get or create API credentials to use in the main application by going to 
-        https://console.cloud.google.com/apis/credentials and selecting the default credential or clicking on 
-        Create Credentials and selecting API key. Copy this API key. You will need to use this when deploying the application.
+    3. Configure the (OAuth consent screen)[https://console.cloud.google.com/apis/credentials/consent]. The web application must be external, but no consent screen is required.
+        Make sure to include the domain for this project in the authorized domains.
+    4. Get or Create (Credentials)[https://console.cloud.google.com/apis/credentials]. Select the default credential or clicking on 
+        Create Credentials and select the API key. Copy this API key. You will need to use this when deploying the application.
     5. The URL you use for the main application will need to be added to the list of authorized domains in the Firebase Console: https://console.firebase.google.com/u/0/project/PROJECT-NAME/authentication/settings.
+    6. On the credentials screen, add the Firebase URI to the authorized Javascript origins and authorized redirects. The application settings are similar to those below:
+        ![image](https://github.com/emerginganalytics/cyberarena/assets/50633591/86065381-3e49-4c1e-b511-d1b78278acf3)
 6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/ - You will use this to run setup.py as described in the deployment section below.
 
 ## Deployment
