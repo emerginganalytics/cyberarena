@@ -20,8 +20,8 @@ class EnvironmentVariables:
     DEFAULT_REGION = "us-central1"
     DEFAULT_ZONE = "us-central1-a"
     DEFAULT_TIMEZONE = "America/Chicago"
-    VARIABLES = ['dns_suffix', 'api_key', 'main_app_url', 'main_app_url_v2', 'admin_email', 'guac_password',
-                 'project_number']
+    VARIABLES = ['dns_suffix', 'dnszone', 'api_key', 'main_app_url', 'main_app_url_v2', 'admin_email',
+                 'guac_db_password', 'project_number', 'max_workspaces', 'sendgrid_api_key', 'shodan_api_key']
 
     def __init__(self, project):
         self.project = project

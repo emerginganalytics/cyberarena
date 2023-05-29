@@ -3,6 +3,7 @@ import time
 from google.cloud import datastore
 from datetime import datetime, timedelta
 from googleapiclient.errors import HttpError
+from google.api_core.exceptions import NotFound
 
 from cloud_fn_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, ServerStates, \
     FixedArenaClassStates, WorkoutStates
@@ -43,8 +44,12 @@ class DataStoreManager:
         else:
             use_key = self.key
         obj = self.ds_client.get(use_key)
+
+        if not obj and use_key.kind == DatastoreKeyTypes.ADMIN_INFO.value:
+            return self._create_new_entity(use_key)
+
         i = 0
-        while not obj and i < self.MAX_ATTEMPTS and key_type != DatastoreKeyTypes.ADMIN_INFO:
+        while not obj and i < self.MAX_ATTEMPTS:
             i += 1
             time.sleep(self.WAIT_PERIOD)
             obj = self.ds_client.get(use_key)
@@ -163,6 +168,11 @@ class DataStoreManager:
         users = self.ds_client.query(kind=DatastoreKeyTypes.USERS,
                                      filters=[('permissions.admin', '=', True)])
         return list(users.fetch())
+
+    def _create_new_entity(self, key):
+        new_entity = datastore.Entity(key=key)
+        self.ds_client.put(new_entity)
+        return new_entity
 
     @staticmethod
     def _create_safe_entity(entity):
