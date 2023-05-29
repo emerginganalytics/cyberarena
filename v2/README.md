@@ -2,7 +2,7 @@
 ## Prerequisites
 1. Create a new Google Cloud Project: https://console.cloud.google.com/
 2. Install the Google Cloud SDK: https://cloud.google.com/sdk/install
-3. Create a service account with owner access and download a local key here: https://console.cloud.google.com/iam-admin/serviceaccounts.
+3. Create a service account under your name with owner access and download a local key from here: https://console.cloud.google.com/iam-admin/serviceaccounts.
     You will need to save this (e.g. C:\Users\<username>\.gcp\cyberarena.json). This key will be used for running the setup.
 4. Enable the [Clouds Domains API](https://console.cloud.google.com/net-services/domains/) and select a DNS to register for the project. Then enable the [DNS service](https://console.cloud.google.com/net-services/dns/) and create a new managed domain with the same name as you just registered. **The zone must be named cybergym-public.**
 5. Set up the Identity Platform service and obtain the API key as follows:
