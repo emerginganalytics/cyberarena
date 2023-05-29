@@ -5,6 +5,7 @@ from googleapiclient.errors import HttpError
 
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes
+from cloud_fn_utilities.gcp.cloud_logger import Logger
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -24,6 +25,7 @@ class CloudEnv:
         Pull all the environment variables. If an HTTP error occurs because of too many requests, then back off a few
         seconds each time.
         """
+        self.logger = Logger("cloud_functions.cloud_env").logger
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.ADMIN_INFO, key_id='cyberarena')
         self.env_dict = env_dict if env_dict else self.ds.get()
         if self.env_dict:
@@ -40,10 +42,11 @@ class CloudEnv:
             self.main_app_url = self.env_dict['main_app_url']
             self.main_app_url_v2 = self.env_dict['main_app_url_v2']
             self.dns_suffix = self.env_dict['dns_suffix']
-            self.max_workspaces = self.env_dict['max_workspaces']
-            self.spec_bucket = self.env_dict['spec_bucket']
-            self.student_instructions_url = self.env_dict['student_instructions_url']
-            self.teacher_instructions_url = self.env_dict['teacher_instructions_url']
+            self.max_workspaces = self.env_dict.get('max_workspaces', 300)
+            self.spec_bucket = self.env_dict.get('spec_bucket', f"{self.project}_build-specs")
+            if not self.spec_bucket:
+                self.logger.warning(f"The environment variable spec_bucket is not set for the project. This should "
+                                    f"occur as part of the build process when synchronizing the specs.")
             # Database Variables
             self.guac_db_password = self.env_dict['guac_db_password']
             # API Keys

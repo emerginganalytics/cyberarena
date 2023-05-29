@@ -2,6 +2,7 @@ import subprocess
 from googleapiclient import discovery
 
 from install_update.utilities.globals import ShellCommands
+from install_update.operations.environment_variables import EnvironmentVariables
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -56,8 +57,4 @@ class BaseBuild:
         confirmation = str(input("Do you want to create the environmental variables at this time? (Y/n): ")).upper() \
             if not self.suppress else "Y"
         if confirmation != "N":
-            for item in ShellCommands.RuntimeConfig:
-                print(f"Running: {item.value}")
-                ret = subprocess.run(item.value, capture_output=True, shell=True)
-                print(ret.stderr.decode())
-
+            EnvironmentVariables(project=self.project).run()
