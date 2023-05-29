@@ -16,8 +16,9 @@
         Create Credentials and select the API key. Copy this API key. You will need to use this when deploying the application.
     5. The URL you use for the main application will need to be added to the list of authorized domains in the Firebase Console: https://console.firebase.google.com/u/0/project/PROJECT-NAME/authentication/settings.
     6. On the credentials screen, add the Firebase URI to the authorized Javascript origins and authorized redirects. The application settings are similar to those below:
-        ![image](https://github.com/emerginganalytics/cyberarena/assets/50633591/86065381-3e49-4c1e-b511-d1b78278acf3)
 6. Install the PyCharm IDE here: https://www.jetbrains.com/pycharm/ - You will use this to run setup.py as described in the deployment section below.
+
+![image](https://github.com/emerginganalytics/cyberarena/assets/50633591/86065381-3e49-4c1e-b511-d1b78278acf3)
 
 ## Deployment
 Create a new project in PyCharm at the root of this directory, and then set `build_files`, `cloud_functions`, and 
