@@ -122,11 +122,10 @@ class Workout(MethodView):
                     self.logger.info(f"PUT request question response for id {question_key}")
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
-                    ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id'])
-                    unit = ds_unit.get()
-                    if unit and 'lms_quiz' in unit:
-                        unit = self._submit_lms_question(unit, question_key)
-                        ds_unit.put(unit)
+                    unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id']).get()
+                    if self.workout and 'lms_quiz' in self.workout:
+                        workout = self._submit_lms_question(unit, self.workout, question_key)
+                        ds_workout.put(workout)
                         return self.http_resp(code=200).prepare_response()
                     elif self.workout and 'assessment' in self.workout:
                         response = recv_data.get('response', None)
@@ -169,7 +168,7 @@ class Workout(MethodView):
                         return True, True
         return False, True
 
-    def _submit_lms_question(self, unit, question_key):
+    def _submit_lms_question(self, unit, workout, question_key):
         """
         Auto assess a question for the LMS based on the unit and question passed in. The workout is an object variable.
         Args:
@@ -187,12 +186,12 @@ class Workout(MethodView):
         if lms_type == BuildConstants.LMS.CANVAS:
             lms = LMSCanvas(url=url, api_key=api_key, course_code=course_code)
         else:
-            self.logger.error(f"Unsupported LMS found for unit {unit['id']} when attempting to auto grade "
+            self.logger.error(f"Unsupported LMS found for unit {workout['id']} when attempting to auto grade "
                               f"for {student_email}")
             raise ValueError("Unsupported LMS unit")
 
-        quiz_key = unit['lms_quiz'].get('quiz_key', None)
-        questions = unit['lms_quiz'].get('questions', None)
+        quiz_key = workout['lms_quiz'].get('quiz_key', None)
+        questions = workout['lms_quiz'].get('questions', None)
         answered = False
         for question in questions:
             if question['question_key'] == question_key and not question.get('complete', False):
@@ -208,9 +207,9 @@ class Workout(MethodView):
                 break
 
         if not answered:
-            self.logger.warning(f"Auto assessment submitted for quiz: {unit['lms_quiz']['name']} and "
+            self.logger.warning(f"Auto assessment submitted for quiz: {workout['lms_quiz']['name']} and "
                                 f"student {student_email}, but the question could not be found in the quiz!")
-        return unit
+        return workout
 
     def _find_existing_workout(self, unit, student_email):
         """

@@ -41,10 +41,13 @@ class LMSCanvas(LMS):
     def get_class_list(self):
         students = []
         for student in self.class_list:
-            students.append({
+            try:
+                students.append({
                     'email': student.email,
                     'name': student.name
                 })
+            except AttributeError:
+                continue
         return students
 
     def create_quiz(self, delete_existing_quizzes=True):
@@ -108,8 +111,8 @@ class LMSCanvas(LMS):
                       f"<a href=https://{self.env.main_app_url_v2}/student/join target=_blank>Cyber Arena</a>. " \
                       f"Use the join code {self.build.get('join_code', None)} and the email address used to login " \
                       f"to this site. "
-        if self.build['summary']['student_instructions_url']:
+        if student_instructions_url := self.build['summary'].get('student_instructions_url', None):
             description = f"{description}The instructions to complete this quiz are here: " \
-                          f"<a href={self.build['summary']['student_instructions_url']} target=_blank>" \
+                          f"<a href={student_instructions_url} target=_blank>" \
                           f"Lab Instructions.</a>"
         return f"<p>{description}</p>"

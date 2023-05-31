@@ -193,8 +193,10 @@ class Unit:
         if escape_room_spec:
             workout_record['escape_room'] = escape_room_spec
         else:
-            if self.unit.get('assessment', None):
-                workout_record['assessment'] = self.unit['assessment']
+            if assessment := self.unit.get('assessment', None):
+                workout_record['assessment'] = assessment
+            elif lms_quiz := self.unit.get('lms_quiz', None):
+                workout_record['lms_quiz'] = lms_quiz
         if self.debug:
             workout_record['test'] = True
         return workout_record

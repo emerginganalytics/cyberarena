@@ -1,6 +1,6 @@
 # The name of the unit you are testing (without the .yaml)
-unit_name: sliver
-instructor_id: philiphuff7@gmail.com
+unit_name: vulnerability-defender-lms
+instructor_id: abbomberger@ualr.edu
 lms_integration: true
 lms_due_at: 2023-05-23 00:00:00
 lms_time_limit: -1
