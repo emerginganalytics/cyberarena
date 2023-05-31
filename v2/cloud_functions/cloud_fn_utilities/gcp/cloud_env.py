@@ -124,35 +124,3 @@ class CloudEnv:
         """
         return vars(self)
 
-    def sync_with_datastore(self):
-        """Takes values stored in runtimeconfig and updates the datastore"""
-        self.load_from_runtimeconfig()
-        variables = self.get_env()
-        if not (admin_info := self.ds.get()):
-            admin_info = {'budget_exceeded': False}
-
-        # Load Environment Variables into Datastore
-        update = False
-        for key, value in variables.items():
-            if not any(key == x for x in ['env_dict', 'ds', 'custom_dnszone']):
-                if variable := admin_info.get(key, None):
-                    if variable == value:
-                        # Value is the same ignore
-                        continue
-                    else:
-                        update = True
-                else:
-                    update = True
-                admin_info[key] = value
-
-        if custom_dnszone := variables.get('custom_dnszone', None):
-            dnszone = admin_info['dnszone']
-            if custom_dnszone != dnszone:
-                dnszone = custom_dnszone
-                update = True
-
-        if update:
-            self.ds.put(admin_info)
-            return True
-        else:
-            return False

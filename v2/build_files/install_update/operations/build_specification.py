@@ -43,7 +43,7 @@ class BuildSpecification:
     STUDENT_FOLDER = "student_instructions/"
 
     # List of directory names to exclude from the cloud sync process
-    EXCLUDE = ['fipte', 'old']
+    EXCLUDE = ['fipte', 'old', 'courses', 'agency', 'fixed_cyber_arenas']
 
     def __init__(self, sync=True, suppress=True):
         self.suppress = suppress
