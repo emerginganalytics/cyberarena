@@ -4,6 +4,9 @@ A base parent class for the LMS object in the Cyber Arena
 
 from abc import ABC, abstractmethod
 
+from cloud_fn_utilities.gcp.cloud_logger import Logger
+
+
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff"]
@@ -16,6 +19,7 @@ __status__ = "Testing"
 
 class LMS:
     def __init__(self, url, api_key, course_code, build):
+        self.logger = Logger("cloud_functions.cloud_env").logger
         self.url = url
         self.api_key = api_key
         self.course_code = course_code

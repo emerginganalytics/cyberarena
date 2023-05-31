@@ -3,7 +3,6 @@ Cloud function LMS class to create assignments
 """
 import json
 from canvasapi import Canvas
-from canvasapi.quiz import Quiz, QuizQuestion
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.lms.lms import LMS
@@ -43,11 +42,15 @@ class LMSCanvas(LMS):
         for student in self.class_list:
             try:
                 students.append({
-                    'email': student.email,
-                    'name': student.name
-                })
+                        'email': student.email,
+                        'name': student.name
+                    })
             except AttributeError:
-                continue
+                if hasattr(student, 'name'):
+                    self.logger.warning(f"Email does not exist for {student.name} and a workout will not be created "
+                                        f"for them!")
+                else:
+                    self.logger.warning(f"Error when trying to enumerate class list. Student record has no name!")
         return students
 
     def create_quiz(self, delete_existing_quizzes=True):

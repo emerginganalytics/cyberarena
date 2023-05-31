@@ -235,7 +235,7 @@ class Workout(MethodView):
                 return workout_id
 
         # No workout was found. Now determine if you need to build a new one. If not, return None.
-        max_builds = min(self.env.max_workspaces, unit['workspace_settings']['count'])
+        max_builds = min(int(self.env.max_workspaces), int(unit['workspace_settings'].get('count', 10000)))
         lms_build = True if 'lms_quiz' in unit else False
         if len(workout_list) < max_builds and not lms_build:
             claimed_by = json.dumps({'student_email': student_email.lower()})
