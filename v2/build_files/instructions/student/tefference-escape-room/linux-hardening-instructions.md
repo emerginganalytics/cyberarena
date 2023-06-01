@@ -5,13 +5,6 @@ While the Gigabyte Group isn’t a real APT, [MITRE ATT&CK](https://attack.mitre
 
 For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.  Identify them and remediate any related vulnerabilities, footholds, and persistence mechanisms to complete the lab.
 
-## Navigating to the Vulnerable System
-While the machine we logged into is on our organization’s network, it isn’t the machine targeted by the Gigabyte Group.  We’ll need to ssh into the target machine to gain a shell on it and start executing commands there.  To do that, use this command:
-
-`ssh cyberarena@10.1.1.51`
-
-Accept the ssh key warning and then type in the password: `Let’s workout!`
-
 ## Assignment
 Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system. Your assignment will be automatically assessed after you complete each activity. It may take 1-2 minutes for the assessment to show up.
 1. **Malicious User**: Delete the malicious user account
