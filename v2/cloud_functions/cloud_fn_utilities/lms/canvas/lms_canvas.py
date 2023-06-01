@@ -7,6 +7,7 @@ from canvasapi import Canvas
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
 from cloud_fn_utilities.lms.lms import LMS
 
+
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
 __credits__ = ["Philip Huff"]
@@ -37,7 +38,7 @@ class LMSCanvas(LMS):
         self.course = self.canvas.get_course(self.course_code)
         self.class_list = self.course.get_users(enrollment_type=['student'])
 
-    def get_class_list(self):
+    def get_class_list(self, suppress_logs=False):
         students = []
         for student in self.class_list:
             try:
@@ -46,10 +47,10 @@ class LMSCanvas(LMS):
                         'name': student.name
                     })
             except AttributeError:
-                if hasattr(student, 'name'):
+                if hasattr(student, 'name') and not suppress_logs:
                     self.logger.warning(f"Email does not exist for {student.name} and a workout will not be created "
                                         f"for them!")
-                else:
+                elif not suppress_logs:
                     self.logger.warning(f"Error when trying to enumerate class list. Student record has no name!")
         return students
 
@@ -64,6 +65,7 @@ class LMSCanvas(LMS):
             'description': description,
             'due_at': self.build['lms_quiz']['due_at'],
             'show_correct_answers': False,
+            'allowed_attempts': -1,
             'published': True,
             'grading_type': 'percent',
             'shuffle_answers': True,
