@@ -3,20 +3,16 @@ import logging
 import random
 import string
 from datetime import datetime, timezone
-from netaddr import IPNetwork, IPAddress, iter_iprange
 
 from cloud_fn_utilities.gcp.cloud_env import CloudEnv
-from cloud_fn_utilities.gcp.vpc_manager import VpcManager
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
-from cloud_fn_utilities.gcp.firewall_rule_manager import FirewallManager
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
-from cloud_fn_utilities.gcp.compute_manager import ComputeManager
 from cloud_fn_utilities.gcp.cloud_logger import Logger
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub, BuildConstants, UnitStates, WorkoutStates, \
     get_current_timestamp_utc
 from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
-from cloud_fn_utilities.lms.lms_canvas import LMSCanvas
+from cloud_fn_utilities.lms.canvas.lms_canvas import LMSCanvas
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -30,6 +26,17 @@ __status__ = "Testing"
 
 class Unit:
     def __init__(self, build_id, child_id=None, form_data=None, debug=False, force=False, env_dict=None):
+        """
+
+        Args:
+            build_id (str): The Unit ID to manage
+            child_id (str): A Workout ID if the intent is to build a new workout
+            form_data (str): Use associated with web form. This includes keys for student_name, student_email and
+                        team_name (for escape rooms)
+            debug (bool): Avoids pubsub messages and builds synchronously
+            force (bool): Unused
+            env_dict (dict): A boolean of dictionary values to avoid hitting the datastore
+        """
         self.unit_id = build_id
         self.debug = debug
         self.force = force
@@ -108,6 +115,23 @@ class Unit:
     def get_build_id(self):
         return self.unit_id
 
+    def add_student_workout_record(self, student_email, student_name):
+        """
+        Creates a workout record for the unit without building it. This is initially used for synchronizing with the
+        LMS when new students are added to the course. The LMS sync get called in the hourly maintenance function.
+        Args:
+            student_email (str): The email address of the student
+            student_name (str): The name of the student
+
+        Returns: None
+
+        """
+        workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
+        workout_record = self._create_workout_record(workout_id=workout_id)
+        workout_record['student_email'] = student_email
+        workout_record['student_name'] = student_name
+        self.ds_workout.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
+
     def _create_unit_for_lms(self):
         lms_type = self.unit['lms_connection']['lms_type']
         url = self.unit['lms_connection']['url']
@@ -134,7 +158,6 @@ class Unit:
         count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
         workout_list = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query(
             filters=[('parent_id', '=', self.unit_id)])
-        # workout_list = [i for i in workout_query if i['parent_id'] == self.unit_id]
         if workout_list:
             if len(workout_list) >= count:
                 self.logger.error(f"Requested build for unit {self.unit_id} failed; Unit is at max capacity")

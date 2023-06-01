@@ -91,15 +91,16 @@ class DataStoreManager:
         query_servers = self.ds_client.query(kind=DatastoreKeyTypes.SERVER, filters=filters)
         return list(query_servers.fetch())
 
-    def get_children(self, child_key_type, parent_id):
+    def get_children(self, child_key_type, parent_id, wait=True):
         filters = [('parent_id', '=', parent_id)]
         query_workspaces = self.ds_client.query(kind=child_key_type, filters=filters)
         children = list(query_workspaces.fetch())
         i = 0
-        while not children and i < self.MAX_ATTEMPTS:
-            i += 1
-            time.sleep(self.WAIT_PERIOD)
-            children = list(query_workspaces.fetch())
+        if wait:
+            while not children and i < self.MAX_ATTEMPTS:
+                i += 1
+                time.sleep(self.WAIT_PERIOD)
+                children = list(query_workspaces.fetch())
         return children
 
     def get_expired(self):
