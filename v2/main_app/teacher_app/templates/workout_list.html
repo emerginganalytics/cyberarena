@@ -176,7 +176,7 @@
                                                         {% elif workout['state'] == 72 %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState deleted" data-toggle="tooltip" data-placement="top" title="DELETED"></i>
                                                         {% elif workout['state'] == -1 %}
-                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState notbuilt" data-toggle="tooltip" data-placement="top" title="NOT BUILT"></i>
+                                                            <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle-o buildState notbuilt" data-toggle="tooltip" data-placement="top" title="NOT BUILT"></i>
                                                         {% elif workout['state'] == 62 %}
                                                             <i id="workoutState-{{ workout['id'] }}" class="fa fa-circle buildState broken" data-toggle="tooltip" data-placement="top" title="BROKEN"></i>
                                                         {% else %}
@@ -186,8 +186,13 @@
                                                     <td>{{ workout['id'] }}</td>
                                                     <td>{{ workout.student_email }}</td>
                                                     <td>
-                                                        <button class="btn-fa" onclick="window.open('{{ url_for('student_app.workout_view', build_id=workout['id'])}}')">
-                                                            <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</button>
+                                                        {% if workout['state'] != -1 %}
+                                                            <button class="btn-fa" onclick="window.open('{{ url_for('student_app.workout_view', build_id=workout['id'])}}')">
+                                                                <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</button>
+                                                        {% else %}
+                                                            <button class="btn btn-fa" onclick="window.open('{{ url_for('student_app.workout_view', build_id=workout['id'])}}')" disabled>
+                                                                <i class="fa fa-book" style="padding-right: 5px;"></i>View Workout</button>
+                                                        {% endif %}
                                                     </td>
                                                     {% if unit.assessment %}
                                                         <td>
@@ -198,10 +203,17 @@
                                                     {% endif %}
                                                     {% if unit.servers %}
                                                         <td>
-                                                            <button class="btn-fa btn-delete" data-toggle="modal" data-target="modal_{{ workout['id'] }}_nuke"
-                                                                    onclick="show_modal_card('modal_{{ workout['id'] }}_nuke')"
-                                                                    style="min-width: 70px;"><i class="fa fa-rocket"></i>
-                                                            </button>
+                                                            {% if workout['state'] != -1 %}
+                                                                <button class="btn-fa btn-delete" data-toggle="modal" data-target="modal_{{ workout['id'] }}_nuke"
+                                                                        onclick="show_modal_card('modal_{{ workout['id'] }}_nuke')"
+                                                                        style="min-width: 70px;"><i class="fa fa-rocket"></i>
+                                                                </button>
+                                                            {% else %}
+                                                                <button class="btn btn-fa btn-delete" data-toggle="modal" data-target="modal_{{ workout['id'] }}_nuke"
+                                                                        onclick="show_modal_card('modal_{{ workout['id'] }}_nuke')"
+                                                                        style="min-width: 70px;" disabled><i class="fa fa-rocket"></i>
+                                                                </button>
+                                                            {% endif %}
                                                         </td>
                                                     {% endif %}
                                                 </tr>
@@ -220,7 +232,7 @@
                                     {{ macros.workoutAssessmentModals(workout_list, unit_url) }}
                                 {% endif %}
                                 {% if unit.servers %}
-                                    {% set workout_url = unit.api ~ '/workout' %}
+                                    {% set workout_url = unit.api ~ 'workout' %}
                                     {{ macros.nuke_workout_modals(workout_list, workout_url) }}
                                 {% endif %}
                             </div> <!-- End modal container divs -->

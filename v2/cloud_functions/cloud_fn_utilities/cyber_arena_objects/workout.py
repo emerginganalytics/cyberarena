@@ -196,8 +196,8 @@ class Workout:
                 except LookupError:
                     continue
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.NUKE.value),
-                                        build_id=server,
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(PubSub.Actions.NUKE.value),
+                                        build_id=str(server_name),
                                         cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
 
         if not self.state_manager.are_server_builds_finished():

@@ -43,10 +43,12 @@
                                 <input id="class-expire-date-{{ outer_loop.index }}" class="form-control" name="expires"
                                        type="datetime-local" onchange="validateDateTime(this)">
                             </div>
-                            <div id="{{ build_type }}-build-count-{{ outer_loop.index }}-div" class="form-group">
-                                <label for="build-count-{{ outer_loop.index }}">Enter max number of students:</label>
-                                <input id="build-count-{{ outer_loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
-                            </div>
+                            {% if not spec.lms_quiz %}
+                                <div id="{{ build_type }}-build-count-{{ outer_loop.index }}-div" class="form-group">
+                                    <label for="build-count-{{ outer_loop.index }}">Enter max number of students:</label>
+                                    <input id="build-count-{{ outer_loop.index }}" class="form-control" type="number" name="build_count" min="1" max="50" />
+                                </div>
+                            {% endif %}
                             {% if spec.lms_quiz %}
                                 <input name="lms_integration" value="1" type="hidden">
                                 {% if courses %}

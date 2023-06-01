@@ -66,10 +66,10 @@ class Unit(MethodView):
         expire_datetime = recv_data.get('expires', None)
         registration_required = recv_data.get('registration_required', False)
         build_type = recv_data.get('build_file', None)
-        build_count = recv_data.get('build_count', None)
+        build_count = recv_data.get('build_count', 1)
 
         # Send build request
-        if build_count and expire_datetime and build_type:
+        if expire_datetime and build_type:
             build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=build_type).get()
             if not build_spec:
                 return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
