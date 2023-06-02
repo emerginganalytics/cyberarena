@@ -6,6 +6,7 @@ from install_update.utilities.globals import SetupOptions
 from install_update.operations.base_build import BaseBuild
 from install_update.operations.environment_variables import EnvironmentVariables
 from install_update.operations.cyber_arena_app import CyberArenaApp
+from install_update.operations.classified_app import ClassifiedApp
 from install_update.operations.build_specification import BuildSpecification
 from install_update.operations.bulk_install_update import BulkInstallUpdate
 
@@ -44,6 +45,8 @@ class SetupManager:
             CyberArenaApp().deploy_cloud_functions()
         elif self.selection == SetupOptions.MAIN_APP:
             CyberArenaApp().deploy_main_app()
+        elif self.selection == SetupOptions.CLASSIFIED_APP:
+            ClassifiedApp().deploy()
         elif self.selection == SetupOptions.BUILD_SPECS:
             BuildSpecification().run()
         elif self.selection == SetupOptions.PREPARE_SPEC:
