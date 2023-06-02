@@ -21,7 +21,7 @@ You have 2 servers in your lab:
 ![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
 
 ### Start and Run Sliver
-If promted for the sudo password, enter in `Let's workout!`
+Open the Sliver server interface, which will be an SSH command prompt. Run the following commands to start Sliver. If promted for the sudo password, enter in `Let's workout!`
 ```
 sudo systemctl start sliver
 sudo sliver
