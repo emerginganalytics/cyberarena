@@ -105,12 +105,13 @@ function checkState(build_id, url){
                     for (let i = 0; i < states.length; i++) {
                         let icon = document.getElementById('workoutState-' + String(states[i]['id']));
                         if (icon){
+                            var wState = String(states[i]['state']);
                             icon.classList.remove(...state_classes);
-                            if (states[i]['state'] in state_classes) {
+                            if (state_classes.includes(wState)) {
                                 icon.classList.add(states[i]['state']);
-                            } else if (states[i]['state'] === 'ready') {
+                            } else if (wState === 'ready') {
                                 icon.classList.add('stopped');
-                            } else if (states[i]['state'] === 'not_built') {
+                            } else if (wState === 'not_built') {
                                 icon.classList.add('notbuilt');
                             } else {
                                 icon.classList.add('transition');

@@ -30,19 +30,30 @@
                 <a id="contact-us" class="nav-item btn top-navbar-btn" href="#" data-toggle="modal"
                    data-target="#modalContactUs"><i class="fa fa-envelope-o icon-light"></i>Contact Us</a>
             </li>
-            <li class="nav-item disabled">
-                <p id="banner" class="nav-item btn top-navbar-btn disabled no-select"></p>
-            </li>
-            {% if workout.registration_required %}
-                <li class="nav-item">
-                    <a id="sign-out" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign Out</a>
-                </li>
-            {% elif auth_config and not workout.registration_required %}
-                <li class="nav-item">
-                    <a id="sign-in" class="nav-item btn top-navbar-btn"><i class="fa fa-sign-out"></i>Sign In</a>
-                </li>
-            {% endif %}
         </ul>
+        <div class="dropdown">
+             <ul class="nav nav-pills top-navbar-pill">
+                <li class="nav-item m-l-r-3">
+                    <button id="banner" class="nav-item btn top-navbar-btn" data-toggle="dropdown">
+                        <span id="user">Anonymous User</span><i class="fa fa-caret-down ml-1"></i>
+                    </button>
+                    <ul class="dropdown-menu m-l-r-3 dropdown-menu-hover">
+                        {% if auth_user.auth %}
+                            <li class="nav-item m-l-r-3 text-center">
+                                <a id="settings" class="nav-item btn" href="/teacher/settings" style="width: 100%;">Settings</a>
+                            </li>
+                            <li class="nav-item m-l-r-3 text-center">
+                                <a id="sign-out" class="nav-item btn" style="width: 100%;">Sign Out</a>
+                            </li>
+                        {% else %}
+                            <li class="nav-item m-l-r-3 text-center">
+                                <a id="sign-in" class="nav-item btn" style="width: 100%;">Sign In</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+        </div>
     </div>
 {% endblock %}
 {% block content %}
@@ -61,7 +72,7 @@
           initApp(auth_config).then(value => {
               enable_signout();
                // Set welcome banner
-              const welcome_nav = document.getElementById('banner');
+              const welcome_nav = document.getElementById('user');
               welcome_nav.textContent = value['display_name'];
           });
            $(document).ready(function() {

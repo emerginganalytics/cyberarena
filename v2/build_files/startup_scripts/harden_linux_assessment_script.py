@@ -42,6 +42,7 @@ class Question:
             if response and response.status_code == 200:
                 open(self.complete_file, 'a').close()
 
+
 class Question0(Question):
     """
     Assess whether the Gigabyte user is deleted
@@ -54,6 +55,7 @@ class Question0(Question):
             if p[0] == AssessmentArtifacts.Q0_USER_CHECK:
                 return False
         return True
+
 
 class Question1(Question):
     """
@@ -69,6 +71,7 @@ class Question1(Question):
                 return False
         return True
 
+
 class Question2(Question):
     """
     Assess over-privileged user
@@ -83,6 +86,7 @@ class Question2(Question):
             return False
         return True
 
+
 class Question3(Question):
     """
     Assess banned File Type
@@ -96,6 +100,7 @@ class Question3(Question):
         if AssessmentArtifacts.FILETYPE_CHECK in output:
             return False
         return True
+
 
 class Question4(Question):
     """
@@ -112,7 +117,7 @@ class Question4(Question):
 
 
 def main():
-    url = os.environ.get('URL')
+    url = f"https://{os.environ.get('URL')}"
     build_id = os.environ.get('BUILD_ID')
     Question0(build_id=build_id, url=url).assess()
     Question1(build_id=build_id, url=url).assess()

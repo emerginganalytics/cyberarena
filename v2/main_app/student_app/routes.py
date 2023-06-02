@@ -59,6 +59,10 @@ def claim_escape_room():
 @student_app.route('/assignment/workout/<build_id>', methods=['GET'])
 def workout_view(build_id):
     auth_config = cloud_env.auth_config
+    auth_user = {'email': None, 'auth': False}
+    if user := session.get('user_email', None):
+        auth_user['email'] = user
+        auth_user['auth'] = True
 
     if not (workout_info := DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()):
         workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
@@ -92,7 +96,7 @@ def workout_view(build_id):
 
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,
-                                   server_list=server_list, project_id=cloud_env.project)
+                                   server_list=server_list, project_id=cloud_env.project, auth_user=auth_user)
         return redirect(url_for('student_app.claim_workout', error=500))
     return redirect(url_for('student_app.claim_workout', error=400))
 

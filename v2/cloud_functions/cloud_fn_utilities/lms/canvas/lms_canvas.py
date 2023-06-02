@@ -66,7 +66,7 @@ class LMSCanvas(LMS):
             'due_at': self.build['lms_quiz']['due_at'],
             'show_correct_answers': False,
             'allowed_attempts': -1,
-            'published': True,
+            'published': False,
             'grading_type': 'percent',
             'shuffle_answers': True,
             'assignees': [{'id': x.id, 'type': 'user'} for x in self.class_list]
@@ -88,7 +88,7 @@ class LMSCanvas(LMS):
             if not question.get('bonus', None):
                 total_points += points_possible
         self._store_quiz_identifiers(quiz_key=new_quiz.id, question_ids=question_ids)
-        new_quiz.edit(quiz={'points_possible': total_points})
+        new_quiz.edit(quiz={'points_possible': total_points, 'published': True})
         return new_quiz
 
     def get_updated_build(self):
