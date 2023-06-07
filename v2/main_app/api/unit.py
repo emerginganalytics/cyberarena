@@ -118,8 +118,9 @@ class Unit(MethodView):
         return self.http_resp(code=400, msg="BAD REQUEST").prepare_response()
 
     def _lms_integrate(self, build_spec, recv_data):
+        expires = recv_data.get('expires', None)
         lms_course_code = recv_data.get('lms_course_code', None)
-        lms_due_at = recv_data.get('lms_due_at', None)
+        lms_due_at = recv_data.get('lms_due_at', expires)
         lms_allowed_attempts = recv_data.get('lms_allowed_attempts', None)
         lms_type = recv_data.get('lms_type', BuildConstants.LMS.CANVAS.value)
         if lms_type == BuildConstants.LMS.CANVAS.value:

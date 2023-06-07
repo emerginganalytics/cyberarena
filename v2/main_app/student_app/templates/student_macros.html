@@ -1,0 +1,108 @@
+{% macro display_lms_assessment(workout, unit) %}
+    <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
+        <h1 class="text-center">Assessment Questions</h1>
+        <br />
+        <div class="assessment-table-container">
+            <table class="table table-large assessment-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Status</th>
+                        <th>Question</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in workout.lms_quiz.questions %}
+                        <tr>
+                            <td colspan="1">{{ loop.index }}</td>
+                            <td colspan="1" class="assessment-indicator">
+                                {% if question.complete %}
+                                    <h6 style="color: var(--grass-green);">Complete</h6>
+                                {% else %}
+                                    <h6 style="color: var(--broken);">Incomplete</h6>
+                                {% endif %}
+                            </td>
+                            <td colspan="3" class="assessment-question">{{ question.question_text }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endmacro %}
+{% macro display_workout_assessment(workout) %}
+    <div id="assessment-container" class="tab-pane fade" role="tabpanel" aria-labelledby="assessment-tab">
+        <div>
+            <h1 class="text-center">Assessment Questions</h1>
+            <br />
+            {% set completed = namespace(value=0) %}
+            <div class="row card-columns">
+                {% for question in workout.assessment.questions %}
+                    <div class="card puzzle-card col-lg-4 col-sm12" onclick="showCurrentQuestion('{{ loop.index }}')">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ question.question }}</h4>
+                            {% if question.complete == True %}
+                                {% set completed.value = completed.value + 1 %}
+                                <h5 class="card-subtitle" id="{{ question['id'] }}Status">Complete!</h5>
+                            {% else %}
+                                <h5 class="card-subtitle" id="{{ question['id'] }}Status">Incomplete</h5>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="modal fade" tabindex="-1" role="dialog" id="currentQuestion{{ loop.index }}">
+                        <div class="modal-dialog modal-lg" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    {% if question.type == 'auto' %}
+                                        <h5>Auto Complete Question</h5>
+                                    {% else %}
+                                        <h5>Assessment Question</h5>
+                                    {% endif %}
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">x</span>
+                                    </button>
+                                </div> <!-- End modal-header-->
+                                <div class="modal-body">
+                                    <div class="workout-details">
+                                        <p id="workout-details">{{ question.question }}</p>
+                                    </div>
+                                    {% if workout.expired == False %}
+                                        <div class="form-container">
+                                             <form id="{{ question['id']}}Form" class="form-control">
+                                                 <input name="parent_id" type="hidden" readonly value="{{ workout.parent_id }}">
+                                                 {% if question.type == 'input' %}
+                                                     <div class="form-group mx-sm-3 mb-2">
+                                                        <label for="{{ question['id'] }}" class="sr-only">Answer: </label>
+                                                        <input name='response' id="{{ question['id'] }}" type="text" placeholder="Answer">
+                                                    </div>
+                                                     <input id="submit_{{ loop.index }}" type="button"
+                                                            onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}',
+                                                                    '{{ workout.api.workout }}{{ workout['id'] }}','{{ loop.index }}', false);"
+                                                            class="btn-fa mb-2" value="Check Answer">
+                                                 {% elif question.type == 'upload' %}
+                                                     <div class="form-group mx-sm-3 mb-2">
+                                                        <label for="{{ question['id'] }}" class="sr-only">Upload: </label>
+                                                        <input name="response" id="{{ question['id'] }}" type="file" placeholder="Upload">
+                                                     </div>
+                                                     <input id="submit_{{ loop.index }}" type="button"
+                                                            onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}','{{ workout.api.workout }}{{ workout['id'] }}', false);"
+                                                            class="btn-fa mb-2" value="Check Answer">
+                                                 {% else %}
+                                                     <input name="response" id="{{ question['id'] }}" type="text" readonly value="check auto" hidden>
+                                                     <input id="submit_{{ loop.index }}" type="button"
+                                                       onclick="checkQuestion('{{ question["id"] }}', '{{ workout['id'] }}', '{{ workout.api.workout }}{{ workout['id'] }}',
+                                                               '{{ loop.index }}', true);"
+                                                       class="btn-fa mb-2" value="Check Auto Complete">
+                                                 {% endif %}
+                                            </form>
+                                        </div> <!-- End question form div -->
+                                    {% endif %}
+                                </div><!--End question modal-body-->
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div> <!--End row, card-columns -->
+        </div> <!--End info-container -->
+    </div> <!-- End assessment-tab -->
+{% endmacro %}
