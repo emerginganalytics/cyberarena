@@ -88,7 +88,7 @@ def list_projects():
         print(f'The following error occurred when listing projects: \n{error}')
         exit(1)
     ret_msg = ret.stdout.decode()
-    projects = ret_msg.split('\r\n')
+    projects = ret_msg.splitlines()
 
     for idx, item in enumerate(projects):
         project = item.split(' ')[0]
