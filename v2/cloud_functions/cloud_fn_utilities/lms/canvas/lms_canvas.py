@@ -58,7 +58,7 @@ class LMSCanvas(LMS):
         questions = self.build['lms_quiz']['questions']
         quiz_name = f"Quiz for the Cyber Arena workout: {self.build['summary']['name']}"
         if delete_existing_quizzes:
-            self.delete_quiz_by_name(quiz_name)
+            self.delete_assignment_by_name(quiz_name)
         description = self._get_description()
         quiz_data = {
             'title': quiz_name,
@@ -91,6 +91,19 @@ class LMSCanvas(LMS):
         new_quiz.edit(quiz={'points_possible': total_points, 'published': True})
         return new_quiz
 
+    def create_assignment(self, delete_existing_assignment=True):
+        assignment_name = f"Assignment for the Cyber Arena workout: {self.build['summary']['name']}"
+        if delete_existing_assignment:
+            self.delete_assignment_by_name(assignment_name)
+        description = self._get_description()
+        assignment_data = {
+            'name': assignment_name,
+            'description': description,
+            'assignees': [{'id': x.id, 'type': 'user'} for x in self.class_list]
+        }
+        new_assignment = self.course.create_assignment(assignment_data)
+        return new_assignment
+
     def get_updated_build(self):
         """
         It's dangerous to save a Datastore Entity inside a class. Otherwise, it could be overwritten by the calling
@@ -100,11 +113,11 @@ class LMSCanvas(LMS):
         """
         return self.build
 
-    def delete_quiz_by_name(self, quiz_name: str):
-        assigned_quizzes = self.course.get_assignments()
-        for quiz in assigned_quizzes:
-            if quiz.name == quiz_name:
-                quiz.delete()
+    def delete_assignment_by_name(self, assignment_name: str):
+        assignments = self.course.get_assignments()
+        for assignment in assignments:
+            if assignment.name == assignment_name:
+                assignment.delete()
 
     def _store_quiz_identifiers(self, quiz_key: int, question_ids: list):
         self.build['lms_quiz']['quiz_key'] = quiz_key

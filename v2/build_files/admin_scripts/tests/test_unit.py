@@ -53,11 +53,11 @@ class TestUnit:
         if self.yaml.get('lms_integration', False):
             if self.yaml['lms_type'] == 'canvas':
                 lms_spec_decorator = LMSSpecCanvas(build_spec=build_spec,
-                                                            course_code=self.yaml['lms_course_code'],
-                                                            due_at=self.yaml['lms_due_at'],
-                                                            time_limit=self.yaml['lms_time_limit'],
-                                                            allowed_attempts=self.yaml['lms_allowed_attempts'],
-                                                            lms_type=self.yaml['lms_type'])
+                                                   course_code=self.yaml['lms_course_code'],
+                                                   due_at=self.yaml.get('lms_due_at', None),
+                                                   time_limit=self.yaml.get('lms_time_limit', None),
+                                                   allowed_attempts=self.yaml.get('lms_allowed_attempts', None),
+                                                   lms_type=self.yaml['lms_type'])
             build_spec = lms_spec_decorator.decorate()
 
         build_spec_to_cloud = BuildSpecToCloud(cyber_arena_spec=build_spec, env_dict=self.env_dict)
@@ -127,7 +127,7 @@ if __name__ == "__main__":
         delete_unit = str(input(f"What is the unit ID that you want to delete?"))
         TestUnit(build_id=delete_unit, debug=False).delete()
         print(f"Unit deletion was successful!")
-    build_first = str(input(f"Build the test unit described in test_v2_unit.yaml? (Y/n)"))
+    build_first = str(input(f"Build the test unit described in test_unit.yaml? (Y/n)"))
     if not build_first or build_first.upper()[0] == "Y":
         test_unit = TestUnit()
         test_unit.build()

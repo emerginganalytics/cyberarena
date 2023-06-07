@@ -55,11 +55,12 @@ class LMSSpec:
         if 'questions' in self.build_spec:
             self.build_spec['lms_quiz']['questions'] = self._decorate_questions(
                 self.build_spec['lms_quiz']['questions'])
-        self.build_spec['lms_quiz'].update({
-            'description': '',
-            'due_at': str(self.due_at),
-            'allowed_attempts': self.allowed_attempts
-        })
+        if 'lms_quiz' in self.build_spec:
+            self.build_spec['lms_quiz'].update({
+                'description': '',
+                'due_at': str(self.due_at),
+                'allowed_attempts': self.allowed_attempts
+            })
         return self.build_spec
 
     def _get_connection(self):
