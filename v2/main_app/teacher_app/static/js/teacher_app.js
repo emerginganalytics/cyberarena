@@ -294,3 +294,40 @@ function updateLMSCourses(option, element_id){
     let element = $('#' + option + element_id);
     element.show();
 }
+
+function enableLMSFields(formID){
+    var i, field, maxBuildField, lmsType, lmsCourseSelect, lmsCourseCode, form, lms_integration;
+    form = document.getElementById(formID);
+    var useLMS = form.querySelector('input[name="use_lms"]').checked;
+
+    // Grab targeted form fields
+    maxBuildField = form.querySelector('input[name="build_count"]');
+    lmsType = form.querySelector('select[name="lms_type"]');
+    lmsCourseSelect = form.querySelector('select[name="lms_course_code"]');
+    lmsCourseCode = form.querySelector('select[name="lms_course_code"]');
+    lms_integration = form.querySelector('input[name="lms_integration"]');
+
+    // Disable / Enable Fields based on useLMS boolean value
+    var lmsFields = [lmsType, lmsCourseSelect, lmsCourseCode, lms_integration];
+    if (useLMS){
+        console.log('Enable LMS Fields for form ' + formID);
+        maxBuildField.disabled = useLMS;
+        for (i = 0; i < lmsFields.length; i++){
+            field = lmsFields[i];
+            field.removeAttribute('disabled');
+            if (field.name === 'lms_integration'){
+                field.value = '1'
+            }
+        }
+    } else {
+        console.log('Disable LMS Fields for form ' + formID);
+        maxBuildField.removeAttribute('disabled');
+        for (i = 0; i < lmsFields.length; i++){
+            field = lmsFields[i];
+            if (field.name === 'lms_integration'){
+               field.value = ''
+            }
+            field.disabled = true;
+        }
+    }
+}

@@ -30,3 +30,25 @@ class TimestampToDate {
         return month + '. ' + date + ', ' + year + ' ' + hour + ':' + min + ':' + sec + format;
     }
 }
+
+function copyToClipboard(target_id, parentNode){
+    /*
+    * args:
+    *   target_id (id of element to copy from )
+    *   parentNode: id of element to create popup element in
+    * */
+    var copyText, copyPopup, node;
+    // Copy text to clipboard
+    copyText = document.getElementById(target_id).innerText;
+    navigator.clipboard.writeText(copyText);
+    // Create copy confirm notif
+    node = document.getElementById(parentNode);
+    copyPopup = document.createElement('p');
+    copyPopup.id = 'popup-notif-p';
+    copyPopup.classList.add('popup-notif', 'fade-out', 'text-center');
+    copyPopup.innerText = 'Copied to clipboard!';
+    node.appendChild(copyPopup);
+    setTimeout(function () {
+        node.removeChild(copyPopup);
+    }, 6000);
+}

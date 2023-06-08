@@ -32,6 +32,7 @@
                         <div style="border-bottom: 1px solid #e6e6e6; padding: 3px;">
                             <p>{{ spec.summary.description }}</p>
                         </div>
+                        {% set form_id = build_type ~ '_' ~ outer_loop.index ~ '_form' %}
                         <form id="{{ build_type }}_{{ outer_loop.index }}_form" action="{{ url }}" method="post"
                               onsubmit="displayWaitingMessage('current_{{ build_type }}_{{ outer_loop.index }}');">
                             <div class="form-group">
@@ -50,47 +51,14 @@
                                 </div>
                             {% endif %}
                             {% if spec.lms_quiz %}
-                                <input name="lms_integration" value="1" type="hidden">
                                 {% if courses %}
                                     <hr>
+                                    {{ create_lms_fields(form_id, outer_loop, courses, True) }}
                                     <div class="form-group">
                                         <label for="quiz-due-date-{{ outer_loop.index }}">Quiz Due: </label>
                                         <input id="quiz-due-date-{{ outer_loop.index }}" class="form-control" name="lms_due_at"
                                                type="datetime-local" onchange="validateDateTime(this)">
                                     </div>
-                                    <div class="form-group">
-                                        <label for="lms-type-{{ outer_loop.index }}">Learning Management System: </label>
-                                        <select id="lms-type-{{ outer_loop.index }}" class="form-control" name="lms_type"
-                                                onchange="updateLMSCourses(this.value, '-course-select-div-{{ outer_loop.index }}')">
-                                            {% for lms, value in courses.items() %}
-                                                <option value="{{ lms }}">{{ lms | capitalize }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                    {% for lms, value in courses.items() %}
-                                        {% if lms == 'canvas' %}
-                                            <div id="{{ lms }}-course-select-div-{{ outer_loop.index }}" class="form-group lms-courses">
-                                                <label for="course-code-{{ outer_loop.index }}">Course Code: </label>
-                                                <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code">
-                                                    <option value="" type="hidden" hidden="hidden" selected disabled>-- Select a Course --</option>
-                                                    {% for course_id, course_name in courses[lms].items() %}
-                                                        <option value="{{ course_id }}">{{ course_name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        {% else %}
-                                            <div id="{{ lms }}-course-select-div-{{ outer_loop.index }}" class="form-group lms-courses"
-                                                 style="display: none;">
-                                                <label for="course-code-{{ outer_loop.index }}">Course Code: </label>
-                                                <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code">
-                                                    <option value="" type="hidden" hidden="hidden" selected disabled>-- Select a Course --</option>
-                                                    {% for course_id, course_name in courses[lms].items() %}
-                                                        <option value="{{ course_id }}">{{ course_name }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}{# End select lms course generation #}
                                     <div class="d-flex justify-content-center">
                                         <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
                                     </div>
@@ -105,8 +73,12 @@
                                     </div>
                                 {% endif %}
                             {% else %}
+                                {% if courses %}
+                                    {{ create_lms_fields(form_id, outer_loop, courses, False) }}
+                                {% endif %}
                                 <div class="d-flex justify-content-center">
-                                    <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
+                                    <button type="submit" id="build-{{ build_type }}-{{ loop.index }}"
+                                            class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
                                 </div>
                             {% endif %}
                         </form>
@@ -116,6 +88,64 @@
         </div> <!-- End modal-->
     {% endfor %}
 {%- endmacro %}
+
+{% macro create_lms_fields(form_id, outer_loop, courses, enable) %}
+    <!-- Generates form fields from LMS values -->
+    {% if enable %}
+        <label for="use_lms">Build with LMS</label>
+        <input type="checkbox" name="use_lms" value="" checked readonly style="pointer-events: none;">
+        <input type="text" name="lms_integration" value="1" readonly hidden>
+    {% else %}
+        <label for="lms_integration">Build with LMS</label>
+        <input type="checkbox" name="use_lms" value="" onclick="enableLMSFields('{{ form_id }}')">
+        <input type="text" name="lms_integration" value="" readonly hidden>
+    {% endif %}
+    <div class="form-group">
+        <label for="lms-type-{{ outer_loop.index }}">Learning Management System: </label>
+        {% if enable %}
+        <select id="lms-type-{{ outer_loop.index }}" class="form-control" name="lms_type"
+                onchange="updateLMSCourses(this.value, '-course-select-div-{{ outer_loop.index }}')">
+        {% else %}
+        <select id="lms-type-{{ outer_loop.index }}" class="form-control" name="lms_type" disabled
+                onchange="updateLMSCourses(this.value, '-course-select-div-{{ outer_loop.index }}')">
+        {% endif %}
+            {% for lms, value in courses.items() %}
+                <option value="{{ lms }}">{{ lms | capitalize }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% for lms, value in courses.items() %}
+        {% if lms == 'canvas' %}
+            <div id="{{ lms }}-course-select-div-{{ outer_loop.index }}" class="form-group lms-courses">
+                <label for="course-code-{{ outer_loop.index }}">Course Code: </label>
+                {% if enable %}
+                    <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code">
+                {% else %}
+                    <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code" disabled>
+                {% endif %}
+                    <option value="" type="hidden" hidden="hidden" selected disabled>-- Select a Course --</option>
+                    {% for course_id, course_name in courses[lms].items() %}
+                        <option value="{{ course_id }}">{{ course_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% else %}
+            <div id="{{ lms }}-course-select-div-{{ outer_loop.index }}" class="form-group lms-courses" hidden disabled>
+                <label for="course-code-{{ outer_loop.index }}">Course Code: </label>
+                {% if enable %}
+                    <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code">
+                {% else %}
+                    <select id="{{ lms }}-course-code" class="form-control" name="lms_course_code" disabled>
+                {% endif %}
+                    <option value="" type="hidden" hidden="hidden" selected disabled>-- Select a Course --</option>
+                    {% for course_id, course_name in courses[lms].items() %}
+                        <option value="{{ course_id }}">{{ course_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    {% endfor %}{# End select lms course generation #}
+{% endmacro %}
 
 {% macro workoutAssessmentModals(workout_list, url) %}
     {% for workout in workout_list %}

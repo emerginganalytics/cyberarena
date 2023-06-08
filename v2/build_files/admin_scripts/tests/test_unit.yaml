@@ -1,9 +1,9 @@
 # The name of the unit you are testing (without the .yaml)
-unit_name: vulnerability-defender-lms
-instructor_id: abbomberger@ualr.edu
+unit_name: ransomware
+instructor_id: pdhuff@ualr.edu
 lms_integration: true
-lms_due_at: 2023-05-23 00:00:00
-lms_time_limit: -1
-lms_allowed_attempts: -1
+#lms_due_at: 2023-05-23 00:00:00
+#lms_time_limit: -1
+#lms_allowed_attempts: -1
 lms_course_code: 37
 lms_type: canvas

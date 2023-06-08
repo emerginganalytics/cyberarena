@@ -7,6 +7,7 @@
 {% block styles %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('teacher_app.static', filename='css/teacher_app_styles.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/animations.css') }}">
 {% endblock styles %}
 {% block navbar %}
     <div class="navbar-nav mr-auto">
@@ -130,6 +131,7 @@
                     <div id="main-container-tab" class="tab-pane fade active show" role="tabpanel" aria-labelledby="main-container-btn">
                         <div class="container">
                             <div id="assignment-info" class="info-container">
+                                <div id="popup-notif" class="d-flex align-items-center justify-content-center"></div>
                                 <h2 class="text-center">{{ unit.summary.name }}</h2>
                                 <p><span style="font-weight: bold">Author: </span>{{ unit.summary.author }}</p>
                                 <p><span style="font-weight: bold">Summary: </span> {{ unit.summary.description }}</p>
@@ -141,7 +143,12 @@
                                     <div id="distribution" style="margin-top: 12px;">
                                         <h6 class="text-center">Students can join assignment by visiting <span style="color: var(--python-blue);"><em>{{ join_url }}</em></span> and entering the code below: </h6>
                                         <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
-                                            <h4>{{ unit['join_code'] }}</h4>
+                                            <h4 id="join-code">{{ unit['join_code'] }}
+                                                <button onclick="copyToClipboard('join-code', 'popup-notif')"
+                                                        class="icon-button" data-toggle="tooltip" data-placement="top"
+                                                        title="Copy join code"><i class="fa fa-clipboard"></i>
+                                                </button>
+                                            </h4>
                                         </div>
                                     </div>
                                 {% endif %}

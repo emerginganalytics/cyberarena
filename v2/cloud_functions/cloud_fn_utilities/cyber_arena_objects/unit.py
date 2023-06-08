@@ -128,7 +128,7 @@ class Unit:
         """
         workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))
         workout_record = self._create_workout_record(workout_id=workout_id)
-        workout_record['student_email'] = student_email
+        workout_record['student_email'] = student_email.lower()
         workout_record['student_name'] = student_name
         self.ds_workout.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
 
@@ -146,6 +146,8 @@ class Unit:
         if self.unit.get('lms_quiz', None):
             lms.create_quiz()
             self.unit = lms.get_updated_build()  # Prevents overwriting the unit after the quiz has been updated
+        else:
+            lms.create_assignment()
         students = lms.get_class_list()
         for student in students:
             workout_id = ''.join(random.choice(string.ascii_lowercase) for j in range(10))

@@ -14,6 +14,7 @@
     --python-yellow: #ffd343;
     --python-blue: #2b5b84;
     --indigo: #6610f2;
+    --dark-blue: #34495e;
 }
 
 /* General Styles */
@@ -278,6 +279,22 @@ li.teams:before {
 td, th {
     text-align: center;
 }
+.popup-notif {
+    border-radius: 3px;
+    line-height:30px;
+    position: fixed;
+    display: block;
+    margin: 0 auto !important;
+    width: auto;
+    min-width: 400px;
+    height: 50px;
+    padding: 12px;
+    box-sizing: border-box;
+    box-shadow: 0px 10px 50px rgba(0,0,0,.6);
+    background: var(--mint);
+    color: black;
+    border: 1px solid gray;
+}
 
 /* Timer Styles */
 .countdown-timer {
@@ -325,6 +342,17 @@ td, th {
     background-color: var(--muted-marine-blue);
     color: white;
 }
+.icon-button {
+    border: none;
+    background: none;
+}
+.icon-button:hover {
+    cursor: pointer;
+}
+.icon-button:active, .icon-button:after, .icon-button:focus {
+    border: none;
+}
+
 .loading-icon {
     visibility: hidden;
     margin-left: 2px;
@@ -542,4 +570,23 @@ p.complete {
     color: whitesmoke;
     border-radius: 10px;
     padding: 5px;
+}
+
+/* Assessment Styles */
+.assessment-table-container {
+    border: 1px solid gray;
+    box-shadow: 1px 2px 3px 0 gray;
+    padding: 10px;
+    background: white;
+}
+.table.assessment-table thead th {
+    border: none;
+}
+.table.assessment-table td {
+    background: white;
+}
+td.assessment-question {
+    text-align: left;
+    word-break: break-word;
+    overflow-y: auto;
 }

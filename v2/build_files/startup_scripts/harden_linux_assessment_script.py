@@ -117,8 +117,8 @@ class Question4(Question):
 
 
 def main():
-    url = f"https://{os.environ.get('URL')}"
     build_id = os.environ.get('BUILD_ID')
+    url = f"http://{os.environ.get('URL')}"
     Question0(build_id=build_id, url=url).assess()
     Question1(build_id=build_id, url=url).assess()
     Question2(build_id=build_id, url=url).assess()

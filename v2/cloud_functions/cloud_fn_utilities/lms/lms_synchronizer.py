@@ -28,15 +28,16 @@ class LMSSynchronizer:
             ds_unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=unit_id)
             unit_obj = Unit(build_id=unit_id, env_dict=self.env_dict)
             active_students = self._get_active_students(unit=unit)
-            new_student_emails = [student['email'] for student in active_students]
+            new_student_emails = [student['email'].lower() for student in active_students]
             workouts = ds_unit.get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id, wait=False)
             for workout in workouts:
                 student_email = workout.get('student_email', '').lower()
                 if student_email in new_student_emails:
                     new_student_emails.remove(student_email)
             for student in active_students:
-                if student['email'] in new_student_emails:
-                    unit_obj.add_student_workout_record(student_email=student['email'], student_name=student['name'])
+                active_email = student['email'].lower()
+                if student['email'].lower() in new_student_emails:
+                    unit_obj.add_student_workout_record(student_email=active_email, student_name=student['name'])
 
     def _get_active_lms_units(self):
         raise NotImplementedError("_get_active_lms_units not implemented for this object.")
