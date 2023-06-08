@@ -141,33 +141,61 @@
     <div class="container">
         <p id="responseMessage" class="text-center hidden"></p>
     </div>
-    <form class="form" id="settings-form">
-        <div class="form-input-group">
-            <div class="form-group">
-                <label for="apiKeyCanvas">API Key (Canvas)</label>
-                <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text">
+    <div class="container-fluid">
+        <form class="form" id="settings-form">
+            <div class="form-input-group" style="background-color: white;">
+                <div class="form-group">
+                    <label for="apiKeyCanvas">API Key (Canvas)</label>
+                    {% if settings.canvas.api %}
+                        <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
+                               style="background-color: whitesmoke"
+                               placeholder="{{ settings.canvas.api | truncate(25, True, ' . . .', 0)}}">
+                    {% else %}
+                        <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
+                               style="background-color: whitesmoke">
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="urlCanvas">URL (Canvas)</label>
+                    {% if settings.canvas.url %}
+                        <input id="urlCanvas" class="form-control" name="urlCanvas" type="text"
+                               style="background-color: whitesmoke" placeholder="{{ settings.canvas.url }}">
+                    {% else %}
+                        <input id="urlCanvas" class="form-control" name="urlCanvas" type="text"
+                               style="background-color: whitesmoke">
+                    {% endif %}
+                </div>
             </div>
-            <div class="form-group">
-                <label for="urlCanvas">URL (Canvas)</label>
-                <input id="urlCanvas" class="form-control" name="urlCanvas" type="text">
+            <div class="form-input-group" style="background-color: white;">
+                <div class="form-group">
+                    <label for="apiKeyBlackboard">API Key (Blackboard)</label>
+                    {% if settings.blackboard.api %}
+                        <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
+                               style="background-color: whitesmoke"
+                               placeholder="{{ settings.blackboard.api | truncate(25, True, ' . . .', 0) }}">
+                    {% else %}
+                        <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
+                               style="background-color: whitesmoke;" placeholder="">
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="urlBlackboard">URL (Blackboard)</label>
+                    {% if settings.blackboard.url %}
+                        <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
+                               style="background-color: whitesmoke" placeholder="{{ settings.blackboard.url }}">
+                    {% else %}
+                        <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
+                               style="background-color: whitesmoke">
+                    {% endif %}
+                </div>
             </div>
-        </div>
-        <div class="form-input-group">
-            <div class="form-group">
-                <label for="apiKeyBlackboard">API Key (Blackboard)</label>
-                <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text">
+            <div class="d-flex justify-content-right">
+                <button type="button" id="save-settings"
+                        class="btn-fa text-center nav-link m-auto w-50" style="border-radius: 4px; max-width: 450px;"
+                        onclick="updateSettings()">Save Settings<i class="fa fa-circle-o-notch loading-icon" style="display: none;"></i></button>
             </div>
-            <div class="form-group">
-                <label for="urlBlackboard">URL (Blackboard)</label>
-                <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text">
-            </div>
-        </div>
-        <div class="d-flex justify-content-right">
-            <button type="button" id="save-settings"
-                    class="btn-fa text-center nav-link m-auto w-50" style="border-radius: 4px; max-width: 450px;"
-                    onclick="updateSettings()">Save Settings<i class="fa fa-circle-o-notch loading-icon" style="display: none;"></i></button>
-        </div>
-    </form>
+        </form>
+    </div>
     {{ forms.contact_us() }}
 </div>
 {% endblock content %}

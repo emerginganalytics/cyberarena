@@ -53,12 +53,12 @@
                             {% if spec.lms_quiz %}
                                 {% if courses %}
                                     <hr>
+                                    {{ create_lms_fields(form_id, outer_loop, courses, True) }}
                                     <div class="form-group">
                                         <label for="quiz-due-date-{{ outer_loop.index }}">Quiz Due: </label>
                                         <input id="quiz-due-date-{{ outer_loop.index }}" class="form-control" name="lms_due_at"
                                                type="datetime-local" onchange="validateDateTime(this)">
                                     </div>
-                                    {{ create_lms_fields(form_id, outer_loop, courses, True) }}
                                     <div class="d-flex justify-content-center">
                                         <button type="submit" id="build-{{ build_type }}-{{ loop.index }}" class="waves-effect waves-light btn-fa text-center build-workout">Build Workout!</button>
                                     </div>
@@ -92,11 +92,11 @@
 {% macro create_lms_fields(form_id, outer_loop, courses, enable) %}
     <!-- Generates form fields from LMS values -->
     {% if enable %}
-        <label for="use_lms" hidden>Use LMS</label>
-        <input type="checkbox" name="use_lms" value="" readonly>
+        <label for="use_lms">Build with LMS</label>
+        <input type="checkbox" name="use_lms" value="" checked readonly style="pointer-events: none;">
         <input type="text" name="lms_integration" value="1" readonly hidden>
     {% else %}
-        <label for="lms_integration">Use LMS</label>
+        <label for="lms_integration">Build with LMS</label>
         <input type="checkbox" name="use_lms" value="" onclick="enableLMSFields('{{ form_id }}')">
         <input type="text" name="lms_integration" value="" readonly hidden>
     {% endif %}

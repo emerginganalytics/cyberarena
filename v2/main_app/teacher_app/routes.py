@@ -191,7 +191,8 @@ def settings():
         if user := auth.authorized(email=teacher_email, base=auth.UserGroups.INSTRUCTOR):
             urls = _get_api_urls(return_all=True)
             return render_template('settings.html', auth_config=cloud_env.auth_config,
-                                   auth_list=user['permissions'], urls=urls)
+                                   auth_list=user['permissions'], urls=urls,
+                                   settings=user['settings'])
     return redirect('/login')
 
 
