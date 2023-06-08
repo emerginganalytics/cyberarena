@@ -20,7 +20,7 @@ class LMSCanvasSynchronizer(LMSSynchronizer):
 
     def _get_active_lms_units(self):
         ds = DataStoreManager(key_type=DatastoreKeyTypes.UNIT)
-        active_units = ds.query(filters=[('workspace_settings.expires', '<', get_current_timestamp_utc())])
+        active_units = ds.query(filters=[('workspace_settings.expires', '>', get_current_timestamp_utc())])
         active_lms_units = []
         for unit in active_units:
             if 'lms_connection' in unit and unit['lms_connection']['lms_type'] == BuildConstants.LMS.CANVAS:
