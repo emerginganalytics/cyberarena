@@ -32,8 +32,9 @@ admin_scripts/reports/
 /v2/.bulk_settings.yaml
 /v2/documentation/
 /v2/documentation/images/
-/v2/Bill/
+/v2/bill/
 .env
 .gitignore
 v2/container-applications/Classified/test.py
 /v2/build_files/admin_scripts/local/
+/v2/setup_gui.py
