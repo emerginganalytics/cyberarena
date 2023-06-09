@@ -18,4 +18,3 @@ functions-framework==3.4.0
 flask==2.3.2
 google-cloud-error-reporting==1.9.1
 sendgrid
-pyad

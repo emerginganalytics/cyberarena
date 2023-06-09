@@ -25,4 +25,3 @@ pytz==2023.3
 validators
 Werkzeug==2.3.4
 sendgrid
-pyad
