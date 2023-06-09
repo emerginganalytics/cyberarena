@@ -18,7 +18,7 @@ You have 2 servers in your lab:
 
 > **Information:** When connecting to servers, it may be best to open this in an incognito browser to avoid caching the credentials used to connect. Only connect to one of the servers at a time, and then, only in incognito mode.
 
-![image](https://user-images.githubusercontent.com/50633591/234986130-619d61f1-1a5b-47e7-9efa-555311ccb725.png)
+![image](https://github.com/emerginganalytics/cyberarena/assets/50710945/4b1ffb77-62f5-4208-89e7-fd88ef5be39c)
 
 ### Start and Run Sliver
 Open the Sliver server interface, which will be an SSH command prompt. Run the following commands to start Sliver. If promted for the sudo password, enter in `Let's workout!`

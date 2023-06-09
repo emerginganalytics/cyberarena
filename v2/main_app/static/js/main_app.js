@@ -40,7 +40,7 @@ function copyToClipboard(target_id, parentNode){
     var copyText, copyPopup, node;
     // Copy text to clipboard
     copyText = document.getElementById(target_id).innerText;
-    navigator.clipboard.writeText(copyText);
+    navigator.clipboard.writeText(copyText.trim());
     // Create copy confirm notif
     node = document.getElementById(parentNode);
     copyPopup = document.createElement('p');
