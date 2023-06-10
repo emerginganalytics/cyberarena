@@ -38,3 +38,5 @@ admin_scripts/reports/
 v2/container-applications/Classified/test.py
 /v2/build_files/admin_scripts/local/
 /v2/setup_gui.py
+v2/build_files/startup_scripts/keepitsimple-ac-scripts/include/spec/settings.yaml
+v2/build_files/startup_scripts/keepitsimple-ac-scripts/include/certs/
