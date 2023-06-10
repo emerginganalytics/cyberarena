@@ -146,10 +146,12 @@
             <div class="form-input-group" style="background-color: white;">
                 <div class="form-group">
                     <label for="apiKeyCanvas">API Key (Canvas)</label>
-                    {% if settings.canvas.api %}
-                        <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
-                               style="background-color: whitesmoke"
-                               placeholder="{{ settings.canvas.api | truncate(25, True, ' . . .', 0)}}">
+                    {% if settings.canvas %}
+                        {% if settings.canvas.api %}
+                            <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
+                                   style="background-color: whitesmoke"
+                                   placeholder="{{ settings.canvas.api | truncate(25, True, ' . . .', 0)}}">
+                        {% endif %}
                     {% else %}
                         <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
                                style="background-color: whitesmoke">
@@ -162,17 +164,19 @@
                                style="background-color: whitesmoke" placeholder="{{ settings.canvas.url }}">
                     {% else %}
                         <input id="urlCanvas" class="form-control" name="urlCanvas" type="text"
-                               style="background-color: whitesmoke">
+                               style="background-color: whitesmoke" placeholder="https://example-url.com">
                     {% endif %}
                 </div>
             </div>
             <div class="form-input-group" style="background-color: white;">
                 <div class="form-group">
                     <label for="apiKeyBlackboard">API Key (Blackboard)</label>
-                    {% if settings.blackboard.api %}
-                        <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
-                               style="background-color: whitesmoke"
-                               placeholder="{{ settings.blackboard.api | truncate(25, True, ' . . .', 0) }}">
+                    {% if settings.blackboard %}
+                        {% if settings.blackboard.api %}
+                            <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
+                                   style="background-color: whitesmoke"
+                                   placeholder="{{ settings.blackboard.api | truncate(25, True, ' . . .', 0) }}">
+                        {% endif %}
                     {% else %}
                         <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
                                style="background-color: whitesmoke;" placeholder="">
@@ -180,12 +184,14 @@
                 </div>
                 <div class="form-group">
                     <label for="urlBlackboard">URL (Blackboard)</label>
-                    {% if settings.blackboard.url %}
-                        <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
-                               style="background-color: whitesmoke" placeholder="{{ settings.blackboard.url }}">
+                    {% if settings.blackboard %}
+                        {% if settings.blackboard.url %}
+                            <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
+                                   style="background-color: whitesmoke" placeholder="{{ settings.blackboard.url }}">
+                        {% endif %}
                     {% else %}
                         <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
-                               style="background-color: whitesmoke">
+                               style="background-color: whitesmoke" placeholder="https://example-url.com">
                     {% endif %}
                 </div>
             </div>
