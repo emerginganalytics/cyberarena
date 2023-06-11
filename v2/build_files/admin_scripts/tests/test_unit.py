@@ -46,7 +46,7 @@ class TestUnit:
             'count': 1,
             'registration_required': False,
             'student_emails': [],
-            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(hours=3)).timestamp()
+            'expires': (datetime.now(timezone.utc).replace(tzinfo=timezone.utc) + timedelta(days=10)).timestamp()
         }
         build_spec['join_code'] = ''.join(str(random.randint(0, 9)) for num in range(0, 6))
 
