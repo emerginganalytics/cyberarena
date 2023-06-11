@@ -1,11 +1,16 @@
 import os
 import subprocess
+import time
+
+import win32net
+import win32security
 
 import tkinter as tk
 from tkinter.font import Font
 from tkinter import messagebox
 
 from cert_manager import CertManager
+from privilege_checker import PrivilegeChecker, Roles
 
 class RebelGlobals:
     INSTRUCTIONS = "In a galaxy far, far away, you are a skilled system administrator responsible for managing the" \
@@ -55,7 +60,7 @@ class RebelBaseForm:
 
         self.window = tk.Tk()
         self.window.title("Rebel Base Access Control Mission")
-        self.image = tk.PhotoImage(file="jedi-master-on-a-computer.png")
+        self.image = tk.PhotoImage(file="img/jedi-master-on-a-computer.png")
         self.bold_heading2_font = Font(family="Arial", size=14, weight="bold")
         self.normal_font = Font(family="Arial", size=11)
         canvas = tk.Canvas(self.window, width=500, height=500)
@@ -97,18 +102,127 @@ class RebelBaseForm:
                 old_users_deleted = False
                 break
         if old_users_deleted:
-            messagebox.showinfo("Congratulations!", f"You have completed your Youngling training! "
-                                                    f"The passcode for your certificate is:")
+            self.cert_manager.decrypt_youngling_cert()
+            self.show_certificate(CertManager.CertFiles.YOUNGLING)
         else:
-            messagebox.showinfo("Keep Trying!", "You are missing some users that should be removed")
+            messagebox.showinfo("Keep trying you must...", "You are missing some users that should be removed")
 
 
 
     def padawan_assessment(self):
-        self.cert_manager.decrypt_padawan_cert()
+        remove_group_accounts = {
+            "Rebel Alliance Leaders": ['han', 'orson', 'grievous'],
+            "Pilots": ["jarjar", "darth", "dooku"],
+            "Engineers": ["watto"],
+            "Jedi Council": ["luke", "r2d2", "darth", "dooku"]
+        }
+
+        users_remaining = 0
+        group_removed = None
+        for group_name in remove_group_accounts:
+            try:
+                group_info = win32net.NetLocalGroupGetMembers(None, group_name, 2)
+            except:
+                group_removed = group_name
+                break
+
+            for member_info in group_info:
+                try:
+                    if member_info[0]['domainandname'].split("\\")[-1] in remove_group_accounts[group_name]:
+                        users_remaining += 1
+                except TypeError:
+                    continue
+
+        if not users_remaining:
+            self.cert_manager.decrypt_padawan_cert()
+            self.show_certificate(CertManager.CertFiles.PADAWAN)
+        elif group_removed:
+            messagebox.showinfo("Keep trying you must...",
+                                f"Uh oh! The group {group_removed} was deleted! Please add it back and try again")
+        else:
+            messagebox.showinfo("Keep trying you must...",
+                                f"Keep Trying. You have {users_remaining} users remaining to remove")
 
     def jedi_assessment(self):
-        self.cert_manager.decrypt_jedi_cert()
+        base_folder = "C:\\Rebel Forces"
+        correct_folder_acl = {
+            'Alliance Budgets': {
+                'Rebel Alliance Leaders': Roles.FULL_ACCESS
+            },
+            'Design Blueprints': {
+                'Engineers': Roles.FULL_ACCESS
+            },
+            'Flight Logs': {
+                'Pilots': Roles.FULL_ACCESS,
+                'Engineers': Roles.READ_ONLY
+            },
+            'Maintenance Schedules': {
+                'Engineers': Roles.FULL_ACCESS
+            },
+            'Mission Reports': {
+                'Jedi Council': Roles.FULL_ACCESS,
+                'Rebel Alliance Leaders': Roles.FULL_ACCESS,
+                'Pilots': Roles.READ_ONLY
+            },
+            'Navigational Charts': {
+                'Pilots': Roles.FULL_ACCESS
+            },
+            'Starship Specifications': {
+                'Pilots': Roles.FULL_ACCESS,
+                'Engineers': Roles.FULL_ACCESS
+            },
+            'Strategic Plans': {
+                'Jedi Council': Roles.FULL_ACCESS,
+                'Rebel Alliance Leaders': Roles.READ_WRITE
+            },
+            'Technical Documentation': {
+                'Engineers': Roles.FULL_ACCESS
+            }
+        }
+
+        privileges_correct = True
+        too_many_privileges = False
+        missing_folder = False
+        for folder in correct_folder_acl:
+            # Get the security descriptor of the folder
+            try:
+                security_descriptor = win32security.GetFileSecurity(os.path.join(base_folder, folder),
+                                                                    win32security.DACL_SECURITY_INFORMATION)
+            except:
+                missing_folder = True
+                break
+
+            # Get the discretionary access control list (DACL) from the security descriptor
+            dacl = security_descriptor.GetSecurityDescriptorDacl()
+
+            # Iterate over each access control entry (ACE) in the DACL
+            for i in range(dacl.GetAceCount()):
+                ace = dacl.GetAce(i)
+                sid = ace[2]
+                access_mask = ace[1]
+
+                # Get the user account associated with the SID
+                account_name, domain, account_type = win32security.LookupAccountSid(None, sid)
+                if account_name in correct_folder_acl[folder]:
+                    role = correct_folder_acl[folder][account_name]
+                    if not PrivilegeChecker(role=role, access_mask=access_mask).check_permissions():
+                        privileges_correct = False
+                        break
+                else:
+                    if domain not in ['NT Authority']:
+                        too_many_privileges = True
+                        break
+
+        if privileges_correct and not too_many_privileges and not missing_folder:
+            self.cert_manager.decrypt_jedi_cert()
+            self.show_certificate(CertManager.CertFiles.JEDI)
+        elif missing_folder:
+            messagebox.showinfo("I've got a bad feeling about this...", f"You are missing the folder {folder}")
+        elif too_many_privileges:
+            messagebox.showinfo("Keep trying you must...",
+                                f"Uh oh! It looks like the folder {folder} has too many users and groups.")
+        else:
+            messagebox.showinfo("Keep trying you must...", f"There are incorrect permissions on the folder {folder}")
 
     def show_instructions(self):
         self.instructions_window = tk.Toplevel(self.window)
@@ -123,6 +237,9 @@ class RebelBaseForm:
 
     def on_close(self):
         self.instructions_window.destroy()
+
+    def show_certificate(self, certificate):
+        subprocess.run(['start', '', f"certs/{certificate}"], shell=True)
 
 
 def main():
