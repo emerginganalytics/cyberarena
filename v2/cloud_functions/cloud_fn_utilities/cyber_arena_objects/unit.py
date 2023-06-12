@@ -157,7 +157,7 @@ class Unit:
             self.ds_workout.put(workout_record, key_type=DatastoreKeyTypes.WORKOUT, key_id=workout_id)
 
     def _build_one_workout(self, workout_id):
-        count = min(self.env.max_workspaces, self.unit['workspace_settings']['count'])
+        count = min(int(self.env.max_workspaces), int(self.unit['workspace_settings']['count']))
         workout_list = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT).query(
             filters=[('parent_id', '=', self.unit_id)])
         if workout_list:
