@@ -12,15 +12,36 @@ sense_hat = SenseHat()
 with open('/usr/src/cyberarena-dev/config.yaml') as file:
     config = yaml.full_load(file)
 
+
 class ImageToPixmap(object):
     '''
         This is a utility class used to mass generate image maps for
         the SenseHat display. This is intended to reduce the load of
         generating maps for a larger sequence of images.
     '''
+    class Images:
+        heart = '/usr/src/cyberarena-dev/images/heart/'
+        heartrate = '/usr/src/cyberarena-dev/images/heartrate/'
+        arrow = '/usr/src/cyberarena-dev/images/arrow/'
+        road = '/usr/src/cyberarena-dev/images/road/'
+        alerts = '/usr/src/cyberarena-dev/images/alerts/'
+        faces = '/usr/src/cyberarena-dev/images/faces/'
+        phase = '/usr/src/cyberarena-dev/images/phase/'
+        lock = '/usr/src/cyberarena-dev/images/lock/'
+
     def __init__(self, **kwargs):
         self.target_dir = None
         self.image = None
+        self.images = {
+            'heart': '/usr/src/cyberarena-dev/images/heart/',
+            'heartrate': '/usr/src/cyberarena-dev/images/heartrate/',
+            'arrow': '/usr/src/cyberarena-dev/images/arrow/',
+            'road': '/usr/src/cyberarena-dev/images/road/',
+            'alerts': '/usr/src/cyberarena-dev/images/alerts/',
+            'faces': '/usr/src/cyberarena-dev/images/faces/',
+            'phase': '/usr/src/cyberarena-dev/images/phase/',
+            'lock': '/usr/src/cyberarena-dev/images/lock/',
+        }
         
         if 'target_dir' in kwargs:
             self.target_dir = kwargs['target_dir']
@@ -86,7 +107,8 @@ class ImageToPixmap(object):
             f.write(f'ImageMaps = {repr(image_maps)}\n')
         print('[+] Image maps updated!')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     # target_dir or image: (target_dir/image path)
     action = argv[1]
     

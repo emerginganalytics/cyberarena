@@ -45,6 +45,7 @@ class MaintenanceHandler:
             self.quarter_hourly = True
 
     def route(self):
+        logging.info(f'{self.daily} : {self.hourly} : {self.quarter_hourly}')
         if self.quarter_hourly:
             logging.info(f"Running quarter hourly maintenance tasks")
             QuarterHourlyMaintenance(env_dict=self.env_dict).run()

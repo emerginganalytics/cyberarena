@@ -67,10 +67,10 @@ def workout_view(build_id):
     if not (workout_info := DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()):
         workout_info = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
     if workout_info:
+        server_list = []
         parent_id = workout_info.get('parent_id', None)
         if parent_id:
             unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=parent_id).get()
-            server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value, parent_id=build_id)
             if unit:
                 workout_info['summary'] = unit['summary']
                 workout_info['expires'] = unit['workspace_settings']['expires']
@@ -93,6 +93,8 @@ def workout_view(build_id):
             connections = _generate_connection_urls(workout_info)
             if servers := workout_info.get('servers', None):
                 workout_info['servers'] = _assign_urls_to_server(build_id, servers, connections)
+                server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value,
+                                                              parent_id=build_id)
 
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,

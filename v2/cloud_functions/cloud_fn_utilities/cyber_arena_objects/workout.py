@@ -211,5 +211,5 @@ class Workout:
     def extend_runtime(self):
         shutoff_ts = self.workout.get('shutoff_timestamp', None)
         if shutoff_ts:
-            self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(seconds=self.duration_seconds)
+            self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(seconds=self.duration_seconds).total_seconds()
             self.ds.put(self.workout)

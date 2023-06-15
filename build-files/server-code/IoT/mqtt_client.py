@@ -18,33 +18,31 @@ import paho.mqtt.client as mqtt
 import re
 import time
 import threading
-import yaml
-from controller import SenseHatControls, Colors
-from multiprocessing import Pipe, Process
+from controller import SenseHatControls
 from system_status import SystemInfo
+from globals import Configuration, Iot, Files
 
 
-with open('/usr/src/cyberarena-dev/config.yaml') as file:
-    config = yaml.full_load(file)
+config = Configuration
 
 # load project configs
-ssl_private_key = config['certs']['ssl_private_key']
-ssl_algorithm   = config['certs']['algorithm']
-root_cert       = config['certs']['root_cert']
-project_id      = config['gcp']['project_id']
-zone            = config['gcp']['zone']
-registry_id     = config['gcp']['registry_id']
-device_id       = config['gcp']['device_id']
+ssl_private_key = config.CERTS['ssl_private_key']
+ssl_algorithm   = config.CERTS['algorithm']
+root_cert       = config.CERTS['root_cert']
+project_id      = config.PROJECT['project_id']
+zone            = config.PROJECT['zone']
+registry_id     = config.PROJECT['registry_id']
+device_id       = config.PROJECT['device_id']
 
 # initialize logger
 logging.basicConfig(
-        filename=config['log_file'],
+        filename=config.TELEMETRY,
         format="%(asctime)s [%(levelname)s] %(funcName)s: %(message)s",
         level=logging.INFO,
         datefmt='%Y-%m-%d %H:%M')
 
 
-class MQTT_Handler(object):
+class MqttHandler(object):
     """
         This class establishes connection to MQTT PubSub server based
         on settings listed in config.yaml and handles any commands 
@@ -79,7 +77,7 @@ class MQTT_Handler(object):
             'aud': project_id
         }
         with open(ssl_private_key, 'r') as f:
-            private_key  = f.read()
+            private_key = f.read()
         return jwt.encode(token, private_key, ssl_algorithm)
 
     def error_str(self, rc):
@@ -137,9 +135,14 @@ class MQTT_Handler(object):
             'HEART': sense.display_heartrate,
             'HUMIDITY': sense.display_humidity,
             'PRESSURE': sense.display_pressure,
+            'PATIENTS': sense.display_ssn,
+            'RADIO': sense.radio,
             'SNAKE': sense.snake,
             'TEMP': sense.display_temp,
             'UNLOCK': sense.display_combination,
+            'CAR_USER': sense.car_user,
+            'PRODUCTS': sense.products,
+            'TRIP': sense.trip_planner,
         }
         # Make sure previous thread is complete before creating new one
         """
@@ -150,54 +153,47 @@ class MQTT_Handler(object):
             self.sense_thread.join()
 
         # Check for valid command
-        if msg == 'SSN':
-            sensor_data['sensor_data']['flag'] = sense.curious2
+        if msg == Iot.Commands.PATIENTS:
+            sensor_data['sensor_data']['flag'] = sense.secrets.CURIOUS2.value
+            sensor_data['sensor_data']['patients'] = sense.get_patients()
+        elif msg == Iot.Commands.CRITICAL:
+            sensor_data['sensor_data']['flag'] = sense.secrets.PATIENT_CRIT.value
         elif msg in commands:
-            if msg == 'CRITICAL':
-                sensor_data['sensor_data']['flag'] = sense.accel_crit_msg
             # Heart is a special case that takes in int value to display
-            if msg == 'HEART':
+            if msg == Iot.Commands.HEART:
                 data = [msg, sensor_data['sensor_data']['heart']]
             else:
+                if msg == Iot.Commands.IAMSPEED:
+                    sensor_data['sensor_data']['flag'] = sense.secrets.ACCEL_CRIT.value
+                elif msg == Iot.Commands.TRIP:
+                    sensor_data['sensor_data']['car']['trip'] = sense.get_trip()
+                elif msg == Iot.Commands.CAR_USER:
+                    sensor_data['sensor_data']['car']['user'] = sense.get_user()
+                elif msg == Iot.Commands.PRODUCTS:
+                    sensor_data['sensor_data']['car']['products'] = sense.get_products()
+                elif msg == Iot.Commands.VEHICLE:
+                    sensor_data['sensor_data']['car']['vehicle'] = sense.get_vehicle()
+                elif msg == Iot.Commands.RADIO:
+                    sensor_data['sensor_data']['car']['radio'] = sense.get_radio()
                 data = [msg, None]
 
-            # Create threat for current cmd
+            # Create thread for current cmd
             self.sense_thread = threading.Thread(
                 target=SenseHatControls(
-                    init_time=self.sys_time,
-                    sys_info=self.system_info).process_thread_msg,
+                    init_time=self.sys_time, sys_info=self.system_info
+                ).process_thread_msg,
                 args=(data,))
             self.sense_thread.start()
         # Command is possibly a Color request; No thread needed
         else:
-            if msg in Colors:
+            if Iot.DisplayColors.get(msg):
                 sense.display_color(msg)
                 sensor_data['sensor_data']['color'] = msg
                 if msg == 'GREEN':
-                    sensor_data['sensor_data']['flag'] = sense.curious
+                    sensor_data['sensor_data']['flag'] = sense.secrets.CURIOUS
             # Invalid cmd
             else:
                 sensor_data = f'Invalid Command: {msg}'
-
-        """if msg in commands:
-            if msg == 'CRITICAL':
-                sensor_data['sensor_data']['flag'] = sense.accel_crit_msg
-            # Pass command to process 2 and free up this process
-            if msg == 'HEART':
-                print('HEART')
-                #self.parent_pipe.send([msg, sense.heartrate])
-            else:
-                self.parent_pipe.send([msg])
-        else:
-            # Colors commands don't lock the process, no need to pass on to process 2
-            if msg in Colors:
-                if msg == 'GREEN':
-                    sensor_data['sensor_data']['flag'] = sense.curious
-                else:
-                    sensor_data['sensor_data']['color'] = msg
-                self.parent_pipe.send([msg])
-            else:
-                sensor_data = f'Invalid Command: {cleaned_msg}'"""
 
         # publish returned data
         return_data = json.dumps(sensor_data)
@@ -260,6 +256,6 @@ if __name__ == '__main__':
 
     # Create Thread
     SENSE_THREAD = threading.Thread(target=SenseHatControls(init_time=init_time, sys_info=sys_info).process_thread_msg, args=(data, ))
-    MQTT_Handler(sense_thread=SENSE_THREAD)
+    MqttHandler(sense_thread=SENSE_THREAD)
 
 # [ eof ]

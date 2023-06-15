@@ -26,4 +26,8 @@ images:
         alerts: '/usr/src/cyberarena-dev/images/alerts/'
         faces: '/usr/src/cyberarena-dev/images/faces/'
         phase: '/usr/src/cyberarena-dev/images/phase/'
+        lock: '/usr/src/cyberarena-dev/images/lock/'
 
+data:
+        car: '/usr/src/cyberarena-dev/data/tesla.json'
+        patients: '/usr/src/cyberarena-dev/data/patients.json'

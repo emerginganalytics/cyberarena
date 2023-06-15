@@ -1,0 +1,122 @@
+{
+  "vehicle": {
+    "id": 12345678901234567,
+    "vehicle_id": 1234567890,
+    "vin": "5YJSA11111111111",
+    "display_name": "Adamantium",
+    "color": null,
+    "tokens": ["abcdef1234567890", "1234567890abcdef"],
+    "state": "online",
+    "in_service": false,
+    "id_s": "12345678901234567",
+    "calendar_enabled": true,
+    "api_version": 7,
+    "backseat_token": null,
+    "backseat_token_updated_at": null
+  },
+  "user": {
+    "email": "adamantium_elephant@tesla.com",
+    "full_name": "Elong Tusk",
+    "feature_config": {
+      "signaling": {
+        "enabled": true,
+        "subscribe_connectivity": false
+      }
+    }
+  },
+  "products": {
+    "energy_site_id": 2252147638651575,
+    "resource_type": "solar",
+    "id": "313dbc37-555c-45b1-83aa-62a4ef9ff7ac",
+    "asset_site_id": "47d04752-9cf1-4e76-88fb-08839a1c41c4",
+    "solar_power": 2320,
+    "solar_type": "pv_panel",
+    "sync_grid_alert_enabled": false,
+    "breaker_alert_enabled": false,
+    "components": {
+      "battery": false,
+      "solar": true,
+      "solar_type": "pv_panel",
+      "grid": true,
+      "load_meter": false,
+      "market_type": "residential"
+    }
+  },
+  "trip_planner": {
+    "destination_soe": 0.064,
+    "origin_soe": 0.65,
+    "status": "TRIP_PLAN_SUCCESS_WITH_STOPS",
+    "stops": [
+      {
+        "addr": "W Panoche Rd, Firebaugh",
+        "arrival_soe": 0.123,
+        "charge_dur_s": 1180.79,
+        "charge_kWh": 52.013,
+        "id": "2768",
+        "location": {
+          "lat": 36.639154,
+          "lng": -120.625877
+        },
+        "name": "Firebaugh, CA",
+        "trt_id": "11676"
+      },
+      {
+        "addr": "Copus Rd, Bakersfield",
+        "arrival_soe": 0.108,
+        "charge_dur_s": 1351.903,
+        "charge_kWh": 55.878,
+        "id": "4506",
+        "location": {
+          "lat": 35.094359,
+          "lng": -119.040751
+        },
+        "name": "Bakersfield, CA – Copus Road (No Amenities)",
+        "trt_id": "16818"
+      },
+      {
+        "addr": "Highland Ave, Highland",
+        "arrival_soe": 0.112,
+        "charge_dur_s": 1506.139,
+        "charge_kWh": 58.946,
+        "id": "2898",
+        "location": {
+          "lat": 34.135162,
+          "lng": -117.195175
+        },
+        "name": "Highland, CA",
+        "trt_id": "12324"
+      },
+      {
+        "addr": "Frontage Rd, Ehrenberg",
+        "arrival_soe": 0.12,
+        "charge_dur_s": 960.943,
+        "charge_kWh": 46.249,
+        "id": "1888",
+        "location": {
+          "lat": 33.601995,
+          "lng": -114.522011
+        },
+        "name": "Ehrenberg, AZ",
+        "trt_id": "5637"
+      },
+      {
+        "addr": "S Watson Rd, Buckeye",
+        "arrival_soe": 0.098,
+        "charge_dur_s": 300,
+        "charge_kWh": 14.564,
+        "id": "55",
+        "location": {
+          "lat": 33.443011,
+          "lng": -112.556876
+        },
+        "name": "Buckeye, AZ",
+        "trt_id": "2145"
+      }
+    ],
+    "total_charge_dur_s": 5299.774,
+    "total_charge_kWh": 227.65,
+    "total_drive_dur_s": 40274.0,
+    "total_drive_kWh": 229.461,
+    "total_drive_mi": 729.106
+  }
+}

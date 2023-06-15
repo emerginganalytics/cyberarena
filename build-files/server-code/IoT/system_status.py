@@ -2,6 +2,7 @@
 from psutil import disk_usage, virtual_memory
 from requests import get
 
+
 class SystemInfo(object):
     def __init__(self, **kwargs):
         self.mem = self.get_mem
