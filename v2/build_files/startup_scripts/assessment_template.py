@@ -35,7 +35,7 @@ class Question:
             data = {
                 "question_key": self.question_key,
             }
-            response = requests.put(f"{self.url}{self.build_id}", json=data)
+            response = requests.put(f"http://{self.url}{self.build_id}", json=data)
             if response and response.status_code == 200:
                 open(self.complete_file, 'a').close()
 

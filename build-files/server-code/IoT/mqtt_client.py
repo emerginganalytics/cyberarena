@@ -162,6 +162,9 @@ class MqttHandler(object):
             # Heart is a special case that takes in int value to display
             if msg == Iot.Commands.HEART:
                 data = [msg, sensor_data['sensor_data']['heart']]
+            elif msg == Iot.Commands.RADIO:
+                station = sensor_data['sensor_data']['car']['radio'] = sense.get_radio()
+                data = [msg, station]
             else:
                 if msg == Iot.Commands.IAMSPEED:
                     sensor_data['sensor_data']['flag'] = sense.secrets.ACCEL_CRIT.value
@@ -173,8 +176,6 @@ class MqttHandler(object):
                     sensor_data['sensor_data']['car']['products'] = sense.get_products()
                 elif msg == Iot.Commands.VEHICLE:
                     sensor_data['sensor_data']['car']['vehicle'] = sense.get_vehicle()
-                elif msg == Iot.Commands.RADIO:
-                    sensor_data['sensor_data']['car']['radio'] = sense.get_radio()
                 data = [msg, None]
 
             # Create thread for current cmd
