@@ -18,33 +18,35 @@ RPI Zero with Sense HAT
 ![image](https://github.com/emerginganalytics/cyberarena/assets/122807407/c7092755-2cdb-4099-97d9-0fa6a0fdf31b)
 
 ## Raspberry Pi
-![image](https://github.com/emerginganalytics/cyberarena/assets/122807407/e64afec1-64d1-4ad2-95a2-666b149b0a53)
+![RaspberryPi](https://github.com/emerginganalytics/cyberarena/assets/50710945/354b8553-e0ec-427d-a5dd-77b85dd50e72)
 
-## Raspberry Pi Case
-![image](https://github.com/emerginganalytics/cyberarena/assets/122807407/afde5284-c361-4df9-9d06-1b8fb645fd64)
+## Sense HAT
+![SenseHat](https://github.com/emerginganalytics/cyberarena/assets/50710945/6d432937-83ad-4c7b-b7e4-f020e7527afc)
 
-## Raspberry Pi Micro SD Card and Adapter
-![image](https://github.com/emerginganalytics/cyberarena/assets/122807407/59193eba-ba15-4f05-81fd-3d05bf6a1894)
 
-**Step 2:** Assemble the Raspberry Pi inside the provided case. Ensure that the metal Raspberry Pi pins are exposed through the lid of the case. Then, connect the Sense HAT to the Raspberry Pi by plugging the pins into the black HAT header.
+**Step 2:** Assemble the Raspberry Pi inside the provided case. Ensure that the metal Raspberry Pi pins are exposed through the lid of the case. Then, connect the Sense HAT to the Raspberry Pi by ***carefully*** plugging the pins into the black HAT header. 
 
-**Step 3:** Place the MicroSD card in its adapter.
+When assembled, the Raspberry Pi should look like the following image.
+![Assembled](https://github.com/emerginganalytics/cyberarena/assets/50710945/235313e4-2e91-441e-9a47-61776a21e40e)
 
-**Step 4:** Connect the HDMI cable, USB hub, and power supply to the Raspberry Pi.
+**Step 3:** Connect the HDMI cable, USB hub, and power supply to the Raspberry Pi. The ports can be found from left to right looking at the side of the case.
+![RPIPorts](https://github.com/emerginganalytics/cyberarena/assets/50710945/2eebc0b9-2a2d-49d7-a4f0-d117e8656daf)
 
-**Step 5:** Plug the keyboard’s Bluetooth adapter to the USB hub. 
+**Step 4:** Plug the keyboard’s Bluetooth adapter to the USB hub. The adapter can be found inside the battery compartment of the keyboard.
 
-**Step 6:** Connect the HDMI cable to a monitor. It will take a few minutes to boot up,  and then prompted for the username and password, use your keyboard to type: 
+**Step 5:** Connect the HDMI cable to a monitor and power on. It will take a few minutes to boot up. 
 
-Username: pi 
+**Step 6:** When prompted for the username and password, use your keyboard to type: 
 
-Password: R3pr3$ent! 
+- Username: pi 
+
+- Password: R3pr3$ent! 
 
 **Step 7:** Run `sudo raspi-config` to configure wireless. You’ll see a screen  similar to the one below 
-![image](https://github.com/emerginganalytics/cyberarena/assets/122807407/cabefae1-b3ff-4c3d-825c-914c0f69e3ec)
+![IMG_20230616_100313](https://github.com/emerginganalytics/cyberarena/assets/50710945/6e77f521-3801-47be-b498-9ca7c49694c3)
 
 **Step 8:** Select System Options > Wireless LAN, and enter the wireless network  name and password for your home wireless network. 
 
 **Step 9:** Restart your Raspberry Pi with sudo reboot. If the device makes a  successful connection, you should see a rotating image display on your device  screen.
  
-**Step 10:** Go to https://cybergym-classified.cybergym-eac-ualr.org/iot/. Enter the  name of the device (e.g. cyber-arena-0001) on the bottom of your Raspberry Pi  case. Then try sending a couple of commands to the device. If the device does not  work, then please email cybergym@ualr.edu and include the device ID to let us  know.
+**Step 10:** Go to https://gencyber-classfied.buildthewarrior.test-cybergym.org/iot/. Enter the  name of the device (e.g. cyber-arena-001) on the bottom of your Raspberry Pi  case. Then try sending a couple of commands to the device. If the device does not  work, then please email cybergym@ualr.edu and include the device ID to let us  know.
