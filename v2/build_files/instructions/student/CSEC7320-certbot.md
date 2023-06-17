@@ -11,20 +11,20 @@ password: Let's workout!
 You already have the Apache webserver installed on your web server, but you still need to prepare the webserver to use your DNS. prepare the web server to server from your designated domain. Your lab has a specific DNS name for the webserver using your lab ID.
 1. Create a directory for your website:
 ```
-sudo mkdir -p /var/www/<LAB-ID>-nat-web.trojan-cybergym.org
+sudo mkdir -p /var/www/<LAB-ID>-myweb.trojan-cybergym.org
 ```
 
 2. Create a new virtual host configuration for your website.
 ```
-sudo vim /etc/httpd/conf.d/<LAB-ID>-nat-web.trojan-cybergym.org.conf
+sudo vim /etc/httpd/conf.d/<LAB-ID>-myweb.trojan-cybergym.org.conf
 ```
 
 Then, click i to insert the following text into the new file:
 ```
    <VirtualHost *:80>
-    ServerName <LAB-ID>-nat-web.trojan-cybergym.org
-    ServerAlias *.<LAB-ID>-nat-web.trojan-cybergym.org
-    DocumentRoot /var/www/<LAB-ID>-nat-web.trojan-cybergym.org
+    ServerName <LAB-ID>-myweb.trojan-cybergym.org
+    ServerAlias *.<LAB-ID>-myweb.trojan-cybergym.org
+    DocumentRoot /var/www/<LAB-ID>-myweb.trojan-cybergym.org
 </VirtualHost>
 ```
 
@@ -46,4 +46,4 @@ Initiate the certbot installation:
 ```
 sudo certbot --apache 
 ```
-Enter your email address when prompted, and when asked for your domain name, use <LAB-ID>-nat-web.trojan-cybergym.org.
+Enter your email address when prompted, and when asked for your domain name, use <LAB-ID>-myweb.trojan-cybergym.org.
