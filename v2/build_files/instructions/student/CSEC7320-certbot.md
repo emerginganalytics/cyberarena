@@ -21,7 +21,7 @@ sudo vim /etc/httpd/conf.d/<LAB-ID>-myweb.trojan-cybergym.org.conf
 
 Then, click i to insert the following text into the new file:
 ```
-   <VirtualHost *:80>
+<VirtualHost *:80>
     ServerName <LAB-ID>-myweb.trojan-cybergym.org
     ServerAlias *.<LAB-ID>-myweb.trojan-cybergym.org
     DocumentRoot /var/www/<LAB-ID>-myweb.trojan-cybergym.org
