@@ -232,8 +232,8 @@ def _assign_urls_to_server(build_id, servers, connections):
     for server in servers:
         if server.get('human_interaction', None):
             server['url'] = connections['server'].get(server['name'], None)
-        else:
-            if dns_host_suffix := server['nics'][0].get('dns_host_suffix', None):
-                server['nics'][0]['host_dns'] = f'{build_id}-{dns_host_suffix}{cloud_env.dns_suffix}'
+
+        if dns_host_suffix := server['nics'][0].get('dns_host_suffix', None):
+            server['dns_hostname'] = f'{build_id}-{dns_host_suffix}{cloud_env.dns_suffix}'
     return servers
 # [ eof ]
