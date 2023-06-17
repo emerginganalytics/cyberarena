@@ -270,8 +270,8 @@
                                                                         <td>No Public Interface</td>
                                                                     {% endif %}
                                                                     <td>{{ server.name }}</td>
-                                                                    {% if server.nics[0].host_dns %}
-                                                                        <td>{{ server.nics[0].host_dns }}</td>
+                                                                    {% if server.dns_hostname %}
+                                                                        <td>{{ server.dns_hostname }}</td>
                                                                     {% else %}
                                                                         <td>None</td>
                                                                     {% endif %}
@@ -289,8 +289,8 @@
                                                                     <td>No Public Interface</td>
                                                                 {% endif %}
                                                                 <td>{{ server.name }}</td>
-                                                                {% if server.nics[0].host_dns %}
-                                                                    <td>{{ server.nics[0].host_dns }}</td>
+                                                                {% if server.dns_hostname %}
+                                                                    <td>{{ server.dns_hostname }}</td>
                                                                 {% else %}
                                                                     <td>None</td>
                                                                 {% endif %}
