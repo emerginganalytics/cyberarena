@@ -3,7 +3,7 @@ Medical themed variant to normal IoT workout
 """
 import json
 from flask import abort, Blueprint, render_template, request, jsonify, make_response, url_for, redirect, flash
-from globals import project
+from app_utilities.gcp.cloud_env import CloudEnv
 from google.api_core.exceptions import NotFound
 from google.cloud import iot_v1
 from iot_database import IOTDatabase
@@ -15,6 +15,7 @@ iot_nsa_bp = Blueprint(
     static_folder='static'
 )
 
+env =  CloudEnv()
 
 @iot_nsa_bp.route('/', methods=['GET', 'POST'])
 def setup():
@@ -23,7 +24,7 @@ def setup():
     cloud_region = 'us-central1'
     registry_id = 'cybergym-registry'
     devices_gen = iot_client.list_devices(
-        parent=f'projects/{project}/locations/{cloud_region}/registries/{registry_id}')
+        parent=f'projects/{env.project}/locations/{cloud_region}/registries/{registry_id}')
     device_list = [i.id for i in devices_gen]
 
     if request.method == 'POST':
@@ -55,7 +56,7 @@ def index(device_id):
     registry_id = 'cybergym-registry'
     client = iot_v1.DeviceManagerClient()  # publishes to device
     iotdb = IOTDatabase()
-    device_path = client.device_path(project, cloud_region, registry_id, device_id)
+    device_path = client.device_path(env.project, cloud_region, registry_id, device_id)
     device_num_id = str(client.get_device(request={"name": device_path}).num_id)
     valid_commands = ['HEART', 'PRESSURE', 'HUMIDITY', 'TEMP',]
 
@@ -94,7 +95,7 @@ def patients(device_id):
     registry_id = 'cybergym-registry'
     iotdb = IOTDatabase()
     client = iot_v1.DeviceManagerClient()
-    device_path = client.device_path(project, cloud_region, registry_id, device_id)
+    device_path = client.device_path(env.project, cloud_region, registry_id, device_id)
     device_num_id = str(client.get_device(request={"name": device_path}).num_id)
 
     # page data

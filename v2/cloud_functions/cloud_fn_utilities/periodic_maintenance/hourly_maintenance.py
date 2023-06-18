@@ -13,6 +13,7 @@ from cloud_fn_utilities.cyber_arena_objects.workout import Workout
 from cloud_fn_utilities.state_managers.unit_states import UnitStateManager
 from cloud_fn_utilities.state_managers.workout_states import WorkoutStateManager
 from cloud_fn_utilities.lms.canvas.lms_canavas_synchronizer import LMSCanvasSynchronizer
+from cloud_fn_utilities.gcp.iot_manager import IotManager
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"

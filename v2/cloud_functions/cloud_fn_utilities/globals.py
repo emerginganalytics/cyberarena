@@ -13,7 +13,7 @@ class DatastoreKeyTypes(str, Enum):
     SERVER = 'cybergym-server'
     CYBERARENA_ATTACK = 'cyberarena-attack'
     CYBERARENA_ATTACK_SPEC = 'cyberarena-attack-spec'
-    IOT_DEVICE = 'cybergym-iot-device'
+    IOT_DEVICE = 'cyberarena-iot-device'  # 'cybergym-iot-device'
     CATALOG = 'v2-catalog'
     USERS = 'cyberarena-user'
     NVD_DATA = 'nvd_data'
