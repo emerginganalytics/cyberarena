@@ -1,0 +1,330 @@
+{% macro render(iot_data, iot_json, url, tab_idx) %}
+    <!--
+        Credits to: Maroš Gonda - https://codepen.io/cfmano/pen/MJGYzo
+        README: Currently only webkit-based browsers support all required features. List of browsers non-supporting exact feature:
+
+        ## IE ##
+        - ES6+
+        - CSS variables
+
+        ## Edge ##
+        - CSS variables
+
+        ## Firefox ##
+        - Calc for degrees (non-length units in general)
+
+        ## Safari ##
+        - Nested Calcs - to make it work properly, targeting CSS hack was required and one rule rewritten. Otherwise, works well!
+
+        Requires:
+            dashboard.js and dashboard.css to function
+
+    -->
+    <div class="body-grid">
+        <div class="command-results-grid">
+            <div class="command-result-error">
+                <p id="command-result-error{{ tab_idx }}"><p>
+            </div>
+            {% if iot_json %}
+                <p>{{ iot_json }}</p>
+            {% endif %}
+        </div>
+        <div class="command-grid">
+            <div id="dashboard" style="display: flex">
+              <div id="revmeter">
+                <div class="gauge" style="--rpm: 750; --limiter: 6700; --gauge-value: var(--rpm) / 1000;">
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">0</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">1</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">2</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">3</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">4</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">5</div>
+                    </div>
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+
+                        <div class="label">6</div>
+                    </div>
+                    <div class="digit">
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="separating line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+                        <span class="highlighted line"></span>
+
+                        <div class="label">7</div>
+                    </div>
+                    <div class="digit">
+                        <div class="label">8</div>
+                    </div>
+
+                    <div class="limiter"></div>
+
+                    <div class="pointer">
+                        <div class="hand"></div>
+                    </div>
+
+                    <div class="gear"></div>
+                </div>
+              </div>
+              <div id="speedmeter">
+                <div class="gauge" style="--mph: 0; --start-angle: 0deg; --digits-angle: 30deg; --lines-count: 6; --digits-count: 10; --gauge-value: var(--mph) / 18;">
+
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">0</div>
+                    </div>
+
+                    <div class="highlighted digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">20</div>
+                    </div>
+
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">35</div>
+                    </div>
+
+                    <div class="highlighted digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">50</div>
+                    </div>
+
+                    <div class="highlighted digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">70</div>
+                    </div>
+
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">90</div>
+                    </div>
+
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">105</div>
+                    </div>
+
+                    <div class="highlighted digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">125</div>
+                    </div>
+
+                    <div class="digit">
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+                        <span class="separating line"></span>
+                        <span class="line"></span>
+
+                        <div class="label">145</div>
+                    </div>
+
+                    <div class="highlighted digit">
+                        <div class="label">160</div>
+                    </div>
+
+                    <div class="pointer">
+                        <div class="hand"></div>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="misc-grid">
+            <div id="car-controls">
+                <ul id="car-control-list">
+                    <li>
+                        <button id="throttle" name="throttle"><i class="fa fa-car"></i> Gas</button>
+                    </li>
+                    <li>
+                        <button name="gear-up" class="gear-btn"><i class="fa fa-chevron-up"></i> Shift Up</button>
+                    </li>
+                    <li>
+                        <button name="gear-down" class="gear-btn"><i class="fa fa-chevron-down"></i> Shift Down</button>
+                    </li>
+                </ul>
+                <div hidden>
+                    <label>
+                        Revs:
+                        <input type="number" name="rpm" value="750" min="0" max="6700" step="100" />
+                        RPM
+                    </label><br />
+                    <label>
+                        Speed:
+                        <input type="number" name="mph" value="0" min="0" max="270" step="1" />
+                        mp/h
+                    </label><br />
+                    <label>Gear:
+                        <input type="number" name="gear" value="0" min="0" max="6" />
+                    </label>
+                </div>
+                <div hidden>
+                    <h4>Gear ratios:</h4>
+                    <label>
+                        1:
+                        <input type="range" min="24" max="140" value="125" name="gear-1" data-min="79" data-max="140" />
+                        <span>1/125</span>
+                    </label>
+                    <label>
+                        2:
+                        <input type="range" min="24" max="140" value="78" name="gear-2" data-min="53" data-max="124" />
+                        <span>1/78</span>
+                    </label>
+                    <label>
+                        3:
+                        <input type="range" min="24" max="140" value="52" name="gear-3" data-min="41" data-max="77" />
+                        <span>1/52</span>
+                    </label>
+                    <label>
+                        4:
+                        <input type="range" min="24" max="140" value="40" name="gear-4" data-min="33" data-max="51" />
+                        <span>1/40</span>
+                    </label>
+                    <label>
+                        5:
+                        <input type="range" min="24" max="140" value="32" name="gear-5" data-min="28" data-max="39" />
+                        <span>1/32</span>
+                    </label>
+                    <label>
+                        6:
+                        <input type="range" min="24" max="140" value="27" name="gear-6" data-min="24" data-max="31" />
+                        <span>1/27</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="info-grid">
+            <h2>Device ID: </h2> <p id="device_id{{ tab_idx }}">{{ device_id }}</p>
+            {% if iot_data %}
+                <h2>IP Address: </h2> <p>{{ iot_data.ip }}</p>
+                <h2>Load: </h2> <p>{{ iot_data.memory }}%</p>
+                <h2>Storage: </h2> <p>{{ iot_data.storage }}%</p>
+            {% endif %}
+        </div>
+        <script src="{{url_for('iot_bp.static', filename='js/dashboard.js')}}" type="text/javascript"></script>
+    </div>
+{% endmacro %}

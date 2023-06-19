@@ -1,0 +1,342 @@
+.gauge {
+  color: white;
+  --start-angle: -30deg;
+  --digits-angle: 30deg;
+  --lines-count: 10;
+  --digits-count: 8;
+  --gauge-value: 0;
+  position: relative;
+  border: 0.2rem solid #137;
+  border-radius: 100%;
+  box-shadow: inset 0 0 0.25rem 0.25rem #137, inset 0 0 7.5rem rgba(40, 101, 224, 0.5);
+  width: 100%;
+  height: 100%;
+  background-color: #040b10;
+  overflow: hidden;
+}
+.gauge::before {
+  padding-top: 100%;
+  content: '';
+  display: block;
+}
+.gauge::after {
+  font-size: 0.5rem;
+  font-weight: bold;
+  display: block;
+  content: '';
+  position: absolute;
+  top: 25%;
+  width: 100%;
+  text-align: center;
+}
+.gauge .pointer {
+  z-index: 4;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.gauge .pointer::before {
+  content: '';
+  display: block;
+  box-sizing: border-box;
+  position: absolute;
+  width: 22%;
+  height: 22%;
+  left: 39%;
+  top: 39%;
+  border-radius: 100%;
+  box-shadow: inset 0 0 1rem 1px rgba(51, 153, 255, 0.5), 0 0 5rem 0.1rem #137;
+}
+.gauge .pointer .hand {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  transform-origin: center center;
+  transform: rotate(calc( var(--start-angle) + ( ( var(--gauge-value) ) * var(--digits-angle) ) ));
+  transition: transform ease 0.2s;
+}
+.gauge .pointer .hand::after {
+  content: '';
+  display: block;
+  box-sizing: border-box;
+  position: absolute;
+  width: 39%;
+  height: 2%;
+  top: 49%;
+  right: 56%;
+  background: #fff;
+  border: 1px solid #fff;
+  border-right: 0;
+  border-bottom-left-radius: 1.7rem 0.25rem;
+  border-top-left-radius: 1.7rem 0.25rem;
+  box-shadow: inset 0px 0 1px #000;
+  z-index: 1;
+}
+.gauge .pointer .hand::before {
+  content: '';
+  display: block;
+  border: 1px solid #fff;
+  position: absolute;
+  width: 12%;
+  height: 5.5%;
+  left: 44%;
+  top: 47.25%;
+  box-sizing: border-box;
+  border-radius: 20%;
+  background: #e6e7e8;
+  box-shadow: inset 0 0 1px 1px rgba(0, 0, 0, 0.25);
+  z-index: 0;
+}
+.gauge .digit {
+  position: absolute;
+  top: 49.375%;
+  right: 50%;
+  width: 50%;
+  height: 1.25%;
+  border-left: 1.1rem solid white;
+  transform-origin: center right;
+  box-sizing: border-box;
+  z-index: 1;
+  --digit-rotation: calc(var(--start-angle) + var(--digit-order) * var(--digits-angle));
+  transform: rotate(var(--digit-rotation));
+}
+.gauge .digit .label {
+  transform: rotate(calc( -1 * var(--digit-rotation) ));
+}
+.gauge .digit .label:not(:root:root) {
+  transform: rotate(calc( -1 * ( var(--start-angle) + var(--digit-order) * var(--digits-angle)) ));
+}
+.gauge .digit:nth-of-type(1) {
+  --digit-order: 0;
+}
+.gauge .digit:nth-of-type(2) {
+  --digit-order: 1;
+}
+.gauge .digit:nth-of-type(3) {
+  --digit-order: 2;
+}
+.gauge .digit:nth-of-type(4) {
+  --digit-order: 3;
+}
+.gauge .digit:nth-of-type(5) {
+  --digit-order: 4;
+}
+.gauge .digit:nth-of-type(6) {
+  --digit-order: 5;
+}
+.gauge .digit:nth-of-type(7) {
+  --digit-order: 6;
+}
+.gauge .digit:nth-of-type(8) {
+  --digit-order: 7;
+}
+.gauge .digit:nth-of-type(9) {
+  --digit-order: 8;
+}
+.gauge .digit:nth-of-type(10) {
+  --digit-order: 9;
+}
+.gauge .digit:nth-of-type(11) {
+  --digit-order: 10;
+}
+.gauge .digit .label {
+  position: absolute;
+  font-family: 'Changa One', cursive;
+  font-style: italic;
+  font-size: 1.5rem;
+  bottom: -1rem;
+  left: 7%;
+  text-shadow: 0.1rem 0.1rem 0.1rem black, 0.1rem -0.1rem 0.1rem black, -0.1rem 0.1rem 0.1rem black, -0.1rem -0.1rem 0.1rem black;
+  box-shadow: 0 0 1rem 1rem rgba(195, 225, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+}
+.gauge .digit.highlighted {
+  border-left-color: red;
+}
+.gauge .digit .line {
+  position: absolute;
+  display: block;
+  width: 100%;
+  height: 50%;
+  border-left: 0.5rem solid white;
+  border-right: 0.5rem solid transparent;
+  left: -1rem;
+  top: 25%;
+  transform: rotate(calc( var(--digits-angle) / var(--lines-count) * var(--line-order) ));
+  transform-origin: center right;
+  /* max 15 segements in main area */
+}
+.gauge .digit .line.highlighted {
+  border-left-color: red;
+}
+.gauge .digit .line.separating {
+  top: 12.5%;
+  height: 75%;
+}
+.gauge .digit .line.separating::after {
+  content: '';
+  display: block;
+  border-left: 2.5rem solid rgba(255, 255, 255, 0.15);
+  border-top: 0.075rem solid transparent;
+  border-bottom: 0.075rem solid transparent;
+  width: 0;
+  height: 0;
+  position: absolute;
+  left: 0.25rem;
+}
+.gauge .digit .line:nth-child(1) {
+  --line-order: 1;
+}
+.gauge .digit .line:nth-child(2) {
+  --line-order: 2;
+}
+.gauge .digit .line:nth-child(3) {
+  --line-order: 3;
+}
+.gauge .digit .line:nth-child(4) {
+  --line-order: 4;
+}
+.gauge .digit .line:nth-child(5) {
+  --line-order: 5;
+}
+.gauge .digit .line:nth-child(6) {
+  --line-order: 6;
+}
+.gauge .digit .line:nth-child(7) {
+  --line-order: 7;
+}
+.gauge .digit .line:nth-child(8) {
+  --line-order: 8;
+}
+.gauge .digit .line:nth-child(9) {
+  --line-order: 9;
+}
+.gauge .digit .line:nth-child(10) {
+  --line-order: 10;
+}
+.gauge .digit .line:nth-child(11) {
+  --line-order: 11;
+}
+.gauge .digit .line:nth-child(12) {
+  --line-order: 12;
+}
+.gauge .digit .line:nth-child(13) {
+  --line-order: 13;
+}
+.gauge .digit .line:nth-child(14) {
+  --line-order: 14;
+}
+.gauge .limiter {
+  width: 100%;
+  height: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: bottom center;
+  transform: rotate(calc( var(--start-angle) + var(--digits-count) * var(--digits-angle) - 180deg ));
+  overflow: hidden;
+  z-index: 0;
+}
+.gauge .limiter::after {
+  content: '';
+  width: 99.5%;
+  height: 199%;
+  border: 0.6rem solid;
+  border-color: transparent red red transparent;
+  border-radius: 100%;
+  display: block;
+  box-sizing: border-box;
+  transform: rotate(calc(45deg + var(--digits-angle) * ( var(--limiter) / 1000 - var(--digits-count) ) ));
+}
+#speedmeter {
+  margin: 1rem auto;
+  width: 30rem;
+  display: inline-block;
+}
+#speedmeter .gauge::after {
+  content: 'mp/h';
+  font-size: 1.3rem;
+}
+#speedmeter .gauge .pointer::after {
+  counter-reset: mph var(--mph);
+  content: counter(mph) " mp/h";
+  color: #fff;
+  top: 65%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: block;
+  position: absolute;
+  font-size: 2rem;
+}
+#revmeter {
+  margin: 1rem auto;
+  width: 30rem;
+  display: inline-block;
+}
+#revmeter .gauge::after {
+  content: 'x1000r/min';
+  font-size: 1.3rem;
+}
+#revmeter .gauge .label {
+  font-size: 1.7rem;
+  bottom: -0.7rem;
+  left: 10%;
+}
+#revmeter .gauge .pointer::after {
+  font-family: 'Changa One', cursive;
+  font-style: italic;
+  counter-reset: gear var(--gear);
+  content: counter(gear);
+  color: #99c459;
+  top: 70%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  display: block;
+  position: absolute;
+  font-size: 2rem;
+}
+#car-controls {
+  width: 7rem;
+  font-size: 16px;
+}
+#car-controls input[type=range] {
+  transform: rotate(180deg);
+}
+h3 {
+  text-align: center;
+}
+.gear-btn {
+  border-radius: 4px;
+  background: #535353;
+  color: white;
+  box-shadow: none;
+  border: none;
+  width: 12rem;
+  height: 5rem;
+  font-size: 1.5rem;
+}
+.gear-btn:hover {
+  background: none;
+  color: black;
+  border: 1px solid gray;
+}
+#car-control-list {
+  list-style: none;
+  display: inline-flex;
+}
+#car-control-list > li {
+  display: inline-flex;
+}
+#throttle {
+  background-color: green;
+  border-radius: 4px;
+  border: 1px solid gray;
+  color: white;
+  width: 11rem;
+}

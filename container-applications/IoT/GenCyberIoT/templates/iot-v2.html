@@ -1,0 +1,48 @@
+{% extends 'base.jinja' %}
+{% import 'car.jinja' as car %}
+{% import 'quick_commands.html' as quick_commands %}
+{% import 'display_code.html' as code_block %}
+{% block title_block %}IoT Command and Control{% endblock title_block %}
+{% block styles_block %}
+    <link rel="stylesheet" href="{{ url_for('iot_bp.static', filename='css/animations.css') }}">
+    <link rel="stylesheet" href="{{ url_for('iot_bp.static', filename='css/iot-styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('iot_bp.static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock styles_block %}
+{% block js_block %}
+    <script src="{{ url_for('iot_bp.static', filename='js/commands.js') }}" type="text/javascript"></script>
+    <script src="{{url_for('iot_bp.static', filename='js/self-driving.js')}}" type="text/javascript"></script>
+{% endblock js_block %}
+{% block nav_block %}
+    <h1>IoT Command and Control</h1>
+    <div class="navbar-top">
+        <ul class="navbar-list">
+            <li>
+                <button class="tab-btns tabLinks" id="command-home-tab"
+                        onclick="openTab(event, 'quick-commands')">Quick Commands</button>
+            </li>
+            <li>
+                <button class="tab-btns tabLinks" onclick="openTab(event, 'car-dashboard')">Car Control</button>
+            </li>
+            <li>
+                <button class="tab-btns tabLinks" onclick="openTab(event, 'raw-data')">Raw Data</button>
+            </li>
+        </ul>
+    </div>
+{% endblock nav_block %}
+{% block content_block %}
+    <script>
+        function getDeviceID(){
+            return '{{ device_id }}';
+        }
+    </script>
+    <div class="tabContent" id="quick-commands">
+        {{ quick_commands.render(iot_data, iot_json, commands, "%s" % url_for('iot_bp.submit', device_id=device_id) , tab_idx) }}
+    </div>
+    <div class="tabContent" id="car-dashboard">
+        {{ car.render(iot_data, iot_json, "%s" % url_for('iot_bp.submit', device_id=device_id), tab_idx) }}
+    </div>
+    <div class="tabContent" id="raw-data">
+        {{ code_block.render(iot_data) }}
+    </div>
+{% endblock content_block %}

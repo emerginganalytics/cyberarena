@@ -1,0 +1,22 @@
+{% macro display_code(data) -%}
+    {% for obj in data %}
+        {{ data[obj] }}
+    {% endfor %}
+{%- endmacro %}
+{% macro display_patients(patients) %}
+    {% for patient in patients %}
+        {{- display_code(patients[patient]) -}}
+    {% endfor %}
+{% endmacro %}
+{% macro display_car(car) %}
+    {% for d in car %}
+        '{{ d }}': {{ car[d] }}
+    {% endfor %}
+{% endmacro %}
+{% macro render(data) %}
+    <div class="code-block">
+        {% for obj in data %}
+            '{{ obj }}': {{ data[obj] }},
+        {% endfor %}
+    </div>
+{% endmacro %}
