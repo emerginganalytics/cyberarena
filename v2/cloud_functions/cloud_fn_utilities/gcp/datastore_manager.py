@@ -109,7 +109,8 @@ class DataStoreManager:
         if self.key_type in [DatastoreKeyTypes.FIXED_ARENA_CLASS, DatastoreKeyTypes.UNIT]:
             query_expired.add_filter('workspace_settings.expires', '<', get_current_timestamp_utc())
             for obj in query_expired.fetch():
-                if obj.get('state', None) != FixedArenaClassStates.DELETED.value:
+                if obj.get('state', None) not in [FixedArenaClassStates.DELETED.value,
+                                                  FixedArenaClassStates.START.value]:
                     expired.append(obj.key.name)
         elif self.key_type == DatastoreKeyTypes.WORKOUT:
             query_expired.add_filter('expiration', '<', get_current_timestamp_utc())
