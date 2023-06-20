@@ -38,6 +38,9 @@ class HourlyMaintenance:
         self.ds_workouts = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT)
 
     def run(self):
+        self.logger.info(f"hourly maintenance: beginning to sync LMS students with active workouts")
+        self._lms_sync()
+        self.logger.info(f"hourly maintenance: completed sync'ing LMS students")
         self.logger.info(f"hourly maintenance: beginning to delete expired classes")
         self._delete_expired_classes()
         self.logger.info(f"hourly maintenance: completed deleting expired classes")
@@ -47,9 +50,7 @@ class HourlyMaintenance:
         self.logger.info(f"hourly maintenance: beginning to delete expired workouts")
         self._delete_expired_workouts()
         self.logger.info(f"hourly maintenance: completed deleting expired workouts")
-        self.logger.info(f"hourly maintenance: beginning to sync LMS students with active workouts")
-        self._lms_sync()
-        self.logger.info(f"hourly maintenance: completed sync'ing LMS students")
+
 
     def _delete_expired_classes(self):
         expired_classes = self.ds_classes.get_expired()
@@ -78,12 +79,15 @@ class HourlyMaintenance:
             unit_state_manager = UnitStateManager(build_id=build_id)
             if unit_state_manager.get_state() not in [UnitStates.DELETED.value]:
                 if self.debug:
-                    Unit(build_id=build_id, debug=self.debug, env_dict=self.env_dict).delete()
+                    try:
+                        unit = Unit(build_id=build_id, debug=self.debug, env_dict=self.env_dict)
+                        unit.delete()
+                    except ValueError as e:
+                        self.logger.warning(f"Error when attempting to delete unit found for {build_id}")
                 else:
                     self.pub_sub_mgr.msg(handler=PubSub.Handlers.CONTROL,
                                          cyber_arena_object=str(PubSub.CyberArenaObjects.UNIT.value),
                                          build_id=build_id, action=str(PubSub.Actions.DELETE.value))
-                    time.sleep(20)
 
     def _delete_expired_workouts(self):
         """
