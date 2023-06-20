@@ -36,7 +36,8 @@ class IotCloudMaintenance:
 
     def maintenance(self):
         if self.hourly:
-            self._reset_records()
+            # self._reset_records()
+            print('I am not cleaning anything ([==]o[==])')
 
     def _update(self):
         device = self.ds.get(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=str(self.device_id))
@@ -60,6 +61,9 @@ class IotCloudMaintenance:
                 if color := sensor_data.get('color', None):
                     if color != device['sensor_data'].get('color', None):
                         device['sensor_data']['color'] = color
+                if flag := sensor_data.get('flag', None):
+                    if flag != device.get('flag', None):
+                        device['flag'] = flag
             # Finally Update Timestamp
             device['ts'] = self.now.timestamp()
             self.ds.put(device, key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=str(self.device_id))
@@ -117,6 +121,7 @@ class IotCloudMaintenance:
         try:
             data = base64.b64decode(base64Str).decode('UTF-8')
             if type(data) == str:
+                print(data)
                 return json.loads(data)
         except Exception:
             logging.error('Method failed to process data str; Object is not base64 decodable!')

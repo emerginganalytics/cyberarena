@@ -1,0 +1,58 @@
+{% macro render(iot_data, iot_json, commands, url, tab_idx) %}
+<div class="body-grid">
+    <div class="command-results-grid">
+        <div class="command-result-error">
+            <p id="command-result-error{{ tab_idx }}"><p>
+        </div>
+        {% if iot_data %}
+            <p>{{ iot_json }}</p>
+            {% if iot_data.flag %}
+                <input class="modal-checkbox-cb" id="modal-checkbox-cb{{ tab_idx }}" type="checkbox" />
+                <div class="modal-popup">
+                  <span class="modal-message">
+                      {{ iot_data['flag'] }}
+                  </span>
+                  <label for="modal-checkbox-cb{{ tab_idx }}" class="modal-close-cb"><a></a>x</label>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div id="quick-commands" class="command-grid">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert {{category}}" role="alert"> {{ message }} </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <h1>Quick IoT Commands</h1>
+        <h2>Data Functions </h2>
+        {% for command in commands.functions %}
+            <button class="iot-commands" id="{{ command }}"
+                    onclick="send_command('{{ command }}', '{{ device_id }}', '{{ url }}', {{ tab_idx }});">
+                {{ command }}
+            </button>
+        {% endfor %}
+        <h2>Display Colors </h2>
+        {% for color in commands.colors %}
+            <button class="iot-commands" id="{{ color }}"
+                    onclick="send_command('{{ color }}', '{{ device_id }}', '{{ url }}', {{ tab_idx }});">
+                {{ color }}
+            </button>
+        {% endfor %}
+        <!--Note: Why is this command here? Kind of redundant, no?
+        <button class="iot-commands" id="green"
+                    onclick="send_command('green', '{{ device_id }}', '{{ url }}', {{ tab_idx }});">
+                green
+        </button>-->
+    </div>
+    <div class="info-grid">
+        <h2>Device ID: </h2> <p id="device_id{{ tab_idx }}">{{ device_id }}</p>
+        {% if iot_data %}
+            <h2>IP Address: </h2> <p>{{ iot_data.ip }}</p>
+            <h2>Load: </h2> <p>{{ iot_data.memory }}%</p>
+            <h2>Storage: </h2> <p>{{ iot_data.storage }}%</p>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

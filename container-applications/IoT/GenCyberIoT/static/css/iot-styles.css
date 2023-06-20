@@ -48,7 +48,7 @@ nav.iot-navbar {
     top: 0;
     width: 100%;
     padding: 0 1%;
-    z-index: 2;
+    z-index: 10;
     border-bottom: #535353 solid 0.1vh;
     box-shadow: 1px 1px 10px #000000;
 }
@@ -65,6 +65,19 @@ link#nav-ico {
 }
 nav > h1 {
     display: inline-block;
+}
+nav > .navbar-top {
+    display: inline-block;
+    border-left: 1px solid white;
+    margin-left: 2rem;
+    vertical-align: middle;
+    margin-top: 0;
+}
+nav > ul > .navbar-list {
+    list-style: none;
+}
+.navbar-list li {
+    display: inline;
 }
 
 /* Container Styles */
@@ -112,13 +125,11 @@ div.iot-setup-container {
 .body-grid {
     display: grid;
     grid-template-areas:
-        'tabs tabs tabs tabs info'
         'results results results results info'
         'commands commands commands commands info'
         'commands commands commands commands info'
-        'commands commands commands commands info';
-    /*grid-template-columns: 300px;
-    grid-template-rows: 300px;*/
+        'commands commands commands commands info'
+        'misc misc misc misc info';
     grid-gap: 15px;
     padding: 1px 15px 15px 15px;
 }
@@ -160,6 +171,14 @@ div.iot-setup-container {
 
 .command-results-grid {
     grid-area: results;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 3px 3px 1px darkgray;
+    background: white;
+    padding: 10px;
+}
+.misc-grid {
+    grid-area: misc;
     border: 1px solid gray;
     border-radius: 2px;
     box-shadow: 1px 3px 3px 1px darkgray;
@@ -254,36 +273,30 @@ p.iot-footer {
     transition: 0.1s linear;
 }
 
-.tab{
-    overflow:hidden;
-    border: 1px solid #4285F4;
-    grid-area: tabs;
-    background-color:white;
-}
-
-.tab button{
-    background-color: inherit;
+.tab-btns {
+    background-color: #4285F4;
     float:left;
     border: none;
+    border-radius: 5px;
     outline: none;
     cursor: pointer;
     transition: 0.3s;
-    font-size:2em;
+    font-size: 1.3rem;
+    padding: 10px;
 }
 
-.tab button:hover{
+.tab-btns:hover {
     background-color: #4285F4;
-    color:white;
+    color: white;
     box-shadow: inset 1px 2px 5px 0 rgba(12, 12, 12, 0.2);
 }
 
-.tab button.active{
-    background-color: #4285F4;
+.tab-btns.active {
+    background-color: #274e8f;
     color: white;
-    border-bottom: 3px solid #eeb211;
 }
 
-.tabContent{
+.tabContent {
     display: none;
     border-top: none;
 }
@@ -308,6 +321,7 @@ p.iot-footer {
     font-size: 2.5em;
     font-weight: bold;
     transition: 0.8s;
+    z-index: 10px;
 }
 .modal-popup .modal-message {
     white-space: nowrap;
@@ -361,4 +375,13 @@ p.iot-footer {
 }
 .modal-checkbox-cb:checked + .modal-popup {
     transform: translateY(-500px);
+}
+.code-block {
+    font-size: 16px;
+    width: 90%;
+    min-width: 800px;
+    height: 500px;
+    background-color: lightgray;
+    border-radius: 2px;
+    border: 1px solid gray;
 }

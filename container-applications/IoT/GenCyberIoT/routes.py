@@ -39,7 +39,7 @@ def faq():
 
 @iot_bp.route('/commands/<device_id>', methods=['GET'])
 def index(device_id):
-    page_template = './iot.jinja'
+    page_template = './iot-v2.html'
     iot_mgr = IotManager(device_id=device_id)
 
     # Pass level_1 flag back in override var to unlock level_2 of the challenge
@@ -60,7 +60,7 @@ def index(device_id):
             device_id=device_id,
             commands=commands,
             override=override,
-            iot_data=iot_data,
+            iot_data=dict(iot_data),
             iot_json=json.dumps(iot_data['sensor_data'])
         )
     flash("Couldn\'t connect to device. Is it online?")
@@ -73,7 +73,7 @@ def submit(device_id):
         iot_mgr = IotManager(device_id)
         resp = json.loads(request.data)
         if command := resp.get('command'):
-            success, data = iot_mgr.msg(command)
+            success, data = iot_mgr.msg(command, device_type=4553232)
             if success:
                 return jsonify(success=True)
             else:

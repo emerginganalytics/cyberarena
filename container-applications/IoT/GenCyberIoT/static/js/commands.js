@@ -5,7 +5,7 @@ function override(command, device_id, dest_url) {
     */
 }
 
-function send_command(command, device_id, dest_url) {
+function send_command(command, device_id, dest_url, tab_idx) {
     /*
     *  ABOUT: Used to send basic commands to IOT device
     *  PARAMS:
@@ -18,6 +18,7 @@ function send_command(command, device_id, dest_url) {
     */
     let quick_commands = {'command': command,
                             'device_id': device_id};
+    console.log()
     $.ajax(dest_url,{
         method: 'POST',
         data: JSON.stringify(quick_commands),
@@ -30,7 +31,7 @@ function send_command(command, device_id, dest_url) {
         error : function(e){
             console.log('AJAX ERROR!');
             console.log(e);
-            let error_div = $('#command-result-error');
+            let error_div = $('#command-result-error' + tab_idx);
             error_div.html('');
             let error_string = 'Jinkies! Something doesn\'t look right. Error message: ' + e;
             error_div.html(error_string);
@@ -51,7 +52,6 @@ function send_command(command, device_id, dest_url) {
         window.location = url;
     }
 }
-
 function sendDeviceID(device_id, dest_url, caller) {
     if (device_id.trim().length === 0 ){
         let disp_msg = 'Missing Device ID!';
@@ -108,7 +108,7 @@ function openTab(evt, tabName){
         tabContent[i].style.display = "none";
     }
 
-    var tabLinks = document.getElementsByClassName("tablinks");
+    var tabLinks = document.getElementsByClassName("tabLinks");
     for(var i = 0; i < tabLinks.length; i++){
         tabLinks[i].className = tabLinks[i].className.replace(" active", "");
     }

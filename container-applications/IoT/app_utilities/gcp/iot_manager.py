@@ -8,6 +8,11 @@ from app_utilities.globals import DatastoreKeyTypes
 
 
 class IotManager:
+    class Commands:
+        BASE = ['CLEAR', 'CONNECTED', 'HUMIDITY', 'PRESSURE', 'TEMP', 'SNAKE']
+        HEALTHCARE = [ 'CRITICAL', 'HEART', 'PATIENT']
+        CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'USER', 'PRODUCTS', 'TRIP_PLANNER']
+
     """
     Managing class to handle Publish messages used by Cloud Run container
     """
@@ -44,8 +49,15 @@ class IotManager:
         device_list = [i.id for i in devices_gen]
         return True if self.device_id in device_list else False
 
-    def msg(self, command):
+    def msg(self, command, device_type):
         """ Takes input command, encodes it and sends it through the GCP IoT client """
+        if command in ['all', 'ALL']:
+            if device_type == 4553232:
+                commands = self.Commands.BASE + self.Commands.CAR
+            elif device_type == 5555555:
+                commands = self.Commands.BASE + self.Commands.HEALTHCARE
+            else:
+                commands = self.Commands.BASE
         data = {"name": self.device_path, "binary_data": command.encode('utf-8')}
         print("[+] Publishing to device topic")
         try:
