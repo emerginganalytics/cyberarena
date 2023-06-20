@@ -1,6 +1,7 @@
 {% macro render(iot_data, iot_json, url, tab_idx) %}
     <!--
         Credits to: Maroš Gonda - https://codepen.io/cfmano/pen/MJGYzo
+        Modified by: 0xfut1le
         README: Currently only webkit-based browsers support all required features. List of browsers non-supporting exact feature:
 
         ## IE ##
@@ -244,9 +245,11 @@
                     </div>
 
                     <div class="highlighted digit">
-                        <div class="label">160</div>
+                        <div class="label">180</div>
                     </div>
-
+                    <!-- I hope we don't need to measure any speeds above 180. That could be problematic ..
+                    CMD=[PRODUCTS]
+                    -->
                     <div class="pointer">
                         <div class="hand"></div>
                     </div>
@@ -326,5 +329,87 @@
             {% endif %}
         </div>
         <script src="{{url_for('iot_bp.static', filename='js/dashboard.js')}}" type="text/javascript"></script>
+        <div id="top-secret">
+            <!-- TODO: Need to figure out why our servers keep dumping this data from the devices here.
+            This is probably the new kid's fault (=>_<=)
+            "trip_planner": {
+                "destination_soe": 0.064,
+                "origin_soe": 0.65,
+                "status": "TRIP_PLAN_SUCCESS_WITH_STOPS",
+                "stops": [
+                  {
+                    "addr": "W Panoche Rd, Firebaugh",
+                    "arrival_soe": 0.123,
+                    "charge_dur_s": 1180.79,
+                    "charge_kWh": 52.013,
+                    "id": "2768",
+                    "location": {
+                      "lat": 36.639154,
+                      "lng": -120.625877
+                    },
+                    "name": "Firebaugh, CA",
+                    "trt_id": "11676"
+                  },
+                  {
+                    "addr": "Copus Rd, Bakersfield",
+                    "arrival_soe": 0.108,
+                    "charge_dur_s": 1351.903,
+                    "charge_kWh": 55.878,
+                    "id": "4506",
+                    "location": {
+                      "lat": 35.094359,
+                      "lng": -119.040751
+                    },
+                    "name": "Bakersfield, CA – Copus Road (No Amenities)",
+                    "trt_id": "16818"
+                  },
+                  {
+                    "addr": "Highland Ave, Highland",
+                    "arrival_soe": 0.112,
+                    "charge_dur_s": 1506.139,
+                    "charge_kWh": 58.946,
+                    "id": "2898",
+                    "location": {
+                      "lat": 34.135162,
+                      "lng": -117.195175
+                    },
+                    "name": "Highland, CA",
+                    "trt_id": "12324"
+                  },
+                  {
+                    "addr": "Frontage Rd, Ehrenberg",
+                    "arrival_soe": 0.12,
+                    "charge_dur_s": 960.943,
+                    "charge_kWh": 46.249,
+                    "id": "1888",
+                    "location": {
+                      "lat": 33.601995,
+                      "lng": -114.522011
+                    },
+                    "name": "Ehrenberg, AZ",
+                    "trt_id": "5637"
+                  },
+                  {
+                    "addr": "S Watson Rd, Buckeye",
+                    "arrival_soe": 0.098,
+                    "charge_dur_s": 300,
+                    "charge_kWh": 14.564,
+                    "id": "55",
+                    "location": {
+                      "lat": 33.443011,
+                      "lng": -112.556876
+                    },
+                    "name": "Buckeye, AZ",
+                    "trt_id": "2145"
+                  }
+                ],
+                "total_charge_dur_s": 5299.774,
+                "total_charge_kWh": 227.65,
+                "total_drive_dur_s": 40274.0,
+                "total_drive_kWh": 229.461,
+                "total_drive_mi": 729.106
+              }
+            -->
+        </div>
     </div>
 {% endmacro %}

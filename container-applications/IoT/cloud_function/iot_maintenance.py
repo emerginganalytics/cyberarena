@@ -101,6 +101,7 @@ class IotCloudMaintenance:
             'ip': self.dataflow['system'].get('ip', None),
             'memory': self.dataflow['system'].get('memory', None),
             'storage': self.dataflow['system'].get('storage', None),
+            'misc': []
         }
         device.update(split_data)
         # for key, val in enumerate(split_data):

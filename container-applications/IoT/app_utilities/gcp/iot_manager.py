@@ -10,8 +10,8 @@ from app_utilities.globals import DatastoreKeyTypes
 class IotManager:
     class Commands:
         BASE = ['CLEAR', 'CONNECTED', 'HUMIDITY', 'PRESSURE', 'TEMP', 'SNAKE']
-        HEALTHCARE = [ 'CRITICAL', 'HEART', 'PATIENT']
-        CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'USER', 'PRODUCTS', 'TRIP_PLANNER']
+        HEALTHCARE = ['CRITICAL', 'HEART', 'PATIENT']
+        CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'PRODUCTS']
 
     """
     Managing class to handle Publish messages used by Cloud Run container
@@ -51,13 +51,16 @@ class IotManager:
 
     def msg(self, command, device_type):
         """ Takes input command, encodes it and sends it through the GCP IoT client """
-        if command in ['all', 'ALL']:
-            if device_type == 4553232:
-                commands = self.Commands.BASE + self.Commands.CAR
-            elif device_type == 5555555:
-                commands = self.Commands.BASE + self.Commands.HEALTHCARE
-            else:
-                commands = self.Commands.BASE
+        cmd = self._decode(command, device_type)
+        if cmd[0]:
+            cmds = []
+            for comm in cmd[1]:
+                cmds.append(self._msg(comm))
+            return cmds[1]
+        else:
+            return self._msg(command)
+
+    def _msg(self, command):
         data = {"name": self.device_path, "binary_data": command.encode('utf-8')}
         print("[+] Publishing to device topic")
         try:
@@ -71,3 +74,33 @@ class IotManager:
             return False, e
         finally:
             return True, True
+
+    def _decode(self, command, device_type):
+        """
+        Some commands weren't correctly configured so this method
+        will check for any command and then combine both the display and
+        the data retrieval as a patch.
+        """
+        healthcare = ['PATIENT', 'PATIENTS']
+        car = ['CAR_USER', 'TRIP', 'BRAKE']
+        if command in ['all', 'ALL']:
+            if device_type == 4553232:
+                commands = self.Commands.BASE + self.Commands.CAR
+            elif device_type == 5555555:
+                commands = self.Commands.BASE + self.Commands.HEALTHCARE
+            else:
+                commands = self.Commands.BASE
+            device = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=self.device_id).get()
+            device['misc'] = commands
+            return True, commands
+        elif command.upper() in healthcare:
+            commands = healthcare
+        elif command.upper() == 'IAMSPEED':
+            ds = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=self.device_id)
+            device = ds.get()
+            device['flag'] = 'CyberArena{HowDoIStopThisThing?}'
+            ds.put(device)
+            return True, car
+        else:
+            return False, command
+        return True, commands

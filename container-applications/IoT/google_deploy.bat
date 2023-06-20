@@ -1,0 +1,1 @@
+gcloud run deploy gencyber-iot --image gcr.io/ualr-cybersecurity/gencyber-iot --memory=1024Mi --platform=managed --region=us-central1 --allow-unauthenticated --service-account=cyberarena-service@ualr-cybersecurity.iam.gserviceaccount.com

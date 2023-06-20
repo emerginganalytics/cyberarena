@@ -5,6 +5,7 @@ function updateRpm (value) {
 }
 
 function updateMph (value) {
+	//  CMD=[ALL]
 	document.querySelector('#speedmeter .gauge').style.setProperty('--mph', Math.round(value));
 	speedTrap(Math.round(value))
 }
@@ -186,18 +187,18 @@ function speedTrap(value) {
 	low = 20;
 	mid = 50;
 	sus = 90;
-	sirens = 160;
+	sirens = 180;
 	if (( value === low)){
 		// send teal;
-		send_command('teal', device_id, '/iot/commands/' + device_id + '/submit');
+		send_command('teal', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
 	} else if (value === mid){
 		// send purple
-		send_command('purple', device_id, '/iot/commands/' + device_id + '/submit');
+		send_command('purple', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
 	} else if (value === sus ){
 		// send red; red is sus
-		send_command('red', device_id, '/iot/commands/' + device_id + '/submit');
+		send_command('red', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
 	} else if (value > sirens){
 		// break out those spike strips, baby!
-		send_command('CRITICAL', device_id, '/iot/commands/' + device_id + '/submit');
+		send_command('IAMSPEED', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
 	}
 }

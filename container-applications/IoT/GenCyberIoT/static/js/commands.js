@@ -5,7 +5,7 @@ function override(command, device_id, dest_url) {
     */
 }
 
-function send_command(command, device_id, dest_url, tab_idx) {
+function send_command(command, device_id, dest_url, tab_idx, reload=true) {
     /*
     *  ABOUT: Used to send basic commands to IOT device
     *  PARAMS:
@@ -26,7 +26,9 @@ function send_command(command, device_id, dest_url, tab_idx) {
         contentType: "application/json",
         success : function(data) {
             console.log('AJAX Success!');
-            reloadContent();
+            if (reload){
+                reloadContent();
+            }
         },
         error : function(e){
             console.log('AJAX ERROR!');
