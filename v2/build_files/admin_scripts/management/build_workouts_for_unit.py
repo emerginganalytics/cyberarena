@@ -25,10 +25,13 @@ class WorkoutBuilder:
 
 if __name__ == '__main__':
     workout_builder = WorkoutBuilder()
-    while True:
-        unit_id = str(input(f"For what unit ID do you wish to build student workouts? "))
-        workout_builder.build_workouts_for_unit(unit_id)
-
-        response = str(input("Do you wish to build workouts for additional units (Y/n)?"))
-        if response and str.upper(response) == "N":
-            break
+    units = ['vnxquezuhr', 'xakiycceks', 'rdzryqcdjp', 'npqdocfzzp', 'melnaaqhtj', 'ffpydicofm']
+    for unit in units:
+        workout_builder.build_workouts_for_unit(unit)
+    # while True:
+    #     unit_id = str(input(f"For what unit ID do you wish to build student workouts? "))
+    #     workout_builder.build_workouts_for_unit(unit_id)
+    #
+    #     response = str(input("Do you wish to build workouts for additional units (Y/n)?"))
+    #     if response and str.upper(response) == "N":
+    #         break

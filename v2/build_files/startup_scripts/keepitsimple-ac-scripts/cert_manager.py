@@ -8,7 +8,6 @@ from enum import Enum
 
 class CertManager:
     BASE_CERTS_LOCATION = 'certs'
-    USER_CERTS_LOCATION = os.path.join(os.path.expanduser('~'), 'Desktop')
     PASSWORD = "NMt95FB0szzKMZMoTc3Q"
 
     class CertFiles:
@@ -20,14 +19,16 @@ class CertManager:
         self.password = self.PASSWORD
 
     def decrypt_youngling_cert(self):
-        self._decrypt_cert(input_file=f"{self.CertFiles.YOUNGLING}.zip", entry_name=self.CertFiles.YOUNGLING)
+        input_file = os.path.join('certs', f"{self.CertFiles.YOUNGLING}.zip")
+        self._decrypt_cert(input_file=input_file, entry_name=self.CertFiles.YOUNGLING)
 
     def decrypt_padawan_cert(self):
         input_file = os.path.join('certs', f"{self.CertFiles.PADAWAN}.zip")
         self._decrypt_cert(input_file=input_file, entry_name=self.CertFiles.PADAWAN)
 
     def decrypt_jedi_cert(self):
-        self._decrypt_cert(input_file=f"{self.CertFiles.JEDI}.zip", entry_name=self.CertFiles.JEDI)
+        input_file = os.path.join('certs', f"{self.CertFiles.JEDI}.zip")
+        self._decrypt_cert(input_file=input_file, entry_name=self.CertFiles.JEDI)
 
     def _decrypt_cert(self, input_file, entry_name):
         with zipfile.ZipFile(input_file, 'r', zipfile.ZIP_DEFLATED) as zip_file:

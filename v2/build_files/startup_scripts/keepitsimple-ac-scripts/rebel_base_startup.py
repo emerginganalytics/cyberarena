@@ -92,13 +92,13 @@ class RebelBaseForm:
         self.window.mainloop()
 
     def youngling_assessment(self):
-        users_to_delete = ['orson', 'grievous', 'darth', 'watto']
+        users_to_delete = ['orson', 'grevious', 'darth', 'watto']
         old_users_deleted = True
         for user in users_to_delete:
             command = f"net user {user}"
             result = subprocess.run(command, capture_output=True, text=True)
 
-            if result.returncode != 0:
+            if result.returncode == 0:
                 old_users_deleted = False
                 break
         if old_users_deleted:
@@ -126,9 +126,9 @@ class RebelBaseForm:
                 group_removed = group_name
                 break
 
-            for member_info in group_info:
+            for member_info in group_info[0]:
                 try:
-                    if member_info[0]['domainandname'].split("\\")[-1] in remove_group_accounts[group_name]:
+                    if member_info['domainandname'].split("\\")[-1] in remove_group_accounts[group_name]:
                         users_remaining += 1
                 except TypeError:
                     continue
@@ -202,7 +202,10 @@ class RebelBaseForm:
                 access_mask = ace[1]
 
                 # Get the user account associated with the SID
-                account_name, domain, account_type = win32security.LookupAccountSid(None, sid)
+                try:
+                    account_name, domain, account_type = win32security.LookupAccountSid(None, sid)
+                except Exception as e:
+                    continue
                 if account_name in correct_folder_acl[folder]:
                     role = correct_folder_acl[folder][account_name]
                     if not PrivilegeChecker(role=role, access_mask=access_mask).check_permissions():
