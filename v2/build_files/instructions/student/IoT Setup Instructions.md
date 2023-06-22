@@ -49,4 +49,4 @@ When assembled, the Raspberry Pi should look like the following image.
 
 **Step 9:** Restart your Raspberry Pi with sudo reboot. If the device makes a  successful connection, you should see a rotating image display on your device  screen.
  
-**Step 10:** Go to [[https://gencyber-classified.test-cybergym.org/iot/](https://gencyber-classified.test-cybergym.org/iot/commands/)](https://gencyber-classified.test-cybergym.org/iot/). Enter the  name of the device (e.g. cyber-arena-001) on the bottom of your Raspberry Pi  case. Then try sending a couple of commands to the device. If the device does not  work, then please email cybergym@ualr.edu and include the device ID to let us  know.
+**Step 10:** Go to [https://gencyber-classified.test-cybergym.org/iot/](https://gencyber-classified.test-cybergym.org/iot/). Enter the  name of the device (e.g. cyber-arena-001) on the bottom of your Raspberry Pi  case. Then try sending a couple of commands to the device. If the device does not  work, then please email cybergym@ualr.edu and include the device ID to let us  know.
