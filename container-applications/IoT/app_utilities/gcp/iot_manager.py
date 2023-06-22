@@ -1,4 +1,6 @@
 import json
+import time
+
 from google.api_core.exceptions import NotFound
 from google.cloud import iot_v1
 
@@ -12,6 +14,7 @@ class IotManager:
         BASE = ['CLEAR', 'CONNECTED', 'HUMIDITY', 'PRESSURE', 'TEMP', 'SNAKE']
         HEALTHCARE = ['CRITICAL', 'HEART', 'PATIENT']
         CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'PRODUCTS']
+
 
     """
     Managing class to handle Publish messages used by Cloud Run container
@@ -56,6 +59,7 @@ class IotManager:
             cmds = []
             for comm in cmd[1]:
                 cmds.append(self._msg(comm))
+                time.sleep(2)
             return cmds[1]
         else:
             return self._msg(command)

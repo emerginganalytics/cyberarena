@@ -120,6 +120,7 @@ class Workout(MethodView):
             elif recv_data := request.json:  # Check if question response is submitted
                 if question_key := recv_data.get('question_key', None):
                     self.logger.info(f"PUT request question response for id {question_key}")
+                    print(recv_data)
                     ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
                     self.workout = ds_workout.get()
                     unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id']).get()
@@ -131,7 +132,6 @@ class Workout(MethodView):
                         response = recv_data.get('response', None)
                         check_auto = recv_data.get('check_auto', False)
                         correct, update = self._evaluate_question(question_key, response, check_auto)
-                        self._evaluate_question(question_key, response, check_auto)
                         if correct and update:
                             ds_workout.put(self.workout)
                         return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
@@ -174,15 +174,14 @@ class Workout(MethodView):
         Args:
             unit (Any): Datastore entity
             question_key (str): A unique identifier of the question being auto assessed
-
         Returns: None
-
         """
         lms_type = unit['lms_connection']['lms_type']
         url = unit['lms_connection']['url']
         api_key = unit['lms_connection']['api_key']
         course_code = unit['lms_connection']['course_code']
         student_email = self.workout.get('student_email', None)
+
         if lms_type == BuildConstants.LMS.CANVAS:
             lms = LMSCanvas(url=url, api_key=api_key, course_code=course_code)
         else:
@@ -197,6 +196,9 @@ class Workout(MethodView):
             if question['question_key'] == question_key and not question.get('complete', False):
                 added_points = question['points_possible']
                 question['complete'] = True
+                print(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
+                                 f"Question {question['question_text']}\nStudent: {student_email}")
+
                 self.logger.info(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
                                  f"Question {question['question_text']}\nStudent: {student_email}")
                 lms.mark_question_correct(quiz_id=quiz_key, student_email=student_email, added_points=added_points)
@@ -207,7 +209,9 @@ class Workout(MethodView):
                 break
 
         if not answered:
-            self.logger.warning(f"Auto assessment submitted for quiz: {workout['lms_quiz']['name']} and "
+            print(f"Auto assessment submitted for quiz: {workout['lms_quiz']['id']} and "
+                  f"student {student_email}, but the question could not be found in the quiz!")
+            self.logger.warning(f"Auto assessment submitted for quiz: {workout['lms_quiz']['id']} and "
                                 f"student {student_email}, but the question could not be found in the quiz!")
         return workout
 

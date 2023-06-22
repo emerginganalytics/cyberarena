@@ -141,7 +141,11 @@
                                 {% endif %}
                                 {% if join_url %}
                                     <div id="distribution" style="margin-top: 12px;">
-                                        <h6 class="text-center">Students can join assignment by visiting <span style="color: var(--python-blue);"><em>{{ join_url }}</em></span> and entering the code below: </h6>
+                                        <h6 class="text-center">Students can join assignment by visiting <span id="join-url" style="color: var(--python-blue);"><em>{{ join_url }}</em></span>
+                                            <button onclick="copyToClipboard('join-url', 'popup-notif')"
+                                                        class="icon-button" data-toggle="tooltip" data-placement="top"
+                                                        title="Copy url"><i class="fa fa-clipboard"></i>
+                                                </button>and entering the code below: </h6>
                                         <div class="alert alert-info text-center" style="max-width: 65%; margin: 0 auto;">
                                             <h4 id="join-code">{{ unit['join_code'] }}
                                                 <button onclick="copyToClipboard('join-code', 'popup-notif')"

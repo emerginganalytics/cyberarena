@@ -5,8 +5,9 @@ import json
 from flask import abort, Blueprint, render_template, request, jsonify, make_response, url_for, redirect, flash
 from app_utilities.gcp.cloud_env import CloudEnv
 from google.api_core.exceptions import NotFound
-from google.cloud import iot_v1
-from iot_database import IOTDatabase
+from app_utilities.gcp.iot_manager import IotManager
+from app_utilities.gcp.datastore_manager import DataStoreManager
+from app_utilities.globals import DatastoreKeyTypes, Commands
 
 iot_nsa_bp = Blueprint(
     'iot_nsa_bp', __name__,
@@ -15,27 +16,25 @@ iot_nsa_bp = Blueprint(
     static_folder='static'
 )
 
-env =  CloudEnv()
+env = CloudEnv()
+physician = 'BMTeNtG4FEZMhVA5MyDljul4LhcY4297'
+nurse = 'jZnTtcKM4JL07Sq5PjGMM9eCsAnUUC6E'
+guest = '3tR2aJ8BQgf99TRkE7xxHMQ4Q2lW5qFX'
+
 
 @iot_nsa_bp.route('/', methods=['GET', 'POST'])
 def setup():
     page_template = './nsa_iot_setup.jinja'
-    iot_client = iot_v1.DeviceManagerClient()
-    cloud_region = 'us-central1'
-    registry_id = 'cybergym-registry'
-    devices_gen = iot_client.list_devices(
-        parent=f'projects/{env.project}/locations/{cloud_region}/registries/{registry_id}')
-    device_list = [i.id for i in devices_gen]
-
     if request.method == 'POST':
-        print(request.data)
         resp = json.loads(request.data)
         device_id = resp['device_id']
-        check_device = True if device_id in device_list else False
+        check_device = IotManager(device_id=device_id).check_device()
         if check_device:
-            print(f'Recieved object {resp}')
+            print(f'Received object {resp}')
             print(str(url_for('iot_nsa_bp.index', device_id=device_id)))
-            return jsonify({'url': url_for('iot_nsa_bp.index', device_id=device_id)})
+            resp = make_response(jsonify({'url': url_for('iot_nsa_bp.index', device_id=device_id)}))
+            resp.set_cookie('uid', '2')
+            return resp
         message = jsonify({'error_msg': f'Unrecognized device with ID: {device_id}'})
         return make_response(message, 400)
     return render_template(page_template)
@@ -44,7 +43,7 @@ def setup():
 @iot_nsa_bp.route('/faq', methods=['GET'])
 def nsa_faq():
     page_template = './nsa_faq.jinja'
-    return render_template(page_template, project=project)
+    return render_template(page_template, project=env.project)
 
 
 @iot_nsa_bp.route('/iot/<device_id>', methods=['GET'])
@@ -52,19 +51,16 @@ def index(device_id):
     page_template = './index.jinja'
 
     # Used to get current registered device data
-    cloud_region = 'us-central1'
-    registry_id = 'cybergym-registry'
-    client = iot_v1.DeviceManagerClient()  # publishes to device
-    iotdb = IOTDatabase()
-    device_path = client.device_path(env.project, cloud_region, registry_id, device_id)
-    device_num_id = str(client.get_device(request={"name": device_path}).num_id)
-    valid_commands = ['HEART', 'PRESSURE', 'HUMIDITY', 'TEMP',]
-
-    iot_data = None
-    if device_num_id:
-        iot_data = iotdb.get_rpi_sense_hat_data(device_num_id=device_num_id)
+    auth = request.cookies.get('auth', guest)
+    uid = request.args.get('uid', 2)
+    if uid == 1 and auth in [physician, nurse]:
+        valid_commands = Commands.healthcare(1)
+    elif uid == 0 and auth == physician:
+        valid_commands = Commands.healthcare(uid)
+    else:
+        valid_commands = Commands.healthcare(uid)
+    iot_data = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=str(device_id)).get()
     if iot_data is not None:
-        iot_data['sensor_data'] = json.loads(iot_data['sensor_data'])
         iot_data['sensor_data']['heart'] = iot_data['sensor_data']['heart'].split(" ")[0]
         iot_temp = int(float(iot_data['sensor_data']['temp'].split('f')[0]))
         iot_hum = int(float(iot_data['sensor_data']['humidity'].split('%')[0]))
@@ -90,14 +86,6 @@ def patients(device_id):
     #       pi on previously revealed flags
     page_template = './classified.jinja'
 
-    # Used to get current registered device data
-    cloud_region = 'us-central1'
-    registry_id = 'cybergym-registry'
-    iotdb = IOTDatabase()
-    client = iot_v1.DeviceManagerClient()
-    device_path = client.device_path(env.project, cloud_region, registry_id, device_id)
-    device_num_id = str(client.get_device(request={"name": device_path}).num_id)
-
     # page data
     auth_cookie = request.cookies.get('authed')
     medical_data = [
@@ -109,10 +97,8 @@ def patients(device_id):
     ]
     classified_flag = "CyberArena{Yg9ttKzAA9}"
 
-    iot_data = None
     if request.method == 'GET':
-        if device_num_id:
-            iot_data = iotdb.get_rpi_sense_hat_data(device_num_id=device_num_id)
+        iot_data = IotManager(device_id=device_id).get()
         if iot_data is not None:
             return render_template(
                 page_template,
@@ -133,29 +119,48 @@ def patients(device_id):
 
 @iot_nsa_bp.route('/iot/<device_id>/submit', methods=['POST'])
 def submit(device_id):
-    cloud_region = 'us-central1'
-    registry_id = 'cybergym-registry'
-
-    # Init Publisher client for server
-    client = iot_v1.DeviceManagerClient()
-    device_path = client.device_path(project, cloud_region, registry_id, device_id)
     if request.method == 'POST':
+        iot_mgr = IotManager(device_id)
         resp = json.loads(request.data)
-        command = resp['command']
-        data = command.encode("utf-8")
-        # Try publishing to device topic
-        print("[+] Publishing to device topic")
-        try:
-            client.send_command_to_device(
-                request={"name": device_path, "binary_data": data}
-            )
-        except NotFound as e:
-            print(e)
-            flash(f'Device {device_id} responded with 404. Ensure the device is properly connected.', 'alert-warning')
-            return jsonify(error=e)
-        except Exception as e:
-            return jsonify(error=e)
-        finally:
-            return jsonify(success=True)
+        if command := resp.get('command'):
+            if not (token := resp.get('token', None)) or token != physician:
+                flash(f'403: Missing or invalid authentication token! You do not have permissions to run: {command}',
+                      'alert-warning')
+                return jsonify({'resp': 403})
+            success, data = iot_mgr.msg(command, device_type=555555)
+            if success:
+                return jsonify(success=True)
+            else:
+                if data[1] == NotFound:
+                    flash(f'Device {device_id} responded with 404. Ensure the device is properly connected.',
+                          'alert-warning')
+                return jsonify(error=data[1])
+        return jsonify({'resp': 400})
     else:
         return jsonify({'resp': 404})
+
+
+@iot_nsa_bp.route('/token/', methods=['GET'])
+def get_token():
+    if args := request.args.get('auth', None):
+        auth = args.get('auth', 'guest')
+        if auth == 'physician':
+            level = 0
+            token = physician
+        elif auth == 'nurse':
+            level = 1
+            token = nurse
+        else:
+            level = 2
+            token = guest
+        resp = make_response(jsonify({'token': token}))
+        resp.set_cookie('uid', str(level))
+        return resp
+    return jsonify({'resp': 400})
+
+
+def _validate(cmd, token):
+    cmd = Commands.validate(cmd, token)
+    if token:
+        return cmd
+    return False

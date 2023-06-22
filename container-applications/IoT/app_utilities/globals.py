@@ -1,7 +1,6 @@
 from enum import Enum
 from datetime import datetime, timezone, timedelta
 
-
 class DatastoreKeyTypes(str, Enum):
     ADMIN_INFO = 'cybergym-admin-info'
     CLASSROOM = 'cybergym-class'
@@ -82,6 +81,40 @@ class PubSub:
         AGENT_MACHINE = 5
         UNIT = 6
         WORKOUT = 7
+
+
+class Commands:
+    BASE = ['CLEAR', 'CONNECTED', 'HUMIDITY', 'PRESSURE', 'TEMP']
+    HEALTHCARE = ['CRITICAL', 'HEART', 'PATIENT']
+    CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'PRODUCTS']
+    COLORS = ['TEAL', 'RED', 'ORANGE', 'GREEN', 'PURPLE', 'WHITE', 'BLUE', 'YELLOW']
+    MISC = ['SNAKE']
+
+    @classmethod
+    def get_all(cls):
+        return cls.BASE + cls.HEALTHCARE + cls.CAR
+
+    @classmethod
+    def healthcare(cls, level):
+        if level == 0:
+            return [cls.BASE, cls.HEALTHCARE, cls.COLORS, cls.MISC]
+        elif level == 1:
+            return [cls.BASE, cls.COLORS]
+        else:
+            return cls.COLORS
+
+    @classmethod
+    def validate(cls, cmd, level):
+        if level == 0:
+            if cmd in cls.healthcare(0):
+                return cmd
+        elif level == 1:
+            if cmd in cls.healthcare(1):
+                return cmd
+        else:
+            if cmd in cls.healthcare(2):
+                return cmd
+        return False
 
 
 def get_current_timestamp_utc(add_minutes=0):

@@ -4,13 +4,13 @@ from app_utilities.gcp.datastore_manager import DataStoreManager
 from app_utilities.globals import DatastoreKeyTypes
 # Import App Blueprints
 from GenCyberIoT.routes import iot_bp
-# from NSAHealthcare.routes import iot_nsa_bp
+from NSAHealthcare.routes import iot_nsa_bp
 
 # Register blueprints
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
 app.register_blueprint(iot_bp)
-# app.register_blueprint(iot_nsa_bp)
+app.register_blueprint(iot_nsa_bp)
 
 
 @app.route('/<workout_id>')

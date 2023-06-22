@@ -50,7 +50,6 @@ const maxGearRatio = 100;
 const gearRatios = [ 0, 125, 78, 47, 34, 27, 24 ].map(i => i ? 1/i : i);
 const thresholds = 'low'
 
-
 function gearUp () {
 	if (gear < topGear) {
 		_prevGear = gear;
@@ -197,7 +196,7 @@ function speedTrap(value) {
 	} else if (value === sus ){
 		// send red; red is sus
 		send_command('red', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
-	} else if (value > sirens){
+	} else if (value === sirens){
 		// break out those spike strips, baby!
 		send_command('IAMSPEED', device_id, '/iot/commands/' + device_id + '/submit', 1, false);
 	}

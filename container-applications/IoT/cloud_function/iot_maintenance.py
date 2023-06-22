@@ -20,7 +20,7 @@ class IotCloudMaintenance:
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE)
         self.device_num_id = None
         self.device_id = None
-        self.expire_hours = 3
+        self.expire_hours = 0
         self.now = self._get_local_time()
         if 0 <= self.now.minute <= 16:
             self.hourly = True
@@ -70,14 +70,15 @@ class IotCloudMaintenance:
 
     def _reset_records(self):
         if devices := self.ds.query():
-            expire_time = (self.now - timedelta(hours=self.expire_hours)).timestamp()
+            # expire_time = (self.now - timedelta(hours=self.expire_hours)).timestamp()
             update = []
             for device in devices:
-                if last_seen := device.get('ts', False):
+                update.append(self.ds.entity(self._clean(device)))
+                """if last_seen := device.get('ts', False):
                     if last_seen < expire_time:
-                        update.append(self.ds.entity(self._clean(device)))
+                        pass
                     else:
-                        continue
+                        continue"""
             if len(update) > 0:
                 self.ds.put_multi(devices)
                 logging.info(f'Records reset')
@@ -129,11 +130,11 @@ class IotCloudMaintenance:
 
     @staticmethod
     def _clean(device):
-        for key, value in enumerate(device):
+        for key, value in device.items():
             if key in ['patients', 'car']:
-                value = {}
+                device[key] = {}
             elif key == 'flag':
-                value = ''
+                device[key] = ''
         return device
 
     @staticmethod

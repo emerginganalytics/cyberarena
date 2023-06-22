@@ -8,6 +8,9 @@ function send_command(command, device_id, dest_url) {
     *  RETURNS:
     *         If POST request is successful, it waits 5s before making a GET
     *         request and reloading the page with new content.
+    *
+    * TODO: This command doesn't function properly anymore.
+    *   Did IT change something without telling me?
     */
     let quick_commands = {'command': command,
                             'device_id': device_id};
