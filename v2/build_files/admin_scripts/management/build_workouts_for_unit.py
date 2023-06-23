@@ -1,3 +1,4 @@
+import time
 from cloud_fn_utilities.gcp.datastore_manager import DataStoreManager
 from cloud_fn_utilities.globals import DatastoreKeyTypes, PubSub
 from cloud_fn_utilities.gcp.pubsub_manager import PubSubManager
@@ -21,11 +22,12 @@ class WorkoutBuilder:
                 self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
                                         action=str(PubSub.BuildActions.WORKOUT.value),
                                         build_id=workout_id)
+                time.sleep(1)
 
 
 if __name__ == '__main__':
     workout_builder = WorkoutBuilder()
-    units = ['vnxquezuhr', 'xakiycceks', 'rdzryqcdjp', 'npqdocfzzp', 'melnaaqhtj', 'ffpydicofm']
+    units = ['zdvhxyxpzg']
     for unit in units:
         workout_builder.build_workouts_for_unit(unit)
     # while True:

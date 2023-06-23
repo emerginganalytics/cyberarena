@@ -63,7 +63,8 @@ class RebelBaseForm:
         self.image = tk.PhotoImage(file="img/jedi-master-on-a-computer.png")
         self.bold_heading2_font = Font(family="Arial", size=14, weight="bold")
         self.normal_font = Font(family="Arial", size=11)
-        canvas = tk.Canvas(self.window, width=500, height=500)
+        self.button_font = Font(family="Arial", size=12, weight="bold")
+        canvas = tk.Canvas(self.window, width=400, height=400)
 
         # Create the form elements
         instructions = tk.Button(self.window, text="Your Mission", command=self.show_instructions,
@@ -71,13 +72,16 @@ class RebelBaseForm:
         label1 = tk.Label(self.window, text="Click the button associated with your experience level after you have "
                                             "completed your mission. If you successfully completed the mission, you "
                                             "will receive the passcode to unlock your certificate",
-                          font=self.bold_heading2_font, wraplength=500)
-        youngling_button = tk.Button(self.window, text="Youngling Assessment", font=self.normal_font,
-                                     command=self.youngling_assessment)
-        padawan_button = tk.Button(self.window, text="Padawan Assessment", font=self.normal_font,
-                                   command=self.padawan_assessment)
-        jedi_button = tk.Button(self.window, text="Jedi Master Assessment", font=self.normal_font,
-                                command=self.jedi_assessment)
+                          font=self.normal_font, wraplength=500)
+        youngling_button = tk.Button(self.window, text="Youngling Assessment", bg="light blue", fg="dark red",
+                                     font=("Helvetica", 12), bd=5,  relief="raised",  activebackground="light green",
+                                     padx=10,  pady=10, command=self.youngling_assessment)
+        padawan_button = tk.Button(self.window, text="Padawan Assessment", bg="light blue", fg="dark red",
+                                     font=("Helvetica", 12), bd=5,  relief="raised",  activebackground="light green",
+                                     padx=10,  pady=10, command=self.padawan_assessment)
+        jedi_button = tk.Button(self.window, text="Jedi Master Assessment", bg="light blue", fg="dark red",
+                                     font=("Helvetica", 12), bd=5,  relief="raised",  activebackground="light green",
+                                     padx=10,  pady=10, command=self.jedi_assessment)
 
         # Pack the self.window
         instructions.pack()
