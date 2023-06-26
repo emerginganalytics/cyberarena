@@ -24,15 +24,15 @@
                     <th>SSN</th>
                     <th>Name</th>
                     <th>Age</th>
-                    <th>Blood Type</th>
+                    <th>ABO</th>
                 </tr>
             {% for patient in medical_data %}
                 <tr>
                     <td>{{ patient.id }}</td>
-                    <td>{{ patient.ssn }}</td>
+                    <td>{{ patient.SSN }}</td>
                     <td>{{ patient.name }}</td>
-                    <td>{{ patient.age }}</td>
-                    <td>{{ patient.blood_type }}</td>
+                    <td>{{ patient.DOB }}</td>
+                    <td>{{ patient.ABO }}</td>
                 </tr>
             {% endfor %}
             </table>

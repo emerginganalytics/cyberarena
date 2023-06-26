@@ -1,0 +1,26 @@
+{% macro patients(records) %}
+    <div id='patients-tab' class="body-grid">
+        <div class="cmd-btn-grid">
+            <table class="patients-table">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>D.O.B</th>
+                    <th>ABO</th>
+                    <th>SSN</th>
+                </tr>
+                <tbody>
+                    {% for idx in records %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ records[idx].name }}</td>
+                            <td>{{ records[idx].DOB }}</td>
+                            <td>{{ records[idx].ABO }}</td>
+                            <td>{{ records[idx].SSN }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endmacro %}

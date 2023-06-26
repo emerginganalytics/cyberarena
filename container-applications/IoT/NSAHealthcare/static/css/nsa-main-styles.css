@@ -65,6 +65,42 @@ link#nav-ico {
 nav > h1 {
     display: inline-block;
 }
+nav > .navbar-top {
+    display: inline-block;
+    border-left: 1px solid white;
+    margin-left: 2rem;
+    vertical-align: middle;
+    margin-top: 0;
+}
+nav > ul > .navbar-list {
+    list-style: none;
+}
+.navbar-list li {
+    display: inline;
+}
+.tab-btns {
+    background-color: #4285F4;
+    float:left;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 1.3rem;
+    padding: 10px;
+}
+
+.tab-btns:hover {
+    background-color: #4285F4;
+    color: white;
+    box-shadow: inset 1px 2px 5px 0 rgba(12, 12, 12, 0.2);
+}
+
+.tab-btns.active {
+    background-color: #274e8f;
+    color: white;
+}
+
 
 span.disp-bpm {
     visibility: hidden;
@@ -226,8 +262,25 @@ button.iot-commands:active {
 .command-result {}
 
 /* Table Styles */
-table {
-    
+.patients-table {
+    font-size: 1.6em;
+    border-collapse: collapse;
+    width: 100%;
+}
+.patients-table td, .patients-table th {
+    border: 1px solid black;
+    padding: 8px;
+}
+.patients-table tr:nth-child(even){
+    background-color: lightgray;
+}
+.patients-table tr:hover {background-color: #535353;}
+.patients-table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
 }
 
 /* Footer Styles */
@@ -356,4 +409,12 @@ p.iot-footer {
 }
 .modal-checkbox-cb:checked + .modal-popup {
     transform: translateY(-500px);
+}
+
+.alert-warning {
+    width: 100%;
+    min-width: 500px;
+    color: red;
+    font-size: 16px;
+    font-weight: bold;
 }

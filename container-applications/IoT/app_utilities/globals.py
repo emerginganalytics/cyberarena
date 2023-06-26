@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import datetime, timezone, timedelta
 
+
 class DatastoreKeyTypes(str, Enum):
     ADMIN_INFO = 'cybergym-admin-info'
     CLASSROOM = 'cybergym-class'
@@ -83,37 +84,77 @@ class PubSub:
         WORKOUT = 7
 
 
+class Tokens:
+    PHYSICIAN = 'BMTeNtG4FEZMhVA5MyDljul4LhcY4297'
+    NURSE = 'jZnTtcKM4JL07Sq5PjGMM9eCsAnUUC6E'
+    GUEST = '3tR2aJ8BQgf99TRkE7xxHMQ4Q2lW5qFX'
+
+    @classmethod
+    def token_by_uid(cls, uid):
+        """
+        Takes input uid and returns the associated authentication token and uid
+        """
+        uid = int(uid)
+        if uid == 0:
+            return cls.PHYSICIAN, 0
+        elif uid == 1:
+            return cls.NURSE, 1
+        else:
+            return cls.GUEST, 2
+
+    @classmethod
+    def uid_by_token(cls, token):
+        """
+        Takes input token and returns the associated uid
+        """
+        mapping = {0: cls.PHYSICIAN, 1: cls.NURSE, 2: cls.GUEST}
+        for key, val in mapping.items():
+            if val == token:
+                return key
+        return 2
+
+
 class Commands:
     BASE = ['CLEAR', 'CONNECTED', 'HUMIDITY', 'PRESSURE', 'TEMP']
-    HEALTHCARE = ['CRITICAL', 'HEART', 'PATIENT']
+    PHYSICIAN = ['PATIENT']
+    NURSE = ['HEART']
     CAR = ['BRAKE', 'GAS', "RADIO", "VEHICLE", 'PRODUCTS']
     COLORS = ['TEAL', 'RED', 'ORANGE', 'GREEN', 'PURPLE', 'WHITE', 'BLUE', 'YELLOW']
     MISC = ['SNAKE']
 
     @classmethod
     def get_all(cls):
-        return cls.BASE + cls.HEALTHCARE + cls.CAR
+        return cls.BASE + cls.PHYSICIAN + cls.CAR + cls.NURSE
 
     @classmethod
-    def healthcare(cls, level):
-        if level == 0:
-            return [cls.BASE, cls.HEALTHCARE, cls.COLORS, cls.MISC]
-        elif level == 1:
-            return [cls.BASE, cls.COLORS]
+    def healthcare(cls, uid):
+        uid = int(uid)
+        if uid == 0:
+            return {'admin': [*cls.PHYSICIAN, *cls.MISC], 'user': [*cls.NURSE, *cls.BASE], 'guest': cls.COLORS}
+        elif uid == 1:
+            return {'user': [*cls.NURSE, *cls.BASE], 'guest': cls.COLORS}
         else:
-            return cls.COLORS
+            return {'guest': cls.COLORS}
 
     @classmethod
-    def validate(cls, cmd, level):
-        if level == 0:
-            if cmd in cls.healthcare(0):
+    def validate(cls, cmd, token):
+        if token == Tokens.PHYSICIAN:
+            if cls._find(cmd, 0):
                 return cmd
-        elif level == 1:
-            if cmd in cls.healthcare(1):
+        elif token == Tokens.NURSE:
+            if cls._find(cmd, 1):
                 return cmd
         else:
-            if cmd in cls.healthcare(2):
+            if cls._find(cmd, 2):
                 return cmd
+        return False
+
+    @classmethod
+    def _find(cls, cmd, uid):
+        cmds = cls.healthcare(uid)
+        for cmd_group in cmds:
+            if cmd in cmd_group:
+                return True
         return False
 
 

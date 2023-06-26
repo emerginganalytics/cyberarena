@@ -1,53 +1,3 @@
-function send_command(command, device_id, dest_url) {
-    /*
-    *  ABOUT: Used to send basic commands to IOT device
-    *  PARAMS:
-    *         command => type: string, value: this.button.value
-    *         device_id => type: string, value: Registered device ID
-    *         dest_url => type: string, value: URL to send POST request to
-    *  RETURNS:
-    *         If POST request is successful, it waits 5s before making a GET
-    *         request and reloading the page with new content.
-    *
-    * TODO: This command doesn't function properly anymore.
-    *   Did IT change something without telling me?
-    */
-    let quick_commands = {'command': command,
-                            'device_id': device_id};
-    $.ajax(dest_url,{
-        method: 'POST',
-        data: JSON.stringify(quick_commands),
-        dataType: "json",
-        contentType: "application/json",
-        success : function(data) {
-            console.log('AJAX Success!');
-            reloadContent();
-        },
-        error : function(e){
-            console.log('AJAX ERROR!');
-            console.log(e);
-            let error_div = $('#command-result-error');
-            error_div.html('');
-            let error_string = 'Jinkies! Something doesn\'t look right. Error message: ' + e;
-            error_div.html(error_string);
-        }
-    });
-    async function reloadContent(){
-        /*
-        * This function waits 6s before making a get request
-        * and reloading the page.
-        */
-        var url = window.location.href;
-        var xmlHttp = new XMLHttpRequest();
-        await sleep(6300);
-        xmlHttp.open("GET", url,true);
-        xmlHttp.send(null);
-
-        // reload the page with
-        window.location = url;
-    }
-}
-
 function sendDeviceID(device_id, dest_url, caller) {
     if (device_id.trim().length === 0 ){
         let disp_msg = 'Missing Device ID!';
@@ -104,28 +54,12 @@ function openTab(evt, tabName){
         tabContent[i].style.display = "none";
     }
 
-    var tabLinks = document.getElementsByClassName("tablinks");
+    var tabLinks = document.getElementsByClassName("tabLinks");
     for(var i = 0; i < tabLinks.length; i++){
         tabLinks[i].className = tabLinks[i].className.replace(" active", "");
     }
 
     document.getElementById(tabName).style.display = "grid";
     evt.currentTarget.className += " active";
-}
-
-
-function validateHeartRate(){
-    // I don't think this command works as intended
-    let recv_bpm = document.getElementById('heartVal').innerText.split(" ")[0];
-    let device_id = window.location.pathname.split("/").pop();
-    let dest_url = window.location.pathname + "/submit";
-    let danger = 200;
-
-    if (recv_bpm >= danger) {
-        send_command('CRITICAL', device_id, dest_url);
-        sleep(63000);
-        let flag = document.getElementById('flag-span').innerText;
-        window.location.replace(dest_url + 'authed' + '/' + flag)
-    }
 }
 
