@@ -2,7 +2,7 @@
 Medical themed variant to normal IoT workout
 """
 import json
-from flask import abort, Blueprint, render_template, request, jsonify, make_response, url_for, redirect, flash
+from flask import abort, Blueprint, render_template, request, jsonify, make_response, url_for, redirect, flash, session
 from app_utilities.gcp.cloud_env import CloudEnv
 from google.api_core.exceptions import NotFound
 from app_utilities.gcp.iot_manager import IotManager
@@ -77,6 +77,8 @@ def index(device_id):
 @iot_nsa_bp.route('/iot/<device_id>/submit', methods=['POST'])
 def submit(device_id):
     if request.method == 'POST':
+        if session.get('_flashes', None):
+            session['_flashes'].clear()
         iot_mgr = IotManager(device_id)
         resp = json.loads(request.data)
         if command := resp.get('command'):

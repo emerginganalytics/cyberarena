@@ -90,7 +90,7 @@
                 <h2>Guest Functions</h2>
                 {% for button in commands.guest %}
                     <button class="iot-commands" id="{{ button.lower() }}-btn"
-                                onclick="this.disabled=true; sm.send_command('{{ button }}', '{{ url_for('iot_nsa_bp.submit', device_id=device_id) }}');">
+                                onclick="this.disabled=true; sm.send_command('{{ button }}');">
                         {{ button.lower() }}
                     </button>
                 {% endfor %}

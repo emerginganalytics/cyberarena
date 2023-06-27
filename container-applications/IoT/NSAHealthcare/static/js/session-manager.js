@@ -16,7 +16,7 @@
  *  I know this isn't the most secure method, but surely it's good enough until I can get some rest, right?
  *
  *  Usage:
- *      var sm = new SessionManager(cyber-arena-***);
+ *      var sm = new SessionManager('cyber-arena-***');
  *
  *      // Get session user id:
  *      uid = sm.getSessionCookie('uid');
@@ -31,10 +31,10 @@
 class SessionManager {
     constructor(device_id=String, url=null) {
         this.device_id = device_id;
-        this.url = url;
+        this.url = this._getURL();
     }
 
-    send_command(command, dest_url, reload=true){
+    send_command(command, reload=true){
         /*
         * ABOUT: Used to send basic commands to IoT device
         * PARAMS:
@@ -49,8 +49,9 @@ class SessionManager {
         * TODO: This method isn't working quite right and I'm too tired to figure this out right now.
         *  Maybe I'm missing something in the object that I am sending ...
         * */
+        let url = window.location.pathname + '/submit';
         let quick_commands = {'command': command, 'device_id': this.device_id}
-        $.ajax(dest_url, {
+        $.ajax(url, {
             method: 'POST',
             data: JSON.stringify(quick_commands),
             dataType: "json",
@@ -133,5 +134,9 @@ class SessionManager {
         fetch(url)
             .then((response) => response.json())
             .then((json) => console.log(json));
+    }
+    _getURL(){
+        var url = window.location.pathname;
+        return url.substring(0, url.lastIndexOf('/'));
     }
 }
