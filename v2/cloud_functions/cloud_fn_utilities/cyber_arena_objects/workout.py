@@ -42,11 +42,13 @@ class Workout:
         self.firewall_manager = FirewallManager(env_dict=self.env_dict)
         self.ds = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=self.workout_id)
         self.workout = self.ds.get()
+        self.unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id']).get()
         if not self.workout:
             self.logger.error(f"The datastore record for {self.workout_id} no longer exists!")
             raise LookupError
 
     def build(self):
+        self._reset_expiration()
         if not self.workout.get('networks', None):
             if self.workout.get('web_applications', None):
                 self.state_manager.state_transition(self.s.READY)
@@ -212,4 +214,9 @@ class Workout:
         shutoff_ts = self.workout.get('shutoff_timestamp', None)
         if shutoff_ts:
             self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(seconds=self.duration_seconds).total_seconds()
+            self.ds.put(self.workout)
+
+    def _reset_expiration(self):
+        if workout_duration_days := self.unit.get('workout_duration_days', None):
+            self.workout['expiration'] = get_current_timestamp_utc(add_seconds=86400 * workout_duration_days)
             self.ds.put(self.workout)
