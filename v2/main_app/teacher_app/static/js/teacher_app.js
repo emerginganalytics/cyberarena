@@ -179,6 +179,23 @@ function validateDateTime(element){
     }
 }
 
+function buildNow(build_id, url){
+    fetch(url, {
+        method: 'POST',
+        headers: json_headers,
+        body: JSON.stringify({'build_id': build_id})
+    }).then((response) => {
+        if (response.ok){
+            return response.json();
+        }
+    }).then((data) => {
+       if (data['status'] === 200){
+           if (!Number(data['data']['state']) in [53, 50]){
+               window.location.reload();
+           }
+       }
+    });
+}
 function nuke(endpoint, modal_id){
     // Sends PUT request to rebuild a specific workout
     show_modal_card(modal_id);
