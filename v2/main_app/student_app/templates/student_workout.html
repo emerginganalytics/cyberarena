@@ -102,8 +102,8 @@
                {% endif %}
            });
            {% if workout.expired == False %}
+               let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
                {% if workout.state != 72 %}
-                   let control = new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}');
                    {% if workout.state != 62 %}
                        control.poll();
                    {% endif %}
@@ -142,6 +142,10 @@
                                         style="width: 100%; display: block; border-radius: 4px;" placeholder="Duration (hours)"
                                         class="text-center">
                                     {% endif %}
+                                {% else %}
+                                    <h5><i id="workoutState" class="fa fa-circle-o buildState notbuilt fa-pr-5"></i>
+                                        <span id="workoutStateObj" style="color: white;">Workout deleted!</span></h5>
+                                    <p style="color: white">Rebuild available until <span class="timestampField">{{ workout.expires }}</span></p>
                                 {% endif %}
                             {% else %}
                                 <div id="room-timer-div" class="nav-link disabled" style="pointer-events: none">
@@ -180,12 +184,17 @@
                                     <li class="nav-item control-container-list">
                                         <button id="stopWorkoutBtn" class="nav-link" onclick="control.stop();">Stop Workout</button>
                                     </li>
-                                {% else %}{# workout is deleted #}
-                                    <li class="nav-item control-container-list">
-                                        <button class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
+                                {% else %}{# workout is deleted but not expired #}
+                                    <li class="nav-item control-container-list" id="rebuildWorkoutLi">
+                                        <button id="rebuildWorkoutBtn" class="nav-link" onclick="control.rebuild();">Rebuild Workout
+                                            <i class="fa fa-circle-o-notch loading-icon"></i>
+                                        </button>
                                     </li>
                                     <li class="nav-item control-container-list">
-                                        <button class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
+                                        <button id="startWorkoutBtn" class="nav-link disabled" disabled style="pointer-events: none;">Start Workout</button>
+                                    </li>
+                                    <li class="nav-item control-container-list">
+                                        <button id="stopWorkoutBtn" class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
                                     </li>
                                 {% endif %}
                             {% else %}{# workout is expired #}

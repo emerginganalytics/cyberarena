@@ -58,8 +58,15 @@ class Workout:
                 self.logger.info(f"No compute assets to build for workout {self.workout_id}.")
             return
 
-        if not self.state_manager.get_state():
+        if not (state := self.state_manager.get_state()):
             self.state_manager.state_transition(self.s.START)
+        elif state == self.s.DELETED.value:
+            now = get_current_timestamp_utc()
+            if now < self.unit['workspace_settings']['expires']:
+                self.state_manager.state_transition(self.s.START)
+            else:
+                self.logger.error(f"Attempt to rebuild workout {self.workout_id} failed: Unit is already expired!")
+                return
 
         if self.state_manager.get_state() < self.s.BUILDING_NETWORKS.value:
             self.state_manager.state_transition(self.s.BUILDING_NETWORKS)

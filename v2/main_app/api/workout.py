@@ -13,6 +13,7 @@ from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.globals import PubSub, WorkoutStates, BuildConstants
 from main_app_utilities.lms.lms_canvas import LMSCanvas
+from cloud_fn_utilities.cyber_arena_objects.workout import Workout as WorkoutFn
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -94,7 +95,7 @@ class Workout(MethodView):
             if args := request.args:  # Check what action is being requested for current workout
                 action = args.get('action', None)
                 valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value,
-                                 PubSub.Actions.EXTEND_RUNTIME.value]
+                                 PubSub.Actions.EXTEND_RUNTIME.value, PubSub.Actions.BUILD.value]
                 if action and int(action) in valid_actions:
                     action = int(action)
                     workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
@@ -115,6 +116,11 @@ class Workout(MethodView):
                             self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
                                                     build_id=str(build_id),
                                                     cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+                        elif action in [PubSub.Actions.BUILD.value]:
+                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                                    action=str(PubSub.BuildActions.WORKOUT.value),
+                                                    key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                                    build_id=str(build_id))
                         return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
                     return self.http_resp(code=404).prepare_response()
             elif recv_data := request.json:  # Check if question response is submitted

@@ -22,6 +22,7 @@ class WorkoutStateManager:
                          WorkoutStates.COMPLETED_NETWORKS.value, WorkoutStates.COMPLETED_ROUTES.value,
                          WorkoutStates.COMPLETED_SERVERS.value, WorkoutStates.COMPLETED_STUDENT_ENTRY.value]
     OTHER_VALID_TRANSITIONS = [
+        (WorkoutStates.DELETED.value, WorkoutStates.START.value),
         (WorkoutStates.READY.value, WorkoutStates.START.value),
         (WorkoutStates.READY.value, WorkoutStates.STARTING.value),
         (WorkoutStates.START.value, WorkoutStates.DELETING_SERVERS.value),

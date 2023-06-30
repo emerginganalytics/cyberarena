@@ -35,6 +35,7 @@ class Control {
     }
     toggle(state, func1=null, func2=null){
         // Control Elements
+        var loadingIcon;
         let startWorkoutLi = document.getElementById('startWorkoutLi');
         let startButton = document.getElementById('startWorkoutBtn');
         let stopButton = document.getElementById('stopWorkoutBtn');
@@ -58,7 +59,23 @@ class Control {
             disableElements = this.disableElements;
         }
 
-        if (state === 50){
+        if (state === 1){
+            // Disable rebuild button
+            let rebuildBtn;
+            rebuildBtn = document.getElementById('rebuildWorkoutBtn');
+            loadingIcon = rebuildBtn.querySelector('.loading-icon');
+            loadingIcon.classList.add('animated');
+            disableElement(rebuildBtn, true);
+            // Add working status
+            workoutStateObj.innerText = 'WORKING';
+            workoutStateIcon.classList.remove('stopped', 'running', 'broken', 'notbuilt');
+            workoutStateIcon.classList.add('transition');
+            disableElement(workoutStateObj);
+            // Disable All
+            disableElement(stopButton);
+            disableElement(startButton);
+        }
+        else if (state === 50){
            workoutStateObj.innerText = 'RUNNING';
            workoutStateIcon.classList.remove('transition', 'stopped');
            workoutStateIcon.classList.add('running');
@@ -208,6 +225,20 @@ class Control {
         }).then(data => {
             if (data['status'] === 200){
                 window.location.reload();
+            }
+        });
+    }
+    rebuild(){
+        this.toggle(1);
+        fetch(this.url + '?action=1', {
+            method: 'PUT'
+        }).then((response) => {
+            if (response.ok){
+                return response.json();
+            }
+        }).then((data) => {
+            if (data['status'] === 200) {
+                this.getState(53);
             }
         });
     }
