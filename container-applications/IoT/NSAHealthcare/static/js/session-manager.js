@@ -67,7 +67,8 @@ class SessionManager {
                 console.log(e);
                 let error_div = $('#command-result-error');
                 error_div.html('');
-                let error_str = 'Jinkies! Something doesn\'t look right. Error: ' + e;
+                let resp = $.parseJSON(e);
+                let error_str = resp.resp;
                 error_div.html(error_str);
             }
         })

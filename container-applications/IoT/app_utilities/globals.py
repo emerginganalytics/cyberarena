@@ -153,7 +153,7 @@ class Commands:
     def _find(cls, cmd, uid):
         cmds = cls.healthcare(uid)
         for cmd_group in cmds:
-            if cmd in cmd_group:
+            if cmd in cmds[cmd_group]:
                 return True
         return False
 

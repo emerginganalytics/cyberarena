@@ -102,7 +102,7 @@
                 <h2>Authenticated User Functions</h2>
                 {% for button in commands.user %}
                     <button class="iot-commands" id="{{ button.lower() }}-btn"
-                                    onclick="this.disabled=true; sm.send_command('{{ button }}', '{{ url_for('iot_nsa_bp.submit', device_id=device_id) }}');">
+                                    onclick="this.disabled=true; sm.send_command('{{ button }}', true);">
                             {{ button.lower() }}
                         </button>
                 {% endfor %}
@@ -114,7 +114,7 @@
                 <h2>Admin User Functions</h2>
                 {% for button in commands.admin %}
                     <button class="iot-commands" id="{{ button.lower() }}-btn"
-                            onclick="this.disabled=true; sm.send_command('{{ button }}', '{{ url_for('iot_nsa_bp.submit', device_id=device_id) }}');">
+                            onclick="this.disabled=true; sm.send_command('{{ button }}', true);">
                         {{ button.lower() }}
                     </button>
                 {% endfor %}
