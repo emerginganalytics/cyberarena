@@ -141,3 +141,28 @@ function enableGroups(enable, uid){
         }
     });
 }
+function filter_active_units(){
+    var input, filter, table, tr, td, i, tdValue, filterType, col;
+    input = document.getElementById('searchUnits');
+    filter = input.value.toLowerCase();
+    filterType = document.getElementById('filterUnitsCol').value;
+    table = document.getElementById('active-units-table');
+    tr = table.getElementsByTagName('tr');
+    col = 1;
+    if (filterType === 'filterByID'){
+        col = 1;
+    } else if (filterType === 'filterByJoinCode') {
+        col = 4;
+    }
+    for (i = 0; i < tr.length; i++){
+        td = tr[i].getElementsByTagName("td")[col];
+        if (td) {
+            tdValue = td.textContent || td.innerText;
+            if (tdValue.toLowerCase().indexOf(filter) > -1){
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}

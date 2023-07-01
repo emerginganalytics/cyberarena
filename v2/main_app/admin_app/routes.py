@@ -1,8 +1,8 @@
 import json
 import logging as logger
-from flask import abort, Blueprint, render_template, redirect, request, session
+from flask import abort, Blueprint, render_template, redirect, request, session, url_for
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
-from main_app_utilities.globals import DatastoreKeyTypes
+from main_app_utilities.globals import DatastoreKeyTypes, get_current_timestamp_utc, BuildConstants
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
 
@@ -18,8 +18,10 @@ def home():
         auth = ArenaAuthorizer()
         if user := auth.authorized(user_email, base=auth.UserGroups.ADMIN):
             admin_info = auth.get_all_users()
+            active_filter = [('workspace_settings.expires', '>', get_current_timestamp_utc())]
+            active_units = DataStoreManager(key_type=DatastoreKeyTypes.UNIT).query(filters=active_filter)
             return render_template('v2-admin-home.html', auth_config=cloud_env.auth_config, workout_list=workout_list,
-                                   admin_info=admin_info, auth_list=user['permissions'])
+                                   admin_info=admin_info, auth_list=user['permissions'], active_units=active_units)
     return redirect('/login')
 
 
@@ -32,3 +34,10 @@ def iot_device(device_id):
         abort(404)
 
 
+def _generate_urls():
+    urls = {
+        'unit': url_for('unit'),
+        'escape_room': url_for('escape-room'),
+        'fixed_arena': url_for('fixed-arena'),
+        'fixed_arena_class': url_for('class'),
+    }

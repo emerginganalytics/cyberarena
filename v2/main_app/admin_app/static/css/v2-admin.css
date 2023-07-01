@@ -316,6 +316,22 @@ ul#instructions-list li {
     width: 50%;
     text-align: center;
 }
+/* Active Units Table */
+table#active-units-table {
+}
+table#active-units-table{
+    counter-reset: rowNumber;
+}
+
+table#active-units-table tr > td:first-child {
+    counter-increment: rowNumber;
+}
+
+table#active-units-table tr td:first-child::before {
+    content: counter(rowNumber);
+    min-width: 1em;
+    margin-right: 0.5em;
+}
 
 /* User management table */
 table#admin-users-table {

@@ -69,6 +69,11 @@
                             data-target="#user-manage-tab" type="button" role="tab"
                             aria-controls="user-manage-tab" aria-selected="true">User Management</button>
                 </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="active-units-btn" data-toggle="pill"
+                            data-target="#active-units-tab" type="button" role="tab"
+                            aria-controls="active-units-tab" aria-selected="false">Active Units</button>
+                </li>
             </ul>
         </div> <!-- End sidebar-menu div -->
         <main class="col offset-2 main pt-3 mt-3 h-100 pr-3">
@@ -128,6 +133,24 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                    </div> <!-- End User Manage tab -->
+                    <div class="tab-pane fade" id="active-units-tab" role="tabpanel" aria-labelledby="active-units-btn">
+                        <div class="row" style="margin-bottom: 3vh;">
+                            <div class="input-group justify-content-center">
+                                <div class="input-group-prepend">
+                                    <select id='filterUnitsCol' name='filter_group' class="dropdown-toggle">
+                                        <option selected disabled hidden value="">Select Column Filter</option>
+                                        <option class="dropdown-item" value="filterByID" selected>ID</option>
+                                        <option class="dropdown-item" value="filterByJoinCode">Join Code</option>
+                                    </select>
+                                    <input type="text" id="searchUnits" class="form-control card-search" onkeyup="filter_active_units();"
+                                           placeholder="Search for Unit ...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col table-ctn">
+                            {{ macros.active_units_table(active_units) }}
                         </div>
                     </div>
                 </div> <!--End tab-container-->
