@@ -48,7 +48,11 @@ class Workout:
             raise LookupError
 
     def build(self):
-        self._reset_expiration()
+        if not (state := self.state_manager.get_state()):
+            self.state_manager.state_transition(self.s.START)
+        elif state == self.s.DELETED.value:
+            self._reset_deleted_workout()
+
         if not self.workout.get('networks', None):
             if self.workout.get('web_applications', None):
                 self.state_manager.state_transition(self.s.READY)
@@ -57,16 +61,6 @@ class Workout:
             else:
                 self.logger.info(f"No compute assets to build for workout {self.workout_id}.")
             return
-
-        if not (state := self.state_manager.get_state()):
-            self.state_manager.state_transition(self.s.START)
-        elif state == self.s.DELETED.value:
-            now = get_current_timestamp_utc()
-            if now < self.unit['workspace_settings']['expires']:
-                self.state_manager.state_transition(self.s.START)
-            else:
-                self.logger.error(f"Attempt to rebuild workout {self.workout_id} failed: Unit is already expired!")
-                return
 
         if self.state_manager.get_state() < self.s.BUILDING_NETWORKS.value:
             self.state_manager.state_transition(self.s.BUILDING_NETWORKS)
@@ -223,7 +217,14 @@ class Workout:
             self.workout['shutoff_timestamp'] = shutoff_ts + timedelta(seconds=self.duration_seconds).total_seconds()
             self.ds.put(self.workout)
 
-    def _reset_expiration(self):
+    def _reset_deleted_workout(self):
+        now = get_current_timestamp_utc()
+        if now < self.unit['workspace_settings']['expires']:
+            self.state_manager.state_transition(self.s.START)
+        else:
+            self.logger.error(f"Attempt to rebuild workout {self.workout_id} failed: Unit is already expired!")
+            return
+
         if workout_duration_days := self.unit.get('workout_duration_days', None):
             self.workout['expiration'] = get_current_timestamp_utc(add_seconds=86400 * workout_duration_days)
             self.ds.put(self.workout)

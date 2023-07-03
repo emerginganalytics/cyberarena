@@ -97,56 +97,61 @@ class Workout(MethodView):
                 valid_actions = [PubSub.Actions.START.value, PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value,
                                  PubSub.Actions.EXTEND_RUNTIME.value, PubSub.Actions.BUILD.value]
                 if action and int(action) in valid_actions:
-                    action = int(action)
-                    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
-                    if workout:
-                        if action in [PubSub.Actions.START.value, PubSub.Actions.EXTEND_RUNTIME.value]:
-                            if action == PubSub.Actions.EXTEND_RUNTIME.value:
-                                duration_hours = 1
-                            else:
-                                duration_hours = request.json.get('duration', None)
-                                try:
-                                    duration_hours = min(int(duration_hours), 10)
-                                except (TypeError, ValueError):
-                                    duration_hours = 2
-                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                    build_id=str(build_id), duration=str(duration_hours),
-                                                    cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
-                        elif action in [PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]:
-                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
-                                                    build_id=str(build_id),
-                                                    cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
-                        elif action in [PubSub.Actions.BUILD.value]:
-                            self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
-                                                    action=str(PubSub.BuildActions.WORKOUT.value),
-                                                    key_type=str(DatastoreKeyTypes.WORKOUT.value),
-                                                    build_id=str(build_id))
-                        return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
-                    return self.http_resp(code=404).prepare_response()
-            elif recv_data := request.json:  # Check if question response is submitted
-                if question_key := recv_data.get('question_key', None):
-                    self.logger.info(f"PUT request question response for id {question_key}")
-                    print(recv_data)
-                    ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
-                    self.workout = ds_workout.get()
-                    unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id']).get()
-                    if self.workout and 'lms_quiz' in self.workout:
-                        workout = self._submit_lms_question(unit, self.workout, question_key)
-                        ds_workout.put(workout)
-                        return self.http_resp(code=200).prepare_response()
-                    elif self.workout and 'assessment' in self.workout:
-                        response = recv_data.get('response', None)
-                        check_auto = recv_data.get('check_auto', False)
-                        correct, update = self._evaluate_question(question_key, response, check_auto)
-                        if correct and update:
-                            ds_workout.put(self.workout)
-                        return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
-                    else:
-                        self.logger.error(f"Auto assessment error for workout {build_id}. Either the workout is "
-                                          f"invalid or the workout has no associated assessment")
-                        return self.http_resp(code=404).prepare_response()
+                    self._process_workout_action(build_id, action)
+            elif recv_data := request.json:
+                self._process_question_response(build_id, recv_data)
         self.logger.error(f"No build_id supplied.")
         return self.http_resp(code=400).prepare_response()
+
+    def _process_workout_action(self, build_id, action):
+        action = int(action)
+        workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=build_id).get()
+        if workout:
+            if action in [PubSub.Actions.START.value, PubSub.Actions.EXTEND_RUNTIME.value]:
+                if action == PubSub.Actions.EXTEND_RUNTIME.value:
+                    duration_hours = 1
+                else:
+                    duration_hours = request.json.get('duration', None)
+                    try:
+                        duration_hours = min(int(duration_hours), 10)
+                    except (TypeError, ValueError):
+                        duration_hours = 2
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                        build_id=str(build_id), duration=str(duration_hours),
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+            elif action in [PubSub.Actions.STOP.value, PubSub.Actions.NUKE.value]:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.CONTROL.value), action=str(action),
+                                        build_id=str(build_id),
+                                        cyber_arena_object=str(PubSub.CyberArenaObjects.WORKOUT.value))
+            elif action in [PubSub.Actions.BUILD.value]:
+                self.pubsub_manager.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                        action=str(PubSub.BuildActions.WORKOUT.value),
+                                        key_type=str(DatastoreKeyTypes.WORKOUT.value),
+                                        build_id=str(build_id))
+            return self.http_resp(code=200, data={'state': workout.get('state')}).prepare_response()
+        return self.http_resp(code=404).prepare_response()
+
+    def _process_question_response(self, build_id, recv_data):
+        if question_key := recv_data.get('question_key', None):
+            self.logger.info(f"PUT request question response for id {question_key}")
+            ds_workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT.value, key_id=str(build_id))
+            self.workout = ds_workout.get()
+            unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT.value, key_id=self.workout['parent_id']).get()
+            if self.workout and 'lms_quiz' in self.workout:
+                workout = self._submit_lms_question(unit, self.workout, question_key)
+                ds_workout.put(workout)
+                return self.http_resp(code=200).prepare_response()
+            elif self.workout and 'assessment' in self.workout:
+                response = recv_data.get('response', None)
+                check_auto = recv_data.get('check_auto', False)
+                correct, update = self._evaluate_question(question_key, response, check_auto)
+                if correct and update:
+                    ds_workout.put(self.workout)
+                return self.http_resp(code=200, data=self.workout['assessment']).prepare_response()
+            else:
+                self.logger.error(f"Auto assessment error for workout {build_id}. Either the workout is "
+                                  f"invalid or the workout has no associated assessment")
+                return self.http_resp(code=404).prepare_response()
 
     def _evaluate_question(self, question_key: int, response: str, check_auto=False):
         """
@@ -199,12 +204,9 @@ class Workout(MethodView):
         questions = workout['lms_quiz'].get('questions', None)
         answered = False
         for question in questions:
-            if question['question_key'] == question_key and not question.get('complete', False):
+            if str(question['question_key']) == question_key and not question.get('complete', False):
                 added_points = question['points_possible']
                 question['complete'] = True
-                print(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
-                                 f"Question {question['question_text']}\nStudent: {student_email}")
-
                 self.logger.info(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
                                  f"Question {question['question_text']}\nStudent: {student_email}")
                 lms.mark_question_correct(quiz_id=quiz_key, student_email=student_email, added_points=added_points)
@@ -215,8 +217,6 @@ class Workout(MethodView):
                 break
 
         if not answered:
-            print(f"Auto assessment submitted for quiz: {workout['lms_quiz']['id']} and "
-                  f"student {student_email}, but the question could not be found in the quiz!")
             self.logger.warning(f"Auto assessment submitted for quiz: {workout['lms_quiz']['id']} and "
                                 f"student {student_email}, but the question could not be found in the quiz!")
         return workout

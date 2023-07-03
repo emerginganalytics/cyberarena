@@ -53,7 +53,7 @@ class LMSCanvas(LMS):
         selected_assignment = None
         assignments = list(self.course.get_assignments())
         for assignment in assignments:
-            if assignment.quiz_id == quiz_id:
+            if hasattr(assignment, 'quiz_id') and assignment.quiz_id == quiz_id:
                 selected_assignment = assignment
                 break
         if not selected_assignment:
