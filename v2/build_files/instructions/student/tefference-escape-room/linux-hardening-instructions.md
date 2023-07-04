@@ -12,6 +12,7 @@ Review Gigabyte's Indicators of Compromise and perform the following tasks to se
 2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
 > **Hint:** Run `getent groupo sudo` to see the comma-separated users in the sudo group. To remove a user from the group, run `sudo deluser USERNAME sudo`. Replace USERNAME with the name of the user you wish to remove.
 4. **Malicious Files**: Delete the malicious files added by Gigabyte
+> **Hint:** Run `sudo find / -type f -name *.ext` to find all files with the extension ext. Replace ext with the file extension you are looking for. To delete files, run `sudo rm /full/path/to/file.ext` where you replace the full path to the file you wish to remove.
 
 # Gigabyte’s Indicators of Compromise
 ### Initial Access: Log4J Vulnerability
