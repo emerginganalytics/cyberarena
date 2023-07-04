@@ -13,7 +13,6 @@ from main_app_utilities.gcp.pubsub_manager import PubSubManager
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.globals import PubSub, WorkoutStates, BuildConstants
 from main_app_utilities.lms.lms_canvas import LMSCanvas
-from cloud_fn_utilities.cyber_arena_objects.workout import Workout as WorkoutFn
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
