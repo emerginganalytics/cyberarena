@@ -8,8 +8,9 @@ For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.
 ## Assignment
 Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system. Your assignment will be automatically assessed after you complete each activity. It may take 1-2 minutes for the assessment to show up.
 1. **Malicious User**: Delete the malicious user account
-> **Hint:** run the command `cat /etc/passwd` to view all users on the system. The username is listed before the first colon. To delete the user, run `sudo deluser USERNAME` where USERNAME is replaced with the user you want to delete. When prompted for a password, use `Let's workout!`
-3. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
+> **Hint:** Run the `cat /etc/passwd` command to view all system users. The username is listed before the first colon. To delete the user, run `sudo deluser USERNAME` where USERNAME is replaced with the user you want to delete. When prompted for a password, use `Let's workout!`
+2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
+> **Hint:** Run `getent groupo sudo` to see the comma-separated users in the sudo group. To remove a user from the group, run `sudo deluser USERNAME sudo`. Replace USERNAME with the name of the user you wish to remove.
 4. **Malicious Files**: Delete the malicious files added by Gigabyte
 
 # Gigabyte’s Indicators of Compromise
