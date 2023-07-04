@@ -78,14 +78,7 @@ class BuildSpecification:
         upload_specs = self._scan_specs_for_image_sync()
         self._upload_files_to_cloud(upload_specs, self.SPEC_FOLDER)
         self._sync_specs_to_datastore(upload_specs)
-
-        self._sync_locked_folder(plaintext_dir=self.build_teacher_instructions_plaintext,
-                                 encrypted_dir=self.build_teacher_instructions_encrypted, extension="pdf")
-        self._upload_folder_to_cloud(self.build_teacher_instructions_encrypted, self.TEACHER_FOLDER)
-        self._upload_folder_to_cloud(self.build_student_instructions, self.STUDENT_FOLDER)
-        self._upload_folder_to_cloud(self.build_startup_scripts, self.STARTUP_SCRIPT_FOLDER)
-        self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
-        self._sync_attacks_to_cloud()
+        self.sync_startup_scripts_and_instructions()
 
     def sync_single_spec(self):
         """
@@ -130,6 +123,15 @@ class BuildSpecification:
                                  extension="yaml")
         print(f"\t...Encryption is complete.")
         self._sync_specs_to_datastore(filename)
+
+    def sync_startup_scripts_and_instructions(self):
+        self._sync_locked_folder(plaintext_dir=self.build_teacher_instructions_plaintext,
+                                 encrypted_dir=self.build_teacher_instructions_encrypted, extension="pdf")
+        self._upload_folder_to_cloud(self.build_teacher_instructions_encrypted, self.TEACHER_FOLDER)
+        self._upload_folder_to_cloud(self.build_student_instructions, self.STUDENT_FOLDER)
+        self._upload_folder_to_cloud(self.build_startup_scripts, self.STARTUP_SCRIPT_FOLDER)
+        self._upload_folder_to_cloud(self.build_attacks_specs, self.ATTACK_FOLDER)
+        self._sync_attacks_to_cloud()
 
     def decrypt_locked_folders(self):
         print(f'\t...Beginning decryption process')
