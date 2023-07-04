@@ -8,9 +8,9 @@ For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.
 ## Assignment
 Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system. Your assignment will be automatically assessed after you complete each activity. It may take 1-2 minutes for the assessment to show up.
 1. **Malicious User**: Delete the malicious user account
-2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
-3. **Malicious Files**: Delete the malicious files added by Gigabyte
-4. **Startup Scripts**: Delete the malicious startup scripts for Gigabyte that allow its persistence
+> **Hint:** run the command `cat /etc/passwd` to view all users on the system. The username is listed before the first colon. To delete the user, run `sudo deluser USERNAME` where USERNAME is replaced with the user you want to delete. When prompted for a password, use `Let's workout!`
+3. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
+4. **Malicious Files**: Delete the malicious files added by Gigabyte
 
 # Gigabyte’s Indicators of Compromise
 ### Initial Access: Log4J Vulnerability
