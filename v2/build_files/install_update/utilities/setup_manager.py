@@ -55,6 +55,8 @@ class SetupManager:
             BuildSpecification(sync=False).decrypt_locked_folders()
         elif self.selection == SetupOptions.ENV:
             EnvironmentVariables(project=self.project).run()
+        elif self.selection == SetupOptions.STARTUP_SCRIPTS_AND_INSTRUCTIONS:
+            BuildSpecification().sync_startup_scripts_and_instructions()
         elif self.selection == SetupOptions.BULK_UPDATE:
             BulkInstallUpdate().run()
         else:

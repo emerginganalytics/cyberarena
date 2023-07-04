@@ -26,7 +26,8 @@ class SetupOptions(bytes, Enum):
     PREPARE_SPEC = (6, "Prepare a single specification for deployment")
     DECRYPT_SPECS = (7, "Decrypt Build Specifications")
     ENV = (8, "Synchronize Environment Variables")
-    BULK_UPDATE = (9, "Update multiple cloud projects at once")
+    STARTUP_SCRIPTS_AND_INSTRUCTIONS = (9, "Synchronize startup scripts and instructions")
+    BULK_UPDATE = (10, "Update multiple cloud projects at once")
     EXIT = (11, "Exit")
 
 

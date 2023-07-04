@@ -10,9 +10,8 @@ class AssessmentArtifacts:
     Q0_USER_CHECK = 'gigabyte'
     OLD_SOFTWARE = "liblog4j2-java/bionic,now 2.10.0-2"
     FILETYPE_CHECK = 'mp4'
-    ADMIN_CHECK = 'philip'
+    ADMIN_CHECK = 'noadmin_user'
     SUDOERS_STRING = "(ALL : ALL) ALL"
-    CRONTAB_STRING = "philip    ALL=(ALL:ALL) ALL"
 
 
 class Question:
@@ -57,10 +56,10 @@ class Question0(Question):
         return True
 
 
+"""
+This assessment is hard to maintain because the image will require many new patches in the future and the log4j
+vulnerability is more difficult to find.
 class Question1(Question):
-    """
-    Assess whether the Log4j exists
-    """
     def __init__(self, build_id, url):
         super().__init__(build_id, url, 1)
 
@@ -70,14 +69,15 @@ class Question1(Question):
             if line.startswith(AssessmentArtifacts.OLD_SOFTWARE):
                 return False
         return True
+"""
 
 
-class Question2(Question):
+class Question1(Question):
     """
     Assess over-privileged user
     """
     def __init__(self, build_id, url):
-        super().__init__(build_id, url, 2)
+        super().__init__(build_id, url, 1)
 
     def unique_assessment(self):
         output = subprocess\
@@ -87,12 +87,12 @@ class Question2(Question):
         return True
 
 
-class Question3(Question):
+class Question2(Question):
     """
     Assess banned File Type
     """
     def __init__(self, build_id, url):
-        super().__init__(build_id, url, 3)
+        super().__init__(build_id, url, 2)
 
     def unique_assessment(self):
         output = subprocess.run(["find", "/", "-type", "f", "-name", "*.mp4"], stdout=subprocess.PIPE).stdout \
@@ -102,28 +102,12 @@ class Question3(Question):
         return True
 
 
-class Question4(Question):
-    """
-    Assess crontab
-    """
-    def __init__(self, build_id, url):
-        super().__init__(build_id, url, 4)
-
-    def unique_assessment(self):
-        output = subprocess.run(["cat", "/var/spool/cron/crontabs/root"], stdout=subprocess.PIPE).stdout.decode('utf-8')
-        if AssessmentArtifacts.CRONTAB_STRING in output:
-            return False
-        return True
-
-
 def main():
     build_id = os.environ.get('BUILD_ID')
-    url = f"http://{os.environ.get('URL')}"
+    url = f"https://{os.environ.get('URL')}"
     Question0(build_id=build_id, url=url).assess()
     Question1(build_id=build_id, url=url).assess()
     Question2(build_id=build_id, url=url).assess()
-    Question3(build_id=build_id, url=url).assess()
-    Question4(build_id=build_id, url=url).assess()
 
 
 if __name__ == "__main__":

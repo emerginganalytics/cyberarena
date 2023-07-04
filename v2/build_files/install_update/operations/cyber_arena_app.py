@@ -15,7 +15,7 @@ __status__ = "Testing"
 
 class CyberArenaApp:
     BUILD_CLOUD_RUN_COMMAND = "gcloud builds submit main_app/ --tag gcr.io/{project}/cyberarena"
-    DEPLOY_CLOUD_RUN_COMMAND = "gcloud run deploy cyberarena-v2 --image gcr.io/{project}/cyberarena --memory=1024Mi " \
+    DEPLOY_CLOUD_RUN_COMMAND = "gcloud run deploy cyberarena-v2 --image gcr.io/{project}/cyberarena --memory=4096Mi " \
                                "--platform=managed --region={region} --allow-unauthenticated " \
                                "--service-account=cyberarena-service@{project}.iam.gserviceaccount.com"
     MAP_DNS_COMMAND = "gcloud beta run domain-mappings create --service cyberarena-v2 --domain={dns} --region={region}"
