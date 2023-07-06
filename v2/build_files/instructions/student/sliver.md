@@ -1,5 +1,8 @@
 > **Disclaimer:** The purpose of the lab environment is solely for educational and research purposes within the context of authorized and supervised activities. This lab environment is established to facilitate learning, analysis, and understanding of malware and related cybersecurity concepts. The malware lab environment is equipped with security measures to prevent unauthorized access and the spread of malware. However, it is essential to exercise caution and follow established protocols to minimize the risk of accidental exposure, infection, or unintended distribution of malware.
 
+
+> **Connecting to Cybersecurity Concepts:** This lab serves as an introduction to key cybersecurity concepts involving systems, people, and trust. By completing this lab, you will understand the difficulties associated with establishing trust in the presence of adversarial computing infrastructure, which aims to remain hidden and requires minimal user interaction to operate. The primary objective of this lab is to familiarize yourself with typical adversarial actions, enabling you to recognize and comprehend the various types of attacks that cybersecurity aims to defend systems against.
+
 # Sliver C2 Botnet Instructions
 Sliver is an open-source command and control (C2) botnet framework designed for educational purposes. The framework consists of a main server component that allows the deployment and management of botnet infrastructure. The server facilitates communication with the botnets.
 
