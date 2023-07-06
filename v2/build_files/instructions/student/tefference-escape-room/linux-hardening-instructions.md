@@ -1,17 +1,19 @@
 # Gigabyte APT
+> **Connections to System Security:** Cyber systems consist of multiple operating systems, and the security of these systems is ensured through engineering security controls. This lab offers an opportunity to interact with a small portion of the security controls found in a commonly used Linux system. Your task is to assess the deployed security controls following a suspected incident. Each assigned task specifies the policy for a particular security control, and your objective is to evaluate the system's compliance with the policy and address any necessary corrections.
+
 For this lab exercise, the cybersecurity response team has been notified that the **Advanced Persistent Threat (APT)** Gigabyte Group has infiltrated one of our machines.  This APT uses several known attack methods and vectors.  To successfully complete the lab, we’ll need to remove their access and properly harden the Linux system they compromised.
 
 While the Gigabyte Group isn’t a real APT, [MITRE ATT&CK](https://attack.mitre.org) is an excellent resource for learning about real-world APTs and the **tactics, tools, and procedures (TTPs)** they use to compromise their targets.
 
-For this lab, there are five known Gigabyte **indicators of compromise (IOCs)**.  Identify them and remediate any related vulnerabilities, footholds, and persistence mechanisms to complete the lab.
+For this lab, there are three known Gigabyte **indicators of compromise (IOCs)** that violate the system security policy.  Identify them and remediate any related vulnerabilities, footholds, and persistence mechanisms to complete the lab.
 
 ## Assignment
 Review Gigabyte's Indicators of Compromise and perform the following tasks to secure the operating system. Your assignment will be automatically assessed after you complete each activity. It may take 1-2 minutes for the assessment to show up.
-1. **Malicious User**: Delete the malicious user account
+1. **Malicious User**: The system security policy states only authorized users may access the system. Assess the system according to the policy and delete the malicious user account.
 > **Hint:** Run the `cat /etc/passwd` command to view all system users. The username is listed before the first colon. To delete the user, run `sudo deluser USERNAME` where USERNAME is replaced with the user you want to delete. When prompted for a password, use `Let's workout!`
-2. **Privilege Escalation**: Remove the unnecessary privileges added by Gigabyte
+2. **Privilege Escalation**: The system security policy states that only authorized accounts may have administrative (i.e., sudo) privileges. Remove the unnecessary privileges added by Gigabyte.
 > **Hint:** Run `getent group sudo` to see the comma-separated users in the sudo group. To remove a user from the group, run `sudo deluser USERNAME sudo`. Replace USERNAME with the name of the user you wish to remove.
-4. **Malicious Files**: Delete the malicious files added by Gigabyte
+3. **Malicious Files**: The system security policy states video and audio files cannot be stored on system components. Delete the malicious files added by Gigabyte.
 > **Hint:** Run `sudo find / -type f -name *.ext` to find all files with the extension ext. Replace ext with the file extension you are looking for. To delete files, run `sudo rm /full/path/to/file.ext` where you replace the full path to the file you wish to remove.
 
 # Gigabyte’s Indicators of Compromise
