@@ -161,6 +161,8 @@ class DataStoreManager:
             query_filters = [('state', '=', FixedArenaClassStates.RUNNING.value)]
         elif self.key_type == DatastoreKeyTypes.SERVER:
             query_filters = [('state', '=', ServerStates.RUNNING.value)]
+        elif self.key_type == DatastoreKeyTypes.WORKOUT:
+            query_filters = [('state', '=', WorkoutStates.RUNNING.value)]
         query_running = self.ds_client.query(kind=self.key_type, filters=query_filters)
         running += list(query_running.fetch())
         return running
