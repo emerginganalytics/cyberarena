@@ -30,11 +30,9 @@ class MaintenanceHandler:
         self.env_dict = self.env.get_env()
         log_client = logging_v2.Client()
         log_client.setup_logging()
-        now = datetime.now()
-        timezone = pytz.timezone(self.env.timezone)
-        now = timezone.localize(now)
+        now = self._get_localized_time()
         self.daily = self.hourly = self.quarter_hourly = False
-        if now.hour == 0 and now.minute <= 16:
+        if now.hour == 0 and now.minute <= 14:
             self.daily = True
             self.hourly = True
             self.quarter_hourly = True
@@ -57,3 +55,8 @@ class MaintenanceHandler:
         if self.daily:
             logging.info(f"Running daily maintenance tasks")
             DailyMaintenance(env_dict=self.env_dict).run()
+
+    def _get_localized_time(self):
+        now = datetime.now(pytz.utc)
+        timezone = pytz.timezone(self.env.timezone)
+        return now.astimezone(timezone)
