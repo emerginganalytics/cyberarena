@@ -25,6 +25,17 @@ def home():
     return redirect('/login')
 
 
+@admin_app.route('/dashboard/manage/workout/<build_id>', methods=['GET'])
+def manage(build_id):
+    workout_list = []
+    workout = DataStoreManager(key_type=DatastoreKeyTypes.WORKOUT, key_id=build_id).get()
+    unit = DataStoreManager(key_type=DatastoreKeyTypes.UNIT, key_id=workout['parent_id']).get()
+    servers = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER, parent_id=workout['id'])
+
+    return render_template('manage-workout.html', workout=workout, unit=unit, servers=servers)
+
+
+
 @admin_app.route('/iot_device/<device_id>', methods=['GET'])
 def iot_device(device_id):
     device = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=device_id)
