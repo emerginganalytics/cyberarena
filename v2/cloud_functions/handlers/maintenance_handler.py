@@ -1,7 +1,7 @@
 import logging
 import pytz
 from calendar import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from google import pubsub_v1
 from google.cloud import logging_v2
 from cloud_fn_utilities.globals import PubSub, DatastoreKeyTypes, BuildConstants
@@ -32,7 +32,8 @@ class MaintenanceHandler:
         log_client.setup_logging()
         now = self._get_localized_time()
         self.daily = self.hourly = self.quarter_hourly = False
-        if now.hour == 0 and now.minute <= 14:
+
+        if self._is_midnight(now):
             self.daily = True
             self.hourly = True
             self.quarter_hourly = True
@@ -41,6 +42,8 @@ class MaintenanceHandler:
             self.quarter_hourly = True
         elif (27 <= now.minute <= 33) or (42 <= now.minute <= 48):
             self.quarter_hourly = True
+
+        print(f'Maintenance called at {now} for timezone {self._get_timezone()}')
 
     def route(self):
         logging.info(f'{self.daily} : {self.hourly} : {self.quarter_hourly}')
@@ -56,7 +59,18 @@ class MaintenanceHandler:
             logging.info(f"Running daily maintenance tasks")
             DailyMaintenance(env_dict=self.env_dict).run()
 
+    def _is_midnight(self, now):
+        midnight = datetime(now.year, now.month, now.day, 0, 0, tzinfo=self._get_timezone())
+        start = midnight - timedelta(minutes=5)
+        end = midnight + timedelta(minutes=15)
+        if start <= now <= end:
+            return True
+        return False
+
     def _get_localized_time(self):
         now = datetime.now(pytz.utc)
-        timezone = pytz.timezone(self.env.timezone)
+        timezone = self._get_timezone()
         return now.astimezone(timezone)
+
+    def _get_timezone(self):
+        return pytz.timezone(self.env.timezone)

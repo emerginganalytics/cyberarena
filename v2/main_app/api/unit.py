@@ -70,6 +70,7 @@ class Unit(MethodView):
 
         # Send build request
         if expire_datetime and build_type:
+            # Sends build request for unit; Records are created, but no resources are used until requested by student
             build_spec = DataStoreManager(key_type=DatastoreKeyTypes.CATALOG.value, key_id=build_type).get()
             if not build_spec:
                 return self.http_resp(code=404, msg=f"Invalid build type {build_type}").prepare_response()
@@ -92,6 +93,20 @@ class Unit(MethodView):
                 build_spec_to_cloud.commit(publish=False)
             unit_id = build_spec_to_cloud.get_build_id()
             return redirect(url_for('teacher_app.workout_list', unit_id=unit_id))
+        elif build_id := request.json.get('build_id', None):
+            # Unit ID is passed in, build resources for each existing associated workout record
+            workouts = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=build_id)
+            if workouts:
+                for workout in workouts:
+                    workout_id = workout['id']
+                    if workout.get('state') == WorkoutStates.NOT_BUILT.value:
+                        student_name = workout.get('student_name', None)
+                        print(f"Sending job to build workout for {student_name} with workout ID {workout_id}")
+                        self.pubsub_mgr.msg(handler=str(PubSub.Handlers.BUILD.value),
+                                            action=str(PubSub.BuildActions.WORKOUT.value),
+                                            build_id=workout_id)
+            else:
+                return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
     @instructor_required
