@@ -31,9 +31,9 @@ class Control {
                 let state = data['data']['state'];
                 updateState(state);
             });
-        }, 15000); // 5min => 300000
+        }, 5000);
     }
-    toggle(state, func1=null, func2=null){
+    toggle(state, func1=null, func2=null, servers=true){
         // Control Elements
         var loadingIcon;
         let startWorkoutLi = document.getElementById('startWorkoutLi');
@@ -72,8 +72,10 @@ class Control {
             workoutStateIcon.classList.add('transition');
             disableElement(workoutStateObj);
             // Disable All
-            disableElement(stopButton);
-            disableElement(startButton);
+            if (servers){
+                disableElement(stopButton);
+                disableElement(startButton);
+            }
         }
         else if (state === 50){
            workoutStateObj.innerText = 'RUNNING';
@@ -82,18 +84,21 @@ class Control {
            // Display Timer Div
             disableElement(roomTimerDiv, false, 'block');
             disableElement(roomTimerInput, true, 'none');
-           // Enable Stop Btn
-           disableElement(workoutStateObj, false);
-           disableElement(stopButton, false);
-           // Disable and Hide Start Btn
-           disableElement(startButton, true, 'none');
-           disableElement(startWorkoutLi, true, 'none');
-           // Enable and Show Extend Duration Btn
-           disableElement(extendDurationBtn, false);
-           disableElements(extendWorkoutLi, false);
+           if (servers){
+               // Enable Stop Btn
+               disableElement(workoutStateObj, false);
+               disableElement(stopButton, false);
+               // Disable and Hide Start Btn
+               disableElement(startButton, true, 'none');
+               disableElement(startWorkoutLi, true, 'none');
+               // Enable and Show Extend Duration Btn
+               disableElement(extendDurationBtn, false);
+               disableElements(extendWorkoutLi, false);
+           }
            // Enable Connection Btns
            disableElements(connectionBtns, false, disableElement);
-        } else if (state === 53){
+        }
+        else if (state === 53){
            workoutStateObj.innerText = 'STOPPED';
            workoutStateIcon.classList.remove('transition', 'running');
            workoutStateIcon.classList.add('stopped');
@@ -140,7 +145,8 @@ class Control {
             disableElement(extendDurationBtn, true, 'none');
             disableElement(extendWorkoutLi, true, 'none');
             disableElements(connectionBtns, true, disableElement);
-        } else {
+        }
+        else {
             workoutStateObj.innerText = 'WORKING';
             workoutStateIcon.classList.remove('stopped', 'running', 'broken', 'notbuilt');
             workoutStateIcon.classList.add('transition');
@@ -228,8 +234,8 @@ class Control {
             }
         });
     }
-    rebuild(){
-        this.toggle(1);
+    rebuild(servers=true){
+        this.toggle(1, null, null, servers);
         fetch(this.url + '?action=1', {
             method: 'PUT'
         }).then((response) => {

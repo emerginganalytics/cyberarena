@@ -97,7 +97,11 @@
                collapseDiv();
                 {% if workout.expired == False %}
                     {% if workout.state != 72 %}
-                        new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+                        {% if workout.servers %}
+                            new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }});
+                        {% else %}
+                            new Control('{{ workout["id"] }}', 'workoutStateObj', '{{ workout.api.workout }}').toggle({{ workout.state }}, null, null, false)
+                        {% endif %}
                     {% endif %}
                {% endif %}
            });
@@ -204,6 +208,16 @@
                                 <li class="nav-item control-container-list">
                                     <button class="nav-link disabled" disabled style="pointer-events: none;">Stop Workout</button>
                                 </li>
+                            {% endif %}
+                        {% else %}
+                            {% if workout.expired == False %}
+                                {% if workout.state == 72 %}
+                                    <li class="nav-item control-container-list" id="rebuildWorkoutLi">
+                                        <button id="rebuildWorkoutBtn" class="nav-link" onclick="control.rebuild(false);">Rebuild Workout
+                                            <i class="fa fa-circle-o-notch loading-icon"></i>
+                                        </button>
+                                    </li>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     </ul>

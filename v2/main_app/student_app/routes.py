@@ -23,7 +23,7 @@ def claim_workout():
         if error == '404':
             error_msg = 'Invalid Join Code'
         elif error == '406':
-            error_msg = 'No workouts available! Contact your instructor for further direction'
+            error_msg = 'No workouts found for this email! Make sure you are using the correct account'
         else:
             error_msg = 'Something went wrong. Please try again!'
     return render_template('claim_workout.html', api=api_route, error=error_msg)
@@ -92,9 +92,10 @@ def workout_view(build_id):
             # If they exist, get the entry point information for each server
             connections = _generate_connection_urls(workout_info)
             if servers := workout_info.get('servers', None):
-                workout_info['servers'] = _assign_urls_to_server(build_id, servers, connections)
-                server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value,
-                                                              parent_id=build_id)
+                if workout_info['state'] not in [WorkoutStates.NOT_BUILT.value, WorkoutStates.DELETED.value]:
+                    workout_info['servers'] = _assign_urls_to_server(build_id, servers, connections)
+                    server_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.SERVER.value,
+                                                                  parent_id=build_id)
 
             workout_info['api'] = {'workout': url_for('workout'),}
             return render_template('student_workout.html', auth_config=auth_config, workout=workout_info,

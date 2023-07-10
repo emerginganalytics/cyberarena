@@ -51,7 +51,7 @@ class Workout:
         self._reset_expiration()
         if not self.workout.get('networks', None):
             if self.workout.get('web_applications', None):
-                self.state_manager.state_transition(self.s.READY)
+                self.state_manager.state_transition(self.s.RUNNING)
                 self.logger.info(f"No compute assets required for workout {self.workout_id}.")
                 self.logger.info(f"Finished building workout {self.workout_id}.")
             else:
@@ -138,27 +138,29 @@ class Workout:
         self.ds.put(self.workout)
 
     def stop(self):
-        self.state_manager.state_transition(self.s.STOPPING)
         servers_to_stop = self.ds.get_servers()
 
-        for server in servers_to_stop:
-            server_name = server.key.name
-            if self.debug:
-                ComputeManager(server_name, env_dict=self.env_dict).stop()
+        if servers_to_stop:
+            self.state_manager.state_transition(self.s.STOPPING)
+            for server in servers_to_stop:
+                server_name = server.key.name
+                if self.debug:
+                    ComputeManager(server_name, env_dict=self.env_dict).stop()
+                else:
+                    self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP.value),
+                                            build_id=server_name,
+                                            cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
+            if not self.state_manager.are_servers_stopped():
+                self.state_manager.state_transition(self.s.BROKEN)
+                self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to stop!")
             else:
-                self.pubsub_manager.msg(handler=PubSub.Handlers.CONTROL, action=str(PubSub.Actions.STOP.value),
-                                        build_id=server_name,
-                                        cyber_arena_object=str(PubSub.CyberArenaObjects.SERVER.value))
-
-        if not self.state_manager.are_servers_stopped():
-            self.state_manager.state_transition(self.s.BROKEN)
-            self.logger.error(f"Workout {self.workout_id}: Timed out waiting for server builds to stop!")
+                self.state_manager.state_transition(self.s.READY)
+                self.logger.info(f"Finished Stopping the Workout: {self.workout_id}!")
+                self.workout = self.ds.get()
+                self.workout['shutoff_timestamp'] = None
+                self.ds.put(self.workout)
         else:
-            self.state_manager.state_transition(self.s.READY)
-            self.logger.info(f"Finished Stopping the Workout: {self.workout_id}!")
-            self.workout = self.ds.get()
-            self.workout['shutoff_timestamp'] = None
-            self.ds.put(self.workout)
+            self.logger.info(f'No compute resources found for workout: {self.workout_id}. Ignoring stop request...')
 
     def delete(self):
         self.state_manager.state_transition(self.s.DELETING_SERVERS)
