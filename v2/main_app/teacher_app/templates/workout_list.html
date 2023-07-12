@@ -155,13 +155,15 @@
                                             </h4>
                                         </div>
                                         {% set built = namespace(count = 0, total = 0) %}
-                                        {% for workout in workout_list %}
-                                            {% set built.total = built.total + 1 %}
-                                            {% if workout.state != -1 %}
-                                                {% set built.count = built.count + 1 %}
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if built.count < built.total %}
+                                        {% if workout_list %}
+                                            {% for workout in workout_list %}
+                                                {% set built.total = built.total + 1 %}
+                                                {% if workout.state != -1 %}
+                                                    {% set built.count = built.count + 1 %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        {% if built.count < built.total and built.total != 0%}
                                             <div class="alert alert-warning text-center" style="max-width: 65%; margin: 15px auto;">
                                                 <h6>No resources are currently built for this unit. This could add an extra 2-5 minutes
                                                     to the student join process. If you would like to build all resources now, click "<em>Build Now</em>"</h6>
