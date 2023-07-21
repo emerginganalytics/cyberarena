@@ -53,21 +53,24 @@ class Unit:
             raise LookupError
         self.lms_integration = True if self.unit.get('lms_connection') else False
         self.lms_quiz = True if self.unit.get('lms_quiz', None) else False
-        if not self.lms_integration:
-            if not child_id:
-                logging.error(f"No build id provided for build handler with action {self.unit['build_type']}")
-                raise ValueError
-            elif not form_data:
-                logging.error(f'Missing claimed_by data for build handler with action {self.unit["build_type"]}')
-                raise ValueError
-            self.child_id = child_id
-            self.form_data = json.loads(form_data)
+
+        # Pass in these values to build a single workout associated with the unit
+        self.child_id = child_id  # id to use for child workout
+        self.form_data = form_data  # dictionary in JSON formatted string
 
     def build(self):
         if self.lms_integration:
             self._create_unit_for_lms()
             self.ds_unit.put(self.unit)
         else:
+            if not self.lms_integration:
+                if not self.child_id:
+                    logging.error(f"No build id provided for build handler with action {self.unit['build_type']}")
+                    raise ValueError
+                elif not self.form_data:
+                    logging.error(f'Missing claimed_by data for build handler with action {self.unit["build_type"]}')
+                    raise ValueError
+                self.form_data = json.loads(self.form_data)
             self._build_one_workout(workout_id=self.child_id)
 
     def start(self):

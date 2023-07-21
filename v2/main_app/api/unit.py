@@ -4,7 +4,7 @@ import yaml
 from datetime import datetime, timedelta, timezone
 from flask import json, request, session, redirect, url_for
 from flask.views import MethodView
-from api.utilities.decorators import instructor_required
+from api.utilities.decorators import instructor_required, admin_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
@@ -35,7 +35,7 @@ class Unit(MethodView):
         self.http_resp = HttpResponse
         self.env = CloudEnv()
         self.env_dict = self.env.get_env()
-        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA, env_dict=self.env_dict)
+        self.pubsub_mgr = PubSubManager(topic=PubSub.Topics.CYBER_ARENA.value, env_dict=self.env_dict)
         self.bm = BucketManager(env_dict=self.env_dict)
 
     def get(self, build_id=None):
@@ -109,7 +109,7 @@ class Unit(MethodView):
                 return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
-    @instructor_required
+    @admin_required
     def delete(self, build_id=None):
         if build_id:
             self.pubsub_mgr.msg(handler=str(self.handler.CONTROL.value), build_id=str(build_id),

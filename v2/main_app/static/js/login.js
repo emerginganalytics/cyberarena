@@ -1,3 +1,9 @@
+function setup_firebase(auth_config){
+  firebase.initializeApp(auth_config);
+  configureFirebaseLogin();
+  configureFirebaseLoginWidget();
+}
+
 function configureFirebaseLogin() {
     // Used in the initial login page
     firebase.auth().onAuthStateChanged(function(user) {

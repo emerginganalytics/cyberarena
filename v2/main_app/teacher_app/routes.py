@@ -102,7 +102,6 @@ def workout_list(unit_id):
                 workouts_list = DataStoreManager().get_children(child_key_type=DatastoreKeyTypes.WORKOUT, parent_id=unit_id)
                 attack_specs = DataStoreManager(key_type=DatastoreKeyTypes.CYBERARENA_ATTACK_SPEC).query()
                 if len(workouts_list) > 0:
-                    registration_required = unit.get('registration_required', False)
                     unit['api'] = _get_api_urls(build_type=unit['build_type'])
 
                     # Check if Unit is expired

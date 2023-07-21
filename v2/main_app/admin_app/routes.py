@@ -35,7 +35,6 @@ def manage(build_id):
     return render_template('manage-workout.html', workout=workout, unit=unit, servers=servers)
 
 
-
 @admin_app.route('/iot_device/<device_id>', methods=['GET'])
 def iot_device(device_id):
     device = DataStoreManager(key_type=DatastoreKeyTypes.IOT_DEVICE, key_id=device_id)

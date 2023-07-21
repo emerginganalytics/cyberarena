@@ -50,10 +50,11 @@ class Workout(MethodView):
                     if not args:
                         return self.http_resp(code=200, data=workout).prepare_response()
                     elif args.get('state', False):
-                        if state := workout.get('state', None):
-                            return self.http_resp(code=200, data={'state': state}).prepare_response()
-                        else:
-                            return self.http_resp(code=200, data={'state': WorkoutStates.RUNNING.name}).prepare_response()
+                        return_data = {
+                            'url': url_for('student_app.workout_view', build_id=build_id),
+                            'state': workout.get('state', WorkoutStates.RUNNING.name),
+                        }
+                        return self.http_resp(code=200, data=return_data).prepare_response()
                 return self.http_resp(code=404).prepare_response()
         return self.http_resp(code=400).prepare_response()
 
@@ -78,9 +79,13 @@ class Workout(MethodView):
             else:
                 unit = unit_results[0]
 
-            workout_id = self._find_existing_workout(unit, email)
+            workout_id, exists = self._find_existing_workout(unit, email)
             if workout_id:
-                return redirect(url_for('student_app.workout_view', build_id=workout_id))
+                if exists:
+                    # Workout record already exists; Redirect to student view
+                    return redirect(url_for('student_app.workout_view', build_id=workout_id))
+                # Workout record doesn't exist yet; Return build_id to start poll
+                return self.http_resp(code=200, data={'build_id': workout_id}).prepare_response()
             else:
                 return redirect(url_for('student_app.claim_workout', error=406))
         else:
@@ -202,7 +207,7 @@ class Workout(MethodView):
                 added_points = question['points_possible']
                 question['complete'] = True
                 print(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
-                                 f"Question {question['question_text']}\nStudent: {student_email}")
+                      f"Question {question['question_text']}\nStudent: {student_email}")
 
                 self.logger.info(f"Automated assessment submitted for\nUnit:{unit['id']}\n"
                                  f"Question {question['question_text']}\nStudent: {student_email}")
@@ -241,7 +246,7 @@ class Workout(MethodView):
                                             action=str(PubSub.BuildActions.WORKOUT.value),
                                             key_type=str(DatastoreKeyTypes.WORKOUT.value),
                                             build_id=str(workout_id))
-                return workout_id
+                return workout_id, True
 
         # No workout was found. Now determine if you need to build a new one. If not, return None.
         max_builds = min(int(self.env.max_workspaces), int(unit['workspace_settings'].get('count', 10000)))
@@ -253,6 +258,6 @@ class Workout(MethodView):
                                     action=str(PubSub.BuildActions.UNIT.value),
                                     build_id=str(unit['id']), child_id=workout_id,
                                     claimed_by=claimed_by)
-            return workout_id
+            return workout_id, False
         else:
-            return None
+            return None, None

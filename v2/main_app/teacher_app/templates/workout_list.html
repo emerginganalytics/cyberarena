@@ -121,6 +121,12 @@
                                         aria-selected="true">Build Attack</button>
                             </li>
                         {% endif %}
+                        {% if 'admin' in auth_list %}
+                            <li class="nav-item">
+                                <button class="nav-link btn-delete" id="delete-unit-btn" type="button"
+                                        onclick="delete_unit('{{ unit["api"] }}', '{{ unit["id"] }}');">Delete Unit</button>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 {% endif %}
             </ul>
