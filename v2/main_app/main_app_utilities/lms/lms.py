@@ -33,6 +33,9 @@ class LMS:
     def mark_question_complete(self, quiz_id, student_email, question_id):
         raise NotImplementedError("mark_question_complete not implemented for this object.")
 
+    def validate_connection(self):
+        raise NotImplementedError("validate_connection not implemented for this object.")
+
 
 class LMSSpec:
     def __init__(self, build_spec, course_code, lms_type, due_at=None, time_limit=None, allowed_attempts=None):
@@ -83,4 +86,12 @@ class LMSSpecConnectionError(LMSSpecError):
     pass
 
 class LMSSpecLMSTypeNotSupported(LMSSpecError):
+    pass
+
+
+class LMSExceptionWithHttpStatus(Exception):
+    def __init__(self, message, http_status_code=400):
+        super().__init__(message)
+        self.http_status_code = http_status_code
+class LMSUserNotFound(Exception):
     pass

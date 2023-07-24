@@ -1,7 +1,7 @@
 {% extends "v2-base.html" %}
-{% import 'logo_macro.html' as logo %}
-{% import 'teacher_macros.html' as macros %}
-{% import 'contact_us.html' as forms %}
+{% import 'macros/logos.html' as logo %}
+{% import 'macros/user_settings.html' as user_settings %}
+{% import 'macros/contact_us.html' as forms %}
 {% block title %}Settings{% endblock %}
 {% block nav_title %}Settings{% endblock %}
 {% block styles %}
@@ -84,7 +84,7 @@
               // Clear any previous messages
               let msgElement = document.getElementById('responseMessage');
               msgElement.innerText = '';
-              msgElement.classList.remove('fade-out', 'highlight-warning', 'highlight-info');
+              msgElement.classList.remove('fade-out', 'highlight-warning', 'highlight-info', 'highlight-error');
               msgElement.classList.add('hidden');
 
               // Add animation to submit button
@@ -118,16 +118,34 @@
                       headers: json_headers,
                       body: JSON.stringify({'user': teacher_email, 'settings': settings})
                   })
-                      .then((response) => response.json())
+                      .then((response) => {
+                          if (response.ok){
+                              return response.json();
+                          } else {
+                              return response.json().then(data => {
+                                  const msg = data.message;
+                                  throw new Error(`${response.status}: ${msg}`);
+                            });
+                          }
+                      })
                       .then(data=>{
                           let msg, msgElement;
                           icon.classList.remove('animated');
                           msg = data['message'];
                           msgElement = document.getElementById('responseMessage');
-                          msgElement.classList.remove('hidden', 'highlight-warning');
+                          msgElement.classList.remove('hidden', 'highlight-warning', 'highlight-error');
                           msgElement.classList.add('highlight-info', 'fade-out');
                           msgElement.innerText = msg;
-                      });
+                      })
+                       .catch(error => {
+                           console.log(error);
+                           let msgElement;
+                           icon.classList.remove('animated');
+                           msgElement = document.getElementById('responseMessage');
+                           msgElement.classList.remove('hidden', 'highlight-warning', 'highlight-info');
+                           msgElement.classList.add('highlight-error');
+                           msgElement.innerText = error.message;
+                       });
               } else {
                   let msg, msgElement;
                   icon.classList.remove('animated');
@@ -143,58 +161,9 @@
     </div>
     <div class="container-fluid">
         <form class="form" id="settings-form">
-            <div class="form-input-group" style="background-color: white;">
-                <div class="form-group">
-                    <label for="apiKeyCanvas">API Key (Canvas)</label>
-                    {% if settings.canvas %}
-                        {% if settings.canvas.api %}
-                            <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
-                                   style="background-color: whitesmoke"
-                                   placeholder="{{ settings.canvas.api | truncate(25, True, ' . . .', 0)}}">
-                        {% endif %}
-                    {% else %}
-                        <input id="apiKeyCanvas" class="form-control" name="apiKeyCanvas" type="text"
-                               style="background-color: whitesmoke">
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="urlCanvas">URL (Canvas)</label>
-                    {% if settings.canvas.url %}
-                        <input id="urlCanvas" class="form-control" name="urlCanvas" type="text"
-                               style="background-color: whitesmoke" placeholder="{{ settings.canvas.url }}">
-                    {% else %}
-                        <input id="urlCanvas" class="form-control" name="urlCanvas" type="text"
-                               style="background-color: whitesmoke" placeholder="https://example-url.com">
-                    {% endif %}
-                </div>
-            </div>
-            <div class="form-input-group" style="background-color: white;">
-                <div class="form-group">
-                    <label for="apiKeyBlackboard">API Key (Blackboard)</label>
-                    {% if settings.blackboard %}
-                        {% if settings.blackboard.api %}
-                            <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
-                                   style="background-color: whitesmoke"
-                                   placeholder="{{ settings.blackboard.api | truncate(25, True, ' . . .', 0) }}">
-                        {% endif %}
-                    {% else %}
-                        <input id="apiKeyBlackboard" class="form-control" name="apiKeyBlackboard" type="text"
-                               style="background-color: whitesmoke;" placeholder="">
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="urlBlackboard">URL (Blackboard)</label>
-                    {% if settings.blackboard %}
-                        {% if settings.blackboard.url %}
-                            <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
-                                   style="background-color: whitesmoke" placeholder="{{ settings.blackboard.url }}">
-                        {% endif %}
-                    {% else %}
-                        <input id="urlBlackboard" class="form-control" name="urlBlackboard" type="text"
-                               style="background-color: whitesmoke" placeholder="https://example-url.com">
-                    {% endif %}
-                </div>
-            </div>
+            {% for lms in settings %}
+                {{ user_settings.add_connection_group(settings, lms) }}
+            {% endfor %}
             <div class="d-flex justify-content-right">
                 <button type="button" id="save-settings"
                         class="btn-fa text-center nav-link m-auto w-50" style="border-radius: 4px; max-width: 450px;"

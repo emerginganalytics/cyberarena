@@ -1,12 +1,11 @@
-from flask import json, session, request, redirect, url_for
+from flask import json, session, request
 from flask.views import MethodView
 from api.utilities.decorators import admin_required, instructor_required
 from api.utilities.http_response import HttpResponse
 from main_app_utilities.gcp.arena_authorizer import ArenaAuthorizer
-from main_app_utilities.gcp.cloud_env import CloudEnv
 from main_app_utilities.gcp.datastore_manager import DataStoreManager
-from main_app_utilities.globals import BuildConstants
-from main_app_utilities.lms.lms_canvas import LMSCanvas
+from main_app_utilities.lms.lms import LMSExceptionWithHttpStatus
+
 
 __author__ = "Andrew Bomberger"
 __copyright__ = "Copyright 2022, UA Little Rock, Emerging Analytics Center"
@@ -50,15 +49,20 @@ class Users(MethodView):
             if user and groups and pending:
                 approve = json_data.get('approve', True)
                 user_email = str(user.lower())
-                if not self._update_user(user_email, groups, settings, approve):
-                    return self.http_resp(code=404, msg='User not found').prepare_response()
+                try:
+                    self._update_user(user_email, groups, settings, approve)
+                except LMSExceptionWithHttpStatus as e:
+                    http_code = e.http_status_code
+                    return self.http_resp(code=http_code, msg='User not found').prepare_response()
             elif new_user and groups:
                 user_email = str(new_user.lower())
                 self._add_user(user_email, groups, settings=settings)
             elif user and settings:
-                if not self._update_settings(user_email=str(user.lower()), settings=settings):
-                    return self.http_resp(code=404, msg='No user found!').prepare_response()
-                return self.http_resp(code=200, msg='Settings Updated!').prepare_response()
+                try:
+                    self._update_settings(user_email=str(user.lower()), settings=settings)
+                    return self.http_resp(code=200, msg='Settings Updated!').prepare_response()
+                except LMSExceptionWithHttpStatus as e:
+                    return self.http_resp(code=e.http_status_code, msg=str(e)).prepare_response()
             return self.http_resp(code=200).prepare_response()
         return self.http_resp(code=400, msg='Something went wrong!').prepare_response()
 

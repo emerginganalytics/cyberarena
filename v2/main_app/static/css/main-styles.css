@@ -562,6 +562,7 @@ p.complete {
     padding: 5px;
 }
 .highlight-error {
+    color: white;
     background-color: #b75f5f;
     border-radius: 10px;
     padding: 5px;

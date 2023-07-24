@@ -1,0 +1,37 @@
+{% macro add_connection_group(settings, lms) %}
+    {% set lms_name = lms | capitalize %}
+    {% set lms_id = lms | lower %}
+    <div class="form-input-group" style="background-color: white;">
+        <div class="form-group">
+            <label for="apiKey{{ lms_name }}">API Key ({{ lms_name }})</label>
+            {% if settings[lms_id] %}
+                {% if settings.blackboard.api %}
+                    <input id="apiKey{{ lms_name }}" class="form-control" name="apiKey{{ lms_name }}" type="text"
+                           style="background-color: whitesmoke"
+                           placeholder="{{ settings[lms_id].api | truncate(25, True, ' . . .', 0) }}">
+                {% else %}
+                    <input id="apiKey{{ lms_name }}" class="form-control" name="apiKey{{ lms_name }}" type="text"
+                       style="background-color: whitesmoke;" placeholder="">
+                {% endif %}
+            {% else %}
+                <input id="apiKey{{ lms_name }}" class="form-control" name="apiKey{{ lms_name }}" type="text"
+                       style="background-color: whitesmoke;" placeholder="">
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label for="url{{ lms_name }}">URL ({{ lms_name }})</label>
+            {% if settings[lms_id] %}
+                {% if settings[lms_id].url %}
+                    <input id="url{{ lms_name }}" class="form-control" name="url{{ lms_name }}" type="text"
+                           style="background-color: whitesmoke" placeholder="{{ settings[lms_id].url }}">
+                {% else %}
+                    <input id="url{{ lms_name }}" class="form-control" name="url{{ lms_name }}" type="text"
+                           style="background-color: whitesmoke" placeholder="https://example-url.com">
+                {% endif %}
+            {% else %}
+                <input id="url{{ lms_name }}" class="form-control" name="url{{ lms_name }}" type="text"
+                       style="background-color: whitesmoke" placeholder="https://example-url.com">
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}

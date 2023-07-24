@@ -3,10 +3,10 @@
 """
 import random
 import string
-from canvasapi import Canvas
+from canvasapi import Canvas, exceptions
 from canvasapi.submission import Submission
 
-from main_app_utilities.lms.lms import LMS, LMSSpec, LMSSpecIncompleteInstructorSettingsError
+from main_app_utilities.lms.lms import LMS, LMSSpec, LMSSpecIncompleteInstructorSettingsError, LMSUserNotFound, LMSExceptionWithHttpStatus
 
 __author__ = "Philip Huff"
 __copyright__ = "Copyright 2023, UA Little Rock, Emerging Analytics Center"
@@ -48,6 +48,23 @@ class LMSCanvas(LMS):
         submission = self._get_submission(student_email, quiz_id)
         score = submission.score + added_points if submission.score else added_points
         submission.edit(submission={'posted_grade': score})
+
+    def validate_connection(self):
+        """
+        Validates the input API key is associated with a registered Canvas user
+        returns: True if connection is valid
+        raises: LMS exception with associated HTTP status code if connection fails
+        """
+        try:
+            user = self.canvas.get_current_user()
+            if user:
+                return True
+            else:
+                raise LMSExceptionWithHttpStatus(LMSUserNotFound, http_status_code=404)
+        except exceptions.InvalidAccessToken as e:
+            raise LMSExceptionWithHttpStatus(message=str(e), http_status_code=401) from e
+        except exceptions.CanvasException as e:
+            raise LMSExceptionWithHttpStatus(message=str(e), http_status_code=400) from e
 
     def _get_submission(self, student_email, quiz_id):
         selected_assignment = None
@@ -104,3 +121,6 @@ class LMSSpecCanvas(LMSSpec):
                     'answers': [{'answer_text': random_answer, 'weight': '100'}]
                 })
         return questions
+
+
+

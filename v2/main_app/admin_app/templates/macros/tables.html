@@ -1,0 +1,31 @@
+{% macro active_units_table(active_units) %}
+    <div class="row">
+        <table class="table table-large table-hover" id="active-units-table">
+            <thead>
+                <tr>
+                    <th scope="col" class="text-center">#</th>
+                    <th scope="col" class="text-center">ID</th>
+                    <th scope="col" class="text-center">Name</th>
+                    <th scope="col" class="text-center">Expires</th>
+                    <th scope="col" class="text-center">Join Code</th>
+                    <th scope="col" class="text-center">Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unit in active_units %}
+                    <tr id="{{ unit['id'] }}-unit">
+                        <td class="rowNumber"></td>
+                        <td>{{ unit["id"] }}</td>
+                        <td>{{ unit.summary.name }}</td>
+                        <td class="timestampField">{{ unit.workspace_settings.expires }}</td>
+                        <td>{{ unit.join_code }}</td>
+                        <td>
+                            <a class="btn btn-fa" href="{{ url_for('teacher_app.workout_list', unit_id=unit['id']) }}" target="_blank"
+                               rel="noopener noreferrer">Go to Unit <i class="fa fa-external-link"></i></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endmacro %}

@@ -1,0 +1,143 @@
+{% macro user_manage(user, groups, uid, user_actions) %}
+    {% if groups.student == True %}
+        {% set main_group = 2 %}
+    {% elif groups.instructor == True %}
+        {% set main_group = 1 %}
+    {% elif groups.admin == True %}
+        {% set main_group = 0 %}
+    {% else %}
+        {% set main_group = 3 %}
+    {% endif %}
+
+    <button type="button" class="btn-fa" data-toggle="modal" data-target="#{{ uid }}Modal">Manage</button>
+    <div class="modal fade" id="{{ uid }}Modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Manage User: {{ user }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form enctype="multipart/form-data" id="{{ uid }}ManageForm">
+                        <input type="text" name="user" value="{{ user }}" readonly hidden />
+                        <div class="form-group">
+                            {% if main_group == 3 %}
+                                <input type="text" name="currentLevel"
+                                       id="currentUserLevel" value="pending" readonly hidden>
+                                <div class="form-check" style="width: 20px; margin-bottom: 1vh;">
+                                    <input type="checkbox" name="approve" id="approve-{{ uid }}"
+                                           onchange="enableGroups(this.checked, '{{ uid }}');"
+                                           class="form-check-input" style="width: 20px;"/>
+                                    <label for="approve-{{ uid }}" class="form-check-label">Approve</label>
+                                </div>
+                                <div class="form-control">
+                                    <h6>User Groups: </h6>
+                                    <div class="form-check form-check-inline">
+                                        <input class="checkbox" type="checkbox" name="admin"
+                                               id='checkAdmins-{{ uid }}' value="" disabled>
+                                        <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                               name="instructor" value="" disabled>
+                                        <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                               name="student" value="" disabled>
+                                        <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <input type="text" name="currentLevel"
+                                       id="currentUserLevel" value="other" readonly hidden>
+                                <div class="form-control">
+                                    <div class="form-check form-check-inline">
+                                        {% if groups['admin'] == True %}
+                                            <input class="checkbox" type="checkbox" name="admin" id='checkAdmins-{{ uid }}'
+                                                   value="" checked>
+                                        {% else %}
+                                            <input class="checkbox" type="checkbox" name="admin" id='checkAdmins-{{ uid }}'
+                                                   value="">
+                                        {% endif %}
+                                        <label for="checkAdmins-{{ uid }}" class="form-check-label">Admin</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {% if groups['instructor'] %}
+                                            <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                                   name="instructor" value="" checked>
+                                        {% else %}
+                                            <input id="checkInstructor-{{ uid }}" class="checkbox" type="checkbox"
+                                                   name="instructor" value="">
+                                        {% endif %}
+                                        <label for="checkInstructor-{{ uid }}" class="form-check-label">Instructor</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        {% if groups['student'] %}
+                                            <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                                   name="student" value="" checked>
+                                        {% else %}
+                                            <input id='checkStudents-{{ uid }}' class="checkbox" type="checkbox"
+                                                   name="student" value="">
+                                        {% endif %}
+                                        <label for="checkStudents-{{ uid }}" class="form-check-label">Student</label>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="form-group">
+                            <button class="btn-fa" type="button" onclick="manage_user('{{ uid }}');">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% macro add_user(modal_id) %}
+    <div class="modal fade" id="{{ modal_id }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5>Add User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="form" id="newUserForm">
+                        <div class="form-group">
+                            <div class="input-group mb-3">
+                              <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon3">User Email</span>
+                              </div>
+                              <input type="email" class="form-control" name="new_user" id="newUserInput" aria-describedby="basic-addon3">
+                            </div>
+                            <div class="form-control text-center">
+                                <h6>User Groups: </h6>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddAdmin" class="checkbox" type="checkbox" name="admin" value="">
+                                    <label for="checkAddAdmin" class="form-check-label">Admin</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddInstructor" class="checkbox" type="checkbox" name="instructor" value="">
+                                    <label for="checkAddInstructor" class="form-check-label">Instructor</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input id="checkAddStudent" class="checkbox" type="checkbox" name="student" value="">
+                                    <label for="checkAddStudent" class="form-check-label">Student</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn-fa" type="button" onclick="add_user('newUserForm' ,'{{ modal_id }}');">Submit</button>
+                        </div>
+                    </form>
+                </div> <!-- End modal-body -->
+            </div> <!-- End modal-content -->
+        </div> <!-- End modal-dialog -->
+    </div> <!-- End modal -->
+{% endmacro %}
