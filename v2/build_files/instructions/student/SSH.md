@@ -13,10 +13,12 @@ To enhance SSH security, asymmetric or public-key systems are recommended. This 
 ## SSH Instructions:
 
 1. Connect to the server indicated on the landing page to access your lab desktop environment. Open a new terminal window from here and verify your ability to log in to the specified server.
+2. ssh cyberarena@10.1.1.51
+3. password: Let's workout !
 
    > **Note**: The password you type into the terminal will not be displayed.
 
-2. To enhance security, the transition from password-based login to asymmetric key authentication using the following commands and configuration files:
+4. To enhance security, the transition from password-based login to asymmetric key authentication using the following commands and configuration files:
 
    - Run `ssh-keygen` on your lab desktop machine to generate RSA public and private keys.
 
