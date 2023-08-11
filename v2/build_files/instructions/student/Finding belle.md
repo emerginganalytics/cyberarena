@@ -1,7 +1,7 @@
 # Table of Contents
 
 ## Belle, the Cockapoo Kidnapping
-![Belle Image](C:\Users\klsco\Dropbox\Belle\beautiful belle.JPG)
+<img width="225" alt="image" src="https://github.com/emerginganalytics/cyberarena/assets/71454038/7a6201d3-0316-46a1-835d-6fa4e671e291">
 
 Belle is a black Cockapoo; she was last seen wearing a pink collar with a green tag. 
 The tag contains her owner Mary Smith’s information. (1/28/2018 ~3:15 pm)  
