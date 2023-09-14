@@ -14,7 +14,7 @@ In this lab, you will learn how to use a vulnerability scanner to find vulnerabi
 ## Cyber Arena Server Information
 
 Username: `cybergym`
-Password: `Let's Workout!`
+Password: `Let's workout!`
 
 1. Click on the `Start Workout` button to start the workout.
 
@@ -30,7 +30,7 @@ Password: `Let's Workout!`
 3. The web browser should automatically bring you to the Nessus login page. If it does not, go to the URL `https://localhost:8834/`.
 4. Login to Nessus using the credentials
    - username: `cybergym`
-   - password: `Let's Workout!`
+   - password: `Let's workout!`
 5. Click on the `New Scan` button to create a new scan.
 6. Click on the `Basic Network Scan` button to create a new scan.
 7. Enter the name `Lab 1 Scan` for the scan name.
@@ -58,7 +58,7 @@ Password: `Let's Workout!`
 8. Click on the `Credentials` tab.
 9. Click on the `Add` button to add credentials to the scan.
    1. Enter the username `cybergym` for the username.
-   2. Enter the password `Let's Workout!` for the password.
+   2. Enter the password `Let's workout!` for the password.
 10. Click on the `Save` button to save the scan.
 11. Click on the `Launch` button to launch the scan.
 12. Wait for the scan to complete.
