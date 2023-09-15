@@ -5,8 +5,24 @@ During this exercise, you will examine trust from the perspective of an adversar
 
 > **Background:** Credential harvesting attacks are frequently associated with phishing, where deceptive emails direct users to malicious websites to collect their credentials, such as passwords, for the targeted site. For instance, an attacker might exploit social media platforms. Once they acquire the user's credentials, they can either gain unauthorized access to the social media account or exploit the fact that people often reuse passwords across multiple accounts, including banking accounts. By understanding these techniques and their implications, you will develop a deeper awareness of the importance of trust and the potential vulnerabilities that can arise when misused or exploited.
 
-Begin your workout by clicking _Start Workout_. Then, wait a minute or two, and you can click _Connect to Server_ by the Kali server. You may need to refresh your browser after a few minutes. Once connected, this will take you to your Kali server. On the desktop right-click and select to open a command terminal. 
-At the command terminal, type in ssh kali@10.1.1.30. At the password prompt, type P@55w0rd!. This will log you into your Kali Linux workstation. 
+## Connecting to Your Workout
+Begin your workout by clicking _Start Workout_. Then, wait a minute or two, and you can click _Connect_ by the student-entry server. You may need to refresh your browser after a few minutes. 
+Open your RDP client and use the credentials provided in the connection modal to login to the machine.
+
+## The Gist
+Once logged into your workout machine, open up a command terminal and type in the following command:
+```
+ssh kali@10.1.1.30
+```
+and when prompted, use the password below:
+```
+P@55w0rd!
+```
+
+> [!NOTE]
+> typed characters in a Linux password input are hidden by default. 
+
+This will log you into your Kali Linux workstation. 
 Once in Kali, you will be using the tool Social Engineering Toolkit provided as open-source by TrustedSec and authored by David Kennedy. Follow these instructions to mount the attack: 
 1. To use the tool type sudo setoolkit at the command line and retype the password from above. 
 2. The tool will prompt you to agree to the terms of use. If you agree, type y to continue. Then a menu will pop up with various attack modules. 
