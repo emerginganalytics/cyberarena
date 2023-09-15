@@ -20,9 +20,8 @@ P@55w0rd!
 ```
 
 > [!NOTE]
-> typed characters in a Linux password input are hidden by default. 
+> Characters typed in a Linux password input are hidden by default. If the successful, you will be logged into your Kali Linux workstation.
 
-This will log you into your Kali Linux workstation. 
 Once in Kali, you will be using the tool Social Engineering Toolkit provided as open-source by TrustedSec and authored by David Kennedy. Follow these instructions to mount the attack: 
 1. To use the tool type sudo setoolkit at the command line and retype the password from above. 
 2. The tool will prompt you to agree to the terms of use. If you agree, type y to continue. Then a menu will pop up with various attack modules. 
