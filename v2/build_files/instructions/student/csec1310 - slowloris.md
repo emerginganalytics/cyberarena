@@ -43,7 +43,6 @@ Slowloris keeps sending more information without completing the request, forcing
      - Date
    - Lab Observations
    - Lab Conclusion
-   - Lab Reflection
 
 2. Observations
    In the observation section, you will need to take screenshots of any step that is bolded in the instructions.
