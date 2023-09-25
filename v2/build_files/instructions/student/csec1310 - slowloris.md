@@ -59,7 +59,7 @@ Slowloris keeps sending more information without completing the request, forcing
 
 | Criteria | Exemplary (5) | Proficient (3) | Developing (1) | Score |
 | -------- | ------------- | -------------- | -------------- | ----- |
-| Lab Report File| Formatted perfectly Correctly, No major grammar/spelling errors| Minor errors with formatting, grammar \& spelling | Major errors with formatting, grammar \& spelling | 10% |
+| Lab Report File| Formatted perfectly Correctly, No major grammar/spelling errors| Minor errors with formatting, grammar \& spelling | Major errors with formatting, grammar \& spelling | 20% |
 | Screenshots|All screenshots included| Missing 1-2 screenshots or not legible | Missing a majority of screenshots| 40% |
 | Conclusion| Well thought out and researched, shows exemplary understanding of the lab | Shows understanding of lab | Does not comprehend lab assignment | 40% |
 
