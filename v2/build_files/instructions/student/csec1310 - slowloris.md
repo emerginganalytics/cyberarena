@@ -51,7 +51,7 @@ Slowloris keeps sending more information without completing the request, forcing
       - Please label the screenshot with the step number and the step name.
       - screenshots should include your entire screen, nt just the workout area.
     **Example:**  
-    Step 1 - Open the Chrome Browser ![Step 1 ](imgs/step1.jpg)
+    Step 1 - Open the Chrome Browser ![Step 1 ](img/step1.jpg)
 3. Conclusion
    In the conclusion, you will write a paragraph or two about what you learned in this lab. You should also include a paragraph about what you found interesting or challenging in this lab.
 
