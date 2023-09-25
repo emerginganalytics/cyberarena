@@ -15,14 +15,14 @@ Slowloris keeps sending more information without completing the request, forcing
   - [Lab Objectives](#lab-objectives)
   - [Deliverables](#deliverables)
   - [Rubric](#rubric)
-  - [Creating Your Website](#creating-your-website)
   - [Part 1: Web Server Fundamentals](#part-1-web-server-fundamentals)
     - [Modifying a Web Server](#modifying-a-web-server)
-  - [Accessing your Servers](#accessing-your-servers)
+    - [Accessing your Servers](#accessing-your-servers)
   - [Part 2: Attacking the Web Server](#part-2-attacking-the-web-server)
     - [Preparing the test command](#preparing-the-test-command)
     - [Running Slowloris](#running-slowloris)
   - [Part 3: Securing the Website](#part-3-securing-the-website)
+    - [Accessing your Web Servers](#accessing-your-web-servers)
     - [Option 1: Increase the number of connections](#option-1-increase-the-number-of-connections)
     - [Option 2: Limit the number of connections](#option-2-limit-the-number-of-connections)
 
@@ -63,11 +63,9 @@ Slowloris keeps sending more information without completing the request, forcing
 | Screenshots|All screenshots included| Missing 1-2 screenshots or not legible | Missing a majority of screenshots| 40% |
 | Conclusion| Well thought out and researched, shows exemplary understanding of the lab | Shows understanding of lab | Does not comprehend lab assignment | 40% |
 
-## Creating Your Website
+## Part 1: Web Server Fundamentals
 
 In this first portion of the lab, you will create a website that you will later attack with Slowloris. You will use a web server that is already set up for you. You will also use a tool called WinSCP to transfer files between your lab environment and your computer.
-
-## Part 1: Web Server Fundamentals
 
 ### Modifying a Web Server
 
@@ -82,7 +80,7 @@ To make your web server unique, you can create and upload your own webpage. Here
 5. When finished, copy it to your web server by opening WinSCP in your tools folder on the Desktop.
    ![image](https://github.com/emerginganalytics/cyberarena/assets/71454038/8a0b442b-707e-4d96-aa23-af27fe6f4a7b)
 
-## Accessing your Servers
+### Accessing your Servers
 
 1. **Log in to the "cyberarena@10.1.1.19" connection using the "Let's workout!" password. This will establish a secure connection between your desktop and the SSH web server, allowing file transfer.**
 2. Once connected, you will see a split screen. You will see your desktop on the left side (with caps-lock). You will see your web server on the right side (with enter).
@@ -133,17 +131,18 @@ To run Slowloris, go to your Tools folder and double-click on the PowerShell - S
 4. Stop the attack, type `Ctrl` + `C` or `⌘` + `C` 
     ***Note: You may have to type this twice.***
 
-
 ## Part 3: Securing the Website
 
-To secure the website from a Slowloris attack, you have a few options.
+There are many options for securing your web server. In this section, you will learn how to limit the number of connections that a client can make to your web server. This will help prevent Slowloris from being effective. You will also learn how to set a timeout on incoming requests. This will help ensure that Slowloris cannot keep connections open indefinitely.
 
-1. Begin by opening an SSH session using the PuTTY client in your tools folder on the Desktop. 
-2. Then, select the Web Server connection and click Open.
+### Accessing your Web Servers
+
+1. Begin by opening an SSH session using the PuTTY client in your tools folder on the Desktop.
+2. **Then, select the Web Server connection and click Open.**
     ![image](https://github.com/emerginganalytics/cyberarena/assets/71454038/1f8fd374-ae38-4737-804d-6def49b1f7d2)
 3. Use the following credentials.
 
-    ```powershell
+    ```text
     Username: cyberarena
     Password: Let's workout!
     ```
