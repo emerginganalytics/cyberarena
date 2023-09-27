@@ -27,7 +27,7 @@ Password: `Let's workout!`
 
 1. Once connected to the workout Server, you may need to be presented with a unexpected shutdown message. If you are just put something into the fileds and click `OK`.
 2. Open the web browser found on the Desktop.
-3. The web browser should automatically bring you to the Nessus login page. If it does not, go to the URL `https://localhost:8834/`.
+3. The web browser should automatically bring you to the Nessus login page. If it does not, go to the URL `https://10.1.1.27:8834/`.
 4. Login to Nessus using the credentials
    - username: `cybergym`
    - password: `Let's workout!`
